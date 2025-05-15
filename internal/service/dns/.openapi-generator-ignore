@@ -34,5 +34,3 @@ api*.go
 *_data_source_*.go
 *_data_source.go
 model_*.go
-
-!model_record_a.go
