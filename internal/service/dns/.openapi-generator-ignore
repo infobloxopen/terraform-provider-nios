@@ -34,3 +34,5 @@ api*.go
 *_data_source_*.go
 *_data_source.go
 model_*.go
+
+!model_recordacloudinfo_delegated_member.go

@@ -87,11 +87,11 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
 		Attributes: RecordAAwsRte53RecordInfoResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes: RecordACloudInfoResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
