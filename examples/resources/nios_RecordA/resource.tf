@@ -3,8 +3,8 @@ resource "nios_RecordA" "create_record" {
   ipv4addr = "10.20.1.2"
   view     = "default"
   extattrs = {
-    "Site" = {
-      "value" = "Siteblr"
+    Site = {
+      value = "Siteblr"
     }
   }
 }
