@@ -35,10 +35,10 @@ terraform.tfstate
 .terraform.lock.hcl
 *.backup
 
-/terraform-provider-bloxone
+/terraform-provider-nios
 
 .openapi-generator/
 internal/service/*/.openapi-generator-ignore
 
 # Ignore the metadata files
-**/.DS_Store
+**/.DS_Storenios
