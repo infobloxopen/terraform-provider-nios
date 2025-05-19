@@ -1,9 +1,17 @@
 # github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-00010101000000-000000000000 => ../../Infoblox-CTO/infoblox-nios-go-client/
 ## explicit; go 1.23.0
 github.com/Infoblox-CTO/infoblox-nios-go-client/client
+github.com/Infoblox-CTO/infoblox-nios-go-client/cloud
+github.com/Infoblox-CTO/infoblox-nios-go-client/dhcp
+github.com/Infoblox-CTO/infoblox-nios-go-client/discovery
 github.com/Infoblox-CTO/infoblox-nios-go-client/dns
+github.com/Infoblox-CTO/infoblox-nios-go-client/dtc
+github.com/Infoblox-CTO/infoblox-nios-go-client/grid
 github.com/Infoblox-CTO/infoblox-nios-go-client/internal
+github.com/Infoblox-CTO/infoblox-nios-go-client/ipam
 github.com/Infoblox-CTO/infoblox-nios-go-client/option
+github.com/Infoblox-CTO/infoblox-nios-go-client/rpz
+github.com/Infoblox-CTO/infoblox-nios-go-client/security
 # github.com/ProtonMail/go-crypto v1.1.0-alpha.2
 ## explicit; go 1.17
 github.com/ProtonMail/go-crypto/bitcurves

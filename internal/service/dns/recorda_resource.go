@@ -32,7 +32,7 @@ type RecordaResource struct {
 }
 
 func (r *RecordaResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "RecordA"
+	resp.TypeName = req.ProviderTypeName + "_" + "resource_nios_RecordA"
 }
 
 func (r *RecordaResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -145,12 +145,19 @@ func (r *RecordaResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func ReadByExtAttrs(ctx context.Context, r *RecordaResource, data *RecordAModel, resp *resource.ReadResponse) bool {
+	var diags diag.Diagnostics
+
 	if data.ExtAttrsAll.IsNull() {
 		return false
 	}
 
-	internalId, exists := data.ExtAttrsAll.Elements()["Terraform Internal ID"]
-	if !exists {
+	internalIdExtAttr := *flex.ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	if diags.HasError() {
+		return false
+	}
+
+	internalId := internalIdExtAttr["Terraform Internal ID"].Value
+	if internalId == "" {
 		return false
 	}
 
@@ -177,6 +184,13 @@ func ReadByExtAttrs(ctx context.Context, r *RecordaResource, data *RecordAModel,
 
 	if len(apiRes.ListRecordAResponseObject.GetResult()) > 0 {
 		res := apiRes.ListRecordAResponseObject.GetResult()[0]
+
+		// Remove inherited external attributes and check for errors
+		res.Extattrs, diags = flex.RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+		if diags.HasError() {
+			return true
+		}
+
 		data.Flatten(ctx, &res, &resp.Diagnostics)
 		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 	}
