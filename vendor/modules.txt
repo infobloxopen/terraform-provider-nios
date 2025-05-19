@@ -1,4 +1,4 @@
-# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250516070019-5a8427283e5f
+# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250519120633-7b9379ea843f
 ## explicit; go 1.23.0
 github.com/Infoblox-CTO/infoblox-nios-go-client/client
 github.com/Infoblox-CTO/infoblox-nios-go-client/cloud
