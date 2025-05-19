@@ -64,4 +64,3 @@ require (
 	google.golang.org/protobuf v1.36.3 // indirect
 )
 
-replace github.com/Infoblox-CTO/infoblox-nios-go-client => ../../Infoblox-CTO/infoblox-nios-go-client/
