@@ -2,7 +2,7 @@ package dns
 
 import (
 	"context"
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
 
@@ -61,8 +62,8 @@ var RecordAAttrTypes = map[string]attr.Type{
 	"disable":               types.BoolType,
 	"discovered_data":       types.ObjectType{AttrTypes: RecordADiscoveredDataAttrTypes},
 	"dns_name":              types.StringType,
-	"extattrs":              types.MapType{ElemType: types.ObjectType{AttrTypes: flex.ExtAttrAttrTypes}},
-	"extattrs_all":          types.MapType{ElemType: types.ObjectType{AttrTypes: flex.ExtAttrAttrTypes}},
+	"extattrs":              types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
+	"extattrs_all":          types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
 	"forbid_reclamation":    types.BoolType,
 	"ipv4addr":              types.StringType,
 	"last_queried":          types.Int64Type,
@@ -138,13 +139,13 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
 		Computed:            true,
-		ElementType:         types.ObjectType{AttrTypes: flex.ExtAttrAttrTypes},
-		Default:             mapdefault.StaticValue(types.MapNull(types.ObjectType{AttrTypes: flex.ExtAttrAttrTypes})),
+		ElementType:         types.ObjectType{AttrTypes: ExtAttrAttrTypes},
+		Default:             mapdefault.StaticValue(types.MapNull(types.ObjectType{AttrTypes: ExtAttrAttrTypes})),
 		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
-		ElementType:         types.ObjectType{AttrTypes: flex.ExtAttrAttrTypes},
+		ElementType:         types.ObjectType{AttrTypes: ExtAttrAttrTypes},
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 	},
 	"forbid_reclamation": schema.BoolAttribute{
@@ -218,7 +219,7 @@ func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		DdnsPrincipal:       flex.ExpandStringPointer(m.DdnsPrincipal),
 		DdnsProtected:       flex.ExpandBoolPointer(m.DdnsProtected),
 		Disable:             flex.ExpandBoolPointer(m.Disable),
-		Extattrs:            flex.ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		Extattrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
 		ForbidReclamation:   flex.ExpandBoolPointer(m.ForbidReclamation),
 		Ipv4addr:            flex.ExpandStringPointer(m.Ipv4addr),
 		Name:                flex.ExpandStringPointer(m.Name),
@@ -262,7 +263,7 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DiscoveredData = FlattenRecordADiscoveredData(ctx, from.DiscoveredData, diags)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
-	m.ExtAttrsAll = flex.FlattenExtAttr(ctx, *from.Extattrs, diags)
+	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.Extattrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)

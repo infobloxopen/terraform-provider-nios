@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
@@ -92,7 +91,7 @@ func (r *RecordaResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	res := apiRes.CreateRecordAResponseAsObject.GetResult()
-	res.Extattrs, diags = flex.RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Recorda due inherited Extensible attributes, got error: %s", err))
 		return
@@ -132,7 +131,7 @@ func (r *RecordaResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
-	res.Extattrs, diags = flex.RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Recorda due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -151,7 +150,7 @@ func ReadByExtAttrs(ctx context.Context, r *RecordaResource, data *RecordAModel,
 		return false
 	}
 
-	internalIdExtAttr := *flex.ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	internalIdExtAttr := *ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
 	if diags.HasError() {
 		return false
 	}
@@ -186,7 +185,7 @@ func ReadByExtAttrs(ctx context.Context, r *RecordaResource, data *RecordAModel,
 		res := apiRes.ListRecordAResponseObject.GetResult()[0]
 
 		// Remove inherited external attributes and check for errors
-		res.Extattrs, diags = flex.RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+		res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
 		if diags.HasError() {
 			return true
 		}
@@ -228,7 +227,7 @@ func (r *RecordaResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	res := apiRes.UpdateRecordAResponseAsObject.GetResult()
 
-	res.Extattrs, diags = flex.RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Recorda due inherited Extensible attributes, got error: %s", diags))
 		return

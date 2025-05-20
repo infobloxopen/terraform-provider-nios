@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -432,37 +431,4 @@ func ExpandList[U any](ctx context.Context, tfList types.List, u U, diags *diag.
 	diags.Append(diag...)
 	diags.Append(lv.ElementsAs(ctx, &u, false)...)
 	return u
-}
-
-func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dns.ExtAttrs) (*map[string]dns.ExtAttrs, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	newRespMap := make(map[string]dns.ExtAttrs, len(respExtAttrs))
-
-	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
-		if v, ok := respExtAttrs["Terraform Internal ID"]; ok {
-			newRespMap["Terraform Internal ID"] = v
-		}
-		return &newRespMap, nil
-	}
-
-	planMap := *ExpandExtAttr(ctx, planExtAttrs, &diags)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	for k, v := range respExtAttrs {
-		if k == "Terraform Internal ID" {
-			newRespMap[k] = v
-			continue
-		}
-
-		if respExtAttrs[k].AdditionalProperties["inheritance_source"] != nil {
-			if planVal, ok := planMap[k]; ok {
-				newRespMap[k] = planVal
-			}
-			continue
-		}
-		newRespMap[k] = respExtAttrs[k]
-	}
-	return &newRespMap, diags
 }

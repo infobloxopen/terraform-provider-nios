@@ -1,8 +1,9 @@
-package flex
+package dns
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -10,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
+
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
 
 type ExtAttrModel struct {
@@ -60,7 +63,7 @@ func (m *ExtAttrModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns
 		return nil
 	}
 	to := &dns.ExtAttrs{
-		Value: ExpandString(m.Value),
+		Value: flex.ExpandString(m.Value),
 	}
 	return to
 }
@@ -92,5 +95,38 @@ func (m *ExtAttrModel) Flatten(ctx context.Context, from *dns.ExtAttrs, diags *d
 	if m == nil {
 		*m = ExtAttrModel{}
 	}
-	m.Value = FlattenString(from.Value)
+	m.Value = flex.FlattenString(from.Value)
+}
+
+func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dns.ExtAttrs) (*map[string]dns.ExtAttrs, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	newRespMap := make(map[string]dns.ExtAttrs, len(respExtAttrs))
+
+	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
+		if v, ok := respExtAttrs["Terraform Internal ID"]; ok {
+			newRespMap["Terraform Internal ID"] = v
+		}
+		return &newRespMap, nil
+	}
+
+	planMap := *ExpandExtAttr(ctx, planExtAttrs, &diags)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	for k, v := range respExtAttrs {
+		if k == "Terraform Internal ID" {
+			newRespMap[k] = v
+			continue
+		}
+
+		if respExtAttrs[k].AdditionalProperties["inheritance_source"] != nil {
+			if planVal, ok := planMap[k]; ok {
+				newRespMap[k] = planVal
+			}
+			continue
+		}
+		newRespMap[k] = respExtAttrs[k]
+	}
+	return &newRespMap, diags
 }
