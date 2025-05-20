@@ -105,7 +105,7 @@ func (d *RecordaDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
 		Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 		ReturnAsObject(1).
-		ReturnFields2(readableAttributes).
+		ReturnFields2(readableAttributesForRecordA).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
