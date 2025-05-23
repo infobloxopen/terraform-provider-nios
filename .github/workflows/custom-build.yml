@@ -1,0 +1,28 @@
+name: Acceptance Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  custom-build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+      - name: Setup Go
+        uses: actions/setup-go@v5.2.0
+        with:
+          go-version: '1.23.4'
+      - name: Set current date as env variable
+        run: echo "TIME=$(TZ=Asia/Kolkata date +'%Y-%m-%dT%H%M%S')" >> $GITHUB_ENV
+      - name: Build
+        run: go build -v ./... > terraform-provider-nios-build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: terraform-provider-nios-${{ env.TIME }}
+          path: terraform-provider-nios-build
+
