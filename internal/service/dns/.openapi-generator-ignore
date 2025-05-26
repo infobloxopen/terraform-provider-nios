@@ -32,3 +32,5 @@ api*.go
 *_resource*.go
 *_data_source*.go
 model_*.go
+
+!recorda_resource.go

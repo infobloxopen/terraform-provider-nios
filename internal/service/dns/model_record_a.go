@@ -12,9 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -80,10 +78,7 @@ var RecordAAttrTypes = map[string]attr.Type{
 
 var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Computed: true,
-		PlanModifiers: []planmodifier.String{
-			stringplanmodifier.UseStateForUnknown(),
-		},
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
@@ -277,3 +272,22 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.View = flex.FlattenStringPointer(from.View)
 	m.Zone = flex.FlattenStringPointer(from.Zone)
 }
+
+//func ExpandRecordIpv4AddrStr(str types.String) dns.RecordAIpv4addr {
+//	if str.IsNull() {
+//		return dns.RecordAIpv4addr{}
+//	}
+//	var m dns.RecordAIpv4addr
+//	m.String = flex.ExpandStringPointer(str)
+//
+//	return m
+//}
+//
+//func FlattenRecordIpv4AddrStr(from dns.RecordAIpv4addr) types.String {
+//	if from.String == nil {
+//		return types.StringNull()
+//	}
+//	m := types.String{}
+//	m = flex.FlattenStringPointer(from.String)
+//	return m
+//}
