@@ -1,7 +1,7 @@
 dario.cat/mergo v1.0.0 h1:AGCNq9Evsj31mOgNPcLyXc+4PNABt905YmuqPYYpBWk=
 dario.cat/mergo v1.0.0/go.mod h1:uNxQE+84aUszobStD9th8a29P2fMDhsBdgRYvZOxGmk=
-github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250519120633-7b9379ea843f h1:DLgTj4SdUVypzKosxM6afYCliGt5++qzlupesIO+Tb4=
-github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250519120633-7b9379ea843f/go.mod h1:3JwcPlk1UVv7RyEYLc7jJXBXRfxS5PbrLJMHBwQ8KhE=
+github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416 h1:UpBG9hZc8pIN3ae0deyd/CdM53iymKuUuAvI3WEXZ3A=
+github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416/go.mod h1:3JwcPlk1UVv7RyEYLc7jJXBXRfxS5PbrLJMHBwQ8KhE=
 github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
 github.com/ProtonMail/go-crypto v1.1.0-alpha.2 h1:bkyFVUP+ROOARdgCiJzNQo2V2kiB97LyUpzH9P6Hrlg=
