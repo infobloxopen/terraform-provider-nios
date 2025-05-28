@@ -35,6 +35,7 @@ type RecordAModel struct {
 	ExtAttrs            types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll         types.Map    `tfsdk:"extattrs_all"`
 	ForbidReclamation   types.Bool   `tfsdk:"forbid_reclamation"`
+	FuncCall            types.Object `tfsdk:"func_call"`
 	Ipv4addr            types.String `tfsdk:"ipv4addr"`
 	LastQueried         types.Int64  `tfsdk:"last_queried"`
 	MsAdUserData        types.Object `tfsdk:"ms_ad_user_data"`
@@ -63,6 +64,7 @@ var RecordAAttrTypes = map[string]attr.Type{
 	"extattrs":              types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
 	"extattrs_all":          types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
 	"forbid_reclamation":    types.BoolType,
+	"func_call":             types.ObjectType{AttrTypes: FuncCallAttrTypes},
 	"ipv4addr":              types.StringType,
 	"last_queried":          types.Int64Type,
 	"ms_ad_user_data":       types.ObjectType{AttrTypes: RecordAMsAdUserDataAttrTypes},
@@ -149,8 +151,14 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the reclamation is allowed for the record or not.",
 	},
+	"func_call": schema.SingleNestedAttribute{
+		Optional:            true,
+		MarkdownDescription: "Function call to be executed.",
+		Attributes:          FuncCallResourceSchemaAttributes,
+	},
 	"ipv4addr": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the record.",
 	},
 	"last_queried": schema.Int64Attribute{
@@ -216,7 +224,7 @@ func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		Disable:             flex.ExpandBoolPointer(m.Disable),
 		Extattrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
 		ForbidReclamation:   flex.ExpandBoolPointer(m.ForbidReclamation),
-		Ipv4addr:            flex.ExpandStringPointer(m.Ipv4addr),
+		FuncCall:            ExpandFuncCall(ctx, m.FuncCall, diags),
 		Name:                flex.ExpandStringPointer(m.Name),
 		RemoveAssociatedPtr: flex.ExpandBoolPointer(m.RemoveAssociatedPtr),
 		Ttl:                 flex.ExpandInt64Pointer(m.Ttl),
@@ -225,6 +233,13 @@ func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 	if isCreate {
 		to.View = flex.ExpandStringPointer(m.View)
 	}
+	var l dns.RecordAIpv4addr
+	if m.Ipv4addr.IsNull() || m.Ipv4addr.IsUnknown() {
+		to.Ipv4addr = &dns.RecordAIpv4addr{}
+	} else {
+		l.String = flex.ExpandStringPointer(m.Ipv4addr)
+	}
+	to.Ipv4addr = &l
 	return to
 }
 
@@ -260,7 +275,6 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.Extattrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
-	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)
 	m.MsAdUserData = FlattenRecordAMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
@@ -271,23 +285,5 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
 	m.View = flex.FlattenStringPointer(from.View)
 	m.Zone = flex.FlattenStringPointer(from.Zone)
+	m.Ipv4addr = flex.FlattenStringPointer((*from.Ipv4addr).String)
 }
-
-//func ExpandRecordIpv4AddrStr(str types.String) dns.RecordAIpv4addr {
-//	if str.IsNull() {
-//		return dns.RecordAIpv4addr{}
-//	}
-//	var m dns.RecordAIpv4addr
-//	m.String = flex.ExpandStringPointer(str)
-//
-//	return m
-//}
-//
-//func FlattenRecordIpv4AddrStr(from dns.RecordAIpv4addr) types.String {
-//	if from.String == nil {
-//		return types.StringNull()
-//	}
-//	m := types.String{}
-//	m = flex.FlattenStringPointer(from.String)
-//	return m
-//}
