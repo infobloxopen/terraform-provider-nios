@@ -225,6 +225,7 @@ func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		Extattrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
 		ForbidReclamation:   flex.ExpandBoolPointer(m.ForbidReclamation),
 		FuncCall:            ExpandFuncCall(ctx, m.FuncCall, diags),
+		Ipv4addr:            ExpandRecordAIpv4addr(m.Ipv4addr),
 		Name:                flex.ExpandStringPointer(m.Name),
 		RemoveAssociatedPtr: flex.ExpandBoolPointer(m.RemoveAssociatedPtr),
 		Ttl:                 flex.ExpandInt64Pointer(m.Ttl),
@@ -233,13 +234,6 @@ func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 	if isCreate {
 		to.View = flex.ExpandStringPointer(m.View)
 	}
-	var l dns.RecordAIpv4addr
-	if m.Ipv4addr.IsNull() || m.Ipv4addr.IsUnknown() {
-		to.Ipv4addr = &dns.RecordAIpv4addr{}
-	} else {
-		l.String = flex.ExpandStringPointer(m.Ipv4addr)
-	}
-	to.Ipv4addr = &l
 	return to
 }
 
@@ -275,6 +269,7 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.Extattrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
+	m.Ipv4addr = FlattenRecordAIpv4addr(from.Ipv4addr)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)
 	m.MsAdUserData = FlattenRecordAMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
@@ -285,5 +280,23 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
 	m.View = flex.FlattenStringPointer(from.View)
 	m.Zone = flex.FlattenStringPointer(from.Zone)
-	m.Ipv4addr = flex.FlattenStringPointer((*from.Ipv4addr).String)
+}
+
+func ExpandRecordAIpv4addr(str types.String) *dns.RecordAIpv4addr {
+	if str.IsNull() {
+		return &dns.RecordAIpv4addr{}
+	}
+	var m dns.RecordAIpv4addr
+	m.String = flex.ExpandStringPointer(str)
+
+	return &m
+}
+
+func FlattenRecordAIpv4addr(from *dns.RecordAIpv4addr) types.String {
+	if from.String == nil {
+		return types.StringNull()
+	}
+	m := types.String{}
+	m = flex.FlattenStringPointer(from.String)
+	return m
 }

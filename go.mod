@@ -63,3 +63,5 @@ require (
 	google.golang.org/grpc v1.69.4 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
 )
+
+replace github.com/Infoblox-CTO/infoblox-nios-go-client => ../infoblox-nios-go-client

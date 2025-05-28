@@ -283,6 +283,33 @@ func TestAccRecordaResource_ForbidReclamation(t *testing.T) {
 	})
 }
 
+func TestAccRecordaResource_FuncCall(t *testing.T) {
+	var resourceName = "nios_resource_nios_RecordA.test_func_call"
+	var v dns.RecordA
+	name := acctest.RandomName() + ".example.com"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordaFuncCall(name, "default", "ipv4addr", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Original Function Call"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRecordaFuncCall(name, "default", "comment", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Function Call with Update"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+				),
+			},
+		},
+	})
+}
+
 func TestAccRecordaResource_Ipv4addr(t *testing.T) {
 	var resourceName = "nios_resource_nios_RecordA.test_ipv4addr"
 	var v dns.RecordA
@@ -592,6 +619,26 @@ resource "nios_resource_nios_RecordA" "test_forbid_reclamation" {
 	forbid_reclamation = %q
 }
 `, name, ipV4Addr, view, forbidReclamation)
+}
+
+func testAccRecordaFuncCall(name, view, attributeName, objFunc, parameters, resultField, object, objectParameters, comment string) string {
+	return fmt.Sprintf(`
+resource "nios_resource_nios_RecordA" "test_func_call" {
+	name = %q
+	view = %q
+	func_call = {
+		"attribute_name" = %q
+		"object_function" = %q
+		"result_field" = %q
+		"object" = %q
+		"object_parameters" = {
+			"network" = %q
+			"network_view" = "default"
+		}
+	}
+	comment = %q
+}
+`, name, view, attributeName, objFunc, resultField, object, objectParameters, comment)
 }
 
 func testAccRecordaIpv4addr(name, ipV4addr, view string) string {
