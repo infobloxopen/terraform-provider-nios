@@ -382,11 +382,11 @@ func (a *RecordaAPIService) PostExecute(r RecordaAPIPostRequest) (*CreateRecordA
 	}
 	if r.recordA.FuncCall != nil {
 		bodyForFuncCall := r.recordA
-		if bodyForFuncCall.FuncCall.AttributeName == "" {
-			return localVarReturnValue, nil, internal.ReportError("FuncCall.AttributeName is required and must be specified")
+		var attrName = bodyForFuncCall.FuncCall.AttributeName
+		if attrName == "" {
+			return localVarReturnValue, nil, internal.ReportError("AttributeName is required field for Function Call")
 		}
-		var funcStr string = bodyForFuncCall.FuncCall.AttributeName
-		if funcStr == "Ipv4addr" {
+		if attrName == "Ipv4addr" {
 			if bodyForFuncCall.Ipv4addr.String != nil {
 				return localVarReturnValue, nil, internal.ReportError("Ipv4addr cannot be provided when function call is used")
 			} else {
