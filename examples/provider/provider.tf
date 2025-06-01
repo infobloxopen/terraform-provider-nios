@@ -8,6 +8,6 @@ terraform {
 }
 
 provider "nios" {
-    nios_auth="username:password"
-    nios_host_url="<Nios Host URL>"
-    }
+    nios_auth="admin:Infoblox@123"
+    nios_host_url="https://172.28.83.87"
+}
