@@ -233,20 +233,20 @@ func DataSourceAttribute(name string, val resourceschema.Attribute, diags *diag.
 	return nil
 }
 
-func ReadWithPages[T any](read func(offset, limit int32) ([]T, error)) ([]T, error) {
+func ReadWithPages[T any](read func(pageID string, maxResults int32) ([]T, string, error)) ([]T, error) {
 	var allResults []T
-	var offset int32 = 0
+	var pageID string = ""
 
 	for {
-		results, err := read(offset, ReadPageSizeLimit)
+		results, nextPageID, err := read(pageID, ReadPageSizeLimit)
 		if err != nil {
 			return nil, err
 		}
 		allResults = append(allResults, results...)
-		if len(results) < int(ReadPageSizeLimit) {
+		if nextPageID == "" {
 			break
 		}
-		offset += ReadPageSizeLimit
+		pageID = nextPageID
 	}
 
 	return allResults, nil

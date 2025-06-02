@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -99,25 +100,73 @@ func (d *RecordaDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	apiRes, httpRes, err := d.client.DNSAPI.
-		RecordaAPI.
-		Get(ctx).
-		Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-		Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
-		ReturnAsObject(1).
-		ReturnFields2(readableAttributesForRecordA).
-		Execute()
+	filters := flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)
+
+	allResults, err := utils.ReadWithPages(
+		func(pageID string, maxResults int32) ([]dns.RecordA, string, error) {
+			var maxResultsInt int
+			if maxResultsVal, ok := filters["_max_results"]; ok {
+				if maxResultsStr, ok := maxResultsVal.(string); ok {
+					var err error
+					maxResultsInt, err = strconv.Atoi(maxResultsStr)
+					if err == nil {
+						maxResults = int32(maxResultsInt)
+					}
+				}
+			}
+
+			request := d.client.DNSAPI.RecordaAPI.
+				Get(ctx).
+				Filters(filters).
+				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
+				ReturnAsObject(1).
+				ReturnFields2(readableAttributesForRecordA).
+				Paging(1).
+				MaxResults(maxResults)
+
+			// Add page ID if provided
+			if pageID != "" {
+				request = request.PageId(pageID)
+			}
+
+			// Execute the request
+			apiRes, httpRes, err := request.Execute()
+
+			if err != nil {
+				if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+					resp.State.RemoveResource(ctx)
+					return nil, "", err
+				}
+				return nil, "", err
+			}
+
+			var records []dns.RecordA
+			var nextPageID string
+
+			if apiRes.ListRecordAResponseObject != nil {
+				records = apiRes.ListRecordAResponseObject.GetResult()
+
+				if maxResultsInt == 0 {
+					// Check for next page ID in additional properties
+					additionalProperties := apiRes.ListRecordAResponseObject.AdditionalProperties
+					if npID, ok := additionalProperties["next_page_id"]; ok {
+						if npIDstr, ok := npID.(string); ok {
+							nextPageID = npIDstr
+						}
+					}
+				}
+			}
+			return records, nextPageID, nil
+		},
+	)
+
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			resp.State.RemoveResource(ctx)
-			return
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Recorda, got error: %s", err))
 		return
 	}
 
-	res := apiRes.ListRecordAResponseObject.GetResult()
-	data.FlattenResults(ctx, res, &resp.Diagnostics)
+	// Process the results
+	data.FlattenResults(ctx, allResults, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
