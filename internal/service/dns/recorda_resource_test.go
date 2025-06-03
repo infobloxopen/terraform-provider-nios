@@ -216,7 +216,7 @@ func TestAccRecordaResource_Disable(t *testing.T) {
 func TestAccRecordaResource_Extattrs(t *testing.T) {
 	var resourceName = "nios_resource_nios_RecordA.test_extattrs"
 	var v dns.RecordA
-	name := acctest.RandomName() + ".example.com"
+	name := acctest.RandomName() + ".test.com"
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -230,7 +230,7 @@ func TestAccRecordaResource_Extattrs(t *testing.T) {
 					"Site": {
 						value: extAttrValue1,
 					},
-					"mystrung": {
+					"Location": {
 						value: "myvalue",
 					},
 				}),

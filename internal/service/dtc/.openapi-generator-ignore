@@ -32,3 +32,8 @@ api*.go
 *_resource*.go
 *_data_source*.go
 model_*.go
+
+#!model_dtc_pool_lb_dynamic_ratio_preferred.go
+#!model_dtc_pool_consolidated_monitors.go
+#!model_dtc_pool_health.go
+#!model_dtc_pool_servers.go

@@ -3,6 +3,7 @@ package flex
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"strconv"
 	"strings"
@@ -163,7 +164,12 @@ func FlattenFrameworkListString(ctx context.Context, l []string, diags *diag.Dia
 	if len(l) == 0 {
 		return types.ListNull(types.StringType)
 	}
-	tfList, d := types.ListValueFrom(ctx, types.StringType, l)
+	// Create a copy of the slice to avoid modifying the original
+    sortedList := make([]string, len(l))
+	copy(sortedList, l)
+    // Sort the list to maintain consistent ordering
+    sort.Strings(sortedList)
+	tfList, d := types.ListValueFrom(ctx, types.StringType, sortedList)
 	diags.Append(d...)
 	return tfList
 }

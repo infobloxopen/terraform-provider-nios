@@ -1,0 +1,12 @@
+{
+	"version": "0.2.0", 
+	"configurations": [ {
+		"name": "Debug Terraform Provider IBM with Delve", 
+		"type": "go", 
+		"request": "launch", 
+		"mode": "debug", 
+		"program": "${workspaceFolder}", 
+		"internalConsoleOptions": "openOnSessionStart", 
+		"args": [ "-debug" ] 
+	} ]
+}

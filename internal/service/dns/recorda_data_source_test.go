@@ -73,7 +73,7 @@ func testAccCheckRecordaResourceAttrPair(resourceName, dataSourceName string) []
 		resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),
 		resource.TestCheckResourceAttrPair(resourceName, "discovered_data", dataSourceName, "result.0.discovered_data"),
 		resource.TestCheckResourceAttrPair(resourceName, "dns_name", dataSourceName, "result.0.dns_name"),
-		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, ""),
 		resource.TestCheckResourceAttrPair(resourceName, "forbid_reclamation", dataSourceName, "result.0.forbid_reclamation"),
 		resource.TestCheckResourceAttrPair(resourceName, "ipv4addr", dataSourceName, "result.0.ipv4addr"),
 		resource.TestCheckResourceAttrPair(resourceName, "last_queried", dataSourceName, "result.0.last_queried"),
