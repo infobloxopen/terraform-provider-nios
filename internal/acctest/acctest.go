@@ -56,11 +56,6 @@ func PreCheck(t *testing.T) {
 		t.Fatal("NIOS_HOST_URL must be set for acceptance tests")
 	}
 
-	auth := os.Getenv("NIOS_AUTH")
-	if auth == "" {
-		t.Fatal("NIOS_AUTH must be set for acceptance tests")
-	}
-
 	username := os.Getenv("NIOS_USERNAME")
 	if username == "" {
 		t.Fatal("NIOS_USERNAME must be set for acceptance tests")
