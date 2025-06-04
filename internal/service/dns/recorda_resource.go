@@ -3,9 +3,9 @@ package dns
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/go-uuid"
 	"net/http"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -204,6 +204,12 @@ func (r *RecordaResource) Update(ctx context.Context, req resource.UpdateRequest
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 

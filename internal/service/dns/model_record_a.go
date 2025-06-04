@@ -12,9 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -62,8 +60,8 @@ var RecordAAttrTypes = map[string]attr.Type{
 	"disable":               types.BoolType,
 	"discovered_data":       types.ObjectType{AttrTypes: RecordADiscoveredDataAttrTypes},
 	"dns_name":              types.StringType,
-	"extattrs":              types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
-	"extattrs_all":          types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
+	"extattrs":              types.MapType{ElemType: types.StringType},
+	"extattrs_all":          types.MapType{ElemType: types.StringType},
 	"forbid_reclamation":    types.BoolType,
 	"ipv4addr":              types.StringType,
 	"last_queried":          types.Int64Type,
@@ -80,10 +78,7 @@ var RecordAAttrTypes = map[string]attr.Type{
 
 var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Computed: true,
-		PlanModifiers: []planmodifier.String{
-			stringplanmodifier.UseStateForUnknown(),
-		},
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
@@ -139,14 +134,14 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
 		Computed:            true,
-		ElementType:         types.ObjectType{AttrTypes: ExtAttrAttrTypes},
-		Default:             mapdefault.StaticValue(types.MapNull(types.ObjectType{AttrTypes: ExtAttrAttrTypes})),
 		MarkdownDescription: "Extensible attributes associated with the object.",
+		ElementType:         types.StringType,
+		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
-		ElementType:         types.ObjectType{AttrTypes: ExtAttrAttrTypes},
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		ElementType:         types.StringType,
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
