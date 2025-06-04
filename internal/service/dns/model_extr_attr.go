@@ -52,6 +52,7 @@ func FlattenExtAttr(ctx context.Context, extattrs map[string]dns.ExtAttrs, diags
 					"Error converting list to JSON",
 					fmt.Sprintf("Could not convert list value for key %s: %s", key, err),
 				)
+				result[key] = types.StringValue(fmt.Sprintf("%v", v))
 			} else {
 				result[key] = types.StringValue(string(jsonBytes))
 			}
