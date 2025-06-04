@@ -274,7 +274,11 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 	m.AutoConsolidatedMonitors = types.BoolPointerValue(from.AutoConsolidatedMonitors)
 	m.Availability = flex.FlattenStringPointer(from.Availability)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-	m.ConsolidatedMonitors = flex.FlattenFrameworkListNestedBlock(ctx, from.ConsolidatedMonitors, DtcPoolConsolidatedMonitorsAttrTypes, diags, FlattenDtcPoolConsolidatedMonitors)
+	if from.AutoConsolidatedMonitors == nil || !*from.AutoConsolidatedMonitors {
+        m.ConsolidatedMonitors = flex.FlattenFrameworkListNestedBlock(ctx, from.ConsolidatedMonitors, DtcPoolConsolidatedMonitorsAttrTypes, diags, FlattenDtcPoolConsolidatedMonitors)
+    } else {
+        m.ConsolidatedMonitors = types.ListNull(types.ObjectType{AttrTypes: DtcPoolConsolidatedMonitorsAttrTypes})
+    }
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Health = FlattenDtcPoolHealth(ctx, from.Health, diags)
 	m.LbAlternateMethod = flex.FlattenStringPointer(from.LbAlternateMethod)
