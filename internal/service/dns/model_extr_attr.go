@@ -122,7 +122,7 @@ func parseExtAttrValue(valStr string) interface{} {
 	}
 	// Integer values
 	if intVal, err := strconv.ParseInt(valStr, 10, 64); err == nil {
-		return int(intVal)
+		return intVal
 	}
 	return valStr
 }
