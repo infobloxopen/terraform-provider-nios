@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 	"net/http"
 	"testing"
 
@@ -13,6 +12,7 @@ import (
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
 func TestAccRecordaResource_basic(t *testing.T) {
@@ -226,29 +226,22 @@ func TestAccRecordaResource_Extattrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]struct{ value string }{
-					"Site": {
-						value: extAttrValue1,
-					},
-					"mystrung": {
-						value: "myvalue",
-					},
+				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]string{
+					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site.value", extAttrValue1),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]struct{ value string }{
-					"Site": {
-						value: extAttrValue2,
-					},
+				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]string{
+					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site.value", extAttrValue2),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -566,24 +559,20 @@ resource "nios_resource_nios_RecordA" "test_disable" {
 `, name, ipV4Addr, view, disable)
 }
 
-func testAccRecordaExtattrs(name, ipV4Addr, view string, extAttrs map[string]struct{ value string }) string {
-	valueStr := ""
+func testAccRecordaExtattrs(name, ipV4Addr, view string, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
-		valueStr += fmt.Sprintf(`%q = {`, k)
-		valueStr += fmt.Sprintf(`
-					value = %q,
-		`, v.value)
-		valueStr += "\t},"
-		extattrsStr += valueStr
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
 	}
 	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_resource_nios_RecordA" "test_extattrs" {
     name = %q
-	ipv4addr = %q
-	view = %q
-	extattrs = %s
+ 	ipv4addr = %q
+ 	view = %q
+ 	extattrs = %s
 }
 `, name, ipV4Addr, view, extattrsStr)
 }
