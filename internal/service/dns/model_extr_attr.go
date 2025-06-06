@@ -73,7 +73,7 @@ func FlattenExtAttr(ctx context.Context, input map[string]dns.ExtAttrs, diags *d
 	elementsOg := make(map[string]attr.Value)
 
 	for k, v := range input {
-		if &v == nil {
+		if v.Value == "" {
 			continue
 		}
 		m := ExtAttrModel{}

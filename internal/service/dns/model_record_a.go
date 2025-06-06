@@ -113,6 +113,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The record creator.",
 	},
 	"ddns_principal": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The GSS-TSIG principal that owns this record.",
 	},
@@ -184,6 +185,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The shared record group this record belongs to.",
 	},
 	"ttl": schema.Int64Attribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Time-to-live value of the record, in seconds.",
 		Validators: []validator.Int64{

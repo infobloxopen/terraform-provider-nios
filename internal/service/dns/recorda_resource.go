@@ -207,6 +207,12 @@ func (r *RecordaResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	// Add internal ID exists in the Extensible Attributes if not already present
 	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
