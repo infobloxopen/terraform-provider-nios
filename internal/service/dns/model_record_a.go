@@ -153,6 +153,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Function call to be executed.",
 		Attributes:          FuncCallResourceSchemaAttributes,
 	},
@@ -188,6 +189,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ttl": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Time-to-live value of the record, in seconds.",
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
@@ -280,6 +282,10 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
 	m.View = flex.FlattenStringPointer(from.View)
 	m.Zone = flex.FlattenStringPointer(from.Zone)
+
+	if m.FuncCall.IsNull() || m.FuncCall.IsUnknown() {
+		m.FuncCall = FlattenFuncCall(ctx, from.FuncCall, diags)
+	}
 }
 
 func ExpandRecordAIpv4addr(str types.String) *dns.RecordAIpv4addr {
