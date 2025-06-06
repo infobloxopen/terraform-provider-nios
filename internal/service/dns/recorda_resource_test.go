@@ -230,9 +230,6 @@ func TestAccRecordaResource_Extattrs(t *testing.T) {
 					"Site": {
 						value: extAttrValue1,
 					},
-					"mystrung": {
-						value: "myvalue",
-					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordaExists(context.Background(), resourceName, &v),
@@ -368,10 +365,10 @@ func TestAccRecordaResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaTtl(name, "10.0.0.20", "default", 30, "true"),
+				Config: testAccRecordaTtl(name, "10.0.0.20", "default", 0, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "30"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "0"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
