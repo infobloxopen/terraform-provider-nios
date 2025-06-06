@@ -99,7 +99,7 @@ resource "nios_resource_nios_RecordA" "test" {
 
 data "nios_datasource_nios_RecordA" "test" {
   filters = {
-	ipv4addr = nios_resource_nios_RecordA.test.ipv4addr
+	name = nios_resource_nios_RecordA.test.name
   }
 }
 `, name, ipV4Addr, view)

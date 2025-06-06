@@ -81,7 +81,7 @@ func (r *RecordaResource) Create(ctx context.Context, req resource.CreateRequest
 
 	// If the function call attributes are set, update the attribute name to match tfsdk tag
 	origFunCallAttrs := data.FuncCall.Attributes()
-	if !data.FuncCall.IsNull() {
+	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
@@ -107,7 +107,7 @@ func (r *RecordaResource) Create(ctx context.Context, req resource.CreateRequest
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Retain the original function call attributes
-	if !data.FuncCall.IsNull() {
+	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
 	}
 
