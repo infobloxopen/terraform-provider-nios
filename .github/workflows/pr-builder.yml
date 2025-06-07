@@ -20,6 +20,12 @@ jobs:
           git config --global url."https://${GH_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Go get private module
+        run: |
+          go get github.com/your-org/your-private-repo@latest
+        env:
+          GOPRIVATE: github.com/unasra/*
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: go mod
         run: |
           go mod tidy
