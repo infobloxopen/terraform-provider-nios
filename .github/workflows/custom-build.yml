@@ -22,5 +22,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: terraform-provider-nios
-          path: terraform-provider-nios-build
+          path: terraform-provider-nios
 
