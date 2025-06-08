@@ -22,7 +22,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Go get private module
         run: |
-          go get github.com/unasra/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416
+          go get github.com/unasra/infoblox-nios-go-client
         env:
           GOPRIVATE: github.com/unasra/*
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
