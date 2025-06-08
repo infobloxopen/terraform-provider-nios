@@ -20,17 +20,14 @@ jobs:
           git config --global url."https://${GH_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      - name: Go get private module
-        run: |
-          go get github.com/unasra/infoblox-nios-go-client
-        env:
-          GOPRIVATE: github.com/unasra/*
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: go mod
         run: |
           go mod tidy
           git diff --exit-code -- go.mod go.sum || \
             (echo; echo "Unexpected difference in go.mod/go.sum files. Run 'go mod tidy' command or revert any go.mod/go.sum changes and commit."; exit 1)
+          env:
+            GOPRIVATE: github.com/unasra/*
+            GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: go fmt
         run: |
           go fmt
