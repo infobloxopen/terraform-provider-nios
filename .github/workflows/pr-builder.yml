@@ -25,9 +25,6 @@ jobs:
           go mod tidy
           git diff --exit-code -- go.mod go.sum || \
             (echo; echo "Unexpected difference in go.mod/go.sum files. Run 'go mod tidy' command or revert any go.mod/go.sum changes and commit."; exit 1)
-          env:
-            GOPRIVATE: github.com/unasra/*
-            GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: go fmt
         run: |
           go fmt
