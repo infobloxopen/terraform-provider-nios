@@ -302,7 +302,6 @@ func FlattenRecordAIpv4addr(from *dns.RecordAIpv4addr) types.String {
 	if from.String == nil {
 		return types.StringNull()
 	}
-	m := types.String{}
-	m = flex.FlattenStringPointer(from.String)
+	m := flex.FlattenStringPointer(from.String)
 	return m
 }
