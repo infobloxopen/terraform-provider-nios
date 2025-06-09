@@ -4,15 +4,20 @@ import (
 	"context"
 
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	//"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -21,12 +26,44 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
 
+//Add this custom plan modifier function
+type consolidatedMonitorsModifier struct{}
+
+func (m consolidatedMonitorsModifier) PlanModifyList(ctx context.Context, req planmodifier.ListRequest, resp *planmodifier.ListResponse) {
+	// If there's no state, nothing to do
+	if req.StateValue.IsNull() {
+		return
+	}
+
+	// Check if auto_consolidated_monitors is true in config
+	var autoConsolidatedMonitors types.Bool
+	diags := req.Config.GetAttribute(ctx, path.Root("auto_consolidated_monitors"), &autoConsolidatedMonitors)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// If auto_consolidated_monitors is true and consolidated_monitors is not set in config
+	if autoConsolidatedMonitors.ValueBool() && req.ConfigValue.IsNull() {
+		// Use state value instead
+		resp.PlanValue = req.StateValue
+	}
+}
+
+func (m consolidatedMonitorsModifier) Description(ctx context.Context) string {
+	return "Suppresses changes to consolidated_monitors when auto_consolidated_monitors is true"
+}
+
+func (m consolidatedMonitorsModifier) MarkdownDescription(ctx context.Context) string {
+	return "Suppresses changes to consolidated_monitors when auto_consolidated_monitors is true"
+}
+
 type DtcPoolModel struct {
 	Ref                      types.String                     `tfsdk:"ref"`
 	AutoConsolidatedMonitors types.Bool                       `tfsdk:"auto_consolidated_monitors"`
 	Availability             types.String                     `tfsdk:"availability"`
 	Comment                  types.String                     `tfsdk:"comment"`
-	ConsolidatedMonitors     types.List                       `tfsdk:"consolidated_monitors"`
+	ConsolidatedMonitors     internaltypes.UnorderedListValue `tfsdk:"consolidated_monitors"`
 	Disable                  types.Bool                       `tfsdk:"disable"`
 	ExtAttrs                 types.Map                        `tfsdk:"extattrs"`
 	ExtAttrsAll              types.Map                        `tfsdk:"extattrs_all"`
@@ -50,7 +87,7 @@ var DtcPoolAttrTypes = map[string]attr.Type{
 	"auto_consolidated_monitors": types.BoolType,
 	"availability":               types.StringType,
 	"comment":                    types.StringType,
-	"consolidated_monitors":      types.ListType{ElemType: types.ObjectType{AttrTypes: DtcPoolConsolidatedMonitorsAttrTypes}},
+	"consolidated_monitors":      internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: DtcPoolConsolidatedMonitorsAttrTypes}}},
 	"disable":                    types.BoolType,
 	"extattrs":                   types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
 	"extattrs_all":               types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
@@ -98,8 +135,14 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcPoolConsolidatedMonitorsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: DtcPoolConsolidatedMonitorsAttrTypes}}},
+		Optional: true,
+		Computed: true,
+		PlanModifiers: []planmodifier.List{
+			//listplanmodifier.UseStateForUnknown(),
+			// listplanmodifier.RequiresReplaceIfConfigured(),
+			consolidatedMonitorsModifier{},
+		},
 		MarkdownDescription: "List of monitors and associated members statuses of which are shared across members and consolidated in server availability determination.",
 	},
 	"disable": schema.BoolAttribute{
@@ -200,11 +243,17 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	"ttl": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The Time To Live (TTL) value for the DTC Pool. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.",
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
+		},
 	},
 	"use_ttl": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("ttl")),
+		},
 		MarkdownDescription: "Use flag for: ttl",
 	},
 }
@@ -274,11 +323,12 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 	m.AutoConsolidatedMonitors = types.BoolPointerValue(from.AutoConsolidatedMonitors)
 	m.Availability = flex.FlattenStringPointer(from.Availability)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-	if from.AutoConsolidatedMonitors == nil || !*from.AutoConsolidatedMonitors {
-        m.ConsolidatedMonitors = flex.FlattenFrameworkListNestedBlock(ctx, from.ConsolidatedMonitors, DtcPoolConsolidatedMonitorsAttrTypes, diags, FlattenDtcPoolConsolidatedMonitors)
-    } else {
-        m.ConsolidatedMonitors = types.ListNull(types.ObjectType{AttrTypes: DtcPoolConsolidatedMonitorsAttrTypes})
-    }
+	m.ConsolidatedMonitors = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.ConsolidatedMonitors, DtcPoolConsolidatedMonitorsAttrTypes, diags, FlattenDtcPoolConsolidatedMonitors)
+	// if from.AutoConsolidatedMonitors == nil || !*from.AutoConsolidatedMonitors {
+	//     m.ConsolidatedMonitors = flex.FlattenFrameworkListNestedBlock(ctx, from.ConsolidatedMonitors, DtcPoolConsolidatedMonitorsAttrTypes, diags, FlattenDtcPoolConsolidatedMonitors)
+	// } else {
+	//     m.ConsolidatedMonitors = types.ListNull(types.ObjectType{AttrTypes: DtcPoolConsolidatedMonitorsAttrTypes})
+	// }
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Health = FlattenDtcPoolHealth(ctx, from.Health, diags)
 	m.LbAlternateMethod = flex.FlattenStringPointer(from.LbAlternateMethod)

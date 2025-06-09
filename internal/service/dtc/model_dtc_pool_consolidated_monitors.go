@@ -11,19 +11,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
+	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
 
 type DtcPoolConsolidatedMonitorsModel struct {
-	Members                 types.List   `tfsdk:"members"`
-	Monitor                 types.String `tfsdk:"monitor"`
-	Availability            types.String `tfsdk:"availability"`
-	FullHealthCommunication types.Bool   `tfsdk:"full_health_communication"`
+	Members                 internaltypes.UnorderedListValue `tfsdk:"members"`
+	Monitor                 types.String                     `tfsdk:"monitor"`
+	Availability            types.String                     `tfsdk:"availability"`
+	FullHealthCommunication types.Bool                       `tfsdk:"full_health_communication"`
 }
 
 var DtcPoolConsolidatedMonitorsAttrTypes = map[string]attr.Type{
-	"members":                   types.ListType{ElemType: types.StringType},
+	"members":                   internaltypes.UnorderedListOfStringType,
 	"monitor":                   types.StringType,
 	"availability":              types.StringType,
 	"full_health_communication": types.BoolType,
@@ -31,16 +32,20 @@ var DtcPoolConsolidatedMonitorsAttrTypes = map[string]attr.Type{
 
 var DtcPoolConsolidatedMonitorsResourceSchemaAttributes = map[string]schema.Attribute{
 	"members": schema.ListAttribute{
+		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Members whose monitor statuses are shared across other members in a pool.",
 	},
 	"monitor": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Monitor whose statuses are shared across other members in a pool.",
 	},
 	"availability": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Servers assigned to a pool with monitor defined are healthy if ANY or ALL members report healthy status.",
 	},
 	"full_health_communication": schema.BoolAttribute{
@@ -94,7 +99,7 @@ func (m *DtcPoolConsolidatedMonitorsModel) Flatten(ctx context.Context, from *dt
 	if m == nil {
 		*m = DtcPoolConsolidatedMonitorsModel{}
 	}
-	m.Members = flex.FlattenFrameworkListString(ctx, from.Members, diags)
+	m.Members = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Members, diags)
 	m.Monitor = flex.FlattenStringPointer(from.Monitor)
 	m.Availability = flex.FlattenStringPointer(from.Availability)
 	m.FullHealthCommunication = types.BoolPointerValue(from.FullHealthCommunication)

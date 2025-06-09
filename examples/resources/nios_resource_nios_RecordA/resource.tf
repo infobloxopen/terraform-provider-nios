@@ -84,10 +84,23 @@ resource "nios_resource_nios_DtcPool" "create_pool4"{
   quorum = 4
 }
 
-resource "nios_resource_nios_DtcPool" "create_pool4"{
-  name = "dtc_pool__new47"
+resource "nios_resource_nios_DtcPool" "create_pool5"{
+  name = "dtc_pool__new300"
   lb_preferred_method = "ROUND_ROBIN"
-  monitors =["dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http",""]
+  monitors =["dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http","dtc:monitor:icmp/ZG5zLmlkbnNfbW9uaXRvcl9pY21wJGljbXA:icmp"]
   auto_consolidated_monitors = true
+  # consolidated_monitors =[
+  #   {
+  #     monitor = "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http"
+  #     members = ["infoblox.172_28_83_235"]
+  #     availability= "ALL"
+  #   }
+  # ]
+  servers = [
+    {
+      server = "dtc:server/ZG5zLmlkbnNfc2VydmVyJHNlcnZlcmMub20:serverc.om"
+      ratio = 3
+    },
+  ]
   quorum = 4
 }
