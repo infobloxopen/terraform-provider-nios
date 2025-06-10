@@ -177,6 +177,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"remove_associated_ptr": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Whether to remove associated PTR records while deleting the A record.",
 	},
 	"shared_record_group": schema.StringAttribute{
@@ -199,6 +200,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"view": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "View that this record is part of.",
 	},
 	"zone": schema.StringAttribute{
