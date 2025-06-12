@@ -191,7 +191,6 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"ttl": schema.Int64Attribute{
 		Computed:            true,
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "Time-to-live value of the record, in seconds.",
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
