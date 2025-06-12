@@ -380,6 +380,32 @@ func (a *RecordaAPIService) PostExecute(r RecordaAPIPostRequest) (*CreateRecordA
 			}
 		}
 	}
+	if r.recordA.FuncCall != nil {
+		bodyForFuncCall := r.recordA
+		var attrName = bodyForFuncCall.FuncCall.AttributeName
+		if attrName == "" {
+			return localVarReturnValue, nil, internal.ReportError("AttributeName is required field for Function Call")
+		}
+		if attrName == "Ipv4addr" {
+			if bodyForFuncCall.Ipv4addr.String != nil {
+				return localVarReturnValue, nil, internal.ReportError("Ipv4addr cannot be provided when function call is used")
+			} else {
+				var l RecordAIpv4addr
+				var m RecordAIpv4addrOneOf
+				m.ObjectFunction = bodyForFuncCall.FuncCall.ObjectFunction
+				m.Parameters = bodyForFuncCall.FuncCall.Parameters
+				m.ResultField = bodyForFuncCall.FuncCall.ResultField
+				m.Object = bodyForFuncCall.FuncCall.Object
+				m.ObjectParameters = bodyForFuncCall.FuncCall.ObjectParameters
+
+				l.RecordAIpv4addrOneOf = &m
+				l.String = nil
+				bodyForFuncCall.Ipv4addr = &l
+				bodyForFuncCall.FuncCall = nil
+			}
+		}
+		r.recordA = bodyForFuncCall
+	}
 	// body params
 	localVarPostBody = r.recordA
 	req, err := a.Client.PrepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
@@ -756,6 +782,12 @@ func (a *RecordaAPIService) ReferencePutExecute(r RecordaAPIReferencePutRequest)
 				}
 			}
 		}
+	}
+	if r.recordA.FuncCall != nil {
+		bodyForFuncCall := r.recordA
+		bodyForFuncCall.FuncCall = nil
+		bodyForFuncCall.Ipv4addr = nil
+		r.recordA = bodyForFuncCall
 	}
 	// body params
 	localVarPostBody = r.recordA

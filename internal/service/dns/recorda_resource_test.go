@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 	"net/http"
 	"testing"
 
@@ -13,6 +12,7 @@ import (
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
 func TestAccRecordaResource_basic(t *testing.T) {
@@ -226,26 +226,22 @@ func TestAccRecordaResource_Extattrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]struct{ value string }{
-					"Site": {
-						value: extAttrValue1,
-					},
+				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]string{
+					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site.value", extAttrValue1),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]struct{ value string }{
-					"Site": {
-						value: extAttrValue2,
-					},
+				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]string{
+					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site.value", extAttrValue2),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -283,11 +279,10 @@ func TestAccRecordaResource_ForbidReclamation(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_Ipv4addr(t *testing.T) {
-	t.Skip("Skipping test for ipv4addr")
-	var resourceName = "nios_resource_nios_RecordA.test_ipv4addr"
+func TestAccRecordaResource_FuncCall(t *testing.T) {
+	var resourceName = "nios_resource_nios_RecordA.test_func_call"
 	var v dns.RecordA
-	//name := acctest.RandomName() +  ".example.com"
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -295,18 +290,45 @@ func TestAccRecordaResource_Ipv4addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaIpv4addr("IPV4ADDR_REPLACE_ME"),
+				Config: testAccRecordaFuncCall(name, "default", "ipv4addr", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Original Function Call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "IPV4ADDR_REPLACE_ME"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaIpv4addr("IPV4ADDR_UPDATE_REPLACE_ME"),
+				Config: testAccRecordaFuncCall(name, "default", "comment", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Function Call with Update"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "IPV4ADDR_UPDATE_REPLACE_ME"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccRecordaResource_Ipv4addr(t *testing.T) {
+	var resourceName = "nios_resource_nios_RecordA.test_ipv4addr"
+	var v dns.RecordA
+	name := acctest.RandomName() + ".example.com"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordaIpv4addr(name, "10.0.0.20", "default"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.0.0.20"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRecordaIpv4addr(name, "10.1.0.20", "default"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.1.0.20"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -315,7 +337,6 @@ func TestAccRecordaResource_Ipv4addr(t *testing.T) {
 }
 
 func TestAccRecordaResource_Name(t *testing.T) {
-	t.Skip("Skipping test for name")
 	var resourceName = "nios_resource_nios_RecordA.test_name"
 	var v dns.RecordA
 	name1 := acctest.RandomName() + ".example.com"
@@ -563,24 +584,20 @@ resource "nios_resource_nios_RecordA" "test_disable" {
 `, name, ipV4Addr, view, disable)
 }
 
-func testAccRecordaExtattrs(name, ipV4Addr, view string, extAttrs map[string]struct{ value string }) string {
-	valueStr := ""
+func testAccRecordaExtattrs(name, ipV4Addr, view string, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
-		valueStr += fmt.Sprintf(`%q = {`, k)
-		valueStr += fmt.Sprintf(`
-					value = %q,
-		`, v.value)
-		valueStr += "\t},"
-		extattrsStr += valueStr
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
 	}
 	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_resource_nios_RecordA" "test_extattrs" {
     name = %q
-	ipv4addr = %q
-	view = %q
-	extattrs = %s
+ 	ipv4addr = %q
+ 	view = %q
+ 	extattrs = %s
 }
 `, name, ipV4Addr, view, extattrsStr)
 }
@@ -596,12 +613,34 @@ resource "nios_resource_nios_RecordA" "test_forbid_reclamation" {
 `, name, ipV4Addr, view, forbidReclamation)
 }
 
-func testAccRecordaIpv4addr(ipv4addr string) string {
+func testAccRecordaFuncCall(name, view, attributeName, objFunc, parameters, resultField, object, objectParameters, comment string) string {
+	return fmt.Sprintf(`
+resource "nios_resource_nios_RecordA" "test_func_call" {
+	name = %q
+	view = %q
+	func_call = {
+		"attribute_name" = %q
+		"object_function" = %q
+		"result_field" = %q
+		"object" = %q
+		"object_parameters" = {
+			"network" = %q
+			"network_view" = "default"
+		}
+	}
+	comment = %q
+}
+`, name, view, attributeName, objFunc, resultField, object, objectParameters, comment)
+}
+
+func testAccRecordaIpv4addr(name, ipV4addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_resource_nios_RecordA" "test_ipv4addr" {
+	name = %q
 	ipv4addr = %q
+	view = %q
 }
-`, ipv4addr)
+`, name, ipV4addr, view)
 }
 
 func testAccRecordaName(name, ipV4addr, view string) string {

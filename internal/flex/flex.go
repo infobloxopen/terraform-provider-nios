@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 )
 
 type FrameworkElementFlExFunc[T any, U any] func(context.Context, T, *diag.Diagnostics) U
@@ -182,6 +184,21 @@ func FlattenFrameworkListString(ctx context.Context, l []string, diags *diag.Dia
 
 func FlattenFrameworkListStringNotNull(ctx context.Context, l []string, diags *diag.Diagnostics) types.List {
 	tfList, d := types.ListValueFrom(ctx, types.StringType, l)
+	diags.Append(d...)
+	return tfList
+}
+
+func FlattenFrameworkUnorderedList[T any](ctx context.Context, elemType attr.Type, data []T, diags *diag.Diagnostics) internaltypes.UnorderedListValue {
+	if len(data) == 0 {
+		return internaltypes.NewUnorderedListValueNull(elemType)
+	}
+	tfList, d := internaltypes.NewUnorderedListValueFrom(ctx, elemType, data)
+	diags.Append(d...)
+	return tfList
+}
+
+func FlattenFrameworkUnorderedListNotNull[T any](ctx context.Context, elemType attr.Type, data []T, diags *diag.Diagnostics) internaltypes.UnorderedListValue {
+	tfList, d := internaltypes.NewUnorderedListValueFrom(ctx, elemType, data)
 	diags.Append(d...)
 	return tfList
 }

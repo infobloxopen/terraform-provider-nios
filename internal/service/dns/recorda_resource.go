@@ -3,13 +3,14 @@ package dns
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/go-uuid"
 	"net/http"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
@@ -78,6 +79,12 @@ func (r *RecordaResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
+	// If the function call attributes are set, update the attribute name to match tfsdk tag
+	origFunCallAttrs := data.FuncCall.Attributes()
+	if len(origFunCallAttrs) > 0 {
+		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
+	}
+
 	apiRes, _, err := r.client.DNSAPI.
 		RecordaAPI.
 		Post(ctx).
@@ -98,6 +105,11 @@ func (r *RecordaResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Retain the original function call attributes
+	if len(origFunCallAttrs) > 0 {
+		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -285,6 +297,19 @@ func (r *RecordaResource) addInternalIDToExtAttrs(ctx context.Context, data *Rec
 	}
 
 	return nil
+}
+func (r *RecordaResource) UpdateFuncCallAttributeName(ctx context.Context, data RecordAModel, diags *diag.Diagnostics) types.Object {
+
+	updatedFuncCallAttrs := data.FuncCall.Attributes()
+	attrVal := updatedFuncCallAttrs["attribute_name"].(types.String).ValueString()
+	pathVar, err := utils.FindModelFieldByTFSdkTag(data, attrVal)
+	if !err {
+		diags.AddError("Client Error", fmt.Sprintf("Unable to find attribute '%s' in RecordA model, got error", attrVal))
+		return types.ObjectNull(FuncCallAttrTypes)
+	}
+	updatedFuncCallAttrs["attribute_name"] = types.StringValue(pathVar)
+
+	return types.ObjectValueMust(FuncCallAttrTypes, updatedFuncCallAttrs)
 }
 
 func (r *RecordaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

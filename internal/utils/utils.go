@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -361,4 +362,26 @@ func ToComputedAttribute(name string, val resourceschema.Attribute) resourcesche
 func ExtractResourceRef(ref string) string {
 	v := strings.SplitN(strings.Trim(ref, "/"), "/", 2)
 	return v[1]
+}
+
+func FindModelFieldByTFSdkTag(model any, tagName string) (string, bool) {
+	modelType := reflect.TypeOf(model)
+	if modelType.Kind() == reflect.Ptr {
+		modelType = modelType.Elem()
+	}
+
+	for i := 0; i < modelType.NumField(); i++ {
+		field := modelType.Field(i)
+		tag := field.Tag.Get("tfsdk")
+		if tag == tagName {
+			return field.Name, true
+		}
+
+		// Handle comma-separated options, like `tfsdk:"name,computed"`
+		if parts := strings.Split(tag, ","); len(parts) > 0 && parts[0] == tagName {
+			return field.Name, true
+		}
+	}
+
+	return "", false
 }
