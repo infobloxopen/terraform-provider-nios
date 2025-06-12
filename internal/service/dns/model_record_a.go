@@ -61,8 +61,8 @@ var RecordAAttrTypes = map[string]attr.Type{
 	"disable":               types.BoolType,
 	"discovered_data":       types.ObjectType{AttrTypes: RecordADiscoveredDataAttrTypes},
 	"dns_name":              types.StringType,
-	"extattrs":              types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
-	"extattrs_all":          types.MapType{ElemType: types.ObjectType{AttrTypes: ExtAttrAttrTypes}},
+	"extattrs":              types.MapType{ElemType: types.StringType},
+	"extattrs_all":          types.MapType{ElemType: types.StringType},
 	"forbid_reclamation":    types.BoolType,
 	"func_call":             types.ObjectType{AttrTypes: FuncCallAttrTypes},
 	"ipv4addr":              types.StringType,
@@ -136,14 +136,14 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
 		Computed:            true,
-		ElementType:         types.ObjectType{AttrTypes: ExtAttrAttrTypes},
-		Default:             mapdefault.StaticValue(types.MapNull(types.ObjectType{AttrTypes: ExtAttrAttrTypes})),
 		MarkdownDescription: "Extensible attributes associated with the object.",
+		ElementType:         types.StringType,
+		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
-		ElementType:         types.ObjectType{AttrTypes: ExtAttrAttrTypes},
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		ElementType:         types.StringType,
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
