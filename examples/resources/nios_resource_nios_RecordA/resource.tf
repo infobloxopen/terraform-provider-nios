@@ -3,12 +3,9 @@ resource "nios_resource_nios_RecordA" "create_record" {
   ipv4addr = "10.20.1.2"
   view     = "default"
   extattrs = {
-    Site = {
-      value = "Siteblr"
-    }
+    Site = "Siteblr"
   }
 }
-
 resource "nios_resource_nios_RecordA" "create_with_func_call" {
   name = "example_test_func_call.example.com"
   func_call = {
