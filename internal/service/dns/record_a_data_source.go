@@ -29,7 +29,7 @@ type RecordADataSource struct {
 }
 
 func (d *RecordADataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "nios_dns_record_a"
+	resp.TypeName = req.ProviderTypeName + "_" + "dns_record_a"
 }
 
 type RecordAModelWithFilter struct {

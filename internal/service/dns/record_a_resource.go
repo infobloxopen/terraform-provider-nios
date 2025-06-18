@@ -32,7 +32,7 @@ type RecordAResource struct {
 }
 
 func (r *RecordAResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "resource_nios_RecordA"
+	resp.TypeName = req.ProviderTypeName + "_" + "dns_record_a"
 }
 
 func (r *RecordAResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
