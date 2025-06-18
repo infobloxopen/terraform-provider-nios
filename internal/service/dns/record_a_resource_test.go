@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccRecordaResource_basic(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test"
+	var resourceName = "nios_dns_record_a.test"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -42,7 +42,7 @@ func TestAccRecordaResource_basic(t *testing.T) {
 
 func TestAccRecordaResource_disappears(t *testing.T) {
 	t.Skip("Skipping test for disappears")
-	resourceName := "nios_resource_nios_RecordA.test"
+	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -64,7 +64,7 @@ func TestAccRecordaResource_disappears(t *testing.T) {
 }
 
 func TestAccRecordaResource_Comment(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_comment"
+	var resourceName = "nios_dns_record_a.test_comment"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -94,7 +94,7 @@ func TestAccRecordaResource_Comment(t *testing.T) {
 }
 
 func TestAccRecordaResource_Creator(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_creator"
+	var resourceName = "nios_dns_record_a.test_creator"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -124,7 +124,7 @@ func TestAccRecordaResource_Creator(t *testing.T) {
 }
 
 func TestAccRecordaResource_DdnsPrincipal(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_ddns_principal"
+	var resourceName = "nios_dns_record_a.test_ddns_principal"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -154,7 +154,7 @@ func TestAccRecordaResource_DdnsPrincipal(t *testing.T) {
 }
 
 func TestAccRecordaResource_DdnsProtected(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_ddns_protected"
+	var resourceName = "nios_dns_record_a.test_ddns_protected"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -184,7 +184,7 @@ func TestAccRecordaResource_DdnsProtected(t *testing.T) {
 }
 
 func TestAccRecordaResource_Disable(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_disable"
+	var resourceName = "nios_dns_record_a.test_disable"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -214,7 +214,7 @@ func TestAccRecordaResource_Disable(t *testing.T) {
 }
 
 func TestAccRecordaResource_Extattrs(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_extattrs"
+	var resourceName = "nios_dns_record_a.test_extattrs"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 	extAttrValue1 := acctest.RandomName()
@@ -250,7 +250,7 @@ func TestAccRecordaResource_Extattrs(t *testing.T) {
 }
 
 func TestAccRecordaResource_ForbidReclamation(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_forbid_reclamation"
+	var resourceName = "nios_dns_record_a.test_forbid_reclamation"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -280,7 +280,7 @@ func TestAccRecordaResource_ForbidReclamation(t *testing.T) {
 }
 
 func TestAccRecordaResource_FuncCall(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_func_call"
+	var resourceName = "nios_dns_record_a.test_func_call"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -307,7 +307,7 @@ func TestAccRecordaResource_FuncCall(t *testing.T) {
 }
 
 func TestAccRecordaResource_Ipv4addr(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_ipv4addr"
+	var resourceName = "nios_dns_record_a.test_ipv4addr"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -337,7 +337,7 @@ func TestAccRecordaResource_Ipv4addr(t *testing.T) {
 }
 
 func TestAccRecordaResource_Name(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_name"
+	var resourceName = "nios_dns_record_a.test_name"
 	var v dns.RecordA
 	name1 := acctest.RandomName() + ".example.com"
 	name2 := acctest.RandomName() + ".example.com"
@@ -368,7 +368,7 @@ func TestAccRecordaResource_Name(t *testing.T) {
 }
 
 func TestAccRecordaResource_Ttl(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_ttl"
+	var resourceName = "nios_dns_record_a.test_ttl"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -398,7 +398,7 @@ func TestAccRecordaResource_Ttl(t *testing.T) {
 }
 
 func TestAccRecordaResource_UseTtl(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_use_ttl"
+	var resourceName = "nios_dns_record_a.test_use_ttl"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -428,7 +428,7 @@ func TestAccRecordaResource_UseTtl(t *testing.T) {
 }
 
 func TestAccRecordaResource_View(t *testing.T) {
-	var resourceName = "nios_resource_nios_RecordA.test_view"
+	var resourceName = "nios_dns_record_a.test_view"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
 
@@ -520,7 +520,7 @@ func testAccCheckRecordaDisappears(ctx context.Context, v *dns.RecordA) resource
 
 func testAccRecordaBasicConfig(name, ipV4Addr, view string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test" {
+resource "nios_dns_record_a" "test" {
 	name = %q
 	ipv4addr = %q
 	view = %q
@@ -530,7 +530,7 @@ resource "nios_resource_nios_RecordA" "test" {
 
 func testAccRecordaComment(name, ipV4Addr, view, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_comment" {
+resource "nios_dns_record_a" "test_comment" {
 	name = %q
 	ipv4addr = %q
 	view = %q
@@ -541,7 +541,7 @@ resource "nios_resource_nios_RecordA" "test_comment" {
 
 func testAccRecordaCreator(name, ipV4Addr, view, creator string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_creator" {
+resource "nios_dns_record_a" "test_creator" {
 	name = %q
 	ipv4addr = %q
 	view = %q  
@@ -552,7 +552,7 @@ resource "nios_resource_nios_RecordA" "test_creator" {
 
 func testAccRecordaDdnsPrincipal(name, ipV4Addr, view, ddnsPrincipal string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_ddns_principal" {
+resource "nios_dns_record_a" "test_ddns_principal" {
 	name = %q
 	ipv4addr = %q
 	view = %q
@@ -564,7 +564,7 @@ resource "nios_resource_nios_RecordA" "test_ddns_principal" {
 
 func testAccRecordaDdnsProtected(name, ipV4Addr, view, ddnsProtected string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_ddns_protected" {
+resource "nios_dns_record_a" "test_ddns_protected" {
     name = %q
 	ipv4addr = %q
 	view = %q
@@ -575,7 +575,7 @@ resource "nios_resource_nios_RecordA" "test_ddns_protected" {
 
 func testAccRecordaDisable(name, ipV4Addr, view, disable string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_disable" {
+resource "nios_dns_record_a" "test_disable" {
     name = %q
 	ipv4addr = %q
 	view = %q
@@ -593,7 +593,7 @@ func testAccRecordaExtattrs(name, ipV4Addr, view string, extAttrs map[string]str
 	}
 	extattrsStr += "\t}"
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_extattrs" {
+resource "nios_dns_record_a" "test_extattrs" {
     name = %q
  	ipv4addr = %q
  	view = %q
@@ -604,7 +604,7 @@ resource "nios_resource_nios_RecordA" "test_extattrs" {
 
 func testAccRecordaForbidReclamation(name, ipV4Addr, view, forbidReclamation string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_forbid_reclamation" {
+resource "nios_dns_record_a" "test_forbid_reclamation" {
     name = %q
 	ipv4addr = %q
 	view = %q
@@ -615,7 +615,7 @@ resource "nios_resource_nios_RecordA" "test_forbid_reclamation" {
 
 func testAccRecordaFuncCall(name, view, attributeName, objFunc, parameters, resultField, object, objectParameters, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_func_call" {
+resource "nios_dns_record_a" "test_func_call" {
 	name = %q
 	view = %q
 	func_call = {
@@ -635,7 +635,7 @@ resource "nios_resource_nios_RecordA" "test_func_call" {
 
 func testAccRecordaIpv4addr(name, ipV4addr, view string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_ipv4addr" {
+resource "nios_dns_record_a" "test_ipv4addr" {
 	name = %q
 	ipv4addr = %q
 	view = %q
@@ -645,7 +645,7 @@ resource "nios_resource_nios_RecordA" "test_ipv4addr" {
 
 func testAccRecordaName(name, ipV4addr, view string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_name" {
+resource "nios_dns_record_a" "test_name" {
 	name = %q
 	ipv4addr = %q
 	view = %q
@@ -655,7 +655,7 @@ resource "nios_resource_nios_RecordA" "test_name" {
 
 func testAccRecordaTtl(name, ipV4Addr, view string, ttl int32, use_ttl string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_ttl" {
+resource "nios_dns_record_a" "test_ttl" {
     name = %q
 	ipv4addr = %q
 	view = %q
@@ -667,7 +667,7 @@ resource "nios_resource_nios_RecordA" "test_ttl" {
 
 func testAccRecordaUseTtl(name, ipV4Addr, view, useTtl string, ttl int32) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_use_ttl" {
+resource "nios_dns_record_a" "test_use_ttl" {
     name = %q
 	ipv4addr = %q
 	view = %q
@@ -679,7 +679,7 @@ resource "nios_resource_nios_RecordA" "test_use_ttl" {
 
 func testAccRecordaView(ipV4addr string, name string, view string) string {
 	return fmt.Sprintf(`
-resource "nios_resource_nios_RecordA" "test_view" {
+resource "nios_dns_record_a" "test_view" {
 	ipv4addr = %q
 	name = %q
 	view = %q
