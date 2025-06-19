@@ -625,7 +625,6 @@ func FlattenFixedaddressDiscoveredData(ctx context.Context, from *dhcp.Fixedaddr
 	}
 	m := FixedaddressDiscoveredDataModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, FixedaddressDiscoveredDataAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -91,7 +91,6 @@ func FlattenFixedaddressMsOptions(ctx context.Context, from *dhcp.FixedaddressMs
 	}
 	m := FixedaddressMsOptionsModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, FixedaddressMsOptionsAttrTypes, m)
 	diags.Append(d...)
 	return t

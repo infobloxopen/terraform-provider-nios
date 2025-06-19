@@ -99,7 +99,6 @@ func FlattenFixedaddressCloudInfo(ctx context.Context, from *dhcp.FixedaddressCl
 	}
 	m := FixedaddressCloudInfoModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, FixedaddressCloudInfoAttrTypes, m)
 	diags.Append(d...)
 	return t

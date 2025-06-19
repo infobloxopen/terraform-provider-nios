@@ -71,7 +71,6 @@ func FlattenFixedaddressSnmpCredential(ctx context.Context, from *dhcp.Fixedaddr
 	}
 	m := FixedaddressSnmpCredentialModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, FixedaddressSnmpCredentialAttrTypes, m)
 	diags.Append(d...)
 	return t
