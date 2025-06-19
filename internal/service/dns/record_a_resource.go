@@ -98,7 +98,7 @@ func (r *RecordAResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	res := apiRes.CreateRecordAResponseAsObject.GetResult()
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.Extattrs, *res.Extattrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordA due inherited Extensible attributes, got error: %s", err))
 		return
@@ -151,7 +151,7 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.Extattrs, *res.Extattrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordA due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -230,7 +230,7 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 		res := apiRes.ListRecordAResponseObject.GetResult()[0]
 
 		// Remove inherited external attributes and check for errors
-		res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+		res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.Extattrs, *res.Extattrs)
 		if diags.HasError() {
 			return true
 		}
@@ -283,7 +283,7 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	res := apiRes.UpdateRecordAResponseAsObject.GetResult()
 
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.Extattrs, *res.Extattrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -322,11 +322,12 @@ func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *Rec
 	var internalId string
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
-		if idEA, ok := elements["Terraform Internal ID"]; ok {
-			idObj := idEA.(types.Object)
-			valueAttr := idObj.Attributes()["value"]
-			internalId = valueAttr.(types.String).ValueString()
+		if id, ok := elements["Terraform Internal ID"]; ok {
+			if idStr, ok := id.(types.String); ok {
+				internalId = idStr.ValueString()
+			}
 		}
+
 	}
 
 	if internalId == "" {
