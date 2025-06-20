@@ -2,6 +2,7 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dhcp"
+
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
 
@@ -41,7 +43,7 @@ type FixedaddressModel struct {
 	EnableImmediateDiscovery       types.Bool   `tfsdk:"enable_immediate_discovery"`
 	EnablePxeLeaseTime             types.Bool   `tfsdk:"enable_pxe_lease_time"`
 	ExtAttrs                       types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                    types.Map    `tfsdk:"extattrs"`
+	ExtAttrsAll                    types.Map    `tfsdk:"extattrs_all"`
 	IgnoreDhcpOptionListRequest    types.Bool   `tfsdk:"ignore_dhcp_option_list_request"`
 	Ipv4addr                       types.String `tfsdk:"ipv4addr"`
 	FuncCall                       types.Object `tfsdk:"func_call"`
@@ -80,7 +82,7 @@ type FixedaddressModel struct {
 }
 
 var FixedaddressAttrTypes = map[string]attr.Type{
-	"_ref":                                types.StringType,
+	"ref":                                 types.StringType,
 	"agent_circuit_id":                    types.StringType,
 	"agent_remote_id":                     types.StringType,
 	"allow_telnet":                        types.BoolType,
@@ -146,8 +148,9 @@ var FixedaddressAttrTypes = map[string]attr.Type{
 }
 
 var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
-	"_ref": schema.StringAttribute{
+	"ref": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"agent_circuit_id": schema.StringAttribute{
@@ -160,10 +163,14 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"allow_telnet": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.",
 	},
 	"always_update_dns": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This field controls whether only the DHCP server is allowed to update DNS, regardless of the DHCP client requests.",
 	},
 	"bootfile": schema.StringAttribute{
@@ -183,10 +190,13 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"client_identifier_prepend_zero": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This field controls whether there is a prepend for the dhcp-client-identifier of a fixed address.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes: FixedaddressCloudInfoResourceSchemaAttributes,
+		Computed:   true,
 		Optional:   true,
 	},
 	"comment": schema.StringAttribute{
@@ -203,6 +213,8 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"deny_bootp": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to true, BOOTP settings are disabled and BOOTP requests will be denied.",
 	},
 	"device_description": schema.StringAttribute{
@@ -223,14 +235,19 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"dhcp_client_identifier": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The DHCP client ID for the fixed address.",
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a fixed address is disabled or not. When this is set to False, the fixed address is enabled.",
 	},
 	"disable_discovery": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the discovery for this fixed address is disabled or not. False means that the discovery is enabled.",
 	},
 	"discover_now_status": schema.StringAttribute{
@@ -243,6 +260,8 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The dynamic DNS updates flag of a DHCP Fixed Address object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
 	},
 	"enable_immediate_discovery": schema.BoolAttribute{
@@ -251,6 +270,8 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"enable_pxe_lease_time": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this to True if you want the DHCP server to use a different lease time for PXE clients.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -258,8 +279,15 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
+	"extattrs_all": schema.MapAttribute{
+		ElementType:         types.StringType,
+		Computed:            true,
+		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.",
 	},
 	"ipv4addr": schema.StringAttribute{
@@ -311,10 +339,12 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"network": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The network to which this fixed address belongs, in IPv4 Address/CIDR format.",
 	},
 	"network_view": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the network view in which this fixed address resides.",
 	},
 	"nextserver": schema.StringAttribute{
@@ -326,6 +356,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: FixedaddressOptionsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
@@ -354,58 +385,86 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"use_bootfile": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: bootfile",
 	},
 	"use_bootserver": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: bootserver",
 	},
 	"use_cli_credentials": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to true, the CLI credential will override member-level settings.",
 	},
 	"use_ddns_domainname": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ddns_domainname",
 	},
 	"use_deny_bootp": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: deny_bootp",
 	},
 	"use_enable_ddns": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: enable_ddns",
 	},
 	"use_ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ignore_dhcp_option_list_request",
 	},
 	"use_logic_filter_rules": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: logic_filter_rules",
 	},
 	"use_ms_options": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ms_options",
 	},
 	"use_nextserver": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: nextserver",
 	},
 	"use_options": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: options",
 	},
 	"use_pxe_lease_time": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: pxe_lease_time",
 	},
 	"use_snmp3_credential": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the SNMPv3 credential should be used for the fixed address.",
 	},
 	"use_snmp_credential": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to true, the SNMP credential will override member-level settings.",
 	},
 }

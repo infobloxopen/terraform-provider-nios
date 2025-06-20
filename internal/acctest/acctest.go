@@ -42,6 +42,17 @@ func RandomIP() string {
 	return fmt.Sprintf("%d.%d.%d.%d", rand.Intn(255), rand.Intn(255), rand.Intn(255), rand.Intn(255))
 }
 
+func RandomIPWithSpecificOctetsSet(prefix string) string {
+	return fmt.Sprintf("15.0.0.%d", rand.Intn(255))
+}
+
+func RandomNumber(maxLimit int) int {
+	if maxLimit <= 0 {
+		return 0
+	}
+	return rand.Intn(maxLimit)
+}
+
 func RandomName() string {
 	b := make([]byte, 6)
 	for i := range b {
