@@ -322,9 +322,9 @@ func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *Rec
 	var internalId string
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
-		if id, ok := elements["Terraform Internal ID"]; ok {
-			if idStr, ok := id.(types.String); ok {
-				internalId = idStr.ValueString()
+		if tid, ok := elements["Terraform Internal ID"]; ok {
+			if tidStr, ok := tid.(types.String); ok {
+				internalId = tidStr.ValueString()
 			}
 		}
 
