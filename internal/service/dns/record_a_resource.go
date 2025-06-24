@@ -216,7 +216,6 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordA).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordA by extattrs, got error: %s", err))
 		return true
@@ -236,7 +235,9 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 	if diags.HasError() {
 		return true
 	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
