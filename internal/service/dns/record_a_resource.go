@@ -235,8 +235,8 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 	if diags.HasError() {
 		return true
 	}
-	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	data.Flatten(ctx, &res, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -323,9 +323,9 @@ func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *Rec
 	var internalId string
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
-		if tid, ok := elements["Terraform Internal ID"]; ok {
-			if tidStr, ok := tid.(types.String); ok {
-				internalId = tidStr.ValueString()
+		if tId, ok := elements["Terraform Internal ID"]; ok {
+			if tIdStr, ok := tId.(types.String); ok {
+				internalId = tIdStr.ValueString()
 			}
 		}
 	}
