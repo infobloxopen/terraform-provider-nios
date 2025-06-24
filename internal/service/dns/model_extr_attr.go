@@ -126,3 +126,26 @@ func parseExtAttrValue(valStr string) interface{} {
 	}
 	return valStr
 }
+
+func FlattenUserExtAttrs(ctx context.Context, extattrs *map[string]dns.ExtAttrs, diags *diag.Diagnostics) types.Map {
+	if extattrs == nil {
+		return types.MapNull(types.StringType)
+	}
+
+	sys_extattrs := map[string]bool{
+		"Terraform Internal ID": true,
+	}
+
+	userExtAttrs := make(map[string]dns.ExtAttrs)
+	for key, val := range *extattrs {
+		if !sys_extattrs[key] {
+			userExtAttrs[key] = val
+		}
+	}
+
+	if len(userExtAttrs) > 0 {
+		return FlattenExtAttr(ctx, userExtAttrs, diags)
+	}
+
+	return types.MapNull(types.StringType)
+}

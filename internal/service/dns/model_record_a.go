@@ -268,6 +268,7 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DiscoveredData = FlattenRecordADiscoveredData(ctx, from.DiscoveredData, diags)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
+	m.ExtAttrs = FlattenUserExtAttrs(ctx, from.Extattrs, diags)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.Extattrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
 	m.Ipv4addr = FlattenRecordAIpv4addr(from.Ipv4addr)
