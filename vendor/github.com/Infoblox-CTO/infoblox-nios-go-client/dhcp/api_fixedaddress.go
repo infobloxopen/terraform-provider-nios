@@ -198,16 +198,43 @@ func (a *FixedaddressAPIService) CreateExecute(r FixedaddressAPICreateRequest) (
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	if len(a.Client.Cfg.DefaultExtAttrs) > 0 && r.fixedaddress != nil {
-		if r.fixedaddress.Extattrs == nil {
-			r.fixedaddress.Extattrs = &map[string]ExtAttrs{}
+		if r.fixedaddress.ExtAttrs == nil {
+			r.fixedaddress.ExtAttrs = &map[string]ExtAttrs{}
 		}
 		for k, v := range a.Client.Cfg.DefaultExtAttrs {
-			if _, ok := (*r.fixedaddress.Extattrs)[k]; !ok {
-				(*r.fixedaddress.Extattrs)[k] = ExtAttrs{
+			if _, ok := (*r.fixedaddress.ExtAttrs)[k]; !ok {
+				(*r.fixedaddress.ExtAttrs)[k] = ExtAttrs{
 					Value: v.Value,
 				}
 			}
 		}
+	}
+	if r.fixedaddress.FuncCall != nil {
+		bodyForFuncCall := r.fixedaddress
+		if bodyForFuncCall.FuncCall.AttributeName == "" {
+			return localVarReturnValue, nil, internal.ReportError("FuncCall.AttributeName is required and must be specified")
+		}
+		var funcStr string = bodyForFuncCall.FuncCall.AttributeName
+		if funcStr == "Ipv4addr" {
+			if bodyForFuncCall.Ipv4addr.String != nil {
+				return localVarReturnValue, nil, internal.ReportError("Ipv4addr cannot be provided when function call is used")
+			} else {
+
+				var l FixedaddressIpv4addr
+				var m FixedaddressIpv4addrOneOf
+				m.ObjectFunction = bodyForFuncCall.FuncCall.ObjectFunction
+				m.Parameters = bodyForFuncCall.FuncCall.Parameters
+				m.ResultField = bodyForFuncCall.FuncCall.ResultField
+				m.Object = bodyForFuncCall.FuncCall.Object
+				m.ObjectParameters = bodyForFuncCall.FuncCall.ObjectParameters
+
+				l.FixedaddressIpv4addrOneOf = &m
+				l.String = nil
+				bodyForFuncCall.Ipv4addr = &l
+				bodyForFuncCall.FuncCall = nil
+			}
+		}
+		r.fixedaddress = bodyForFuncCall
 	}
 	// body params
 	localVarPostBody = r.fixedaddress
@@ -736,16 +763,22 @@ func (a *FixedaddressAPIService) UpdateExecute(r FixedaddressAPIUpdateRequest) (
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	if len(a.Client.Cfg.DefaultExtAttrs) > 0 && r.fixedaddress != nil {
-		if r.fixedaddress.Extattrs == nil {
-			r.fixedaddress.Extattrs = &map[string]ExtAttrs{}
+		if r.fixedaddress.ExtAttrs == nil {
+			r.fixedaddress.ExtAttrs = &map[string]ExtAttrs{}
 		}
 		for k, v := range a.Client.Cfg.DefaultExtAttrs {
-			if _, ok := (*r.fixedaddress.Extattrs)[k]; !ok {
-				(*r.fixedaddress.Extattrs)[k] = ExtAttrs{
+			if _, ok := (*r.fixedaddress.ExtAttrs)[k]; !ok {
+				(*r.fixedaddress.ExtAttrs)[k] = ExtAttrs{
 					Value: v.Value,
 				}
 			}
 		}
+	}
+	if r.fixedaddress.FuncCall != nil {
+		bodyForFuncCall := r.fixedaddress
+		bodyForFuncCall.FuncCall = nil
+		bodyForFuncCall.Ipv4addr = nil
+		r.fixedaddress = bodyForFuncCall
 	}
 	// body params
 	localVarPostBody = r.fixedaddress
