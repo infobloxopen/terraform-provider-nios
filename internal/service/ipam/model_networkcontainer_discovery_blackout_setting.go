@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -31,6 +32,7 @@ var NetworkcontainerDiscoveryBlackoutSettingResourceSchemaAttributes = map[strin
 		Optional:            true,
 		MarkdownDescription: "Determines whether a blackout is enabled or not.",
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"blackout_duration": schema.Int64Attribute{
 		Optional:            true,

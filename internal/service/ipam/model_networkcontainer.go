@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
 
@@ -774,69 +773,69 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandNetworkcontainer(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.Networkcontainer {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m NetworkcontainerModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
+// func ExpandNetworkcontainer(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.Networkcontainer {
+// 	if o.IsNull() || o.IsUnknown() {
+// 		return nil
+// 	}
+// 	var m NetworkcontainerModel
+// 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+// 	if diags.HasError() {
+// 		return nil
+// 	}
+// 	return m.Expand(ctx, diags)
+// }
 
-func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Networkcontainer {
+func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Networkcontainer {
 	if m == nil {
 		return nil
 	}
 	to := &ipam.Networkcontainer{
-		Ref:                              flex.ExpandStringPointer(m.Ref),
-		Authority:                        flex.ExpandBoolPointer(m.Authority),
-		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
-		Bootfile:                         flex.ExpandStringPointer(m.Bootfile),
-		Bootserver:                       flex.ExpandStringPointer(m.Bootserver),
-		CloudInfo:                        ExpandNetworkcontainerCloudInfo(ctx, m.CloudInfo, diags),
-		Comment:                          flex.ExpandStringPointer(m.Comment),
-		DdnsDomainname:                   flex.ExpandStringPointer(m.DdnsDomainname),
-		DdnsGenerateHostname:             flex.ExpandBoolPointer(m.DdnsGenerateHostname),
-		DdnsServerAlwaysUpdates:          flex.ExpandBoolPointer(m.DdnsServerAlwaysUpdates),
-		DdnsTtl:                          flex.ExpandInt64Pointer(m.DdnsTtl),
-		DdnsUpdateFixedAddresses:         flex.ExpandBoolPointer(m.DdnsUpdateFixedAddresses),
-		DdnsUseOption81:                  flex.ExpandBoolPointer(m.DdnsUseOption81),
-		DeleteReason:                     flex.ExpandStringPointer(m.DeleteReason),
-		DenyBootp:                        flex.ExpandBoolPointer(m.DenyBootp),
-		DiscoveryBasicPollSettings:       ExpandNetworkcontainerDiscoveryBasicPollSettings(ctx, m.DiscoveryBasicPollSettings, diags),
-		DiscoveryBlackoutSetting:         ExpandNetworkcontainerDiscoveryBlackoutSetting(ctx, m.DiscoveryBlackoutSetting, diags),
-		DiscoveryMember:                  flex.ExpandStringPointer(m.DiscoveryMember),
-		EmailList:                        flex.ExpandFrameworkListString(ctx, m.EmailList, diags),
-		EnableDdns:                       flex.ExpandBoolPointer(m.EnableDdns),
-		EnableDhcpThresholds:             flex.ExpandBoolPointer(m.EnableDhcpThresholds),
-		EnableDiscovery:                  flex.ExpandBoolPointer(m.EnableDiscovery),
-		EnableEmailWarnings:              flex.ExpandBoolPointer(m.EnableEmailWarnings),
-		EnableImmediateDiscovery:         flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
-		EnablePxeLeaseTime:               flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
-		EnableSnmpWarnings:               flex.ExpandBoolPointer(m.EnableSnmpWarnings),
-		Extattrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
-		FederatedRealms:                  flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandNetworkcontainerFederatedRealms),
-		HighWaterMark:                    flex.ExpandInt64Pointer(m.HighWaterMark),
-		HighWaterMarkReset:               flex.ExpandInt64Pointer(m.HighWaterMarkReset),
-		IgnoreDhcpOptionListRequest:      flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
-		IgnoreId:                         flex.ExpandStringPointer(m.IgnoreId),
-		IgnoreMacAddresses:               flex.ExpandFrameworkListString(ctx, m.IgnoreMacAddresses, diags),
-		IpamEmailAddresses:               flex.ExpandFrameworkListString(ctx, m.IpamEmailAddresses, diags),
-		IpamThresholdSettings:            ExpandNetworkcontainerIpamThresholdSettings(ctx, m.IpamThresholdSettings, diags),
-		IpamTrapSettings:                 ExpandNetworkcontainerIpamTrapSettings(ctx, m.IpamTrapSettings, diags),
-		LeaseScavengeTime:                flex.ExpandInt64Pointer(m.LeaseScavengeTime),
-		LogicFilterRules:                 flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandNetworkcontainerLogicFilterRules),
-		LowWaterMark:                     flex.ExpandInt64Pointer(m.LowWaterMark),
-		LowWaterMarkReset:                flex.ExpandInt64Pointer(m.LowWaterMarkReset),
-		MgmPrivate:                       flex.ExpandBoolPointer(m.MgmPrivate),
-		MsAdUserData:                     ExpandNetworkcontainerMsAdUserData(ctx, m.MsAdUserData, diags),
-		Network:                          ExpandNetworkcontainerNetwork(m.Network),
-		FuncCall:                         ExpandFuncCall(ctx, m.FuncCall, diags),
-		NetworkContainer:                 flex.ExpandStringPointer(m.NetworkContainer),
-		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
+		Ref:                         flex.ExpandStringPointer(m.Ref),
+		Authority:                   flex.ExpandBoolPointer(m.Authority),
+		AutoCreateReversezone:       flex.ExpandBoolPointer(m.AutoCreateReversezone),
+		Bootfile:                    flex.ExpandStringPointer(m.Bootfile),
+		Bootserver:                  flex.ExpandStringPointer(m.Bootserver),
+		CloudInfo:                   ExpandNetworkcontainerCloudInfo(ctx, m.CloudInfo, diags),
+		Comment:                     flex.ExpandStringPointer(m.Comment),
+		DdnsDomainname:              flex.ExpandStringPointer(m.DdnsDomainname),
+		DdnsGenerateHostname:        flex.ExpandBoolPointer(m.DdnsGenerateHostname),
+		DdnsServerAlwaysUpdates:     flex.ExpandBoolPointer(m.DdnsServerAlwaysUpdates),
+		DdnsTtl:                     flex.ExpandInt64Pointer(m.DdnsTtl),
+		DdnsUpdateFixedAddresses:    flex.ExpandBoolPointer(m.DdnsUpdateFixedAddresses),
+		DdnsUseOption81:             flex.ExpandBoolPointer(m.DdnsUseOption81),
+		DeleteReason:                flex.ExpandStringPointer(m.DeleteReason),
+		DenyBootp:                   flex.ExpandBoolPointer(m.DenyBootp),
+		DiscoveryBasicPollSettings:  ExpandNetworkcontainerDiscoveryBasicPollSettings(ctx, m.DiscoveryBasicPollSettings, diags),
+		DiscoveryBlackoutSetting:    ExpandNetworkcontainerDiscoveryBlackoutSetting(ctx, m.DiscoveryBlackoutSetting, diags),
+		DiscoveryMember:             flex.ExpandStringPointer(m.DiscoveryMember),
+		EmailList:                   flex.ExpandFrameworkListString(ctx, m.EmailList, diags),
+		EnableDdns:                  flex.ExpandBoolPointer(m.EnableDdns),
+		EnableDhcpThresholds:        flex.ExpandBoolPointer(m.EnableDhcpThresholds),
+		EnableDiscovery:             flex.ExpandBoolPointer(m.EnableDiscovery),
+		EnableEmailWarnings:         flex.ExpandBoolPointer(m.EnableEmailWarnings),
+		EnableImmediateDiscovery:    flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
+		EnablePxeLeaseTime:          flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
+		EnableSnmpWarnings:          flex.ExpandBoolPointer(m.EnableSnmpWarnings),
+		ExtAttrs:                    ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		FederatedRealms:             flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandNetworkcontainerFederatedRealms),
+		HighWaterMark:               flex.ExpandInt64Pointer(m.HighWaterMark),
+		HighWaterMarkReset:          flex.ExpandInt64Pointer(m.HighWaterMarkReset),
+		IgnoreDhcpOptionListRequest: flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
+		IgnoreId:                    flex.ExpandStringPointer(m.IgnoreId),
+		IgnoreMacAddresses:          flex.ExpandFrameworkListString(ctx, m.IgnoreMacAddresses, diags),
+		IpamEmailAddresses:          flex.ExpandFrameworkListString(ctx, m.IpamEmailAddresses, diags),
+		IpamThresholdSettings:       ExpandNetworkcontainerIpamThresholdSettings(ctx, m.IpamThresholdSettings, diags),
+		IpamTrapSettings:            ExpandNetworkcontainerIpamTrapSettings(ctx, m.IpamTrapSettings, diags),
+		LeaseScavengeTime:           flex.ExpandInt64Pointer(m.LeaseScavengeTime),
+		LogicFilterRules:            flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandNetworkcontainerLogicFilterRules),
+		LowWaterMark:                flex.ExpandInt64Pointer(m.LowWaterMark),
+		LowWaterMarkReset:           flex.ExpandInt64Pointer(m.LowWaterMarkReset),
+		MgmPrivate:                  flex.ExpandBoolPointer(m.MgmPrivate),
+		MsAdUserData:                ExpandNetworkcontainerMsAdUserData(ctx, m.MsAdUserData, diags),
+		Network:                     ExpandNetworkcontainerNetwork(m.Network),
+		FuncCall:                    ExpandFuncCall(ctx, m.FuncCall, diags),
+		// NetworkContainer:                 flex.ExpandStringPointer(m.NetworkContainer),
+		// NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
 		Nextserver:                       flex.ExpandStringPointer(m.Nextserver),
 		Options:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandNetworkcontainerOptions),
 		PortControlBlackoutSetting:       ExpandNetworkcontainerPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
@@ -883,6 +882,10 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 		UseUpdateDnsOnLeaseRenewal:       flex.ExpandBoolPointer(m.UseUpdateDnsOnLeaseRenewal),
 		UseZoneAssociations:              flex.ExpandBoolPointer(m.UseZoneAssociations),
 		ZoneAssociations:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZoneAssociations, diags, ExpandNetworkcontainerZoneAssociations),
+	}
+	if isCreate {
+		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
+		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
 	}
 	return to
 }
@@ -935,8 +938,8 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
-	// m.ExtAttrs = flex.FlattenFrameworkMapString(ctx, from.ExtAttrs, diags)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.Extattrs, diags)
+	// m.ExtAttrs = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
+	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, NetworkcontainerFederatedRealmsAttrTypes, diags, FlattenNetworkcontainerFederatedRealms)
 	m.HighWaterMark = flex.FlattenInt64Pointer(from.HighWaterMark)
 	m.HighWaterMarkReset = flex.FlattenInt64Pointer(from.HighWaterMarkReset)
