@@ -50,7 +50,7 @@ func TestAccNetworkcontainerResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkcontainerDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkcontainerBasicConfig(),
+				Config: testAccNetworkcontainerBasicConfig("11.0.0.0/16"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
 					testAccCheckNetworkcontainerDisappears(context.Background(), &v),
@@ -61,34 +61,34 @@ func TestAccNetworkcontainerResource_disappears(t *testing.T) {
 	})
 }
 
-// func TestAccNetworkcontainerResource_Ref(t *testing.T) {
-// 	var resourceName = "nios_nios_ipam_networkcontainer.test__ref"
-// 	var v ipam.Networkcontainer
+func TestAccNetworkcontainerResource_Ref(t *testing.T) {
+	var resourceName = "nios_nios_ipam_networkcontainer.test__ref"
+	var v ipam.Networkcontainer
 
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccNetworkcontainerRef("REF_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "_ref", "REF_REPLACE_ME"),
-// 				),
-// 			},
-// 			// Update and Read
-// 			{
-// 				Config: testAccNetworkcontainerRef("REF_UPDATE_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "_ref", "REF_UPDATE_REPLACE_ME"),
-// 				),
-// 			},
-// 			// Delete testing automatically occurs in TestCase
-// 		},
-// 	})
-// }
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerRef("REF_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "_ref", "REF_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerRef("REF_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "_ref", "REF_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
 
 // func TestAccNetworkcontainerResource_Authority(t *testing.T) {
 // 	var resourceName = "nios_nios_ipam_networkcontainer.test_authority"
@@ -2744,19 +2744,19 @@ func testAccCheckNetworkcontainerDestroy(ctx context.Context, v *ipam.Networkcon
 	}
 }
 
-// func testAccCheckNetworkcontainerDisappears(ctx context.Context, v *ipam.Networkcontainer) resource.TestCheckFunc {
-// 	// Delete the resource externally to verify disappears test
-// 	return func(state *terraform.State) error {
-// 		_, err := acctest.NIOSClient.IPAMAPI.
-// 			NetworkcontainerAPI.
-// 			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
-// 			Execute()
-// 		if err != nil {
-// 			return err
-// 		}
-// 		return nil
-// 	}
-// }
+func testAccCheckNetworkcontainerDisappears(ctx context.Context, v *ipam.Networkcontainer) resource.TestCheckFunc {
+	// Delete the resource externally to verify disappears test
+	return func(state *terraform.State) error {
+		_, err := acctest.NIOSClient.IPAMAPI.
+			NetworkcontainerAPI.
+			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Execute()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}
 
 func testAccNetworkcontainerBasicConfig(network string) string {
 	// TODO: create basic resource with required fields
@@ -2767,13 +2767,13 @@ resource "nios_nios_ipam_networkcontainer" "test" {
 `, network)
 }
 
-// func testAccNetworkcontainerRef(ref string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_nios_ipam_networkcontainer" "test__ref" {
-//     _ref = %q
-// }
-// `, ref)
-// }
+func testAccNetworkcontainerRef(ref string) string {
+	return fmt.Sprintf(`
+resource "nios_nios_ipam_networkcontainer" "test__ref" {
+    _ref = %q
+}
+`, ref)
+}
 
 // func testAccNetworkcontainerAuthority(authority string) string {
 // 	return fmt.Sprintf(`
