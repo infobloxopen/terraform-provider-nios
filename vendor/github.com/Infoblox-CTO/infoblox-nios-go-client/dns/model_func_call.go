@@ -18,7 +18,7 @@ import (
 // checks if the FuncCall type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FuncCall{}
 
-// FuncCall struct for FuncCall
+// FuncCall Function Call attribute
 type FuncCall struct {
 	// The attribute to be called.
 	AttributeName string `json:"attribute_name"`

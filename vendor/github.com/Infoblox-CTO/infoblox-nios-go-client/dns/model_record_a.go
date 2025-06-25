@@ -42,8 +42,8 @@ type RecordA struct {
 	Extattrs *map[string]ExtAttrs `json:"extattrs,omitempty"`
 	// Determines if the reclamation is allowed for the record or not.
 	ForbidReclamation *bool            `json:"forbid_reclamation,omitempty"`
-	FuncCall          *FuncCall        `json:"func_call,omitempty"`
 	Ipv4addr          *RecordAIpv4addr `json:"ipv4addr,omitempty"`
+	FuncCall          *FuncCall        `json:"func_call,omitempty"`
 	// The time of the last DNS query in Epoch seconds format.
 	LastQueried  *int64               `json:"last_queried,omitempty"`
 	MsAdUserData *RecordAMsAdUserData `json:"ms_ad_user_data,omitempty"`
@@ -498,38 +498,6 @@ func (o *RecordA) SetForbidReclamation(v bool) {
 	o.ForbidReclamation = &v
 }
 
-// GetFuncCall returns the FuncCall field value if set, zero value otherwise.
-func (o *RecordA) GetFuncCall() FuncCall {
-	if o == nil || IsNil(o.FuncCall) {
-		var ret FuncCall
-		return ret
-	}
-	return *o.FuncCall
-}
-
-// GetFuncCallOk returns a tuple with the FuncCall field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *RecordA) GetFuncCallOk() (*FuncCall, bool) {
-	if o == nil || IsNil(o.FuncCall) {
-		return nil, false
-	}
-	return o.FuncCall, true
-}
-
-// HasFuncCall returns a boolean if a field has been set.
-func (o *RecordA) HasFuncCall() bool {
-	if o != nil && !IsNil(o.FuncCall) {
-		return true
-	}
-
-	return false
-}
-
-// SetFuncCall gets a reference to the given FuncCall and assigns it to the FuncCall field.
-func (o *RecordA) SetFuncCall(v FuncCall) {
-	o.FuncCall = &v
-}
-
 // GetIpv4addr returns the Ipv4addr field value if set, zero value otherwise.
 func (o *RecordA) GetIpv4addr() RecordAIpv4addr {
 	if o == nil || IsNil(o.Ipv4addr) {
@@ -560,6 +528,38 @@ func (o *RecordA) HasIpv4addr() bool {
 // SetIpv4addr gets a reference to the given RecordAIpv4addr and assigns it to the Ipv4addr field.
 func (o *RecordA) SetIpv4addr(v RecordAIpv4addr) {
 	o.Ipv4addr = &v
+}
+
+// GetFuncCall returns the FuncCall field value if set, zero value otherwise.
+func (o *RecordA) GetFuncCall() FuncCall {
+	if o == nil || IsNil(o.FuncCall) {
+		var ret FuncCall
+		return ret
+	}
+	return *o.FuncCall
+}
+
+// GetFuncCallOk returns a tuple with the FuncCall field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RecordA) GetFuncCallOk() (*FuncCall, bool) {
+	if o == nil || IsNil(o.FuncCall) {
+		return nil, false
+	}
+	return o.FuncCall, true
+}
+
+// HasFuncCall returns a boolean if a field has been set.
+func (o *RecordA) HasFuncCall() bool {
+	if o != nil && !IsNil(o.FuncCall) {
+		return true
+	}
+
+	return false
+}
+
+// SetFuncCall gets a reference to the given FuncCall and assigns it to the FuncCall field.
+func (o *RecordA) SetFuncCall(v FuncCall) {
+	o.FuncCall = &v
 }
 
 // GetLastQueried returns the LastQueried field value if set, zero value otherwise.
@@ -931,11 +931,11 @@ func (o RecordA) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ForbidReclamation) {
 		toSerialize["forbid_reclamation"] = o.ForbidReclamation
 	}
-	if !IsNil(o.FuncCall) {
-		toSerialize["func_call"] = o.FuncCall
-	}
 	if !IsNil(o.Ipv4addr) {
 		toSerialize["ipv4addr"] = o.Ipv4addr
+	}
+	if !IsNil(o.FuncCall) {
+		toSerialize["func_call"] = o.FuncCall
 	}
 	if !IsNil(o.LastQueried) {
 		toSerialize["last_queried"] = o.LastQueried

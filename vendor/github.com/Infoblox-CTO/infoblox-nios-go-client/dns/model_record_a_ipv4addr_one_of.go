@@ -17,7 +17,7 @@ import (
 // checks if the RecordAIpv4addrOneOf type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &RecordAIpv4addrOneOf{}
 
-// RecordAIpv4addrOneOf The IPv4 Address of the record in object format
+// RecordAIpv4addrOneOf record:a: The IPv4 Address of the record.
 type RecordAIpv4addrOneOf struct {
 	ObjectFunction       *string                `json:"_object_function,omitempty"`
 	Parameters           map[string]interface{} `json:"_parameters,omitempty"`
