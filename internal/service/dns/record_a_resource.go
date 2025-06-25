@@ -209,25 +209,26 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 		"Terraform Internal ID": internalId,
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
+	apiRes, _, err := r.client.DNSAPI.
 		RecordAAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordA).
 		Execute()
-
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			resp.State.RemoveResource(ctx)
-			return true
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordA by extattrs, got error: %s", err))
 		return true
 	}
 
-	if len(apiRes.ListRecordAResponseObject.GetResult()) > 0 {
-		res := apiRes.ListRecordAResponseObject.GetResult()[0]
+	results := apiRes.ListRecordAResponseObject.GetResult()
+	// If the list is empty, the resource no longer exists so remove it from state
+	if len(results) == 0 {
+		resp.State.RemoveResource(ctx)
+		return true
+	}
+
+	res := results[0]
 
 		// Remove inherited external attributes and check for errors
 		res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
@@ -235,9 +236,9 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 			return true
 		}
 
-		data.Flatten(ctx, &res, &resp.Diagnostics)
-		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-	}
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+
 	return true
 }
 
@@ -322,10 +323,10 @@ func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *Rec
 	var internalId string
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
-		if idEA, ok := elements["Terraform Internal ID"]; ok {
-			idObj := idEA.(types.Object)
-			valueAttr := idObj.Attributes()["value"]
-			internalId = valueAttr.(types.String).ValueString()
+		if tId, ok := elements["Terraform Internal ID"]; ok {
+			if tIdStr, ok := tId.(types.String); ok {
+				internalId = tIdStr.ValueString()
+			}
 		}
 	}
 
