@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -14,7 +15,6 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 )
 
 type NetworkcontainerOptionsModel struct {

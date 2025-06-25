@@ -88,7 +88,7 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	apiRes, _, err := r.client.IPAMAPI.
 		NetworkcontainerAPI.
 		Create(ctx).
-		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics)).
+		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 		ReturnAsObject(1).
 		Execute()
@@ -98,7 +98,7 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	res := apiRes.CreateNetworkcontainerResponseAsObject.GetResult()
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Networkcontainer due inherited Extensible attributes, got error: %s", err))
 		return
@@ -143,7 +143,7 @@ func (r *NetworkcontainerResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	res := apiRes.GetNetworkcontainerResponseObjectAsResult.GetResult()
-	if res.Extattrs == nil {
+	if res.ExtAttrs == nil {
 		resp.Diagnostics.AddError(
 			"Missing Extensible Attributes",
 			"Unable to read Networkcontainer because no extensible attributes were returned from the API.",
@@ -151,13 +151,13 @@ func (r *NetworkcontainerResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Networkcontainer due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
-	apiTerraformId, ok := (*res.Extattrs)["Terraform Internal ID"]
+	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Missing Terraform internal id Attributes",
@@ -231,7 +231,7 @@ func (r *NetworkcontainerResource) ReadByExtAttrs(ctx context.Context, data *Net
 		res := apiRes.ListNetworkcontainerResponseObject.GetResult()[0]
 
 		// Remove inherited external attributes and check for errors
-		res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+		res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 		if diags.HasError() {
 			return true
 		}
@@ -275,7 +275,7 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 	apiRes, _, err := r.client.IPAMAPI.
 		NetworkcontainerAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics)).
+		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 		ReturnAsObject(1).
 		Execute()
@@ -287,7 +287,7 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 
 	res := apiRes.UpdateNetworkcontainerResponseAsObject.GetResult()
 
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Networkcontainer due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -327,10 +327,10 @@ func (r *NetworkcontainerResource) addInternalIDToExtAttrs(ctx context.Context, 
 
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
-		if idEA, ok := elements["Terraform Internal ID"]; ok {
-			idObj := idEA.(types.Object)
-			valueAttr := idObj.Attributes()["value"]
-			internalId = valueAttr.(types.String).ValueString()
+		if tId, ok := elements["Terraform Internal ID"]; ok {
+			if tIdStr, ok := tId.(types.String); ok {
+				internalId = tIdStr.ValueString()
+			}
 		}
 	}
 
@@ -342,7 +342,7 @@ func (r *NetworkcontainerResource) addInternalIDToExtAttrs(ctx context.Context, 
 		}
 	}
 
-	r.client.DNSAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
+	r.client.IPAMAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
 		"Terraform Internal ID": {Value: internalId},
 	}
 

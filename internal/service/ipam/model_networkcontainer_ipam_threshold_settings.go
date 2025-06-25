@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -27,10 +28,14 @@ var NetworkcontainerIpamThresholdSettingsAttrTypes = map[string]attr.Type{
 var NetworkcontainerIpamThresholdSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"trigger_value": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Indicates the percentage point which triggers the email/SNMP trap sending.",
+		Default:             int64default.StaticInt64(95),
 	},
 	"reset_value": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(85),
 		MarkdownDescription: "Indicates the percentage point which resets the email/SNMP trap sending.",
 	},
 }
