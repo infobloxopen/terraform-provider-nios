@@ -2,7 +2,9 @@ package ipam_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -38,26 +40,26 @@ func TestAccNetworkcontainerResource_basic(t *testing.T) {
 	})
 }
 
-// func TestAccNetworkcontainerResource_disappears(t *testing.T) {
-// 	resourceName := "nios_nios_ipam_networkcontainer.test"
-// 	var v ipam.Networkcontainer
+func TestAccNetworkcontainerResource_disappears(t *testing.T) {
+	resourceName := "nios_nios_ipam_networkcontainer.test"
+	var v ipam.Networkcontainer
 
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckNetworkcontainerDestroy(context.Background(), &v),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccNetworkcontainerBasicConfig(),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-// 					testAccCheckNetworkcontainerDisappears(context.Background(), &v),
-// 				),
-// 				ExpectNonEmptyPlan: true,
-// 			},
-// 		},
-// 	})
-// }
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNetworkcontainerDestroy(context.Background(), &v),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkcontainerBasicConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					testAccCheckNetworkcontainerDisappears(context.Background(), &v),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
 
 // func TestAccNetworkcontainerResource_Ref(t *testing.T) {
 // 	var resourceName = "nios_nios_ipam_networkcontainer.test__ref"
@@ -2722,25 +2724,25 @@ func testAccCheckNetworkcontainerExists(ctx context.Context, resourceName string
 	}
 }
 
-// func testAccCheckNetworkcontainerDestroy(ctx context.Context, v *ipam.Networkcontainer) resource.TestCheckFunc {
-// 	// Verify the resource was destroyed
-// 	return func(state *terraform.State) error {
-// 		_, httpRes, err := acctest.NIOSClient.IPAMAPI.
-// 			NetworkcontainerAPI.
-// 			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
-// 			ReturnAsObject(1).
-// 			ReturnFieldsPlus(readableAttributesForNetworkcontainer).
-// 			Execute()
-// 		if err != nil {
-// 			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-// 				// resource was deleted
-// 				return nil
-// 			}
-// 			return err
-// 		}
-// 		return errors.New("expected to be deleted")
-// 	}
-// }
+func testAccCheckNetworkcontainerDestroy(ctx context.Context, v *ipam.Networkcontainer) resource.TestCheckFunc {
+	// Verify the resource was destroyed
+	return func(state *terraform.State) error {
+		_, httpRes, err := acctest.NIOSClient.IPAMAPI.
+			NetworkcontainerAPI.
+			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			ReturnAsObject(1).
+			ReturnFieldsPlus(readableAttributesForNetworkcontainer).
+			Execute()
+		if err != nil {
+			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+				// resource was deleted
+				return nil
+			}
+			return err
+		}
+		return errors.New("expected to be deleted")
+	}
+}
 
 // func testAccCheckNetworkcontainerDisappears(ctx context.Context, v *ipam.Networkcontainer) resource.TestCheckFunc {
 // 	// Delete the resource externally to verify disappears test
