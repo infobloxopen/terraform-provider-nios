@@ -1,4 +1,4 @@
-# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416 => ../infoblox-nios-go-client
+# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250624102233-0ca24303afac
 ## explicit; go 1.23.0
 github.com/Infoblox-CTO/infoblox-nios-go-client/acl
 github.com/Infoblox-CTO/infoblox-nios-go-client/client
@@ -501,4 +501,3 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/timestamppb
-# github.com/Infoblox-CTO/infoblox-nios-go-client => ../infoblox-nios-go-client
