@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 )
 
 type FrameworkElementFlExFunc[T any, U any] func(context.Context, T, *diag.Diagnostics) U
@@ -64,6 +66,13 @@ func FlattenInt32Pointer(i *int32) types.Int32 {
 	if i == nil {
 		return types.Int32Null()
 	}
+	return types.Int32Value(*i)
+}
+
+func FlattenInt32PointerNull(i *int32) types.Int32 {
+	if i == nil {
+		return types.Int32Null()
+	}
 	return FlattenInt32(*i)
 }
 
@@ -75,6 +84,13 @@ func FlattenInt64(i int64) types.Int64 {
 }
 
 func FlattenInt64Pointer(i *int64) types.Int64 {
+	if i == nil {
+		return types.Int64Null()
+	}
+	return types.Int64Value(*i)
+}
+
+func FlattenInt64PointerNull(i *int64) types.Int64 {
 	if i == nil {
 		return types.Int64Null()
 	}
@@ -168,6 +184,21 @@ func FlattenFrameworkListString(ctx context.Context, l []string, diags *diag.Dia
 
 func FlattenFrameworkListStringNotNull(ctx context.Context, l []string, diags *diag.Diagnostics) types.List {
 	tfList, d := types.ListValueFrom(ctx, types.StringType, l)
+	diags.Append(d...)
+	return tfList
+}
+
+func FlattenFrameworkUnorderedList[T any](ctx context.Context, elemType attr.Type, data []T, diags *diag.Diagnostics) internaltypes.UnorderedListValue {
+	if len(data) == 0 {
+		return internaltypes.NewUnorderedListValueNull(elemType)
+	}
+	tfList, d := internaltypes.NewUnorderedListValueFrom(ctx, elemType, data)
+	diags.Append(d...)
+	return tfList
+}
+
+func FlattenFrameworkUnorderedListNotNull[T any](ctx context.Context, elemType attr.Type, data []T, diags *diag.Diagnostics) internaltypes.UnorderedListValue {
+	tfList, d := internaltypes.NewUnorderedListValueFrom(ctx, elemType, data)
 	diags.Append(d...)
 	return tfList
 }
