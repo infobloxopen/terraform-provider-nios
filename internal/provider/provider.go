@@ -76,12 +76,14 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		dns.NewRecordAResource,
+		dns.NewRecordAaaaResource,
 	}
 }
 
 func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		dns.NewRecordADataSource,
+		dns.NewRecordAaaaDataSource,
 	}
 }
 

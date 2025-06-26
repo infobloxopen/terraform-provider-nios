@@ -230,11 +230,11 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 
 	res := results[0]
 
-		// Remove inherited external attributes and check for errors
-		res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-		if diags.HasError() {
-			return true
-		}
+	// Remove inherited external attributes and check for errors
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		return true
+	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)

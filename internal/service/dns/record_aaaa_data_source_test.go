@@ -15,6 +15,7 @@ func TestAccRecordAaaaDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_aaaa.test"
 	resourceName := "nios_dns_record_aaaa.test"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +23,7 @@ func TestAccRecordAaaaDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordAaaaDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordAaaaDataSourceConfigFilters(),
+				Config: testAccRecordAaaaDataSourceConfigFilters(name, "2002:1111::1401", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
@@ -37,13 +38,16 @@ func TestAccRecordAaaaDataSource_TagFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_aaaa.test"
 	resourceName := "nios_dns_record_aaaa.test"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
+	extAttrValue := acctest.RandomName()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckRecordAaaaDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordAaaaDataSourceConfigExtAttrFilters("value1"),
+				Config: testAccRecordAaaaDataSourceConfigExtAttrFilters(name, "2002:1111::1401", "default", extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
@@ -72,7 +76,6 @@ func testAccCheckRecordAaaaResourceAttrPair(resourceName, dataSourceName string)
 		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
 		resource.TestCheckResourceAttrPair(resourceName, "forbid_reclamation", dataSourceName, "result.0.forbid_reclamation"),
 		resource.TestCheckResourceAttrPair(resourceName, "ipv6addr", dataSourceName, "result.0.ipv6addr"),
-		resource.TestCheckResourceAttrPair(resourceName, "func_call", dataSourceName, "result.0.func_call"),
 		resource.TestCheckResourceAttrPair(resourceName, "last_queried", dataSourceName, "result.0.last_queried"),
 		resource.TestCheckResourceAttrPair(resourceName, "ms_ad_user_data", dataSourceName, "result.0.ms_ad_user_data"),
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
@@ -86,33 +89,37 @@ func testAccCheckRecordAaaaResourceAttrPair(resourceName, dataSourceName string)
 	}
 }
 
-func testAccRecordAaaaDataSourceConfigFilters() string {
+func testAccRecordAaaaDataSourceConfigFilters(name, ipV6Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test" {
+  name    = %q
+  ipv6addr = %q
+  view    = %q
 }
 
 data "nios_dns_record_aaaa" "test" {
   filters = {
-	 = nios_dns_record_aaaa.test.
+	"name"    = nios_dns_record_aaaa.test.name
   }
 }
-`)
+`, name, ipV6Addr, view)
 }
 
-func testAccRecordAaaaDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccRecordAaaaDataSourceConfigExtAttrFilters(name, ipV6Addr, view, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test" {
+  name    = %q
+  ipv6addr = %q
+  view    = %q
   extattrs = {
-    Site = {
-        value = %q
-    }
-  	}
+    Site = %q
+	}
 }
 
 data "nios_dns_record_aaaa" "test" {
   extattrfilters = {
-	"Site" = nios_dns_record_aaaa.test.tags.tag1
+	"Site" = nios_dns_record_aaaa.test.extattrs.Site
   }
 }
-`, extAttrsValue)
+`, name, ipV6Addr, view, extAttrsValue)
 }

@@ -3,12 +3,17 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 
@@ -45,7 +50,7 @@ type RecordAaaaModel struct {
 }
 
 var RecordAaaaAttrTypes = map[string]attr.Type{
-	"_ref":                  types.StringType,
+	"ref":                   types.StringType,
 	"aws_rte53_record_info": types.ObjectType{AttrTypes: RecordAaaaAwsRte53RecordInfoAttrTypes},
 	"cloud_info":            types.ObjectType{AttrTypes: RecordAaaaCloudInfoAttrTypes},
 	"comment":               types.StringType,
@@ -74,7 +79,7 @@ var RecordAaaaAttrTypes = map[string]attr.Type{
 }
 
 var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
-	"_ref": schema.StringAttribute{
+	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
@@ -88,7 +93,6 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
@@ -96,17 +100,23 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The time of the record creation in Epoch seconds format.",
 	},
 	"creator": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("STATIC", "DYNAMIC"),
+		},
+		Default:             stringdefault.StaticString("STATIC"),
 		MarkdownDescription: "The record creator. Note that changing creator from or to 'SYSTEM' value is not allowed.",
 	},
 	"ddns_principal": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The GSS-TSIG principal that owns this record.",
 	},
 	"ddns_protected": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the DDNS updates for this record are allowed or not.",
 	},
 	"disable": schema.BoolAttribute{
@@ -125,9 +135,9 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -136,6 +146,8 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the reclamation is allowed for the record or not.",
 	},
 	"ipv6addr": schema.StringAttribute{
@@ -144,20 +156,22 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The IPv6 Address of the record.",
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Attributes: FuncCallResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          FuncCallResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Function call to be executed.",
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: RecordAaaaMsAdUserDataResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RecordAaaaMsAdUserDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "Name for the AAAA record in FQDN format. This value can be in unicode format.",
 	},
 	"reclaimable": schema.BoolAttribute{
@@ -166,6 +180,7 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"remove_associated_ptr": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Delete option that indicates whether the associated PTR records should be removed while deleting the specified A record.",
 	},
 	"shared_record_group": schema.StringAttribute{
@@ -175,13 +190,19 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"ttl": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.",
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
+		},
 	},
 	"use_ttl": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "Use flag for: ttl",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
+		MarkdownDescription: "Flag to indicate whether the TTL value should be used for the AAAAA record.",
 	},
 	"view": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the DNS view in which the record resides. Example: \"external\".",
 	},
 	"zone": schema.StringAttribute{
@@ -190,19 +211,7 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRecordAaaa(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordAaaa {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RecordAaaaModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
-func (m *RecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordAaaa {
+func (m *RecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordAaaa {
 	if m == nil {
 		return nil
 	}
@@ -225,7 +234,9 @@ func (m *RecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		RemoveAssociatedPtr: flex.ExpandBoolPointer(m.RemoveAssociatedPtr),
 		Ttl:                 flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:              flex.ExpandBoolPointer(m.UseTtl),
-		View:                flex.ExpandStringPointer(m.View),
+	}
+	if isCreate {
+		to.View = flex.ExpandStringPointer(m.View)
 	}
 	return to
 }

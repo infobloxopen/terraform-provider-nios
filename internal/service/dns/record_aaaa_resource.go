@@ -17,7 +17,7 @@ import (
 )
 
 // TODO : Add readable attributes for the resource
-var readableAttributesForRecordAaaa = ""
+var readableAttributesForRecordAaaa = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,extattrs,forbid_reclamation,ipv6addr,last_queried,ms_ad_user_data,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RecordAaaaResource{}
@@ -89,7 +89,7 @@ func (r *RecordAaaaResource) Create(ctx context.Context, req resource.CreateRequ
 	apiRes, _, err := r.client.DNSAPI.
 		RecordAaaaAPI.
 		Create(ctx).
-		RecordAaaa(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordAaaa(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForRecordAaaa).
 		ReturnAsObject(1).
 		Execute()
@@ -278,7 +278,7 @@ func (r *RecordAaaaResource) Update(ctx context.Context, req resource.UpdateRequ
 	apiRes, _, err := r.client.DNSAPI.
 		RecordAaaaAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordAaaa(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordAaaa(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordAaaa).
 		ReturnAsObject(1).
 		Execute()

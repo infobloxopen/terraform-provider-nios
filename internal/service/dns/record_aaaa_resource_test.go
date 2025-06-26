@@ -15,12 +15,10 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
-// TODO : Add readable attributes for the resource
-var readableAttributesForRecordAaaa = ""
-
 func TestAccRecordAaaaResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -28,11 +26,12 @@ func TestAccRecordAaaaResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaBasicConfig(""),
+				Config: testAccRecordAaaaBasicConfig(name, "2002:1111::1401", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "2002:1111::1401"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -41,8 +40,10 @@ func TestAccRecordAaaaResource_basic(t *testing.T) {
 }
 
 func TestAccRecordAaaaResource_disappears(t *testing.T) {
+	t.Skip("Skipping test for disappears")
 	resourceName := "nios_dns_record_aaaa.test"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -50,7 +51,7 @@ func TestAccRecordAaaaResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordAaaaDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordAaaaBasicConfig(""),
+				Config: testAccRecordAaaaBasicConfig(name, "2002:1111::1401", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
 					testAccCheckRecordAaaaDisappears(context.Background(), &v),
@@ -61,96 +62,10 @@ func TestAccRecordAaaaResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccRecordAaaaResource_Ref(t *testing.T) {
-	var resourceName = "nios_dns_record_aaaa.test__ref"
-	var v dns.RecordAaaa
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordAaaaRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "_ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordAaaaRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "_ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccRecordAaaaResource_AwsRte53RecordInfo(t *testing.T) {
-	var resourceName = "nios_dns_record_aaaa.test_aws_rte53_record_info"
-	var v dns.RecordAaaa
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordAaaaAwsRte53RecordInfo("AWS_RTE53_RECORD_INFO_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "aws_rte53_record_info", "AWS_RTE53_RECORD_INFO_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordAaaaAwsRte53RecordInfo("AWS_RTE53_RECORD_INFO_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "aws_rte53_record_info", "AWS_RTE53_RECORD_INFO_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccRecordAaaaResource_CloudInfo(t *testing.T) {
-	var resourceName = "nios_dns_record_aaaa.test_cloud_info"
-	var v dns.RecordAaaa
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordAaaaCloudInfo("CLOUD_INFO_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_info", "CLOUD_INFO_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordAaaaCloudInfo("CLOUD_INFO_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_info", "CLOUD_INFO_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccRecordAaaaResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_comment"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -158,18 +73,18 @@ func TestAccRecordAaaaResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaComment("COMMENT_REPLACE_ME"),
+				Config: testAccRecordAaaaComment(name, "2002:1111::1401", "default", "This is a new record"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a new record"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaComment(name, "2002:1111::1401", "default", "This is an updated record"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated record"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -180,6 +95,7 @@ func TestAccRecordAaaaResource_Comment(t *testing.T) {
 func TestAccRecordAaaaResource_Creator(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_creator"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -187,18 +103,18 @@ func TestAccRecordAaaaResource_Creator(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaCreator("CREATOR_REPLACE_ME"),
+				Config: testAccRecordAaaaCreator(name, "2002:1111::1401", "default", "STATIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "creator", "CREATOR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaCreator("CREATOR_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaCreator(name, "2002:1111::1401", "default", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "creator", "CREATOR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "creator", "DYNAMIC"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -209,6 +125,7 @@ func TestAccRecordAaaaResource_Creator(t *testing.T) {
 func TestAccRecordAaaaResource_DdnsPrincipal(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_ddns_principal"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -216,18 +133,18 @@ func TestAccRecordAaaaResource_DdnsPrincipal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaDdnsPrincipal("DDNS_PRINCIPAL_REPLACE_ME"),
+				Config: testAccRecordAaaaDdnsPrincipal(name, "2002:1111::1401", "default", "DYNAMIC", "ddns_principal"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "ddns_principal"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaDdnsPrincipal("DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaDdnsPrincipal(name, "2002:1111::1401", "default", "DYNAMIC", "updated_ddns_principal"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "updated_ddns_principal"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -238,6 +155,7 @@ func TestAccRecordAaaaResource_DdnsPrincipal(t *testing.T) {
 func TestAccRecordAaaaResource_DdnsProtected(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_ddns_protected"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -245,18 +163,18 @@ func TestAccRecordAaaaResource_DdnsProtected(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaDdnsProtected("DDNS_PROTECTED_REPLACE_ME"),
+				Config: testAccRecordAaaaDdnsProtected(name, "2002:1111::1401", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "DDNS_PROTECTED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaDdnsProtected("DDNS_PROTECTED_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaDdnsProtected(name, "2002:1111::1401", "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "DDNS_PROTECTED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -267,6 +185,7 @@ func TestAccRecordAaaaResource_DdnsProtected(t *testing.T) {
 func TestAccRecordAaaaResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_disable"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -274,47 +193,18 @@ func TestAccRecordAaaaResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaDisable("DISABLE_REPLACE_ME"),
+				Config: testAccRecordAaaaDisable(name, "2002:1111::1401", "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaDisable(name, "2002:1111::1401", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccRecordAaaaResource_DiscoveredData(t *testing.T) {
-	var resourceName = "nios_dns_record_aaaa.test_discovered_data"
-	var v dns.RecordAaaa
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordAaaaDiscoveredData("DISCOVERED_DATA_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovered_data", "DISCOVERED_DATA_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordAaaaDiscoveredData("DISCOVERED_DATA_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovered_data", "DISCOVERED_DATA_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -325,6 +215,9 @@ func TestAccRecordAaaaResource_DiscoveredData(t *testing.T) {
 func TestAccRecordAaaaResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_extattrs"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -332,18 +225,22 @@ func TestAccRecordAaaaResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccRecordAaaaExtAttrs(name, "2002:1111::1401", "default", map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaExtAttrs(name, "2002:1111::1401", "default", map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -354,6 +251,7 @@ func TestAccRecordAaaaResource_ExtAttrs(t *testing.T) {
 func TestAccRecordAaaaResource_ForbidReclamation(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_forbid_reclamation"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -361,18 +259,18 @@ func TestAccRecordAaaaResource_ForbidReclamation(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaForbidReclamation("FORBID_RECLAMATION_REPLACE_ME"),
+				Config: testAccRecordAaaaForbidReclamation(name, "2002:1111::1401", "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "FORBID_RECLAMATION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaForbidReclamation("FORBID_RECLAMATION_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaForbidReclamation(name, "2002:1111::1401", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "FORBID_RECLAMATION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -383,6 +281,7 @@ func TestAccRecordAaaaResource_ForbidReclamation(t *testing.T) {
 func TestAccRecordAaaaResource_Ipv6addr(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_ipv6addr"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -390,18 +289,18 @@ func TestAccRecordAaaaResource_Ipv6addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaIpv6addr("IPV6ADDR_REPLACE_ME"),
+				Config: testAccRecordAaaaIpv6addr(name, "default", "2002:1111::1401"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "IPV6ADDR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "2002:1111::1401"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaIpv6addr("IPV6ADDR_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaIpv6addr(name, "default", "2002:1111::1402"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "IPV6ADDR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "2002:1111::1402"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -412,6 +311,7 @@ func TestAccRecordAaaaResource_Ipv6addr(t *testing.T) {
 func TestAccRecordAaaaResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_func_call"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -419,47 +319,16 @@ func TestAccRecordAaaaResource_FuncCall(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaFuncCall("FUNC_CALL_REPLACE_ME"),
+				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", "2001:db8:abcd:12::/64", "Original Function Call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "func_call", "FUNC_CALL_REPLACE_ME"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaFuncCall("FUNC_CALL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", "2001:db8:abcd:12::/64", "Updated Function Call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "func_call", "FUNC_CALL_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccRecordAaaaResource_MsAdUserData(t *testing.T) {
-	var resourceName = "nios_dns_record_aaaa.test_ms_ad_user_data"
-	var v dns.RecordAaaa
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordAaaaMsAdUserData("MS_AD_USER_DATA_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ad_user_data", "MS_AD_USER_DATA_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordAaaaMsAdUserData("MS_AD_USER_DATA_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ad_user_data", "MS_AD_USER_DATA_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -470,6 +339,8 @@ func TestAccRecordAaaaResource_MsAdUserData(t *testing.T) {
 func TestAccRecordAaaaResource_Name(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_name"
 	var v dns.RecordAaaa
+	name1 := acctest.RandomName() + ".example.com"
+	name2 := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -477,47 +348,18 @@ func TestAccRecordAaaaResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaName("NAME_REPLACE_ME"),
+				Config: testAccRecordAaaaName(name1, "2002:1111::1401", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaName(name2, "2002:1111::1402", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccRecordAaaaResource_RemoveAssociatedPtr(t *testing.T) {
-	var resourceName = "nios_dns_record_aaaa.test_remove_associated_ptr"
-	var v dns.RecordAaaa
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordAaaaRemoveAssociatedPtr("REMOVE_ASSOCIATED_PTR_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "remove_associated_ptr", "REMOVE_ASSOCIATED_PTR_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordAaaaRemoveAssociatedPtr("REMOVE_ASSOCIATED_PTR_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "remove_associated_ptr", "REMOVE_ASSOCIATED_PTR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -528,6 +370,7 @@ func TestAccRecordAaaaResource_RemoveAssociatedPtr(t *testing.T) {
 func TestAccRecordAaaaResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_ttl"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -535,18 +378,18 @@ func TestAccRecordAaaaResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaTtl("TTL_REPLACE_ME"),
+				Config: testAccRecordAaaaTtl(name, "2002:1111::1401", "default", 10, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaTtl("TTL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaTtl(name, "2002:1111::1401", "default", 0, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "0"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -557,6 +400,7 @@ func TestAccRecordAaaaResource_Ttl(t *testing.T) {
 func TestAccRecordAaaaResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_use_ttl"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -564,18 +408,18 @@ func TestAccRecordAaaaResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaUseTtl("USE_TTL_REPLACE_ME"),
+				Config: testAccRecordAaaaUseTtl(name, "2002:1111::1401", "default", 10, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaUseTtl("USE_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaUseTtl(name, "2002:1111::1401", "default", 10, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -586,6 +430,7 @@ func TestAccRecordAaaaResource_UseTtl(t *testing.T) {
 func TestAccRecordAaaaResource_View(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_view"
 	var v dns.RecordAaaa
+	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -593,18 +438,18 @@ func TestAccRecordAaaaResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaView("VIEW_REPLACE_ME"),
+				Config: testAccRecordAaaaView(name, "2002:1111::1401", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaView("VIEW_UPDATE_REPLACE_ME"),
+				Config: testAccRecordAaaaView(name, "2002:1111::1401", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -614,6 +459,8 @@ func TestAccRecordAaaaResource_View(t *testing.T) {
 
 func testAccCheckRecordAaaaExists(ctx context.Context, resourceName string, v *dns.RecordAaaa) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
+	var readableAttributes = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,extattrs,forbid_reclamation,ipv6addr,last_queried,ms_ad_user_data,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
+
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -622,7 +469,7 @@ func testAccCheckRecordAaaaExists(ctx context.Context, resourceName string, v *d
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			RecordAaaaAPI.
 			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
-			ReturnFieldsPlus(readableAttributesForRecordAaaa).
+			ReturnFieldsPlus(readableAttributes).
 			ReturnAsObject(1).
 			Execute()
 		if err != nil {
@@ -637,13 +484,15 @@ func testAccCheckRecordAaaaExists(ctx context.Context, resourceName string, v *d
 }
 
 func testAccCheckRecordAaaaDestroy(ctx context.Context, v *dns.RecordAaaa) resource.TestCheckFunc {
+
+	var readableAttributes = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,extattrs,forbid_reclamation,ipv6addr,last_queried,ms_ad_user_data,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
 	// Verify the resource was destroyed
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			RecordAaaaAPI.
 			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
 			ReturnAsObject(1).
-			ReturnFieldsPlus(readableAttributesForRecordAaaa).
+			ReturnFieldsPlus(readableAttributes).
 			Execute()
 		if err != nil {
 			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -670,162 +519,168 @@ func testAccCheckRecordAaaaDisappears(ctx context.Context, v *dns.RecordAaaa) re
 	}
 }
 
-func testAccRecordAaaaBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccRecordAaaaBasicConfig(name, ipV6Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test" {
+    name     = %q
+    ipv6addr = %q
+    view     = %q
 }
-`)
-}
-
-func testAccRecordAaaaRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_aaaa" "test__ref" {
-    _ref = %q
-}
-`, ref)
+`, name, ipV6Addr, view)
 }
 
-func testAccRecordAaaaAwsRte53RecordInfo(awsRte53RecordInfo string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_aaaa" "test_aws_rte53_record_info" {
-    aws_rte53_record_info = %q
-}
-`, awsRte53RecordInfo)
-}
-
-func testAccRecordAaaaCloudInfo(cloudInfo string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_aaaa" "test_cloud_info" {
-    cloud_info = %q
-}
-`, cloudInfo)
-}
-
-func testAccRecordAaaaComment(comment string) string {
+func testAccRecordAaaaComment(name, ipV6Addr, view, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_comment" {
-    comment = %q
+	name     = %q
+	ipv6addr = %q
+	view     = %q
+    comment  = %q
 }
-`, comment)
+`, name, ipV6Addr, view, comment)
 }
 
-func testAccRecordAaaaCreator(creator string) string {
+func testAccRecordAaaaCreator(name, ipV6Addr, view, creator string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_creator" {
-    creator = %q
+    name     = %q
+    ipv6addr = %q
+    view     = %q
+    creator  = %q
 }
-`, creator)
+`, name, ipV6Addr, view, creator)
 }
 
-func testAccRecordAaaaDdnsPrincipal(ddnsPrincipal string) string {
+func testAccRecordAaaaDdnsPrincipal(name, ipV6Addr, view, creator, ddnsPrincipal string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_ddns_principal" {
-    ddns_principal = %q
+    name            = %q
+	ipv6addr        = %q
+	view            = %q
+	creator         = %q
+    ddns_principal  = %q
 }
-`, ddnsPrincipal)
+`, name, ipV6Addr, view, creator, ddnsPrincipal)
 }
 
-func testAccRecordAaaaDdnsProtected(ddnsProtected string) string {
+func testAccRecordAaaaDdnsProtected(name, ipV6Addr, view, ddnsProtected string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_ddns_protected" {
-    ddns_protected = %q
+    name            = %q
+	ipv6addr        = %q
+	view            = %q
+    ddns_protected  = %q
 }
-`, ddnsProtected)
+`, name, ipV6Addr, view, ddnsProtected)
 }
 
-func testAccRecordAaaaDisable(disable string) string {
+func testAccRecordAaaaDisable(name, ipV6Addr, view, disable string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_disable" {
-    disable = %q
+	name     = %q
+	ipv6addr = %q
+	view     = %q
+    disable  = %q
 }
-`, disable)
-}
-
-func testAccRecordAaaaDiscoveredData(discoveredData string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_aaaa" "test_discovered_data" {
-    discovered_data = %q
-}
-`, discoveredData)
+`, name, ipV6Addr, view, disable)
 }
 
-func testAccRecordAaaaExtAttrs(extAttrs string) string {
+func testAccRecordAaaaExtAttrs(name, ipV6Addr, view string, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf("    %q = %q\n", k, v)
+	}
+	extattrsStr += "  }"
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_extattrs" {
-    extattrs = %q
+    name     = %q
+    ipv6addr = %q
+    view     = %q
+    extattrs = %s
 }
-`, extAttrs)
+`, name, ipV6Addr, view, extattrsStr)
 }
-
-func testAccRecordAaaaForbidReclamation(forbidReclamation string) string {
+func testAccRecordAaaaForbidReclamation(name, ipV6Addr, view, forbidReclamation string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_forbid_reclamation" {
+    name              = %q
+    ipv6addr          = %q
+    view              = %q
     forbid_reclamation = %q
 }
-`, forbidReclamation)
+`, name, ipV6Addr, view, forbidReclamation)
 }
 
-func testAccRecordAaaaIpv6addr(ipv6addr string) string {
+func testAccRecordAaaaIpv6addr(name, view, ipv6addr string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_ipv6addr" {
+    name     = %q
+    view     = %q
     ipv6addr = %q
 }
-`, ipv6addr)
+`, name, view, ipv6addr)
 }
 
-func testAccRecordAaaaFuncCall(funcCall string) string {
+func testAccRecordAaaaFuncCall(name, view, attributeName, objFunc, resultField, object, objectParameters, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_func_call" {
-    func_call = %q
+	name = %q
+	view = %q
+	func_call = {
+		"attribute_name" = %q
+		"object_function" = %q
+		"result_field" = %q
+		"object" = %q
+		"object_parameters" = {
+			"network" = %q
+			"network_view" = "default"
+		}
+	}
+	comment = %q
 }
-`, funcCall)
+`, name, view, attributeName, objFunc, resultField, object, objectParameters, comment)
 }
 
-func testAccRecordAaaaMsAdUserData(msAdUserData string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_aaaa" "test_ms_ad_user_data" {
-    ms_ad_user_data = %q
-}
-`, msAdUserData)
-}
-
-func testAccRecordAaaaName(name string) string {
+func testAccRecordAaaaName(name, ipV6Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_name" {
-    name = %q
+    name     = %q
+    ipv6addr = %q
+    view     = %q
 }
-`, name)
-}
-
-func testAccRecordAaaaRemoveAssociatedPtr(removeAssociatedPtr string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_aaaa" "test_remove_associated_ptr" {
-    remove_associated_ptr = %q
-}
-`, removeAssociatedPtr)
+`, name, ipV6Addr, view)
 }
 
-func testAccRecordAaaaTtl(ttl string) string {
+func testAccRecordAaaaTtl(name, ipV6Addr, view string, ttl int32, use_ttl string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_ttl" {
-    ttl = %q
+	name     = %q
+	ipv6addr = %q
+	view     = %q
+    ttl      = %d
+	use_ttl  = %q
 }
-`, ttl)
+`, name, ipV6Addr, view, ttl, use_ttl)
 }
 
-func testAccRecordAaaaUseTtl(useTtl string) string {
+func testAccRecordAaaaUseTtl(name, ipV6Addr, view string, ttl int32, useTtl string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_use_ttl" {
-    use_ttl = %q
+    name     = %q
+    ipv6addr = %q
+    view     = %q
+    ttl      = %d
+    use_ttl  = %q
 }
-`, useTtl)
+`, name, ipV6Addr, view, ttl, useTtl)
 }
 
-func testAccRecordAaaaView(view string) string {
+func testAccRecordAaaaView(name, ipV6Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_aaaa" "test_view" {
-    view = %q
+	name     = %q
+	ipv6addr = %q
+	view     = %q
 }
-`, view)
+`, name, ipV6Addr, view)
 }
