@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/option"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dns"
@@ -24,8 +25,9 @@ type NIOSProvider struct {
 
 // NIOSProviderModel describes the provider data model.
 type NIOSProviderModel struct {
-	NIOSHostURL types.String `tfsdk:"nios_host_url"`
-	NIOSAuth    types.String `tfsdk:"nios_auth"`
+	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
+	NIOSUsername types.String `tfsdk:"nios_username"`
+	NIOSPassword types.String `tfsdk:"nios_password"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -40,7 +42,10 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			"nios_host_url": schema.StringAttribute{
 				Optional: true,
 			},
-			"nios_auth": schema.StringAttribute{
+			"nios_username": schema.StringAttribute{
+				Optional: true,
+			},
+			"nios_password": schema.StringAttribute{
 				Optional: true,
 			},
 		},
@@ -58,7 +63,8 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	client := niosclient.NewAPIClient(
 		option.WithClientName(fmt.Sprintf("terraform/%s#%s", p.version, p.commit)),
-		option.WithNIOSAuth(data.NIOSAuth.ValueString()),
+		option.WithNIOSUsername(data.NIOSUsername.ValueString()),
+		option.WithNIOSPassword(data.NIOSPassword.ValueString()),
 		option.WithNIOSHostUrl(data.NIOSHostURL.ValueString()),
 		option.WithDebug(true),
 	)
@@ -69,13 +75,13 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		dns.NewRecordaResource,
+		dns.NewRecordAResource,
 	}
 }
 
 func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		dns.NewRecordaDataSource,
+		dns.NewRecordADataSource,
 	}
 }
 
