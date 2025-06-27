@@ -93,6 +93,7 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
