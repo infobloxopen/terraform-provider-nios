@@ -1,5 +1,5 @@
 data "nios_dns_record_a" "get_record" {
-    extattrfilters =  {
+  extattrfilters = {
     "Site" = "Siteblr"
   }
 }
