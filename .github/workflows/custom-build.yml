@@ -1,4 +1,4 @@
-name: Acceptance Tests
+name: Custom Build Workflow
 
 on:
   workflow_dispatch:
