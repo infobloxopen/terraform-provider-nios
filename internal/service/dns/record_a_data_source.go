@@ -149,9 +149,9 @@ func (d *RecordADataSource) Read(ctx context.Context, req datasource.ReadRequest
 				if maxResultsInt == 0 {
 					// Check for next page ID in additional properties
 					additionalProperties := apiRes.ListRecordAResponseObject.AdditionalProperties
-					if npID, ok := additionalProperties["next_page_id"]; ok {
-						if npIDstr, ok := npID.(string); ok {
-							nextPageID = npIDstr
+					if npId, ok := additionalProperties["next_page_id"]; ok {
+						if npIdStr, ok := npId.(string); ok {
+							nextPageID = npIdStr
 						}
 					}
 				}
