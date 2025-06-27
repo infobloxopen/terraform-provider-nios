@@ -1,17 +1,27 @@
-# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416 => github.com/unasra/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416
+# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250624102233-0ca24303afac
 ## explicit; go 1.23.0
+github.com/Infoblox-CTO/infoblox-nios-go-client/acl
 github.com/Infoblox-CTO/infoblox-nios-go-client/client
 github.com/Infoblox-CTO/infoblox-nios-go-client/cloud
 github.com/Infoblox-CTO/infoblox-nios-go-client/dhcp
 github.com/Infoblox-CTO/infoblox-nios-go-client/discovery
 github.com/Infoblox-CTO/infoblox-nios-go-client/dns
 github.com/Infoblox-CTO/infoblox-nios-go-client/dtc
+github.com/Infoblox-CTO/infoblox-nios-go-client/federatedrealms
 github.com/Infoblox-CTO/infoblox-nios-go-client/grid
 github.com/Infoblox-CTO/infoblox-nios-go-client/internal
 github.com/Infoblox-CTO/infoblox-nios-go-client/ipam
+github.com/Infoblox-CTO/infoblox-nios-go-client/microsoftserver
+github.com/Infoblox-CTO/infoblox-nios-go-client/misc
+github.com/Infoblox-CTO/infoblox-nios-go-client/notification
 github.com/Infoblox-CTO/infoblox-nios-go-client/option
+github.com/Infoblox-CTO/infoblox-nios-go-client/parentalcontrol
+github.com/Infoblox-CTO/infoblox-nios-go-client/rir
 github.com/Infoblox-CTO/infoblox-nios-go-client/rpz
 github.com/Infoblox-CTO/infoblox-nios-go-client/security
+github.com/Infoblox-CTO/infoblox-nios-go-client/smartfolder
+github.com/Infoblox-CTO/infoblox-nios-go-client/threatinsight
+github.com/Infoblox-CTO/infoblox-nios-go-client/threatprotection
 # github.com/ProtonMail/go-crypto v1.1.0-alpha.2
 ## explicit; go 1.17
 github.com/ProtonMail/go-crypto/bitcurves
@@ -179,7 +189,6 @@ github.com/hashicorp/terraform-plugin-framework/resource/schema/defaults
 github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault
 github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier
 github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault
-github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier
 github.com/hashicorp/terraform-plugin-framework/schema/validator
 github.com/hashicorp/terraform-plugin-framework/tfsdk
 github.com/hashicorp/terraform-plugin-framework/types
@@ -189,7 +198,6 @@ github.com/hashicorp/terraform-plugin-framework/types/basetypes
 github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes
 # github.com/hashicorp/terraform-plugin-framework-validators v0.17.0
 ## explicit; go 1.22.0
-github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator
 github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag
 github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatorfuncerr
 github.com/hashicorp/terraform-plugin-framework-validators/int64validator
@@ -319,6 +327,9 @@ golang.org/x/crypto/blake2b
 golang.org/x/crypto/cast5
 golang.org/x/crypto/hkdf
 golang.org/x/crypto/sha3
+# golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6
+## explicit; go 1.23.0
+golang.org/x/exp/slices
 # golang.org/x/mod v0.24.0
 ## explicit; go 1.23.0
 golang.org/x/mod/internal/lazyregexp
@@ -349,7 +360,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.31.0
+# golang.org/x/tools v0.33.0
 ## explicit; go 1.23.0
 golang.org/x/tools/cmd/stringer
 golang.org/x/tools/go/gcexportdata
