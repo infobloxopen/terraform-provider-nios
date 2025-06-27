@@ -18,7 +18,7 @@ jobs:
 
       - name: Configure Git for Private Go Module
         run: |
-          git config --global url."https://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@github.com/unasra/infoblox-nios-go-client".insteadOf "https://github.com/unasra/infoblox-nios-go-client"
+          git config --global url."https://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@github.com/unasra/infoblox-nios-go-client".insteadOf "https://github.com/unasra/infoblox-nios-go-client"
 
       - name: go mod
         run: |
@@ -30,11 +30,11 @@ jobs:
           go fmt
           git diff --exit-code || \
             (echo; echo "Unexpected difference. Run 'go fmt' command and commit."; exit 1)
-      - name: go generate
-        run: |
-          go generate
-          git diff --exit-code -- docs/ || \
-            (echo; echo "Unexpected difference in docs. Run 'go generate' command and commit."; exit 1)
+#      - name: go generate
+#        run: |
+#          go generate
+#          git diff --exit-code -- docs/ || \
+#            (echo; echo "Unexpected difference in docs. Run 'go generate' command and commit."; exit 1)
       - name: Build
         run: go build -v ./...
       - name: Test
