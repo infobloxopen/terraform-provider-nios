@@ -501,3 +501,4 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/timestamppb
+# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416 => github.com/unasra/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416
