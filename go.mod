@@ -86,5 +86,3 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416 => github.com/unasra/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416

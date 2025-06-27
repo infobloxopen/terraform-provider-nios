@@ -596,4 +596,3 @@ gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416 => github.com/unasra/infoblox-nios-go-client v0.0.0-20250526053734-5732220ba416
