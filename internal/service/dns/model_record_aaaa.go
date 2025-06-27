@@ -305,7 +305,6 @@ func FlattenRecordAaaaIpv6addr(from *dns.RecordAaaaIpv6addr) types.String {
 	if from.String == nil {
 		return types.StringNull()
 	}
-	m := types.String{}
-	m = flex.FlattenStringPointer(from.String)
+	m := flex.FlattenStringPointer(from.String)
 	return m
 }
