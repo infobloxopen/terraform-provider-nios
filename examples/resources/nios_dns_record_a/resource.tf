@@ -1,5 +1,5 @@
 resource "nios_dns_record_a" "create_record" {
-  name     = "example_test.example.com"
+  name     = "example_record.example.com"
   ipv4addr = "10.20.1.2"
   view     = "default"
   extattrs = {
