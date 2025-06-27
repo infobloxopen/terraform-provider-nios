@@ -1,3 +1,4 @@
+// Create Record A with Basic Fields
 resource "nios_dns_record_a" "create_record" {
   name     = "example_record.example.com"
   ipv4addr = "10.20.1.2"
@@ -6,6 +7,8 @@ resource "nios_dns_record_a" "create_record" {
     Site = "Siteblr"
   }
 }
+
+// Create Record A using function call to retrieve ipv4addr
 resource "nios_dns_record_a" "create_with_func_call" {
   name = "example_test_func_call.example.com"
   func_call = {
