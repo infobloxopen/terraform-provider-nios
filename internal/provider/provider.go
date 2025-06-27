@@ -20,7 +20,9 @@ var _ provider.Provider = &NIOSProvider{}
 
 const eaForInternalId = "Terraform Internal ID"
 
-var readableAttributesForEAdef = "allowed_object_types,comment,default_value,flags,list_values,max,min,name,namespace,type"
+var flag = 0 // Flag to check if EA is created or not
+
+var readableAttributesForEADef = "allowed_object_types,comment,default_value,flags,list_values,max,min,name,namespace,type"
 
 // NIOSProvider defines the provider implementation.
 type NIOSProvider struct {
@@ -74,12 +76,14 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithDebug(true),
 	)
 
-	err := checkAndCreatePreRequisites(ctx, client)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Failed to ensure Terraform extensible attribute exists",
-			err.Error(),
-		)
+	if flag == 0 {
+		err := checkAndCreatePreRequisites(ctx, client)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Failed to ensure Terraform extensible attribute exists",
+				err.Error(),
+			)
+		}
 	}
 	resp.DataSourceData = client
 	resp.ResourceData = client
@@ -109,6 +113,7 @@ func New(version, commit string) func() provider.Provider {
 // checkAndCreatePreRequisites creates Terraform Internal ID EA if it doesn't exist
 func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClient) error {
 
+	flag = 1
 	filters := map[string]interface{}{
 		"name": eaForInternalId,
 	}
@@ -116,7 +121,7 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 	apiRes, _, err := client.GridAPI.ExtensibleattributedefAPI.
 		List(ctx).
 		Filters(filters).
-		ReturnFieldsPlus(readableAttributesForEAdef).
+		ReturnFieldsPlus(readableAttributesForEADef).
 		ReturnAsObject(1).
 		Execute()
 
@@ -140,7 +145,7 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
 		Create(ctx).
 		Extensibleattributedef(data).
-		ReturnFieldsPlus(readableAttributesForEAdef).
+		ReturnFieldsPlus(readableAttributesForEADef).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
