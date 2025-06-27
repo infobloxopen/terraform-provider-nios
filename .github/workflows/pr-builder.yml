@@ -18,7 +18,7 @@ jobs:
 
       - name: Configure Git for Private Go Module
         run: |
-          git config --global url."https://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@github.com/unasra/infoblox-nios-go-client".insteadOf "https://github.com/unasra/infoblox-nios-go-client"
+          git config --global url."https://${{ secrets.GITPAT }}@github.com/Infoblox-CTO/infoblox-nios-go-client".insteadOf "https://github.com/Infoblox-CTO/infoblox-nios-go-client"
 
       - name: go mod
         run: |
