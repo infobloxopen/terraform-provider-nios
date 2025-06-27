@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/grid"
@@ -18,16 +19,14 @@ import (
 // Ensure NIOSProvider satisfies various provider interfaces.
 var _ provider.Provider = &NIOSProvider{}
 
-const eaForInternalId = "Terraform Internal ID"
-
-var flag = 0 // Flag to check if EA is created or not
-
-var readableAttributesForEADef = "allowed_object_types,comment,default_value,flags,list_values,max,min,name,namespace,type"
+const terraformInternalIDEA = "Terraform Internal ID"
 
 // NIOSProvider defines the provider implementation.
 type NIOSProvider struct {
-	version string
-	commit  string
+	version   string
+	commit    string
+	eaInit    sync.Once
+	eaInitErr error
 }
 
 // NIOSProviderModel describes the provider data model.
@@ -76,14 +75,16 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithDebug(true),
 	)
 
-	if flag == 0 {
-		err := checkAndCreatePreRequisites(ctx, client)
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Failed to ensure Terraform extensible attribute exists",
-				err.Error(),
-			)
-		}
+	p.eaInit.Do(func() {
+		p.eaInitErr = checkAndCreatePreRequisites(ctx, client)
+	})
+
+	if p.eaInitErr != nil {
+		resp.Diagnostics.AddError(
+			"Failed to ensure Terraform extensible attribute exists",
+			p.eaInitErr.Error(),
+		)
+		return
 	}
 	resp.DataSourceData = client
 	resp.ResourceData = client
@@ -113,9 +114,10 @@ func New(version, commit string) func() provider.Provider {
 // checkAndCreatePreRequisites creates Terraform Internal ID EA if it doesn't exist
 func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClient) error {
 
-	flag = 1
+	var readableAttributesForEADef = "allowed_object_types,comment,default_value,flags,list_values,max,min,name,namespace,type"
+
 	filters := map[string]interface{}{
-		"name": eaForInternalId,
+		"name": terraformInternalIDEA,
 	}
 
 	apiRes, _, err := client.GridAPI.ExtensibleattributedefAPI.
@@ -124,9 +126,8 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 		ReturnFieldsPlus(readableAttributesForEADef).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
-		return fmt.Errorf("error checking for existing extensible attribute: %w", err)
+		return fmt.Errorf("error checking for existing terraform internal ID EA: %w", err)
 	}
 
 	// If EA already exists, no need to create it
@@ -136,10 +137,10 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 
 	// Create EA if it doesn't exist
 	data := grid.Extensibleattributedef{
-		Name:    grid.PtrString(eaForInternalId),
+		Name:    grid.PtrString(terraformInternalIDEA),
 		Type:    grid.PtrString("STRING"),
-		Comment: grid.PtrString("Internal ID for Terraform Resource"),
-		Flags:   grid.PtrString("CR"),
+		Comment: grid.PtrString("Internal ID for Terraform Resource created by code"),
+		Flags:   grid.PtrString("C"),
 	}
 
 	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
