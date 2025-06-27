@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccRecordaDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_datasource_nios_RecordA.test"
+	dataSourceName := "data.nios_dns_record_a.test"
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -35,7 +35,7 @@ func TestAccRecordaDataSource_Filters(t *testing.T) {
 }
 
 func TestAccRecordaDataSource_TagFilters(t *testing.T) {
-	dataSourceName := "data.nios_datasource_nios_RecordA.test"
+	dataSourceName := "data.nios_dns_record_a.test"
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -97,7 +97,7 @@ resource "nios_dns_record_a" "test" {
 	view = %q
 }
 
-data "nios_datasource_nios_RecordA" "test" {
+data "nios_dns_record_a" "test" {
   filters = {
 	name = nios_dns_record_a.test.name
   }
@@ -112,15 +112,13 @@ resource "nios_dns_record_a" "test" {
 	ipv4addr = %q
 	view = %q
 	extattrs = {
-		Site = {
-			value = %q
-		}
+		Site = %q
 	}
 }
 
-data "nios_datasource_nios_RecordA" "test" {
+data "nios_dns_record_a" "test" {
 	extattrfilters = {
-		"Site" = nios_dns_record_a.test.extattrs.Site.value
+		"Site" = nios_dns_record_a.test.extattrs.Site
 	}
 }
 `, name, ipV4Addr, view, extAttrsValue)
