@@ -7,13 +7,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 )
 
 type NetworkcontainerModel struct {
@@ -234,6 +242,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Authority for the DHCP network container.",
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_authority")),
+		},
 	},
 	"auto_create_reversezone": schema.BoolAttribute{
 		Optional:            true,
@@ -242,10 +253,16 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"bootfile": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The boot server IPv4 Address or name in FQDN format for the network container. You can specify the name and/or IP address of the boot server that the host needs to boot.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
+		},
 	},
 	"bootserver": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The bootserver address for the network container. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
+		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerCloudInfoResourceSchemaAttributes,
@@ -259,35 +276,54 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network container.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+		},
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "If this field is set to True, the DHCP server generates a hostname and updates DNS with it when the DHCP client request does not contain a hostname.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_generate_hostname")),
+		},
 	},
 	"ddns_server_always_updates": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "This field controls whether the DHCP server is allowed to update DNS, regardless of the DHCP client requests. Note that changes for this field take effect only if ddns_use_option81 is True.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("ddns_use_option81")),
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_use_option81")),
+		},
 	},
 	"ddns_ttl": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The DNS update Time to Live (TTL) value of a DHCP network container object. The TTL is a 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
 		Computed:            true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_ddns_ttl")),
+		},
 	},
 	"ddns_update_fixed_addresses": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "By default, the DHCP server does not update DNS when it allocates a fixed address to a client. You can configure the DHCP server to update the A and PTR records of a client with a fixed address. When this feature is enabled and the DHCP server adds A and PTR records for a fixed address, the DHCP server never discards the records.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_update_fixed_addresses")),
+		},
 	},
 	"ddns_use_option81": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "The support for DHCP Option 81 at the network container level.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_use_option81")),
+		},
 	},
 	"delete_reason": schema.StringAttribute{
 		Optional:            true,
@@ -298,6 +334,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If set to True, BOOTP settings are disabled and BOOTP requests will be denied.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_deny_bootp")),
+		},
 	},
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
@@ -308,11 +347,17 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes: NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_basic_polling_settings")),
+		},
 	},
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerDiscoveryBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
+		},
 	},
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
@@ -322,29 +367,45 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The member that will run discovery for this network container.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
+		},
 	},
 	"email_list": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The e-mail lists to which the appliance sends DHCP threshold alarm e-mail messages.",
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("use_email_list")),
+		},
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "The dynamic DNS updates flag of a DHCP network container object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_ddns")),
+		},
 	},
 	"enable_dhcp_thresholds": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines if DHCP thresholds are enabled for the network container.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_dhcp_thresholds")),
+		},
 	},
 	"enable_discovery": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether a discovery is enabled or not for this network container. When this is set to False, the network container discovery is disabled.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
+		},
 	},
 	"enable_email_warnings": schema.BoolAttribute{
 		Optional:            true,
@@ -407,12 +468,19 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ignore_dhcp_option_list_request")),
+		},
 	},
 	"ignore_id": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Indicates whether the appliance will ignore DHCP client IDs or MAC addresses.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("NONE"),
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
+			stringvalidator.OneOf("CLIENT", "MACADDR", "NONE"),
+		},
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -423,16 +491,25 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The e-mail lists to which the appliance sends IPAM threshold alarm e-mail messages.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_ipam_email_addresses")),
+		},
 	},
 	"ipam_threshold_settings": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerIpamThresholdSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_ipam_threshold_settings")),
+		},
 	},
 	"ipam_trap_settings": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerIpamTrapSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_ipam_trap_settings")),
+		},
 	},
 	"last_rir_registration_update_sent": schema.Int64Attribute{
 		Computed:            true,
@@ -446,6 +523,13 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "An integer that specifies the period of time (in seconds) that frees and backs up leases remained in the database before they are automatically deleted. To disable lease scavenging, set the parameter to -1. The minimum positive value must be greater than 86400 seconds (1 day).",
 		Computed:            true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_lease_scavenge_time")),
+			int64validator.Any(
+				int64validator.OneOf(-1),
+				int64validator.Between(86400, 2147472000),
+			),
+		},
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -453,22 +537,39 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		MarkdownDescription: "This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+		},
 	},
 	"low_water_mark": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The percentage of DHCP network container usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 		Computed:            true,
+		Validators: []validator.Int64{
+			int64validator.Any(
+				int64validator.Between(0, 100),
+			),
+		},
 	},
 	"low_water_mark_reset": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The percentage of DHCP network container usage threshold below which network container usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.",
 		Computed:            true,
+		Default:             int64default.StaticInt64(10),
+		Validators: []validator.Int64{
+			int64validator.Any(
+				int64validator.Between(1, 100),
+			),
+		},
 	},
 	"mgm_private": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_mgm_private")),
+		},
 	},
 	"mgm_private_overridable": schema.BoolAttribute{
 		Computed:            true,
@@ -480,8 +581,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:   true,
 	},
 	"network": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address of the record.",
 	},
 	"func_call": schema.SingleNestedAttribute{
@@ -501,6 +601,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"nextserver": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
+		},
 	},
 	"options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -509,22 +612,37 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
+		},
 	},
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerPortControlBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
+		},
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The PXE lease time value of a DHCP Network container object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
 		Computed:            true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_pxe_lease_time")),
+			int64validator.Any(
+				int64validator.Between(0, 4294967295),
+			),
+		},
 	},
 	"recycle_leases": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_recycle_leases")),
+		},
 	},
 	"remove_subnets": schema.BoolAttribute{
 		Optional:            true,
@@ -558,6 +676,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If the field is set to True, the discovery blackout setting will be used for port control blackout setting.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
+		},
 	},
 	"send_rir_request": schema.BoolAttribute{
 		Optional:            true,
@@ -567,6 +688,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes: NetworkcontainerSubscribeSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
+		},
 	},
 	"unmanaged": schema.BoolAttribute{
 		Optional:            true,
@@ -579,6 +703,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_update_dns_on_lease_renewal")),
+		},
 	},
 	"use_authority": schema.BoolAttribute{
 		Optional:            true,
@@ -770,6 +897,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		MarkdownDescription: "The list of zones associated with this network.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_zone_associations")),
+		},
 	},
 }
 
@@ -886,6 +1016,7 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 	if isCreate {
 		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
 		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
+		to.Network = ExpandNetworkcontainerNetwork(m.Network)
 	}
 	return to
 }

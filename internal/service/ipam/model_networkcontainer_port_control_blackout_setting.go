@@ -36,6 +36,7 @@ var NetworkcontainerPortControlBlackoutSettingResourceSchemaAttributes = map[str
 	},
 	"blackout_duration": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The blackout duration in seconds; minimum value is 1 minute.",
 	},
 	"blackout_schedule": schema.SingleNestedAttribute{
