@@ -7,6 +7,7 @@ import (
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/option"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dns"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/ipam"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -76,12 +77,14 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		dns.NewRecordAResource,
+		ipam.NewNetworkcontainerResource,
 	}
 }
 
 func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		dns.NewRecordADataSource,
+		ipam.NewNetworkcontainerDataSource,
 	}
 }
 
