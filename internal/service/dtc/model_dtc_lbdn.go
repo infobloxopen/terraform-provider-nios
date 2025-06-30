@@ -65,7 +65,7 @@ var DtcLbdnAttrTypes = map[string]attr.Type{
 
 var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"auth_zones": schema.ListAttribute{
@@ -121,7 +121,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "LBDN wildcards for pattern match.",
 	},
 	"persistence": schema.Int64Attribute{
+		Computed:            true,
 		Optional:            true,
+		Default:             int64default.StaticInt64(0),
 		MarkdownDescription: "Maximum time, in seconds, for which client specific LBDN responses will be cached. Zero specifies no caching.",
 	},
 	"pools": schema.ListNestedAttribute{
@@ -230,12 +232,12 @@ func (m *DtcLbdnModel) Flatten(ctx context.Context, from *dtc.DtcLbdn, diags *di
 	m.Health = FlattenDtcLbdnHealth(ctx, from.Health, diags)
 	m.LbMethod = flex.FlattenStringPointer(from.LbMethod)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Patterns = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.AuthZones, diags)
+	m.Patterns = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Patterns, diags)
 	m.Persistence = flex.FlattenInt64Pointer(from.Persistence)
 	m.Pools = flex.FlattenFrameworkListNestedBlock(ctx, from.Pools, DtcLbdnPoolsAttrTypes, diags, FlattenDtcLbdnPools)
 	m.Priority = flex.FlattenInt64Pointer(from.Priority)
 	m.Topology = flex.FlattenStringPointer(from.Topology)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
-	m.Types = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.AuthZones, diags)
+	m.Types = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Types, diags)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
 }

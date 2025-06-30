@@ -1,34 +1,29 @@
-resource "nios_resource_nios_DtcLbdn" "lbdn1" {
-  name = "testLbdn2"
-  lb_method = "ROUND_ROBIN"
-  #  topology = "test-topo"
-  types = ["A", "AAAA","NAPTR"]
+resource "nios_dtc_lbdn" "lbdn1" {
+  name = "testLbdn21"
+  lb_method = "SOURCE_IP_HASH"
 }
 
 
-resource "nios_resource_nios_DtcLbdn" "lbdn2" {
+resource "nios_dtc_lbdn" "lbdn2" {
   name = "lbdn123"
-  auth_zones = ["zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Qx:test1.com/default.view2",
-    #    "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:test.com/default.view2",
-    "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS50ZXN0:test.com/default"
+  auth_zones = ["zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:record_test.com/default",
+    "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:test.com/default.custom_view"
   ]
   comment = "test"
   extattrs = {
-    "Site" = {
-      value = "Kyoto1"
-    }
+    Site = "Yoshino"
   }
   lb_method = "TOPOLOGY"
-  patterns = ["test.com","test1.com*"]
+  patterns = ["*record_test.com","test.com*"]
   pools = [
     {
       pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCRwb29sMg:pool2"
       ratio = 2
     },
-    #    {
-    #      pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCRwb29sNA:pool4"
-    #      ratio = 3
-    #    },
+    {
+      pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCRwb29sNA:pool4"
+      ratio = 3
+    },
     {
       pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCR0ZXN0LXBvb2w:test-pool"
       ratio = 6

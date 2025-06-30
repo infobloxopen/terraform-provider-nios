@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dtc"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/grid"
@@ -86,6 +87,7 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		dns.NewRecordAResource,
+		dtc.NewDtcLbdnResource,
 		dns.NewRecordAaaaResource,
 	}
 }
@@ -94,6 +96,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 	return []func() datasource.DataSource{
 		dns.NewRecordADataSource,
 		dns.NewRecordAaaaDataSource,
+		dtc.NewDtcLbdnDataSource,
 	}
 }
 
