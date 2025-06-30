@@ -1008,13 +1008,6 @@ resource "nios_dtc_pool" "test_extattrs" {
 `, name, lbPreferredMethod, extattrsStr)
 }
 
-func testAccDtcPoolHealth(health string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_pool" "test_health" {
-    health = %q
-}
-`, health)
-}
 
 func testAccDtcPoolLbAlternateMethod(name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod string, servers []map[string]interface{}) string {
 	serversHCL := formatServersToHCL(servers)
