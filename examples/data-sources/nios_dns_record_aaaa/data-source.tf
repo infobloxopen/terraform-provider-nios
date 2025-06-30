@@ -9,7 +9,7 @@ resource "nios_dns_record_aaaa" "record" {
 
 data "nios_dns_record_aaaa" "get_record_with_filter" {
   filters = {
-   "name" = nios_dns_record_aaaa.record.name
+    "name" = nios_dns_record_aaaa.record.name
   }
 }
 

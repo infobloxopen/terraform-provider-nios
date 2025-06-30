@@ -27,5 +27,5 @@ resource "nios_dns_record_aaaa" "record3" {
       network_view = "default"
     }
   }
-  view    = "default"
+  view = "default"
 }
