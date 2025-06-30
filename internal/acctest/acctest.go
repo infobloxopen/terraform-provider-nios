@@ -50,6 +50,16 @@ func RandomName() string {
 	return string(b)
 }
 
+// RandomCIDRNetwork generates a random network with specific CIDR
+func RandomCIDRNetwork() string {
+	// Generate test-suitable private networks
+	base := 10 + rand.Intn(246) // 10-255 for first octet
+	second := rand.Intn(256)    // 0-255 for second octet
+	cidr := 16 + rand.Intn(9)   // /16 to /24 (common for network containers)
+
+	return fmt.Sprintf("%d.%d.0.0/%d", base, second, cidr)
+}
+
 func PreCheck(t *testing.T) {
 	hostURL := os.Getenv("NIOS_HOST_URL")
 	if hostURL == "" {
