@@ -140,7 +140,7 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 		Name:    grid.PtrString(terraformInternalIDEA),
 		Type:    grid.PtrString("STRING"),
 		Comment: grid.PtrString("Internal ID for Terraform Resource created by code"),
-		Flags:   grid.PtrString("C"),
+		Flags:   grid.PtrString("CR"),
 	}
 
 	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
