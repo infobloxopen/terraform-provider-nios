@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -16,6 +17,23 @@ import (
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
+
+// specialDhcpOptions defines the list of special DHCP options that support use_option flag
+var specialDhcpOptions = []string{
+	"routers",
+	"router-templates",
+	"domain-name-servers",
+	"domain-name",
+	"broadcast-address",
+	"broadcast-address-offset",
+	"dhcp-lease-time",
+	"dhcp6.name-servers",
+}
+
+// isSpecialDhcpOption checks if the given option name is a special DHCP option
+func isSpecialDhcpOption(name string) bool {
+	return slices.Contains(specialDhcpOptions, name)
+}
 
 type NetworkcontainerOptionsModel struct {
 	Name        types.String `tfsdk:"name"`
@@ -82,13 +100,24 @@ func (m *NetworkcontainerOptionsModel) Expand(ctx context.Context, diags *diag.D
 	if m == nil {
 		return nil
 	}
+
 	to := &ipam.NetworkcontainerOptions{
 		Name:        flex.ExpandStringPointer(m.Name),
 		Num:         flex.ExpandInt64Pointer(m.Num),
 		VendorClass: flex.ExpandStringPointer(m.VendorClass),
 		Value:       flex.ExpandStringPointer(m.Value),
-		UseOption:   flex.ExpandBoolPointer(m.UseOption),
 	}
+
+	// Only set UseOption for special DHCP options that support it
+	if !m.Name.IsNull() && !m.Name.IsUnknown() {
+		optionName := m.Name.ValueString()
+		if isSpecialDhcpOption(optionName) {
+			// For special options, include the use_option flag
+			to.UseOption = flex.ExpandBoolPointer(m.UseOption)
+		}
+		// For non-special options, don't include UseOption at all to avoid API errors
+	}
+
 	return to
 }
 
@@ -115,5 +144,14 @@ func (m *NetworkcontainerOptionsModel) Flatten(ctx context.Context, from *ipam.N
 	m.Num = flex.FlattenInt64Pointer(from.Num)
 	m.VendorClass = flex.FlattenStringPointer(from.VendorClass)
 	m.Value = flex.FlattenStringPointer(from.Value)
-	m.UseOption = types.BoolPointerValue(from.UseOption)
+
+	// Handle use_option field based on option type to ensure state consistency
+	if from.Name != nil && isSpecialDhcpOption(*from.Name) {
+		// For special options, respect the API response
+		m.UseOption = types.BoolPointerValue(from.UseOption)
+	} else {
+		// For non-special options, always set to false since we don't send use_option to API
+		// This prevents state inconsistencies when transitioning between option types
+		m.UseOption = types.BoolValue(false)
+	}
 }

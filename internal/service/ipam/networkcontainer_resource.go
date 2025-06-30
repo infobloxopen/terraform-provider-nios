@@ -32,7 +32,7 @@ type NetworkcontainerResource struct {
 }
 
 func (r *NetworkcontainerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "nios_ipam_networkcontainer"
+	resp.TypeName = req.ProviderTypeName + "_" + "ipam_networkcontainer"
 }
 
 func (r *NetworkcontainerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -81,7 +81,7 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 
 	// If the function call attributes are set, update the attribute name to match tfsdk tag
 	origFunCallAttrs := data.FuncCall.Attributes()
-	if !data.FuncCall.IsNull() {
+	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
@@ -107,7 +107,7 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Retain the original function call attributes
-	if !data.FuncCall.IsNull() {
+	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
 	}
 
@@ -210,35 +210,37 @@ func (r *NetworkcontainerResource) ReadByExtAttrs(ctx context.Context, data *Net
 		"Terraform Internal ID": internalId,
 	}
 
-	apiRes, httpRes, err := r.client.IPAMAPI.
+	apiRes, _, err := r.client.IPAMAPI.
 		NetworkcontainerAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 		Execute()
-
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			resp.State.RemoveResource(ctx)
-			return true
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Networkcontainer by extattrs, got error: %s", err))
 		return true
 	}
 
-	if len(apiRes.ListNetworkcontainerResponseObject.GetResult()) > 0 {
-		res := apiRes.ListNetworkcontainerResponseObject.GetResult()[0]
+	results := apiRes.ListNetworkcontainerResponseObject.GetResult()
 
-		// Remove inherited external attributes and check for errors
-		res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-		if diags.HasError() {
-			return true
-		}
-
-		data.Flatten(ctx, &res, &resp.Diagnostics)
-		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+	// If the list is empty, the resource no longer exists so remove it from state
+	if len(results) == 0 {
+		resp.State.RemoveResource(ctx)
+		return true
 	}
+
+	res := results[0]
+
+	// Remove inherited external attributes and check for errors
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		return true
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+
 	return true
 }
 

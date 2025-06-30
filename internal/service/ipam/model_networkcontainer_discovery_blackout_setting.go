@@ -37,6 +37,8 @@ var NetworkcontainerDiscoveryBlackoutSettingResourceSchemaAttributes = map[strin
 	"blackout_duration": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The blackout duration in seconds; minimum value is 1 minute.",
+		// Computed:            true,
+		// Default:             int64default.StaticInt64(0),
 	},
 	"blackout_schedule": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes,
