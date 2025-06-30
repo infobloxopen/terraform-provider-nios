@@ -29,7 +29,7 @@ type NetworkcontainerDataSource struct {
 }
 
 func (d *NetworkcontainerDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "nios_ipam_networkcontainer"
+	resp.TypeName = req.ProviderTypeName + "_" + "ipam_networkcontainer"
 }
 
 type NetworkcontainerModelWithFilter struct {
