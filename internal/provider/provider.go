@@ -9,6 +9,7 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/grid"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/option"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dns"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dtc"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -90,6 +91,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordAaaaResource,
 
 		dtc.NewDtcLbdnResource,
+		dtc.NewDtcPoolResource,
 	}
 }
 
@@ -99,6 +101,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordAaaaDataSource,
 
 		dtc.NewDtcLbdnDataSource,
+		dtc.NewDtcPoolDataSource,
 	}
 }
 
