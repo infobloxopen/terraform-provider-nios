@@ -604,14 +604,6 @@ resource "nios_dtc_lbdn" "test" {
 `, name, lbMethod)
 }
 
-func testAccDtcLbdnRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_lbdn" "test__ref" {
-    _ref = %q
-}
-`, ref)
-}
-
 func testAccDtcLbdnAuthZones(name, lbMethod string, authZones []string, pools []map[string]interface{}, patterns []string) string {
 	authZonesStr := "[\n"
 	for _, zone := range authZones {

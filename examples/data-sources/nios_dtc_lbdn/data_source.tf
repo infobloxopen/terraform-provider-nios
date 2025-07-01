@@ -1,5 +1,5 @@
 resource "nios_dtc_lbdn" "lbdn_record" {
-  name = "testLbdn22"
+  name      = "testLbdn22"
   lb_method = "SOURCE_IP_HASH"
   extattrs = {
     Site = "Spain"
