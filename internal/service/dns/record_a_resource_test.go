@@ -33,6 +33,11 @@ func TestAccRecordAResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.0.0.20"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
