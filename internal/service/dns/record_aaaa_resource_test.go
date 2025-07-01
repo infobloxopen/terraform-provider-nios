@@ -29,9 +29,16 @@ func TestAccRecordAaaaResource_basic(t *testing.T) {
 				Config: testAccRecordAaaaBasicConfig(name, "2002:1111::1401", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
+					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "2002:1111::1401"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -40,7 +47,6 @@ func TestAccRecordAaaaResource_basic(t *testing.T) {
 }
 
 func TestAccRecordAaaaResource_disappears(t *testing.T) {
-	t.Skip("Skipping test for disappears")
 	resourceName := "nios_dns_record_aaaa.test"
 	var v dns.RecordAaaa
 	name := acctest.RandomName() + ".example.com"

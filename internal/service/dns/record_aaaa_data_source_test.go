@@ -62,7 +62,7 @@ func TestAccRecordAaaaDataSource_TagFilters(t *testing.T) {
 
 func testAccCheckRecordAaaaResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
-		resource.TestCheckResourceAttrPair(resourceName, "_ref", dataSourceName, "result.0._ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
 		resource.TestCheckResourceAttrPair(resourceName, "aws_rte53_record_info", dataSourceName, "result.0.aws_rte53_record_info"),
 		resource.TestCheckResourceAttrPair(resourceName, "cloud_info", dataSourceName, "result.0.cloud_info"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
