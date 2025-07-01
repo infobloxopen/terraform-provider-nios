@@ -24,19 +24,16 @@ func FlattenString(s string) types.String {
 	return types.StringValue(s)
 }
 
-func FlattenStringPointer(s *string) types.String {
+// FlattenStringPointerNilAsNotEmpty is a helper function to flatten a string pointer to a string.
+// It returns null instead of an empty string.
+func FlattenStringPointerNilAsNotEmpty(s *string) types.String {
 	if s == nil {
 		return types.StringNull()
 	}
 	return FlattenString(*s)
 }
 
-// FlattenStringPointerWithNilAsEmpty is a helper function to flatten a string pointer to a string.
-// It returns an empty string if the pointer is nil.
-//
-// For most fields, API returns empty string instead of null to signify no data, so use FlattenStringPointer instead.
-// In cases where the API returns null, use FlattenStringPointerWithNilAsEmpty.
-func FlattenStringPointerWithNilAsEmpty(s *string) types.String {
+func FlattenStringPointer(s *string) types.String {
 	if s == nil {
 		return types.StringValue("")
 	}
