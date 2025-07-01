@@ -1,9 +1,11 @@
+// Create Record AAAA with Basic Fields
 resource "nios_dns_record_aaaa" "record1" {
   name     = "example_test.example.com"
   ipv6addr = "2002:1111::1401"
   view     = "default"
 }
 
+// Create Record AAAA with use_ttl set to true
 resource "nios_dns_record_aaaa" "record2" {
   name     = "example_test_with_ttl.example.com"
   ipv6addr = "2002:1111::1401"
@@ -15,6 +17,7 @@ resource "nios_dns_record_aaaa" "record2" {
   }
 }
 
+// Create Record AAAA using function call to retrieve ipv6addr
 resource "nios_dns_record_aaaa" "record3" {
   name = "example_test_with_func_call.example.com"
   func_call = {
