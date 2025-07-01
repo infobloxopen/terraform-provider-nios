@@ -8,6 +8,8 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
 
@@ -43,6 +45,9 @@ var DtcPoolConsolidatedMonitorsResourceSchemaAttributes = map[string]schema.Attr
 	"availability": schema.StringAttribute{
 		Optional:            true,
 		Computed: 		true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ANY", "ALL"),
+		},
 		MarkdownDescription: "Servers assigned to a pool with monitor defined are healthy if ANY or ALL members report healthy status.",
 	},
 	"full_health_communication": schema.BoolAttribute{

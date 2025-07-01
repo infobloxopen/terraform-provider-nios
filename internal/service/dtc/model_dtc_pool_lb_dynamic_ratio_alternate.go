@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
 
@@ -37,6 +39,9 @@ var DtcPoolLbDynamicRatioAlternateResourceSchemaAttributes = map[string]schema.A
 		Optional:            true,
 		Computed:            true,
 		Default:             stringdefault.StaticString("MONITOR"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("MONITOR","ROUND_TRIP_DELAY"),
+		},
 		MarkdownDescription: "The method of the DTC dynamic ratio load balancing.",
 	},
 	"monitor": schema.StringAttribute{
@@ -53,6 +58,9 @@ var DtcPoolLbDynamicRatioAlternateResourceSchemaAttributes = map[string]schema.A
 		Optional:            true,
 		Computed:            true,
 		Default:             stringdefault.StaticString("RATIO"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("PRIORITY", "RATIO"),
+		},
 		MarkdownDescription: "The DTC monitor weight. 'PRIORITY' means that all clients will be forwarded to the least loaded server. 'RATIO' means that distribution will be calculated based on dynamic weights.",
 	},
 	"invert_monitor_metric": schema.BoolAttribute{

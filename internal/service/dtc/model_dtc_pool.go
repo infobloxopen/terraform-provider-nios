@@ -6,6 +6,7 @@ import (
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -47,7 +48,7 @@ type DtcPoolModel struct {
 }
 
 var DtcPoolAttrTypes = map[string]attr.Type{
-	"ref":                       types.StringType,
+	"ref":                        types.StringType,
 	"auto_consolidated_monitors": types.BoolType,
 	"availability":               types.StringType,
 	"comment":                    types.StringType,
@@ -85,7 +86,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Default:  stringdefault.StaticString("ALL"),
-		//validation for all
+		Validators: []validator.String{
+			stringvalidator.OneOf("ALL","ANY","QUORUM"),
+		},
 		MarkdownDescription: "A resource in the pool is available if ANY, at least QUORUM, or ALL monitors for the pool say that it is up.",
 	},
 	"comment": schema.StringAttribute{
@@ -127,6 +130,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             stringdefault.StaticString("NONE"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("ALL_AVAILABLE","DYNAMIC_RATIO","GLOBAL_AVAILABILITY","NONE","RATIO","ROUND_ROBIN","SOURCE_IP_HASH","TOPOLOGY"),
+		},
 		MarkdownDescription: "The alternate load balancing method. Use this to select a method type from the pool if the preferred method does not return any results.",
 	},
 	"lb_alternate_topology": schema.StringAttribute{
@@ -146,11 +152,14 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"lb_preferred_method": schema.StringAttribute{
 		Required:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ALL_AVAILABLE","DYNAMIC_RATIO","GLOBAL_AVAILABILITY","RATIO","ROUND_ROBIN","SOURCE_IP_HASH","TOPOLOGY"),
+		},
 		MarkdownDescription: "The preferred load balancing method. Use this to select a method type from the pool.",
 	},
 	"lb_preferred_topology": schema.StringAttribute{
 		Optional:            true,
-		Computed: 		  true,
+		Computed:            true,
 		MarkdownDescription: "The preferred topology for load balancing.",
 	},
 	"monitors": schema.ListAttribute{
