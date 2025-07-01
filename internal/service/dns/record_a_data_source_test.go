@@ -11,7 +11,7 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
 )
 
-func TestAccRecordaDataSource_Filters(t *testing.T) {
+func TestAccRecordADataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_a.test"
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
@@ -20,21 +20,21 @@ func TestAccRecordaDataSource_Filters(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckRecordaDestroy(context.Background(), &v),
+		CheckDestroy:             testAccCheckRecordADestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordaDataSourceConfigFilters(name, "10.0.0.20", "default"),
+				Config: testAccRecordADataSourceConfigFilters(name, "10.0.0.20", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-						testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					}, testAccCheckRecordaResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckRecordAExists(context.Background(), resourceName, &v),
+					}, testAccCheckRecordAResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
 	})
 }
 
-func TestAccRecordaDataSource_TagFilters(t *testing.T) {
+func TestAccRecordADataSource_TagFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_a.test"
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
@@ -44,14 +44,14 @@ func TestAccRecordaDataSource_TagFilters(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckRecordaDestroy(context.Background(), &v),
+		CheckDestroy:             testAccCheckRecordADestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordaDataSourceConfigExtAttrFilters(name, "10.0.0.20", "default", extAttrValue),
+				Config: testAccRecordADataSourceConfigExtAttrFilters(name, "10.0.0.20", "default", extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-						testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					}, testAccCheckRecordaResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckRecordAExists(context.Background(), resourceName, &v),
+					}, testAccCheckRecordAResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -60,7 +60,7 @@ func TestAccRecordaDataSource_TagFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckRecordaResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+func testAccCheckRecordAResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "_ref", dataSourceName, "result.0._ref"),
 		resource.TestCheckResourceAttrPair(resourceName, "aws_rte53_record_info", dataSourceName, "result.0.aws_rte53_record_info"),
@@ -89,7 +89,7 @@ func testAccCheckRecordaResourceAttrPair(resourceName, dataSourceName string) []
 	}
 }
 
-func testAccRecordaDataSourceConfigFilters(name, ipV4Addr, view string) string {
+func testAccRecordADataSourceConfigFilters(name, ipV4Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test" {
 	name = %q
@@ -105,7 +105,7 @@ data "nios_dns_record_a" "test" {
 `, name, ipV4Addr, view)
 }
 
-func testAccRecordaDataSourceConfigExtAttrFilters(name, ipV4Addr, view, extAttrsValue string) string {
+func testAccRecordADataSourceConfigExtAttrFilters(name, ipV4Addr, view, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test" {
 	name = %q

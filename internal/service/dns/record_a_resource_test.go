@@ -15,7 +15,7 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
-func TestAccRecordaResource_basic(t *testing.T) {
+func TestAccRecordAResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -26,9 +26,9 @@ func TestAccRecordaResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaBasicConfig(name, "10.0.0.20", "default"),
+				Config: testAccRecordABasicConfig(name, "10.0.0.20", "default"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.0.0.20"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -40,7 +40,7 @@ func TestAccRecordaResource_basic(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_disappears(t *testing.T) {
+func TestAccRecordAResource_disappears(t *testing.T) {
 	t.Skip("Skipping test for disappears")
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
@@ -49,13 +49,13 @@ func TestAccRecordaResource_disappears(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckRecordaDestroy(context.Background(), &v),
+		CheckDestroy:             testAccCheckRecordADestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordaBasicConfig(name, "10.0.0.20", "default"),
+				Config: testAccRecordABasicConfig(name, "10.0.0.20", "default"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
-					testAccCheckRecordaDisappears(context.Background(), &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
+					testAccCheckRecordADisappears(context.Background(), &v),
 				),
 				ExpectNonEmptyPlan: true,
 			},
@@ -63,7 +63,7 @@ func TestAccRecordaResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_Comment(t *testing.T) {
+func TestAccRecordAResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_comment"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -74,17 +74,17 @@ func TestAccRecordaResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaComment(name, "10.0.0.20", "default", "This is a new record"),
+				Config: testAccRecordAComment(name, "10.0.0.20", "default", "This is a new record"),
 				Check: resource.ComposeTestCheckFunc(
-					//testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					//testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a new record"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaComment(name, "10.0.0.20", "default", "This is an updated record"),
+				Config: testAccRecordAComment(name, "10.0.0.20", "default", "This is an updated record"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated record"),
 				),
 			},
@@ -93,7 +93,7 @@ func TestAccRecordaResource_Comment(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_Creator(t *testing.T) {
+func TestAccRecordAResource_Creator(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_creator"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -104,17 +104,17 @@ func TestAccRecordaResource_Creator(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaCreator(name, "10.0.0.20", "default", "STATIC"),
+				Config: testAccRecordACreator(name, "10.0.0.20", "default", "STATIC"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaCreator(name, "10.0.0.20", "default", "DYNAMIC"),
+				Config: testAccRecordACreator(name, "10.0.0.20", "default", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "creator", "DYNAMIC"),
 				),
 			},
@@ -123,7 +123,7 @@ func TestAccRecordaResource_Creator(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_DdnsPrincipal(t *testing.T) {
+func TestAccRecordAResource_DdnsPrincipal(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_ddns_principal"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -134,17 +134,17 @@ func TestAccRecordaResource_DdnsPrincipal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaDdnsPrincipal(name, "10.0.0.20", "default", "DDNS_PRINCIPAL_REPLACE_ME"),
+				Config: testAccRecordADdnsPrincipal(name, "10.0.0.20", "default", "DDNS_PRINCIPAL_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_REPLACE_ME"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaDdnsPrincipal(name, "10.0.0.20", "default", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordADdnsPrincipal(name, "10.0.0.20", "default", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
 				),
 			},
@@ -153,7 +153,7 @@ func TestAccRecordaResource_DdnsPrincipal(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_DdnsProtected(t *testing.T) {
+func TestAccRecordAResource_DdnsProtected(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_ddns_protected"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -164,17 +164,17 @@ func TestAccRecordaResource_DdnsProtected(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaDdnsProtected(name, "10.0.0.20", "default", "false"),
+				Config: testAccRecordADdnsProtected(name, "10.0.0.20", "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
-					//testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					//testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaDdnsProtected(name, "10.0.0.20", "default", "true"),
+				Config: testAccRecordADdnsProtected(name, "10.0.0.20", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "true"),
 				),
 			},
@@ -183,7 +183,7 @@ func TestAccRecordaResource_DdnsProtected(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_Disable(t *testing.T) {
+func TestAccRecordAResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_disable"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -194,17 +194,17 @@ func TestAccRecordaResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaDisable(name, "10.0.0.20", "default", "false"),
+				Config: testAccRecordADisable(name, "10.0.0.20", "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaDisable(name, "10.0.0.20", "default", "true"),
+				Config: testAccRecordADisable(name, "10.0.0.20", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
@@ -213,7 +213,7 @@ func TestAccRecordaResource_Disable(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_Extattrs(t *testing.T) {
+func TestAccRecordAResource_Extattrs(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_extattrs"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -226,21 +226,21 @@ func TestAccRecordaResource_Extattrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]string{
+				Config: testAccRecordAExtattrs(name, "10.0.0.20", "default", map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaExtattrs(name, "10.0.0.20", "default", map[string]string{
+				Config: testAccRecordAExtattrs(name, "10.0.0.20", "default", map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
@@ -249,7 +249,7 @@ func TestAccRecordaResource_Extattrs(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_ForbidReclamation(t *testing.T) {
+func TestAccRecordAResource_ForbidReclamation(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_forbid_reclamation"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -260,17 +260,17 @@ func TestAccRecordaResource_ForbidReclamation(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaForbidReclamation(name, "10.0.0.20", "default", "true"),
+				Config: testAccRecordAForbidReclamation(name, "10.0.0.20", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaForbidReclamation(name, "10.0.0.20", "default", "false"),
+				Config: testAccRecordAForbidReclamation(name, "10.0.0.20", "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
 				),
 			},
@@ -279,7 +279,7 @@ func TestAccRecordaResource_ForbidReclamation(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_FuncCall(t *testing.T) {
+func TestAccRecordAResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_func_call"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -290,23 +290,23 @@ func TestAccRecordaResource_FuncCall(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaFuncCall(name, "default", "ipv4addr", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Original Function Call"),
+				Config: testAccRecordAFuncCall(name, "default", "ipv4addr", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Original Function Call"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaFuncCall(name, "default", "comment", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Function Call with Update"),
+				Config: testAccRecordAFuncCall(name, "default", "comment", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Function Call with Update"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 				),
 			},
 		},
 	})
 }
 
-func TestAccRecordaResource_Ipv4addr(t *testing.T) {
+func TestAccRecordAResource_Ipv4addr(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_ipv4addr"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -317,17 +317,17 @@ func TestAccRecordaResource_Ipv4addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaIpv4addr(name, "10.0.0.20", "default"),
+				Config: testAccRecordAIpv4addr(name, "10.0.0.20", "default"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.0.0.20"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaIpv4addr(name, "10.1.0.20", "default"),
+				Config: testAccRecordAIpv4addr(name, "10.1.0.20", "default"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.1.0.20"),
 				),
 			},
@@ -336,7 +336,7 @@ func TestAccRecordaResource_Ipv4addr(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_Name(t *testing.T) {
+func TestAccRecordAResource_Name(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_name"
 	var v dns.RecordA
 	name1 := acctest.RandomName() + ".example.com"
@@ -348,17 +348,17 @@ func TestAccRecordaResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaName(name1, "10.0.0.20", "default"),
+				Config: testAccRecordAName(name1, "10.0.0.20", "default"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaName(name2, "10.0.0.20", "default"),
+				Config: testAccRecordAName(name2, "10.0.0.20", "default"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name2),
 				),
 			},
@@ -367,7 +367,7 @@ func TestAccRecordaResource_Name(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_Ttl(t *testing.T) {
+func TestAccRecordAResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_ttl"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -378,17 +378,17 @@ func TestAccRecordaResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaTtl(name, "10.0.0.20", "default", 10, "true"),
+				Config: testAccRecordATtl(name, "10.0.0.20", "default", 10, "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaTtl(name, "10.0.0.20", "default", 0, "true"),
+				Config: testAccRecordATtl(name, "10.0.0.20", "default", 0, "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "0"),
 				),
 			},
@@ -397,7 +397,7 @@ func TestAccRecordaResource_Ttl(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_UseTtl(t *testing.T) {
+func TestAccRecordAResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_use_ttl"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -408,17 +408,17 @@ func TestAccRecordaResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaUseTtl(name, "10.0.0.20", "default", "true", 20),
+				Config: testAccRecordAUseTtl(name, "10.0.0.20", "default", "true", 20),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaUseTtl(name, "10.0.0.20", "default", "false", 20),
+				Config: testAccRecordAUseTtl(name, "10.0.0.20", "default", "false", 20),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
@@ -427,7 +427,7 @@ func TestAccRecordaResource_UseTtl(t *testing.T) {
 	})
 }
 
-func TestAccRecordaResource_View(t *testing.T) {
+func TestAccRecordAResource_View(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_view"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -438,17 +438,17 @@ func TestAccRecordaResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordaView("10.0.0.20", name, "default"),
+				Config: testAccRecordAView("10.0.0.20", name, "default"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordaView("10.0.0.20", name, "default"),
+				Config: testAccRecordAView("10.0.0.20", name, "default"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordaExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
@@ -457,7 +457,7 @@ func TestAccRecordaResource_View(t *testing.T) {
 	})
 }
 
-func testAccCheckRecordaExists(ctx context.Context, resourceName string, v *dns.RecordA) resource.TestCheckFunc {
+func testAccCheckRecordAExists(ctx context.Context, resourceName string, v *dns.RecordA) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	var readableAttributes = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,extattrs,forbid_reclamation,ipv4addr,last_queried,ms_ad_user_data,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
 	return func(state *terraform.State) error {
@@ -483,7 +483,7 @@ func testAccCheckRecordaExists(ctx context.Context, resourceName string, v *dns.
 	}
 }
 
-func testAccCheckRecordaDestroy(ctx context.Context, v *dns.RecordA) resource.TestCheckFunc {
+func testAccCheckRecordADestroy(ctx context.Context, v *dns.RecordA) resource.TestCheckFunc {
 	// Verify the resource was destroyed
 	var readableAttributes = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,extattrs,forbid_reclamation,ipv4addr,last_queried,ms_ad_user_data,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
 	return func(state *terraform.State) error {
@@ -504,7 +504,7 @@ func testAccCheckRecordaDestroy(ctx context.Context, v *dns.RecordA) resource.Te
 	}
 }
 
-func testAccCheckRecordaDisappears(ctx context.Context, v *dns.RecordA) resource.TestCheckFunc {
+func testAccCheckRecordADisappears(ctx context.Context, v *dns.RecordA) resource.TestCheckFunc {
 	// Delete the resource externally to verify disappears test
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
@@ -518,7 +518,7 @@ func testAccCheckRecordaDisappears(ctx context.Context, v *dns.RecordA) resource
 	}
 }
 
-func testAccRecordaBasicConfig(name, ipV4Addr, view string) string {
+func testAccRecordABasicConfig(name, ipV4Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test" {
 	name = %q
@@ -528,7 +528,7 @@ resource "nios_dns_record_a" "test" {
 `, name, ipV4Addr, view)
 }
 
-func testAccRecordaComment(name, ipV4Addr, view, comment string) string {
+func testAccRecordAComment(name, ipV4Addr, view, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_comment" {
 	name = %q
@@ -539,7 +539,7 @@ resource "nios_dns_record_a" "test_comment" {
 `, name, ipV4Addr, view, comment)
 }
 
-func testAccRecordaCreator(name, ipV4Addr, view, creator string) string {
+func testAccRecordACreator(name, ipV4Addr, view, creator string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_creator" {
 	name = %q
@@ -550,7 +550,7 @@ resource "nios_dns_record_a" "test_creator" {
 `, name, ipV4Addr, view, creator)
 }
 
-func testAccRecordaDdnsPrincipal(name, ipV4Addr, view, ddnsPrincipal string) string {
+func testAccRecordADdnsPrincipal(name, ipV4Addr, view, ddnsPrincipal string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_ddns_principal" {
 	name = %q
@@ -562,7 +562,7 @@ resource "nios_dns_record_a" "test_ddns_principal" {
 `, name, ipV4Addr, view, ddnsPrincipal)
 }
 
-func testAccRecordaDdnsProtected(name, ipV4Addr, view, ddnsProtected string) string {
+func testAccRecordADdnsProtected(name, ipV4Addr, view, ddnsProtected string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_ddns_protected" {
     name = %q
@@ -573,7 +573,7 @@ resource "nios_dns_record_a" "test_ddns_protected" {
 `, name, ipV4Addr, view, ddnsProtected)
 }
 
-func testAccRecordaDisable(name, ipV4Addr, view, disable string) string {
+func testAccRecordADisable(name, ipV4Addr, view, disable string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_disable" {
     name = %q
@@ -584,7 +584,7 @@ resource "nios_dns_record_a" "test_disable" {
 `, name, ipV4Addr, view, disable)
 }
 
-func testAccRecordaExtattrs(name, ipV4Addr, view string, extAttrs map[string]string) string {
+func testAccRecordAExtattrs(name, ipV4Addr, view string, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf(`
@@ -602,7 +602,7 @@ resource "nios_dns_record_a" "test_extattrs" {
 `, name, ipV4Addr, view, extattrsStr)
 }
 
-func testAccRecordaForbidReclamation(name, ipV4Addr, view, forbidReclamation string) string {
+func testAccRecordAForbidReclamation(name, ipV4Addr, view, forbidReclamation string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_forbid_reclamation" {
     name = %q
@@ -613,7 +613,7 @@ resource "nios_dns_record_a" "test_forbid_reclamation" {
 `, name, ipV4Addr, view, forbidReclamation)
 }
 
-func testAccRecordaFuncCall(name, view, attributeName, objFunc, parameters, resultField, object, objectParameters, comment string) string {
+func testAccRecordAFuncCall(name, view, attributeName, objFunc, parameters, resultField, object, objectParameters, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_func_call" {
 	name = %q
@@ -633,7 +633,7 @@ resource "nios_dns_record_a" "test_func_call" {
 `, name, view, attributeName, objFunc, resultField, object, objectParameters, comment)
 }
 
-func testAccRecordaIpv4addr(name, ipV4addr, view string) string {
+func testAccRecordAIpv4addr(name, ipV4addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_ipv4addr" {
 	name = %q
@@ -643,7 +643,7 @@ resource "nios_dns_record_a" "test_ipv4addr" {
 `, name, ipV4addr, view)
 }
 
-func testAccRecordaName(name, ipV4addr, view string) string {
+func testAccRecordAName(name, ipV4addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_name" {
 	name = %q
@@ -653,7 +653,7 @@ resource "nios_dns_record_a" "test_name" {
 `, name, ipV4addr, view)
 }
 
-func testAccRecordaTtl(name, ipV4Addr, view string, ttl int32, use_ttl string) string {
+func testAccRecordATtl(name, ipV4Addr, view string, ttl int32, use_ttl string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_ttl" {
     name = %q
@@ -665,7 +665,7 @@ resource "nios_dns_record_a" "test_ttl" {
 `, name, ipV4Addr, view, ttl, use_ttl)
 }
 
-func testAccRecordaUseTtl(name, ipV4Addr, view, useTtl string, ttl int32) string {
+func testAccRecordAUseTtl(name, ipV4Addr, view, useTtl string, ttl int32) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_use_ttl" {
     name = %q
@@ -677,7 +677,7 @@ resource "nios_dns_record_a" "test_use_ttl" {
 `, name, ipV4Addr, view, useTtl, ttl)
 }
 
-func testAccRecordaView(ipV4addr string, name string, view string) string {
+func testAccRecordAView(ipV4addr string, name string, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_a" "test_view" {
 	ipv4addr = %q
