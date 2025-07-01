@@ -2,8 +2,11 @@ package dtc
 
 import (
 	"context"
+	"fmt"
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -20,6 +23,49 @@ import (
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
+
+type recordTypeValidator struct{}
+
+func (v recordTypeValidator) Description(_ context.Context) string {
+	return "Each value must be one of: A, AAAA, CNAME, NAPTR, SRV"
+}
+
+func (v recordTypeValidator) MarkdownDescription(_ context.Context) string {
+	return "Each value must be one of: `A`, `AAAA`, `CNAME`, `NAPTR`, `SRV`"
+}
+
+func (v recordTypeValidator) ValidateList(ctx context.Context, req validator.ListRequest, resp *validator.ListResponse) {
+	var list internaltypes.UnorderedListValue
+
+	diags := req.Config.GetAttribute(ctx, req.Path, &list)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if list.IsNull() || list.IsUnknown() {
+		return
+	}
+
+	allowed := map[string]struct{}{
+		"A": {}, "AAAA": {}, "CNAME": {}, "NAPTR": {}, "SRV": {},
+	}
+
+	for i, elem := range list.Elements() {
+		strElem, ok := elem.(types.String)
+		if !ok || strElem.IsNull() || strElem.IsUnknown() {
+			continue
+		}
+
+		if _, valid := allowed[strElem.ValueString()]; !valid {
+			resp.Diagnostics.AddAttributeError(
+				req.Path,
+				"Invalid Record Type",
+				fmt.Sprintf("Element %d has invalid value %q. Allowed values are: A, AAAA, CNAME, NAPTR, SRV.", i, strElem.ValueString()),
+			)
+		}
+	}
+}
 
 type DtcLbdnModel struct {
 	Ref                      types.String                     `tfsdk:"ref"`
@@ -107,7 +153,10 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:   true,
 	},
 	"lb_method": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("GLOBAL_AVAILABILITY", "RATIO", "ROUND_ROBIN", "SOURCE_IP_HASH", "TOPOLOGY"),
+		},
 		MarkdownDescription: "The load balancing method. Used to select pool.",
 	},
 	"name": schema.StringAttribute{
@@ -152,10 +201,13 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"types": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
-		Computed:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
+		Computed:    true,
+		Validators: []validator.List{
+			recordTypeValidator{},
+		},
 		MarkdownDescription: "The list of resource record types supported by LBDN.",
 	},
 	"use_ttl": schema.BoolAttribute{
