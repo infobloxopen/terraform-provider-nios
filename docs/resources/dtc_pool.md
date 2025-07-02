@@ -150,7 +150,7 @@ Optional:
 <a id="nestedatt--health"></a>
 ### Nested Schema for `health`
 
-Optional:
+Read-Only:
 
 - `availability` (String) The availability color status.
 - `description` (String) The textual description of the object's status.

@@ -20,12 +20,14 @@ data "nios_dtc_pool" "get_record_using_filters" {
   }
 }
 
+// Retrieve specific DTC Pool using Extensible Attributes
 data "nios_dtc_pool" "get_record_using_extensible_attributes" {
   extattrfilters = {
     "Site" = "location-1"
   }
 }
 
+// Retrieve all DTC Pools
 data "nios_dtc_pool" "get_all_pools" {}
 ```
 
@@ -124,7 +126,7 @@ Optional:
 <a id="nestedatt--result--health"></a>
 ### Nested Schema for `result.health`
 
-Optional:
+Read-Only:
 
 - `availability` (String) The availability color status.
 - `description` (String) The textual description of the object's status.
