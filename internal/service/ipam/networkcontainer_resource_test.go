@@ -2807,14 +2807,6 @@ resource "nios_ipam_networkcontainer" "test_same_port_control_discovery_blackout
 `, network, samePortControlDiscoveryBlackout, useBlackoutSetting)
 }
 
-func testAccNetworkcontainerSendRirRequest(sendRirRequest string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_send_rir_request" {
-    send_rir_request = %q
-}
-`, sendRirRequest)
-}
-
 func testAccNetworkcontainerUnmanaged(network, unmanaged string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networkcontainer" "test_unmanaged" {
