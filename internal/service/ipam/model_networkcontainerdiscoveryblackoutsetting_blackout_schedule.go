@@ -135,7 +135,6 @@ func FlattenNetworkcontainerdiscoveryblackoutsettingBlackoutSchedule(ctx context
 	}
 	m := NetworkcontainerdiscoveryblackoutsettingBlackoutScheduleModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerdiscoveryblackoutsettingBlackoutScheduleAttrTypes, m)
 	diags.Append(d...)
 	return t

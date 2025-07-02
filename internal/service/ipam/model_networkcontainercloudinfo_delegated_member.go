@@ -71,7 +71,6 @@ func FlattenNetworkcontainercloudinfoDelegatedMember(ctx context.Context, from *
 	}
 	m := NetworkcontainercloudinfoDelegatedMemberModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainercloudinfoDelegatedMemberAttrTypes, m)
 	diags.Append(d...)
 	return t

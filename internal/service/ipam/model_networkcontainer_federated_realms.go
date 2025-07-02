@@ -64,7 +64,6 @@ func FlattenNetworkcontainerFederatedRealms(ctx context.Context, from *ipam.Netw
 	}
 	m := NetworkcontainerFederatedRealmsModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerFederatedRealmsAttrTypes, m)
 	diags.Append(d...)
 	return t

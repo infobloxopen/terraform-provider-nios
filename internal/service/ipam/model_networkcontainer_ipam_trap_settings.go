@@ -69,7 +69,6 @@ func FlattenNetworkcontainerIpamTrapSettings(ctx context.Context, from *ipam.Net
 	}
 	m := NetworkcontainerIpamTrapSettingsModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerIpamTrapSettingsAttrTypes, m)
 	diags.Append(d...)
 	return t
