@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 
@@ -785,18 +784,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time when \"DNS Zones Last Queried\" was turned on for this zone.",
 	},
-}
-
-func ExpandZoneAuth(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZoneAuth {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m ZoneAuthModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneAuth {
