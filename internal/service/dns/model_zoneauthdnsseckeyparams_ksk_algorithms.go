@@ -1,0 +1,81 @@
+package dns
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
+
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+)
+
+type ZoneauthdnsseckeyparamsKskAlgorithmsModel struct {
+	Algorithm types.String `tfsdk:"algorithm"`
+	Size      types.Int64  `tfsdk:"size"`
+}
+
+var ZoneauthdnsseckeyparamsKskAlgorithmsAttrTypes = map[string]attr.Type{
+	"algorithm": types.StringType,
+	"size":      types.Int64Type,
+}
+
+var ZoneauthdnsseckeyparamsKskAlgorithmsResourceSchemaAttributes = map[string]schema.Attribute{
+	"algorithm": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The signing key algorithm.",
+	},
+	"size": schema.Int64Attribute{
+		Optional:            true,
+		MarkdownDescription: "The signing key size, in bits.",
+	},
+}
+
+func ExpandZoneauthdnsseckeyparamsKskAlgorithms(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZoneauthdnsseckeyparamsKskAlgorithms {
+	if o.IsNull() || o.IsUnknown() {
+		return nil
+	}
+	var m ZoneauthdnsseckeyparamsKskAlgorithmsModel
+	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil
+	}
+	return m.Expand(ctx, diags)
+}
+
+func (m *ZoneauthdnsseckeyparamsKskAlgorithmsModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneauthdnsseckeyparamsKskAlgorithms {
+	if m == nil {
+		return nil
+	}
+	to := &dns.ZoneauthdnsseckeyparamsKskAlgorithms{
+		Algorithm: flex.ExpandStringPointer(m.Algorithm),
+		Size:      flex.ExpandInt64Pointer(m.Size),
+	}
+	return to
+}
+
+func FlattenZoneauthdnsseckeyparamsKskAlgorithms(ctx context.Context, from *dns.ZoneauthdnsseckeyparamsKskAlgorithms, diags *diag.Diagnostics) types.Object {
+	if from == nil {
+		return types.ObjectNull(ZoneauthdnsseckeyparamsKskAlgorithmsAttrTypes)
+	}
+	m := ZoneauthdnsseckeyparamsKskAlgorithmsModel{}
+	m.Flatten(ctx, from, diags)
+	t, d := types.ObjectValueFrom(ctx, ZoneauthdnsseckeyparamsKskAlgorithmsAttrTypes, m)
+	diags.Append(d...)
+	return t
+}
+
+func (m *ZoneauthdnsseckeyparamsKskAlgorithmsModel) Flatten(ctx context.Context, from *dns.ZoneauthdnsseckeyparamsKskAlgorithms, diags *diag.Diagnostics) {
+	if from == nil {
+		return
+	}
+	if m == nil {
+		*m = ZoneauthdnsseckeyparamsKskAlgorithmsModel{}
+	}
+	m.Algorithm = flex.FlattenStringPointer(from.Algorithm)
+	m.Size = flex.FlattenInt64Pointer(from.Size)
+}
