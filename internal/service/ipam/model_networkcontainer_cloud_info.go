@@ -100,7 +100,6 @@ func FlattenNetworkcontainerCloudInfo(ctx context.Context, from *ipam.Networkcon
 	}
 	m := NetworkcontainerCloudInfoModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerCloudInfoAttrTypes, m)
 	diags.Append(d...)
 	return t

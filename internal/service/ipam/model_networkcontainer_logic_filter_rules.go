@@ -69,7 +69,6 @@ func FlattenNetworkcontainerLogicFilterRules(ctx context.Context, from *ipam.Net
 	}
 	m := NetworkcontainerLogicFilterRulesModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerLogicFilterRulesAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -177,7 +177,6 @@ func FlattenNetworkcontainerDiscoveryBasicPollSettings(ctx context.Context, from
 	}
 	m := NetworkcontainerDiscoveryBasicPollSettingsModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerDiscoveryBasicPollSettingsAttrTypes, m)
 	diags.Append(d...)
 	return t
