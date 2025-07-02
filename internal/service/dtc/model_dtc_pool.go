@@ -4,7 +4,6 @@ import (
 	"context"
 
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -87,7 +86,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString("ALL"),
 		Validators: []validator.String{
-			stringvalidator.OneOf("ALL","ANY","QUORUM"),
+			stringvalidator.OneOf("ALL", "ANY", "QUORUM"),
 		},
 		MarkdownDescription: "A resource in the pool is available if ANY, at least QUORUM, or ALL monitors for the pool say that it is up.",
 	},
@@ -123,15 +122,16 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 	},
 	"health": schema.SingleNestedAttribute{
-		Attributes: DtcPoolHealthResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          DtcPoolHealthResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The health status of DTC Pool",
 	},
 	"lb_alternate_method": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("NONE"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("NONE"),
 		Validators: []validator.String{
-			stringvalidator.OneOf("ALL_AVAILABLE","DYNAMIC_RATIO","GLOBAL_AVAILABILITY","NONE","RATIO","ROUND_ROBIN","SOURCE_IP_HASH","TOPOLOGY"),
+			stringvalidator.OneOf("ALL_AVAILABLE", "DYNAMIC_RATIO", "GLOBAL_AVAILABILITY", "NONE", "RATIO", "ROUND_ROBIN", "SOURCE_IP_HASH", "TOPOLOGY"),
 		},
 		MarkdownDescription: "The alternate load balancing method. Use this to select a method type from the pool if the preferred method does not return any results.",
 	},
@@ -141,19 +141,21 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The alternate topology for load balancing.",
 	},
 	"lb_dynamic_ratio_alternate": schema.SingleNestedAttribute{
-		Attributes: DtcPoolLbDynamicRatioAlternateResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          DtcPoolLbDynamicRatioAlternateResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The DTC Pool settings for dynamic ratio when its selected as alternate method.",
 	},
 	"lb_dynamic_ratio_preferred": schema.SingleNestedAttribute{
-		Attributes: DtcPoolLbDynamicRatioPreferredResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          DtcPoolLbDynamicRatioPreferredResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The DTC Pool settings for dynamic ratio when its selected as preferred method.",
 	},
 	"lb_preferred_method": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("ALL_AVAILABLE","DYNAMIC_RATIO","GLOBAL_AVAILABILITY","RATIO","ROUND_ROBIN","SOURCE_IP_HASH","TOPOLOGY"),
+			stringvalidator.OneOf("ALL_AVAILABLE", "DYNAMIC_RATIO", "GLOBAL_AVAILABILITY", "RATIO", "ROUND_ROBIN", "SOURCE_IP_HASH", "TOPOLOGY"),
 		},
 		MarkdownDescription: "The preferred load balancing method. Use this to select a method type from the pool.",
 	},
@@ -195,9 +197,6 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: ttl",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
-		Validators: []validator.Bool{
-			boolvalidator.AlsoRequires(path.MatchRoot("ttl")),
-		},
 	},
 }
 

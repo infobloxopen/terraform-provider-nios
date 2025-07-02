@@ -3,15 +3,15 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
 
@@ -36,11 +36,11 @@ var DtcPoolLbDynamicRatioPreferredAttrTypes = map[string]attr.Type{
 
 var DtcPoolLbDynamicRatioPreferredResourceSchemaAttributes = map[string]schema.Attribute{
 	"method": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("MONITOR"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("MONITOR"),
 		Validators: []validator.String{
-			stringvalidator.OneOf("MONITOR","ROUND_TRIP_DELAY"),
+			stringvalidator.OneOf("MONITOR", "ROUND_TRIP_DELAY"),
 		},
 		MarkdownDescription: "The method of the DTC dynamic ratio load balancing.",
 	},
@@ -51,13 +51,13 @@ var DtcPoolLbDynamicRatioPreferredResourceSchemaAttributes = map[string]schema.A
 	},
 	"monitor_metric": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,	
+		Computed:            true,
 		MarkdownDescription: "The metric of the DTC SNMP monitor that will be used for dynamic weighing.",
 	},
 	"monitor_weighing": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("RATIO"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("RATIO"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("PRIORITY", "RATIO"),
 		},

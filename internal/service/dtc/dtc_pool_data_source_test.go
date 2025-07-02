@@ -1,4 +1,3 @@
-
 package dtc_test
 
 import (
@@ -28,8 +27,8 @@ func TestAccDtcPoolDataSource_Filters(t *testing.T) {
 				Config: testAccDtcPoolDataSourceConfigFilters(name, lbPreferredMethod),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-						}, testAccCheckDtcPoolResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
+					}, testAccCheckDtcPoolResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -48,11 +47,11 @@ func TestAccDtcPoolDataSource_TagFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcPoolDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcPoolDataSourceConfigExtAttrFilters(name , lbPreferredMethod,  "Blr"),
+				Config: testAccDtcPoolDataSourceConfigExtAttrFilters(name, lbPreferredMethod, "Blr"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-						}, testAccCheckDtcPoolResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
+					}, testAccCheckDtcPoolResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -61,32 +60,32 @@ func TestAccDtcPoolDataSource_TagFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckDtcPoolResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "auto_consolidated_monitors", dataSourceName, "result.0.auto_consolidated_monitors"),
-        resource.TestCheckResourceAttrPair(resourceName, "availability", dataSourceName, "result.0.availability"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "consolidated_monitors", dataSourceName, "result.0.consolidated_monitors"),
-        resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "health", dataSourceName, "result.0.health"),
-        resource.TestCheckResourceAttrPair(resourceName, "lb_alternate_method", dataSourceName, "result.0.lb_alternate_method"),
-        resource.TestCheckResourceAttrPair(resourceName, "lb_alternate_topology", dataSourceName, "result.0.lb_alternate_topology"),
-        resource.TestCheckResourceAttrPair(resourceName, "lb_dynamic_ratio_alternate", dataSourceName, "result.0.lb_dynamic_ratio_alternate"),
-        resource.TestCheckResourceAttrPair(resourceName, "lb_dynamic_ratio_preferred", dataSourceName, "result.0.lb_dynamic_ratio_preferred"),
-        resource.TestCheckResourceAttrPair(resourceName, "lb_preferred_method", dataSourceName, "result.0.lb_preferred_method"),
-        resource.TestCheckResourceAttrPair(resourceName, "lb_preferred_topology", dataSourceName, "result.0.lb_preferred_topology"),
-        resource.TestCheckResourceAttrPair(resourceName, "monitors", dataSourceName, "result.0.monitors"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-        resource.TestCheckResourceAttrPair(resourceName, "quorum", dataSourceName, "result.0.quorum"),
-        resource.TestCheckResourceAttrPair(resourceName, "servers", dataSourceName, "result.0.servers"),
-        resource.TestCheckResourceAttrPair(resourceName, "ttl", dataSourceName, "result.0.ttl"),
-        resource.TestCheckResourceAttrPair(resourceName, "use_ttl", dataSourceName, "result.0.use_ttl"),
-    }
+func testAccCheckDtcPoolResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "auto_consolidated_monitors", dataSourceName, "result.0.auto_consolidated_monitors"),
+		resource.TestCheckResourceAttrPair(resourceName, "availability", dataSourceName, "result.0.availability"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "consolidated_monitors", dataSourceName, "result.0.consolidated_monitors"),
+		resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "health", dataSourceName, "result.0.health"),
+		resource.TestCheckResourceAttrPair(resourceName, "lb_alternate_method", dataSourceName, "result.0.lb_alternate_method"),
+		resource.TestCheckResourceAttrPair(resourceName, "lb_alternate_topology", dataSourceName, "result.0.lb_alternate_topology"),
+		resource.TestCheckResourceAttrPair(resourceName, "lb_dynamic_ratio_alternate", dataSourceName, "result.0.lb_dynamic_ratio_alternate"),
+		resource.TestCheckResourceAttrPair(resourceName, "lb_dynamic_ratio_preferred", dataSourceName, "result.0.lb_dynamic_ratio_preferred"),
+		resource.TestCheckResourceAttrPair(resourceName, "lb_preferred_method", dataSourceName, "result.0.lb_preferred_method"),
+		resource.TestCheckResourceAttrPair(resourceName, "lb_preferred_topology", dataSourceName, "result.0.lb_preferred_topology"),
+		resource.TestCheckResourceAttrPair(resourceName, "monitors", dataSourceName, "result.0.monitors"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+		resource.TestCheckResourceAttrPair(resourceName, "quorum", dataSourceName, "result.0.quorum"),
+		resource.TestCheckResourceAttrPair(resourceName, "servers", dataSourceName, "result.0.servers"),
+		resource.TestCheckResourceAttrPair(resourceName, "ttl", dataSourceName, "result.0.ttl"),
+		resource.TestCheckResourceAttrPair(resourceName, "use_ttl", dataSourceName, "result.0.use_ttl"),
+	}
 }
 
-func testAccDtcPoolDataSourceConfigFilters(name , lbPreferredMethod string ) string {
+func testAccDtcPoolDataSourceConfigFilters(name, lbPreferredMethod string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test" {
   name = "%s"
@@ -101,7 +100,7 @@ data "nios_dtc_pool" "test" {
 `, name, lbPreferredMethod)
 }
 
-func testAccDtcPoolDataSourceConfigExtAttrFilters(name , lbPreferredMethod , extAttrsValue string) string {
+func testAccDtcPoolDataSourceConfigExtAttrFilters(name, lbPreferredMethod, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test" {
   name = "%s"
@@ -116,6 +115,5 @@ data "nios_dtc_pool" "test" {
 	"Site" = nios_dtc_pool.test.extattrs.Site
   }
 }
-`,name, lbPreferredMethod , extAttrsValue)
+`, name, lbPreferredMethod, extAttrsValue)
 }
-

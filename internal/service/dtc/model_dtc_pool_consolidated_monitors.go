@@ -3,13 +3,13 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
 
@@ -34,17 +34,17 @@ var DtcPoolConsolidatedMonitorsResourceSchemaAttributes = map[string]schema.Attr
 	"members": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
-		Computed: 		  true,
+		Computed:            true,
 		MarkdownDescription: "Members whose monitor statuses are shared across other members in a pool.",
 	},
 	"monitor": schema.StringAttribute{
 		Optional:            true,
-		Computed: 		  true,
+		Computed:            true,
 		MarkdownDescription: "Monitor whose statuses are shared across other members in a pool.",
 	},
 	"availability": schema.StringAttribute{
-		Optional:            true,
-		Computed: 		true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("ANY", "ALL"),
 		},

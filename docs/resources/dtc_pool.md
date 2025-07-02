@@ -85,8 +85,8 @@ resource "nios_dtc_pool" "dtc_pool3" {
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `lb_alternate_method` (String) The alternate load balancing method. Use this to select a method type from the pool if the preferred method does not return any results.
 - `lb_alternate_topology` (String) The alternate topology for load balancing.
-- `lb_dynamic_ratio_alternate` (Attributes) (see [below for nested schema](#nestedatt--lb_dynamic_ratio_alternate))
-- `lb_dynamic_ratio_preferred` (Attributes) (see [below for nested schema](#nestedatt--lb_dynamic_ratio_preferred))
+- `lb_dynamic_ratio_alternate` (Attributes) The DTC Pool settings for dynamic ratio when its selected as alternate method. (see [below for nested schema](#nestedatt--lb_dynamic_ratio_alternate))
+- `lb_dynamic_ratio_preferred` (Attributes) The DTC Pool settings for dynamic ratio when its selected as preferred method. (see [below for nested schema](#nestedatt--lb_dynamic_ratio_preferred))
 - `lb_preferred_topology` (String) The preferred topology for load balancing.
 - `monitors` (List of String) The monitors related to pool.
 - `quorum` (Number) For availability mode QUORUM, at least this many monitors must report the resource as up for it to be available
@@ -97,7 +97,7 @@ resource "nios_dtc_pool" "dtc_pool3" {
 ### Read-Only
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
-- `health` (Attributes) (see [below for nested schema](#nestedatt--health))
+- `health` (Attributes) The health status of DTC Pool (see [below for nested schema](#nestedatt--health))
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--consolidated_monitors"></a>
@@ -150,7 +150,7 @@ Optional:
 <a id="nestedatt--health"></a>
 ### Nested Schema for `health`
 
-Read-Only:
+Optional:
 
 - `availability` (String) The availability color status.
 - `description` (String) The textual description of the object's status.

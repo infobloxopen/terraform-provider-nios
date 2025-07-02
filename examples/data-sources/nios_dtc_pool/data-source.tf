@@ -1,19 +1,16 @@
-resource "nios_dtc_pool" "dtc_pool1"{
-    name = "dtc_pool23"
-    lb_preferred_method="ROUND_ROBIN"
-    extattrs = {
-    Site = "Siteblr"
-  }
-}
-
-data "nios_dtc_pool" "test" {
+// Retrieve a specific DTC Pool by name
+data "nios_dtc_pool" "get_record_using_filters" {
   filters = {
-    name = nios_dtc_pool.dtc_pool1.name 
+    name = "dtc_pool"
   }
 }
 
-data "nios_dtc_pool" "test2" {
+// Retrieve specific DTC Pool using Extensible Attributes
+data "nios_dtc_pool" "get_record_using_extensible_attributes" {
   extattrfilters = {
-	"Site" = nios_dtc_pool.dtc_pool1.extattrs.Site
+    "Site" = "location-1"
   }
 }
+
+// Retrieve all DTC Pools
+data "nios_dtc_pool" "get_all_pools" {}
