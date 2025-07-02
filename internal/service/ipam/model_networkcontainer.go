@@ -1156,7 +1156,6 @@ func FlattenNetworkcontainerNetwork(from *ipam.NetworkcontainerNetwork) types.St
 	if from.String == nil {
 		return types.StringNull()
 	}
-	m := types.String{}
-	m = flex.FlattenStringPointer(from.String)
+	m := flex.FlattenStringPointer(from.String)
 	return m
 }
