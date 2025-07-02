@@ -75,7 +75,6 @@ func FlattenNetworkcontainerPortControlBlackoutSetting(ctx context.Context, from
 	}
 	m := NetworkcontainerPortControlBlackoutSettingModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerPortControlBlackoutSettingAttrTypes, m)
 	diags.Append(d...)
 	return t

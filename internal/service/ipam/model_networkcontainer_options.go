@@ -7,9 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -56,31 +53,26 @@ var NetworkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attribut
 		Optional:            true,
 		MarkdownDescription: "Name of the DHCP option.",
 		Computed:            true,
-		Default:             stringdefault.StaticString("dhcp-lease-time"),
 	},
 	"num": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The code of the DHCP option.",
 		Computed:            true,
-		Default:             int64default.StaticInt64(51),
 	},
 	"vendor_class": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 		Computed:            true,
-		Default:             stringdefault.StaticString("DHCP"),
 	},
 	"value": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Value of the DHCP option",
 		Computed:            true,
-		Default:             stringdefault.StaticString("43200"),
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers",
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 	},
 }
 
@@ -127,7 +119,6 @@ func FlattenNetworkcontainerOptions(ctx context.Context, from *ipam.Networkconta
 	}
 	m := NetworkcontainerOptionsModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerOptionsAttrTypes, m)
 	diags.Append(d...)
 	return t

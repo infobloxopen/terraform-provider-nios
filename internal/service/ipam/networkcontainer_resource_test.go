@@ -1329,7 +1329,7 @@ func TestAccNetworkcontainerResource_SamePortControlDiscoveryBlackout(t *testing
 	})
 }
 
-// TODO: "mapped_ea_attributes": list of object required.
+// //TODO: "mapped_ea_attributes": list of object required.
 // func TestAccNetworkcontainerResource_SubscribeSettings(t *testing.T) {
 // 	var resourceName = "nios_ipam_networkcontainer.test_subscribe_settings"
 // 	var v ipam.Networkcontainer

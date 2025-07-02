@@ -37,8 +37,7 @@ var NetworkcontainerDiscoveryBlackoutSettingResourceSchemaAttributes = map[strin
 	"blackout_duration": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The blackout duration in seconds; minimum value is 1 minute.",
-		// Computed:            true,
-		// Default:             int64default.StaticInt64(0),
+		Computed:            true,
 	},
 	"blackout_schedule": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes,
@@ -76,7 +75,6 @@ func FlattenNetworkcontainerDiscoveryBlackoutSetting(ctx context.Context, from *
 	}
 	m := NetworkcontainerDiscoveryBlackoutSettingModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerDiscoveryBlackoutSettingAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -69,7 +69,6 @@ func FlattenNetworkcontainerIpamThresholdSettings(ctx context.Context, from *ipa
 	}
 	m := NetworkcontainerIpamThresholdSettingsModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerIpamThresholdSettingsAttrTypes, m)
 	diags.Append(d...)
 	return t

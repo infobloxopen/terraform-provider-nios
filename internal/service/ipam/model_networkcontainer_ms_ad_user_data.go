@@ -55,7 +55,6 @@ func FlattenNetworkcontainerMsAdUserData(ctx context.Context, from *ipam.Network
 	}
 	m := NetworkcontainerMsAdUserDataModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerMsAdUserDataAttrTypes, m)
 	diags.Append(d...)
 	return t
