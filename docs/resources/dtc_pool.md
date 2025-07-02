@@ -92,7 +92,7 @@ resource "nios_dtc_pool" "dtc_pool3" {
 - `quorum` (Number) For availability mode QUORUM, at least this many monitors must report the resource as up for it to be available
 - `servers` (Attributes List) The servers related to the pool. (see [below for nested schema](#nestedatt--servers))
 - `ttl` (Number) The Time To Live (TTL) value for the DTC Pool. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
-- `use_ttl` (Boolean) Use flag for: ttl
+- `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the DTC Pool.
 
 ### Read-Only
 
