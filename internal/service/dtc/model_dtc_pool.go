@@ -194,7 +194,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"use_ttl": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "Use flag for: ttl",
+		MarkdownDescription: "Flag to indicate whether the TTL value should be used for the DTC Pool.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 	},
