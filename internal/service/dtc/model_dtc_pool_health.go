@@ -3,11 +3,9 @@ package dtc
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -31,16 +29,10 @@ var DtcPoolHealthAttrTypes = map[string]attr.Type{
 var DtcPoolHealthResourceSchemaAttributes = map[string]schema.Attribute{
 	"availability": schema.StringAttribute{
 		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("BLUE", "GRAY", "GREEN", "NONE", "RED", "YELLOW"),
-		},
 		MarkdownDescription: "The availability color status.",
 	},
 	"enabled_state": schema.StringAttribute{
 		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("DISABLED", "DISABLED_BY_PARENT", "ENABLED", "NONE"),
-		},
 		MarkdownDescription: "The enabled state of the object.",
 	},
 	"description": schema.StringAttribute{
