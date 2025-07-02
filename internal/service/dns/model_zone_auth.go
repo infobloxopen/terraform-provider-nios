@@ -3,135 +3,144 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 )
 
 type ZoneAuthModel struct {
-	Ref                                     types.String `tfsdk:"ref"`
-	Address                                 types.String `tfsdk:"address"`
-	AllowActiveDir                          types.List   `tfsdk:"allow_active_dir"`
-	AllowFixedRrsetOrder                    types.Bool   `tfsdk:"allow_fixed_rrset_order"`
-	AllowGssTsigForUnderscoreZone           types.Bool   `tfsdk:"allow_gss_tsig_for_underscore_zone"`
-	AllowGssTsigZoneUpdates                 types.Bool   `tfsdk:"allow_gss_tsig_zone_updates"`
-	AllowQuery                              types.List   `tfsdk:"allow_query"`
-	AllowTransfer                           types.List   `tfsdk:"allow_transfer"`
-	AllowUpdate                             types.List   `tfsdk:"allow_update"`
-	AllowUpdateForwarding                   types.Bool   `tfsdk:"allow_update_forwarding"`
-	AwsRte53ZoneInfo                        types.Object `tfsdk:"aws_rte53_zone_info"`
-	CloudInfo                               types.Object `tfsdk:"cloud_info"`
-	Comment                                 types.String `tfsdk:"comment"`
-	CopyXferToNotify                        types.Bool   `tfsdk:"copy_xfer_to_notify"`
-	CreatePtrForBulkHosts                   types.Bool   `tfsdk:"create_ptr_for_bulk_hosts"`
-	CreatePtrForHosts                       types.Bool   `tfsdk:"create_ptr_for_hosts"`
-	CreateUnderscoreZones                   types.Bool   `tfsdk:"create_underscore_zones"`
-	DdnsForceCreationTimestampUpdate        types.Bool   `tfsdk:"ddns_force_creation_timestamp_update"`
-	DdnsPrincipalGroup                      types.String `tfsdk:"ddns_principal_group"`
-	DdnsPrincipalTracking                   types.Bool   `tfsdk:"ddns_principal_tracking"`
-	DdnsRestrictPatterns                    types.Bool   `tfsdk:"ddns_restrict_patterns"`
-	DdnsRestrictPatternsList                types.List   `tfsdk:"ddns_restrict_patterns_list"`
-	DdnsRestrictProtected                   types.Bool   `tfsdk:"ddns_restrict_protected"`
-	DdnsRestrictSecure                      types.Bool   `tfsdk:"ddns_restrict_secure"`
-	DdnsRestrictStatic                      types.Bool   `tfsdk:"ddns_restrict_static"`
-	Disable                                 types.Bool   `tfsdk:"disable"`
-	DisableForwarding                       types.Bool   `tfsdk:"disable_forwarding"`
-	DisplayDomain                           types.String `tfsdk:"display_domain"`
-	DnsFqdn                                 types.String `tfsdk:"dns_fqdn"`
-	DnsIntegrityEnable                      types.Bool   `tfsdk:"dns_integrity_enable"`
-	DnsIntegrityFrequency                   types.Int64  `tfsdk:"dns_integrity_frequency"`
-	DnsIntegrityMember                      types.String `tfsdk:"dns_integrity_member"`
-	DnsIntegrityVerboseLogging              types.Bool   `tfsdk:"dns_integrity_verbose_logging"`
-	DnsSoaEmail                             types.String `tfsdk:"dns_soa_email"`
-	DnssecKeyParams                         types.Object `tfsdk:"dnssec_key_params"`
-	DnssecKeys                              types.List   `tfsdk:"dnssec_keys"`
-	DnssecKskRolloverDate                   types.Int64  `tfsdk:"dnssec_ksk_rollover_date"`
-	DnssecZskRolloverDate                   types.Int64  `tfsdk:"dnssec_zsk_rollover_date"`
-	DoHostAbstraction                       types.Bool   `tfsdk:"do_host_abstraction"`
-	EffectiveCheckNamesPolicy               types.String `tfsdk:"effective_check_names_policy"`
-	EffectiveRecordNamePolicy               types.String `tfsdk:"effective_record_name_policy"`
-	ExtAttrs                                types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                             types.Map    `tfsdk:"extattrs_all"`
-	ExternalPrimaries                       types.List   `tfsdk:"external_primaries"`
-	ExternalSecondaries                     types.List   `tfsdk:"external_secondaries"`
-	Fqdn                                    types.String `tfsdk:"fqdn"`
-	GridPrimary                             types.List   `tfsdk:"grid_primary"`
-	GridPrimarySharedWithMsParentDelegation types.Bool   `tfsdk:"grid_primary_shared_with_ms_parent_delegation"`
-	GridSecondaries                         types.List   `tfsdk:"grid_secondaries"`
-	ImportFrom                              types.String `tfsdk:"import_from"`
-	IsDnssecEnabled                         types.Bool   `tfsdk:"is_dnssec_enabled"`
-	IsDnssecSigned                          types.Bool   `tfsdk:"is_dnssec_signed"`
-	IsMultimaster                           types.Bool   `tfsdk:"is_multimaster"`
-	LastQueried                             types.Int64  `tfsdk:"last_queried"`
-	LastQueriedAcl                          types.List   `tfsdk:"last_queried_acl"`
-	Locked                                  types.Bool   `tfsdk:"locked"`
-	LockedBy                                types.String `tfsdk:"locked_by"`
-	MaskPrefix                              types.String `tfsdk:"mask_prefix"`
-	MemberSoaMnames                         types.List   `tfsdk:"member_soa_mnames"`
-	MemberSoaSerials                        types.List   `tfsdk:"member_soa_serials"`
-	MsAdIntegrated                          types.Bool   `tfsdk:"ms_ad_integrated"`
-	MsAllowTransfer                         types.List   `tfsdk:"ms_allow_transfer"`
-	MsAllowTransferMode                     types.String `tfsdk:"ms_allow_transfer_mode"`
-	MsDcNsRecordCreation                    types.List   `tfsdk:"ms_dc_ns_record_creation"`
-	MsDdnsMode                              types.String `tfsdk:"ms_ddns_mode"`
-	MsManaged                               types.String `tfsdk:"ms_managed"`
-	MsPrimaries                             types.List   `tfsdk:"ms_primaries"`
-	MsReadOnly                              types.Bool   `tfsdk:"ms_read_only"`
-	MsSecondaries                           types.List   `tfsdk:"ms_secondaries"`
-	MsSyncDisabled                          types.Bool   `tfsdk:"ms_sync_disabled"`
-	MsSyncMasterName                        types.String `tfsdk:"ms_sync_master_name"`
-	NetworkAssociations                     types.List   `tfsdk:"network_associations"`
-	NetworkView                             types.String `tfsdk:"network_view"`
-	NotifyDelay                             types.Int64  `tfsdk:"notify_delay"`
-	NsGroup                                 types.String `tfsdk:"ns_group"`
-	Parent                                  types.String `tfsdk:"parent"`
-	Prefix                                  types.String `tfsdk:"prefix"`
-	PrimaryType                             types.String `tfsdk:"primary_type"`
-	RecordNamePolicy                        types.String `tfsdk:"record_name_policy"`
-	RecordsMonitored                        types.Bool   `tfsdk:"records_monitored"`
-	RemoveSubzones                          types.Bool   `tfsdk:"remove_subzones"`
-	RestartIfNeeded                         types.Bool   `tfsdk:"restart_if_needed"`
-	RrNotQueriedEnabledTime                 types.Int64  `tfsdk:"rr_not_queried_enabled_time"`
-	ScavengingSettings                      types.Object `tfsdk:"scavenging_settings"`
-	SetSoaSerialNumber                      types.Bool   `tfsdk:"set_soa_serial_number"`
-	SoaDefaultTtl                           types.Int64  `tfsdk:"soa_default_ttl"`
-	SoaEmail                                types.String `tfsdk:"soa_email"`
-	SoaExpire                               types.Int64  `tfsdk:"soa_expire"`
-	SoaNegativeTtl                          types.Int64  `tfsdk:"soa_negative_ttl"`
-	SoaRefresh                              types.Int64  `tfsdk:"soa_refresh"`
-	SoaRetry                                types.Int64  `tfsdk:"soa_retry"`
-	SoaSerialNumber                         types.Int64  `tfsdk:"soa_serial_number"`
-	Srgs                                    types.List   `tfsdk:"srgs"`
-	UpdateForwarding                        types.List   `tfsdk:"update_forwarding"`
-	UseAllowActiveDir                       types.Bool   `tfsdk:"use_allow_active_dir"`
-	UseAllowQuery                           types.Bool   `tfsdk:"use_allow_query"`
-	UseAllowTransfer                        types.Bool   `tfsdk:"use_allow_transfer"`
-	UseAllowUpdate                          types.Bool   `tfsdk:"use_allow_update"`
-	UseAllowUpdateForwarding                types.Bool   `tfsdk:"use_allow_update_forwarding"`
-	UseCheckNamesPolicy                     types.Bool   `tfsdk:"use_check_names_policy"`
-	UseCopyXferToNotify                     types.Bool   `tfsdk:"use_copy_xfer_to_notify"`
-	UseDdnsForceCreationTimestampUpdate     types.Bool   `tfsdk:"use_ddns_force_creation_timestamp_update"`
-	UseDdnsPatternsRestriction              types.Bool   `tfsdk:"use_ddns_patterns_restriction"`
-	UseDdnsPrincipalSecurity                types.Bool   `tfsdk:"use_ddns_principal_security"`
-	UseDdnsRestrictProtected                types.Bool   `tfsdk:"use_ddns_restrict_protected"`
-	UseDdnsRestrictStatic                   types.Bool   `tfsdk:"use_ddns_restrict_static"`
-	UseDnssecKeyParams                      types.Bool   `tfsdk:"use_dnssec_key_params"`
-	UseExternalPrimary                      types.Bool   `tfsdk:"use_external_primary"`
-	UseGridZoneTimer                        types.Bool   `tfsdk:"use_grid_zone_timer"`
-	UseImportFrom                           types.Bool   `tfsdk:"use_import_from"`
-	UseNotifyDelay                          types.Bool   `tfsdk:"use_notify_delay"`
-	UseRecordNamePolicy                     types.Bool   `tfsdk:"use_record_name_policy"`
-	UseScavengingSettings                   types.Bool   `tfsdk:"use_scavenging_settings"`
-	UseSoaEmail                             types.Bool   `tfsdk:"use_soa_email"`
-	UsingSrgAssociations                    types.Bool   `tfsdk:"using_srg_associations"`
-	View                                    types.String `tfsdk:"view"`
-	ZoneFormat                              types.String `tfsdk:"zone_format"`
-	ZoneNotQueriedEnabledTime               types.Int64  `tfsdk:"zone_not_queried_enabled_time"`
+	Ref                                     types.String                     `tfsdk:"ref"`
+	Address                                 types.String                     `tfsdk:"address"`
+	AllowActiveDir                          types.List                       `tfsdk:"allow_active_dir"`
+	AllowFixedRrsetOrder                    types.Bool                       `tfsdk:"allow_fixed_rrset_order"`
+	AllowGssTsigForUnderscoreZone           types.Bool                       `tfsdk:"allow_gss_tsig_for_underscore_zone"`
+	AllowGssTsigZoneUpdates                 types.Bool                       `tfsdk:"allow_gss_tsig_zone_updates"`
+	AllowQuery                              types.List                       `tfsdk:"allow_query"`
+	AllowTransfer                           types.List                       `tfsdk:"allow_transfer"`
+	AllowUpdate                             types.List                       `tfsdk:"allow_update"`
+	AllowUpdateForwarding                   types.Bool                       `tfsdk:"allow_update_forwarding"`
+	AwsRte53ZoneInfo                        types.Object                     `tfsdk:"aws_rte53_zone_info"`
+	CloudInfo                               types.Object                     `tfsdk:"cloud_info"`
+	Comment                                 types.String                     `tfsdk:"comment"`
+	CopyXferToNotify                        types.Bool                       `tfsdk:"copy_xfer_to_notify"`
+	CreatePtrForBulkHosts                   types.Bool                       `tfsdk:"create_ptr_for_bulk_hosts"`
+	CreatePtrForHosts                       types.Bool                       `tfsdk:"create_ptr_for_hosts"`
+	CreateUnderscoreZones                   types.Bool                       `tfsdk:"create_underscore_zones"`
+	DdnsForceCreationTimestampUpdate        types.Bool                       `tfsdk:"ddns_force_creation_timestamp_update"`
+	DdnsPrincipalGroup                      types.String                     `tfsdk:"ddns_principal_group"`
+	DdnsPrincipalTracking                   types.Bool                       `tfsdk:"ddns_principal_tracking"`
+	DdnsRestrictPatterns                    types.Bool                       `tfsdk:"ddns_restrict_patterns"`
+	DdnsRestrictPatternsList                internaltypes.UnorderedListValue `tfsdk:"ddns_restrict_patterns_list"`
+	DdnsRestrictProtected                   types.Bool                       `tfsdk:"ddns_restrict_protected"`
+	DdnsRestrictSecure                      types.Bool                       `tfsdk:"ddns_restrict_secure"`
+	DdnsRestrictStatic                      types.Bool                       `tfsdk:"ddns_restrict_static"`
+	Disable                                 types.Bool                       `tfsdk:"disable"`
+	DisableForwarding                       types.Bool                       `tfsdk:"disable_forwarding"`
+	DisplayDomain                           types.String                     `tfsdk:"display_domain"`
+	DnsFqdn                                 types.String                     `tfsdk:"dns_fqdn"`
+	DnsIntegrityEnable                      types.Bool                       `tfsdk:"dns_integrity_enable"`
+	DnsIntegrityFrequency                   types.Int64                      `tfsdk:"dns_integrity_frequency"`
+	DnsIntegrityMember                      types.String                     `tfsdk:"dns_integrity_member"`
+	DnsIntegrityVerboseLogging              types.Bool                       `tfsdk:"dns_integrity_verbose_logging"`
+	DnsSoaEmail                             types.String                     `tfsdk:"dns_soa_email"`
+	DnssecKeyParams                         types.Object                     `tfsdk:"dnssec_key_params"`
+	DnssecKeys                              types.List                       `tfsdk:"dnssec_keys"`
+	DnssecKskRolloverDate                   types.Int64                      `tfsdk:"dnssec_ksk_rollover_date"`
+	DnssecZskRolloverDate                   types.Int64                      `tfsdk:"dnssec_zsk_rollover_date"`
+	DoHostAbstraction                       types.Bool                       `tfsdk:"do_host_abstraction"`
+	EffectiveCheckNamesPolicy               types.String                     `tfsdk:"effective_check_names_policy"`
+	EffectiveRecordNamePolicy               types.String                     `tfsdk:"effective_record_name_policy"`
+	ExtAttrs                                types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll                             types.Map                        `tfsdk:"extattrs_all"`
+	ExternalPrimaries                       types.List                       `tfsdk:"external_primaries"`
+	ExternalSecondaries                     types.List                       `tfsdk:"external_secondaries"`
+	Fqdn                                    types.String                     `tfsdk:"fqdn"`
+	GridPrimary                             types.List                       `tfsdk:"grid_primary"`
+	GridPrimarySharedWithMsParentDelegation types.Bool                       `tfsdk:"grid_primary_shared_with_ms_parent_delegation"`
+	GridSecondaries                         types.List                       `tfsdk:"grid_secondaries"`
+	ImportFrom                              types.String                     `tfsdk:"import_from"`
+	IsDnssecEnabled                         types.Bool                       `tfsdk:"is_dnssec_enabled"`
+	IsDnssecSigned                          types.Bool                       `tfsdk:"is_dnssec_signed"`
+	IsMultimaster                           types.Bool                       `tfsdk:"is_multimaster"`
+	LastQueried                             types.Int64                      `tfsdk:"last_queried"`
+	LastQueriedAcl                          types.List                       `tfsdk:"last_queried_acl"`
+	Locked                                  types.Bool                       `tfsdk:"locked"`
+	LockedBy                                types.String                     `tfsdk:"locked_by"`
+	MaskPrefix                              types.String                     `tfsdk:"mask_prefix"`
+	MemberSoaMnames                         types.List                       `tfsdk:"member_soa_mnames"`
+	MemberSoaSerials                        types.List                       `tfsdk:"member_soa_serials"`
+	MsAdIntegrated                          types.Bool                       `tfsdk:"ms_ad_integrated"`
+	MsAllowTransfer                         types.List                       `tfsdk:"ms_allow_transfer"`
+	MsAllowTransferMode                     types.String                     `tfsdk:"ms_allow_transfer_mode"`
+	MsDcNsRecordCreation                    types.List                       `tfsdk:"ms_dc_ns_record_creation"`
+	MsDdnsMode                              types.String                     `tfsdk:"ms_ddns_mode"`
+	MsManaged                               types.String                     `tfsdk:"ms_managed"`
+	MsPrimaries                             types.List                       `tfsdk:"ms_primaries"`
+	MsReadOnly                              types.Bool                       `tfsdk:"ms_read_only"`
+	MsSecondaries                           types.List                       `tfsdk:"ms_secondaries"`
+	MsSyncDisabled                          types.Bool                       `tfsdk:"ms_sync_disabled"`
+	MsSyncMasterName                        types.String                     `tfsdk:"ms_sync_master_name"`
+	NetworkAssociations                     types.List                       `tfsdk:"network_associations"`
+	NetworkView                             types.String                     `tfsdk:"network_view"`
+	NotifyDelay                             types.Int64                      `tfsdk:"notify_delay"`
+	NsGroup                                 types.String                     `tfsdk:"ns_group"`
+	Parent                                  types.String                     `tfsdk:"parent"`
+	Prefix                                  types.String                     `tfsdk:"prefix"`
+	PrimaryType                             types.String                     `tfsdk:"primary_type"`
+	RecordNamePolicy                        types.String                     `tfsdk:"record_name_policy"`
+	RecordsMonitored                        types.Bool                       `tfsdk:"records_monitored"`
+	RemoveSubzones                          types.Bool                       `tfsdk:"remove_subzones"`
+	RestartIfNeeded                         types.Bool                       `tfsdk:"restart_if_needed"`
+	RrNotQueriedEnabledTime                 types.Int64                      `tfsdk:"rr_not_queried_enabled_time"`
+	ScavengingSettings                      types.Object                     `tfsdk:"scavenging_settings"`
+	SetSoaSerialNumber                      types.Bool                       `tfsdk:"set_soa_serial_number"`
+	SoaDefaultTtl                           types.Int64                      `tfsdk:"soa_default_ttl"`
+	SoaEmail                                types.String                     `tfsdk:"soa_email"`
+	SoaExpire                               types.Int64                      `tfsdk:"soa_expire"`
+	SoaNegativeTtl                          types.Int64                      `tfsdk:"soa_negative_ttl"`
+	SoaRefresh                              types.Int64                      `tfsdk:"soa_refresh"`
+	SoaRetry                                types.Int64                      `tfsdk:"soa_retry"`
+	SoaSerialNumber                         types.Int64                      `tfsdk:"soa_serial_number"`
+	Srgs                                    types.List                       `tfsdk:"srgs"`
+	UpdateForwarding                        types.List                       `tfsdk:"update_forwarding"`
+	UseAllowActiveDir                       types.Bool                       `tfsdk:"use_allow_active_dir"`
+	UseAllowQuery                           types.Bool                       `tfsdk:"use_allow_query"`
+	UseAllowTransfer                        types.Bool                       `tfsdk:"use_allow_transfer"`
+	UseAllowUpdate                          types.Bool                       `tfsdk:"use_allow_update"`
+	UseAllowUpdateForwarding                types.Bool                       `tfsdk:"use_allow_update_forwarding"`
+	UseCheckNamesPolicy                     types.Bool                       `tfsdk:"use_check_names_policy"`
+	UseCopyXferToNotify                     types.Bool                       `tfsdk:"use_copy_xfer_to_notify"`
+	UseDdnsForceCreationTimestampUpdate     types.Bool                       `tfsdk:"use_ddns_force_creation_timestamp_update"`
+	UseDdnsPatternsRestriction              types.Bool                       `tfsdk:"use_ddns_patterns_restriction"`
+	UseDdnsPrincipalSecurity                types.Bool                       `tfsdk:"use_ddns_principal_security"`
+	UseDdnsRestrictProtected                types.Bool                       `tfsdk:"use_ddns_restrict_protected"`
+	UseDdnsRestrictStatic                   types.Bool                       `tfsdk:"use_ddns_restrict_static"`
+	UseDnssecKeyParams                      types.Bool                       `tfsdk:"use_dnssec_key_params"`
+	UseExternalPrimary                      types.Bool                       `tfsdk:"use_external_primary"`
+	UseGridZoneTimer                        types.Bool                       `tfsdk:"use_grid_zone_timer"`
+	UseImportFrom                           types.Bool                       `tfsdk:"use_import_from"`
+	UseNotifyDelay                          types.Bool                       `tfsdk:"use_notify_delay"`
+	UseRecordNamePolicy                     types.Bool                       `tfsdk:"use_record_name_policy"`
+	UseScavengingSettings                   types.Bool                       `tfsdk:"use_scavenging_settings"`
+	UseSoaEmail                             types.Bool                       `tfsdk:"use_soa_email"`
+	UsingSrgAssociations                    types.Bool                       `tfsdk:"using_srg_associations"`
+	View                                    types.String                     `tfsdk:"view"`
+	ZoneFormat                              types.String                     `tfsdk:"zone_format"`
+	ZoneNotQueriedEnabledTime               types.Int64                      `tfsdk:"zone_not_queried_enabled_time"`
 }
 
 var ZoneAuthAttrTypes = map[string]attr.Type{
@@ -156,7 +165,7 @@ var ZoneAuthAttrTypes = map[string]attr.Type{
 	"ddns_principal_group":                 types.StringType,
 	"ddns_principal_tracking":              types.BoolType,
 	"ddns_restrict_patterns":               types.BoolType,
-	"ddns_restrict_patterns_list":          types.ListType{ElemType: types.StringType},
+	"ddns_restrict_patterns_list":          internaltypes.UnorderedListOfStringType,
 	"ddns_restrict_protected":              types.BoolType,
 	"ddns_restrict_secure":                 types.BoolType,
 	"ddns_restrict_static":                 types.BoolType,
@@ -269,18 +278,28 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthAllowActiveDirResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "This field allows the zone to receive GSS-TSIG authenticated DDNS updates from DHCP clients and servers in an AD domain. Note that addresses specified in this field ignore the permission set in the struct which will be set to 'ALLOW'.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_allow_active_dir")),
+		},
 	},
 	"allow_fixed_rrset_order": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "The flag that allows to enable or disable fixed RRset ordering for authoritative forward-mapping zones.",
 	},
 	"allow_gss_tsig_for_underscore_zone": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag that allows DHCP clients to perform GSS-TSIG signed updates for underscore zones.",
 	},
 	"allow_gss_tsig_zone_updates": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag that enables or disables the zone for GSS-TSIG updates.",
 	},
 	"allow_query": schema.ListNestedAttribute{
@@ -288,93 +307,167 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthAllowQueryResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines whether DNS queries are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_allow_query")),
+		},
 	},
 	"allow_transfer": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthAllowTransferResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines whether zone transfers are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_allow_transfer")),
+		},
 	},
 	"allow_update": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthAllowUpdateResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines whether dynamic DNS updates are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_allow_update")),
+		},
 	},
 	"allow_update_forwarding": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The list with IP addresses, networks or TSIG keys for clients, from which forwarded dynamic updates are allowed.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_allow_update_forwarding")),
+		},
 	},
 	"aws_rte53_zone_info": schema.SingleNestedAttribute{
 		Attributes: ZoneAuthAwsRte53ZoneInfoResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes: ZoneAuthCloudInfoResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Comment for the zone; maximum 256 characters.",
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+		},
 	},
 	"copy_xfer_to_notify": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this flag is set to True then copy allowed IPs from Allow Transfer to Also Notify.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_copy_xfer_to_notify")),
+		},
 	},
 	"create_ptr_for_bulk_hosts": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
 	},
 	"create_ptr_for_hosts": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
 	},
 	"create_underscore_zones": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether automatic creation of subzones is enabled or not.",
 	},
 	"ddns_force_creation_timestamp_update": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Defines whether creation timestamp of RR should be updated ' when DDNS update happens even if there is no change to ' the RR.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_force_creation_timestamp_update")),
+		},
 	},
 	"ddns_principal_group": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The DDNS Principal cluster group name.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
+		},
 	},
 	"ddns_principal_tracking": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag that indicates whether the DDNS principal track is enabled or disabled.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
+		},
 	},
 	"ddns_restrict_patterns": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag that indicates whether an option to restrict DDNS update request based on FQDN patterns is enabled or disabled.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_patterns_restriction")),
+		},
 	},
 	"ddns_restrict_patterns_list": schema.ListAttribute{
+		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The unordered list of restriction patterns for an option of to restrict DDNS updates based on FQDN patterns.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_ddns_patterns_restriction")),
+		},
 	},
 	"ddns_restrict_protected": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag that indicates whether an option to restrict DDNS update request to protected resource records is enabled or disabled.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_restrict_protected")),
+		},
 	},
 	"ddns_restrict_secure": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag that indicates whether DDNS update request for principal other than target resource record's principal is restricted.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
+		},
 	},
 	"ddns_restrict_static": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag that indicates whether an option to restrict DDNS update request to resource records which are marked as 'STATIC' is enabled or disabled.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_restrict_static")),
+		},
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a zone is disabled or not. When this is set to False, the zone is enabled.",
 	},
 	"disable_forwarding": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether the name servers that host the zone should forward queries (ended with the domain name of the zone) to any configured forwarders.",
 	},
 	"display_domain": schema.StringAttribute{
@@ -387,10 +480,14 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"dns_integrity_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this is set to True, DNS integrity check is enabled for this zone.",
 	},
 	"dns_integrity_frequency": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(3600),
 		MarkdownDescription: "The frequency, in seconds, of DNS integrity checks for this zone.",
 	},
 	"dns_integrity_member": schema.StringAttribute{
@@ -399,6 +496,8 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"dns_integrity_verbose_logging": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this is set to True, more information is logged for DNS integrity checks for this zone.",
 	},
 	"dns_soa_email": schema.StringAttribute{
@@ -406,8 +505,13 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The SOA email for the zone in punycode format.",
 	},
 	"dnssec_key_params": schema.SingleNestedAttribute{
-		Attributes: ZoneAuthDnssecKeyParamsResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          ZoneAuthDnssecKeyParamsResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The DNSSEC key parameters for the zone.",
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_dnssec_key_params")),
+		},
 	},
 	"dnssec_keys": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -690,22 +794,31 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"use_allow_active_dir": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: allow_active_dir",
 	},
 	"use_allow_query": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: allow_query",
 	},
 	"use_allow_transfer": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: allow_transfer",
 	},
 	"use_allow_update": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: allow_update",
 	},
 	"use_allow_update_forwarding": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: allow_update_forwarding",
 	},
 	"use_check_names_policy": schema.BoolAttribute{
@@ -714,22 +827,27 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"use_copy_xfer_to_notify": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: copy_xfer_to_notify",
 	},
 	"use_ddns_force_creation_timestamp_update": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: ddns_force_creation_timestamp_update",
 	},
 	"use_ddns_patterns_restriction": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: ddns_restrict_patterns_list , ddns_restrict_patterns",
 	},
 	"use_ddns_principal_security": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: ddns_restrict_secure , ddns_principal_tracking, ddns_principal_group",
 	},
 	"use_ddns_restrict_protected": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: ddns_restrict_protected",
 	},
 	"use_ddns_restrict_static": schema.BoolAttribute{
@@ -926,7 +1044,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.DdnsPrincipalGroup = flex.FlattenStringPointer(from.DdnsPrincipalGroup)
 	m.DdnsPrincipalTracking = types.BoolPointerValue(from.DdnsPrincipalTracking)
 	m.DdnsRestrictPatterns = types.BoolPointerValue(from.DdnsRestrictPatterns)
-	m.DdnsRestrictPatternsList = flex.FlattenFrameworkListString(ctx, from.DdnsRestrictPatternsList, diags)
+	m.DdnsRestrictPatternsList = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.DdnsRestrictPatternsList, diags)
 	m.DdnsRestrictProtected = types.BoolPointerValue(from.DdnsRestrictProtected)
 	m.DdnsRestrictSecure = types.BoolPointerValue(from.DdnsRestrictSecure)
 	m.DdnsRestrictStatic = types.BoolPointerValue(from.DdnsRestrictStatic)

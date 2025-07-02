@@ -6,8 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 
@@ -59,11 +64,19 @@ var ZoneAuthDnssecKeyParamsAttrTypes = map[string]attr.Type{
 var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_ksk_auto_rollover": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to True, automatic rollovers for the signing key is enabled.",
 	},
 	"ksk_algorithm": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("8"),
+
 		MarkdownDescription: "Key Signing Key algorithm. Deprecated.",
+		Validators: []validator.String{
+			stringvalidator.OneOf("10", "13", "14", "5", "7", "8"),
+		},
 	},
 	"ksk_algorithms": schema.SingleNestedAttribute{
 		Attributes: ZoneauthdnsseckeyparamsKskAlgorithmsResourceSchemaAttributes,
