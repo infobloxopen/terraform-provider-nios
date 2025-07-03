@@ -100,7 +100,7 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	res := apiRes.CreateNetworkcontainerResponseAsObject.GetResult()
 	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Networkcontainer due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Networkcontainer due to inherited Extensible attributes: %s", diags))
 		return
 	}
 
