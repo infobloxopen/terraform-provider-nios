@@ -106,7 +106,7 @@ func New(version, commit string) func() provider.Provider {
 
 // checkAndCreatePreRequisites creates Terraform Internal ID EA if it doesn't exist
 func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClient) error {
-	var readableAttributesForEADef = "allowed_object_types,comment,default_value,flags,list_values,max,min,name,namespace,type"
+	var readableAttributesForEADefinition = "allowed_object_types,comment,default_value,flags,list_values,max,min,name,namespace,type"
 
 	filters := map[string]interface{}{
 		"name": terraformInternalIDEA,
@@ -115,14 +115,14 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 	apiRes, _, err := client.GridAPI.ExtensibleattributedefAPI.
 		List(ctx).
 		Filters(filters).
-		ReturnFieldsPlus(readableAttributesForEADef).
+		ReturnFieldsPlus(readableAttributesForEADefinition).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
 		return fmt.Errorf("error checking for existing extensible attribute: %w", err)
 	}
 
-	// If EA already exists, no need to create it
+	// If EA already exists, creation is not required
 	if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
 		return nil
 	}
@@ -138,7 +138,7 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
 		Create(ctx).
 		Extensibleattributedef(data).
-		ReturnFieldsPlus(readableAttributesForEADef).
+		ReturnFieldsPlus(readableAttributesForEADefinition).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
