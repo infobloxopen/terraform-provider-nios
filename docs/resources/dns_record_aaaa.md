@@ -69,17 +69,17 @@ resource "nios_dns_record_aaaa" "record3" {
 - `ipv6addr` (String) The IPv6 Address of the record.
 - `remove_associated_ptr` (Boolean) Delete option that indicates whether the associated PTR records should be removed while deleting the specified A record.
 - `ttl` (Number) The Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
-- `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the AAAAA record.
+- `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the AAAA record.
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".
 
 ### Read-Only
 
-- `aws_rte53_record_info` (Attributes) (see [below for nested schema](#nestedatt--aws_rte53_record_info))
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--cloud_info))
+- `aws_rte53_record_info` (Attributes) The AWS Route53 record information associated with the record. (see [below for nested schema](#nestedatt--aws_rte53_record_info))
+- `cloud_info` (Attributes) The cloud information associated with the record. (see [below for nested schema](#nestedatt--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
-- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--discovered_data))
+- `discovered_data` (Attributes) The discovered data for the record. (see [below for nested schema](#nestedatt--discovered_data))
 - `dns_name` (String) The name for an AAAA record in punycode format.
-- `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
+- `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `reclaimable` (Boolean) Determines if the record is reclaimable or not.
@@ -127,7 +127,7 @@ Read-Only:
 
 Optional:
 
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
 
 Read-Only:
 
