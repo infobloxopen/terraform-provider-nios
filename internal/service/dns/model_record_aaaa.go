@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -84,12 +85,14 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
-		Attributes: RecordAaaaAwsRte53RecordInfoResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RecordAaaaAwsRte53RecordInfoResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The AWS Route53 record information associated with the record.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: RecordAaaaCloudInfoResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RecordAaaaCloudInfoResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -123,11 +126,13 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"disable": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the record is disabled or not. False means that the record is enabled.",
 	},
 	"discovered_data": schema.SingleNestedAttribute{
-		Attributes: RecordAaaaDiscoveredDataResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RecordAaaaDiscoveredDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The discovered data for the record.",
 	},
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
@@ -142,7 +147,7 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
 	},
 	"forbid_reclamation": schema.BoolAttribute{
@@ -174,6 +179,12 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "Name for the AAAA record in FQDN format. This value can be in unicode format.",
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"reclaimable": schema.BoolAttribute{
 		Computed:            true,
@@ -190,6 +201,7 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ttl": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.",
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
@@ -199,11 +211,12 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
-		MarkdownDescription: "Flag to indicate whether the TTL value should be used for the AAAAA record.",
+		MarkdownDescription: "Flag to indicate whether the TTL value should be used for the AAAA record.",
 	},
 	"view": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the DNS view in which the record resides. Example: \"external\".",
 	},
 	"zone": schema.StringAttribute{
