@@ -236,7 +236,7 @@ func DataSourceAttribute(name string, val resourceschema.Attribute, diags *diag.
 
 func ReadWithPages[T any](read func(pageID string, maxResults int32) ([]T, string, error)) ([]T, error) {
 	var allResults []T
-	var pageID string = ""
+	var pageID = ""
 
 	for {
 		results, nextPageID, err := read(pageID, ReadPageSizeLimit)

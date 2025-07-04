@@ -3,8 +3,6 @@ package dns
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -15,6 +13,7 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -34,9 +33,11 @@ func (d *RecordADataSource) Metadata(ctx context.Context, req datasource.Metadat
 }
 
 type RecordAModelWithFilter struct {
-	Filters        types.Map  `tfsdk:"filters"`
-	ExtAttrFilters types.Map  `tfsdk:"extattrfilters"`
-	Result         types.List `tfsdk:"result"`
+	Filters        types.Map   `tfsdk:"filters"`
+	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
+	Result         types.List  `tfsdk:"result"`
+	MaxResults     types.Int32 `tfsdk:"max_results"`
+	Paging         types.Int32 `tfsdk:"paging"`
 }
 
 func (m *RecordAModelWithFilter) FlattenResults(ctx context.Context, from []dns.RecordA, diags *diag.Diagnostics) {
@@ -65,6 +66,14 @@ func (d *RecordADataSource) Schema(ctx context.Context, req datasource.SchemaReq
 					Attributes: utils.DataSourceAttributeMap(RecordAResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
+			},
+			"paging": schema.Int32Attribute{
+				Optional:    true,
+				Description: "Enable paging for the data source query. When enabled, the system will retrieve results in pages to handle large result sets efficiently.",
+			},
+			"max_results": schema.Int32Attribute{
+				Optional:    true,
+				Description: "Maximum number of results to return in a single Page. If paging is enabled, this limits the number of results per page.",
 			},
 		},
 	}
@@ -99,29 +108,28 @@ func (d *RecordADataSource) Read(ctx context.Context, req datasource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	filters := flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)
-
+	pageCount := 0
 	allResults, err := utils.ReadWithPages(
 		func(pageID string, maxResults int32) ([]dns.RecordA, string, error) {
-			var maxResultsInt int
-			if maxResultsVal, ok := filters["_max_results"]; ok {
-				if maxResultsStr, ok := maxResultsVal.(string); ok {
-					var err error
-					maxResultsInt, err = strconv.Atoi(maxResultsStr)
-					if err == nil {
-						maxResults = int32(maxResultsInt)
-					}
-				}
+
+			if !data.MaxResults.IsNull() {
+				maxResults = data.MaxResults.ValueInt32()
 			}
+			var paging int32 = 1
+			if !data.Paging.IsNull() {
+				paging = data.Paging.ValueInt32()
+			}
+
+			//Increment the page count
+			pageCount++
 
 			request := d.client.DNSAPI.RecordAAPI.
 				List(ctx).
-				Filters(filters).
+				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
 				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForRecordA).
-				Paging(1).
+				Paging(paging).
 				MaxResults(maxResults)
 
 			// Add page ID if provided
@@ -130,40 +138,35 @@ func (d *RecordADataSource) Read(ctx context.Context, req datasource.ReadRequest
 			}
 
 			// Execute the request
-			apiRes, httpRes, err := request.Execute()
-
+			apiRes, _, err := request.Execute()
 			if err != nil {
-				if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-					resp.State.RemoveResource(ctx)
-					return nil, "", err
-				}
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordA by extattrs, got error: %s", err))
 				return nil, "", err
 			}
 
-			var records []dns.RecordA
+			res := apiRes.ListRecordAResponseObject.GetResult()
+			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
+
+			// Check for next page ID in additional properties
+			additionalProperties := apiRes.ListRecordAResponseObject.AdditionalProperties
 			var nextPageID string
-
-			if apiRes.ListRecordAResponseObject != nil {
-				records = apiRes.ListRecordAResponseObject.GetResult()
-
-				if maxResultsInt == 0 {
-					// Check for next page ID in additional properties
-					additionalProperties := apiRes.ListRecordAResponseObject.AdditionalProperties
-					if npId, ok := additionalProperties["next_page_id"]; ok {
-						if npIdStr, ok := npId.(string); ok {
-							nextPageID = npIdStr
-						}
-					}
+			npId, ok := additionalProperties["next_page_id"]
+			if ok {
+				if npIdStr, ok := npId.(string); ok {
+					nextPageID = npIdStr
 				}
+			} else {
+				tflog.Info(ctx, "No next page ID found. This is the last page.")
 			}
-			return records, nextPageID, nil
+			return res, nextPageID, nil
 		},
 	)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Recorda, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordA, got error: %s", err))
 		return
 	}
+	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
 
 	// Process the results
 	data.FlattenResults(ctx, allResults, &resp.Diagnostics)
