@@ -408,8 +408,6 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
 		return
 	}
 
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
-
 	// Convert API response to model
 	var data RecordAModel
 	data.ExtAttrs = types.MapValueMust(
