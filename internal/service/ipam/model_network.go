@@ -14,11 +14,13 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
 
@@ -283,7 +285,10 @@ var NetworkAttrTypes = map[string]attr.Type{
 
 var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 		MarkdownDescription: "The reference to the object.",
 	},
 	"authority": schema.BoolAttribute{
@@ -325,6 +330,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Boolean flag to indicate if the network is shared with cloud.",
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -334,6 +340,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"conflict_count": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The number of conflicts discovered via network discovery.",
+		Default:             int64default.StaticInt64(0),
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
@@ -370,6 +377,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ddns_ttl")),
 		},
+		Default: int64default.StaticInt64(0),
 	},
 	"ddns_update_fixed_addresses": schema.BoolAttribute{
 		Optional:            true,
@@ -405,18 +413,23 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"dhcp_utilization": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The percentage of the total DHCP utilization of the network multiplied by 1000. This is the percentage of the total number of available IP addresses belonging to the network versus the total number of all IP addresses in network.",
+		Default:             int64default.StaticInt64(0),
 	},
 	"dhcp_utilization_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "A string describing the utilization level of the network.",
+		Default:             stringdefault.StaticString("LOW"),
 	},
 	"disable": schema.BoolAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Determines whether a network is disabled or not. When this is set to False, the network is enabled.",
+		Default:             booldefault.StaticBool(false),
 	},
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this network.",
+		Default:             stringdefault.StaticString("NONE"),
 	},
 	"discovered_bgp_as": schema.StringAttribute{
 		Computed:            true,
@@ -425,10 +438,12 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovered_bridge_domain": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered bridge domain.",
+		Computed:            true,
 	},
 	"discovered_tenant": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered tenant.",
+		Computed:            true,
 	},
 	"discovered_vlan_id": schema.StringAttribute{
 		Computed:            true,
@@ -482,6 +497,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"dynamic_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The total number of DHCP leases issued for the network.",
+		Default:             int64default.StaticInt64(0),
 	},
 	"email_list": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -528,6 +544,11 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_ifmap_publishing": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines if IFMAP publishing is enabled for the network.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_ifmap_publishing")),
+		},
 	},
 	"enable_immediate_discovery": schema.BoolAttribute{
 		Optional:            true,
@@ -553,6 +574,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"extattrs": schema.MapAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 	},
@@ -572,11 +594,13 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The percentage of DHCP network usage threshold above which network usage is not expected and may warrant your attention. When the high watermark is reached, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 		Computed:            true,
+		Default:             int64default.StaticInt64(95),
 	},
 	"high_water_mark_reset": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The percentage of DHCP network usage below which the corresponding SNMP trap is reset. A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The high watermark reset value must be lower than the high watermark value.",
 		Computed:            true,
+		Default:             int64default.StaticInt64(85),
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional:            true,
@@ -629,6 +653,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address of the network.",
+		Computed:            true,
 	},
 	"last_rir_registration_update_sent": schema.Int64Attribute{
 		Computed:            true,
@@ -649,6 +674,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 				int64validator.Between(86400, 2147472000),
 			),
 		},
+		Default: int64default.StaticInt64(-1),
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -669,6 +695,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 				int64validator.Between(0, 100),
 			),
 		},
+		Default: int64default.StaticInt64(0),
 	},
 	"low_water_mark_reset": schema.Int64Attribute{
 		Optional:            true,
@@ -687,6 +714,8 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		MarkdownDescription: "A list of members or Microsoft (r) servers that serve DHCP for this network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the \"_struct\" member to the struct type.",
+		Computed:            true,
+		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: NetworkMembersAttrTypes})),
 	},
 	"mgm_private": schema.BoolAttribute{
 		Optional:            true,
@@ -709,11 +738,12 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"netmask": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The netmask of the network in CIDR format.",
+		Computed:            true,
 	},
-	"network": schema.SingleNestedAttribute{
-		// Attributes: NetworkNetworkResourceSchemaAttributes,
-		Optional: true,
-		Computed: true,
+	"network": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The IPv4 Address of the record.",
+		Computed:            true,
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes: FuncCallResourceSchemaAttributes,
@@ -723,6 +753,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"network_container": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network container to which this network belongs (if any).",
+		// Default:             stringdefault.StaticString("/"),
 	},
 	"network_view": schema.StringAttribute{
 		Optional:            true,
@@ -820,6 +851,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"static_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The number of static DHCP addresses configured in the network.",
+		Default:             int64default.StaticInt64(0),
 	},
 	"subscribe_settings": schema.SingleNestedAttribute{
 		Attributes: NetworkSubscribeSettingsResourceSchemaAttributes,
@@ -836,6 +868,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"total_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The total number of DHCP addresses configured in the network.",
+		Default:             int64default.StaticInt64(0),
 	},
 	"unmanaged": schema.BoolAttribute{
 		Optional:            true,
@@ -846,6 +879,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"unmanaged_count": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The number of unmanaged IP addresses as discovered by network discovery.",
+		Default:             int64default.StaticInt64(0),
 	},
 	"update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,
@@ -949,6 +983,8 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_enable_ifmap_publishing": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Use flag for: enable_ifmap_publishing",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"use_ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional:            true,
@@ -1038,11 +1074,12 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use flag for: zone_associations",
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(true),
 	},
 	"utilization": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The network utilization in percentage.",
+		Default:             int64default.StaticInt64(0),
 	},
 	"utilization_update": schema.Int64Attribute{
 		Computed:            true,
@@ -1067,19 +1104,19 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandNetwork(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.Network {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m NetworkModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
+// func ExpandNetwork(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.Network {
+// 	if o.IsNull() || o.IsUnknown() {
+// 		return nil
+// 	}
+// 	var m NetworkModel
+// 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+// 	if diags.HasError() {
+// 		return nil
+// 	}
+// 	return m.Expand(ctx, diags)
+// }
 
-func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Network {
+func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Network {
 	if m == nil {
 		return nil
 	}
@@ -1186,6 +1223,12 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipa
 		Vlans:                            flex.ExpandFrameworkListNestedBlock(ctx, m.Vlans, diags, ExpandNetworkVlans),
 		ZoneAssociations:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZoneAssociations, diags, ExpandNetworkZoneAssociations),
 	}
+	if isCreate {
+		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
+		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
+		to.Network = ExpandNetworkNetwork(m.Network)
+		to.Template = flex.ExpandStringPointer(m.Template)
+	}
 	return to
 }
 
@@ -1223,7 +1266,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.DdnsTtl = flex.FlattenInt64Pointer(from.DdnsTtl)
 	m.DdnsUpdateFixedAddresses = types.BoolPointerValue(from.DdnsUpdateFixedAddresses)
 	m.DdnsUseOption81 = types.BoolPointerValue(from.DdnsUseOption81)
-	m.DeleteReason = flex.FlattenStringPointer(from.DeleteReason)
+	// m.DeleteReason = flex.FlattenStringPointer(from.DeleteReason)
 	m.DenyBootp = types.BoolPointerValue(from.DenyBootp)
 	m.DhcpUtilization = flex.FlattenInt64Pointer(from.DhcpUtilization)
 	m.DhcpUtilizationStatus = flex.FlattenStringPointer(from.DhcpUtilizationStatus)
@@ -1249,7 +1292,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
 	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
-	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
+	// m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
@@ -1285,7 +1328,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.PortControlBlackoutSetting = FlattenNetworkPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
-	m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
+	// m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
@@ -1294,7 +1337,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.SubscribeSettings = FlattenNetworkSubscribeSettings(ctx, from.SubscribeSettings, diags)
-	m.Template = flex.FlattenStringPointer(from.Template)
+	// m.Template = flex.FlattenStringPointer(from.Template)
 	m.TotalHosts = flex.FlattenInt64Pointer(from.TotalHosts)
 	m.Unmanaged = types.BoolPointerValue(from.Unmanaged)
 	m.UnmanagedCount = flex.FlattenInt64Pointer(from.UnmanagedCount)
@@ -1350,7 +1393,6 @@ func FlattenNetworkNetwork(from *ipam.NetworkNetwork) types.String {
 	if from.String == nil {
 		return types.StringNull()
 	}
-	m := types.String{}
-	m = flex.FlattenStringPointer(from.String)
+	m := flex.FlattenStringPointer(from.String)
 	return m
 }
