@@ -1,11 +1,12 @@
+// Create DTC LBDN with minimum required fields
 resource "nios_dtc_lbdn" "lbdn1" {
   name      = "testLbdn21"
   lb_method = "SOURCE_IP_HASH"
 }
 
-
+// Create DTC LBDN with maximum fields
 resource "nios_dtc_lbdn" "lbdn2" {
-  name = "lbdn123"
+  name = "lbdn1234"
   auth_zones = ["zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:record_test.com/default",
     "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:test.com/default.custom_view"
   ]

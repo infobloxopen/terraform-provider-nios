@@ -15,6 +15,7 @@ func TestAccDtcLbdnDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_lbdn.test"
 	resourceName := "nios_dtc_lbdn.test"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +23,7 @@ func TestAccDtcLbdnDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcLbdnDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcLbdnDataSourceConfigFilters("lbdn-data-source-test", "ROUND_ROBIN"),
+				Config: testAccDtcLbdnDataSourceConfigFilters(name, "ROUND_ROBIN"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
@@ -36,6 +37,7 @@ func TestAccDtcLbdnDataSource_Filters(t *testing.T) {
 func TestAccDtcLbdnDataSource_TagFilters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_lbdn.test"
 	resourceName := "nios_dtc_lbdn.test"
+	name := acctest.RandomName()
 	var v dtc.DtcLbdn
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -43,7 +45,7 @@ func TestAccDtcLbdnDataSource_TagFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcLbdnDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcLbdnDataSourceConfigExtAttrFilters("lbdn-data-source-test2", "ROUND_ROBIN", "Denmark"),
+				Config: testAccDtcLbdnDataSourceConfigExtAttrFilters(name, "ROUND_ROBIN", "Denmark"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
@@ -58,7 +60,7 @@ func TestAccDtcLbdnDataSource_TagFilters(t *testing.T) {
 
 func testAccCheckDtcLbdnResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
-		resource.TestCheckResourceAttrPair(resourceName, "_ref", dataSourceName, "result.0._ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
 		resource.TestCheckResourceAttrPair(resourceName, "auth_zones", dataSourceName, "result.0.auth_zones"),
 		resource.TestCheckResourceAttrPair(resourceName, "auto_consolidated_monitors", dataSourceName, "result.0.auto_consolidated_monitors"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),

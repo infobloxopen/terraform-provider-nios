@@ -15,13 +15,12 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
-// TODO : Add readable attributes for the resource
 var readableAttributesForDtcLbdn = "extattrs,disable,auth_zones,auto_consolidated_monitors,lb_method,patterns,persistence,pools,priority,topology,types,health,ttl,use_ttl"
 
 func TestAccDtcLbdnResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test"
 	var v dtc.DtcLbdn
-	name := "lbdn-resource11"
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -32,10 +31,13 @@ func TestAccDtcLbdnResource_basic(t *testing.T) {
 				Config: testAccDtcLbdnBasicConfig(name, "ROUND_ROBIN"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "lb_method", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "auto_consolidated_monitors", "false"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "persistence", "0"),
+					resource.TestCheckResourceAttr(resourceName, "priority", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -46,6 +48,7 @@ func TestAccDtcLbdnResource_basic(t *testing.T) {
 func TestAccDtcLbdnResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_lbdn.test"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -53,7 +56,7 @@ func TestAccDtcLbdnResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcLbdnDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcLbdnBasicConfig("lbdn-resource11", "ROUND_ROBIN"),
+				Config: testAccDtcLbdnBasicConfig(name, "ROUND_ROBIN"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					testAccCheckDtcLbdnDisappears(context.Background(), &v),
@@ -67,6 +70,7 @@ func TestAccDtcLbdnResource_disappears(t *testing.T) {
 func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_auth_zones"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 	authZones := []string{"zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS50ZXN0:test.com/default", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:record_test.com/default"}
 	authZonesUpdated := []string{"zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:test.com/default.custom_view"}
 	pools := []map[string]interface{}{
@@ -80,7 +84,7 @@ func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnAuthZones("lbdn-resource-13", "SOURCE_IP_HASH", authZones, pools, patterns),
+				Config: testAccDtcLbdnAuthZones(name, "SOURCE_IP_HASH", authZones, pools, patterns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auth_zones.#", "2"),
@@ -105,6 +109,7 @@ func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
 func TestAccDtcLbdnResource_AutoConsolidatedMonitors(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_auto_consolidated_monitors"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -112,7 +117,7 @@ func TestAccDtcLbdnResource_AutoConsolidatedMonitors(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnAutoConsolidatedMonitors("lbdn-resource-111", "RATIO", "true"),
+				Config: testAccDtcLbdnAutoConsolidatedMonitors(name, "RATIO", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidated_monitors", "true"),
@@ -120,7 +125,7 @@ func TestAccDtcLbdnResource_AutoConsolidatedMonitors(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnAutoConsolidatedMonitors("lbdn-resource-111", "RATIO", "false"),
+				Config: testAccDtcLbdnAutoConsolidatedMonitors(name, "RATIO", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidated_monitors", "false"),
@@ -134,6 +139,7 @@ func TestAccDtcLbdnResource_AutoConsolidatedMonitors(t *testing.T) {
 func TestAccDtcLbdnResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_comment"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -141,18 +147,18 @@ func TestAccDtcLbdnResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnComment("lbdn-resource-22", "GLOBAL_AVAILABILITY", "lbdn-resource-22-comment"),
+				Config: testAccDtcLbdnComment(name, "GLOBAL_AVAILABILITY", "resource-comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "lbdn-resource-22-comment"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "resource-comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnComment("lbdn-resource-22", "GLOBAL_AVAILABILITY", "lbdn-resource-22-comment-update"),
+				Config: testAccDtcLbdnComment(name, "GLOBAL_AVAILABILITY", "resource-comment-update"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "lbdn-resource-22-comment-update"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "resource-comment-update"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -163,6 +169,7 @@ func TestAccDtcLbdnResource_Comment(t *testing.T) {
 func TestAccDtcLbdnResource_Disable(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_disable"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -170,7 +177,7 @@ func TestAccDtcLbdnResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnDisable("lbdn-resource-23", "RATIO", "true"),
+				Config: testAccDtcLbdnDisable(name, "RATIO", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -178,7 +185,7 @@ func TestAccDtcLbdnResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnDisable("lbdn-resource-23", "RATIO", "false"),
+				Config: testAccDtcLbdnDisable(name, "RATIO", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -192,6 +199,7 @@ func TestAccDtcLbdnResource_Disable(t *testing.T) {
 func TestAccDtcLbdnResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_extattrs"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -199,7 +207,7 @@ func TestAccDtcLbdnResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnExtattrs("lbdn-resource-33", "ROUND_ROBIN", map[string]string{"Site": "MOROCCO"}),
+				Config: testAccDtcLbdnExtattrs(name, "ROUND_ROBIN", map[string]string{"Site": "MOROCCO"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", "MOROCCO"),
@@ -207,7 +215,7 @@ func TestAccDtcLbdnResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnExtattrs("lbdn-resource-33", "ROUND_ROBIN", map[string]string{"Site": "Denmark"}),
+				Config: testAccDtcLbdnExtattrs(name, "ROUND_ROBIN", map[string]string{"Site": "Denmark"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", "Denmark"),
@@ -221,6 +229,7 @@ func TestAccDtcLbdnResource_ExtAttrs(t *testing.T) {
 func TestAccDtcLbdnResource_LbMethod(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_lb_method"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -228,7 +237,7 @@ func TestAccDtcLbdnResource_LbMethod(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnLbMethod("lbdn-resource-34", "GLOBAL_AVAILABILITY"),
+				Config: testAccDtcLbdnLbMethod(name, "GLOBAL_AVAILABILITY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_method", "GLOBAL_AVAILABILITY"),
@@ -236,7 +245,7 @@ func TestAccDtcLbdnResource_LbMethod(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnLbMethod("lbdn-resource-34", "RATIO"),
+				Config: testAccDtcLbdnLbMethod(name, "RATIO"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_method", "RATIO"),
@@ -250,6 +259,8 @@ func TestAccDtcLbdnResource_LbMethod(t *testing.T) {
 func TestAccDtcLbdnResource_Name(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_name"
 	var v dtc.DtcLbdn
+	name1 := acctest.RandomName()
+	name2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -257,18 +268,18 @@ func TestAccDtcLbdnResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnName("lbdn-resource-35", "SOURCE_IP_HASH"),
+				Config: testAccDtcLbdnName(name1, "SOURCE_IP_HASH"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "lbdn-resource-35"),
+					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnName("lbdn-resource-335", "SOURCE_IP_HASH"),
+				Config: testAccDtcLbdnName(name2, "SOURCE_IP_HASH"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "lbdn-resource-335"),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -279,6 +290,7 @@ func TestAccDtcLbdnResource_Name(t *testing.T) {
 func TestAccDtcLbdnResource_Patterns(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_patterns"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 	patterns := []string{"*.test.com", "*.info.com"}
 	patternsUpdated := []string{"*.test123.com", "*.info*.com"}
 
@@ -288,7 +300,7 @@ func TestAccDtcLbdnResource_Patterns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnPatterns("lbdn-resource41", "SOURCE_IP_HASH", patterns),
+				Config: testAccDtcLbdnPatterns(name, "SOURCE_IP_HASH", patterns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "patterns.#", "2"),
@@ -298,7 +310,7 @@ func TestAccDtcLbdnResource_Patterns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnPatterns("lbdn-resource41", "SOURCE_IP_HASH", patternsUpdated),
+				Config: testAccDtcLbdnPatterns(name, "SOURCE_IP_HASH", patternsUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "patterns.#", "2"),
@@ -314,6 +326,7 @@ func TestAccDtcLbdnResource_Patterns(t *testing.T) {
 func TestAccDtcLbdnResource_Persistence(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_persistence"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -321,7 +334,7 @@ func TestAccDtcLbdnResource_Persistence(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnPersistence("lbdn-resource-42", "ROUND_ROBIN", "3"),
+				Config: testAccDtcLbdnPersistence(name, "ROUND_ROBIN", "3"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "persistence", "3"),
@@ -329,7 +342,7 @@ func TestAccDtcLbdnResource_Persistence(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnPersistence("lbdn-resource-42", "ROUND_ROBIN", "8"),
+				Config: testAccDtcLbdnPersistence(name, "ROUND_ROBIN", "8"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "persistence", "8"),
@@ -343,6 +356,7 @@ func TestAccDtcLbdnResource_Persistence(t *testing.T) {
 func TestAccDtcLbdnResource_Pools(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_pools"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 	pools := []map[string]interface{}{
 		{"pool": "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3MzAy:dtc_pool__new302", "ratio": 2},
 		{"pool": "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3NDg3:dtc_pool__new487", "ratio": 3},
@@ -357,7 +371,7 @@ func TestAccDtcLbdnResource_Pools(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnPools("lbdn-resource-444", "ROUND_ROBIN", pools),
+				Config: testAccDtcLbdnPools(name, "ROUND_ROBIN", pools),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pools.#", "2"),
@@ -369,11 +383,11 @@ func TestAccDtcLbdnResource_Pools(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnPools("lbdn-resource-444", "ROUND_ROBIN", poolsUpdated),
+				Config: testAccDtcLbdnPools(name, "ROUND_ROBIN", poolsUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pools.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "pools.0.pool", "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3NDY:dtc_pool__new46"),
+					resource.TestCheckResourceAttr(resourceName, "pools.0.pool", "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3NDg5:dtc_pool__new489"),
 					resource.TestCheckResourceAttr(resourceName, "pools.0.ratio", "2"),
 				),
 			},
@@ -385,6 +399,7 @@ func TestAccDtcLbdnResource_Pools(t *testing.T) {
 func TestAccDtcLbdnResource_Priority(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_priority"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -392,7 +407,7 @@ func TestAccDtcLbdnResource_Priority(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnPriority("lbdn-resource-45", "RATIO", "1"),
+				Config: testAccDtcLbdnPriority(name, "RATIO", "1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "priority", "1"),
@@ -400,7 +415,7 @@ func TestAccDtcLbdnResource_Priority(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnPriority("lbdn-resource-45", "RATIO", "3"),
+				Config: testAccDtcLbdnPriority(name, "RATIO", "3"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "priority", "3"),
@@ -414,6 +429,7 @@ func TestAccDtcLbdnResource_Priority(t *testing.T) {
 func TestAccDtcLbdnResource_Topology(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_topology"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -421,7 +437,7 @@ func TestAccDtcLbdnResource_Topology(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnTopology("lbdn-resource-51", "TOPOLOGY", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"),
+				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "topology", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"),
@@ -429,7 +445,7 @@ func TestAccDtcLbdnResource_Topology(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnTopology("lbdn-resource-51", "TOPOLOGY", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzI:topo2"),
+				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzI:topo2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "topology", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzI:topo2"),
@@ -443,6 +459,7 @@ func TestAccDtcLbdnResource_Topology(t *testing.T) {
 func TestAccDtcLbdnResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_ttl"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -450,7 +467,7 @@ func TestAccDtcLbdnResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnTtl("lbdn-resource-52", "GLOBAL_AVAILABILITY", "260", "true"),
+				Config: testAccDtcLbdnTtl(name, "GLOBAL_AVAILABILITY", 260, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "260"),
@@ -458,7 +475,7 @@ func TestAccDtcLbdnResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnTtl("lbdn-resource-52", "GLOBAL_AVAILABILITY", "480", "true"),
+				Config: testAccDtcLbdnTtl(name, "GLOBAL_AVAILABILITY", 480, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "480"),
@@ -472,6 +489,7 @@ func TestAccDtcLbdnResource_Ttl(t *testing.T) {
 func TestAccDtcLbdnResource_Types(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_types"
 	var v dtc.DtcLbdn
+	name := acctest.RandomName()
 	types := []string{"A", "AAAA", "CNAME"}
 	typesUpdated := []string{"A", "AAAA", "CNAME", "SRV"}
 
@@ -481,7 +499,7 @@ func TestAccDtcLbdnResource_Types(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnTypes("lbdn-resource-53", "ROUND_ROBIN", types),
+				Config: testAccDtcLbdnTypes(name, "ROUND_ROBIN", types),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "types.#", "3"),
@@ -492,7 +510,7 @@ func TestAccDtcLbdnResource_Types(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnTypes("lbdn-resource-53", "ROUND_ROBIN", typesUpdated),
+				Config: testAccDtcLbdnTypes(name, "ROUND_ROBIN", typesUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "types.#", "4"),
@@ -510,14 +528,14 @@ func TestAccDtcLbdnResource_Types(t *testing.T) {
 func TestAccDtcLbdnResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_use_ttl"
 	var v dtc.DtcLbdn
-
+	name := acctest.RandomName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnUseTtl("lbdn-resource-54", "SOURCE_IP_HASH", "true", "10"),
+				Config: testAccDtcLbdnUseTtl(name, "SOURCE_IP_HASH", "true", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
@@ -525,7 +543,7 @@ func TestAccDtcLbdnResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnUseTtl("lbdn-resource-54", "SOURCE_IP_HASH", "true", "120"),
+				Config: testAccDtcLbdnUseTtl(name, "SOURCE_IP_HASH", "true", 120),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
@@ -595,7 +613,6 @@ func testAccCheckDtcLbdnDisappears(ctx context.Context, v *dtc.DtcLbdn) resource
 }
 
 func testAccDtcLbdnBasicConfig(name, lbMethod string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dtc_lbdn" "test" {
 	name = %q
@@ -754,12 +771,12 @@ resource "nios_dtc_lbdn" "test_topology" {
 `, name, lbMethod, topology)
 }
 
-func testAccDtcLbdnTtl(name, lbMethod, ttl, useTtl string) string {
+func testAccDtcLbdnTtl(name, lbMethod string, ttl uint32, useTtl string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_lbdn" "test_ttl" {
 	name = %q
 	lb_method = %q
-    ttl = %q
+    ttl = %d
 	use_ttl = %q
 }
 `, name, lbMethod, ttl, useTtl)
@@ -780,13 +797,13 @@ resource "nios_dtc_lbdn" "test_types" {
 `, name, lbMethod, typesStr)
 }
 
-func testAccDtcLbdnUseTtl(name, lbMethod, useTtl, ttl string) string {
+func testAccDtcLbdnUseTtl(name, lbMethod, useTtl string, ttl uint32) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_lbdn" "test_use_ttl" {
 	name = %q
 	lb_method = %q
     use_ttl = %q
-	ttl = %q
+	ttl = %d
 }
 `, name, lbMethod, useTtl, ttl)
 }

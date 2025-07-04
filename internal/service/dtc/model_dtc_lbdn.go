@@ -6,6 +6,7 @@ import (
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -13,13 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
+	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
@@ -64,6 +63,26 @@ func (v recordTypeValidator) ValidateList(ctx context.Context, req validator.Lis
 				fmt.Sprintf("Element %d has invalid value %q. Allowed values are: A, AAAA, CNAME, NAPTR, SRV.", i, strElem.ValueString()),
 			)
 		}
+	}
+}
+
+type NoWhitespaceValidator struct{}
+
+func (v NoWhitespaceValidator) Description(_ context.Context) string {
+	return "String must not have leading or trailing whitespace"
+}
+
+func (v NoWhitespaceValidator) MarkdownDescription(_ context.Context) string {
+	return "String must not have leading or trailing whitespace"
+}
+
+func (v NoWhitespaceValidator) ValidateString(_ context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+	if strings.TrimSpace(req.ConfigValue.ValueString()) != req.ConfigValue.ValueString() {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid Name",
+			"The name must not have leading or trailing whitespace.",
+		)
 	}
 }
 
@@ -128,6 +147,7 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Comment for the DTC LBDN; maximum 256 characters.",
 	},
 	"disable": schema.BoolAttribute{
@@ -139,18 +159,19 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 	},
 	"health": schema.SingleNestedAttribute{
-		Attributes: DtcLbdnHealthResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          DtcLbdnHealthResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The LBDN health information.",
 	},
 	"lb_method": schema.StringAttribute{
 		Required: true,
@@ -160,7 +181,10 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The load balancing method. Used to select pool.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			NoWhitespaceValidator{},
+		},
 		MarkdownDescription: "The display name of the DTC LBDN, not DNS related.",
 	},
 	"patterns": schema.ListAttribute{
@@ -190,15 +214,16 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"topology": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The topology rules for TOPOLOGY method.",
 	},
 	"ttl": schema.Int64Attribute{
-		Computed:            true,
-		Optional:            true,
-		MarkdownDescription: "Time-to-live value of the record, in seconds.",
+		Computed: true,
+		Optional: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
 		},
+		MarkdownDescription: "Time-to-live value of the record, in seconds.",
 	},
 	"types": schema.ListAttribute{
 		CustomType:  internaltypes.UnorderedListOfStringType,
@@ -214,20 +239,8 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
-		MarkdownDescription: "Flag to indicate whether the TTL value should be used for the A record.",
+		MarkdownDescription: "Flag to indicate whether the TTL value should be used for the LBDN record.",
 	},
-}
-
-func ExpandDtcLbdn(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcLbdn {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcLbdnModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *DtcLbdnModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcLbdn {

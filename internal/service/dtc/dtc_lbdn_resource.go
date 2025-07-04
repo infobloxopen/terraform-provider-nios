@@ -16,7 +16,6 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
-// TODO : Add readable attributes for the resource
 var readableAttributesForDtcLbdn = "extattrs,disable,auth_zones,auto_consolidated_monitors,lb_method,patterns,persistence,pools,priority,topology,types,health,ttl,use_ttl"
 
 // Ensure provider defined types fully satisfy framework interfaces.
