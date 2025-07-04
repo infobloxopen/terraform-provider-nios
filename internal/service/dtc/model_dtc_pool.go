@@ -2,6 +2,7 @@ package dtc
 
 import (
 	"context"
+	"regexp"
 
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -172,6 +173,12 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The DTC Pool display name.",
 	},
 	"quorum": schema.Int64Attribute{
