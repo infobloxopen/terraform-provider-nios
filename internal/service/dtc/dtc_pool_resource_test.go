@@ -679,8 +679,8 @@ func TestAccDtcPoolResource_Quorum(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomName()
 	lbPreferredMethod := "ROUND_ROBIN"
-	quorum := int32(3)
-	quorumUpdate := int32(5)
+	quorum := 3
+	quorumUpdate := 5
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -765,8 +765,8 @@ func TestAccDtcPoolResource_Ttl(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomName()
 	lbPreferredMethod := "ROUND_ROBIN"
-	ttl := int32(24)
-	updateTtl := int32(48)
+	ttl := 24
+	updateTtl := 48
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -799,7 +799,7 @@ func TestAccDtcPoolResource_UseTtl(t *testing.T) {
 	name := acctest.RandomName()
 	lbPreferredMethod := "ROUND_ROBIN"
 	useTtl := "true"
-	ttl := "24"
+	ttl := 24
 	updateUseTtl := "false"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1064,7 +1064,7 @@ resource "nios_dtc_pool" "test_name" {
 `, name, lbPreferredMethod)
 }
 
-func testAccDtcPoolQuorum(name, lbPreferredMethod string, quorum int32) string {
+func testAccDtcPoolQuorum(name, lbPreferredMethod string, quorum int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test_quorum" {
     name = %q
@@ -1085,7 +1085,7 @@ name = %q
 `, name, lbPreferredMethod, serversHCL)
 }
 
-func testAccDtcPoolTtl(name, lbPreferredMethod string, ttl int32) string {
+func testAccDtcPoolTtl(name, lbPreferredMethod string, ttl int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test_ttl" {
     name = %q
@@ -1096,13 +1096,13 @@ resource "nios_dtc_pool" "test_ttl" {
 `, name, lbPreferredMethod, ttl)
 }
 
-func testAccDtcPoolUseTtl(name, lbPreferredMethod, ttl, useTtl string) string {
+func testAccDtcPoolUseTtl(name, lbPreferredMethod string, ttl int , useTtl string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test_use_ttl" {
     use_ttl = %q
     name = %q
     lb_preferred_method = %q
-	ttl = %q
+	ttl = %d
 }
 `, useTtl, name, lbPreferredMethod, ttl)
 }
