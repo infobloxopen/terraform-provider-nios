@@ -38,6 +38,8 @@ data "nios_dns_record_a" "get_all_records_in_default_view" {}
 
 - `extattrfilters` (Map of String) External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
 - `filters` (Map of String) Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
+- `max_results` (Number) Maximum number of results to return in a single Page. If paging is enabled, this limits the number of results per page.
+- `paging` (Number) Enable paging for the data source query. When enabled, the system will retrieve results in pages to handle large result sets efficiently.
 
 ### Read-Only
 
