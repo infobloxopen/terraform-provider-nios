@@ -13,14 +13,15 @@ description: |-
 ## Example Usage
 
 ```terraform
+// Create DTC LBDN with minimum required fields
 resource "nios_dtc_lbdn" "lbdn1" {
   name      = "testLbdn21"
   lb_method = "SOURCE_IP_HASH"
 }
 
-
+// Create DTC LBDN with maximum fields
 resource "nios_dtc_lbdn" "lbdn2" {
-  name = "lbdn123"
+  name = "lbdn1234"
   auth_zones = ["zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:record_test.com/default",
     "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:test.com/default.custom_view"
   ]
@@ -76,12 +77,12 @@ resource "nios_dtc_lbdn" "lbdn2" {
 - `topology` (String) The topology rules for TOPOLOGY method.
 - `ttl` (Number) Time-to-live value of the record, in seconds.
 - `types` (List of String) The list of resource record types supported by LBDN.
-- `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the A record.
+- `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the LBDN record.
 
 ### Read-Only
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
-- `health` (Attributes) (see [below for nested schema](#nestedatt--health))
+- `health` (Attributes) The LBDN health information. (see [below for nested schema](#nestedatt--health))
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--pools"></a>
