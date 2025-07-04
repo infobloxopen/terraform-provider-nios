@@ -1,25 +1,32 @@
-resource "nios_dns_zone_forward" "rec1" {
+// Create a DNS zone forward record with minimum required fields
+resource "nios_dns_zone_forward" "zone_forward1" {
+  fqdn     = "example1.example.com"
+  ns_group = "fwd_member"
+}
+
+// Create a DNS zone forward record with maximum fields
+resource "nios_dns_zone_forward" "zone_forward2" {
   fqdn = "example_test1.example.com"
   forward_to = [
     {
-      name = "ns1.example.com"
+      name    = "ns1.example.com"
       address = "1.1.1.1"
     }
   ]
   forwarding_servers = [
     {
-      name = "infoblox.172_28_82_248"
-      forwarders_only = true
+      name                    = "infoblox.172_28_82_248"
+      forwarders_only         = true
       use_override_forwarders = true
       forward_to = [
         {
-          name = "kk.fwd.com"
+          name    = "kk.fwd.com"
           address = "10.2.1.31"
         }
       ]
     }
   ]
-  view     = "default"
+  view = "default"
   extattrs = {
     Site = "Hungary"
   }

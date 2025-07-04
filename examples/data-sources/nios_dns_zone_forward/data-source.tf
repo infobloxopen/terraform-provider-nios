@@ -12,5 +12,5 @@ data "nios_dns_zone_forward" "get_record_using_extensible_attributes" {
   }
 }
 
-// Retrieve all zone forward records
+// Retrieve all zone forward records in default view
 data "nios_dns_zone_forward" "get_all_records_in_default_view" {}
