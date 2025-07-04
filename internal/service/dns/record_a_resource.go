@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/go-uuid"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
+	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
@@ -321,6 +323,7 @@ func (r *RecordAResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *RecordAModel) error {
 	var internalId string
+
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
 		if tId, ok := elements["Terraform Internal ID"]; ok {
@@ -358,5 +361,69 @@ func (r *RecordAResource) UpdateFuncCallAttributeName(ctx context.Context, data 
 }
 
 func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resourceRef := utils.ExtractResourceRef(req.ID)
+
+	// Read existing record
+	readRes, _, err := r.client.DNSAPI.
+		RecordAAPI.
+		Read(ctx, resourceRef).
+		ReturnFieldsPlus(readableAttributesForRecordA).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read record: %s", err))
+		return
+	}
+
+	existingRecord := readRes.GetRecordAResponseObjectAsResult.GetResult()
+
+	// Generate internal ID for tracking
+	internalID, err := uuid.GenerateUUID()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", "Failed to generate internal ID")
+		return
+	}
+
+	// Prepare extended attributes
+	extAttrs := existingRecord.ExtAttrs
+	if extAttrs == nil {
+		extAttrs = &map[string]dns.ExtAttrs{}
+	}
+
+	// Add Terraform internal ID
+	(*extAttrs)["Terraform Internal ID"] = dns.ExtAttrs{
+		Value: &internalID,
+	}
+
+	// Update record with internal ID
+	updateRes, _, err := r.client.DNSAPI.
+		RecordAAPI.
+		Update(ctx, resourceRef).
+		RecordA(dns.RecordA{ExtAttrs: extAttrs}).
+		ReturnFieldsPlus(readableAttributesForRecordA).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update record: %s", err))
+		return
+	}
+
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+
+	// Convert API response to model
+	var data RecordAModel
+	data.ExtAttrs = types.MapValueMust(
+		types.StringType,
+		map[string]attr.Value{},
+	)
+
+	// Flatten response into model and set state
+	record := updateRes.UpdateRecordAResponseAsObject.GetResult()
+	data.Flatten(ctx, &record, &resp.Diagnostics)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
