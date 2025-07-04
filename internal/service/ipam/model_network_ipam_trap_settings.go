@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -28,10 +29,14 @@ var NetworkIpamTrapSettingsResourceSchemaAttributes = map[string]schema.Attribut
 	"enable_email_warnings": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether sending warnings by email is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"enable_snmp_warnings": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether sending warnings by SNMP is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 	},
 }
 

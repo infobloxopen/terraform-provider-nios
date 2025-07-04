@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -52,38 +55,56 @@ var NetworkDiscoveryBasicPollSettingsResourceSchemaAttributes = map[string]schem
 	"port_scanning": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether port scanning is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"device_profile": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether device profile is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"snmp_collection": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether SNMP collection is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 	},
 	"cli_collection": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether CLI collection is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 	},
 	"netbios_scanning": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether netbios scanning is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"complete_ping_sweep": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether complete ping sweep is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"smart_subnet_ping_sweep": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether smart subnet ping sweep is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"auto_arp_refresh_before_switch_port_polling": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether auto ARP refresh before switch port polling is enabled or not.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 	},
 	"switch_port_data_collection_polling": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "A switch port data collection polling mode.",
+		Computed:            true,
+		Default:             stringdefault.StaticString("PERIODIC"),
 	},
 	"switch_port_data_collection_polling_schedule": schema.SingleNestedAttribute{
 		Attributes: NetworkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
@@ -92,18 +113,26 @@ var NetworkDiscoveryBasicPollSettingsResourceSchemaAttributes = map[string]schem
 	"switch_port_data_collection_polling_interval": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "Indicates the interval for switch port data collection polling.",
+		Computed:            true,
+		Default:             int64default.StaticInt64(3600),
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Credential group.",
+		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 	},
 	"polling_frequency_modifier": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Polling Frequency Modifier.",
+		Computed:            true,
+		Default:             stringdefault.StaticString("1"),
 	},
 	"use_global_polling_frequency_modifier": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Use Global Polling Frequency Modifier.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 	},
 }
 
