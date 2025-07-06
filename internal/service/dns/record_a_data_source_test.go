@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccRecordaDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_datasource_nios_RecordA.test"
+	dataSourceName := "data.nios_dns_record_a.test"
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -97,7 +97,7 @@ resource "nios_dns_record_a" "test" {
 	view = %q
 }
 
-data "nios_datasource_nios_RecordA" "test" {
+data "nios_dns_record_a" "test" {
   filters = {
 	name = nios_dns_record_a.test.name
   }

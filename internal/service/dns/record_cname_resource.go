@@ -20,9 +20,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var OperationTimeout = 30 * time.Second
-var d *RecordADataSource
-var r *RecordAResource
+var OperationTimeout = 60 * time.Second
+
+// var d *RecordADataSource
+//var r1 *RecordAResource
 
 // TODO : Add readable attributes for the resource
 var readableAttributesForRecordCname = "aws_rte53_record_info,canonical,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,dns_canonical,dns_name,extattrs,forbid_reclamation,last_queried,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
@@ -89,7 +90,7 @@ func (r *RecordCnameResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	filters := map[string]interface{}{
-		"name": data.Name,
+		"name": data.Name.ValueString(),
 	}
 	err := retry.RetryContext(ctx, OperationTimeout, func() *retry.RetryError {
 		apiRes, _, err := r.client.DNSAPI.
@@ -102,44 +103,17 @@ func (r *RecordCnameResource) Create(ctx context.Context, req resource.CreateReq
 		if err != nil {
 			if strings.Contains(err.Error(), "already exists.") {
 				tflog.Debug(ctx, "Waiting for state to stabilize, will retry", map[string]interface{}{"error": err.Error()})
-				fdip := os.Getenv("FDIP")
-				dimbt := os.Getenv("DIMBT")
+				fdip := os.Getenv("REMOVE_RECORDS_IF_FOUND")
+				dimbt := os.Getenv("DELETE_NON_TERRAFORM_RESOURCES")
 				if checkFDIP(fdip) {
-					if checkRecords(ctx, diags, filters, dimbt) {
+					di, check := r.checkRecords(ctx, diags, filters, dimbt)
+					if check {
 						return retry.RetryableError(err)
 					}
+					resp.Diagnostics.Append(di...)
 				}
-				//apiRes2, httpRes, err2 := d.client.DNSAPI.
-				//	RecordAAPI.
-				//	List(ctx).
-				//	Extattrfilter(filters).
-				//	ReturnAsObject(1).
-				//	ReturnFieldsPlus(readableAttributesForRecordA).
-				//	Execute()
-				//if err2 == nil && len(apiRes2.ListRecordAResponseObject.GetResult()) > 0 {
-				//	httpRes3, err3 := r.client.DNSAPI.
-				//		RecordAAPI.
-				//		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-				//		Execute()
-				//	if err != nil {
-				//		if httpRes3 != nil && httpRes3.StatusCode == http.StatusNotFound {
-				//			return retry.RetryableError(err3)
-				//		}
-				//		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Found Record A with same name , unable to delete, got error: %s", err))
-				//		return retry.NonRetryableError(err)
-				//	}
-				//}
-				//if err2 != nil {
-				//	if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-				//		resp.State.RemoveResource(ctx)
-				//		return
-				//	}
-				//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordA, got error: %s", err))
-				//	return
-				//}
-				//return retry.RetryableError(err)
 			}
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Record, got error: %s", err))
+			//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Record, got error: %s", err))
 			return retry.NonRetryableError(err)
 		}
 		res := apiRes.CreateRecordCnameResponseAsObject.GetResult()
@@ -434,13 +408,13 @@ func checkFDIP(fdip string) bool {
 	return false
 }
 
-func checkRecords(ctx context.Context, diags diag.Diagnostics, filters map[string]interface{}, dimbt string) bool {
+func (r *RecordCnameResource) checkRecords(ctx context.Context, diags diag.Diagnostics, filters map[string]interface{}, dimbt string) (diag.Diagnostics, bool) {
 	records := map[string]string{}
 	mbt := map[string]bool{}
-	apiRes, _, err := d.client.DNSAPI.
+	apiRes, _, err := r.client.DNSAPI.
 		RecordAAPI.
 		List(ctx).
-		Extattrfilter(filters).
+		Filters(filters).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordA).
 		Execute()
@@ -456,27 +430,27 @@ func checkRecords(ctx context.Context, diags diag.Diagnostics, filters map[strin
 		}
 	}
 
-	apiRes, _, err = d.client.DNSAPI.
-		RecordAAPI.
-		List(ctx).
-		Extattrfilter(filters).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForRecordA).
-		Execute()
-	if err == nil && len(apiRes.ListRecordAResponseObject.GetResult()) > 0 {
-		records["AAAA"] = *apiRes.ListRecordAResponseObject.GetResult()[0].Ref
-		mbt["AAAA"] = false
-		if apiRes.ListRecordAResponseObject.GetResult()[0].ExtAttrs != nil {
-			for key, _ := range *apiRes.ListRecordAResponseObject.GetResult()[0].ExtAttrs {
-				if key == "Terraform Internal ID" {
-					mbt["AAAA"] = true
-				}
-			}
-		}
-	}
+	//apiRes, _, err = d.client.DNSAPI.
+	//	RecordAAPI.
+	//	List(ctx).
+	//	Extattrfilter(filters).
+	//	ReturnAsObject(1).
+	//	ReturnFieldsPlus(readableAttributesForRecordA).
+	//	Execute()
+	//if err == nil && len(apiRes.ListRecordAResponseObject.GetResult()) > 0 {
+	//	records["AAAA"] = *apiRes.ListRecordAResponseObject.GetResult()[0].Ref
+	//	mbt["AAAA"] = false
+	//	if apiRes.ListRecordAResponseObject.GetResult()[0].ExtAttrs != nil {
+	//		for key, _ := range *apiRes.ListRecordAResponseObject.GetResult()[0].ExtAttrs {
+	//			if key == "Terraform Internal ID" {
+	//				mbt["AAAA"] = true
+	//			}
+	//		}
+	//	}
+	//}
 
 	if len(records) < 0 {
-		return true
+		return diags, true
 	} else {
 		for key, val := range records {
 			switch key {
@@ -486,11 +460,12 @@ func checkRecords(ctx context.Context, diags diag.Diagnostics, filters map[strin
 						RecordAAPI.
 						Delete(ctx, utils.ExtractResourceRef(val)).
 						Execute()
-					return true
+					return diags, true
 				} else {
-					diags.AddError("Client Error", fmt.Sprintf("Found Record A with same name, unable to delete as either the record is not managed by terraform or  DIMBT is unset"))
+					//tflog.Error(ctx, "Found Record A with same name, unable to delete as either the record is not managed by terraform or DIMBT is unset")
+					diags.AddError("Client Error", fmt.Sprintf("Found Record A with same name, unable to delete as either the record is not managed by terraform and delete_non_terraform_resources is unset"))
 					//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Found Record A with same name, unable to delete as either the record is not managed by terraform or  DIMBT is unset"))
-					return false
+					return diags, false
 				}
 			case "AAAA":
 				if mbt["AAAA"] || dimbt == "true" {
@@ -498,17 +473,17 @@ func checkRecords(ctx context.Context, diags diag.Diagnostics, filters map[strin
 						RecordAAPI.
 						Delete(ctx, utils.ExtractResourceRef(val)).
 						Execute()
-					return true
+					return diags, true
 				} else {
 
 					diags.AddError("Client Error", fmt.Sprintf("Found Record AAAA with same name, unable to delete as either the record is not managed by terraform or  DIMBT is unset"))
-					return false
+					return diags, false
 				}
 			default:
 				diags.AddError("Client Error", fmt.Sprintf("Invalid record type %s found, unable to delete", key))
-				return false
+				return diags, false
 			}
 		}
 	}
-	return true
+	return diags, false
 }

@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/option"
@@ -25,9 +26,11 @@ type NIOSProvider struct {
 
 // NIOSProviderModel describes the provider data model.
 type NIOSProviderModel struct {
-	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
-	NIOSUsername types.String `tfsdk:"nios_username"`
-	NIOSPassword types.String `tfsdk:"nios_password"`
+	NIOSHostURL                 types.String `tfsdk:"nios_host_url"`
+	NIOSUsername                types.String `tfsdk:"nios_username"`
+	NIOSPassword                types.String `tfsdk:"nios_password"`
+	RemoveRecordsIfFound        types.String `tfsdk:"remove_records_if_found"`
+	DeleteNonTerraformResources types.Bool   `tfsdk:"delete_non_terraform_resources"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -48,6 +51,12 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			"nios_password": schema.StringAttribute{
 				Optional: true,
 			},
+			"remove_records_if_found": schema.StringAttribute{
+				Optional: true,
+			},
+			"delete_non_terraform_resources": schema.BoolAttribute{
+				Optional: true,
+			},
 		},
 	}
 }
@@ -59,6 +68,19 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	if data.DeleteNonTerraformResources.IsNull() {
+		data.DeleteNonTerraformResources = types.BoolValue(false) // Default to false if not set
+	}
+
+	//data.RemoveRecordsIfFound = types.StringValue("A")
+	err := os.Setenv("REMOVE_RECORDS_IF_FOUND", data.RemoveRecordsIfFound.ValueString())
+	if err != nil {
+		return
+	}
+	err = os.Setenv("DELETE_NON_TERRAFORM_RESOURCES", data.DeleteNonTerraformResources.String())
+	if err != nil {
 	}
 
 	client := niosclient.NewAPIClient(

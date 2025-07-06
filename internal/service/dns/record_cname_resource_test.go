@@ -30,7 +30,7 @@ func TestAccRecordCnameResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameBasicConfig(canonical, "newzone1.example.com", "default"),
+				Config: testAccRecordCnameBasicConfig(canonical, "example_record.example.com", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
