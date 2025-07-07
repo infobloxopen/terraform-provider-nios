@@ -34,7 +34,7 @@ func TestAccRecordADataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccRecordADataSource_TagFilters(t *testing.T) {
+func TestAccRecordADataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_a.test"
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA

@@ -29,7 +29,6 @@ func TestAccRecordAResource_basic(t *testing.T) {
 				Config: testAccRecordABasicConfig(name, "10.0.0.20", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.0.0.20"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
@@ -81,7 +80,7 @@ func TestAccRecordAResource_Comment(t *testing.T) {
 			{
 				Config: testAccRecordAComment(name, "10.0.0.20", "default", "This is a new record"),
 				Check: resource.ComposeTestCheckFunc(
-					//testAccCheckRecordAExists(context.Background(), resourceName, &v),
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a new record"),
 				),
 			},
