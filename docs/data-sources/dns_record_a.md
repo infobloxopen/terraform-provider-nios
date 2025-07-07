@@ -3,27 +3,27 @@
 page_title: "nios_dns_record_a Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS A Records.
 ---
 
 # nios_dns_record_a (Data Source)
 
-
+Retrieves information about existing DNS A Records.
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific A record by name
+// Retrieve a specific A record by filters
 data "nios_dns_record_a" "get_record_using_filters" {
   filters = {
-    "name" = "example_record.example.com"
+    name = "example_record.example.com"
   }
 }
 
 // Retrieve specific A records using Extensible Attributes
 data "nios_dns_record_a" "get_record_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
@@ -68,8 +68,8 @@ Optional:
 
 Read-Only:
 
-- `aws_rte53_record_info` (Attributes) (see [below for nested schema](#nestedatt--result--aws_rte53_record_info))
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info))
+- `aws_rte53_record_info` (Attributes) The AWS Route53 record information associated with the record. (see [below for nested schema](#nestedatt--result--aws_rte53_record_info))
+- `cloud_info` (Attributes) The cloud information associated with the record. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
 - `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--result--discovered_data))
 - `dns_name` (String) The name for an A record in punycode format.
