@@ -1,12 +1,12 @@
-// Create a DNS zone forward record with minimum required fields
+// Create a DNS zone forward record with basic fields
 resource "nios_dns_zone_forward" "zone_forward1" {
-  fqdn     = "example1.example.com"
-  ns_group = "fwd_member"
+  fqdn              = "example1.example.com"
+  external_ns_group = "nsg1"
 }
 
-// Create a DNS zone forward record with maximum fields
+// Create a DNS zone forward record with additional fields
 resource "nios_dns_zone_forward" "zone_forward2" {
-  fqdn = "example_test1.example.com"
+  fqdn = "example2.example.com"
   forward_to = [
     {
       name    = "ns1.example.com"

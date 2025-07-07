@@ -16,7 +16,6 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
-// TODO : Add readable attributes for the resource
 var readableAttributesForZoneForward = "address,comment,disable,disable_ns_generation,display_domain,dns_fqdn,extattrs,external_ns_group," +
 	"forward_to,forwarders_only,forwarding_servers,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed," +
 	"ms_read_only,ms_sync_master_name,ns_group,parent,prefix,using_srg_associations,view,zone_format"
@@ -40,7 +39,7 @@ func (r *ZoneForwardResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *ZoneForwardResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages DNS Forward Zones.",
 		Attributes:          ZoneForwardResourceSchemaAttributes,
 	}
 }

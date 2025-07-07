@@ -3,31 +3,31 @@
 page_title: "nios_dns_zone_forward Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS Forward Zones.
 ---
 
 # nios_dns_zone_forward (Data Source)
 
-
+Retrieves information about existing DNS Forward Zones.
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific zone forward record by name
+// Retrieve a specific DNS zone forward record by filters
 data "nios_dns_zone_forward" "get_record_using_filters" {
   filters = {
-    "fqdn" = "example_test1.example.com"
+    fqdn = "zone-forward1.example.com"
   }
 }
 
-// Retrieve specific zone forward records using Extensible Attributes
+// Retrieve specific DNS zone forward records using Extensible Attributes
 data "nios_dns_zone_forward" "get_record_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "Hokkaido"
+    Site = "Moscow"
   }
 }
 
-// Retrieve all zone forward records
+// Retrieve all DNS zone forward records in default view
 data "nios_dns_zone_forward" "get_all_records_in_default_view" {}
 ```
 
