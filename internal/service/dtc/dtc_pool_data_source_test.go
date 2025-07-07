@@ -112,7 +112,7 @@ resource "nios_dtc_pool" "test" {
 
 data "nios_dtc_pool" "test" {
   extattrfilters = {
-	"Site" = nios_dtc_pool.test.extattrs.Site
+	Site = nios_dtc_pool.test.extattrs.Site
   }
 }
 `, name, lbPreferredMethod, extAttrsValue)

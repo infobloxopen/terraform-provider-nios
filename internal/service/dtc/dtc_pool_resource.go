@@ -16,7 +16,6 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
-// TODO : Add readable attributes for the resource
 var readableAttributesForDtcPool = "extattrs,lb_preferred_method,auto_consolidated_monitors,availability,comment,consolidated_monitors,disable,health,lb_alternate_method,lb_alternate_topology,lb_dynamic_ratio_alternate,lb_dynamic_ratio_preferred,lb_preferred_topology,name,quorum,servers,ttl,use_ttl,monitors"
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -38,7 +37,7 @@ func (r *DtcPoolResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *DtcPoolResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DTC Pool",
 		Attributes:          DtcPoolResourceSchemaAttributes,
 	}
 }

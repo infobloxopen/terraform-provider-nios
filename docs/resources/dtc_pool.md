@@ -3,12 +3,12 @@
 page_title: "nios_dtc_pool Resource - nios"
 subcategory: "DTC"
 description: |-
-  
+  Manages a DTC Pool
 ---
 
 # nios_dtc_pool (Resource)
 
-
+Manages a DTC Pool
 
 ## Example Usage
 
@@ -49,6 +49,10 @@ resource "nios_dtc_pool" "dtc_pool2" {
   }
   auto_consolidated_monitors = true
   disable                    = false
+  availability               = "QUORUM"
+  quorum                     = 1
+  ttl                        = 23
+  use_ttl                    = true
 }
 
 //Consolidated monitors can only be added if the pool is associated with an LBDN.

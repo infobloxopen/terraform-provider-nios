@@ -3,17 +3,17 @@
 page_title: "nios_dtc_pool Data Source - nios"
 subcategory: "DTC"
 description: |-
-  
+  Retrieves information about existing DTC Pools
 ---
 
 # nios_dtc_pool (Data Source)
 
-
+Retrieves information about existing DTC Pools
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific DTC Pool by name
+// Retrieve a specific DTC Pool by filters 
 data "nios_dtc_pool" "get_record_using_filters" {
   filters = {
     name = "dtc_pool"
@@ -23,7 +23,7 @@ data "nios_dtc_pool" "get_record_using_filters" {
 // Retrieve specific DTC Pool using Extensible Attributes
 data "nios_dtc_pool" "get_record_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
