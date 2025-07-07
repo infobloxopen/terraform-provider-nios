@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -69,11 +71,14 @@ func (d *RecordADataSource) Schema(ctx context.Context, req datasource.SchemaReq
 			},
 			"paging": schema.Int32Attribute{
 				Optional:    true,
-				Description: "Enable paging for the data source query. When enabled, the system will retrieve results in pages to handle large result sets efficiently.",
+				Description: "Enable (1) or disable (0) paging for the data source query. When enabled, the system retrieves results in pages, allowing efficient handling of large result sets. Paging is enabled by default.",
+				Validators: []validator.Int32{
+					int32validator.OneOf(0, 1),
+				},
 			},
 			"max_results": schema.Int32Attribute{
 				Optional:    true,
-				Description: "Maximum number of results to return in a single Page. If paging is enabled, this limits the number of results per page.",
+				Description: "Maximum results per page. If specified and paging is enabled, the system will return up to this number of results per page. If specified and paging is disabled, it will return this number of results in single page. If not specified, it defaults to 1000.",
 			},
 		},
 	}
@@ -101,6 +106,7 @@ func (d *RecordADataSource) Configure(ctx context.Context, req datasource.Config
 
 func (d *RecordADataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data RecordAModelWithFilter
+	pageCount := 0
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -108,7 +114,7 @@ func (d *RecordADataSource) Read(ctx context.Context, req datasource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	pageCount := 0
+
 	allResults, err := utils.ReadWithPages(
 		func(pageID string, maxResults int32) ([]dns.RecordA, string, error) {
 
