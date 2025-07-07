@@ -2,7 +2,9 @@ package ipam_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -38,84 +40,57 @@ func TestAccNetworkResource_basic(t *testing.T) {
 	})
 }
 
-// func TestAccNetworkResource_disappears(t *testing.T) {
-// 	resourceName := "nios_ipam_network.test"
-// 	var v ipam.Network
+func TestAccNetworkResource_disappears(t *testing.T) {
+	resourceName := "nios_ipam_network.test"
+	var v ipam.Network
+	network := acctest.RandomCIDRNetwork()
 
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckNetworkDestroy(context.Background(), &v),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccNetworkBasicConfig(),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					testAccCheckNetworkDisappears(context.Background(), &v),
-// 				),
-// 				ExpectNonEmptyPlan: true,
-// 			},
-// 		},
-// 	})
-// }
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNetworkDestroy(context.Background(), &v),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkBasicConfig(network),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					testAccCheckNetworkDisappears(context.Background(), &v),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
 
-//     func TestAccNetworkResource_Ref(t *testing.T) {
-//     var resourceName = "nios_ipam_network.test__ref"
-//     var v ipam.Network
+func TestAccNetworkResource_Authority(t *testing.T) {
+	var resourceName = "nios_ipam_network.test_authority"
+	var v ipam.Network
+	network := acctest.RandomCIDRNetwork()
 
-//     resource.ParallelTest(t, resource.TestCase{
-//         PreCheck:                 func() { acctest.PreCheck(t) },
-//         ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccNetworkRef("REF_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "_ref", "REF_REPLACE_ME"),
-//                 ),
-//             },
-//             // Update and Read
-// 			{
-// 				Config: testAccNetworkRef("REF_UPDATE_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "_ref", "REF_UPDATE_REPLACE_ME"),
-//                 ),
-//             },
-//    			// Delete testing automatically occurs in TestCase
-//         },
-//     })
-// }
-
-//     func TestAccNetworkResource_Authority(t *testing.T) {
-//     var resourceName = "nios_ipam_network.test_authority"
-//     var v ipam.Network
-
-//     resource.ParallelTest(t, resource.TestCase{
-//         PreCheck:                 func() { acctest.PreCheck(t) },
-//         ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccNetworkAuthority("AUTHORITY_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "authority", "AUTHORITY_REPLACE_ME"),
-//                 ),
-//             },
-//             // Update and Read
-// 			{
-// 				Config: testAccNetworkAuthority("AUTHORITY_UPDATE_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "authority", "AUTHORITY_UPDATE_REPLACE_ME"),
-//                 ),
-//             },
-//    			// Delete testing automatically occurs in TestCase
-//         },
-//     })
-// }
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkAuthority(network, "false", "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "authority", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkAuthority(network, "true", "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "authority", "true"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
 
 //     func TestAccNetworkResource_AutoCreateReversezone(t *testing.T) {
 //     var resourceName = "nios_ipam_network.test_auto_create_reversezone"
@@ -3012,39 +2987,39 @@ func testAccCheckNetworkExists(ctx context.Context, resourceName string, v *ipam
 	}
 }
 
-// func testAccCheckNetworkDestroy(ctx context.Context, v *ipam.Network) resource.TestCheckFunc {
-// 	// Verify the resource was destroyed
-// 	return func(state *terraform.State) error {
-// 		_, httpRes, err := acctest.NIOSClient.IPAMAPI.
-//             NetworkAPI.
-//             Read(ctx, utils.ExtractResourceRef(*v.Ref)).
-//             ReturnAsObject(1).
-//             ReturnFieldsPlus(readableAttributesForNetwork).
-// 			Execute()
-// 		if err != nil {
-// 			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-// 				// resource was deleted
-// 				return nil
-// 			}
-// 			return err
-// 		}
-// 		return errors.New("expected to be deleted")
-// 	}
-// }
+func testAccCheckNetworkDestroy(ctx context.Context, v *ipam.Network) resource.TestCheckFunc {
+	// Verify the resource was destroyed
+	return func(state *terraform.State) error {
+		_, httpRes, err := acctest.NIOSClient.IPAMAPI.
+			NetworkAPI.
+			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			ReturnAsObject(1).
+			ReturnFieldsPlus(readableAttributesForNetwork).
+			Execute()
+		if err != nil {
+			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+				// resource was deleted
+				return nil
+			}
+			return err
+		}
+		return errors.New("expected to be deleted")
+	}
+}
 
-// func testAccCheckNetworkDisappears(ctx context.Context, v *ipam.Network) resource.TestCheckFunc {
-// 	// Delete the resource externally to verify disappears test
-// 	return func(state *terraform.State) error {
-// 		_, err := acctest.NIOSClient.IPAMAPI.
-//             NetworkAPI.
-//             Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
-// 			Execute()
-// 		if err != nil {
-// 			return err
-// 		}
-// 		return nil
-// 	}
-// }
+func testAccCheckNetworkDisappears(ctx context.Context, v *ipam.Network) resource.TestCheckFunc {
+	// Delete the resource externally to verify disappears test
+	return func(state *terraform.State) error {
+		_, err := acctest.NIOSClient.IPAMAPI.
+			NetworkAPI.
+			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Execute()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}
 
 func testAccNetworkBasicConfig(network string) string {
 	// TODO: create basic resource with required fields
@@ -3055,21 +3030,15 @@ resource "nios_ipam_network" "test" {
 `, network)
 }
 
-// func testAccNetworkRef(ref string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_ipam_network" "test__ref" {
-//     _ref = %q
-// }
-// `,ref)
-// }
-
-// func testAccNetworkAuthority(authority string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_ipam_network" "test_authority" {
-//     authority = %q
-// }
-// `,authority)
-// }
+func testAccNetworkAuthority(network, authority, useAuthority string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network" "test_authority" {
+	network = %q
+    authority = %q
+    use_authority = %q
+}
+`, network, authority, useAuthority)
+}
 
 // func testAccNetworkAutoCreateReversezone(autoCreateReversezone string) string {
 // 	return fmt.Sprintf(`
