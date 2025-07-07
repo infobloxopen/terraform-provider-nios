@@ -1,7 +1,7 @@
 // Retrieve a specific DTC LBDN record by filters
 data "nios_dtc_lbdn" "get_record_with_filter" {
   filters = {
-    name = "lbdn22"
+    name = "example_lbdn"
   }
 }
 
