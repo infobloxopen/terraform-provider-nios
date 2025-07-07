@@ -78,7 +78,7 @@ func (d *RecordADataSource) Schema(ctx context.Context, req datasource.SchemaReq
 			},
 			"max_results": schema.Int32Attribute{
 				Optional:    true,
-				Description: "Maximum results per page. If specified and paging is enabled, the system will return up to this number of results per page. If specified and paging is disabled, it will return this number of results in single page. If not specified, it defaults to 1000.",
+				Description: "Maximum number of objects to be returned. Defaults to 1000.",
 			},
 		},
 	}
