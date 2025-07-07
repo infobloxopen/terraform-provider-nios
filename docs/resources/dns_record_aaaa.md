@@ -3,30 +3,31 @@
 page_title: "nios_dns_record_aaaa Resource - nios"
 subcategory: "DNS"
 description: |-
-  
+  Manages a AAAA Record.
 ---
 
 # nios_dns_record_aaaa (Resource)
 
-
+Manages a AAAA Record.
 
 ## Example Usage
 
 ```terraform
 // Create Record AAAA with Basic Fields
 resource "nios_dns_record_aaaa" "record1" {
-  name     = "example_test.example.com"
+  name     = "example_record.example.com"
   ipv6addr = "2002:1111::1401"
   view     = "default"
 }
 
-// Create Record AAAA with use_ttl set to true
+// Create Record AAAA with additional fields
 resource "nios_dns_record_aaaa" "record2" {
-  name     = "example_test_with_ttl.example.com"
+  name     = "example_record_with_ttl.example.com"
   ipv6addr = "2002:1111::1401"
   view     = "default"
   use_ttl  = true
   ttl      = 10
+  comment  = "Example AAAA record"
   extattrs = {
     Site = "Siteblr"
   }
@@ -34,7 +35,7 @@ resource "nios_dns_record_aaaa" "record2" {
 
 // Create Record AAAA using function call to retrieve ipv6addr
 resource "nios_dns_record_aaaa" "record3" {
-  name = "example_test_with_func_call.example.com"
+  name = "example_record_with_func_call.example.com"
   func_call = {
     attribute_name  = "ipv6addr"
     object_function = "next_available_ip"

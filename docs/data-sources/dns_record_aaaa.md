@@ -3,27 +3,27 @@
 page_title: "nios_dns_record_aaaa Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS AAAA Records.
 ---
 
 # nios_dns_record_aaaa (Data Source)
 
-
+Retrieves information about existing DNS AAAA Records.
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific AAAA record by name
+// Retrieve a specific AAAA record by filters
 data "nios_dns_record_aaaa" "get_record_with_filter" {
   filters = {
-    "name" = "example_record.example.com"
+    name = "example_record.example.com"
   }
 }
 
 // Retrieve specific AAAA records using Extensible Attributes
 data "nios_dns_record_aaaa" "get_record_with_extattr_filter" {
   extattrfilters = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
