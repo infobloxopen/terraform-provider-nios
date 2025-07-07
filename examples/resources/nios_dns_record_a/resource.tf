@@ -10,7 +10,7 @@ resource "nios_dns_record_a" "create_record" {
 
 // Create Record A using function call to retrieve ipv4addr
 resource "nios_dns_record_a" "create_with_func_call" {
-  name = "example_test_func_call.example.com"
+  name = "example_func_call.example.com"
   func_call = {
     attribute_name  = "ipv4addr"
     object_function = "next_available_ip"

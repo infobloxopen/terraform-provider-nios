@@ -2,7 +2,7 @@
 ## explicit; go 1.16
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
-# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250624102233-0ca24303afac
+# github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250704064142-91cd55001820
 ## explicit; go 1.23.0
 github.com/Infoblox-CTO/infoblox-nios-go-client/acl
 github.com/Infoblox-CTO/infoblox-nios-go-client/client
@@ -242,6 +242,7 @@ github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes
 ## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag
 github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatorfuncerr
+github.com/hashicorp/terraform-plugin-framework-validators/int32validator
 github.com/hashicorp/terraform-plugin-framework-validators/int64validator
 github.com/hashicorp/terraform-plugin-framework-validators/internal/schemavalidator
 github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator

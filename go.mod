@@ -3,7 +3,7 @@ module github.com/Infoblox-CTO/infoblox-nios-terraform
 go 1.23.4
 
 require (
-	github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250624102233-0ca24303afac
+	github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250704064142-91cd55001820
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-docs v0.21.0
 	github.com/hashicorp/terraform-plugin-framework v1.14.1
