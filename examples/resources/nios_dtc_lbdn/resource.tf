@@ -1,21 +1,21 @@
-// Create DTC LBDN with minimum required fields
+// Create DTC LBDN with basic fields
 resource "nios_dtc_lbdn" "lbdn1" {
-  name      = "testLbdn21"
+  name      = "lbdn21"
   lb_method = "SOURCE_IP_HASH"
 }
 
-// Create DTC LBDN with maximum fields
+// Create DTC LBDN with additional fields
 resource "nios_dtc_lbdn" "lbdn2" {
   name = "lbdn1234"
-  auth_zones = ["zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:record_test.com/default",
-    "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:test.com/default.custom_view"
+  auth_zones = ["zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:wapi.com/default",
+    "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:info.com/default.custom_view"
   ]
-  comment = "test"
+  comment = "lbdn with additional parameters"
   extattrs = {
     Site = "Yoshino"
   }
   lb_method = "TOPOLOGY"
-  patterns  = ["*record_test.com", "test.com*"]
+  patterns  = ["*wapi.com", "info.com*"]
   pools = [
     {
       pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCRwb29sMg:pool2"
@@ -26,7 +26,7 @@ resource "nios_dtc_lbdn" "lbdn2" {
       ratio = 3
     },
     {
-      pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCR0ZXN0LXBvb2w:test-pool"
+      pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCR0ZXN0LXBvb2w:pool6"
       ratio = 6
     }
   ]

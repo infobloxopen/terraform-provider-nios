@@ -1,14 +1,14 @@
-// Retrieve a specific DTC LBDN record by name
+// Retrieve a specific DTC LBDN record by filters
 data "nios_dtc_lbdn" "get_record_with_filter" {
   filters = {
-    "name" = "testLbdn22"
+    name = "lbdn22"
   }
 }
 
 // Retrieve specific DTC LBDN records using Extensible Attributes
 data "nios_dtc_lbdn" "get_record_with_extattr_filter" {
   extattrfilters = {
-    "Site" = "Spain"
+    Site = "Spain"
   }
 }
 

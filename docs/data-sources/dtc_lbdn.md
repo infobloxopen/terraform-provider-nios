@@ -3,27 +3,27 @@
 page_title: "nios_dtc_lbdn Data Source - nios"
 subcategory: "DTC"
 description: |-
-  
+  Retrieves information about existing DTC LBDNs.
 ---
 
 # nios_dtc_lbdn (Data Source)
 
-
+Retrieves information about existing DTC LBDNs.
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific DTC LBDN record by name
+// Retrieve a specific DTC LBDN record by filters
 data "nios_dtc_lbdn" "get_record_with_filter" {
   filters = {
-    "name" = "testLbdn22"
+    name = "lbdn22"
   }
 }
 
 // Retrieve specific DTC LBDN records using Extensible Attributes
 data "nios_dtc_lbdn" "get_record_with_extattr_filter" {
   extattrfilters = {
-    "Site" = "Spain"
+    Site = "Spain"
   }
 }
 

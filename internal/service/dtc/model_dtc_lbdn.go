@@ -6,13 +6,12 @@ import (
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"regexp"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -63,26 +62,6 @@ func (v recordTypeValidator) ValidateList(ctx context.Context, req validator.Lis
 				fmt.Sprintf("Element %d has invalid value %q. Allowed values are: A, AAAA, CNAME, NAPTR, SRV.", i, strElem.ValueString()),
 			)
 		}
-	}
-}
-
-type NoWhitespaceValidator struct{}
-
-func (v NoWhitespaceValidator) Description(_ context.Context) string {
-	return "String must not have leading or trailing whitespace"
-}
-
-func (v NoWhitespaceValidator) MarkdownDescription(_ context.Context) string {
-	return "String must not have leading or trailing whitespace"
-}
-
-func (v NoWhitespaceValidator) ValidateString(_ context.Context, req validator.StringRequest, resp *validator.StringResponse) {
-	if strings.TrimSpace(req.ConfigValue.ValueString()) != req.ConfigValue.ValueString() {
-		resp.Diagnostics.AddAttributeError(
-			req.Path,
-			"Invalid Name",
-			"The name must not have leading or trailing whitespace.",
-		)
 	}
 }
 
@@ -183,7 +162,10 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			NoWhitespaceValidator{},
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing whitespace",
+			),
 		},
 		MarkdownDescription: "The display name of the DTC LBDN, not DNS related.",
 	},

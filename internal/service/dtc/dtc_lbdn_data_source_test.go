@@ -34,7 +34,7 @@ func TestAccDtcLbdnDataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccDtcLbdnDataSource_TagFilters(t *testing.T) {
+func TestAccDtcLbdnDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_lbdn.test"
 	resourceName := "nios_dtc_lbdn.test"
 	name := acctest.RandomName()
