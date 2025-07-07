@@ -34,7 +34,7 @@ func TestAccRecordAaaaDataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccRecordAaaaDataSource_TagFilters(t *testing.T) {
+func TestAccRecordAaaaDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_aaaa.test"
 	resourceName := "nios_dns_record_aaaa.test"
 	var v dns.RecordAaaa
@@ -99,7 +99,7 @@ resource "nios_dns_record_aaaa" "test" {
 
 data "nios_dns_record_aaaa" "test" {
   filters = {
-	"name"    = nios_dns_record_aaaa.test.name
+	name    = nios_dns_record_aaaa.test.name
   }
 }
 `, name, ipV6Addr, view)
@@ -118,7 +118,7 @@ resource "nios_dns_record_aaaa" "test" {
 
 data "nios_dns_record_aaaa" "test" {
   extattrfilters = {
-	"Site" = nios_dns_record_aaaa.test.extattrs.Site
+	Site = nios_dns_record_aaaa.test.extattrs.Site
   }
 }
 `, name, ipV6Addr, view, extAttrsValue)

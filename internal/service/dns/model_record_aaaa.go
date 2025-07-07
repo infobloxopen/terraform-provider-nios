@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -19,6 +18,7 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/validators/dnsvalidator"
 )
 
 type RecordAaaaModel struct {
@@ -180,10 +180,7 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "Name for the AAAA record in FQDN format. This value can be in unicode format.",
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			dnsvalidator.IsRecordNameValid(),
 		},
 	},
 	"reclaimable": schema.BoolAttribute{

@@ -29,7 +29,6 @@ func TestAccRecordAaaaResource_basic(t *testing.T) {
 				Config: testAccRecordAaaaBasicConfig(name, "2002:1111::1401", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "2002:1111::1401"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),

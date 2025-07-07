@@ -16,7 +16,6 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
-// TODO : Add readable attributes for the resource
 var readableAttributesForRecordAaaa = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,extattrs,forbid_reclamation,ipv6addr,last_queried,ms_ad_user_data,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -38,7 +37,7 @@ func (r *RecordAaaaResource) Metadata(ctx context.Context, req resource.Metadata
 
 func (r *RecordAaaaResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a AAAA Record.",
 		Attributes:          RecordAaaaResourceSchemaAttributes,
 	}
 }
