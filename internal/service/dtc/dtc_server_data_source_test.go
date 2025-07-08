@@ -35,7 +35,7 @@ func TestAccDtcServerDataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccDtcServerDataSource_TagFilters(t *testing.T) {
+func TestAccDtcServerDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_server.test"
 	resourceName := "nios_dtc_server.test"
 	var v dtc.DtcServer
@@ -104,7 +104,7 @@ resource "nios_dtc_server" "test" {
 
 data "nios_dtc_server" "test" {
   extattrfilters = {
-	"Site" = nios_dtc_server.test.extattrs.Site
+	Site = nios_dtc_server.test.extattrs.Site
   }
 }
 `, name , host , extAttrsValue)

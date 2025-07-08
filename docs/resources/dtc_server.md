@@ -3,25 +3,25 @@
 page_title: "nios_dtc_server Resource - nios"
 subcategory: "DTC"
 description: |-
-  
+  Manages DTC Server
 ---
 
 # nios_dtc_server (Resource)
 
-
+Manages DTC Server
 
 ## Example Usage
 
 ```terraform
-//create a DTC Server with minimal parameters 
-resource "nios_dtc_server" "dtc_server" {
-  name = "test-server"
+//create a DTC Server with basic fields
+resource "nios_dtc_server" "create_dtc_server" {
+  name = "dtc-server"
   host = "2.3.3.4"
 }
 
-//create a DTC Server with maximal parameters 
-resource "nios_dtc_server" "dtc_server_maximal_parameters" {
-  name                    = "test-server"
+//create a DTC Server with additional fields. 
+resource "nios_dtc_server" "create_with_additional_fields" {
+  name                    = "dtc-server"
   host                    = "2.3.3.4"
   auto_create_host_record = true
   comment                 = "create server"

@@ -33,7 +33,6 @@ func TestAccDtcServerResource_basic(t *testing.T) {
 				Config: testAccDtcServerBasicConfig(name, host),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcServerExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "host", host),
 					// Test fields with default value

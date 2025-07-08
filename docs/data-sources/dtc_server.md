@@ -3,12 +3,12 @@
 page_title: "nios_dtc_server Data Source - nios"
 subcategory: "DTC"
 description: |-
-  
+  Retrieves information about existing DTC Servers.
 ---
 
 # nios_dtc_server (Data Source)
 
-
+Retrieves information about existing DTC Servers.
 
 ## Example Usage
 
@@ -16,14 +16,14 @@ description: |-
 // Retrieve a specific DTC Server by name
 data "nios_dtc_server" "get_server_using_filters" {
   filters = {
-    "name" = "test-server"
+    name = "server"
   }
 }
 
 // Retrieve specific DTC Server using Extensible Attributes
 data "nios_dtc_server" "get_servers_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "Bangalore"
+    Site = "Bangalore"
   }
 }
 
