@@ -1,4 +1,3 @@
-// Model functions for ExtAttrs
 package dns
 
 import (
@@ -65,6 +64,28 @@ func FlattenExtAttr(ctx context.Context, extattrs *map[string]dns.ExtAttrs, diag
 	mapVal, mapDiags := types.MapValue(types.StringType, result)
 	diags.Append(mapDiags...)
 	return mapVal
+}
+
+func FlattenUpdatedExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[string]dns.ExtAttrs, diags *diag.Diagnostics) types.Map {
+	if extattrs == nil || len(*extattrs) == 0 {
+		return types.MapNull(types.StringType)
+	}
+	planExtAttrsMapPtr := ExpandExtAttr(ctx, planExtAttrs, diags)
+	if planExtAttrsMapPtr == nil || len(*planExtAttrsMapPtr) == 0 {
+		return types.MapNull(types.StringType)
+	}
+
+	userExtAttrs := make(map[string]dns.ExtAttrs, len(*extattrs))
+	for key, extAttrVal := range *extattrs {
+		if _, ok := (*planExtAttrsMapPtr)[key]; ok {
+			userExtAttrs[key] = extAttrVal
+		}
+	}
+
+	if len(userExtAttrs) == 0 {
+		return types.MapNull(types.StringType)
+	}
+	return FlattenExtAttr(ctx, &userExtAttrs, diags)
 }
 
 func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dns.ExtAttrs) (*map[string]dns.ExtAttrs, diag.Diagnostics) {
