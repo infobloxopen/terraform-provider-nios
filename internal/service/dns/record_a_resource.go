@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
+	//"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
+	//"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
@@ -361,67 +361,52 @@ func (r *RecordAResource) UpdateFuncCallAttributeName(ctx context.Context, data 
 }
 
 func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resourceRef := utils.ExtractResourceRef(req.ID)
+    resourceRef := utils.ExtractResourceRef(req.ID)
 
-	// Read existing record
-	readRes, _, err := r.client.DNSAPI.
-		RecordAAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForRecordA).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read record: %s", err))
-		return
-	}
+    // Read existing record
+    readRes, _, err := r.client.DNSAPI.
+        RecordAAPI.
+        Read(ctx, resourceRef).
+        ReturnFieldsPlus(readableAttributesForRecordA).
+        ReturnAsObject(1).
+        Execute()
+    if err != nil {
+        resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read record: %s", err))
+        return
+    }
 
-	existingRecord := readRes.GetRecordAResponseObjectAsResult.GetResult()
+    // Initialize model and flatten initial response
+    var data RecordAModel
+    record := readRes.GetRecordAResponseObjectAsResult.GetResult()
+    data.Flatten(ctx, &record, &resp.Diagnostics)
+    data.ExtAttrs = data.ExtAttrsAll
 
-	// Generate internal ID for tracking
-	internalID, err := uuid.GenerateUUID()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", "Failed to generate internal ID")
-		return
-	}
+    // Add internal ID to ExtAttrs using existing function
+    if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
+        resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to add internal ID: %s", err))
+        return
+    }
 
-	// Prepare extended attributes
-	extAttrs := existingRecord.ExtAttrs
-	if extAttrs == nil {
-		extAttrs = &map[string]dns.ExtAttrs{}
-	}
+    // Update record with the new internal ID
+    updateRes, _, err := r.client.DNSAPI.
+        RecordAAPI.
+        Update(ctx, resourceRef).
+        RecordA(*data.Expand(ctx, &resp.Diagnostics, false)).
+        ReturnFieldsPlus(readableAttributesForRecordA).
+        ReturnAsObject(1).
+        Execute()
+    if err != nil {
+        resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update record: %s", err))
+        return
+    }
 
-	// Add Terraform internal ID
-	(*extAttrs)["Terraform Internal ID"] = dns.ExtAttrs{
-		Value: &internalID,
-	}
+    // Flatten final response into model and set state
+    record = updateRes.UpdateRecordAResponseAsObject.GetResult()
+    data.Flatten(ctx, &record, &resp.Diagnostics)
 
-	// Update record with internal ID
-	updateRes, _, err := r.client.DNSAPI.
-		RecordAAPI.
-		Update(ctx, resourceRef).
-		RecordA(dns.RecordA{ExtAttrs: extAttrs}).
-		ReturnFieldsPlus(readableAttributesForRecordA).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update record: %s", err))
-		return
-	}
+    if resp.Diagnostics.HasError() {
+        return
+    }
 
-	// Convert API response to model
-	var data RecordAModel
-	data.ExtAttrs = types.MapValueMust(
-		types.StringType,
-		map[string]attr.Value{},
-	)
-
-	// Flatten response into model and set state
-	record := updateRes.UpdateRecordAResponseAsObject.GetResult()
-	data.Flatten(ctx, &record, &resp.Diagnostics)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+    resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
