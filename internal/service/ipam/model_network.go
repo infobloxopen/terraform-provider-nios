@@ -1253,7 +1253,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Authority = types.BoolPointerValue(from.Authority)
-	m.AutoCreateReversezone = types.BoolPointerValue(from.AutoCreateReversezone)
+	// m.AutoCreateReversezone = types.BoolPointerValue(from.AutoCreateReversezone)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
 	m.CloudInfo = FlattenNetworkCloudInfo(ctx, from.CloudInfo, diags)
@@ -1292,7 +1292,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
 	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
-	// m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
+	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
