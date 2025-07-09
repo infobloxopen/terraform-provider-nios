@@ -15,12 +15,12 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
-// TODO : Add readable attributes for the resource
-var readableAttributesForZoneAuth = ""
+var readableAttributesForZoneAuth = "address,allow_active_dir,allow_fixed_rrset_order,allow_gss_tsig_for_underscore_zone,allow_gss_tsig_zone_updates,allow_query,allow_transfer,allow_update,allow_update_forwarding,aws_rte53_zone_info,cloud_info,comment,copy_xfer_to_notify,create_underscore_zones,ddns_force_creation_timestamp_update,ddns_principal_group,ddns_principal_tracking,ddns_restrict_patterns,ddns_restrict_patterns_list,ddns_restrict_protected,ddns_restrict_secure,ddns_restrict_static,disable,disable_forwarding,display_domain,dns_fqdn,dns_integrity_enable,dns_integrity_frequency,dns_integrity_member,dns_integrity_verbose_logging,dns_soa_email,dnssec_key_params,dnssec_keys,dnssec_ksk_rollover_date,dnssec_zsk_rollover_date,effective_check_names_policy,effective_record_name_policy,extattrs,external_primaries,external_secondaries,fqdn,grid_primary,grid_primary_shared_with_ms_parent_delegation,grid_secondaries,is_dnssec_enabled,is_dnssec_signed,is_multimaster,last_queried,last_queried_acl,locked,locked_by,mask_prefix,member_soa_mnames,member_soa_serials,ms_ad_integrated,ms_allow_transfer,ms_allow_transfer_mode,ms_dc_ns_record_creation,ms_ddns_mode,ms_managed,ms_primaries,ms_read_only,ms_secondaries,ms_sync_disabled,ms_sync_master_name,network_associations,network_view,notify_delay,ns_group,parent,prefix,primary_type,record_name_policy,records_monitored,rr_not_queried_enabled_time,scavenging_settings,soa_default_ttl,soa_email,soa_expire,soa_negative_ttl,soa_refresh,soa_retry,soa_serial_number,srgs,update_forwarding,use_allow_active_dir,use_allow_query,use_allow_transfer,use_allow_update,use_allow_update_forwarding,use_check_names_policy,use_copy_xfer_to_notify,use_ddns_force_creation_timestamp_update,use_ddns_patterns_restriction,use_ddns_principal_security,use_ddns_restrict_protected,use_ddns_restrict_static,use_dnssec_key_params,use_external_primary,use_grid_zone_timer,use_import_from,use_notify_delay,use_record_name_policy,use_scavenging_settings,use_soa_email,using_srg_associations,view,zone_format,zone_not_queried_enabled_time"
 
 func TestAccZoneAuthResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -28,11 +28,10 @@ func TestAccZoneAuthResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthBasicConfig(""),
+				Config: testAccZoneAuthBasicConfig(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					// Test fields with default value
+					// Test fields with default values
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -43,6 +42,7 @@ func TestAccZoneAuthResource_basic(t *testing.T) {
 func TestAccZoneAuthResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_zone_auth.test"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -50,7 +50,7 @@ func TestAccZoneAuthResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneAuthDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneAuthBasicConfig(""),
+				Config: testAccZoneAuthBasicConfig(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					testAccCheckZoneAuthDisappears(context.Background(), &v),
@@ -2758,12 +2758,13 @@ func testAccCheckZoneAuthDisappears(ctx context.Context, v *dns.ZoneAuth) resour
 	}
 }
 
-func testAccZoneAuthBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccZoneAuthBasicConfig(zoneFqdn, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test" {
+    fqdn = %q
+    view = %q
 }
-`)
+`, zoneFqdn, view)
 }
 
 func testAccZoneAuthRef(ref string) string {

@@ -3,9 +3,11 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -32,23 +34,37 @@ var ZoneauthscavengingsettingsEaExpressionListAttrTypes = map[string]attr.Type{
 
 var ZoneauthscavengingsettingsEaExpressionListResourceSchemaAttributes = map[string]schema.Attribute{
 	"op": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"AND", "ENDLIST", "EQ", "EXISTS", "GE", "GT", "LE", "LT", "MATCH_CIDR", "MATCH_IP", "MATCH_RANGE", "NOT_EQ", "NOT_EXISTS", "OR",
+			),
+		},
 		MarkdownDescription: "The operation name.",
 	},
 	"op1": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the Extensible Attribute Definition object which is used as the first operand value.",
 	},
 	"op1_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("FIELD", "LIST", "STRING"),
+		},
 		MarkdownDescription: "The first operand type.",
 	},
 	"op2": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The second operand value.",
 	},
 	"op2_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("FIELD", "LIST", "STRING"),
+		},
 		MarkdownDescription: "The second operand type.",
 	},
 }
