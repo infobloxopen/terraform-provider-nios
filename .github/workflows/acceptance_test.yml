@@ -26,8 +26,8 @@ jobs:
         timeout-minutes: 120
         env:
           TF_ACC: "1"
-          NIOS_HOST_URL: "https://172.28.82.250" #${{ secrets.NIOS_HOST_URL }}
-          NIOS_USERNAME: "admin" #${{ secrets.NIOS_USERNAME }}
-          NIOS_PASSWORD: "Infoblox@123" #${{ secrets.NIOS_PASSWORD }}
+          NIOS_HOST_URL: ${{ secrets.NIOS_HOST_URL }}
+          NIOS_USERNAME: ${{ secrets.NIOS_USERNAME }}
+          NIOS_PASSWORD: ${{ secrets.NIOS_PASSWORD }}
         run: |
           go test $(go list ./... | grep -v 'vendor') -timeout 120m -v -cover
