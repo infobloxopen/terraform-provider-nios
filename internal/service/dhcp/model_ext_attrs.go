@@ -34,10 +34,10 @@ func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnost
     return &result
 }
 
-func FlattenExtAttr(ctx context.Context, extattrs map[string]dhcp.ExtAttrs, diags *diag.Diagnostics) types.Map {
+func FlattenExtAttr(ctx context.Context, extattrs *map[string]dhcp.ExtAttrs, diags *diag.Diagnostics) types.Map {
     result := make(map[string]attr.Value)
 
-    for key, extAttr := range extattrs {
+    for key, extAttr := range *extattrs {
         if extAttr.Value == nil {
             continue
         }

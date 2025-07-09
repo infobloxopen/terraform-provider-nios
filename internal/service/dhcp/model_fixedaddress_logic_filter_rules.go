@@ -2,6 +2,8 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -27,10 +29,15 @@ var FixedaddressLogicFilterRulesAttrTypes = map[string]attr.Type{
 var FixedaddressLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The filter name.",
 	},
 	"type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("MAC", "NAC", "Option"),
+		},
 		MarkdownDescription: "The filter type. Valid values are: * MAC * NAC * Option",
 	},
 }

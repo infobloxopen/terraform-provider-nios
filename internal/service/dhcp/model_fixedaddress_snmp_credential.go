@@ -29,14 +29,17 @@ var FixedaddressSnmpCredentialAttrTypes = map[string]attr.Type{
 var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attribute{
 	"community_string": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The public community string.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Comments for the SNMPv1 and SNMPv2 users.",
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Group for the SNMPv1 and SNMPv2 credential.",
 	},
 }

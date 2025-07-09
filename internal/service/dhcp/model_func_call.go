@@ -39,6 +39,7 @@ var FuncCallResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"_object_function": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The function to be called.",
 	},
 	"_parameters": schema.MapAttribute{
@@ -48,10 +49,12 @@ var FuncCallResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"_result_field": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The result field of the function.",
 	},
 	"_object": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The object to be called.",
 	},
 	"_object_parameters": schema.MapAttribute{

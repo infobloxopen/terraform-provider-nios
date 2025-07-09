@@ -15,6 +15,22 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
+//TODO
+// Failing Tests due to config becoming NULL
+// - CLI Credentials
+// - Restart if Needed
+// - SNMP3 Credential , Use SNMP3 Credential
+// - SNMP Credential , Use SNMP Credential
+
+//TODO: add tests
+// The following require additional resource/data source objects to be supported.
+// - Logic Filter Rules
+// - Reserved Interface
+
+//TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// - Network View - default , test_fixed_address
+// - Ipv4 Network - 15.0.0.0/24 , 16.0.0.0/24
+
 var readableAttributesForFixedaddress = "agent_circuit_id,agent_remote_id,allow_telnet,always_update_dns,bootfile,bootserver,cli_credentials,client_identifier_prepend_zero,cloud_info,comment,ddns_domainname,ddns_hostname,deny_bootp,device_description,device_location,device_type,device_vendor,dhcp_client_identifier,disable,disable_discovery,discover_now_status,discovered_data,enable_ddns,enable_pxe_lease_time,extattrs,ignore_dhcp_option_list_request,ipv4addr,is_invalid_mac,logic_filter_rules,mac,match_client,ms_ad_user_data,ms_options,ms_server,name,network,network_view,nextserver,options,pxe_lease_time,reserved_interface,snmp3_credential,snmp_credential,use_bootfile,use_bootserver,use_cli_credentials,use_ddns_domainname,use_deny_bootp,use_enable_ddns,use_ignore_dhcp_option_list_request,use_logic_filter_rules,use_ms_options,use_nextserver,use_options,use_pxe_lease_time,use_snmp3_credential,use_snmp_credential"
 
 func TestAccFixedaddressResource_basic(t *testing.T) {
@@ -230,18 +246,18 @@ func TestAccFixedaddressResource_Bootserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressBootserver(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressBootserver(ip, "CIRCUIT_ID", agentCircuitID, "boot_server_example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bootserver", "BOOTSERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "bootserver", "boot_server_example.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressBootserver(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressBootserver(ip, "CIRCUIT_ID", agentCircuitID, "boot_server_updated_example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bootserver", "BOOTSERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "bootserver", "boot_server_updated_example.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -261,7 +277,7 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressCliCredentials(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressCliCredentials(ip, "CIRCUIT_ID", agentCircuitID, "Comment for CLI Credentials", "NIOS_USER", "", "SSH", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials", "CLI_CREDENTIALS_REPLACE_ME"),
@@ -269,7 +285,7 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressCliCredentials(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressCliCredentials(ip, "CIRCUIT_ID", agentCircuitID, "Updated Comment for CLI Credentials", "", "NIOS_PASSWORD", "ENABLE_TELNET", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials", "CLI_CREDENTIALS_UPDATE_REPLACE_ME"),
@@ -292,49 +308,18 @@ func TestAccFixedaddressResource_ClientIdentifierPrependZero(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressClientIdentifierPrependZero(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressClientIdentifierPrependZero(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "client_identifier_prepend_zero", "CLIENT_IDENTIFIER_PREPEND_ZERO_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "client_identifier_prepend_zero", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressClientIdentifierPrependZero(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressClientIdentifierPrependZero(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "client_identifier_prepend_zero", "CLIENT_IDENTIFIER_PREPEND_ZERO_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccFixedaddressResource_CloudInfo(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_cloud_info"
-	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
-	agentCircuitID := acctest.RandomNumber(255)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccFixedaddressCloudInfo(ip, "CIRCUIT_ID", agentCircuitID, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_info", "CLOUD_INFO_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFixedaddressCloudInfo(ip, "CIRCUIT_ID", agentCircuitID, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_info", "CLOUD_INFO_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "client_identifier_prepend_zero", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -354,18 +339,18 @@ func TestAccFixedaddressResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressComment(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressComment(ip, "CIRCUIT_ID", agentCircuitID, "Comment for Fixed Address"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for Fixed Address"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressComment(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressComment(ip, "CIRCUIT_ID", agentCircuitID, "Updated Comment for Fixed Address"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Updated Comment for Fixed Address"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -385,18 +370,18 @@ func TestAccFixedaddressResource_DdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDdnsDomainname(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDdnsDomainname(ip, "CIRCUIT_ID", agentCircuitID, "ddns_domain.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "ddns_domain.name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDdnsDomainname(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDdnsDomainname(ip, "CIRCUIT_ID", agentCircuitID, "updated_ddns_domain.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "updated_ddns_domain.name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -416,18 +401,18 @@ func TestAccFixedaddressResource_DdnsHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDdnsHostname(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDdnsHostname(ip, "CIRCUIT_ID", agentCircuitID, "ddns_host.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_hostname", "DDNS_HOSTNAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_hostname", "ddns_host.name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDdnsHostname(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDdnsHostname(ip, "CIRCUIT_ID", agentCircuitID, "updated_ddns_host.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_hostname", "DDNS_HOSTNAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_hostname", "updated_ddns_host.name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -447,18 +432,18 @@ func TestAccFixedaddressResource_DenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDenyBootp(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDenyBootp(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "DENY_BOOTP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDenyBootp(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDenyBootp(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "DENY_BOOTP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -478,18 +463,18 @@ func TestAccFixedaddressResource_DeviceDescription(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDeviceDescription(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDeviceDescription(ip, "CIRCUIT_ID", agentCircuitID, "DEVICE_DESCRIPTION"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "device_description", "DEVICE_DESCRIPTION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "device_description", "DEVICE_DESCRIPTION"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDeviceDescription(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDeviceDescription(ip, "CIRCUIT_ID", agentCircuitID, "DEVICE_DESCRIPTION_UPDATED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "device_description", "DEVICE_DESCRIPTION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "device_description", "DEVICE_DESCRIPTION_UPDATED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -509,18 +494,18 @@ func TestAccFixedaddressResource_DeviceLocation(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDeviceLocation(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDeviceLocation(ip, "CIRCUIT_ID", agentCircuitID, "DEVICE_LOCATION"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "device_location", "DEVICE_LOCATION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "device_location", "DEVICE_LOCATION"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDeviceLocation(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDeviceLocation(ip, "CIRCUIT_ID", agentCircuitID, "DEVICE_LOCATION_UPDATED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "device_location", "DEVICE_LOCATION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "device_location", "DEVICE_LOCATION_UPDATED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -540,18 +525,18 @@ func TestAccFixedaddressResource_DeviceType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDeviceType(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDeviceType(ip, "CIRCUIT_ID", agentCircuitID, "DEVICE_TYPE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "device_type", "DEVICE_TYPE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "device_type", "DEVICE_TYPE"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDeviceType(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDeviceType(ip, "CIRCUIT_ID", agentCircuitID, "DEVICE_TYPE_UPDATED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "device_type", "DEVICE_TYPE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "device_type", "DEVICE_TYPE_UPDATED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -571,18 +556,18 @@ func TestAccFixedaddressResource_DeviceVendor(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDeviceVendor(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDeviceVendor(ip, "CIRCUIT_ID", agentCircuitID, "DEVICE_VENDOR"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "device_vendor", "DEVICE_VENDOR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "device_vendor", "DEVICE_VENDOR"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDeviceVendor(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDeviceVendor(ip, "CIRCUIT_ID", agentCircuitID, "DEVICE_VENDOR_UPDATED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "device_vendor", "DEVICE_VENDOR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "device_vendor", "DEVICE_VENDOR_UPDATED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -602,18 +587,18 @@ func TestAccFixedaddressResource_DhcpClientIdentifier(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDhcpClientIdentifier(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDhcpClientIdentifier(ip, "CLIENT_ID", agentCircuitID, "DHCP_CLIENT_IDENTIFIER"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_client_identifier", "DHCP_CLIENT_IDENTIFIER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_client_identifier", "DHCP_CLIENT_IDENTIFIER"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDhcpClientIdentifier(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDhcpClientIdentifier(ip, "CLIENT_ID", agentCircuitID, "DHCP_CLIENT_IDENTIFIER_UPDATED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_client_identifier", "DHCP_CLIENT_IDENTIFIER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_client_identifier", "DHCP_CLIENT_IDENTIFIER_UPDATED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -633,18 +618,18 @@ func TestAccFixedaddressResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDisable(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDisable(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDisable(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDisable(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -664,49 +649,18 @@ func TestAccFixedaddressResource_DisableDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressDisableDiscovery(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDisableDiscovery(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable_discovery", "DISABLE_DISCOVERY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable_discovery", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressDisableDiscovery(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressDisableDiscovery(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable_discovery", "DISABLE_DISCOVERY_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccFixedaddressResource_DiscoveredData(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_discovered_data"
-	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
-	agentCircuitID := acctest.RandomNumber(255)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccFixedaddressDiscoveredData(ip, "CIRCUIT_ID", agentCircuitID, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovered_data", "DISCOVERED_DATA_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFixedaddressDiscoveredData(ip, "CIRCUIT_ID", agentCircuitID, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovered_data", "DISCOVERED_DATA_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable_discovery", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -726,18 +680,18 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressEnableDdns(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressEnableDdns(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "ENABLE_DDNS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressEnableDdns(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressEnableDdns(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "ENABLE_DDNS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -757,18 +711,18 @@ func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressEnableImmediateDiscovery(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressEnableImmediateDiscovery(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "ENABLE_IMMEDIATE_DISCOVERY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressEnableImmediateDiscovery(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressEnableImmediateDiscovery(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "ENABLE_IMMEDIATE_DISCOVERY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -788,18 +742,18 @@ func TestAccFixedaddressResource_EnablePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressEnablePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressEnablePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "true", 3600),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "ENABLE_PXE_LEASE_TIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressEnablePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressEnablePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "false", 3600),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "ENABLE_PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -812,6 +766,8 @@ func TestAccFixedaddressResource_ExtAttrs(t *testing.T) {
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
 	agentCircuitID := acctest.RandomNumber(255)
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -819,18 +775,22 @@ func TestAccFixedaddressResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressExtAttrs(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressExtAttrs(ip, "CIRCUIT_ID", agentCircuitID, map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressExtAttrs(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressExtAttrs(ip, "CIRCUIT_ID", agentCircuitID, map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -850,18 +810,18 @@ func TestAccFixedaddressResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressIgnoreDhcpOptionListRequest(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressIgnoreDhcpOptionListRequest(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "IGNORE_DHCP_OPTION_LIST_REQUEST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressIgnoreDhcpOptionListRequest(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressIgnoreDhcpOptionListRequest(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "IGNORE_DHCP_OPTION_LIST_REQUEST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -873,6 +833,7 @@ func TestAccFixedaddressResource_Ipv4addr(t *testing.T) {
 	var resourceName = "nios_dhcp_fixedaddress.test_ipv4addr"
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	IPUpdated := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
 	agentCircuitID := acctest.RandomNumber(255)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -884,15 +845,15 @@ func TestAccFixedaddressResource_Ipv4addr(t *testing.T) {
 				Config: testAccFixedaddressIpv4addr(ip, "CIRCUIT_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "IPV4ADDR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv4addr", ip),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressIpv4addr(ip, "CIRCUIT_ID", agentCircuitID),
+				Config: testAccFixedaddressIpv4addr(IPUpdated, "CIRCUIT_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "IPV4ADDR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv4addr", IPUpdated),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -932,6 +893,7 @@ func TestAccFixedaddressResource_FuncCall(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_LogicFilterRules(t *testing.T) {
+	t.Skip("Skipping test as support for MAC/NAC/Option logic filter rules is not implemented yet")
 	var resourceName = "nios_dhcp_fixedaddress.test_logic_filter_rules"
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
@@ -943,18 +905,20 @@ func TestAccFixedaddressResource_LogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, "FILTER_NAME", "MAC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "FILTER_NAME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "MAC"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, "FILTER_NAME_UPDATED", "Options"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "FILTER_NAME_UPDATED"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -974,18 +938,18 @@ func TestAccFixedaddressResource_Mac(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressMac(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressMac(ip, "MAC_ADDRESS", agentCircuitID, "00:1a:2b:3c:4d:5e"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mac", "MAC_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mac", "00:1a:2b:3c:4d:5e"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressMac(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressMac(ip, "MAC_ADDRESS", agentCircuitID, "10:9a:dd:ee:ff:01"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mac", "MAC_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mac", "10:9a:dd:ee:ff:01"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1017,37 +981,6 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "match_client", "MATCH_CLIENT_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccFixedaddressResource_MsAdUserData(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_ms_ad_user_data"
-	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
-	agentCircuitID := acctest.RandomNumber(255)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccFixedaddressMsAdUserData(ip, "CIRCUIT_ID", agentCircuitID, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ad_user_data", "MS_AD_USER_DATA_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFixedaddressMsAdUserData(ip, "CIRCUIT_ID", agentCircuitID, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ad_user_data", "MS_AD_USER_DATA_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1129,18 +1062,18 @@ func TestAccFixedaddressResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressName(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressName(ip, "CIRCUIT_ID", agentCircuitID, "example_fixed_address"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", "example_fixed_address"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressName(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressName(ip, "CIRCUIT_ID", agentCircuitID, "example_updated_fixed_address"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", "example_updated_fixed_address"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1152,6 +1085,7 @@ func TestAccFixedaddressResource_Network(t *testing.T) {
 	var resourceName = "nios_dhcp_fixedaddress.test_network"
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ipUpdated := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
 	agentCircuitID := acctest.RandomNumber(255)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1160,18 +1094,18 @@ func TestAccFixedaddressResource_Network(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressNetwork(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressNetwork(ip, "CIRCUIT_ID", agentCircuitID, "15.0.0.0/24"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network", "NETWORK_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "network", "15.0.0.0/24"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressNetwork(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressNetwork(ipUpdated, "CIRCUIT_ID", agentCircuitID, "16.0.0.0/24"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network", "NETWORK_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "network", "16.0.0.0/24"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1191,18 +1125,10 @@ func TestAccFixedaddressResource_NetworkView(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressNetworkView(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressNetworkView(ip, "CIRCUIT_ID", agentCircuitID, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network_view", "NETWORK_VIEW_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFixedaddressNetworkView(ip, "CIRCUIT_ID", agentCircuitID, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network_view", "NETWORK_VIEW_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "network_view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1222,18 +1148,18 @@ func TestAccFixedaddressResource_Nextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressNextserver(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressNextserver(ip, "CIRCUIT_ID", agentCircuitID, "example_next_server.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "nextserver", "example_next_server.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressNextserver(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressNextserver(ip, "CIRCUIT_ID", agentCircuitID, "example_updated_next_server.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "nextserver", "example_updated_next_server.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1284,18 +1210,18 @@ func TestAccFixedaddressResource_PxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressPxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressPxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "3600"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "PXE_LEASE_TIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "3600"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressPxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressPxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "4800"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "4800"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1304,6 +1230,7 @@ func TestAccFixedaddressResource_PxeLeaseTime(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
+	t.Skip("Skipping test as reserved_interface is not implemented yet")
 	var resourceName = "nios_dhcp_fixedaddress.test_reserved_interface"
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
@@ -1315,18 +1242,18 @@ func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressReservedInterface(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressReservedInterface(ip, "CIRCUIT_ID", agentCircuitID, "ref"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "reserved_interface", "RESERVED_INTERFACE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "reserved_interface", "ref"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressReservedInterface(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressReservedInterface(ip, "CIRCUIT_ID", agentCircuitID, "ref2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "reserved_interface", "RESERVED_INTERFACE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "reserved_interface", "ref2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1346,18 +1273,18 @@ func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressRestartIfNeeded(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressRestartIfNeeded(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "RESTART_IF_NEEDED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressRestartIfNeeded(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressRestartIfNeeded(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "RESTART_IF_NEEDED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1377,7 +1304,7 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential", "SNMP3_CREDENTIAL_REPLACE_ME"),
@@ -1385,7 +1312,7 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "SNMP3_USER_UPDATE", "SHA-224", "AUTH_PASSWORD", "AES-256", "PRIVACY_PASSWORD", "SNMP3 Credential Comment Updated", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential", "SNMP3_CREDENTIAL_UPDATE_REPLACE_ME"),
@@ -1408,7 +1335,7 @@ func TestAccFixedaddressResource_SnmpCredential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "COMMUNITY_STRING", "SNMP Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp_credential", "SNMP_CREDENTIAL_REPLACE_ME"),
@@ -1416,7 +1343,7 @@ func TestAccFixedaddressResource_SnmpCredential(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "COMMUNITY_STRING_UPDATED", "SNMP Credential Comment Updated", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp_credential", "SNMP_CREDENTIAL_UPDATE_REPLACE_ME"),
@@ -1428,6 +1355,7 @@ func TestAccFixedaddressResource_SnmpCredential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Template(t *testing.T) {
+	t.Skip("Skipping test as Fixed Address Template is not implemented yet")
 	var resourceName = "nios_dhcp_fixedaddress.test_template"
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
@@ -1470,18 +1398,18 @@ func TestAccFixedaddressResource_UseBootfile(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseBootfile(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseBootfile(ip, "CIRCUIT_ID", agentCircuitID, "true", "file"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "USE_BOOTFILE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseBootfile(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseBootfile(ip, "CIRCUIT_ID", agentCircuitID, "false", "file"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "USE_BOOTFILE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1501,18 +1429,18 @@ func TestAccFixedaddressResource_UseBootserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseBootserver(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseBootserver(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "USE_BOOTSERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseBootserver(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseBootserver(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "USE_BOOTSERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1532,18 +1460,18 @@ func TestAccFixedaddressResource_UseCliCredentials(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseCliCredentials(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseCliCredentials(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_cli_credentials", "USE_CLI_CREDENTIALS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_cli_credentials", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseCliCredentials(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseCliCredentials(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_cli_credentials", "USE_CLI_CREDENTIALS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_cli_credentials", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1563,18 +1491,18 @@ func TestAccFixedaddressResource_UseDdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseDdnsDomainname(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseDdnsDomainname(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "USE_DDNS_DOMAINNAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseDdnsDomainname(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseDdnsDomainname(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "USE_DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1594,18 +1522,18 @@ func TestAccFixedaddressResource_UseDenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseDenyBootp(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseDenyBootp(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "USE_DENY_BOOTP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseDenyBootp(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseDenyBootp(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "USE_DENY_BOOTP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1625,18 +1553,18 @@ func TestAccFixedaddressResource_UseEnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseEnableDdns(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseEnableDdns(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "USE_ENABLE_DDNS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseEnableDdns(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseEnableDdns(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "USE_ENABLE_DDNS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1656,18 +1584,18 @@ func TestAccFixedaddressResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseIgnoreDhcpOptionListRequest(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseIgnoreDhcpOptionListRequest(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "USE_IGNORE_DHCP_OPTION_LIST_REQUEST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseIgnoreDhcpOptionListRequest(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseIgnoreDhcpOptionListRequest(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "USE_IGNORE_DHCP_OPTION_LIST_REQUEST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1687,18 +1615,18 @@ func TestAccFixedaddressResource_UseLogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "USE_LOGIC_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "USE_LOGIC_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1718,18 +1646,18 @@ func TestAccFixedaddressResource_UseMsOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseMsOptions(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseMsOptions(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ms_options", "USE_MS_OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ms_options", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseMsOptions(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseMsOptions(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ms_options", "USE_MS_OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ms_options", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1749,18 +1677,18 @@ func TestAccFixedaddressResource_UseNextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseNextserver(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseNextserver(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "USE_NEXTSERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseNextserver(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseNextserver(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "USE_NEXTSERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1780,18 +1708,18 @@ func TestAccFixedaddressResource_UseOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseOptions(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseOptions(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "USE_OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseOptions(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseOptions(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "USE_OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1811,18 +1739,18 @@ func TestAccFixedaddressResource_UsePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUsePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUsePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "USE_PXE_LEASE_TIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUsePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUsePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "USE_PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1842,18 +1770,18 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "true", "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "USE_SNMP3_CREDENTIAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "false", "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "USE_SNMP3_CREDENTIAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1873,18 +1801,18 @@ func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "USE_SNMP_CREDENTIAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "USE_SNMP_CREDENTIAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1954,7 +1882,6 @@ func testAccCheckFixedaddressDisappears(ctx context.Context, v *dhcp.Fixedaddres
 // agent_remote_id = %q
 // dhcp_client_identifier = %q
 func testAccFixedaddressBasicConfig(ip4addr, matchClient string, agentCircuitId int) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test" {
 	ipv4addr = %q
@@ -2031,15 +1958,21 @@ resource "nios_dhcp_fixedaddress" "test_bootserver" {
 `, ip, matchClient, agentCircuitID, bootserver)
 }
 
-func testAccFixedaddressCliCredentials(ip, matchClient string, agentCircuitID int, cliCredentials string) string {
+func testAccFixedaddressCliCredentials(ip, matchClient string, agentCircuitID int, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test_cli_credentials" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	cli_credentials = %q
+	cli_credentials = [{
+		comment          = %q
+		user             = %q
+		password         = %q
+		credential_type  = %q
+		credential_group = %q
+	}]
 }
-`, ip, matchClient, agentCircuitID, cliCredentials)
+`, ip, matchClient, agentCircuitID, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup)
 }
 
 func testAccFixedaddressClientIdentifierPrependZero(ip, matchClient string, agentCircuitID int, clientIdentifierPrependZero string) string {
@@ -2051,17 +1984,6 @@ resource "nios_dhcp_fixedaddress" "test_client_identifier_prepend_zero" {
 	client_identifier_prepend_zero = %q
 }
 `, ip, matchClient, agentCircuitID, clientIdentifierPrependZero)
-}
-
-func testAccFixedaddressCloudInfo(ip, matchClient string, agentCircuitID int, cloudInfo string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_cloud_info" {
-	ipv4addr = %q
-	match_client = %q
-	agent_circuit_id = %d
-	cloud_info = %q
-}
-`, ip, matchClient, agentCircuitID, cloudInfo)
 }
 
 func testAccFixedaddressComment(ip, matchClient string, agentCircuitID int, comment string) string {
@@ -2218,26 +2140,34 @@ resource "nios_dhcp_fixedaddress" "test_enable_immediate_discovery" {
 `, ip, matchClient, agentCircuitID, enableImmediateDiscovery)
 }
 
-func testAccFixedaddressEnablePxeLeaseTime(ip, matchClient string, agentCircuitID int, enablePxeLeaseTime string) string {
+func testAccFixedaddressEnablePxeLeaseTime(ip, matchClient string, agentCircuitID int, enablePxeLeaseTime string, pxeLeaseTime int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test_enable_pxe_lease_time" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
 	enable_pxe_lease_time = %q
+	pxe_lease_time = %d
 }
-`, ip, matchClient, agentCircuitID, enablePxeLeaseTime)
+`, ip, matchClient, agentCircuitID, enablePxeLeaseTime, pxeLeaseTime)
 }
 
-func testAccFixedaddressExtAttrs(ip, matchClient string, agentCircuitID int, extAttrs string) string {
+func testAccFixedaddressExtAttrs(ip, matchClient string, agentCircuitID int, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+		  %s = %q
+		`, k, v)
+	}
+	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test_extattrs" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	extattrs = %q
+	extattrs = %s
 }
-`, ip, matchClient, agentCircuitID, extAttrs)
+`, ip, matchClient, agentCircuitID, extattrsStr)
 }
 
 func testAccFixedaddressIgnoreDhcpOptionListRequest(ip, matchClient string, agentCircuitID int, ignoreDhcpOptionListRequest string) string {
@@ -2272,15 +2202,18 @@ resource "nios_dhcp_fixedaddress" "test_func_call" {
 `, ip, matchClient, agentCircuitID, funcCall)
 }
 
-func testAccFixedaddressLogicFilterRules(ip, matchClient string, agentCircuitID int, logicFilterRules string) string {
+func testAccFixedaddressLogicFilterRules(ip, matchClient string, agentCircuitID int, logicFilterRuleFilter, logicFilterRuleType string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test_logic_filter_rules" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	logic_filter_rules = %q
+	logic_filter_rules = [{
+		filter = %q
+		type = %q
+	}]
 }
-`, ip, matchClient, agentCircuitID, logicFilterRules)
+`, ip, matchClient, agentCircuitID, logicFilterRuleFilter, logicFilterRuleType)
 }
 
 func testAccFixedaddressMac(ip, matchClient string, agentCircuitID int, mac string) string {
@@ -2302,17 +2235,6 @@ resource "nios_dhcp_fixedaddress" "test_match_client" {
 	agent_circuit_id = %d
 }
 `, ip, matchClient, agentCircuitID)
-}
-
-func testAccFixedaddressMsAdUserData(ip, matchClient string, agentCircuitID int, msAdUserData string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_ms_ad_user_data" {
-	ipv4addr = %q
-	match_client = %q
-	agent_circuit_id = %d
-	ms_ad_user_data = %q
-}
-`, ip, matchClient, agentCircuitID, msAdUserData)
 }
 
 func testAccFixedaddressMsOptions(ip, matchClient string, agentCircuitID int, msOptions string) string {
@@ -2425,26 +2347,38 @@ resource "nios_dhcp_fixedaddress" "test_restart_if_needed" {
 `, ip, matchClient, agentCircuitID, restartIfNeeded)
 }
 
-func testAccFixedaddressSnmp3Credential(ip, matchClient string, agentCircuitID int, snmp3Credential string) string {
+func testAccFixedaddressSnmp3Credential(ip, matchClient string, agentCircuitID int, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test_snmp3_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	snmp3_credential = %q
+	snmp3_credential = {
+		user = %q
+		authentication_protocol = %q
+		authentication_password = %q
+		privacy_protocol = %q
+		privacy_password = %q
+		comment = %q
+		credential_group = %q
+	}
 }
-`, ip, matchClient, agentCircuitID, snmp3Credential)
+`, ip, matchClient, agentCircuitID, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup)
 }
 
-func testAccFixedaddressSnmpCredential(ip, matchClient string, agentCircuitID int, snmpCredential string) string {
+func testAccFixedaddressSnmpCredential(ip, matchClient string, agentCircuitID int, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test_snmp_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	snmp_credential = %q
+	snmp_credential = {
+		community_string = %q
+		comment = %q
+		credential_group = %q
+	}
 }
-`, ip, matchClient, agentCircuitID, snmpCredential)
+`, ip, matchClient, agentCircuitID, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup)
 }
 
 func testAccFixedaddressTemplate(ip, matchClient string, agentCircuitID int, template string) string {
@@ -2458,15 +2392,16 @@ resource "nios_dhcp_fixedaddress" "test_template" {
 `, ip, matchClient, agentCircuitID, template)
 }
 
-func testAccFixedaddressUseBootfile(ip, matchClient string, agentCircuitID int, useBootfile string) string {
+func testAccFixedaddressUseBootfile(ip, matchClient string, agentCircuitID int, useBootFile, bootFile string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test_use_bootfile" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
 	use_bootfile = %q
+	bootfile = %q
 }
-`, ip, matchClient, agentCircuitID, useBootfile)
+`, ip, matchClient, agentCircuitID, useBootFile, bootFile)
 }
 
 func testAccFixedaddressUseBootserver(ip, matchClient string, agentCircuitID int, useBootserver string) string {
@@ -2590,15 +2525,24 @@ resource "nios_dhcp_fixedaddress" "test_use_pxe_lease_time" {
 `, ip, matchClient, agentCircuitID, usePxeLeaseTime)
 }
 
-func testAccFixedaddressUseSnmp3Credential(ip, matchClient string, agentCircuitID int, useSnmp3Credential string) string {
+func testAccFixedaddressUseSnmp3Credential(ip, matchClient string, agentCircuitID int, useSnmp3Credential, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test_use_snmp3_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
 	use_snmp3_credential = %q
+	snmp3_credential = {
+		user = %q
+		authentication_protocol = %q
+		authentication_password = %q
+		privacy_protocol = %q
+		privacy_password = %q
+		comment = %q
+		credential_group = %q
+	}
 }
-`, ip, matchClient, agentCircuitID, useSnmp3Credential)
+`, ip, matchClient, agentCircuitID, useSnmp3Credential, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup)
 }
 
 func testAccFixedaddressUseSnmpCredential(ip, matchClient string, agentCircuitID int, useSnmpCredential string) string {

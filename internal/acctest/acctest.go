@@ -43,7 +43,7 @@ func RandomIP() string {
 }
 
 func RandomIPWithSpecificOctetsSet(prefix string) string {
-	return fmt.Sprintf("15.0.0.%d", rand.Intn(255))
+	return fmt.Sprintf("%s.%d", prefix, rand.Intn(255))
 }
 
 func RandomNumber(maxLimit int) int {

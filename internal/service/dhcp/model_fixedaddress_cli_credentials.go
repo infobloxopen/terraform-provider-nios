@@ -2,6 +2,8 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -35,18 +37,25 @@ var FixedaddressCliCredentialsAttrTypes = map[string]attr.Type{
 var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attribute{
 	"user": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The CLI user name.",
 	},
 	"password": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The CLI password.",
 	},
 	"credential_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ENABLE_SSH", "ENABLE_TELNET", "SSH", "TELNET"),
+		},
 		MarkdownDescription: "The type of the credential.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The commment for the credential.",
 	},
 	"id": schema.Int64Attribute{
@@ -55,6 +64,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Group for the CLI credential.",
 	},
 }

@@ -3,14 +3,15 @@ package dhcp
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"net/http"
+
+	"github.com/hashicorp/go-uuid"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
@@ -98,7 +99,7 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	res := apiRes.CreateFixedaddressResponseAsObject.GetResult()
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Fixedaddress due inherited Extensible attributes, got error: %s", err))
 		return
@@ -143,7 +144,7 @@ func (r *FixedaddressResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	res := apiRes.GetFixedaddressResponseObjectAsResult.GetResult()
-	if res.Extattrs == nil {
+	if res.ExtAttrs == nil {
 		resp.Diagnostics.AddError(
 			"Missing Extensible Attributes",
 			"Unable to read Fixedaddress because no extensible attributes were returned from the API.",
@@ -151,13 +152,13 @@ func (r *FixedaddressResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Fixedaddress due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
-	apiTerraformId, ok := (*res.Extattrs)["Terraform Internal ID"]
+	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Missing Terraform internal id Attributes",
@@ -210,35 +211,37 @@ func (r *FixedaddressResource) ReadByExtAttrs(ctx context.Context, data *Fixedad
 		"Terraform Internal ID": internalId,
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
+	apiRes, _, err := r.client.DHCPAPI.
 		FixedaddressAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForFixedaddress).
 		Execute()
-
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			resp.State.RemoveResource(ctx)
-			return true
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Fixedaddress by extattrs, got error: %s", err))
 		return true
 	}
 
-	if len(apiRes.ListFixedaddressResponseObject.GetResult()) > 0 {
-		res := apiRes.ListFixedaddressResponseObject.GetResult()[0]
+	results := apiRes.ListFixedaddressResponseObject.GetResult()
 
-		// Remove inherited external attributes and check for errors
-		res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
-		if diags.HasError() {
-			return true
-		}
-
-		data.Flatten(ctx, &res, &resp.Diagnostics)
-		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+	// If the list is empty, the resource no longer exists so remove it from state
+	if len(results) == 0 {
+		resp.State.RemoveResource(ctx)
+		return true
 	}
+
+	res := results[0]
+
+	// Remove inherited external attributes and check for errors
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		return true
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+
 	return true
 }
 
@@ -287,7 +290,7 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 
 	res := apiRes.UpdateFixedaddressResponseAsObject.GetResult()
 
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Fixedaddress due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -327,9 +330,9 @@ func (r *FixedaddressResource) addInternalIDToExtAttrs(ctx context.Context, data
 
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
-		if id, ok := elements["Terraform Internal ID"]; ok {
-			if idStr, ok := id.(types.String); ok {
-				internalId = idStr.ValueString()
+		if tId, ok := elements["Terraform Internal ID"]; ok {
+			if tIdStr, ok := tId.(types.String); ok {
+				internalId = tIdStr.ValueString()
 			}
 		}
 	}

@@ -2,11 +2,10 @@ package dhcp
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -155,10 +154,12 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"agent_circuit_id": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The agent circuit ID for the fixed address.",
 	},
 	"agent_remote_id": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The agent remote ID for the fixed address.",
 	},
 	"allow_telnet": schema.BoolAttribute{
@@ -175,10 +176,12 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"bootfile": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The bootfile name for the fixed address. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.",
 	},
 	"bootserver": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The bootserver address for the fixed address. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
 	"cli_credentials": schema.ListNestedAttribute{
@@ -201,14 +204,17 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Comment for the fixed address; maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this fixed address.",
 	},
 	"ddns_hostname": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The DDNS host name for this fixed address.",
 	},
 	"deny_bootp": schema.BoolAttribute{
@@ -219,18 +225,22 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"device_description": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The description of the device.",
 	},
 	"device_location": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The location of the device.",
 	},
 	"device_type": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The type of the device.",
 	},
 	"device_vendor": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The vendor of the device.",
 	},
 	"dhcp_client_identifier": schema.StringAttribute{
@@ -256,7 +266,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"discovered_data": schema.SingleNestedAttribute{
 		Attributes: FixedaddressDiscoveredDataResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional:            true,
@@ -312,10 +322,12 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"mac": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The MAC address value for this fixed address.",
 	},
 	"match_client": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The match_client value for this fixed address. Valid values are: \"MAC_ADDRESS\": The fixed IP address is leased to the matching MAC address. \"CLIENT_ID\": The fixed IP address is leased to the matching DHCP client identifier. \"RESERVED\": The fixed IP address is reserved for later use with a MAC address that only has zeros. \"CIRCUIT_ID\": The fixed IP address is leased to the DHCP client with a matching circuit ID. Note that the \"agent_circuit_id\" field must be set in this case. \"REMOTE_ID\": The fixed IP address is leased to the DHCP client with a matching remote ID. Note that the \"agent_remote_id\" field must be set in this case.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
@@ -335,6 +347,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "This field contains the name of this fixed address.",
 	},
 	"network": schema.StringAttribute{
@@ -349,6 +362,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"nextserver": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
@@ -365,6 +379,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"reserved_interface": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The ref to the reserved interface to which the device belongs.",
 	},
 	"restart_if_needed": schema.BoolAttribute{
@@ -381,6 +396,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"template": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set on creation, the fixed address will be created according to the values specified in the named template.",
 	},
 	"use_bootfile": schema.BoolAttribute{
@@ -511,7 +527,7 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		EnableDdns:                     flex.ExpandBoolPointer(m.EnableDdns),
 		EnableImmediateDiscovery:       flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		EnablePxeLeaseTime:             flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
-		Extattrs:                       ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                       ExpandExtAttr(ctx, m.ExtAttrs, diags),
 		IgnoreDhcpOptionListRequest:    flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
 		Ipv4addr:                       ExpandRecordAIpv4addr(m.Ipv4addr),
 		FuncCall:                       ExpandFuncCall(ctx, m.FuncCall, diags),
@@ -595,7 +611,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.Extattrs, diags)
+	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.Ipv4addr = FlattenRecordAIpv4addr(from.Ipv4addr)
 	m.IsInvalidMac = types.BoolPointerValue(from.IsInvalidMac)
