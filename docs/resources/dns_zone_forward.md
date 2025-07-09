@@ -14,13 +14,13 @@ Manages DNS Forward Zones.
 
 ```terraform
 // Create a DNS zone forward record with basic fields
-resource "nios_dns_zone_forward" "zone_forward1" {
+resource "nios_dns_zone_forward" "zone_forward_basic_fields" {
   fqdn              = "example1.example.com"
   external_ns_group = "nsg1"
 }
 
 // Create a DNS zone forward record with additional fields
-resource "nios_dns_zone_forward" "zone_forward2" {
+resource "nios_dns_zone_forward" "zone_forward_additional_fields" {
   fqdn = "example2.example.com"
   forward_to = [
     {
@@ -43,7 +43,7 @@ resource "nios_dns_zone_forward" "zone_forward2" {
   ]
   view = "default"
   extattrs = {
-    Site = "Hungary"
+    Site = "location-1"
   }
 }
 ```

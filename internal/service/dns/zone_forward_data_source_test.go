@@ -15,7 +15,8 @@ func TestAccZoneForwardDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_zone_forward.test"
 	resourceName := "nios_dns_zone_forward.test"
 	var v dns.ZoneForward
-	fqdn := acctest.RandomName() + ".example.com"
+	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	externalNsGroup := "ensg1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +24,7 @@ func TestAccZoneForwardDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneForwardDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneForwardDataSourceConfigFilters(fqdn),
+				Config: testAccZoneForwardDataSourceConfigFilters(fqdn, externalNsGroup),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
@@ -38,14 +39,16 @@ func TestAccZoneForwardDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_zone_forward.test"
 	resourceName := "nios_dns_zone_forward.test"
 	var v dns.ZoneForward
-	fqdn := acctest.RandomName() + ".example.com"
+	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	extAttrValue := acctest.RandomName()
+	externalNsGroup := "ensg1"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckZoneForwardDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneForwardDataSourceConfigExtAttrFilters(fqdn, "MOROCCO"),
+				Config: testAccZoneForwardDataSourceConfigExtAttrFilters(fqdn, externalNsGroup, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
@@ -60,7 +63,7 @@ func TestAccZoneForwardDataSource_ExtAttrFilters(t *testing.T) {
 
 func testAccCheckZoneForwardResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
-		resource.TestCheckResourceAttrPair(resourceName, "_ref", dataSourceName, "result.0._ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
 		resource.TestCheckResourceAttrPair(resourceName, "address", dataSourceName, "result.0.address"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),
@@ -90,24 +93,26 @@ func testAccCheckZoneForwardResourceAttrPair(resourceName, dataSourceName string
 	}
 }
 
-func testAccZoneForwardDataSourceConfigFilters(fqdn string) string {
+func testAccZoneForwardDataSourceConfigFilters(fqdn, externalNsGroup string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_forward" "test" {
  fqdn = %q
+ external_ns_group = %q
 }
 
 data "nios_dns_zone_forward" "test" {
  filters = {
-	 = nios_dns_zone_forward.test.fqdn
+	 fqdn = nios_dns_zone_forward.test.fqdn
  }
 }
-`, fqdn)
+`, fqdn, externalNsGroup)
 }
 
-func testAccZoneForwardDataSourceConfigExtAttrFilters(fqdn, extAttrsValue string) string {
+func testAccZoneForwardDataSourceConfigExtAttrFilters(fqdn, externalNsGroup, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_forward" "test" {
  fqdn = %q
+ external_ns_group = %q
  extattrs = {
    Site = %q
  }
@@ -118,5 +123,5 @@ data "nios_dns_zone_forward" "test" {
 	"Site" = nios_dns_zone_forward.test.extattrs.Site
  }
 }
-`, fqdn, extAttrsValue)
+`, fqdn, externalNsGroup, extAttrsValue)
 }
