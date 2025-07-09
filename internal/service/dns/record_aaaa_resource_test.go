@@ -15,6 +15,9 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
+// TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// - Parent Zone: example.com (in default view)
+// - IPv6 Network: 2001:db8:abcd:12::/64 (for func_call tests)
 func TestAccRecordAaaaResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test"
 	var v dns.RecordAaaa
@@ -313,6 +316,9 @@ func TestAccRecordAaaaResource_Ipv6addr(t *testing.T) {
 	})
 }
 
+// TestAccRecordAaaaResource_FuncCall tests the "func_call" attribute functionality
+// which allocates IPv6 addresses using next_available_ip. Since func_call attribute can't be
+// updated, the comment is updated to demonstrate an update to the resource
 func TestAccRecordAaaaResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_func_call"
 	var v dns.RecordAaaa

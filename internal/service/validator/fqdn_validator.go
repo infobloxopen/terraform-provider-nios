@@ -8,21 +8,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-var _ validator.String = dnsRecordNameValidator{}
+var _ validator.String = fqdnValidator{}
 
-// dnsRecordNameValidator validates if the provided value is a valid DNS record name.
-type dnsRecordNameValidator struct {
+// fqdnValidator validates if the provided value is a valid FQDN.
+type fqdnValidator struct {
 }
 
-func (validator dnsRecordNameValidator) Description(ctx context.Context) string {
+func (validator fqdnValidator) Description(ctx context.Context) string {
 	return "value must be a valid DNS record name in FQDN format without leading/trailing whitespace or trailing dot"
 }
 
-func (validator dnsRecordNameValidator) MarkdownDescription(ctx context.Context) string {
+func (validator fqdnValidator) MarkdownDescription(ctx context.Context) string {
 	return validator.Description(ctx)
 }
 
-func (validator dnsRecordNameValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+func (validator fqdnValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	// Only validate the attribute configuration value if it is known.
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
 		return
@@ -47,11 +47,11 @@ func (validator dnsRecordNameValidator) ValidateString(ctx context.Context, req 
 	}
 }
 
-// IsRecordNameValid returns an AttributeValidator which ensures that any configured
+// IsValidFQDN returns an AttributeValidator which ensures that any configured
 // attribute value:
 //
 //   - Contains no whitespace.
 //   - Does not end with a dot
-func IsRecordNameValid() validator.String {
-	return dnsRecordNameValidator{}
+func IsValidFQDN() validator.String {
+	return fqdnValidator{}
 }
