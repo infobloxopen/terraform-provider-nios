@@ -16,9 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
-
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/validators/dnsvalidator"
+	customvalidator "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/validator"
 )
 
 type RecordAaaaModel struct {
@@ -180,7 +179,7 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "Name for the AAAA record in FQDN format. This value can be in unicode format.",
 		Validators: []validator.String{
-			dnsvalidator.IsRecordNameValid(),
+			customvalidator.IsRecordNameValid(),
 		},
 	},
 	"reclaimable": schema.BoolAttribute{

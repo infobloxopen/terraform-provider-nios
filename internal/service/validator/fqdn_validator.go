@@ -1,4 +1,4 @@
-package dnsvalidator
+package validator
 
 import (
 	"context"
