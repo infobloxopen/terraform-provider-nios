@@ -37,7 +37,7 @@ func (r *RecordAResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *RecordAResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DNS A record.",
 		Attributes:          RecordAResourceSchemaAttributes,
 	}
 }
@@ -98,7 +98,7 @@ func (r *RecordAResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	res := apiRes.CreateRecordAResponseAsObject.GetResult()
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordA due inherited Extensible attributes, got error: %s", err))
 		return
@@ -143,7 +143,7 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
-	if res.Extattrs == nil {
+	if res.ExtAttrs == nil {
 		resp.Diagnostics.AddError(
 			"Missing Extensible Attributes",
 			"Unable to read RecordA because no extensible attributes were returned from the API.",
@@ -151,13 +151,13 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordA due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
-	apiTerraformId, ok := (*res.Extattrs)["Terraform Internal ID"]
+	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Missing Terraform internal id Attributes",
@@ -209,35 +209,36 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 		"Terraform Internal ID": internalId,
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
+	apiRes, _, err := r.client.DNSAPI.
 		RecordAAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordA).
 		Execute()
-
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			resp.State.RemoveResource(ctx)
-			return true
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordA by extattrs, got error: %s", err))
 		return true
 	}
 
-	if len(apiRes.ListRecordAResponseObject.GetResult()) > 0 {
-		res := apiRes.ListRecordAResponseObject.GetResult()[0]
-
-		// Remove inherited external attributes and check for errors
-		res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
-		if diags.HasError() {
-			return true
-		}
-
-		data.Flatten(ctx, &res, &resp.Diagnostics)
-		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+	results := apiRes.ListRecordAResponseObject.GetResult()
+	// If the list is empty, the resource no longer exists so remove it from state
+	if len(results) == 0 {
+		resp.State.RemoveResource(ctx)
+		return true
 	}
+
+	res := results[0]
+
+	// Remove inherited external attributes and check for errors
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		return true
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+
 	return true
 }
 
@@ -283,7 +284,7 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	res := apiRes.UpdateRecordAResponseAsObject.GetResult()
 
-	res.Extattrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.Extattrs)
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -322,10 +323,10 @@ func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *Rec
 	var internalId string
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
-		if idEA, ok := elements["Terraform Internal ID"]; ok {
-			idObj := idEA.(types.Object)
-			valueAttr := idObj.Attributes()["value"]
-			internalId = valueAttr.(types.String).ValueString()
+		if tId, ok := elements["Terraform Internal ID"]; ok {
+			if tIdStr, ok := tId.(types.String); ok {
+				internalId = tIdStr.ValueString()
+			}
 		}
 	}
 

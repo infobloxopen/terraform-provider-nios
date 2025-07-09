@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -83,12 +84,14 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
-		Attributes: RecordAAwsRte53RecordInfoResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RecordAAwsRte53RecordInfoResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The AWS Route53 record information associated with the record.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: RecordACloudInfoResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RecordACloudInfoResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -174,6 +177,12 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The Name of the record.",
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"reclaimable": schema.BoolAttribute{
 		Computed:            true,
@@ -223,7 +232,7 @@ func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		DdnsPrincipal:       flex.ExpandStringPointer(m.DdnsPrincipal),
 		DdnsProtected:       flex.ExpandBoolPointer(m.DdnsProtected),
 		Disable:             flex.ExpandBoolPointer(m.Disable),
-		Extattrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
 		ForbidReclamation:   flex.ExpandBoolPointer(m.ForbidReclamation),
 		FuncCall:            ExpandFuncCall(ctx, m.FuncCall, diags),
 		Ipv4addr:            ExpandRecordAIpv4addr(m.Ipv4addr),
@@ -268,7 +277,7 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DiscoveredData = FlattenRecordADiscoveredData(ctx, from.DiscoveredData, diags)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.Extattrs, diags)
+	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
 	m.Ipv4addr = FlattenRecordAIpv4addr(from.Ipv4addr)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)
