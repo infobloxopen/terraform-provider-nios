@@ -3,12 +3,9 @@ package ipam
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -18,8 +15,8 @@ import (
 )
 
 type NetworkcontainerSubscribeSettingsModel struct {
-	EnabledAttributes  types.List   `tfsdk:"enabled_attributes"`
-	MappedEaAttributes types.Object `tfsdk:"mapped_ea_attributes"`
+	EnabledAttributes  types.List `tfsdk:"enabled_attributes"`
+	MappedEaAttributes types.List `tfsdk:"mapped_ea_attributes"`
 }
 
 var NetworkcontainerSubscribeSettingsAttrTypes = map[string]attr.Type{
@@ -32,25 +29,13 @@ var NetworkcontainerSubscribeSettingsResourceSchemaAttributes = map[string]schem
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
-		Validators: []validator.List{
-			listvalidator.ValueStringsAre(
-				stringvalidator.OneOf(
-					"DOMAINNAME",
-					"ENDPOINT_PROFILE",
-					"SECURITY_GROUP",
-					"SESSION_STATE",
-					"SSID",
-					"USERNAME",
-					"VLAN",
-				),
-			),
-		},
 	},
 	"mapped_ea_attributes": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NetworkcontainersubscribesettingsMappedEaAttributesResourceSchemaAttributes,
 		},
-		Optional: true,
+		Optional:            true,
+		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
 	},
 }
 
@@ -72,7 +57,7 @@ func (m *NetworkcontainerSubscribeSettingsModel) Expand(ctx context.Context, dia
 	}
 	to := &ipam.NetworkcontainerSubscribeSettings{
 		EnabledAttributes:  flex.ExpandFrameworkListString(ctx, m.EnabledAttributes, diags),
-		MappedEaAttributes: ExpandNetworkcontainersubscribesettingsMappedEaAttributes(ctx, m.MappedEaAttributes, diags),
+		MappedEaAttributes: flex.ExpandFrameworkListNestedBlock(ctx, m.MappedEaAttributes, diags, ExpandNetworkcontainersubscribesettingsMappedEaAttributes),
 	}
 	return to
 }
@@ -83,6 +68,7 @@ func FlattenNetworkcontainerSubscribeSettings(ctx context.Context, from *ipam.Ne
 	}
 	m := NetworkcontainerSubscribeSettingsModel{}
 	m.Flatten(ctx, from, diags)
+	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerSubscribeSettingsAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -96,5 +82,5 @@ func (m *NetworkcontainerSubscribeSettingsModel) Flatten(ctx context.Context, fr
 		*m = NetworkcontainerSubscribeSettingsModel{}
 	}
 	m.EnabledAttributes = flex.FlattenFrameworkListString(ctx, from.EnabledAttributes, diags)
-	m.MappedEaAttributes = FlattenNetworkcontainersubscribesettingsMappedEaAttributes(ctx, from.MappedEaAttributes, diags)
+	m.MappedEaAttributes = flex.FlattenFrameworkListNestedBlock(ctx, from.MappedEaAttributes, NetworkcontainersubscribesettingsMappedEaAttributesAttrTypes, diags, FlattenNetworkcontainersubscribesettingsMappedEaAttributes)
 }

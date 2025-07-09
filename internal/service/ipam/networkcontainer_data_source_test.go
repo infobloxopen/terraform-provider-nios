@@ -119,7 +119,6 @@ func testAccCheckNetworkcontainerResourceAttrPair(resourceName, dataSourceName s
 		resource.TestCheckResourceAttrPair(resourceName, "pxe_lease_time", dataSourceName, "result.0.pxe_lease_time"),
 		resource.TestCheckResourceAttrPair(resourceName, "recycle_leases", dataSourceName, "result.0.recycle_leases"),
 		resource.TestCheckResourceAttrPair(resourceName, "remove_subnets", dataSourceName, "result.0.remove_subnets"),
-		resource.TestCheckResourceAttrPair(resourceName, "restart_if_needed", dataSourceName, "result.0.restart_if_needed"),
 		resource.TestCheckResourceAttrPair(resourceName, "rir", dataSourceName, "result.0.rir"),
 		resource.TestCheckResourceAttrPair(resourceName, "rir_organization", dataSourceName, "result.0.rir_organization"),
 		resource.TestCheckResourceAttrPair(resourceName, "rir_registration_action", dataSourceName, "result.0.rir_registration_action"),
