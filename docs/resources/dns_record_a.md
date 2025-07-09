@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_a Resource - nios"
 subcategory: "DNS"
 description: |-
-  
+  Manages a DNS A record.
 ---
 
 # nios_dns_record_a (Resource)
 
-
+Manages a DNS A record.
 
 ## Example Usage
 
@@ -25,7 +25,7 @@ resource "nios_dns_record_a" "create_record" {
 
 // Create Record A using function call to retrieve ipv4addr
 resource "nios_dns_record_a" "create_with_func_call" {
-  name = "example_test_func_call.example.com"
+  name = "example_func_call.example.com"
   func_call = {
     attribute_name  = "ipv4addr"
     object_function = "next_available_ip"
@@ -66,8 +66,8 @@ resource "nios_dns_record_a" "create_with_func_call" {
 
 ### Read-Only
 
-- `aws_rte53_record_info` (Attributes) (see [below for nested schema](#nestedatt--aws_rte53_record_info))
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--cloud_info))
+- `aws_rte53_record_info` (Attributes) The AWS Route53 record information associated with the record. (see [below for nested schema](#nestedatt--aws_rte53_record_info))
+- `cloud_info` (Attributes) The cloud information associated with the record. (see [below for nested schema](#nestedatt--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
 - `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--discovered_data))
 - `dns_name` (String) The name for an A record in punycode format.

@@ -3,27 +3,27 @@
 page_title: "nios_dns_record_a Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS A Records.
 ---
 
 # nios_dns_record_a (Data Source)
 
-
+Retrieves information about existing DNS A Records.
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific A record by name
+// Retrieve a specific A record by filters
 data "nios_dns_record_a" "get_record_using_filters" {
   filters = {
-    "name" = "example_record.example.com"
+    name = "example_record.example.com"
   }
 }
 
 // Retrieve specific A records using Extensible Attributes
 data "nios_dns_record_a" "get_record_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
@@ -38,6 +38,8 @@ data "nios_dns_record_a" "get_all_records_in_default_view" {}
 
 - `extattrfilters` (Map of String) External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
 - `filters` (Map of String) Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
+- `max_results` (Number) Maximum number of objects to be returned. Defaults to 1000.
+- `paging` (Number) Enable (1) or disable (0) paging for the data source query. When enabled, the system retrieves results in pages, allowing efficient handling of large result sets. Paging is enabled by default.
 
 ### Read-Only
 
@@ -68,8 +70,8 @@ Optional:
 
 Read-Only:
 
-- `aws_rte53_record_info` (Attributes) (see [below for nested schema](#nestedatt--result--aws_rte53_record_info))
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info))
+- `aws_rte53_record_info` (Attributes) The AWS Route53 record information associated with the record. (see [below for nested schema](#nestedatt--result--aws_rte53_record_info))
+- `cloud_info` (Attributes) The cloud information associated with the record. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
 - `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--result--discovered_data))
 - `dns_name` (String) The name for an A record in punycode format.
