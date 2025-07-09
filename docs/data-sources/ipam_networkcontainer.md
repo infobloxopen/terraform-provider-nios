@@ -357,7 +357,7 @@ Optional:
 Optional:
 
 - `enabled_attributes` (List of String) The list of Cisco ISE attributes allowed for subscription.
-- `mapped_ea_attributes` (Attributes List) (see [below for nested schema](#nestedatt--result--subscribe_settings--mapped_ea_attributes))
+- `mapped_ea_attributes` (Attributes List) The list of NIOS extensible attributes to Cisco ISE attributes mappings. (see [below for nested schema](#nestedatt--result--subscribe_settings--mapped_ea_attributes))
 
 <a id="nestedatt--result--subscribe_settings--mapped_ea_attributes"></a>
 ### Nested Schema for `result.subscribe_settings.mapped_ea_attributes`
