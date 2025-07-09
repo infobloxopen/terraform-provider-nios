@@ -22,8 +22,8 @@ type ZoneAuthScavengingSettingsModel struct {
 	EnableZoneLastQueried     types.Bool   `tfsdk:"enable_zone_last_queried"`
 	ReclaimAssociatedRecords  types.Bool   `tfsdk:"reclaim_associated_records"`
 	ScavengingSchedule        types.Object `tfsdk:"scavenging_schedule"`
-	ExpressionList            types.Object `tfsdk:"expression_list"`
-	EaExpressionList          types.Object `tfsdk:"ea_expression_list"`
+	ExpressionList            types.List   `tfsdk:"expression_list"`
+	EaExpressionList          types.List   `tfsdk:"ea_expression_list"`
 }
 
 var ZoneAuthScavengingSettingsAttrTypes = map[string]attr.Type{
@@ -34,8 +34,8 @@ var ZoneAuthScavengingSettingsAttrTypes = map[string]attr.Type{
 	"enable_zone_last_queried":    types.BoolType,
 	"reclaim_associated_records":  types.BoolType,
 	"scavenging_schedule":         types.ObjectType{AttrTypes: ZoneauthscavengingsettingsScavengingScheduleAttrTypes},
-	"expression_list":             types.ObjectType{AttrTypes: ZoneauthscavengingsettingsExpressionListAttrTypes},
-	"ea_expression_list":          types.ObjectType{AttrTypes: ZoneauthscavengingsettingsEaExpressionListAttrTypes},
+	"expression_list":             types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneauthscavengingsettingsExpressionListAttrTypes}},
+	"ea_expression_list":          types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneauthscavengingsettingsEaExpressionListAttrTypes}},
 }
 
 var ZoneAuthScavengingSettingsResourceSchemaAttributes = map[string]schema.Attribute{
@@ -67,13 +67,19 @@ var ZoneAuthScavengingSettingsResourceSchemaAttributes = map[string]schema.Attri
 		Attributes: ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes,
 		Optional:   true,
 	},
-	"expression_list": schema.SingleNestedAttribute{
-		Attributes: ZoneauthscavengingsettingsExpressionListResourceSchemaAttributes,
-		Optional:   true,
+	"expression_list": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: ZoneauthscavengingsettingsExpressionListResourceSchemaAttributes,
+		},
+		Optional:            true,
+		MarkdownDescription: "The expression list. The particular record is treated as reclaimable if expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record.",
 	},
-	"ea_expression_list": schema.SingleNestedAttribute{
-		Attributes: ZoneauthscavengingsettingsEaExpressionListResourceSchemaAttributes,
-		Optional:   true,
+	"ea_expression_list": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: ZoneauthscavengingsettingsEaExpressionListResourceSchemaAttributes,
+		},
+		Optional:            true,
+		MarkdownDescription: "The extensible attributes expression list. The particular record is treated as reclaimable if extensible attributes expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record.",
 	},
 }
 
@@ -101,8 +107,8 @@ func (m *ZoneAuthScavengingSettingsModel) Expand(ctx context.Context, diags *dia
 		EnableZoneLastQueried:     flex.ExpandBoolPointer(m.EnableZoneLastQueried),
 		ReclaimAssociatedRecords:  flex.ExpandBoolPointer(m.ReclaimAssociatedRecords),
 		ScavengingSchedule:        ExpandZoneauthscavengingsettingsScavengingSchedule(ctx, m.ScavengingSchedule, diags),
-		ExpressionList:            ExpandZoneauthscavengingsettingsExpressionList(ctx, m.ExpressionList, diags),
-		EaExpressionList:          ExpandZoneauthscavengingsettingsEaExpressionList(ctx, m.EaExpressionList, diags),
+		ExpressionList:            flex.ExpandFrameworkListNestedBlock(ctx, m.ExpressionList, diags, ExpandZoneauthscavengingsettingsExpressionList),
+		EaExpressionList:          flex.ExpandFrameworkListNestedBlock(ctx, m.EaExpressionList, diags, ExpandZoneauthscavengingsettingsEaExpressionList),
 	}
 	return to
 }
@@ -132,6 +138,6 @@ func (m *ZoneAuthScavengingSettingsModel) Flatten(ctx context.Context, from *dns
 	m.EnableZoneLastQueried = types.BoolPointerValue(from.EnableZoneLastQueried)
 	m.ReclaimAssociatedRecords = types.BoolPointerValue(from.ReclaimAssociatedRecords)
 	m.ScavengingSchedule = FlattenZoneauthscavengingsettingsScavengingSchedule(ctx, from.ScavengingSchedule, diags)
-	m.ExpressionList = FlattenZoneauthscavengingsettingsExpressionList(ctx, from.ExpressionList, diags)
-	m.EaExpressionList = FlattenZoneauthscavengingsettingsEaExpressionList(ctx, from.EaExpressionList, diags)
+	m.ExpressionList = flex.FlattenFrameworkListNestedBlock(ctx, from.ExpressionList, ZoneauthscavengingsettingsExpressionListAttrTypes, diags, FlattenZoneauthscavengingsettingsExpressionList)
+	m.EaExpressionList = flex.FlattenFrameworkListNestedBlock(ctx, from.EaExpressionList, ZoneauthscavengingsettingsEaExpressionListAttrTypes, diags, FlattenZoneauthscavengingsettingsEaExpressionList)
 }

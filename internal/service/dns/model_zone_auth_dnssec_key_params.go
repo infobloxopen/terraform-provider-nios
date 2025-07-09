@@ -6,13 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 
@@ -22,7 +17,7 @@ import (
 type ZoneAuthDnssecKeyParamsModel struct {
 	EnableKskAutoRollover         types.Bool   `tfsdk:"enable_ksk_auto_rollover"`
 	KskAlgorithm                  types.String `tfsdk:"ksk_algorithm"`
-	KskAlgorithms                 types.Object `tfsdk:"ksk_algorithms"`
+	KskAlgorithms                 types.List   `tfsdk:"ksk_algorithms"`
 	KskRollover                   types.Int64  `tfsdk:"ksk_rollover"`
 	KskSize                       types.Int64  `tfsdk:"ksk_size"`
 	NextSecureType                types.String `tfsdk:"next_secure_type"`
@@ -34,7 +29,7 @@ type ZoneAuthDnssecKeyParamsModel struct {
 	Nsec3Iterations               types.Int64  `tfsdk:"nsec3_iterations"`
 	SignatureExpiration           types.Int64  `tfsdk:"signature_expiration"`
 	ZskAlgorithm                  types.String `tfsdk:"zsk_algorithm"`
-	ZskAlgorithms                 types.Object `tfsdk:"zsk_algorithms"`
+	ZskAlgorithms                 types.List   `tfsdk:"zsk_algorithms"`
 	ZskRollover                   types.Int64  `tfsdk:"zsk_rollover"`
 	ZskRolloverMechanism          types.String `tfsdk:"zsk_rollover_mechanism"`
 	ZskSize                       types.Int64  `tfsdk:"zsk_size"`
@@ -43,7 +38,7 @@ type ZoneAuthDnssecKeyParamsModel struct {
 var ZoneAuthDnssecKeyParamsAttrTypes = map[string]attr.Type{
 	"enable_ksk_auto_rollover":         types.BoolType,
 	"ksk_algorithm":                    types.StringType,
-	"ksk_algorithms":                   types.ObjectType{AttrTypes: ZoneauthdnsseckeyparamsKskAlgorithmsAttrTypes},
+	"ksk_algorithms":                   types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneauthdnsseckeyparamsKskAlgorithmsAttrTypes}},
 	"ksk_rollover":                     types.Int64Type,
 	"ksk_size":                         types.Int64Type,
 	"next_secure_type":                 types.StringType,
@@ -55,7 +50,7 @@ var ZoneAuthDnssecKeyParamsAttrTypes = map[string]attr.Type{
 	"nsec3_iterations":                 types.Int64Type,
 	"signature_expiration":             types.Int64Type,
 	"zsk_algorithm":                    types.StringType,
-	"zsk_algorithms":                   types.ObjectType{AttrTypes: ZoneauthdnsseckeyparamsZskAlgorithmsAttrTypes},
+	"zsk_algorithms":                   types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneauthdnsseckeyparamsZskAlgorithmsAttrTypes}},
 	"zsk_rollover":                     types.Int64Type,
 	"zsk_rollover_mechanism":           types.StringType,
 	"zsk_size":                         types.Int64Type,
@@ -64,23 +59,18 @@ var ZoneAuthDnssecKeyParamsAttrTypes = map[string]attr.Type{
 var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_ksk_auto_rollover": schema.BoolAttribute{
 		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to True, automatic rollovers for the signing key is enabled.",
 	},
 	"ksk_algorithm": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString("8"),
-
+		Optional:            true,
 		MarkdownDescription: "Key Signing Key algorithm. Deprecated.",
-		Validators: []validator.String{
-			stringvalidator.OneOf("10", "13", "14", "5", "7", "8"),
-		},
 	},
-	"ksk_algorithms": schema.SingleNestedAttribute{
-		Attributes: ZoneauthdnsseckeyparamsKskAlgorithmsResourceSchemaAttributes,
-		Optional:   true,
+	"ksk_algorithms": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: ZoneauthdnsseckeyparamsKskAlgorithmsResourceSchemaAttributes,
+		},
+		Optional:            true,
+		MarkdownDescription: "A list of Key Signing Key Algorithms.",
 	},
 	"ksk_rollover": schema.Int64Attribute{
 		Optional:            true,
@@ -126,9 +116,12 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		Optional:            true,
 		MarkdownDescription: "Zone Signing Key algorithm. Deprecated.",
 	},
-	"zsk_algorithms": schema.SingleNestedAttribute{
-		Attributes: ZoneauthdnsseckeyparamsZskAlgorithmsResourceSchemaAttributes,
-		Optional:   true,
+	"zsk_algorithms": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: ZoneauthdnsseckeyparamsZskAlgorithmsResourceSchemaAttributes,
+		},
+		Optional:            true,
+		MarkdownDescription: "A list of Zone Signing Key Algorithms.",
 	},
 	"zsk_rollover": schema.Int64Attribute{
 		Optional:            true,
@@ -163,7 +156,7 @@ func (m *ZoneAuthDnssecKeyParamsModel) Expand(ctx context.Context, diags *diag.D
 	to := &dns.ZoneAuthDnssecKeyParams{
 		EnableKskAutoRollover:         flex.ExpandBoolPointer(m.EnableKskAutoRollover),
 		KskAlgorithm:                  flex.ExpandStringPointer(m.KskAlgorithm),
-		KskAlgorithms:                 ExpandZoneauthdnsseckeyparamsKskAlgorithms(ctx, m.KskAlgorithms, diags),
+		KskAlgorithms:                 flex.ExpandFrameworkListNestedBlock(ctx, m.KskAlgorithms, diags, ExpandZoneauthdnsseckeyparamsKskAlgorithms),
 		KskRollover:                   flex.ExpandInt64Pointer(m.KskRollover),
 		KskSize:                       flex.ExpandInt64Pointer(m.KskSize),
 		NextSecureType:                flex.ExpandStringPointer(m.NextSecureType),
@@ -175,7 +168,7 @@ func (m *ZoneAuthDnssecKeyParamsModel) Expand(ctx context.Context, diags *diag.D
 		Nsec3Iterations:               flex.ExpandInt64Pointer(m.Nsec3Iterations),
 		SignatureExpiration:           flex.ExpandInt64Pointer(m.SignatureExpiration),
 		ZskAlgorithm:                  flex.ExpandStringPointer(m.ZskAlgorithm),
-		ZskAlgorithms:                 ExpandZoneauthdnsseckeyparamsZskAlgorithms(ctx, m.ZskAlgorithms, diags),
+		ZskAlgorithms:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZskAlgorithms, diags, ExpandZoneauthdnsseckeyparamsZskAlgorithms),
 		ZskRollover:                   flex.ExpandInt64Pointer(m.ZskRollover),
 		ZskRolloverMechanism:          flex.ExpandStringPointer(m.ZskRolloverMechanism),
 		ZskSize:                       flex.ExpandInt64Pointer(m.ZskSize),
@@ -203,7 +196,7 @@ func (m *ZoneAuthDnssecKeyParamsModel) Flatten(ctx context.Context, from *dns.Zo
 	}
 	m.EnableKskAutoRollover = types.BoolPointerValue(from.EnableKskAutoRollover)
 	m.KskAlgorithm = flex.FlattenStringPointer(from.KskAlgorithm)
-	m.KskAlgorithms = FlattenZoneauthdnsseckeyparamsKskAlgorithms(ctx, from.KskAlgorithms, diags)
+	m.KskAlgorithms = flex.FlattenFrameworkListNestedBlock(ctx, from.KskAlgorithms, ZoneauthdnsseckeyparamsKskAlgorithmsAttrTypes, diags, FlattenZoneauthdnsseckeyparamsKskAlgorithms)
 	m.KskRollover = flex.FlattenInt64Pointer(from.KskRollover)
 	m.KskSize = flex.FlattenInt64Pointer(from.KskSize)
 	m.NextSecureType = flex.FlattenStringPointer(from.NextSecureType)
@@ -215,7 +208,7 @@ func (m *ZoneAuthDnssecKeyParamsModel) Flatten(ctx context.Context, from *dns.Zo
 	m.Nsec3Iterations = flex.FlattenInt64Pointer(from.Nsec3Iterations)
 	m.SignatureExpiration = flex.FlattenInt64Pointer(from.SignatureExpiration)
 	m.ZskAlgorithm = flex.FlattenStringPointer(from.ZskAlgorithm)
-	m.ZskAlgorithms = FlattenZoneauthdnsseckeyparamsZskAlgorithms(ctx, from.ZskAlgorithms, diags)
+	m.ZskAlgorithms = flex.FlattenFrameworkListNestedBlock(ctx, from.ZskAlgorithms, ZoneauthdnsseckeyparamsZskAlgorithmsAttrTypes, diags, FlattenZoneauthdnsseckeyparamsZskAlgorithms)
 	m.ZskRollover = flex.FlattenInt64Pointer(from.ZskRollover)
 	m.ZskRolloverMechanism = flex.FlattenStringPointer(from.ZskRolloverMechanism)
 	m.ZskSize = flex.FlattenInt64Pointer(from.ZskSize)

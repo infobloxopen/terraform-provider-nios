@@ -19,7 +19,7 @@ type ZoneAuthGridPrimaryModel struct {
 	Stealth                  types.Bool   `tfsdk:"stealth"`
 	GridReplicate            types.Bool   `tfsdk:"grid_replicate"`
 	Lead                     types.Bool   `tfsdk:"lead"`
-	PreferredPrimaries       types.Object `tfsdk:"preferred_primaries"`
+	PreferredPrimaries       types.List   `tfsdk:"preferred_primaries"`
 	EnablePreferredPrimaries types.Bool   `tfsdk:"enable_preferred_primaries"`
 }
 
@@ -28,7 +28,7 @@ var ZoneAuthGridPrimaryAttrTypes = map[string]attr.Type{
 	"stealth":                    types.BoolType,
 	"grid_replicate":             types.BoolType,
 	"lead":                       types.BoolType,
-	"preferred_primaries":        types.ObjectType{AttrTypes: ZoneauthgridprimaryPreferredPrimariesAttrTypes},
+	"preferred_primaries":        types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneauthgridprimaryPreferredPrimariesAttrTypes}},
 	"enable_preferred_primaries": types.BoolType,
 }
 
@@ -49,9 +49,12 @@ var ZoneAuthGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "This flag controls whether the Grid lead secondary server performs zone transfers to non lead secondaries. This flag is ignored if the struct is specified as grid_member in an authoritative zone.",
 	},
-	"preferred_primaries": schema.SingleNestedAttribute{
-		Attributes: ZoneauthgridprimaryPreferredPrimariesResourceSchemaAttributes,
-		Optional:   true,
+	"preferred_primaries": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: ZoneauthgridprimaryPreferredPrimariesResourceSchemaAttributes,
+		},
+		Optional:            true,
+		MarkdownDescription: "The primary preference list with Grid member names and\\or External Server extserver structs for this member.",
 	},
 	"enable_preferred_primaries": schema.BoolAttribute{
 		Optional:            true,
@@ -80,7 +83,7 @@ func (m *ZoneAuthGridPrimaryModel) Expand(ctx context.Context, diags *diag.Diagn
 		Stealth:                  flex.ExpandBoolPointer(m.Stealth),
 		GridReplicate:            flex.ExpandBoolPointer(m.GridReplicate),
 		Lead:                     flex.ExpandBoolPointer(m.Lead),
-		PreferredPrimaries:       ExpandZoneauthgridprimaryPreferredPrimaries(ctx, m.PreferredPrimaries, diags),
+		PreferredPrimaries:       flex.ExpandFrameworkListNestedBlock(ctx, m.PreferredPrimaries, diags, ExpandZoneauthgridprimaryPreferredPrimaries),
 		EnablePreferredPrimaries: flex.ExpandBoolPointer(m.EnablePreferredPrimaries),
 	}
 	return to
@@ -108,6 +111,6 @@ func (m *ZoneAuthGridPrimaryModel) Flatten(ctx context.Context, from *dns.ZoneAu
 	m.Stealth = types.BoolPointerValue(from.Stealth)
 	m.GridReplicate = types.BoolPointerValue(from.GridReplicate)
 	m.Lead = types.BoolPointerValue(from.Lead)
-	m.PreferredPrimaries = FlattenZoneauthgridprimaryPreferredPrimaries(ctx, from.PreferredPrimaries, diags)
+	m.PreferredPrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.PreferredPrimaries, ZoneauthgridprimaryPreferredPrimariesAttrTypes, diags, FlattenZoneauthgridprimaryPreferredPrimaries)
 	m.EnablePreferredPrimaries = types.BoolPointerValue(from.EnablePreferredPrimaries)
 }
