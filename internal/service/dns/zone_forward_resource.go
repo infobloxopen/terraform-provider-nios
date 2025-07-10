@@ -24,6 +24,8 @@ var readableAttributesForZoneForward = "address,comment,disable,disable_ns_gener
 var _ resource.Resource = &ZoneForwardResource{}
 var _ resource.ResourceWithImportState = &ZoneForwardResource{}
 
+var _ resource.ResourceWithValidateConfig = &ZoneForwardResource{}
+
 func NewZoneForwardResource() resource.Resource {
 	return &ZoneForwardResource{}
 }
@@ -62,6 +64,23 @@ func (r *ZoneForwardResource) Configure(ctx context.Context, req resource.Config
 	}
 
 	r.client = client
+}
+
+// ValidateConfig checks the configuration of the resource to ensure that only one of `external_ns_group` or `forward_to` to be set.
+func (r *ZoneForwardResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var externalNsGroup types.String
+	var forwardTo types.List
+
+	// Safely extract only the needed fields
+	req.Config.GetAttribute(ctx, path.Root("external_ns_group"), &externalNsGroup)
+	req.Config.GetAttribute(ctx, path.Root("forward_to"), &forwardTo)
+
+	if !externalNsGroup.IsNull() && !forwardTo.IsNull() && len(forwardTo.Elements()) > 0 {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"Only one of 'external_ns_group' or 'forward_to' can be set.",
+		)
+	}
 }
 
 func (r *ZoneForwardResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

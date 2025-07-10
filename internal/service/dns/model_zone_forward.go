@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -130,11 +129,8 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 	},
 	"external_ns_group": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.ConflictsWith(path.MatchRoot("forward_to")),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A forward stub server name server group.",
 	},
 	"forward_to": schema.ListNestedAttribute{

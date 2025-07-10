@@ -412,6 +412,8 @@ func TestAccZoneForwardResource_Locked(t *testing.T) {
 func TestAccZoneForwardResource_MsAdIntegrated(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_ms_ad_integrated"
 	var v dns.ZoneForward
+	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -419,18 +421,18 @@ func TestAccZoneForwardResource_MsAdIntegrated(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneForwardMsAdIntegrated("MS_AD_INTEGRATED_REPLACE_ME"),
+				Config: testAccZoneForwardMsAdIntegrated(fqdn, externalNsGroup, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "MS_AD_INTEGRATED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneForwardMsAdIntegrated("MS_AD_INTEGRATED_UPDATE_REPLACE_ME"),
+				Config: testAccZoneForwardMsAdIntegrated(fqdn, externalNsGroup, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "MS_AD_INTEGRATED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -442,6 +444,7 @@ func TestAccZoneForwardResource_MsDdnsMode(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_ms_ddns_mode"
 	var v dns.ZoneForward
 	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -449,7 +452,7 @@ func TestAccZoneForwardResource_MsDdnsMode(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneForwardMsDdnsMode(fqdn, "ANY"),
+				Config: testAccZoneForwardMsDdnsMode(fqdn, externalNsGroup, "ANY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ms_ddns_mode", "ANY"),
@@ -457,7 +460,7 @@ func TestAccZoneForwardResource_MsDdnsMode(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneForwardMsDdnsMode(fqdn, "NONE"),
+				Config: testAccZoneForwardMsDdnsMode(fqdn, externalNsGroup, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ms_ddns_mode", "NONE"),
@@ -591,7 +594,6 @@ func testAccCheckZoneForwardDisappears(ctx context.Context, v *dns.ZoneForward) 
 }
 
 func testAccZoneForwardBasicConfig(fqdn, nsGroup string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dns_zone_forward" "test" {
 	fqdn = %q
@@ -710,21 +712,24 @@ resource "nios_dns_zone_forward" "test_locked" {
 `, fqdn, externalNsGroup, locked)
 }
 
-func testAccZoneForwardMsAdIntegrated(msAdIntegrated string) string {
+func testAccZoneForwardMsAdIntegrated(fqdn, externalNsGroup string, msAdIntegrated bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_forward" "test_ms_ad_integrated" {
-   ms_ad_integrated = %q
+   fqdn = %q
+   external_ns_group = %q
+   ms_ad_integrated = %t
 }
-`, msAdIntegrated)
+`, fqdn, externalNsGroup, msAdIntegrated)
 }
 
-func testAccZoneForwardMsDdnsMode(fqdn, msDdnsMode string) string {
+func testAccZoneForwardMsDdnsMode(fqdn, externalNsGrouop, msDdnsMode string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_forward" "test_ms_ddns_mode" {
    fqdn = %q
+   external_ns_group = %q
    ms_ddns_mode = %q
 }
-`, fqdn, msDdnsMode)
+`, fqdn, externalNsGrouop, msDdnsMode)
 }
 
 func testAccZoneForwardNsGroup(fqdn, extaernalNsGroup, nsGroup string) string {
