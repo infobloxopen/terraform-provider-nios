@@ -120,6 +120,7 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_sni_hostname": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default: booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: sni_hostname",
 	},
 }
