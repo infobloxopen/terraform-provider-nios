@@ -451,7 +451,6 @@ func TestAccDtcLbdnResource_Priority(t *testing.T) {
 }
 
 func TestAccDtcLbdnResource_Topology(t *testing.T) {
-	//TODO: Retrieve references based on the provided name of the topology
 	var resourceName = "nios_dtc_lbdn.test_topology"
 	var v dtc.DtcLbdn
 	name := "dtc-lbdn-" + acctest.RandomName()
