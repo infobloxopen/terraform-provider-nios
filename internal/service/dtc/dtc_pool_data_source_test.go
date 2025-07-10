@@ -16,7 +16,7 @@ func TestAccDtcPoolDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dtc_pool.test"
 	var v dtc.DtcPool
 
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -35,19 +35,20 @@ func TestAccDtcPoolDataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccDtcPoolDataSource_TagFilters(t *testing.T) {
+func TestAccDtcPoolDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_pool.test"
 	resourceName := "nios_dtc_pool.test"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
+	extAttrValue := acctest.RandomName()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckDtcPoolDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcPoolDataSourceConfigExtAttrFilters(name, lbPreferredMethod, "Blr"),
+				Config: testAccDtcPoolDataSourceConfigExtAttrFilters(name, lbPreferredMethod, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcPoolExists(context.Background(), resourceName, &v),

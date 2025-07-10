@@ -19,14 +19,14 @@ resource "nios_dtc_pool" "dtc_pool1" {
   lb_preferred_method = "ROUND_ROBIN"
 }
 
-//create a DTC pool with maximal parameters 
+//Create a DTC pool with additional fields
 resource "nios_dtc_pool" "dtc_pool2" {
   name                  = "dtc_pool2"
   lb_preferred_method   = "TOPOLOGY"
   lb_preferred_topology = "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
   comment               = "DTC pool creation"
   extattrs = {
-    Site = "Siteblr"
+    Site = "location-1"
   }
   servers = [
     {
@@ -55,7 +55,11 @@ resource "nios_dtc_pool" "dtc_pool2" {
   use_ttl                    = true
 }
 
-//Consolidated monitors can only be added if the pool is associated with an LBDN.
+//create a DTC pool with consolidated monitors 
+//Steps:
+//-Create a DTC pool without consolidated monitors 
+//- Assoiciate the DTC pool with a DTC LBDN that has a zone with infoblox.localdomain member 
+//- Update this DTC pool to add consolidated monitors 
 resource "nios_dtc_pool" "dtc_pool3" {
   name                = "dtc_pool3"
   lb_preferred_method = "ROUND_ROBIN"

@@ -9,7 +9,6 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/grid"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/option"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dns"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dtc"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"

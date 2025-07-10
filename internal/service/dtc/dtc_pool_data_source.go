@@ -3,12 +3,14 @@ package dtc
 import (
 	"context"
 	"fmt"
-	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
@@ -33,9 +35,11 @@ func (d *DtcPoolDataSource) Metadata(ctx context.Context, req datasource.Metadat
 }
 
 type DtcPoolModelWithFilter struct {
-	Filters        types.Map  `tfsdk:"filters"`
-	ExtAttrFilters types.Map  `tfsdk:"extattrfilters"`
-	Result         types.List `tfsdk:"result"`
+	Filters        types.Map   `tfsdk:"filters"`
+	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
+	Result         types.List  `tfsdk:"result"`
+	MaxResults     types.Int32 `tfsdk:"max_results"`
+	Paging         types.Int32 `tfsdk:"paging"`
 }
 
 func (m *DtcPoolModelWithFilter) FlattenResults(ctx context.Context, from []dtc.DtcPool, diags *diag.Diagnostics) {
@@ -47,7 +51,7 @@ func (m *DtcPoolModelWithFilter) FlattenResults(ctx context.Context, from []dtc.
 
 func (d *DtcPoolDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing DTC Pools",
+		MarkdownDescription: "",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
@@ -64,6 +68,17 @@ func (d *DtcPoolDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 					Attributes: utils.DataSourceAttributeMap(DtcPoolResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
+			},
+			"paging": schema.Int32Attribute{
+				Optional:    true,
+				Description: "Enable (1) or disable (0) paging for the data source query. When enabled, the system retrieves results in pages, allowing efficient handling of large result sets. Paging is enabled by default.",
+				Validators: []validator.Int32{
+					int32validator.OneOf(0, 1),
+				},
+			},
+			"max_results": schema.Int32Attribute{
+				Optional:    true,
+				Description: "Maximum number of objects to be returned. Defaults to 1000.",
 			},
 		},
 	}
@@ -91,6 +106,7 @@ func (d *DtcPoolDataSource) Configure(ctx context.Context, req datasource.Config
 
 func (d *DtcPoolDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data DtcPoolModelWithFilter
+	pageCount := 0
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -99,25 +115,68 @@ func (d *DtcPoolDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	apiRes, httpRes, err := d.client.DTCAPI.
-		DtcPoolAPI.
-		List(ctx).
-		Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-		Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForDtcPool).
-		Execute()
+	allResults, err := utils.ReadWithPages(
+		func(pageID string, maxResults int32) ([]dtc.DtcPool, string, error) {
+
+			if !data.MaxResults.IsNull() {
+				maxResults = data.MaxResults.ValueInt32()
+			}
+			var paging int32 = 1
+			if !data.Paging.IsNull() {
+				paging = data.Paging.ValueInt32()
+			}
+
+			//Increment the page count
+			pageCount++
+
+			request := d.client.DTCAPI.
+				DtcPoolAPI.
+				List(ctx).
+				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
+				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
+				ReturnAsObject(1).
+				ReturnFieldsPlus(readableAttributesForDtcPool).
+				Paging(paging).
+				MaxResults(maxResults)
+
+			// Add page ID if provided
+			if pageID != "" {
+				request = request.PageId(pageID)
+			}
+
+			// Execute the request
+			apiRes, _, err := request.Execute()
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcPool by extattrs, got error: %s", err))
+				return nil, "", err
+			}
+
+			res := apiRes.ListDtcPoolResponseObject.GetResult()
+			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
+
+			// Check for next page ID in additional properties
+			additionalProperties := apiRes.ListDtcPoolResponseObject.AdditionalProperties
+			var nextPageID string
+			npId, ok := additionalProperties["next_page_id"]
+			if ok {
+				if npIdStr, ok := npId.(string); ok {
+					nextPageID = npIdStr
+				}
+			} else {
+				tflog.Info(ctx, "No next page ID found. This is the last page.")
+			}
+			return res, nextPageID, nil
+		},
+	)
+
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			resp.State.RemoveResource(ctx)
-			return
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcPool, got error: %s", err))
 		return
 	}
+	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
 
-	res := apiRes.ListDtcPoolResponseObject.GetResult()
-	data.FlattenResults(ctx, res, &resp.Diagnostics)
+	// Process the results
+	data.FlattenResults(ctx, allResults, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

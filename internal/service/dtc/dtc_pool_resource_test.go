@@ -21,7 +21,7 @@ var readableAttributesForDtcPool = "extattrs,lb_preferred_method,auto_consolidat
 func TestAccDtcPoolResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -57,7 +57,7 @@ func TestAccDtcPoolResource_basic(t *testing.T) {
 func TestAccDtcPoolResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_pool.test"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -80,7 +80,7 @@ func TestAccDtcPoolResource_disappears(t *testing.T) {
 func TestAccDtcPoolResource_AutoConsolidatedMonitors(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_auto_consolidated_monitors"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	autoConsolidatedMonitors := "true"
 	autoConsolidatedMonitorsUpdate := "false"
@@ -113,7 +113,7 @@ func TestAccDtcPoolResource_AutoConsolidatedMonitors(t *testing.T) {
 func TestAccDtcPoolResource_Availability(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_availability"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	initialAvailability := "ANY"
 	updatedAvailability := "ALL"
@@ -146,7 +146,7 @@ func TestAccDtcPoolResource_Availability(t *testing.T) {
 func TestAccDtcPoolResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_comment"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	initialComment := "pool testing"
 	updatedComment := "updated pool comment"
@@ -179,7 +179,7 @@ func TestAccDtcPoolResource_Comment(t *testing.T) {
 func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_consolidated_monitors"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	consolidatedMonitors := []map[string]interface{}{
 		{
@@ -233,7 +233,7 @@ func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 func TestAccDtcPoolResource_Disable(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_disable"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	initialDisable := "false"
 	updatedDisable := "true"
@@ -266,7 +266,7 @@ func TestAccDtcPoolResource_Disable(t *testing.T) {
 func TestAccDtcPoolResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_extattrs"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -303,7 +303,7 @@ func TestAccDtcPoolResource_ExtAttrs(t *testing.T) {
 func TestAccDtcPoolResource_LbAlternateMethod(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_lb_alternate_method"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "TOPOLOGY"
 	lbPreferredToplogyMethod := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
 	lbAlternateMethod := "ALL_AVAILABLE"
@@ -361,7 +361,7 @@ func TestAccDtcPoolResource_LbAlternateMethod(t *testing.T) {
 func TestAccDtcPoolResource_LbAlternateTopology(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_lb_alternate_topology"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "TOPOLOGY"
 	lbPreferredTopology := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
 	lbAlternateMethod := "TOPOLOGY"
@@ -407,7 +407,7 @@ func TestAccDtcPoolResource_LbAlternateTopology(t *testing.T) {
 func TestAccDtcPoolResource_LbDynamicRatioAlternate(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_lb_dynamic_ratio_alternate"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "TOPOLOGY"
 	lbPreferredTopology := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
 	monitors := []string{
@@ -475,7 +475,7 @@ func TestAccDtcPoolResource_LbDynamicRatioAlternate(t *testing.T) {
 func TestAccDtcPoolResource_LbDynamicRatioPreferred(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_lb_dynamic_ratio_preferred"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "DYNAMIC_RATIO"
 	monitors := []string{
 		"dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http", "dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp",
@@ -531,9 +531,72 @@ func TestAccDtcPoolResource_LbDynamicRatioPreferred(t *testing.T) {
 func TestAccDtcPoolResource_LbPreferredMethod(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_lb_preferred_method"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	lbPreferredMethodUpdate := "ALL_AVAILABLE"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccDtcPoolLbPreferredMethod(name, lbPreferredMethod),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "lb_preferred_method", lbPreferredMethod),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDtcPoolLbPreferredMethod(name, lbPreferredMethodUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "lb_preferred_method", lbPreferredMethodUpdate),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+func TestAccDtcPoolResource_LbPreferredMethod_SOURCE_IP_HASH(t *testing.T) {
+	var resourceName = "nios_dtc_pool.test_lb_preferred_method"
+	var v dtc.DtcPool
+	name := acctest.RandomNameWithPrefix("dtc-pool")
+	lbPreferredMethod := "ROUND_ROBIN"
+	lbPreferredMethodUpdate := "SOURCE_IP_HASH"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccDtcPoolLbPreferredMethod(name, lbPreferredMethod),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "lb_preferred_method", lbPreferredMethod),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDtcPoolLbPreferredMethod(name, lbPreferredMethodUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "lb_preferred_method", lbPreferredMethodUpdate),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccDtcPoolResource_LbPreferredMethod_RATIO(t *testing.T) {
+	var resourceName = "nios_dtc_pool.test_lb_preferred_method"
+	var v dtc.DtcPool
+	name := acctest.RandomNameWithPrefix("dtc-pool")
+	lbPreferredMethod := "ROUND_ROBIN"
+	lbPreferredMethodUpdate := "RATIO"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -563,7 +626,7 @@ func TestAccDtcPoolResource_LbPreferredMethod(t *testing.T) {
 func TestAccDtcPoolResource_LbPreferredTopology(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_lb_preferred_topology"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "TOPOLOGY"
 	lbPreferredToplogy := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
 	servers := []map[string]interface{}{
@@ -608,7 +671,7 @@ func TestAccDtcPoolResource_LbPreferredTopology(t *testing.T) {
 func TestAccDtcPoolResource_Monitors(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_monitors"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	monitors := []string{"dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http", "dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp"}
 	monitorsUpdated := []string{"dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp", "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http", "dtc:monitor:icmp/ZG5zLmlkbnNfbW9uaXRvcl9pY21wJGljbXA:icmp"}
@@ -645,7 +708,7 @@ func TestAccDtcPoolResource_Monitors(t *testing.T) {
 func TestAccDtcPoolResource_Name(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_name"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	updateName := acctest.RandomName()
 
@@ -677,7 +740,7 @@ func TestAccDtcPoolResource_Name(t *testing.T) {
 func TestAccDtcPoolResource_Quorum(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_quorum"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	quorum := 3
 	quorumUpdate := 5
@@ -710,7 +773,7 @@ func TestAccDtcPoolResource_Quorum(t *testing.T) {
 func TestAccDtcPoolResource_Servers(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_servers"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	servers := []map[string]interface{}{
 		{
@@ -763,7 +826,7 @@ func TestAccDtcPoolResource_Servers(t *testing.T) {
 func TestAccDtcPoolResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_ttl"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	ttl := 24
 	updateTtl := 48
@@ -796,7 +859,7 @@ func TestAccDtcPoolResource_Ttl(t *testing.T) {
 func TestAccDtcPoolResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dtc_pool.test_use_ttl"
 	var v dtc.DtcPool
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
 	useTtl := "true"
 	ttl := 24
@@ -886,7 +949,6 @@ func testAccCheckDtcPoolDisappears(ctx context.Context, v *dtc.DtcPool) resource
 }
 
 func testAccDtcPoolBasicConfig(name, lbPreferredMethod string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test" {
 	name = %q
