@@ -3,12 +3,12 @@
 page_title: "nios_dtc_lbdn Data Source - nios"
 subcategory: "DTC"
 description: |-
-  Retrieves information about existing DTC LBDNs.
+  Retrieves information about existing DTC Load Balanced Domain Names(LBDNs).
 ---
 
 # nios_dtc_lbdn (Data Source)
 
-Retrieves information about existing DTC LBDNs.
+Retrieves information about existing DTC Load Balanced Domain Names(LBDNs).
 
 ## Example Usage
 
@@ -87,7 +87,7 @@ Optional:
 <a id="nestedatt--result--health"></a>
 ### Nested Schema for `result.health`
 
-Optional:
+Read-Only:
 
 - `availability` (String) The availability color status.
 - `description` (String) The textual description of the object's status.

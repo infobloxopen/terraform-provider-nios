@@ -3,12 +3,12 @@
 page_title: "nios_dtc_lbdn Resource - nios"
 subcategory: "DTC"
 description: |-
-  Manages DTC LBDN
+  Manages DTC Load Balanced Domain Name (LBDN)
 ---
 
 # nios_dtc_lbdn (Resource)
 
-Manages DTC LBDN
+Manages DTC Load Balanced Domain Name (LBDN)
 
 ## Example Usage
 
@@ -98,7 +98,7 @@ Optional:
 <a id="nestedatt--health"></a>
 ### Nested Schema for `health`
 
-Optional:
+Read-Only:
 
 - `availability` (String) The availability color status.
 - `description` (String) The textual description of the object's status.
