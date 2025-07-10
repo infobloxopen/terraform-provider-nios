@@ -594,8 +594,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list with Grid members that are secondary servers for this zone.",
 	},
 	"import_from": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_import_from")),
+		},
 		MarkdownDescription: "The IP address of the Infoblox appliance from which zone data is imported. Setting this address to '255.255.255.255' and do_host_abstraction to 'true' will create Host records from A records in this zone without importing zone data.",
 	},
 	"is_dnssec_enabled": schema.BoolAttribute{
@@ -663,8 +666,12 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of DNS clients that are allowed to perform zone transfers from a Microsoft DNS server. This setting applies only to zones with Microsoft DNS servers that are either primary or secondary servers. This setting does not inherit any value from the Grid or from any member that defines an allow_transfer value. This setting does not apply to any grid member. Use the allow_transfer field to control which DNS clients are allowed to perform zone transfers on Grid members.",
 	},
 	"ms_allow_transfer_mode": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("NONE"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("ADDRESS_AC", "ANY", "ANY_NS", "NONE"),
+		},
 		MarkdownDescription: "Determines which DNS clients are allowed to perform zone transfers from a Microsoft DNS server. Valid values are: \"ADDRESS_AC\", to use ms_allow_transfer field for specifying IP addresses, networks and Transaction Signature (TSIG) keys for clients that are allowed to do zone transfers. \"ANY\", to allow any client. \"ANY_NS\", to allow only the nameservers listed in this zone. \"NONE\", to deny all zone transfer requests.",
 	},
 	"ms_dc_ns_record_creation": schema.ListNestedAttribute{
@@ -749,8 +756,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The type of the primary server.",
 	},
 	"record_name_policy": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_record_name_policy")),
+		},
 		MarkdownDescription: "The hostname policy for records under this zone.",
 	},
 	"records_monitored": schema.BoolAttribute{
@@ -1128,7 +1138,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneAuthGridPrimaryAttrTypes, diags, FlattenZoneAuthGridPrimary)
 	m.GridPrimarySharedWithMsParentDelegation = types.BoolPointerValue(from.GridPrimarySharedWithMsParentDelegation)
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, ZoneAuthGridSecondariesAttrTypes, diags, FlattenZoneAuthGridSecondaries)
-	m.ImportFrom = flex.FlattenStringPointer(from.ImportFrom)
+	m.ImportFrom = flex.FlattenStringPointerNilAsNotEmpty(from.ImportFrom)
 	m.IsDnssecEnabled = types.BoolPointerValue(from.IsDnssecEnabled)
 	m.IsDnssecSigned = types.BoolPointerValue(from.IsDnssecSigned)
 	m.IsMultimaster = types.BoolPointerValue(from.IsMultimaster)

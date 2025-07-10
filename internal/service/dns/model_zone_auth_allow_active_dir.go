@@ -2,10 +2,14 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -26,11 +30,22 @@ var ZoneAuthAllowActiveDirAttrTypes = map[string]attr.Type{
 
 var ZoneAuthAllowActiveDirResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"permission": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("ALLOW"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("ALLOW", "DENY"),
+		},
 		MarkdownDescription: "The permission to use for this address.",
 	},
 }

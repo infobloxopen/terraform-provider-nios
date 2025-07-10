@@ -2,10 +2,16 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -35,26 +41,54 @@ var ZoneAuthAllowTransferAttrTypes = map[string]attr.Type{
 var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
 	"permission": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("ALLOW"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("ALLOW", "DENY"),
+		},
 		MarkdownDescription: "The permission to use for this address.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("HMAC-MD5"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
+		},
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
+		},
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }

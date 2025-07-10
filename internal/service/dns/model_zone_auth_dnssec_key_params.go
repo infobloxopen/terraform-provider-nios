@@ -165,6 +165,7 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 			Attributes: ZoneauthdnsseckeyparamsZskAlgorithmsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A list of Zone Signing Key Algorithms.",
 	},
 	"zsk_rollover": schema.Int64Attribute{

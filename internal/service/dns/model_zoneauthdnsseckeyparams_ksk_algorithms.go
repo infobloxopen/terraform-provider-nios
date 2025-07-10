@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -28,14 +30,17 @@ var ZoneauthdnsseckeyparamsKskAlgorithmsAttrTypes = map[string]attr.Type{
 
 var ZoneauthdnsseckeyparamsKskAlgorithmsResourceSchemaAttributes = map[string]schema.Attribute{
 	"algorithm": schema.StringAttribute{
-		Required: true,
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("RSASHA256"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ECDSAP256SHA256", "ECDSAP384SHA384", "RSASHA1", "RSASHA256", "RSASHA512"),
 		},
 		MarkdownDescription: "The signing key algorithm.",
 	},
 	"size": schema.Int64Attribute{
-		Required:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(2048),
 		MarkdownDescription: "The signing key size, in bits.",
 	},
 }
