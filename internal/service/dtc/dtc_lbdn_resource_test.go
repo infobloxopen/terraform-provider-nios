@@ -15,6 +15,7 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
 
+// TODO: Required parents for the execution of tests
 var readableAttributesForDtcLbdn = "extattrs,disable,auth_zones,auto_consolidated_monitors,lb_method,patterns,persistence,pools,priority,topology,types,health,ttl,use_ttl"
 
 func TestAccDtcLbdnResource_basic(t *testing.T) {
@@ -68,7 +69,6 @@ func TestAccDtcLbdnResource_disappears(t *testing.T) {
 }
 
 func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
-	// TODO: Retrieve references based on the provided names of the objects: auth_zones, pools.
 	var resourceName = "nios_dtc_lbdn.test_auth_zones"
 	var v dtc.DtcLbdn
 	name := "dtc-lbdn-" + acctest.RandomName()
@@ -230,7 +230,6 @@ func TestAccDtcLbdnResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccDtcLbdnResource_LbMethod(t *testing.T) {
-	// TODO: Retrieve references based on the provided name of the topology.
 	var resourceName = "nios_dtc_lbdn.test_lb_method"
 	var v dtc.DtcLbdn
 	name := "dtc-lbdn-" + acctest.RandomName()
@@ -379,7 +378,6 @@ func TestAccDtcLbdnResource_Persistence(t *testing.T) {
 }
 
 func TestAccDtcLbdnResource_Pools(t *testing.T) {
-	// TODO: Retrieve references based on the provided names of the pools.
 	var resourceName = "nios_dtc_lbdn.test_pools"
 	var v dtc.DtcLbdn
 	name := "dtc-lbdn-" + acctest.RandomName()
@@ -453,7 +451,7 @@ func TestAccDtcLbdnResource_Priority(t *testing.T) {
 }
 
 func TestAccDtcLbdnResource_Topology(t *testing.T) {
-	// TODO: Retrieve references based on the provided name of the topology
+	//TODO: Retrieve references based on the provided name of the topology
 	var resourceName = "nios_dtc_lbdn.test_topology"
 	var v dtc.DtcLbdn
 	name := "dtc-lbdn-" + acctest.RandomName()

@@ -37,7 +37,7 @@ func (r *DtcLbdnResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *DtcLbdnResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages DTC LBDN",
+		MarkdownDescription: "Manages DTC Load Balanced Domain Name (LBDN)",
 		Attributes:          DtcLbdnResourceSchemaAttributes,
 	}
 }

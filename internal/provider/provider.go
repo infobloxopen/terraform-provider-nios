@@ -87,9 +87,9 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		dns.NewRecordAResource,
+		dns.NewRecordAaaaResource,
 
 		dtc.NewDtcLbdnResource,
-		dns.NewRecordAaaaResource,
 	}
 }
 
