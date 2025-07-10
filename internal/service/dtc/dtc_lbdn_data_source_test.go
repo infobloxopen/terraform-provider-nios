@@ -15,7 +15,7 @@ func TestAccDtcLbdnDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_lbdn.test"
 	resourceName := "nios_dtc_lbdn.test"
 	var v dtc.DtcLbdn
-	name := acctest.RandomName()
+	name := "dtc-lbdn-" + acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -37,7 +37,8 @@ func TestAccDtcLbdnDataSource_Filters(t *testing.T) {
 func TestAccDtcLbdnDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_lbdn.test"
 	resourceName := "nios_dtc_lbdn.test"
-	name := acctest.RandomName()
+	name := "dtc-lbdn-" + acctest.RandomName()
+	extAttrValue := acctest.RandomName()
 	var v dtc.DtcLbdn
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -45,7 +46,7 @@ func TestAccDtcLbdnDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcLbdnDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcLbdnDataSourceConfigExtAttrFilters(name, "ROUND_ROBIN", "Denmark"),
+				Config: testAccDtcLbdnDataSourceConfigExtAttrFilters(name, "ROUND_ROBIN", extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
@@ -107,7 +108,7 @@ resource "nios_dtc_lbdn" "test" {
 
 data "nios_dtc_lbdn" "test" {
   extattrfilters = {
-	"Site" = nios_dtc_lbdn.test.extattrs.Site
+	Site = nios_dtc_lbdn.test.extattrs.Site
   }
 }
 `, name, lbMethod, extAttrsValue)

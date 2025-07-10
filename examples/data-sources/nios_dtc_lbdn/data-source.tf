@@ -8,7 +8,7 @@ data "nios_dtc_lbdn" "get_record_with_filter" {
 // Retrieve specific DTC LBDN records using Extensible Attributes
 data "nios_dtc_lbdn" "get_record_with_extattr_filter" {
   extattrfilters = {
-    Site = "Spain"
+    Site = "location-1"
   }
 }
 

@@ -7,12 +7,13 @@ resource "nios_dtc_lbdn" "lbdn_basic_fields" {
 // Create DTC LBDN with additional fields
 resource "nios_dtc_lbdn" "lbdn_additional_fields" {
   name = "example_lbdn_2"
+  // TODO: Retrieve references based on the provided names of the objects: auth_zones, pools, and topology
   auth_zones = ["zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:wapi.com/default",
     "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:info.com/default.custom_view"
   ]
   comment = "lbdn with additional parameters"
   extattrs = {
-    Site = "Yoshino"
+    Site = "location-1"
   }
   lb_method = "TOPOLOGY"
   patterns  = ["*wapi.com", "info.com*"]
