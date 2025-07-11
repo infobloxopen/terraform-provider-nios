@@ -34,7 +34,7 @@ func TestAccNetworkcontainerDataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccNetworkcontainerDataSource_TagFilters(t *testing.T) {
+func TestAccNetworkcontainerDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_network_container.test"
 	resourceName := "nios_ipam_network_container.test"
 	var v ipam.Networkcontainer
