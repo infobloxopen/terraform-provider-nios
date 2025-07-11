@@ -76,7 +76,9 @@ func TestAccNetworkResource_Authority(t *testing.T) {
 				Config: testAccNetworkAuthority(network, "false", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "authority", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_authority", "false"),
 				),
 			},
 			// Update and Read
@@ -84,7 +86,9 @@ func TestAccNetworkResource_Authority(t *testing.T) {
 				Config: testAccNetworkAuthority(network, "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "authority", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_authority", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -106,7 +110,9 @@ func TestAccNetworkResource_Bootfile(t *testing.T) {
 				Config: testAccNetworkBootfile(network, "bootfile", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "bootfile", "bootfile"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "false"),
 				),
 			},
 			// Update and Read
@@ -114,7 +120,9 @@ func TestAccNetworkResource_Bootfile(t *testing.T) {
 				Config: testAccNetworkBootfile(network, "bootfile_updated", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "bootfile", "bootfile_updated"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -136,7 +144,9 @@ func TestAccNetworkResource_Bootserver(t *testing.T) {
 				Config: testAccNetworkBootserver(network, "test_bootserver", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "bootserver", "test_bootserver"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "false"),
 				),
 			},
 			// Update and Read
@@ -144,7 +154,9 @@ func TestAccNetworkResource_Bootserver(t *testing.T) {
 				Config: testAccNetworkBootserver(network, "test_bootserver_updated", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "bootserver", "test_bootserver_updated"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -166,6 +178,7 @@ func TestAccNetworkResource_CloudInfo(t *testing.T) {
 				Config: testAccNetworkCloudInfo(network),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.authority_type", "GM"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_scope", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.mgmt_platform", ""),
@@ -191,6 +204,7 @@ func TestAccNetworkResource_CloudShared(t *testing.T) {
 				Config: testAccNetworkCloudShared(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "cloud_shared", "false"),
 				),
 			},
@@ -199,6 +213,7 @@ func TestAccNetworkResource_CloudShared(t *testing.T) {
 				Config: testAccNetworkCloudShared(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "cloud_shared", "true"),
 				),
 			},
@@ -221,6 +236,7 @@ func TestAccNetworkResource_Comment(t *testing.T) {
 				Config: testAccNetworkComment(network, "test comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "comment", "test comment"),
 				),
 			},
@@ -229,6 +245,7 @@ func TestAccNetworkResource_Comment(t *testing.T) {
 				Config: testAccNetworkComment(network, "updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "comment", "updated comment"),
 				),
 			},
@@ -251,7 +268,9 @@ func TestAccNetworkResource_DdnsDomainname(t *testing.T) {
 				Config: testAccNetworkDdnsDomainname(network, "test.com", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "test.com"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "true"),
 				),
 			},
 			// Update and Read
@@ -259,7 +278,9 @@ func TestAccNetworkResource_DdnsDomainname(t *testing.T) {
 				Config: testAccNetworkDdnsDomainname(network, "testupdated.com", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "testupdated.com"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -281,7 +302,9 @@ func TestAccNetworkResource_DdnsGenerateHostname(t *testing.T) {
 				Config: testAccNetworkDdnsGenerateHostname(network, "true", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "false"),
 				),
 			},
 			// Update and Read
@@ -289,7 +312,9 @@ func TestAccNetworkResource_DdnsGenerateHostname(t *testing.T) {
 				Config: testAccNetworkDdnsGenerateHostname(network, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -311,7 +336,10 @@ func TestAccNetworkResource_DdnsServerAlwaysUpdates(t *testing.T) {
 				Config: testAccNetworkDdnsServerAlwaysUpdates(network, "true", "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_use_option81", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_use_option81", "true"),
 				),
 			},
 			// Update and Read
@@ -319,7 +347,10 @@ func TestAccNetworkResource_DdnsServerAlwaysUpdates(t *testing.T) {
 				Config: testAccNetworkDdnsServerAlwaysUpdates(network, "false", "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_use_option81", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_use_option81", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -341,7 +372,9 @@ func TestAccNetworkResource_DdnsTtl(t *testing.T) {
 				Config: testAccNetworkDdnsTtl(network, "1", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "1"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "true"),
 				),
 			},
 			// Update and Read
@@ -349,7 +382,9 @@ func TestAccNetworkResource_DdnsTtl(t *testing.T) {
 				Config: testAccNetworkDdnsTtl(network, "600", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "600"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -371,7 +406,9 @@ func TestAccNetworkResource_DdnsUpdateFixedAddresses(t *testing.T) {
 				Config: testAccNetworkDdnsUpdateFixedAddresses(network, "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_update_fixed_addresses", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_update_fixed_addresses", "true"),
 				),
 			},
 			// Update and Read
@@ -379,7 +416,9 @@ func TestAccNetworkResource_DdnsUpdateFixedAddresses(t *testing.T) {
 				Config: testAccNetworkDdnsUpdateFixedAddresses(network, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_update_fixed_addresses", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_update_fixed_addresses", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -401,7 +440,9 @@ func TestAccNetworkResource_DdnsUseOption81(t *testing.T) {
 				Config: testAccNetworkDdnsUseOption81(network, "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_use_option81", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_use_option81", "true"),
 				),
 			},
 			// Update and Read
@@ -409,7 +450,9 @@ func TestAccNetworkResource_DdnsUseOption81(t *testing.T) {
 				Config: testAccNetworkDdnsUseOption81(network, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_use_option81", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_use_option81", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -431,6 +474,7 @@ func TestAccNetworkResource_DeleteReason(t *testing.T) {
 				Config: testAccNetworkDeleteReason(network, "Test deletion reason"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "delete_reason", "Test deletion reason"),
 				),
 			},
@@ -439,6 +483,7 @@ func TestAccNetworkResource_DeleteReason(t *testing.T) {
 				Config: testAccNetworkDeleteReason(network, "Updated deletion reason"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "delete_reason", "Updated deletion reason"),
 				),
 			},
@@ -461,7 +506,9 @@ func TestAccNetworkResource_DenyBootp(t *testing.T) {
 				Config: testAccNetworkDenyBootp(network, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "true"),
 				),
 			},
 			// Update and Read
@@ -469,7 +516,9 @@ func TestAccNetworkResource_DenyBootp(t *testing.T) {
 				Config: testAccNetworkDenyBootp(network, "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -491,6 +540,7 @@ func TestAccNetworkResource_Disable(t *testing.T) {
 				Config: testAccNetworkDisable(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
@@ -499,6 +549,7 @@ func TestAccNetworkResource_Disable(t *testing.T) {
 				Config: testAccNetworkDisable(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
@@ -521,6 +572,7 @@ func TestAccNetworkResource_DiscoveredBridgeDomain(t *testing.T) {
 				Config: testAccNetworkDiscoveredBridgeDomain(network, "bridge-domain-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "discovered_bridge_domain", "bridge-domain-1"),
 				),
 			},
@@ -529,6 +581,7 @@ func TestAccNetworkResource_DiscoveredBridgeDomain(t *testing.T) {
 				Config: testAccNetworkDiscoveredBridgeDomain(network, "bridge-domain-2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "discovered_bridge_domain", "bridge-domain-2"),
 				),
 			},
@@ -581,6 +634,7 @@ func TestAccNetworkResource_DiscoveryBasicPollSettings(t *testing.T) {
 				Config: testAccNetworkDiscoveryBasicPollSettings(network, "true", "true", "false", "default", "false", "false", "1", "false", "false", "true", "PERIODIC", "3600", "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
@@ -594,6 +648,7 @@ func TestAccNetworkResource_DiscoveryBasicPollSettings(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "PERIODIC"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling_interval", "3600"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.use_global_polling_frequency_modifier", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "true"),
 				),
 			},
 			// Update and Read
@@ -601,6 +656,7 @@ func TestAccNetworkResource_DiscoveryBasicPollSettings(t *testing.T) {
 				Config: testAccNetworkDiscoveryBasicPollSettings(network, "false", "true", "false", "default", "false", "false", "1", "false", "false", "true", "PERIODIC", "3600", "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
@@ -614,6 +670,7 @@ func TestAccNetworkResource_DiscoveryBasicPollSettings(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "PERIODIC"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling_interval", "3600"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.use_global_polling_frequency_modifier", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -635,7 +692,9 @@ func TestAccNetworkResource_DiscoveryBlackoutSetting(t *testing.T) {
 				Config: testAccNetworkDiscoveryBlackoutSetting(network, "false", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -657,7 +716,9 @@ func TestAccNetworkResource_EmailList(t *testing.T) {
 				Config: testAccNetworkEmailList(network, "admin@example.com", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "email_list.0", "admin@example.com"),
+					resource.TestCheckResourceAttr(resourceName, "use_email_list", "true"),
 				),
 			},
 			// Update and Read
@@ -665,7 +726,9 @@ func TestAccNetworkResource_EmailList(t *testing.T) {
 				Config: testAccNetworkEmailList(network, "admin@updated.com", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "email_list.0", "admin@updated.com"),
+					resource.TestCheckResourceAttr(resourceName, "use_email_list", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -687,7 +750,9 @@ func TestAccNetworkResource_EnableDdns(t *testing.T) {
 				Config: testAccNetworkEnableDdns(network, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "true"),
 				),
 			},
 			// Update and Read
@@ -695,7 +760,9 @@ func TestAccNetworkResource_EnableDdns(t *testing.T) {
 				Config: testAccNetworkEnableDdns(network, "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -717,7 +784,9 @@ func TestAccNetworkResource_EnableDhcpThresholds(t *testing.T) {
 				Config: testAccNetworkEnableDhcpThresholds(network, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_dhcp_thresholds", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_dhcp_thresholds", "true"),
 				),
 			},
 			// Update and Read
@@ -725,7 +794,9 @@ func TestAccNetworkResource_EnableDhcpThresholds(t *testing.T) {
 				Config: testAccNetworkEnableDhcpThresholds(network, "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_dhcp_thresholds", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_dhcp_thresholds", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -746,6 +817,7 @@ func TestAccNetworkResource_EnableEmailWarnings(t *testing.T) {
 				Config: testAccNetworkEnableEmailWarnings(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_email_warnings", "false"),
 				),
 			},
@@ -754,6 +826,7 @@ func TestAccNetworkResource_EnableEmailWarnings(t *testing.T) {
 				Config: testAccNetworkEnableEmailWarnings(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_email_warnings", "true"),
 				),
 			},
@@ -776,6 +849,7 @@ func TestAccNetworkResource_EnableIfmapPublishing(t *testing.T) {
 				Config: testAccNetworkEnableIfmapPublishing(network, "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_ifmap_publishing", "true"),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ifmap_publishing", "true"),
 				),
@@ -785,6 +859,7 @@ func TestAccNetworkResource_EnableIfmapPublishing(t *testing.T) {
 				Config: testAccNetworkEnableIfmapPublishing(network, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_ifmap_publishing", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ifmap_publishing", "true"),
 				),
@@ -808,7 +883,10 @@ func TestAccNetworkResource_EnablePxeLeaseTime(t *testing.T) {
 				Config: testAccNetworkEnablePxeLeaseTime(network, "100", "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "100"),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "true"),
 				),
 			},
 			// Update and Read
@@ -816,7 +894,10 @@ func TestAccNetworkResource_EnablePxeLeaseTime(t *testing.T) {
 				Config: testAccNetworkEnablePxeLeaseTime(network, "100", "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "100"),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -838,6 +919,7 @@ func TestAccNetworkResource_EnableSnmpWarnings(t *testing.T) {
 				Config: testAccNetworkEnableSnmpWarnings(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_snmp_warnings", "true"),
 				),
 			},
@@ -846,6 +928,7 @@ func TestAccNetworkResource_EnableSnmpWarnings(t *testing.T) {
 				Config: testAccNetworkEnableSnmpWarnings(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "enable_snmp_warnings", "false"),
 				),
 			},
@@ -870,6 +953,7 @@ func TestAccNetworkResource_ExtAttrs(t *testing.T) {
 				Config: testAccNetworkExtAttrs(network, map[string]string{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
@@ -878,6 +962,7 @@ func TestAccNetworkResource_ExtAttrs(t *testing.T) {
 				Config: testAccNetworkExtAttrs(network, map[string]string{"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
@@ -900,6 +985,7 @@ func TestAccNetworkResource_HighWaterMark(t *testing.T) {
 				Config: testAccNetworkHighWaterMark(network, "80"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "80"),
 				),
 			},
@@ -908,6 +994,7 @@ func TestAccNetworkResource_HighWaterMark(t *testing.T) {
 				Config: testAccNetworkHighWaterMark(network, "90"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "90"),
 				),
 			},
@@ -930,6 +1017,7 @@ func TestAccNetworkResource_HighWaterMarkReset(t *testing.T) {
 				Config: testAccNetworkHighWaterMarkReset(network, "70"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "70"),
 				),
 			},
@@ -938,6 +1026,7 @@ func TestAccNetworkResource_HighWaterMarkReset(t *testing.T) {
 				Config: testAccNetworkHighWaterMarkReset(network, "80"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "80"),
 				),
 			},
@@ -1080,8 +1169,10 @@ func TestAccNetworkResource_IpamThresholdSettings(t *testing.T) {
 				Config: testAccNetworkIpamThresholdSettings(network, "85", "95", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ipam_threshold_settings.reset_value", "85"),
 					resource.TestCheckResourceAttr(resourceName, "ipam_threshold_settings.trigger_value", "95"),
+					resource.TestCheckResourceAttr(resourceName, "use_ipam_threshold_settings", "true"),
 				),
 			},
 			// Update and Read
@@ -1089,8 +1180,10 @@ func TestAccNetworkResource_IpamThresholdSettings(t *testing.T) {
 				Config: testAccNetworkIpamThresholdSettings(network, "75", "80", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ipam_threshold_settings.reset_value", "75"),
 					resource.TestCheckResourceAttr(resourceName, "ipam_threshold_settings.trigger_value", "80"),
+					resource.TestCheckResourceAttr(resourceName, "use_ipam_threshold_settings", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1112,8 +1205,10 @@ func TestAccNetworkResource_IpamTrapSettings(t *testing.T) {
 				Config: testAccNetworkIpamTrapSettings(network, "false", "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_email_warnings", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_snmp_warnings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_ipam_trap_settings", "true"),
 				),
 			},
 			// Update and Read
@@ -1121,8 +1216,10 @@ func TestAccNetworkResource_IpamTrapSettings(t *testing.T) {
 				Config: testAccNetworkIpamTrapSettings(network, "true", "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_email_warnings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_snmp_warnings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ipam_trap_settings", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1173,7 +1270,9 @@ func TestAccNetworkResource_LeaseScavengeTime(t *testing.T) {
 				Config: testAccNetworkLeaseScavengeTime(network, "-1", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "-1"),
+					resource.TestCheckResourceAttr(resourceName, "use_lease_scavenge_time", "true"),
 				),
 			},
 			// Update and Read
@@ -1181,7 +1280,9 @@ func TestAccNetworkResource_LeaseScavengeTime(t *testing.T) {
 				Config: testAccNetworkLeaseScavengeTime(network, "86400", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "86400"),
+					resource.TestCheckResourceAttr(resourceName, "use_lease_scavenge_time", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1203,6 +1304,7 @@ func TestAccNetworkResource_LowWaterMark(t *testing.T) {
 				Config: testAccNetworkLowWaterMark(network, "0"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "0"),
 				),
 			},
@@ -1211,6 +1313,7 @@ func TestAccNetworkResource_LowWaterMark(t *testing.T) {
 				Config: testAccNetworkLowWaterMark(network, "50"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "50"),
 				),
 			},
@@ -1233,6 +1336,7 @@ func TestAccNetworkResource_LowWaterMarkReset(t *testing.T) {
 				Config: testAccNetworkLowWaterMarkReset(network, "10"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "10"),
 				),
 			},
@@ -1241,6 +1345,7 @@ func TestAccNetworkResource_LowWaterMarkReset(t *testing.T) {
 				Config: testAccNetworkLowWaterMarkReset(network, "20"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "20"),
 				),
 			},
@@ -1358,7 +1463,9 @@ func TestAccNetworkResource_Nextserver(t *testing.T) {
 				Config: testAccNetworkNextserver(network, "1.1.1.1", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "nextserver", "1.1.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "false"),
 				),
 			},
 			// Update and Read
@@ -1366,7 +1473,9 @@ func TestAccNetworkResource_Nextserver(t *testing.T) {
 				Config: testAccNetworkNextserver(network, "1.1.1.2", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "nextserver", "1.1.1.2"),
+					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1388,11 +1497,14 @@ func TestAccNetworkResource_Options(t *testing.T) {
 				Config: testAccNetworkOptions(network, "dhcp-lease-time", "51", "7200", "DHCP", "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
 				),
 			},
 			// Update and Read
@@ -1400,11 +1512,14 @@ func TestAccNetworkResource_Options(t *testing.T) {
 				Config: testAccNetworkOptions(network, "dhcp-lease-time", "51", "7300", "DHCP", "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7300"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

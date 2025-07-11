@@ -3,12 +3,9 @@ package ipam
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -18,13 +15,13 @@ import (
 )
 
 type NetworkSubscribeSettingsModel struct {
-	EnabledAttributes  types.List   `tfsdk:"enabled_attributes"`
-	MappedEaAttributes types.Object `tfsdk:"mapped_ea_attributes"`
+	EnabledAttributes  types.List `tfsdk:"enabled_attributes"`
+	MappedEaAttributes types.List `tfsdk:"mapped_ea_attributes"`
 }
 
 var NetworkSubscribeSettingsAttrTypes = map[string]attr.Type{
 	"enabled_attributes":   types.ListType{ElemType: types.StringType},
-	"mapped_ea_attributes": types.ObjectType{AttrTypes: NetworksubscribesettingsMappedEaAttributesAttrTypes},
+	"mapped_ea_attributes": types.ListType{ElemType: types.ObjectType{AttrTypes: NetworksubscribesettingsMappedEaAttributesAttrTypes}},
 }
 
 var NetworkSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute{
@@ -32,23 +29,13 @@ var NetworkSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribu
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
-		Validators: []validator.List{
-			listvalidator.ValueStringsAre(
-				stringvalidator.OneOf(
-					"DOMAINNAME",
-					"ENDPOINT_PROFILE",
-					"SECURITY_GROUP",
-					"SESSION_STATE",
-					"SSID",
-					"USERNAME",
-					"VLAN",
-				),
-			),
-		},
 	},
-	"mapped_ea_attributes": schema.SingleNestedAttribute{
-		Attributes: NetworksubscribesettingsMappedEaAttributesResourceSchemaAttributes,
-		Optional:   true,
+	"mapped_ea_attributes": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: NetworksubscribesettingsMappedEaAttributesResourceSchemaAttributes,
+		},
+		Optional:            true,
+		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
 	},
 }
 
@@ -70,7 +57,7 @@ func (m *NetworkSubscribeSettingsModel) Expand(ctx context.Context, diags *diag.
 	}
 	to := &ipam.NetworkSubscribeSettings{
 		EnabledAttributes:  flex.ExpandFrameworkListString(ctx, m.EnabledAttributes, diags),
-		MappedEaAttributes: ExpandNetworksubscribesettingsMappedEaAttributes(ctx, m.MappedEaAttributes, diags),
+		MappedEaAttributes: flex.ExpandFrameworkListNestedBlock(ctx, m.MappedEaAttributes, diags, ExpandNetworksubscribesettingsMappedEaAttributes),
 	}
 	return to
 }
@@ -94,5 +81,5 @@ func (m *NetworkSubscribeSettingsModel) Flatten(ctx context.Context, from *ipam.
 		*m = NetworkSubscribeSettingsModel{}
 	}
 	m.EnabledAttributes = flex.FlattenFrameworkListString(ctx, from.EnabledAttributes, diags)
-	m.MappedEaAttributes = FlattenNetworksubscribesettingsMappedEaAttributes(ctx, from.MappedEaAttributes, diags)
+	m.MappedEaAttributes = flex.FlattenFrameworkListNestedBlock(ctx, from.MappedEaAttributes, NetworksubscribesettingsMappedEaAttributesAttrTypes, diags, FlattenNetworksubscribesettingsMappedEaAttributes)
 }
