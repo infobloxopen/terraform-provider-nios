@@ -45,7 +45,6 @@ func TestAccRecordAResource_basic(t *testing.T) {
 }
 
 func TestAccRecordAResource_disappears(t *testing.T) {
-	t.Skip("Skipping test for disappears")
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
