@@ -26,6 +26,7 @@ import (
 // The following require additional resource/data source objects to be supported.
 // - Logic Filter Rules
 // - Reserved Interface
+// - Enable Immediate Discovery
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // - Network View - default , test_fixed_address
@@ -700,6 +701,7 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
+	t.Skip("Skipping test as Discovery is not supported")
 	var resourceName = "nios_dhcp_fixedaddress.test_enable_immediate_discovery"
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
@@ -952,6 +954,15 @@ func TestAccFixedaddressResource_Mac(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "mac", "10:9a:dd:ee:ff:01"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccFixedaddressMac(ip, "RESERVED", agentCircuitID, "00:00:00:00:00:00"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "match_client", "RESERVED"),
+					resource.TestCheckResourceAttr(resourceName, "mac", "00:00:00:00:00:00"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -977,7 +988,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressMatchClient(ip, "CIRCUIT_ID", agentCircuitID),
+				Config: testAccFixedaddressMatchClient(ip, "REMOTE_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "match_client", "MATCH_CLIENT_UPDATE_REPLACE_ME"),
