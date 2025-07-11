@@ -2,22 +2,24 @@ package dns
 
 import (
 	"context"
+	"regexp"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"regexp"
-
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
-
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	customvalidator "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/validator"
 )
 
 type ZoneForwardModel struct {
@@ -129,16 +131,21 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 	},
 	"external_ns_group": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(path.MatchRoot("forward_to")),
+		},
 		MarkdownDescription: "A forward stub server name server group.",
 	},
 	"forward_to": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneForwardForwardToResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.ConflictsWith(path.MatchRoot("external_ns_group")),
+		},
 		MarkdownDescription: "The information for the remote name servers to which you want the Infoblox appliance to forward queries for a specified domain name.",
 	},
 	"forwarders_only": schema.BoolAttribute{
@@ -151,17 +158,14 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneForwardForwardingServersResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		//Computed:            true,
 		MarkdownDescription: "The information for the Grid members to which you want the Infoblox appliance to forward queries for a specified domain name.",
 	},
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.IsValidFQDN(),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
 	},
@@ -216,8 +220,14 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The parent zone of this zone. Note that when searching for reverse zones, the \"in-addr.arpa\" notation should be used.",
 	},
 	"prefix": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"prefix should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.",
 	},
 	"using_srg_associations": schema.BoolAttribute{

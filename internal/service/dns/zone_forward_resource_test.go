@@ -5,23 +5,23 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"net/http"
-	"testing"
 )
 
-var readableAttributesForZoneForward = "address,comment,disable,disable_ns_generation,display_domain,dns_fqdn,extattrs,external_ns_group," +
-	"forward_to,forwarders_only,forwarding_servers,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed," +
-	"ms_read_only,ms_sync_master_name,ns_group,parent,prefix,using_srg_associations,view,zone_format"
+var readableAttributesForZoneForward = "address,comment,disable,disable_ns_generation,display_domain,dns_fqdn,extattrs,external_ns_group,forward_to,forwarders_only,forwarding_servers,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed,ms_read_only,ms_sync_master_name,ns_group,parent,prefix,using_srg_associations,view,zone_format"
 
 func TestAccZoneForwardResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -53,7 +53,7 @@ func TestAccZoneForwardResource_basic(t *testing.T) {
 func TestAccZoneForwardResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_zone_forward.test"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -76,7 +76,7 @@ func TestAccZoneForwardResource_disappears(t *testing.T) {
 func TestAccZoneForwardResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_comment"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -107,7 +107,7 @@ func TestAccZoneForwardResource_Comment(t *testing.T) {
 func TestAccZoneForwardResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_disable"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -138,7 +138,7 @@ func TestAccZoneForwardResource_Disable(t *testing.T) {
 func TestAccZoneForwardResource_DisableNsGeneration(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_disable_ns_generation"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -169,7 +169,7 @@ func TestAccZoneForwardResource_DisableNsGeneration(t *testing.T) {
 func TestAccZoneForwardResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_extattrs"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -206,7 +206,7 @@ func TestAccZoneForwardResource_ExtAttrs(t *testing.T) {
 func TestAccZoneForwardResource_ExternalNsGroup(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_external_ns_group"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup1 := "ensg1"
 	externalNsGroup2 := "ensg2"
 
@@ -238,7 +238,7 @@ func TestAccZoneForwardResource_ExternalNsGroup(t *testing.T) {
 func TestAccZoneForwardResource_ForwardTo(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_forward_to"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	forwardTo1 := []map[string]string{
 		{
 			"name":    "example1.org",
@@ -284,7 +284,7 @@ func TestAccZoneForwardResource_ForwardTo(t *testing.T) {
 func TestAccZoneForwardResource_ForwardersOnly(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_forwarders_only"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -315,7 +315,7 @@ func TestAccZoneForwardResource_ForwardersOnly(t *testing.T) {
 func TestAccZoneForwardResource_ForwardingServers(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_forwarding_servers"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 	forwardingServer1 := []dns.ZoneForwardForwardingServers{
 		{
@@ -381,7 +381,7 @@ func TestAccZoneForwardResource_ForwardingServers(t *testing.T) {
 func TestAccZoneForwardResource_Locked(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_locked"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -412,7 +412,7 @@ func TestAccZoneForwardResource_Locked(t *testing.T) {
 func TestAccZoneForwardResource_MsAdIntegrated(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_ms_ad_integrated"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -443,7 +443,7 @@ func TestAccZoneForwardResource_MsAdIntegrated(t *testing.T) {
 func TestAccZoneForwardResource_MsDdnsMode(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_ms_ddns_mode"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -474,7 +474,7 @@ func TestAccZoneForwardResource_MsDdnsMode(t *testing.T) {
 func TestAccZoneForwardResource_NsGroup(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_ns_group"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 	nsGroup1 := "ns_group1"
 	nsGroup2 := "ns_group2"
@@ -507,7 +507,7 @@ func TestAccZoneForwardResource_NsGroup(t *testing.T) {
 func TestAccZoneForwardResource_Prefix(t *testing.T) {
 	var resourceName = "nios_dns_zone_forward.test_prefix"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.ParallelTest(t, resource.TestCase{

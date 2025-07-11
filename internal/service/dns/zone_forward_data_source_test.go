@@ -15,7 +15,7 @@ func TestAccZoneForwardDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_zone_forward.test"
 	resourceName := "nios_dns_zone_forward.test"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
 
 	resource.Test(t, resource.TestCase{
@@ -39,7 +39,7 @@ func TestAccZoneForwardDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_zone_forward.test"
 	resourceName := "nios_dns_zone_forward.test"
 	var v dns.ZoneForward
-	fqdn := "zone-forward" + acctest.RandomName() + ".example.com"
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	extAttrValue := acctest.RandomName()
 	externalNsGroup := "ensg1"
 	resource.Test(t, resource.TestCase{
@@ -120,7 +120,7 @@ resource "nios_dns_zone_forward" "test" {
 
 data "nios_dns_zone_forward" "test" {
  extattrfilters = {
-	"Site" = nios_dns_zone_forward.test.extattrs.Site
+	Site = nios_dns_zone_forward.test.extattrs.Site
  }
 }
 `, fqdn, externalNsGroup, extAttrsValue)
