@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 
-	customvalidator "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	customvalidator "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/validator"
 )
 
 type RecordAaaaModel struct {
