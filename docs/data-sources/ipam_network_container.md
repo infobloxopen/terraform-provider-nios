@@ -3,12 +3,12 @@
 page_title: "nios_ipam_network_container Data Source - nios"
 subcategory: "IPAM"
 description: |-
-  Manages a network container within Infoblox NIOS.
+  Retrieves Information about existing Network Containers.
 ---
 
 # nios_ipam_network_container (Data Source)
 
-Manages a network container within Infoblox NIOS.
+Retrieves Information about existing Network Containers.
 
 
 

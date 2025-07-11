@@ -45,7 +45,6 @@ func TestAccNetworkcontainerResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 					// Check default values are populated correctly
 					resource.TestCheckResourceAttr(resourceName, "authority", "false"),
-					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "false"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.authority_type", "GM"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_scope", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.mgmt_platform", ""),

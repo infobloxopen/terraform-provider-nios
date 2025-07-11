@@ -13,15 +13,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
-
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+
+	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
 )
 
 type NetworkcontainerModel struct {
@@ -1049,7 +1049,6 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Authority = types.BoolPointerValue(from.Authority)
-	m.AutoCreateReversezone = types.BoolPointerValue(from.AutoCreateReversezone)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
 	m.CloudInfo = FlattenNetworkcontainerCloudInfo(ctx, from.CloudInfo, diags)

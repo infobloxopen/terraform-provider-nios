@@ -3,12 +3,12 @@
 page_title: "nios_ipam_network_container Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Manages a network container within Infoblox NIOS.
+  Manages a Network Container
 ---
 
 # nios_ipam_network_container (Resource)
 
-Manages a network container within Infoblox NIOS.
+Manages a Network Container
 
 
 
