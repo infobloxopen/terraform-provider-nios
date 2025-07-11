@@ -6,8 +6,8 @@ resource "nios_dtc_server" "create_dtc_server" {
 
 //Create a DTC Server with additional fields. 
 resource "nios_dtc_server" "create_with_additional_fields" {
-  name                    = "example-server"
-  host                    = "2.3.3.4"
+  name                    = "example-dtc-server"
+  host                    = "2.3.1.2"
   auto_create_host_record = true
   comment                 = "create server"
   disable                 = false

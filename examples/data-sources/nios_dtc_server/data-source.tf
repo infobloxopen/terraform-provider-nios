@@ -1,7 +1,7 @@
 // Retrieve a specific DTC Server by name
 data "nios_dtc_server" "get_server_using_filters" {
   filters = {
-    name = "server"
+    name = "example-server"
   }
 }
 
