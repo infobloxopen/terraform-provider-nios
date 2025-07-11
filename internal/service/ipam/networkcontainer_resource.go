@@ -37,7 +37,7 @@ func (r *NetworkcontainerResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *NetworkcontainerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a network container within Infoblox NIOS.",
+		MarkdownDescription: "Manages a Network Container",
 		Attributes:          NetworkcontainerResourceSchemaAttributes,
 	}
 }
