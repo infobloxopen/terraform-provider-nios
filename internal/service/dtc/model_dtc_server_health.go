@@ -28,15 +28,15 @@ var DtcServerHealthAttrTypes = map[string]attr.Type{
 
 var DtcServerHealthResourceSchemaAttributes = map[string]schema.Attribute{
 	"availability": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The availability color status.",
 	},
 	"enabled_state": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The enabled state of the object.",
 	},
 	"description": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The textual description of the object's status.",
 	},
 }

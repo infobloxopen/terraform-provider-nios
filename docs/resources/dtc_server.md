@@ -65,13 +65,13 @@ resource "nios_dtc_server" "create_with_additional_fields" {
 ### Read-Only
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
-- `health` (Attributes) (see [below for nested schema](#nestedatt--health))
+- `health` (Attributes) The health status of DTC Server (see [below for nested schema](#nestedatt--health))
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--monitors"></a>
 ### Nested Schema for `monitors`
 
-Optional:
+Required:
 
 - `host` (String) IP address or FQDN of the server used for monitoring.
 - `monitor` (String) The monitor related to server.
@@ -80,7 +80,7 @@ Optional:
 <a id="nestedatt--health"></a>
 ### Nested Schema for `health`
 
-Optional:
+Read-Only:
 
 - `availability` (String) The availability color status.
 - `description` (String) The textual description of the object's status.

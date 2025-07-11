@@ -87,6 +87,7 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 	"health": schema.SingleNestedAttribute{
 		Attributes: DtcServerHealthResourceSchemaAttributes,
 		Computed:   true,
+		MarkdownDescription: "The health status of DTC Server",
 	},
 	"host": schema.StringAttribute{
 		Required:            true,

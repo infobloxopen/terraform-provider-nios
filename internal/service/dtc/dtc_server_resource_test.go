@@ -144,8 +144,8 @@ func TestAccDtcServerResource_Disable(t *testing.T) {
 	var v dtc.DtcServer
 	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
-	disable := "true"
-	disableUpdate := "false"
+	disable := true
+	disableUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -156,7 +156,7 @@ func TestAccDtcServerResource_Disable(t *testing.T) {
 				Config: testAccDtcServerDisable(name, host, disable),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcServerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", disable),
+					resource.TestCheckResourceAttr(resourceName, "disable", fmt.Sprintf("%t", disable)),
 				),
 			},
 			// Update and Read
@@ -164,7 +164,7 @@ func TestAccDtcServerResource_Disable(t *testing.T) {
 				Config: testAccDtcServerDisable(name, host, disableUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcServerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", disableUpdate),
+					resource.TestCheckResourceAttr(resourceName, "disable", fmt.Sprintf("%t", disableUpdate)),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -333,7 +333,7 @@ func TestAccDtcServerResource_SniHostname(t *testing.T) {
 	host := acctest.RandomIP()
 	sniHostName := acctest.RandomName()
 	sniHostNameUpdate := acctest.RandomName() + "-update"
-	useSniHostName := "true"
+	useSniHostName := true
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -366,8 +366,8 @@ func TestAccDtcServerResource_UseSniHostname(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 	sniHostName := acctest.RandomName()
-	useSniHostName := "true"
-	useSniHostNameUpdate := "false"
+	useSniHostName := true
+	useSniHostNameUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -378,7 +378,7 @@ func TestAccDtcServerResource_UseSniHostname(t *testing.T) {
 				Config: testAccDtcServerUseSniHostname(name, host, sniHostName, useSniHostName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcServerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_sni_hostname", useSniHostName),
+					resource.TestCheckResourceAttr(resourceName, "use_sni_hostname", fmt.Sprintf("%t", useSniHostName)),
 				),
 			},
 			// Update and Read
@@ -386,7 +386,7 @@ func TestAccDtcServerResource_UseSniHostname(t *testing.T) {
 				Config: testAccDtcServerUseSniHostname(name, host, sniHostName, useSniHostNameUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcServerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_sni_hostname", useSniHostNameUpdate),
+					resource.TestCheckResourceAttr(resourceName, "use_sni_hostname", fmt.Sprintf("%t", useSniHostNameUpdate)),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -481,12 +481,12 @@ resource "nios_dtc_server" "test_comment" {
 `, name, host, comment)
 }
 
-func testAccDtcServerDisable(name, host, disable string) string {
+func testAccDtcServerDisable(name, host string, disable bool) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_server" "test_disable" {
 	name = %q
 	host = %q		
-    disable = %q
+    disable = %t
 }
 `, name, host, disable)
 }
@@ -537,24 +537,24 @@ resource "nios_dtc_server" "test_name" {
 `, name, host)
 }
 
-func testAccDtcServerSniHostname(name, host, sniHostname, useSniHostName string) string {
+func testAccDtcServerSniHostname(name, host, sniHostname string, useSniHostName bool) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_server" "test_sni_hostname" {
 	name = %q
 	host = %q
     sni_hostname = %q
-	use_sni_hostname = %q
+	use_sni_hostname = %t
 }
 `, name, host, sniHostname, useSniHostName)
 }
 
-func testAccDtcServerUseSniHostname(name, host, sniHostname, useSniHostname string) string {
+func testAccDtcServerUseSniHostname(name, host, sniHostname string, useSniHostname bool) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_server" "test_use_sni_hostname" {
     name = %q
     host = %q
     sni_hostname = %q
-    use_sni_hostname = %q
+    use_sni_hostname = %t
 }
 `, name, host, sniHostname, useSniHostname)
 }

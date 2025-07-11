@@ -26,11 +26,11 @@ var DtcServerMonitorsAttrTypes = map[string]attr.Type{
 
 var DtcServerMonitorsResourceSchemaAttributes = map[string]schema.Attribute{
 	"monitor": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The monitor related to server.",
 	},
 	"host": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "IP address or FQDN of the server used for monitoring.",
 	},
 }

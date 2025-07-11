@@ -65,13 +65,13 @@ Optional:
 Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
-- `health` (Attributes) (see [below for nested schema](#nestedatt--result--health))
+- `health` (Attributes) The health status of DTC Server (see [below for nested schema](#nestedatt--result--health))
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--result--monitors"></a>
 ### Nested Schema for `result.monitors`
 
-Optional:
+Required:
 
 - `host` (String) IP address or FQDN of the server used for monitoring.
 - `monitor` (String) The monitor related to server.
@@ -80,7 +80,7 @@ Optional:
 <a id="nestedatt--result--health"></a>
 ### Nested Schema for `result.health`
 
-Optional:
+Read-Only:
 
 - `availability` (String) The availability color status.
 - `description` (String) The textual description of the object's status.
