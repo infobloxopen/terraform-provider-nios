@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -43,6 +44,9 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(path.MatchRoot("tsig_key"), path.MatchRoot("tsig_key_alg"), path.MatchRoot("tsig_key_name"), path.MatchRoot("use_tsig_key_name")),
+		},
 	},
 	"permission": schema.StringAttribute{
 		Optional: true,
@@ -50,6 +54,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString("ALLOW"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ALLOW", "DENY"),
+			stringvalidator.ConflictsWith(path.MatchRoot("tsig_key"), path.MatchRoot("tsig_key_alg"), path.MatchRoot("tsig_key_name"), path.MatchRoot("use_tsig_key_name")),
 		},
 		MarkdownDescription: "The permission to use for this address.",
 	},
@@ -61,6 +66,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Address should not have leading or trailing whitespace",
 			),
+			stringvalidator.ConflictsWith(path.MatchRoot("address"), path.MatchRoot("permission")),
 		},
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
@@ -70,6 +76,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString("HMAC-MD5"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
+			stringvalidator.ConflictsWith(path.MatchRoot("address"), path.MatchRoot("permission")),
 		},
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
@@ -82,13 +89,17 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				"Address should not have leading or trailing whitespace",
 			),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
+			stringvalidator.ConflictsWith(path.MatchRoot("address"), path.MatchRoot("permission")),
 		},
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.ConflictsWith(path.MatchRoot("address"), path.MatchRoot("permission")),
+		},
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }

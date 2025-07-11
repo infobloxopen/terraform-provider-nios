@@ -35,26 +35,32 @@ var ZoneAuthAllowQueryAttrTypes = map[string]attr.Type{
 var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
 	"permission": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The permission to use for this address.",
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }

@@ -20,6 +20,7 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
 
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	customvalidator "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/validator"
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 )
 
@@ -288,7 +289,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"allow_fixed_rrset_order": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag that allows to enable or disable fixed RRset ordering for authoritative forward-mapping zones.",
 	},
 	"allow_gss_tsig_for_underscore_zone": schema.BoolAttribute{
@@ -572,7 +573,10 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of external secondary servers.",
 	},
 	"fqdn": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
 	},
 	"grid_primary": schema.ListNestedAttribute{
@@ -818,6 +822,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"soa_serial_number": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
 	},
 	"srgs": schema.ListAttribute{
@@ -1173,7 +1178,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.RrNotQueriedEnabledTime = flex.FlattenInt64Pointer(from.RrNotQueriedEnabledTime)
 	m.ScavengingSettings = FlattenZoneAuthScavengingSettings(ctx, from.ScavengingSettings, diags)
-	m.SetSoaSerialNumber = types.BoolPointerValue(from.SetSoaSerialNumber)
+	// m.SetSoaSerialNumber = types.BoolPointerValue(from.SetSoaSerialNumber)
 	m.SoaDefaultTtl = flex.FlattenInt64Pointer(from.SoaDefaultTtl)
 	m.SoaEmail = flex.FlattenStringPointer(from.SoaEmail)
 	m.SoaExpire = flex.FlattenInt64Pointer(from.SoaExpire)

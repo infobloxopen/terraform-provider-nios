@@ -35,6 +35,7 @@ var ZoneAuthGridPrimaryAttrTypes = map[string]attr.Type{
 var ZoneAuthGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The grid member name.",
 	},
 	"stealth": schema.BoolAttribute{

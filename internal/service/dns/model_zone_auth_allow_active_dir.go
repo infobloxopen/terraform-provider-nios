@@ -30,7 +30,8 @@ var ZoneAuthAllowActiveDirAttrTypes = map[string]attr.Type{
 
 var ZoneAuthAllowActiveDirResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
