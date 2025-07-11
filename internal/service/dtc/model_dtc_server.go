@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
 
@@ -126,17 +125,6 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandDtcServer(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcServer {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcServerModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
 
 func (m *DtcServerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcServer {
 	if m == nil {

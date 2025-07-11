@@ -207,18 +207,6 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandDtcPool(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcPool {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcPoolModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *DtcPoolModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcPool {
 	if m == nil {
 		return nil

@@ -1,10 +1,10 @@
-//create a DTC Server with basic fields
+//Create a DTC Server with basic fields
 resource "nios_dtc_server" "create_dtc_server" {
   name = "example-server"
   host = "2.3.3.4"
 }
 
-//create a DTC Server with additional fields. 
+//Create a DTC Server with additional fields. 
 resource "nios_dtc_server" "create_with_additional_fields" {
   name                    = "example-server"
   host                    = "2.3.3.4"
