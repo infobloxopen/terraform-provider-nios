@@ -15,19 +15,19 @@ Manages DTC Server
 ```terraform
 //create a DTC Server with basic fields
 resource "nios_dtc_server" "create_dtc_server" {
-  name = "dtc-server"
+  name = "example-server"
   host = "2.3.3.4"
 }
 
 //create a DTC Server with additional fields. 
 resource "nios_dtc_server" "create_with_additional_fields" {
-  name                    = "dtc-server"
+  name                    = "example-server"
   host                    = "2.3.3.4"
   auto_create_host_record = true
   comment                 = "create server"
   disable                 = false
   extattrs = {
-    Site = "Siteblr"
+    Site = "location-1"
   }
   monitors = [
     {

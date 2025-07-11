@@ -23,7 +23,7 @@ data "nios_dtc_server" "get_server_using_filters" {
 // Retrieve specific DTC Server using Extensible Attributes
 data "nios_dtc_server" "get_servers_using_extensible_attributes" {
   extattrfilters = {
-    Site = "Bangalore"
+    Site = "location-1"
   }
 }
 

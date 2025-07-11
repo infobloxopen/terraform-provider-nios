@@ -15,15 +15,17 @@ import (
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
 	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 )
+//TODO : Required parents for the execution of tests
+// -dtc_monitors
 
 var readableAttributesForDtcServer = "extattrs,auto_create_host_record,disable,comment,disable,health,host,monitors,name,sni_hostname,use_sni_hostname"
 
 func TestAccDtcServerResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_server.test"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -51,9 +53,9 @@ func TestAccDtcServerResource_basic(t *testing.T) {
 func TestAccDtcServerResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_server.test"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -74,11 +76,11 @@ func TestAccDtcServerResource_disappears(t *testing.T) {
 func TestAccDtcServerResource_AutoCreateHostRecord(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_auto_create_host_record"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
-	autoCreateHostRecord := "false"
-	autoCreateHostRecordUpdate := "true"
+	autoCreateHostRecord := false
+	autoCreateHostRecordUpdate := true
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -88,7 +90,7 @@ func TestAccDtcServerResource_AutoCreateHostRecord(t *testing.T) {
 				Config: testAccDtcServerAutoCreateHostRecord(name, host, autoCreateHostRecord),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcServerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auto_create_host_record", autoCreateHostRecord),
+					resource.TestCheckResourceAttr(resourceName, "auto_create_host_record", fmt.Sprintf("%t", autoCreateHostRecord)),
 				),
 			},
 			// Update and Read
@@ -96,7 +98,7 @@ func TestAccDtcServerResource_AutoCreateHostRecord(t *testing.T) {
 				Config: testAccDtcServerAutoCreateHostRecord(name, host, autoCreateHostRecordUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcServerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auto_create_host_record", autoCreateHostRecordUpdate),
+					resource.TestCheckResourceAttr(resourceName, "auto_create_host_record", fmt.Sprintf("%t", autoCreateHostRecordUpdate)),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -107,11 +109,11 @@ func TestAccDtcServerResource_AutoCreateHostRecord(t *testing.T) {
 func TestAccDtcServerResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_comment"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 	comment := "initial comment"
 	commentUpdate := "updated comment"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -140,11 +142,11 @@ func TestAccDtcServerResource_Comment(t *testing.T) {
 func TestAccDtcServerResource_Disable(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_disable"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 	disable := "true"
 	disableUpdate := "false"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -173,11 +175,11 @@ func TestAccDtcServerResource_Disable(t *testing.T) {
 func TestAccDtcServerResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_extattrs"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -210,10 +212,10 @@ func TestAccDtcServerResource_ExtAttrs(t *testing.T) {
 func TestAccDtcServerResource_Host(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_host"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 	hostUpdate := acctest.RandomIP() // Use a different IP for update to test replace behavior
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -242,8 +244,7 @@ func TestAccDtcServerResource_Host(t *testing.T) {
 func TestAccDtcServerResource_Monitors(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_monitors"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 	monitors := []map[string]any{
 		{
@@ -261,6 +262,7 @@ func TestAccDtcServerResource_Monitors(t *testing.T) {
 			"monitor": "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHBz:https",
 		},
 	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -295,10 +297,10 @@ func TestAccDtcServerResource_Monitors(t *testing.T) {
 func TestAccDtcServerResource_Name(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_name"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
-	updateName := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
+	updateName := acctest.RandomNameWithPrefix("dtc-server-update")
 	host := acctest.RandomIP()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -327,12 +329,12 @@ func TestAccDtcServerResource_Name(t *testing.T) {
 func TestAccDtcServerResource_SniHostname(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_sni_hostname"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 	sniHostName := acctest.RandomName()
 	sniHostNameUpdate := acctest.RandomName() + "-update"
 	useSniHostName := "true"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -361,12 +363,12 @@ func TestAccDtcServerResource_SniHostname(t *testing.T) {
 func TestAccDtcServerResource_UseSniHostname(t *testing.T) {
 	var resourceName = "nios_dtc_server.test_use_sni_hostname"
 	var v dtc.DtcServer
-
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 	sniHostName := acctest.RandomName()
 	useSniHostName := "true"
 	useSniHostNameUpdate := "false"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -451,7 +453,6 @@ func testAccCheckDtcServerDisappears(ctx context.Context, v *dtc.DtcServer) reso
 }
 
 func testAccDtcServerBasicConfig(name, host string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dtc_server" "test" {
 	name = %q
@@ -460,12 +461,12 @@ resource "nios_dtc_server" "test" {
 `, name, host)
 }
 
-func testAccDtcServerAutoCreateHostRecord(name, host, autoCreateHostRecord string) string {
+func testAccDtcServerAutoCreateHostRecord(name, host string, autoCreateHostRecord bool) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_server" "test_auto_create_host_record" {
 	name = %q
 	host = %q
-    auto_create_host_record = %q
+    auto_create_host_record = %t
 }
 `, name, host, autoCreateHostRecord)
 }

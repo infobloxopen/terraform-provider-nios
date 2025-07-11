@@ -15,7 +15,7 @@ func TestAccDtcServerDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_server.test"
 	resourceName := "nios_dtc_server.test"
 	var v dtc.DtcServer
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
 
 	resource.Test(t, resource.TestCase{
@@ -39,8 +39,9 @@ func TestAccDtcServerDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_server.test"
 	resourceName := "nios_dtc_server.test"
 	var v dtc.DtcServer
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("dtc-server")
 	host := acctest.RandomIP()
+	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -48,7 +49,7 @@ func TestAccDtcServerDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcServerDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcServerDataSourceConfigExtAttrFilters(name , host ,"value1"),
+				Config: testAccDtcServerDataSourceConfigExtAttrFilters(name , host , extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcServerExists(context.Background(), resourceName, &v),
