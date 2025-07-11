@@ -249,6 +249,8 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"auto_create_reversezone": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "This flag controls whether reverse zones are automatically created when the network is added.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"bootfile": schema.StringAttribute{
 		Optional:            true,
@@ -931,7 +933,6 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 	to := &ipam.Networkcontainer{
 		Ref:                              flex.ExpandStringPointer(m.Ref),
 		Authority:                        flex.ExpandBoolPointer(m.Authority),
-		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		Bootfile:                         flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                       flex.ExpandStringPointer(m.Bootserver),
 		CloudInfo:                        ExpandNetworkcontainerCloudInfo(ctx, m.CloudInfo, diags),
