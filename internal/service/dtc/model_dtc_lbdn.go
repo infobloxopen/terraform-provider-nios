@@ -4,8 +4,8 @@ import (
 	"context"
 	"regexp"
 
-	customvalidator "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/validator"
 	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
+	customvalidator "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
