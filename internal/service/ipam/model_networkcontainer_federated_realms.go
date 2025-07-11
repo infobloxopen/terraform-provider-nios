@@ -28,10 +28,12 @@ var NetworkcontainerFederatedRealmsResourceSchemaAttributes = map[string]schema.
 	"name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The federated realm name",
+		Computed:            true,
 	},
 	"id": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The federated realm id",
+		Computed:            true,
 	},
 }
 

@@ -30,6 +30,7 @@ var NetworkcontainerLogicFilterRulesResourceSchemaAttributes = map[string]schema
 	"filter": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The filter name.",
+		Computed:            true,
 	},
 	"type": schema.StringAttribute{
 		Optional:            true,
@@ -37,6 +38,7 @@ var NetworkcontainerLogicFilterRulesResourceSchemaAttributes = map[string]schema
 		Validators: []validator.String{
 			stringvalidator.OneOf("MAC", "NAC", "Option"),
 		},
+		Computed: true,
 	},
 }
 

@@ -30,14 +30,17 @@ var NetworkcontainercloudinfoDelegatedMemberResourceSchemaAttributes = map[strin
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
+		Computed:            true,
 	},
 	"ipv6addr": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The IPv6 Address of the Grid Member.",
+		Computed:            true,
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The Grid member name",
+		Computed:            true,
 	},
 }
 
