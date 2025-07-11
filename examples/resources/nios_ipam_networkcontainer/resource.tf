@@ -1,4 +1,4 @@
-resource "nios_ipam_networkcontainer" "example_container" {
+resource "nios_ipam_network_container" "example_container" {
   network      = "10.0.0.0/24"
   network_view = "default"
   comment      = "Created by Terraform"
@@ -9,7 +9,7 @@ resource "nios_ipam_networkcontainer" "example_container" {
   }
 }
 
-resource "nios_ipam_networkcontainer" "complete_example" {
+resource "nios_ipam_network_container" "complete_example" {
   // Required attributes
   network = "11.0.0.0/24"
 
@@ -55,7 +55,7 @@ resource "nios_ipam_networkcontainer" "complete_example" {
 }
 
 
-resource "nios_ipam_networkcontainer" "example_func_call" {
+resource "nios_ipam_network_container" "example_func_call" {
   func_call = {
     attribute_name  = "network"
     object_function = "next_available_network"
@@ -71,6 +71,6 @@ resource "nios_ipam_networkcontainer" "example_func_call" {
   }
   comment = "Network container created with function call"
   depends_on = [
-    nios_ipam_networkcontainer.example_container
+    nios_ipam_network_container.example_container
   ]
 }

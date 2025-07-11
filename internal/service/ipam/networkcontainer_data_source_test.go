@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccNetworkcontainerDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_ipam_networkcontainer.test"
-	resourceName := "nios_ipam_networkcontainer.test"
+	dataSourceName := "data.nios_ipam_network_container.test"
+	resourceName := "nios_ipam_network_container.test"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -35,8 +35,8 @@ func TestAccNetworkcontainerDataSource_Filters(t *testing.T) {
 }
 
 func TestAccNetworkcontainerDataSource_TagFilters(t *testing.T) {
-	dataSourceName := "data.nios_ipam_networkcontainer.test"
-	resourceName := "nios_ipam_networkcontainer.test"
+	dataSourceName := "data.nios_ipam_network_container.test"
+	resourceName := "nios_ipam_network_container.test"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -165,13 +165,13 @@ func testAccCheckNetworkcontainerResourceAttrPair(resourceName, dataSourceName s
 
 func testAccNetworkcontainerDataSourceConfigFilters(network string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test" {
+resource "nios_ipam_network_container" "test" {
   network = %q
 }
 
-data "nios_ipam_networkcontainer" "test" {
+data "nios_ipam_network_container" "test" {
   filters = {
-	network = nios_ipam_networkcontainer.test.network
+	network = nios_ipam_network_container.test.network
   }
 }
 `, network)
@@ -179,16 +179,16 @@ data "nios_ipam_networkcontainer" "test" {
 
 func testAccNetworkcontainerDataSourceConfigExtAttrFilters(network, extAttrsValue string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test" {
+resource "nios_ipam_network_container" "test" {
   network = %q
   extattrs = {
     Site = %q
   }
 }
 
-data "nios_ipam_networkcontainer" "test" {
+data "nios_ipam_network_container" "test" {
   extattrfilters = {
-	"Site" = nios_ipam_networkcontainer.test.extattrs.Site
+	"Site" = nios_ipam_network_container.test.extattrs.Site
   }
 }
 `, network, extAttrsValue)

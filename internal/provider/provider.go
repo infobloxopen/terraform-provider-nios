@@ -90,9 +90,11 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		dns.NewRecordAResource,
 		dns.NewRecordAaaaResource,
+
 		dtc.NewDtcLbdnResource,
-		ipam.NewNetworkcontainerResource,
 		dtc.NewDtcPoolResource,
+
+		ipam.NewNetworkcontainerResource,
 	}
 }
 
@@ -100,9 +102,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 	return []func() datasource.DataSource{
 		dns.NewRecordADataSource,
 		dns.NewRecordAaaaDataSource,
+
 		dtc.NewDtcLbdnDataSource,
-		ipam.NewNetworkcontainerDataSource,
 		dtc.NewDtcPoolDataSource,
+
+		ipam.NewNetworkcontainerDataSource,
 	}
 }
 

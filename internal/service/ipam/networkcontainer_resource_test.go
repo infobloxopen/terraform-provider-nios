@@ -29,7 +29,7 @@ import (
 var readableAttributesForNetworkcontainer = "authority,bootfile,bootserver,cloud_info,comment,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,deny_bootp,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,email_list,enable_ddns,enable_dhcp_thresholds,enable_discovery,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,endpoint_sources,extattrs,federated_realms,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,ipam_email_addresses,ipam_threshold_settings,ipam_trap_settings,last_rir_registration_update_sent,last_rir_registration_update_status,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,nextserver,options,port_control_blackout_setting,pxe_lease_time,recycle_leases,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_authority,use_blackout_setting,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_discovery_basic_polling_settings,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_enable_discovery,use_ignore_dhcp_option_list_request,use_ignore_id,use_ipam_email_addresses,use_ipam_threshold_settings,use_ipam_trap_settings,use_lease_scavenge_time,use_logic_filter_rules,use_mgm_private,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_subscribe_settings,use_update_dns_on_lease_renewal,use_zone_associations,utilization,zone_associations"
 
 func TestAccNetworkcontainerResource_basic(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test"
+	var resourceName = "nios_ipam_network_container.test"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -42,7 +42,6 @@ func TestAccNetworkcontainerResource_basic(t *testing.T) {
 				Config: testAccNetworkcontainerBasicConfig(network),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -52,7 +51,7 @@ func TestAccNetworkcontainerResource_basic(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_disappears(t *testing.T) {
-	resourceName := "nios_ipam_networkcontainer.test"
+	resourceName := "nios_ipam_network_container.test"
 	var v ipam.Networkcontainer
 	// Generate a random CIDR network for the test
 	network := acctest.RandomCIDRNetwork()
@@ -75,7 +74,7 @@ func TestAccNetworkcontainerResource_disappears(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_Authority(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_authority"
+	var resourceName = "nios_ipam_network_container.test_authority"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -109,7 +108,7 @@ func TestAccNetworkcontainerResource_Authority(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_Bootfile(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_bootfile"
+	var resourceName = "nios_ipam_network_container.test_bootfile"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -143,7 +142,7 @@ func TestAccNetworkcontainerResource_Bootfile(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_Bootserver(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_bootserver"
+	var resourceName = "nios_ipam_network_container.test_bootserver"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -177,7 +176,7 @@ func TestAccNetworkcontainerResource_Bootserver(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_CloudInfo(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_cloud_info"
+	var resourceName = "nios_ipam_network_container.test_cloud_info"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -202,7 +201,7 @@ func TestAccNetworkcontainerResource_CloudInfo(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_Comment(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_comment"
+	var resourceName = "nios_ipam_network_container.test_comment"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -234,7 +233,7 @@ func TestAccNetworkcontainerResource_Comment(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DdnsDomainname(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ddns_domainname"
+	var resourceName = "nios_ipam_network_container.test_ddns_domainname"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -268,7 +267,7 @@ func TestAccNetworkcontainerResource_DdnsDomainname(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DdnsGenerateHostname(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ddns_generate_hostname"
+	var resourceName = "nios_ipam_network_container.test_ddns_generate_hostname"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -302,7 +301,7 @@ func TestAccNetworkcontainerResource_DdnsGenerateHostname(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DdnsServerAlwaysUpdates(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ddns_server_always_updates"
+	var resourceName = "nios_ipam_network_container.test_ddns_server_always_updates"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -338,7 +337,7 @@ func TestAccNetworkcontainerResource_DdnsServerAlwaysUpdates(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DdnsTtl(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ddns_ttl"
+	var resourceName = "nios_ipam_network_container.test_ddns_ttl"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -372,7 +371,7 @@ func TestAccNetworkcontainerResource_DdnsTtl(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DdnsUpdateFixedAddresses(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ddns_update_fixed_addresses"
+	var resourceName = "nios_ipam_network_container.test_ddns_update_fixed_addresses"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -406,7 +405,7 @@ func TestAccNetworkcontainerResource_DdnsUpdateFixedAddresses(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DdnsUseOption81(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ddns_use_option81"
+	var resourceName = "nios_ipam_network_container.test_ddns_use_option81"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -440,7 +439,7 @@ func TestAccNetworkcontainerResource_DdnsUseOption81(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DenyBootp(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_deny_bootp"
+	var resourceName = "nios_ipam_network_container.test_deny_bootp"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -474,7 +473,7 @@ func TestAccNetworkcontainerResource_DenyBootp(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DiscoveryBasicPollSettings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_discovery_basic_poll_settings"
+	var resourceName = "nios_ipam_network_container.test_discovery_basic_poll_settings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -532,7 +531,7 @@ func TestAccNetworkcontainerResource_DiscoveryBasicPollSettings(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DiscoveryBlackoutSetting(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_discovery_blackout_setting"
+	var resourceName = "nios_ipam_network_container.test_discovery_blackout_setting"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -556,7 +555,7 @@ func TestAccNetworkcontainerResource_DiscoveryBlackoutSetting(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_EmailList(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_email_list"
+	var resourceName = "nios_ipam_network_container.test_email_list"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -590,7 +589,7 @@ func TestAccNetworkcontainerResource_EmailList(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_EnableDdns(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_enable_ddns"
+	var resourceName = "nios_ipam_network_container.test_enable_ddns"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -624,7 +623,7 @@ func TestAccNetworkcontainerResource_EnableDdns(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_EnableDhcpThresholds(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_enable_dhcp_thresholds"
+	var resourceName = "nios_ipam_network_container.test_enable_dhcp_thresholds"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -658,7 +657,7 @@ func TestAccNetworkcontainerResource_EnableDhcpThresholds(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_EnableEmailWarnings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_enable_email_warnings"
+	var resourceName = "nios_ipam_network_container.test_enable_email_warnings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -690,7 +689,7 @@ func TestAccNetworkcontainerResource_EnableEmailWarnings(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_EnablePxeLeaseTime(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_enable_pxe_lease_time"
+	var resourceName = "nios_ipam_network_container.test_enable_pxe_lease_time"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -726,7 +725,7 @@ func TestAccNetworkcontainerResource_EnablePxeLeaseTime(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_EnableSnmpWarnings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_enable_snmp_warnings"
+	var resourceName = "nios_ipam_network_container.test_enable_snmp_warnings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -758,7 +757,7 @@ func TestAccNetworkcontainerResource_EnableSnmpWarnings(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_extattrs"
+	var resourceName = "nios_ipam_network_container.test_extattrs"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 	extAttrValue1 := acctest.RandomName()
@@ -792,7 +791,7 @@ func TestAccNetworkcontainerResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_HighWaterMark(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_high_water_mark"
+	var resourceName = "nios_ipam_network_container.test_high_water_mark"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -824,7 +823,7 @@ func TestAccNetworkcontainerResource_HighWaterMark(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_HighWaterMarkReset(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_high_water_mark_reset"
+	var resourceName = "nios_ipam_network_container.test_high_water_mark_reset"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -856,7 +855,7 @@ func TestAccNetworkcontainerResource_HighWaterMarkReset(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_IgnoreDhcpOptionListRequest(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ignore_dhcp_option_list_request"
+	var resourceName = "nios_ipam_network_container.test_ignore_dhcp_option_list_request"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -890,7 +889,7 @@ func TestAccNetworkcontainerResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_IgnoreId(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ignore_id"
+	var resourceName = "nios_ipam_network_container.test_ignore_id"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -924,7 +923,7 @@ func TestAccNetworkcontainerResource_IgnoreId(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_IgnoreMacAddresses(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ignore_mac_addresses"
+	var resourceName = "nios_ipam_network_container.test_ignore_mac_addresses"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -956,7 +955,7 @@ func TestAccNetworkcontainerResource_IgnoreMacAddresses(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_IpamEmailAddresses(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ipam_email_addresses"
+	var resourceName = "nios_ipam_network_container.test_ipam_email_addresses"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -990,7 +989,7 @@ func TestAccNetworkcontainerResource_IpamEmailAddresses(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_IpamThresholdSettings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ipam_threshold_settings"
+	var resourceName = "nios_ipam_network_container.test_ipam_threshold_settings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1026,7 +1025,7 @@ func TestAccNetworkcontainerResource_IpamThresholdSettings(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_IpamTrapSettings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_ipam_trap_settings"
+	var resourceName = "nios_ipam_network_container.test_ipam_trap_settings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1058,7 +1057,7 @@ func TestAccNetworkcontainerResource_IpamTrapSettings(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_LeaseScavengeTime(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_lease_scavenge_time"
+	var resourceName = "nios_ipam_network_container.test_lease_scavenge_time"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1088,7 +1087,7 @@ func TestAccNetworkcontainerResource_LeaseScavengeTime(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_LowWaterMark(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_low_water_mark"
+	var resourceName = "nios_ipam_network_container.test_low_water_mark"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1118,7 +1117,7 @@ func TestAccNetworkcontainerResource_LowWaterMark(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_LowWaterMarkReset(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_low_water_mark_reset"
+	var resourceName = "nios_ipam_network_container.test_low_water_mark_reset"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1148,7 +1147,7 @@ func TestAccNetworkcontainerResource_LowWaterMarkReset(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_MgmPrivate(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_mgm_private"
+	var resourceName = "nios_ipam_network_container.test_mgm_private"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1182,7 +1181,7 @@ func TestAccNetworkcontainerResource_MgmPrivate(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_Network(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_network"
+	var resourceName = "nios_ipam_network_container.test_network"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1204,7 +1203,7 @@ func TestAccNetworkcontainerResource_Network(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_NetworkView(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_network_view"
+	var resourceName = "nios_ipam_network_container.test_network_view"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1227,7 +1226,7 @@ func TestAccNetworkcontainerResource_NetworkView(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_Nextserver(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_nextserver"
+	var resourceName = "nios_ipam_network_container.test_nextserver"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1261,7 +1260,7 @@ func TestAccNetworkcontainerResource_Nextserver(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_Options(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_options"
+	var resourceName = "nios_ipam_network_container.test_options"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1303,7 +1302,7 @@ func TestAccNetworkcontainerResource_Options(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_PortControlBlackoutSetting(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_port_control_blackout_setting"
+	var resourceName = "nios_ipam_network_container.test_port_control_blackout_setting"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1327,7 +1326,7 @@ func TestAccNetworkcontainerResource_PortControlBlackoutSetting(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_PxeLeaseTime(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_pxe_lease_time"
+	var resourceName = "nios_ipam_network_container.test_pxe_lease_time"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1361,7 +1360,7 @@ func TestAccNetworkcontainerResource_PxeLeaseTime(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_RecycleLeases(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_recycle_leases"
+	var resourceName = "nios_ipam_network_container.test_recycle_leases"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1395,7 +1394,7 @@ func TestAccNetworkcontainerResource_RecycleLeases(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_RirRegistrationStatus(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_rir_registration_status"
+	var resourceName = "nios_ipam_network_container.test_rir_registration_status"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1418,7 +1417,7 @@ func TestAccNetworkcontainerResource_RirRegistrationStatus(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_SamePortControlDiscoveryBlackout(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_same_port_control_discovery_blackout"
+	var resourceName = "nios_ipam_network_container.test_same_port_control_discovery_blackout"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1450,7 +1449,7 @@ func TestAccNetworkcontainerResource_SamePortControlDiscoveryBlackout(t *testing
 }
 
 func TestAccNetworkcontainerResource_Unmanaged(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_unmanaged"
+	var resourceName = "nios_ipam_network_container.test_unmanaged"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1473,7 +1472,7 @@ func TestAccNetworkcontainerResource_Unmanaged(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_update_dns_on_lease_renewal"
+	var resourceName = "nios_ipam_network_container.test_update_dns_on_lease_renewal"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1507,7 +1506,7 @@ func TestAccNetworkcontainerResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseAuthority(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_authority"
+	var resourceName = "nios_ipam_network_container.test_use_authority"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1539,7 +1538,7 @@ func TestAccNetworkcontainerResource_UseAuthority(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseBlackoutSetting(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_blackout_setting"
+	var resourceName = "nios_ipam_network_container.test_use_blackout_setting"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1571,7 +1570,7 @@ func TestAccNetworkcontainerResource_UseBlackoutSetting(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseBootfile(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_bootfile"
+	var resourceName = "nios_ipam_network_container.test_use_bootfile"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1603,7 +1602,7 @@ func TestAccNetworkcontainerResource_UseBootfile(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseBootserver(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_bootserver"
+	var resourceName = "nios_ipam_network_container.test_use_bootserver"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1635,7 +1634,7 @@ func TestAccNetworkcontainerResource_UseBootserver(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseDdnsDomainname(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ddns_domainname"
+	var resourceName = "nios_ipam_network_container.test_use_ddns_domainname"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1667,7 +1666,7 @@ func TestAccNetworkcontainerResource_UseDdnsDomainname(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseDdnsGenerateHostname(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ddns_generate_hostname"
+	var resourceName = "nios_ipam_network_container.test_use_ddns_generate_hostname"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1699,7 +1698,7 @@ func TestAccNetworkcontainerResource_UseDdnsGenerateHostname(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseDdnsTtl(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ddns_ttl"
+	var resourceName = "nios_ipam_network_container.test_use_ddns_ttl"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1731,7 +1730,7 @@ func TestAccNetworkcontainerResource_UseDdnsTtl(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseDdnsUpdateFixedAddresses(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ddns_update_fixed_addresses"
+	var resourceName = "nios_ipam_network_container.test_use_ddns_update_fixed_addresses"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1763,7 +1762,7 @@ func TestAccNetworkcontainerResource_UseDdnsUpdateFixedAddresses(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseDdnsUseOption81(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ddns_use_option81"
+	var resourceName = "nios_ipam_network_container.test_use_ddns_use_option81"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1795,7 +1794,7 @@ func TestAccNetworkcontainerResource_UseDdnsUseOption81(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseDenyBootp(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_deny_bootp"
+	var resourceName = "nios_ipam_network_container.test_use_deny_bootp"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1827,7 +1826,7 @@ func TestAccNetworkcontainerResource_UseDenyBootp(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseDiscoveryBasicPollingSettings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_discovery_basic_polling_settings"
+	var resourceName = "nios_ipam_network_container.test_use_discovery_basic_polling_settings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1859,7 +1858,7 @@ func TestAccNetworkcontainerResource_UseDiscoveryBasicPollingSettings(t *testing
 }
 
 func TestAccNetworkcontainerResource_UseEmailList(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_email_list"
+	var resourceName = "nios_ipam_network_container.test_use_email_list"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1891,7 +1890,7 @@ func TestAccNetworkcontainerResource_UseEmailList(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseEnableDdns(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_enable_ddns"
+	var resourceName = "nios_ipam_network_container.test_use_enable_ddns"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1923,7 +1922,7 @@ func TestAccNetworkcontainerResource_UseEnableDdns(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseEnableDhcpThresholds(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_enable_dhcp_thresholds"
+	var resourceName = "nios_ipam_network_container.test_use_enable_dhcp_thresholds"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1955,7 +1954,7 @@ func TestAccNetworkcontainerResource_UseEnableDhcpThresholds(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseEnableDiscovery(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_enable_discovery"
+	var resourceName = "nios_ipam_network_container.test_use_enable_discovery"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -1987,7 +1986,7 @@ func TestAccNetworkcontainerResource_UseEnableDiscovery(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ignore_dhcp_option_list_request"
+	var resourceName = "nios_ipam_network_container.test_use_ignore_dhcp_option_list_request"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2019,7 +2018,7 @@ func TestAccNetworkcontainerResource_UseIgnoreDhcpOptionListRequest(t *testing.T
 }
 
 func TestAccNetworkcontainerResource_UseIgnoreId(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ignore_id"
+	var resourceName = "nios_ipam_network_container.test_use_ignore_id"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2051,7 +2050,7 @@ func TestAccNetworkcontainerResource_UseIgnoreId(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseIpamEmailAddresses(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ipam_email_addresses"
+	var resourceName = "nios_ipam_network_container.test_use_ipam_email_addresses"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2083,7 +2082,7 @@ func TestAccNetworkcontainerResource_UseIpamEmailAddresses(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseIpamThresholdSettings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ipam_threshold_settings"
+	var resourceName = "nios_ipam_network_container.test_use_ipam_threshold_settings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2115,7 +2114,7 @@ func TestAccNetworkcontainerResource_UseIpamThresholdSettings(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseIpamTrapSettings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_ipam_trap_settings"
+	var resourceName = "nios_ipam_network_container.test_use_ipam_trap_settings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2147,7 +2146,7 @@ func TestAccNetworkcontainerResource_UseIpamTrapSettings(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseLeaseScavengeTime(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_lease_scavenge_time"
+	var resourceName = "nios_ipam_network_container.test_use_lease_scavenge_time"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2179,7 +2178,7 @@ func TestAccNetworkcontainerResource_UseLeaseScavengeTime(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseLogicFilterRules(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_logic_filter_rules"
+	var resourceName = "nios_ipam_network_container.test_use_logic_filter_rules"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2211,7 +2210,7 @@ func TestAccNetworkcontainerResource_UseLogicFilterRules(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseMgmPrivate(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_mgm_private"
+	var resourceName = "nios_ipam_network_container.test_use_mgm_private"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2234,7 +2233,7 @@ func TestAccNetworkcontainerResource_UseMgmPrivate(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseNextserver(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_nextserver"
+	var resourceName = "nios_ipam_network_container.test_use_nextserver"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2266,7 +2265,7 @@ func TestAccNetworkcontainerResource_UseNextserver(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseOptions(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_options"
+	var resourceName = "nios_ipam_network_container.test_use_options"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2298,7 +2297,7 @@ func TestAccNetworkcontainerResource_UseOptions(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UsePxeLeaseTime(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_pxe_lease_time"
+	var resourceName = "nios_ipam_network_container.test_use_pxe_lease_time"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2330,7 +2329,7 @@ func TestAccNetworkcontainerResource_UsePxeLeaseTime(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseRecycleLeases(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_recycle_leases"
+	var resourceName = "nios_ipam_network_container.test_use_recycle_leases"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2362,7 +2361,7 @@ func TestAccNetworkcontainerResource_UseRecycleLeases(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseSubscribeSettings(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_subscribe_settings"
+	var resourceName = "nios_ipam_network_container.test_use_subscribe_settings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2385,7 +2384,7 @@ func TestAccNetworkcontainerResource_UseSubscribeSettings(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_update_dns_on_lease_renewal"
+	var resourceName = "nios_ipam_network_container.test_use_update_dns_on_lease_renewal"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2417,7 +2416,7 @@ func TestAccNetworkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseZoneAssociations(t *testing.T) {
-	var resourceName = "nios_ipam_networkcontainer.test_use_zone_associations"
+	var resourceName = "nios_ipam_network_container.test_use_zone_associations"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
@@ -2498,9 +2497,8 @@ func testAccCheckNetworkcontainerDisappears(ctx context.Context, v *ipam.Network
 }
 
 func testAccNetworkcontainerBasicConfig(network string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test" {
+resource "nios_ipam_network_container" "test" {
 	network = %q
 }
 `, network)
@@ -2508,7 +2506,7 @@ resource "nios_ipam_networkcontainer" "test" {
 
 func testAccNetworkcontainerAuthority(network, authority, useAuthority string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_authority" {
+resource "nios_ipam_network_container" "test_authority" {
 	network = %q
     authority = %q
 	use_authority = %q
@@ -2518,7 +2516,7 @@ resource "nios_ipam_networkcontainer" "test_authority" {
 
 func testAccNetworkcontainerBootfile(network, bootfile, useBootfile string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_bootfile" {
+resource "nios_ipam_network_container" "test_bootfile" {
     network = %q
     bootfile = %q
     use_bootfile = %q
@@ -2528,7 +2526,7 @@ resource "nios_ipam_networkcontainer" "test_bootfile" {
 
 func testAccNetworkcontainerBootserver(network, bootserver, useBootserver string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_bootserver" {
+resource "nios_ipam_network_container" "test_bootserver" {
     network = %q
     bootserver = %q
     use_bootserver = %q
@@ -2538,7 +2536,7 @@ resource "nios_ipam_networkcontainer" "test_bootserver" {
 
 func testAccNetworkcontainerCloudInfo(network string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_cloud_info" {
+resource "nios_ipam_network_container" "test_cloud_info" {
     network = %q
 }
 `, network)
@@ -2546,7 +2544,7 @@ resource "nios_ipam_networkcontainer" "test_cloud_info" {
 
 func testAccNetworkcontainerComment(network, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_comment" {
+resource "nios_ipam_network_container" "test_comment" {
     network = %q
     comment = %q
 }
@@ -2555,7 +2553,7 @@ resource "nios_ipam_networkcontainer" "test_comment" {
 
 func testAccNetworkcontainerDdnsDomainname(network, ddnsDomainname, useDdnsDomainname string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ddns_domainname" {
+resource "nios_ipam_network_container" "test_ddns_domainname" {
     network = %q
     ddns_domainname = %q
 	use_ddns_domainname = %q
@@ -2565,7 +2563,7 @@ resource "nios_ipam_networkcontainer" "test_ddns_domainname" {
 
 func testAccNetworkcontainerDdnsGenerateHostname(network, ddnsGenerateHostname, useDdnsGenerateHostname string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ddns_generate_hostname" {
+resource "nios_ipam_network_container" "test_ddns_generate_hostname" {
     network = %q
     ddns_generate_hostname = %q
     use_ddns_generate_hostname = %q
@@ -2575,7 +2573,7 @@ resource "nios_ipam_networkcontainer" "test_ddns_generate_hostname" {
 
 func testAccNetworkcontainerDdnsServerAlwaysUpdates(network, ddnsServerAlwaysUpdates, ddnsUseOption81, useDdnsUseOption81 string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ddns_server_always_updates" {
+resource "nios_ipam_network_container" "test_ddns_server_always_updates" {
     network = %q
     ddns_server_always_updates = %q
     ddns_use_option81 = %q
@@ -2586,7 +2584,7 @@ resource "nios_ipam_networkcontainer" "test_ddns_server_always_updates" {
 
 func testAccNetworkcontainerDdnsTtl(network, ddnsTtl, useDdnsTtl string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ddns_ttl" {
+resource "nios_ipam_network_container" "test_ddns_ttl" {
     network = %q
     ddns_ttl = %q
     use_ddns_ttl = %q
@@ -2596,7 +2594,7 @@ resource "nios_ipam_networkcontainer" "test_ddns_ttl" {
 
 func testAccNetworkcontainerDdnsUpdateFixedAddresses(network, ddnsUpdateFixedAddresses, useDdnsUpdateFixedAddresses string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ddns_update_fixed_addresses" {
+resource "nios_ipam_network_container" "test_ddns_update_fixed_addresses" {
     network = %q
     ddns_update_fixed_addresses = %q
     use_ddns_update_fixed_addresses = %q
@@ -2606,7 +2604,7 @@ resource "nios_ipam_networkcontainer" "test_ddns_update_fixed_addresses" {
 
 func testAccNetworkcontainerDdnsUseOption81(network, ddnsUseOption81, useDdnsUseOption81 string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ddns_use_option81" {
+resource "nios_ipam_network_container" "test_ddns_use_option81" {
     network = %q
     ddns_use_option81 = %q
     use_ddns_use_option81 = %q
@@ -2616,7 +2614,7 @@ resource "nios_ipam_networkcontainer" "test_ddns_use_option81" {
 
 func testAccNetworkcontainerDenyBootp(network, denyBootp, useDenyBootp string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_deny_bootp" {
+resource "nios_ipam_network_container" "test_deny_bootp" {
     network = %q
     deny_bootp = %q
     use_deny_bootp = %q
@@ -2626,7 +2624,7 @@ resource "nios_ipam_networkcontainer" "test_deny_bootp" {
 
 func testAccNetworkcontainerDiscoveryBasicPollSettings(network, autoArpRefreshBeforeSwitchPortPolling, cliCollection, completePingSweep, credentialGroup, deviceProfile, netbiosScanning, pollingFrequencyModifier, portScanning, smartSubnetPingSweep, snmpCollection, switchPortDataCollectionPolling, switchPortDataCollectionPollingInterval, useGlobalPollingFrequencyModifier, useDiscoveryBasicPollSettings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_discovery_basic_poll_settings" {
+resource "nios_ipam_network_container" "test_discovery_basic_poll_settings" {
     network = %q
     discovery_basic_poll_settings = {
         auto_arp_refresh_before_switch_port_polling = %s
@@ -2650,7 +2648,7 @@ resource "nios_ipam_networkcontainer" "test_discovery_basic_poll_settings" {
 
 func testAccNetworkcontainerDiscoveryBlackoutSetting(network, enabledBlackout, useBlackoutSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_discovery_blackout_setting" {
+resource "nios_ipam_network_container" "test_discovery_blackout_setting" {
     network = %q
     discovery_blackout_setting = {
 		enabled_blackout = %q
@@ -2662,7 +2660,7 @@ resource "nios_ipam_networkcontainer" "test_discovery_blackout_setting" {
 
 func testAccNetworkcontainerEmailList(network, emailList, useEmailList string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_email_list" {
+resource "nios_ipam_network_container" "test_email_list" {
     network = %q
     email_list = [%q]
     use_email_list = %q
@@ -2672,7 +2670,7 @@ resource "nios_ipam_networkcontainer" "test_email_list" {
 
 func testAccNetworkcontainerEnableDdns(network, enableDdns, useEnableDdns string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_enable_ddns" {
+resource "nios_ipam_network_container" "test_enable_ddns" {
     network = %q
     enable_ddns = %q
     use_enable_ddns = %q
@@ -2682,7 +2680,7 @@ resource "nios_ipam_networkcontainer" "test_enable_ddns" {
 
 func testAccNetworkcontainerEnableDhcpThresholds(network, enableDhcpThresholds, useEnableDhcpThresholds string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_enable_dhcp_thresholds" {
+resource "nios_ipam_network_container" "test_enable_dhcp_thresholds" {
     network = %q
     enable_dhcp_thresholds = %q
     use_enable_dhcp_thresholds = %q
@@ -2692,7 +2690,7 @@ resource "nios_ipam_networkcontainer" "test_enable_dhcp_thresholds" {
 
 func testAccNetworkcontainerEnableEmailWarnings(network, enableEmailWarnings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_enable_email_warnings" {
+resource "nios_ipam_network_container" "test_enable_email_warnings" {
     network = %q
     enable_email_warnings = %q
 }
@@ -2701,7 +2699,7 @@ resource "nios_ipam_networkcontainer" "test_enable_email_warnings" {
 
 func testAccNetworkcontainerEnablePxeLeaseTime(network, pxeLeaseTime, enablePxeLeaseTime, usePxeLeaseTime string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_enable_pxe_lease_time" {
+resource "nios_ipam_network_container" "test_enable_pxe_lease_time" {
     network = %q
     pxe_lease_time = %q
     enable_pxe_lease_time = %q
@@ -2713,7 +2711,7 @@ resource "nios_ipam_networkcontainer" "test_enable_pxe_lease_time" {
 
 func testAccNetworkcontainerEnableSnmpWarnings(network, enableSnmpWarnings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_enable_snmp_warnings" {
+resource "nios_ipam_network_container" "test_enable_snmp_warnings" {
     network = %q
     enable_snmp_warnings = %q
 }
@@ -2729,7 +2727,7 @@ func testAccNetworkcontainerExtAttrs(network string, extAttrs map[string]string)
 	}
 	extattrsStr += "\t}"
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_extattrs" {
+resource "nios_ipam_network_container" "test_extattrs" {
     network = %q
     extattrs = %s
 }
@@ -2738,7 +2736,7 @@ resource "nios_ipam_networkcontainer" "test_extattrs" {
 
 func testAccNetworkcontainerHighWaterMark(network, highWaterMark string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_high_water_mark" {
+resource "nios_ipam_network_container" "test_high_water_mark" {
     network = %q
     high_water_mark = %q
 }
@@ -2747,7 +2745,7 @@ resource "nios_ipam_networkcontainer" "test_high_water_mark" {
 
 func testAccNetworkcontainerHighWaterMarkReset(network, highWaterMarkReset string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_high_water_mark_reset" {
+resource "nios_ipam_network_container" "test_high_water_mark_reset" {
     network = %q
     high_water_mark_reset = %q
 }
@@ -2756,7 +2754,7 @@ resource "nios_ipam_networkcontainer" "test_high_water_mark_reset" {
 
 func testAccNetworkcontainerIgnoreDhcpOptionListRequest(network, ignoreDhcpOptionListRequest, useIgnoreDhcpOptionListRequest string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ignore_dhcp_option_list_request" {
+resource "nios_ipam_network_container" "test_ignore_dhcp_option_list_request" {
     network = %q
     ignore_dhcp_option_list_request = %q
     use_ignore_dhcp_option_list_request = %q
@@ -2766,7 +2764,7 @@ resource "nios_ipam_networkcontainer" "test_ignore_dhcp_option_list_request" {
 
 func testAccNetworkcontainerIgnoreId(network, ignoreId, useIgnoreId, useBootfile string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ignore_id" {
+resource "nios_ipam_network_container" "test_ignore_id" {
     network = %q
     ignore_id = %q
     use_ignore_id = %q
@@ -2777,7 +2775,7 @@ resource "nios_ipam_networkcontainer" "test_ignore_id" {
 
 func testAccNetworkcontainerIgnoreMacAddresses(network, ignoreMacAddresses string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ignore_mac_addresses" {
+resource "nios_ipam_network_container" "test_ignore_mac_addresses" {
     network = %q
     ignore_mac_addresses = [%q]
 }
@@ -2786,7 +2784,7 @@ resource "nios_ipam_networkcontainer" "test_ignore_mac_addresses" {
 
 func testAccNetworkcontainerIpamEmailAddresses(network, ipamEmailAddresses, useIpamEmailAddresses string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ipam_email_addresses" {
+resource "nios_ipam_network_container" "test_ipam_email_addresses" {
     network = %q
     ipam_email_addresses = [%q]
     use_ipam_email_addresses = %q
@@ -2796,7 +2794,7 @@ resource "nios_ipam_networkcontainer" "test_ipam_email_addresses" {
 
 func testAccNetworkcontainerIpamThresholdSettings(network, resetValue, triggerValue, useIpamThresholdSettings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ipam_threshold_settings" {
+resource "nios_ipam_network_container" "test_ipam_threshold_settings" {
     network = %q
     ipam_threshold_settings = {
         reset_value = %q
@@ -2809,7 +2807,7 @@ resource "nios_ipam_networkcontainer" "test_ipam_threshold_settings" {
 
 func testAccNetworkcontainerIpamTrapSettings(network, enableEmailWarnings, enableSnmpWarnings, useIpamTrapSettings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_ipam_trap_settings" {
+resource "nios_ipam_network_container" "test_ipam_trap_settings" {
     network = %q
     ipam_trap_settings = {
         enable_email_warnings = %q
@@ -2822,7 +2820,7 @@ resource "nios_ipam_networkcontainer" "test_ipam_trap_settings" {
 
 func testAccNetworkcontainerLeaseScavengeTime(network, leaseScavengeTime, useLeaseScavengeTime string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_lease_scavenge_time" {
+resource "nios_ipam_network_container" "test_lease_scavenge_time" {
     network = %q
     lease_scavenge_time = %q
     use_lease_scavenge_time = %q
@@ -2832,7 +2830,7 @@ resource "nios_ipam_networkcontainer" "test_lease_scavenge_time" {
 
 func testAccNetworkcontainerLowWaterMark(network, lowWaterMark string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_low_water_mark" {
+resource "nios_ipam_network_container" "test_low_water_mark" {
     network = %q
     low_water_mark = %q
 }
@@ -2841,7 +2839,7 @@ resource "nios_ipam_networkcontainer" "test_low_water_mark" {
 
 func testAccNetworkcontainerLowWaterMarkReset(network, lowWaterMarkReset string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_low_water_mark_reset" {
+resource "nios_ipam_network_container" "test_low_water_mark_reset" {
     network = %q
     low_water_mark_reset = %q
 }
@@ -2850,7 +2848,7 @@ resource "nios_ipam_networkcontainer" "test_low_water_mark_reset" {
 
 func testAccNetworkcontainerMgmPrivate(network, mgmPrivate, useMgmPrivate string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_mgm_private" {
+resource "nios_ipam_network_container" "test_mgm_private" {
     network = %q
     mgm_private = %q
     use_mgm_private = %q
@@ -2860,7 +2858,7 @@ resource "nios_ipam_networkcontainer" "test_mgm_private" {
 
 func testAccNetworkcontainerNetwork(network string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_network" {
+resource "nios_ipam_network_container" "test_network" {
     network = %q
 }
 `, network)
@@ -2868,7 +2866,7 @@ resource "nios_ipam_networkcontainer" "test_network" {
 
 func testAccNetworkcontainerNetworkView(network, networkView string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_network_view" {
+resource "nios_ipam_network_container" "test_network_view" {
     network = %q
     network_view = %q
 }
@@ -2877,7 +2875,7 @@ resource "nios_ipam_networkcontainer" "test_network_view" {
 
 func testAccNetworkcontainerNextserver(network, nextserver, useNextserver string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_nextserver" {
+resource "nios_ipam_network_container" "test_nextserver" {
     network = %q
     nextserver = %q
     use_nextserver = %q
@@ -2887,7 +2885,7 @@ resource "nios_ipam_networkcontainer" "test_nextserver" {
 
 func testAccNetworkcontainerOptions(network, name, num, value, vendorClass, useOption, useOptions string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_options" {
+resource "nios_ipam_network_container" "test_options" {
     network = %q
     options = [
 		{
@@ -2905,7 +2903,7 @@ resource "nios_ipam_networkcontainer" "test_options" {
 
 func testAccNetworkcontainerPortControlBlackoutSetting(network, enableBlackout, useBlackoutSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_port_control_blackout_setting" {
+resource "nios_ipam_network_container" "test_port_control_blackout_setting" {
 	network = %q
     port_control_blackout_setting = {
 		enable_blackout = %q
@@ -2917,7 +2915,7 @@ resource "nios_ipam_networkcontainer" "test_port_control_blackout_setting" {
 
 func testAccNetworkcontainerPxeLeaseTime(network, pxeLeaseTime, usePxeLeaseTime string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_pxe_lease_time" {
+resource "nios_ipam_network_container" "test_pxe_lease_time" {
     network = %q
     pxe_lease_time = %q
     use_pxe_lease_time = %q
@@ -2927,7 +2925,7 @@ resource "nios_ipam_networkcontainer" "test_pxe_lease_time" {
 
 func testAccNetworkcontainerRecycleLeases(network, recycleLeases, useRecycleLeases string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_recycle_leases" {
+resource "nios_ipam_network_container" "test_recycle_leases" {
     network = %q
     recycle_leases = %q
     use_recycle_leases = %q
@@ -2937,7 +2935,7 @@ resource "nios_ipam_networkcontainer" "test_recycle_leases" {
 
 func testAccNetworkcontainerRirRegistrationStatus(network, rirRegistrationStatus string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_rir_registration_status" {
+resource "nios_ipam_network_container" "test_rir_registration_status" {
     network = %q
     rir_registration_status = %q
 }
@@ -2946,7 +2944,7 @@ resource "nios_ipam_networkcontainer" "test_rir_registration_status" {
 
 func testAccNetworkcontainerSamePortControlDiscoveryBlackout(network, samePortControlDiscoveryBlackout, useBlackoutSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_same_port_control_discovery_blackout" {
+resource "nios_ipam_network_container" "test_same_port_control_discovery_blackout" {
     network = %q
     same_port_control_discovery_blackout = %q
     use_blackout_setting = %q
@@ -2956,7 +2954,7 @@ resource "nios_ipam_networkcontainer" "test_same_port_control_discovery_blackout
 
 func testAccNetworkcontainerUnmanaged(network, unmanaged string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_unmanaged" {
+resource "nios_ipam_network_container" "test_unmanaged" {
     network = %q
     unmanaged = %q
 }
@@ -2965,7 +2963,7 @@ resource "nios_ipam_networkcontainer" "test_unmanaged" {
 
 func testAccNetworkcontainerUpdateDnsOnLeaseRenewal(network, updateDnsOnLeaseRenewal, useUpdateDnsOnLeaseRenewal string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_update_dns_on_lease_renewal" {
+resource "nios_ipam_network_container" "test_update_dns_on_lease_renewal" {
     network = %q
     update_dns_on_lease_renewal = %q
     use_update_dns_on_lease_renewal = %q
@@ -2975,7 +2973,7 @@ resource "nios_ipam_networkcontainer" "test_update_dns_on_lease_renewal" {
 
 func testAccNetworkcontainerUseAuthority(network, useAuthority string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_authority" {
+resource "nios_ipam_network_container" "test_use_authority" {
     network = %q
     use_authority = %q
 }
@@ -2984,7 +2982,7 @@ resource "nios_ipam_networkcontainer" "test_use_authority" {
 
 func testAccNetworkcontainerUseBlackoutSetting(network, useBlackoutSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_blackout_setting" {
+resource "nios_ipam_network_container" "test_use_blackout_setting" {
 	network = %q
     use_blackout_setting = %q
 }
@@ -2993,7 +2991,7 @@ resource "nios_ipam_networkcontainer" "test_use_blackout_setting" {
 
 func testAccNetworkcontainerUseBootfile(network, useBootfile string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_bootfile" {
+resource "nios_ipam_network_container" "test_use_bootfile" {
     network = %q
     use_bootfile = %q
 }
@@ -3002,7 +3000,7 @@ resource "nios_ipam_networkcontainer" "test_use_bootfile" {
 
 func testAccNetworkcontainerUseBootserver(network, useBootserver string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_bootserver" {
+resource "nios_ipam_network_container" "test_use_bootserver" {
     network = %q
     use_bootserver = %q
 }
@@ -3011,7 +3009,7 @@ resource "nios_ipam_networkcontainer" "test_use_bootserver" {
 
 func testAccNetworkcontainerUseDdnsDomainname(network, useDdnsDomainname string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ddns_domainname" {
+resource "nios_ipam_network_container" "test_use_ddns_domainname" {
     network = %q
     use_ddns_domainname = %q
 }
@@ -3020,7 +3018,7 @@ resource "nios_ipam_networkcontainer" "test_use_ddns_domainname" {
 
 func testAccNetworkcontainerUseDdnsGenerateHostname(network, useDdnsGenerateHostname string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ddns_generate_hostname" {
+resource "nios_ipam_network_container" "test_use_ddns_generate_hostname" {
     network = %q
     use_ddns_generate_hostname = %q
 }
@@ -3029,7 +3027,7 @@ resource "nios_ipam_networkcontainer" "test_use_ddns_generate_hostname" {
 
 func testAccNetworkcontainerUseDdnsTtl(network, useDdnsTtl string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ddns_ttl" {
+resource "nios_ipam_network_container" "test_use_ddns_ttl" {
     network = %q
     use_ddns_ttl = %q
 }
@@ -3038,7 +3036,7 @@ resource "nios_ipam_networkcontainer" "test_use_ddns_ttl" {
 
 func testAccNetworkcontainerUseDdnsUpdateFixedAddresses(network, useDdnsUpdateFixedAddresses string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ddns_update_fixed_addresses" {
+resource "nios_ipam_network_container" "test_use_ddns_update_fixed_addresses" {
     network = %q
     use_ddns_update_fixed_addresses = %q
 }
@@ -3047,7 +3045,7 @@ resource "nios_ipam_networkcontainer" "test_use_ddns_update_fixed_addresses" {
 
 func testAccNetworkcontainerUseDdnsUseOption81(network, useDdnsUseOption81 string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ddns_use_option81" {
+resource "nios_ipam_network_container" "test_use_ddns_use_option81" {
     network = %q
     use_ddns_use_option81 = %q
 }
@@ -3056,7 +3054,7 @@ resource "nios_ipam_networkcontainer" "test_use_ddns_use_option81" {
 
 func testAccNetworkcontainerUseDenyBootp(network, useDenyBootp string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_deny_bootp" {
+resource "nios_ipam_network_container" "test_use_deny_bootp" {
     network = %q
     use_deny_bootp = %q
 }
@@ -3065,7 +3063,7 @@ resource "nios_ipam_networkcontainer" "test_use_deny_bootp" {
 
 func testAccNetworkcontainerUseDiscoveryBasicPollingSettings(network, useDiscoveryBasicPollingSettings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_discovery_basic_polling_settings" {
+resource "nios_ipam_network_container" "test_use_discovery_basic_polling_settings" {
     network = %q
     use_discovery_basic_polling_settings = %q
 }
@@ -3074,7 +3072,7 @@ resource "nios_ipam_networkcontainer" "test_use_discovery_basic_polling_settings
 
 func testAccNetworkcontainerUseEmailList(network, useEmailList string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_email_list" {
+resource "nios_ipam_network_container" "test_use_email_list" {
     network = %q
     use_email_list = %q
 }
@@ -3083,7 +3081,7 @@ resource "nios_ipam_networkcontainer" "test_use_email_list" {
 
 func testAccNetworkcontainerUseEnableDdns(network, useEnableDdns string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_enable_ddns" {
+resource "nios_ipam_network_container" "test_use_enable_ddns" {
     network = %q
     use_enable_ddns = %q
 }
@@ -3092,7 +3090,7 @@ resource "nios_ipam_networkcontainer" "test_use_enable_ddns" {
 
 func testAccNetworkcontainerUseEnableDhcpThresholds(network, useEnableDhcpThresholds string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_enable_dhcp_thresholds" {
+resource "nios_ipam_network_container" "test_use_enable_dhcp_thresholds" {
     network = %q
     use_enable_dhcp_thresholds = %q
 }
@@ -3101,7 +3099,7 @@ resource "nios_ipam_networkcontainer" "test_use_enable_dhcp_thresholds" {
 
 func testAccNetworkcontainerUseEnableDiscovery(network, useEnableDiscovery string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_enable_discovery" {
+resource "nios_ipam_network_container" "test_use_enable_discovery" {
     network = %q
     use_enable_discovery = %q
 }
@@ -3110,7 +3108,7 @@ resource "nios_ipam_networkcontainer" "test_use_enable_discovery" {
 
 func testAccNetworkcontainerUseIgnoreDhcpOptionListRequest(network, useIgnoreDhcpOptionListRequest string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ignore_dhcp_option_list_request" {
+resource "nios_ipam_network_container" "test_use_ignore_dhcp_option_list_request" {
     network = %q
     use_ignore_dhcp_option_list_request = %q
 }
@@ -3119,7 +3117,7 @@ resource "nios_ipam_networkcontainer" "test_use_ignore_dhcp_option_list_request"
 
 func testAccNetworkcontainerUseIgnoreId(network, useIgnoreId string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ignore_id" {
+resource "nios_ipam_network_container" "test_use_ignore_id" {
     network = %q
     use_ignore_id = %q
 }
@@ -3128,7 +3126,7 @@ resource "nios_ipam_networkcontainer" "test_use_ignore_id" {
 
 func testAccNetworkcontainerUseIpamEmailAddresses(network, useIpamEmailAddresses string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ipam_email_addresses" {
+resource "nios_ipam_network_container" "test_use_ipam_email_addresses" {
     network = %q
     use_ipam_email_addresses = %q
 }
@@ -3137,7 +3135,7 @@ resource "nios_ipam_networkcontainer" "test_use_ipam_email_addresses" {
 
 func testAccNetworkcontainerUseIpamThresholdSettings(network, useIpamThresholdSettings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ipam_threshold_settings" {
+resource "nios_ipam_network_container" "test_use_ipam_threshold_settings" {
     network = %q
     use_ipam_threshold_settings = %q
 }
@@ -3146,7 +3144,7 @@ resource "nios_ipam_networkcontainer" "test_use_ipam_threshold_settings" {
 
 func testAccNetworkcontainerUseIpamTrapSettings(network, useIpamTrapSettings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_ipam_trap_settings" {
+resource "nios_ipam_network_container" "test_use_ipam_trap_settings" {
     network = %q
     use_ipam_trap_settings = %q
 }
@@ -3155,7 +3153,7 @@ resource "nios_ipam_networkcontainer" "test_use_ipam_trap_settings" {
 
 func testAccNetworkcontainerUseLeaseScavengeTime(network, useLeaseScavengeTime string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_lease_scavenge_time" {
+resource "nios_ipam_network_container" "test_use_lease_scavenge_time" {
     network = %q
     use_lease_scavenge_time = %q
 }
@@ -3164,7 +3162,7 @@ resource "nios_ipam_networkcontainer" "test_use_lease_scavenge_time" {
 
 func testAccNetworkcontainerUseLogicFilterRules(network, useLogicFilterRules string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_logic_filter_rules" {
+resource "nios_ipam_network_container" "test_use_logic_filter_rules" {
     network = %q
     use_logic_filter_rules = %q
 }
@@ -3173,7 +3171,7 @@ resource "nios_ipam_networkcontainer" "test_use_logic_filter_rules" {
 
 func testAccNetworkcontainerUseMgmPrivate(network, useMgmPrivate string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_mgm_private" {
+resource "nios_ipam_network_container" "test_use_mgm_private" {
     network = %q
     use_mgm_private = %q
 }
@@ -3182,7 +3180,7 @@ resource "nios_ipam_networkcontainer" "test_use_mgm_private" {
 
 func testAccNetworkcontainerUseNextserver(network, useNextserver string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_nextserver" {
+resource "nios_ipam_network_container" "test_use_nextserver" {
     network = %q
     use_nextserver = %q
 }
@@ -3191,7 +3189,7 @@ resource "nios_ipam_networkcontainer" "test_use_nextserver" {
 
 func testAccNetworkcontainerUseOptions(network, useOptions string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_options" {
+resource "nios_ipam_network_container" "test_use_options" {
     network = %q
     use_options = %q
 }
@@ -3200,7 +3198,7 @@ resource "nios_ipam_networkcontainer" "test_use_options" {
 
 func testAccNetworkcontainerUsePxeLeaseTime(network, usePxeLeaseTime string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_pxe_lease_time" {
+resource "nios_ipam_network_container" "test_use_pxe_lease_time" {
     network = %q
     use_pxe_lease_time = %q
 }
@@ -3209,7 +3207,7 @@ resource "nios_ipam_networkcontainer" "test_use_pxe_lease_time" {
 
 func testAccNetworkcontainerUseRecycleLeases(network, useRecycleLeases string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_recycle_leases" {
+resource "nios_ipam_network_container" "test_use_recycle_leases" {
     network = %q
     use_recycle_leases = %q
 }
@@ -3218,7 +3216,7 @@ resource "nios_ipam_networkcontainer" "test_use_recycle_leases" {
 
 func testAccNetworkcontainerUseSubscribeSettings(network, useSubscribeSettings string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_subscribe_settings" {
+resource "nios_ipam_network_container" "test_use_subscribe_settings" {
     network = %q
     use_subscribe_settings = %q
 }
@@ -3227,7 +3225,7 @@ resource "nios_ipam_networkcontainer" "test_use_subscribe_settings" {
 
 func testAccNetworkcontainerUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_update_dns_on_lease_renewal" {
+resource "nios_ipam_network_container" "test_use_update_dns_on_lease_renewal" {
     network = %q
     use_update_dns_on_lease_renewal = %q
 }
@@ -3236,7 +3234,7 @@ resource "nios_ipam_networkcontainer" "test_use_update_dns_on_lease_renewal" {
 
 func testAccNetworkcontainerUseZoneAssociations(network, useZoneAssociations string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkcontainer" "test_use_zone_associations" {
+resource "nios_ipam_network_container" "test_use_zone_associations" {
     network = %q
     use_zone_associations = %q
 }

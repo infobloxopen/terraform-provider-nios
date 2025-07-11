@@ -32,7 +32,7 @@ type NetworkcontainerResource struct {
 }
 
 func (r *NetworkcontainerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "ipam_networkcontainer"
+	resp.TypeName = req.ProviderTypeName + "_" + "ipam_network_container"
 }
 
 func (r *NetworkcontainerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

@@ -268,9 +268,10 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerCloudInfoResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          NetworkcontainerCloudInfoResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -356,6 +357,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_basic_polling_settings")),
 		},
+		MarkdownDescription: "The discovery basic poll settings for this network container.",
 	},
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerDiscoveryBlackoutSettingResourceSchemaAttributes,
@@ -364,6 +366,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
+		MarkdownDescription: "The discovery blackout setting for this network container.",
 	},
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
@@ -509,6 +512,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_ipam_threshold_settings")),
 		},
+		MarkdownDescription: "The IPAM threshold settings for this network container.",
 	},
 	"ipam_trap_settings": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerIpamTrapSettingsResourceSchemaAttributes,
@@ -517,6 +521,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_ipam_trap_settings")),
 		},
+		MarkdownDescription: "The IPAM trap settings for this network container.",
 	},
 	"last_rir_registration_update_sent": schema.Int64Attribute{
 		Computed:            true,
@@ -593,9 +598,10 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Computed:   true,
-		Attributes: FuncCallResourceSchemaAttributes,
-		Optional:   true,
+		Computed:            true,
+		Attributes:          FuncCallResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "Function call to be executed.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,
@@ -633,6 +639,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
+		MarkdownDescription: "The port control blackout setting for this network container.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional:            true,

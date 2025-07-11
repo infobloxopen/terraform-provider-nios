@@ -31,7 +31,7 @@ type NetworkcontainerDataSource struct {
 }
 
 func (d *NetworkcontainerDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "ipam_networkcontainer"
+	resp.TypeName = req.ProviderTypeName + "_" + "ipam_network_container"
 }
 
 type NetworkcontainerModelWithFilter struct {
@@ -51,7 +51,7 @@ func (m *NetworkcontainerModelWithFilter) FlattenResults(ctx context.Context, fr
 
 func (d *NetworkcontainerDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a network container within Infoblox NIOS.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
