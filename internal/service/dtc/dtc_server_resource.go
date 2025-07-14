@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
+	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDtcServer = "extattrs,auto_create_host_record,disable,comment,disable,health,host,monitors,name,sni_hostname,use_sni_hostname"

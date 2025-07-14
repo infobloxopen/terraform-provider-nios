@@ -11,10 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
+
 //TODO : Required parents for the execution of tests
 // - dtc:monitors
 // - dtc:servers
@@ -1162,7 +1163,7 @@ resource "nios_dtc_pool" "test_ttl" {
 `, name, lbPreferredMethod, ttl)
 }
 
-func testAccDtcPoolUseTtl(name, lbPreferredMethod string, ttl int , useTtl string) string {
+func testAccDtcPoolUseTtl(name, lbPreferredMethod string, ttl int, useTtl string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test_use_ttl" {
     use_ttl = %q

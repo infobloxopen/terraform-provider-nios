@@ -7,8 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
 func TestAccDtcServerDataSource_Filters(t *testing.T) {
@@ -49,7 +49,7 @@ func TestAccDtcServerDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcServerDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcServerDataSourceConfigExtAttrFilters(name , host , extAttrValue),
+				Config: testAccDtcServerDataSourceConfigExtAttrFilters(name, host, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcServerExists(context.Background(), resourceName, &v),
@@ -93,7 +93,7 @@ data "nios_dtc_server" "test" {
 `, name, host)
 }
 
-func testAccDtcServerDataSourceConfigExtAttrFilters(name , host , extAttrsValue string) string {
+func testAccDtcServerDataSourceConfigExtAttrFilters(name, host, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_server" "test" {
 	name = %q
@@ -108,5 +108,5 @@ data "nios_dtc_server" "test" {
 	Site = nios_dtc_server.test.extattrs.Site
   }
 }
-`, name , host , extAttrsValue)
+`, name, host, extAttrsValue)
 }

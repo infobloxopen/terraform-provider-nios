@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS

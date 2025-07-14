@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
+	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDtcPool = "extattrs,lb_preferred_method,auto_consolidated_monitors,availability,comment,consolidated_monitors,disable,health,lb_alternate_method,lb_alternate_topology,lb_dynamic_ratio_alternate,lb_dynamic_ratio_preferred,lb_preferred_topology,name,quorum,servers,ttl,use_ttl,monitors"

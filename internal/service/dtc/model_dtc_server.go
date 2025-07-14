@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type DtcServerModel struct {
@@ -84,8 +84,8 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 	},
 	"health": schema.SingleNestedAttribute{
-		Attributes: DtcServerHealthResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          DtcServerHealthResourceSchemaAttributes,
+		Computed:            true,
 		MarkdownDescription: "The health status of DTC Server",
 	},
 	"host": schema.StringAttribute{
@@ -120,11 +120,10 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_sni_hostname": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default: booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: sni_hostname",
 	},
 }
-
 
 func (m *DtcServerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcServer {
 	if m == nil {

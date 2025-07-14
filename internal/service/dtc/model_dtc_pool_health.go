@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type DtcPoolHealthModel struct {
@@ -28,11 +28,11 @@ var DtcPoolHealthAttrTypes = map[string]attr.Type{
 
 var DtcPoolHealthResourceSchemaAttributes = map[string]schema.Attribute{
 	"availability": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The availability color status.",
 	},
 	"enabled_state": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The enabled state of the object.",
 	},
 	"description": schema.StringAttribute{

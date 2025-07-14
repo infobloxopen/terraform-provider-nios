@@ -4,7 +4,6 @@ import (
 	"context"
 	"regexp"
 
-	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -16,10 +15,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type DtcPoolModel struct {
@@ -171,7 +171,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The monitors related to pool.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
