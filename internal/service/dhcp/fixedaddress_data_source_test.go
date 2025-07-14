@@ -7,14 +7,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dhcp"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
 func TestAccFixedaddressDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_fixedaddress.test"
 	resourceName := "nios_dhcp_fixedaddress.test"
 	var v dhcp.Fixedaddress
+	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	agentCircuitID := acctest.RandomNumber(255)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +24,7 @@ func TestAccFixedaddressDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckFixedaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFixedaddressDataSourceConfigFilters(),
+				Config: testAccFixedaddressDataSourceConfigFilters(ip, "CIRCUIT_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
@@ -33,7 +35,7 @@ func TestAccFixedaddressDataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccFixedaddressDataSource_TagFilters(t *testing.T) {
+func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_fixedaddress.test"
 	resourceName := "nios_dhcp_fixedaddress.test"
 	var v dhcp.Fixedaddress
@@ -123,17 +125,20 @@ func testAccCheckFixedaddressResourceAttrPair(resourceName, dataSourceName strin
 	}
 }
 
-func testAccFixedaddressDataSourceConfigFilters() string {
+func testAccFixedaddressDataSourceConfigFilters(ip, matchClient string, agentCircuitID int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddress" "test" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
 }
 
 data "nios_dhcp_fixedaddress" "test" {
   filters = {
-	 = nios_dhcp_fixedaddress.test.
+	ipv4addr = nios_dhcp_fixedaddress.test.ipv4addr
   }
 }
-`)
+`, ip, matchClient, agentCircuitID)
 }
 
 func testAccFixedaddressDataSourceConfigExtAttrFilters(extAttrsValue string) string {
