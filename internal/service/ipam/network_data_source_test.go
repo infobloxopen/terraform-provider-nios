@@ -34,7 +34,7 @@ func TestAccNetworkDataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccNetworkDataSource_TagFilters(t *testing.T) {
+func TestAccNetworkDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_network.test"
 	resourceName := "nios_ipam_network.test"
 	var v ipam.Network
