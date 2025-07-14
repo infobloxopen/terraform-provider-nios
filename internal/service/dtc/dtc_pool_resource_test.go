@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
+
 //TODO : Required parents for the execution of tests
 // - dtc:monitors
 // - dtc:servers
@@ -1162,7 +1163,7 @@ resource "nios_dtc_pool" "test_ttl" {
 `, name, lbPreferredMethod, ttl)
 }
 
-func testAccDtcPoolUseTtl(name, lbPreferredMethod string, ttl int , useTtl string) string {
+func testAccDtcPoolUseTtl(name, lbPreferredMethod string, ttl int, useTtl string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test_use_ttl" {
     use_ttl = %q

@@ -17,7 +17,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/service/validator"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordAaaaModel struct {

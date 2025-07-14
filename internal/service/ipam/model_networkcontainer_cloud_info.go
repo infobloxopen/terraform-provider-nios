@@ -1,4 +1,4 @@
-package dns
+package ipam
 
 import (
 	"context"
@@ -8,12 +8,13 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type RecordACloudInfoModel struct {
+type NetworkcontainerCloudInfoModel struct {
 	DelegatedMember types.Object `tfsdk:"delegated_member"`
 	DelegatedScope  types.String `tfsdk:"delegated_scope"`
 	DelegatedRoot   types.String `tfsdk:"delegated_root"`
@@ -24,8 +25,8 @@ type RecordACloudInfoModel struct {
 	AuthorityType   types.String `tfsdk:"authority_type"`
 }
 
-var RecordACloudInfoAttrTypes = map[string]attr.Type{
-	"delegated_member": types.ObjectType{AttrTypes: RecordacloudinfoDelegatedMemberAttrTypes},
+var NetworkcontainerCloudInfoAttrTypes = map[string]attr.Type{
+	"delegated_member": types.ObjectType{AttrTypes: NetworkcontainercloudinfoDelegatedMemberAttrTypes},
 	"delegated_scope":  types.StringType,
 	"delegated_root":   types.StringType,
 	"owned_by_adaptor": types.BoolType,
@@ -35,9 +36,9 @@ var RecordACloudInfoAttrTypes = map[string]attr.Type{
 	"authority_type":   types.StringType,
 }
 
-var RecordACloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
+var NetworkcontainerCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes: RecordacloudinfoDelegatedMemberResourceSchemaAttributes,
+		Attributes: NetworkcontainercloudinfoDelegatedMemberResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
 	},
@@ -71,11 +72,11 @@ var RecordACloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRecordACloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordACloudInfo {
+func ExpandNetworkcontainerCloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.NetworkcontainerCloudInfo {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m RecordACloudInfoModel
+	var m NetworkcontainerCloudInfoModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -83,35 +84,35 @@ func ExpandRecordACloudInfo(ctx context.Context, o types.Object, diags *diag.Dia
 	return m.Expand(ctx, diags)
 }
 
-func (m *RecordACloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordACloudInfo {
+func (m *NetworkcontainerCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.NetworkcontainerCloudInfo {
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordACloudInfo{
-		DelegatedMember: ExpandRecordacloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
+	to := &ipam.NetworkcontainerCloudInfo{
+		DelegatedMember: ExpandNetworkcontainercloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
 	}
 	return to
 }
 
-func FlattenRecordACloudInfo(ctx context.Context, from *dns.RecordACloudInfo, diags *diag.Diagnostics) types.Object {
+func FlattenNetworkcontainerCloudInfo(ctx context.Context, from *ipam.NetworkcontainerCloudInfo, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(RecordACloudInfoAttrTypes)
+		return types.ObjectNull(NetworkcontainerCloudInfoAttrTypes)
 	}
-	m := RecordACloudInfoModel{}
+	m := NetworkcontainerCloudInfoModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, RecordACloudInfoAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, NetworkcontainerCloudInfoAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *RecordACloudInfoModel) Flatten(ctx context.Context, from *dns.RecordACloudInfo, diags *diag.Diagnostics) {
+func (m *NetworkcontainerCloudInfoModel) Flatten(ctx context.Context, from *ipam.NetworkcontainerCloudInfo, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = RecordACloudInfoModel{}
+		*m = NetworkcontainerCloudInfoModel{}
 	}
-	m.DelegatedMember = FlattenRecordacloudinfoDelegatedMember(ctx, from.DelegatedMember, diags)
+	m.DelegatedMember = FlattenNetworkcontainercloudinfoDelegatedMember(ctx, from.DelegatedMember, diags)
 	m.DelegatedScope = flex.FlattenStringPointer(from.DelegatedScope)
 	m.DelegatedRoot = flex.FlattenStringPointer(from.DelegatedRoot)
 	m.OwnedByAdaptor = types.BoolPointerValue(from.OwnedByAdaptor)

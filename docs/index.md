@@ -16,7 +16,7 @@ The NIOS provider is used to interact with the resources supported by Infoblox N
 terraform {
   required_providers {
     nios = {
-      source  = "infoblox-cto/nios"
+      source  = "infobloxopen/nios"
       version = "1.0.0"
     }
   }

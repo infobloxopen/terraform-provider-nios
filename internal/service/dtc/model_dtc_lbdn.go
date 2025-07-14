@@ -2,22 +2,22 @@ package dtc
 
 import (
 	"context"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
-	internalvalidator "github.com/infobloxopen/terraform-provider-nios/validator"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"regexp"
-
-	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
@@ -172,7 +172,7 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:    true,
 		Computed:    true,
 		Validators: []validator.List{
-			internalvalidator.StringsInSlice([]string{"A", "AAAA", "CNAME", "NAPTR", "SRV"}),
+			customvalidator.StringsInSlice([]string{"A", "AAAA", "CNAME", "NAPTR", "SRV"}),
 		},
 		MarkdownDescription: "The list of resource record types supported by LBDN.",
 	},

@@ -4,7 +4,6 @@ import (
 	"context"
 	"regexp"
 
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -16,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
@@ -172,7 +171,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The monitors related to pool.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -205,18 +204,6 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 	},
-}
-
-func ExpandDtcPool(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcPool {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcPoolModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *DtcPoolModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcPool {
