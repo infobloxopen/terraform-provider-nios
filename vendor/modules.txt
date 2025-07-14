@@ -181,8 +181,8 @@ github.com/hashicorp/terraform-exec/tfexec
 # github.com/hashicorp/terraform-json v0.25.0
 ## explicit; go 1.18
 github.com/hashicorp/terraform-json
-# github.com/hashicorp/terraform-plugin-docs v0.21.0
-## explicit; go 1.22.7
+# github.com/hashicorp/terraform-plugin-docs v0.22.0
+## explicit; go 1.23.7
 github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs/build
 github.com/hashicorp/terraform-plugin-docs/internal/check
@@ -240,7 +240,6 @@ github.com/hashicorp/terraform-plugin-framework/types/basetypes
 # github.com/hashicorp/terraform-plugin-framework-timetypes v0.5.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes
-
 # github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
 ## explicit; go 1.23.0
 github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator

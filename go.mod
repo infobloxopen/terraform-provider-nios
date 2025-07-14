@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	github.com/Infoblox-CTO/infoblox-nios-go-client v0.0.0-20250707134121-1f23a3788baf
 	github.com/hashicorp/go-uuid v1.0.3
-	github.com/hashicorp/terraform-plugin-docs v0.21.0
+	github.com/hashicorp/terraform-plugin-docs v0.22.0
 	github.com/hashicorp/terraform-plugin-framework v1.15.0
 	github.com/hashicorp/terraform-plugin-framework-timetypes v0.5.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
