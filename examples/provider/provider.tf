@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     nios = {
-      source  = "infoblox-cto/nios"
+      source  = "infobloxopen/nios"
       version = "1.0.0"
     }
   }

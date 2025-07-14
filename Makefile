@@ -1,6 +1,6 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
 HOSTNAME=registry.terraform.io
-NAMESPACE=infoblox-cto
+NAMESPACE=infobloxopen
 NAME=nios
 BINARY=terraform-provider-${NAME}
 VERSION=1.0.0

@@ -6,11 +6,11 @@ import (
 	"os"
 	"testing"
 
-	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/option"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/terraform-provider-nios/internal/provider"
 )
 
 const (
@@ -59,6 +59,16 @@ func RandomName() string {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
 	return string(b)
+}
+
+// RandomCIDRNetwork generates a random network with specific CIDR
+func RandomCIDRNetwork() string {
+	// Generate test-suitable private networks
+	base := 10 + rand.Intn(246) // 10-255 for first octet
+	second := rand.Intn(256)    // 0-255 for second octet
+	cidr := 16 + rand.Intn(9)   // /16 to /24 (common for network containers)
+
+	return fmt.Sprintf("%d.%d.0.0/%d", base, second, cidr)
 }
 
 func PreCheck(t *testing.T) {
