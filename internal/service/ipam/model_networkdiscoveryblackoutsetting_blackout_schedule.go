@@ -53,6 +53,7 @@ var NetworkdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = ma
 	"time_zone": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
+		Computed:            true,
 	},
 	"recurring_time": schema.Int64Attribute{
 		Optional:            true,
@@ -61,6 +62,7 @@ var NetworkdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = ma
 	"frequency": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The frequency for the scheduled task.",
+		Computed:            true,
 	},
 	"every": schema.Int64Attribute{
 		Optional:            true,
@@ -89,6 +91,7 @@ var NetworkdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = ma
 	"repeat": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Indicates if the scheduled task will be repeated or run only once.",
+		Computed:            true,
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,

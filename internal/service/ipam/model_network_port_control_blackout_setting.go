@@ -40,8 +40,9 @@ var NetworkPortControlBlackoutSettingResourceSchemaAttributes = map[string]schem
 		MarkdownDescription: "The blackout duration in seconds; minimum value is 1 minute.",
 	},
 	"blackout_schedule": schema.SingleNestedAttribute{
-		Attributes: NetworkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          NetworkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "A Schedule Setting struct that determines blackout schedule.",
 	},
 }
 

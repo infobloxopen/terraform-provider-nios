@@ -19,13 +19,14 @@ type NetworkDiscoveryModel struct {
 }
 
 var NetworkDiscoveryAttrTypes = map[string]attr.Type{
-	"_ref": types.StringType,
+	"ref": types.StringType,
 }
 
 var NetworkDiscoveryResourceSchemaAttributes = map[string]schema.Attribute{
-	"_ref": schema.StringAttribute{
+	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+		Computed:            true,
 	},
 }
 

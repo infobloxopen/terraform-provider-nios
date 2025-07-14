@@ -40,8 +40,9 @@ var NetworkDiscoveryBlackoutSettingResourceSchemaAttributes = map[string]schema.
 		Computed:            true,
 	},
 	"blackout_schedule": schema.SingleNestedAttribute{
-		Attributes: NetworkdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          NetworkdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "A Schedule Setting struct that determines blackout schedule.",
 	},
 }
 

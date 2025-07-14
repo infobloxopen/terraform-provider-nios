@@ -30,14 +30,17 @@ var NetworkMembersResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address or FQDN of the Microsoft server.",
+		Computed:            true,
 	},
 	"ipv6addr": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The IPv6 Address of the Grid Member.",
+		Computed:            true,
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The Grid member name",
+		Computed:            true,
 	},
 }
 

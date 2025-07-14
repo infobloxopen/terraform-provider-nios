@@ -322,9 +322,10 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: NetworkCloudInfoResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          NetworkCloudInfoResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "A CloudInfo struct that contains information about the cloud provider and region for the network.",
 	},
 	"cloud_shared": schema.BoolAttribute{
 		Optional:            true,
@@ -1316,7 +1317,6 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
-	m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.SubscribeSettings = FlattenNetworkSubscribeSettings(ctx, from.SubscribeSettings, diags)
 	m.TotalHosts = flex.FlattenInt64Pointer(from.TotalHosts)

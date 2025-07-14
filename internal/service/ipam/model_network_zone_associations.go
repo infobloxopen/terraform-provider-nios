@@ -30,14 +30,17 @@ var NetworkZoneAssociationsResourceSchemaAttributes = map[string]schema.Attribut
 	"fqdn": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The FQDN of the authoritative forward zone.",
+		Computed:            true,
 	},
 	"is_default": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "True if this is the default zone.",
+		Computed:            true,
 	},
 	"view": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The view to which the zone belongs. If a view is not specified, the default view is used.",
+		Computed:            true,
 	},
 }
 
