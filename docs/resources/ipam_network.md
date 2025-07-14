@@ -3,12 +3,12 @@
 page_title: "nios_ipam_network Resource - nios"
 subcategory: "IPAM"
 description: |-
-  
+  Manages a Network
 ---
 
 # nios_ipam_network (Resource)
 
-
+Manages a Network
 
 ## Example Usage
 
@@ -34,8 +34,6 @@ resource "nios_ipam_networkcontainer" "complete_example" {
   network_view = "default"
   comment      = "Complete network container example with all possible writable attributes"
 
-  // Authority and boot settings
-  authority = true
   # auto_create_reversezone = false
   bootfile       = "pxelinux.0"
   bootserver     = "192.168.1.10"
@@ -44,6 +42,8 @@ resource "nios_ipam_networkcontainer" "complete_example" {
   use_bootserver = true
 
   // DDNS settings
+  enable_ddns                     = true
+  use_enable_ddns                 = true
   ddns_domainname                 = "example.com"
   ddns_generate_hostname          = true
   ddns_ttl                        = 3600
@@ -55,132 +55,15 @@ resource "nios_ipam_networkcontainer" "complete_example" {
   use_ddns_update_fixed_addresses = true
   use_ddns_use_option81           = true
 
-  // DHCP settings
-  deny_bootp                          = false
-  enable_ddns                         = true
-  enable_dhcp_thresholds              = true
-  enable_email_warnings               = true
-  enable_pxe_lease_time               = true
-  enable_snmp_warnings                = true
-  ignore_dhcp_option_list_request     = false
-  lease_scavenge_time                 = 86400
-  pxe_lease_time                      = 43200
-  recycle_leases                      = true
-  update_dns_on_lease_renewal         = true
-  use_deny_bootp                      = true
-  use_enable_ddns                     = true
-  use_enable_dhcp_thresholds          = true
-  use_ignore_dhcp_option_list_request = true
-  use_lease_scavenge_time             = true
-  use_pxe_lease_time                  = true
-  use_recycle_leases                  = true
-  use_update_dns_on_lease_renewal     = true
-
-  // Discovery settings (removed read-only discovery_engine_type)
-  same_port_control_discovery_blackout = false
-
-  use_discovery_basic_polling_settings = true
-
-  // Network management
-  mgm_private     = true
-  nextserver      = "192.168.1.11"
-  unmanaged       = false
-  use_mgm_private = true
-  use_nextserver  = true
-
   // Email and notification settings
-  email_list               = ["admin@example.com", "network@example.com"]
-  ipam_email_addresses     = ["ipam@example.com"]
-  use_email_list           = true
-  use_ipam_email_addresses = true
+  email_list     = ["admin@example.com", "network@example.com"]
+  use_email_list = true
 
   // Water mark settings
   high_water_mark       = 95
   high_water_mark_reset = 85
   low_water_mark        = 10
   low_water_mark_reset  = 20
-
-  // Ignore settings (fixed ignore_id value)
-  ignore_id            = "MACADDR" // Valid values: "CLIENT", "MACADDR", "NONE"
-  ignore_mac_addresses = ["00:11:22:33:44:55", "aa:bb:cc:dd:ee:ff"]
-  use_ignore_id        = true
-
-  // Operation flags
-  delete_reason     = "Network reorganization"
-  restart_if_needed = true
-
-
-  // Discovery basic poll settings (nested object)
-  discovery_basic_poll_settings = {
-    auto_arp_refresh_before_switch_port_polling : true,
-    cli_collection : true,
-    complete_ping_sweep : false,
-    credential_group : "default",
-    device_profile : false,
-    netbios_scanning : false,
-    polling_frequency_modifier : "1",
-    port_scanning : false,
-    smart_subnet_ping_sweep : false,
-    snmp_collection : true,
-    switch_port_data_collection_polling : "PERIODIC",
-    switch_port_data_collection_polling_interval : 3600,
-    use_global_polling_frequency_modifier : true
-  }
-
-  // Discovery blackout setting (nested object)
-  discovery_blackout_setting = {
-    enable_blackout = false
-  }
-  use_blackout_setting = true
-
-  // IPAM threshold settings (nested object)
-  ipam_threshold_settings = {
-    reset_value : 90,
-    trigger_value : 100
-  }
-  use_ipam_threshold_settings = true
-
-  // IPAM trap settings (nested object) 
-  ipam_trap_settings = {
-    enable_email_warnings : true,
-    enable_snmp_warnings : true
-  }
-  use_ipam_trap_settings = true
-
-  # // DHCP options (list of nested objects)
-  # options = [
-  #   {
-  #     name         = "routers"
-  #     num          = 3
-  #     value        = "10.0.0.1"
-  #     use_option   = true
-  #     vendor_class = "DHCP"
-  #   },
-  #   {
-  #     name         = "domain-name-servers"
-  #     num          = 6
-  #     value        = "8.8.8.8,8.8.4.4"
-  #     use_option   = true
-  #     vendor_class = "DHCP"
-  #   }
-  # ]
-  # use_options = true
-
-  # // Subscribe settings (nested object)
-  # subscribe_settings = {
-  #   enabled_attributes = ["USERNAME", "SSID", "VLAN"]
-  #   mapped_ea_attributes = [
-  #     {
-  #       name      = "Username"
-  #       mapped_ea = "User"
-  #     },
-  #     {
-  #       name      = "SSID"
-  #       mapped_ea = "WiFiNetwork"
-  #     }
-  #   ]
-  # }
-  # use_subscribe_settings = true
 
   // Extensible attributes
   extattrs = {
@@ -219,7 +102,7 @@ resource "nios_ipam_network" "example_func_call" {
 - `auto_create_reversezone` (Boolean) This flag controls whether reverse zones are automatically created when the network is added.
 - `bootfile` (String) The bootfile name for the network. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.
 - `bootserver` (String) The bootserver address for the network. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--cloud_info))
+- `cloud_info` (Attributes) A CloudInfo struct that contains information about the cloud provider and region for the network. (see [below for nested schema](#nestedatt--cloud_info))
 - `cloud_shared` (Boolean) Boolean flag to indicate if the network is shared with cloud.
 - `comment` (String) Comment for the network, maximum 256 characters.
 - `ddns_domainname` (String) The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.
@@ -389,7 +272,7 @@ Optional:
 - `snmp_collection` (Boolean) Determines whether SNMP collection is enabled or not.
 - `switch_port_data_collection_polling` (String) A switch port data collection polling mode.
 - `switch_port_data_collection_polling_interval` (Number) Indicates the interval for switch port data collection polling.
-- `switch_port_data_collection_polling_schedule` (Attributes) (see [below for nested schema](#nestedatt--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
+- `switch_port_data_collection_polling_schedule` (Attributes) A Schedule Setting struct that determines switch port data collection polling schedule. (see [below for nested schema](#nestedatt--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
 - `use_global_polling_frequency_modifier` (Boolean) Use Global Polling Frequency Modifier.
 
 <a id="nestedatt--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule"></a>
@@ -418,7 +301,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--discovery_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) A Schedule Setting struct that determines blackout schedule. (see [below for nested schema](#nestedatt--discovery_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--discovery_blackout_setting--blackout_schedule"></a>
@@ -529,7 +412,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--port_control_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) A Schedule Setting struct that determines blackout schedule. (see [below for nested schema](#nestedatt--port_control_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--port_control_blackout_setting--blackout_schedule"></a>
@@ -558,7 +441,7 @@ Optional:
 Optional:
 
 - `enabled_attributes` (List of String) The list of Cisco ISE attributes allowed for subscription.
-- `mapped_ea_attributes` (Attributes) (see [below for nested schema](#nestedatt--subscribe_settings--mapped_ea_attributes))
+- `mapped_ea_attributes` (Attributes List) The list of NIOS extensible attributes to Cisco ISE attributes mappings. (see [below for nested schema](#nestedatt--subscribe_settings--mapped_ea_attributes))
 
 <a id="nestedatt--subscribe_settings--mapped_ea_attributes"></a>
 ### Nested Schema for `subscribe_settings.mapped_ea_attributes`

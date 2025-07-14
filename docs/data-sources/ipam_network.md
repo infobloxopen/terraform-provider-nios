@@ -3,17 +3,17 @@
 page_title: "nios_ipam_network Data Source - nios"
 subcategory: "IPAM"
 description: |-
-  
+  Retrieves Information about existing Network
 ---
 
 # nios_ipam_network (Data Source)
 
-
+Retrieves Information about existing Network
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific IPAM network container by name
+// Retrieve a specific IPAM network container using filters
 data "nios_ipam_networkcontainer" "get_record_using_filters" {
   filters = {
     "network" = "10.0.0.0/24"
@@ -54,7 +54,7 @@ Optional:
 - `auto_create_reversezone` (Boolean) This flag controls whether reverse zones are automatically created when the network is added.
 - `bootfile` (String) The bootfile name for the network. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.
 - `bootserver` (String) The bootserver address for the network. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info))
+- `cloud_info` (Attributes) A CloudInfo struct that contains information about the cloud provider and region for the network. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `cloud_shared` (Boolean) Boolean flag to indicate if the network is shared with cloud.
 - `comment` (String) Comment for the network, maximum 256 characters.
 - `ddns_domainname` (String) The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.
@@ -224,7 +224,7 @@ Optional:
 - `snmp_collection` (Boolean) Determines whether SNMP collection is enabled or not.
 - `switch_port_data_collection_polling` (String) A switch port data collection polling mode.
 - `switch_port_data_collection_polling_interval` (Number) Indicates the interval for switch port data collection polling.
-- `switch_port_data_collection_polling_schedule` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
+- `switch_port_data_collection_polling_schedule` (Attributes) A Schedule Setting struct that determines switch port data collection polling schedule. (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
 - `use_global_polling_frequency_modifier` (Boolean) Use Global Polling Frequency Modifier.
 
 <a id="nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule"></a>
@@ -253,7 +253,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) A Schedule Setting struct that determines blackout schedule. (see [below for nested schema](#nestedatt--result--discovery_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--result--discovery_blackout_setting--blackout_schedule"></a>
@@ -364,7 +364,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--result--port_control_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) A Schedule Setting struct that determines blackout schedule. (see [below for nested schema](#nestedatt--result--port_control_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--result--port_control_blackout_setting--blackout_schedule"></a>
@@ -393,7 +393,7 @@ Optional:
 Optional:
 
 - `enabled_attributes` (List of String) The list of Cisco ISE attributes allowed for subscription.
-- `mapped_ea_attributes` (Attributes) (see [below for nested schema](#nestedatt--result--subscribe_settings--mapped_ea_attributes))
+- `mapped_ea_attributes` (Attributes List) The list of NIOS extensible attributes to Cisco ISE attributes mappings. (see [below for nested schema](#nestedatt--result--subscribe_settings--mapped_ea_attributes))
 
 <a id="nestedatt--result--subscribe_settings--mapped_ea_attributes"></a>
 ### Nested Schema for `result.subscribe_settings.mapped_ea_attributes`
