@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -87,6 +88,9 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+
+		dhcp.NewFixedaddressResource,
+
 		dns.NewRecordAResource,
 		dns.NewRecordAaaaResource,
 		dns.NewZoneForwardResource,
@@ -101,6 +105,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+
+		dhcp.NewFixedaddressDataSource,
+
 		dns.NewRecordADataSource,
 		dns.NewRecordAaaaDataSource,
 		dns.NewZoneForwardDataSource,
