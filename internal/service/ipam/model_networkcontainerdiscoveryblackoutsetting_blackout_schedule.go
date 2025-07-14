@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type NetworkcontainerdiscoveryblackoutsettingBlackoutScheduleModel struct {

@@ -9,10 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 // TODO: DiscoveryMember requires discovering to be enabled.

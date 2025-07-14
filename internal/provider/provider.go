@@ -4,18 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dtc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 
-	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/grid"
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/option"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dns"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/ipam"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
+	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
