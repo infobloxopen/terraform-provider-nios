@@ -3,17 +3,19 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dtc"
+
+	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
+	"github.com/Infoblox-CTO/infoblox-nios-go-client/grid"
+	"github.com/Infoblox-CTO/infoblox-nios-go-client/option"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dns"
+	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/ipam"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/grid"
-	"github.com/infobloxopen/infoblox-nios-go-client/option"
-	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
@@ -93,6 +95,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
+
+		ipam.NewNetworkcontainerResource,
 	}
 }
 
@@ -105,6 +109,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+
+		ipam.NewNetworkcontainerDataSource,
 	}
 }
 
