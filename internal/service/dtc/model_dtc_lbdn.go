@@ -2,8 +2,8 @@ package dtc
 
 import (
 	"context"
-	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
-	internalvalidator "github.com/Infoblox-CTO/infoblox-nios-terraform/validator"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	internalvalidator "github.com/infobloxopen/terraform-provider-nios/validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -13,13 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"regexp"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type DtcLbdnModel struct {

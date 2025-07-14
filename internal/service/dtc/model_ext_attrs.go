@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 )
 
 func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dtc.ExtAttrs {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/ipam"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
 func TestAccNetworkDataSource_Filters(t *testing.T) {
