@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/provider"
+	"github.com/infobloxopen/terraform-provider-nios/internal/provider"
 )
 
 // Run "go generate" to format example terraform files and generate the docs for the registry/website
@@ -37,7 +37,7 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		Address: "registry.terraform.io/infoblox-cto/nios",
+		Address: "registry.terraform.io/infobloxopen/nios",
 		Debug:   debug,
 	}
 

@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	internaltypes "github.com/Infoblox-CTO/infoblox-nios-terraform/internal/types"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 )
 
 type FrameworkElementFlExFunc[T any, U any] func(context.Context, T, *diag.Diagnostics) U
