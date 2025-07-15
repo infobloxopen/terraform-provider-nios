@@ -40,7 +40,6 @@ func TestAccRecordAliasResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "3600"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

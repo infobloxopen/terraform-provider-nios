@@ -15,7 +15,7 @@ func TestAccRecordAliasDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_alias.test"
 	resourceName := "nios_dns_record_alias.test"
 	var v dns.RecordAlias
-	name := acctest.RandomName() + ".example-alias.com"
+	name := acctest.RandomName() + ".example.com"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
