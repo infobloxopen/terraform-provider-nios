@@ -39,7 +39,7 @@ var RangeCloudInfoAttrTypes = map[string]attr.Type{
 var RangeCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes: RangecloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,

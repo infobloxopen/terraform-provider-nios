@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -219,7 +221,7 @@ var RangeAttrTypes = map[string]attr.Type{
 
 var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"always_update_dns": schema.BoolAttribute{
@@ -236,10 +238,11 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes: RangeCloudInfoResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Comment for the range; maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
@@ -268,6 +271,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a range is disabled or not. When this is set to False, the range is enabled.",
 	},
 	"discover_now_status": schema.StringAttribute{
@@ -475,6 +480,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangeOptionsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
@@ -502,10 +508,14 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"same_port_control_discovery_blackout": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If the field is set to True, the discovery blackout setting will be used for port control blackout setting.",
 	},
 	"server_association_type": schema.StringAttribute{
 		Optional:            true,
+		Computed: 	  true,
+		Default:             stringdefault.StaticString("NONE"),
 		MarkdownDescription: "The type of server that is going to serve the range.",
 	},
 	"split_member": schema.SingleNestedAttribute{
