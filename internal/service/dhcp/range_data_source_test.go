@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dhcp"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/acctest"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
 func TestAccRangeDataSource_Filters(t *testing.T) {
@@ -44,7 +44,7 @@ func TestAccRangeDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRangeDataSourceConfigExtAttrFilters( "value1"),
+				Config: testAccRangeDataSourceConfigExtAttrFilters("value1"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckRangeExists(context.Background(), resourceName, &v),

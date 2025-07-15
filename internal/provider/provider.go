@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dhcp"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/service/dtc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -16,7 +16,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
-	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 )
 
@@ -91,7 +90,7 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		dhcp.NewRangeResource,
-		
+
 		dns.NewRecordAResource,
 		dns.NewRecordAaaaResource,
 		dns.NewRecordAliasResource,
