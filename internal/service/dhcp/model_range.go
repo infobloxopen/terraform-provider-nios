@@ -6,7 +6,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -226,14 +229,18 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"always_update_dns": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This field controls whether only the DHCP server is allowed to update DNS, regardless of the DHCP clients requests.",
 	},
 	"bootfile": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The bootfile name for the range. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.",
 	},
 	"bootserver": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The bootserver address for the range. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
@@ -247,18 +254,25 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.",
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this field is set to True, the DHCP server generates a hostname and updates DNS with it when the DHCP client request does not contain a hostname.",
 	},
 	"deny_all_clients": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True, send NAK forcing the client to take the new address.",
 	},
 	"deny_bootp": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to true, BOOTP settings are disabled and BOOTP requests will be denied.",
 	},
 	"dhcp_utilization": schema.Int64Attribute{
@@ -286,9 +300,11 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: RangeDiscoveryBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
+		Computed:  true,
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The member that will run discovery for this range.",
 	},
 	"dynamic_hosts": schema.Int64Attribute{
@@ -302,22 +318,32 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The dynamic DNS updates flag of a DHCP range object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
 	},
 	"enable_dhcp_thresholds": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if DHCP thresholds are enabled for the range.",
 	},
 	"enable_discovery": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a discovery is enabled or not for this range. When this is set to False, the discovery for this range is disabled.",
 	},
 	"enable_email_warnings": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if DHCP threshold warnings are sent through email.",
 	},
 	"enable_ifmap_publishing": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if IFMAP publishing is enabled for the range.",
 	},
 	"enable_immediate_discovery": schema.BoolAttribute{
@@ -326,10 +352,14 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"enable_pxe_lease_time": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this to True if you want the DHCP server to use a different lease time for PXE clients.",
 	},
 	"enable_snmp_warnings": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if DHCP threshold warnings are send through SNMP.",
 	},
 	"end_addr": schema.StringAttribute{
@@ -362,6 +392,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"failover_association": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the failover association: the server in this failover association will serve the IPv4 range in case the main server is out of service. {range:range} must be set to 'FAILOVER' or 'FAILOVER_MS' if you want the failover association specified here to serve the range.",
 	},
 	"fingerprint_filter_rules": schema.ListNestedAttribute{
@@ -373,18 +404,26 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"high_water_mark": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(95),
 		MarkdownDescription: "The percentage of DHCP range usage threshold above which range usage is not expected and may warrant your attention. When the high watermark is reached, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 	},
 	"high_water_mark_reset": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(85),
 		MarkdownDescription: "The percentage of DHCP range usage below which the corresponding SNMP trap is reset. A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The high watermark reset value must be lower than the high watermark value.",
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.",
 	},
 	"ignore_id": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString("NONE"),
 		MarkdownDescription: "Indicates whether the appliance will ignore DHCP client IDs or MAC addresses. Valid values are \"NONE\", \"CLIENT\", or \"MACADDR\". The default is \"NONE\".",
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
@@ -398,10 +437,13 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"known_clients": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Permission for known clients. This can be 'Allow' or 'Deny'. If set to 'Deny' known clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"lease_scavenge_time": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(-1),
 		MarkdownDescription: "An integer that specifies the period of time (in seconds) that frees and backs up leases remained in the database before they are automatically deleted. To disable lease scavenging, set the parameter to -1. The minimum positive value must be greater than 86400 seconds (1 day).",
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
@@ -413,10 +455,14 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"low_water_mark": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(0),
 		MarkdownDescription: "The percentage of DHCP range usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 	},
 	"low_water_mark_reset": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(10),
 		MarkdownDescription: "The percentage of DHCP range usage threshold below which range usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.",
 	},
 	"mac_filter_rules": schema.ListNestedAttribute{
@@ -454,18 +500,23 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "This field contains the name of the Microsoft scope.",
 	},
 	"network": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The network to which this range belongs, in IPv4 Address/CIDR format.",
 	},
 	"network_view": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the network view in which this range resides.",
 	},
 	"nextserver": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 	},
 	"option_filter_rules": schema.ListNestedAttribute{
@@ -486,6 +537,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: RangePortControlBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
+		Computed:  true,
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional:            true,
@@ -493,6 +545,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"recycle_leases": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.",
 	},
 	"relay_agent_filter_rules": schema.ListNestedAttribute{
@@ -514,7 +568,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"server_association_type": schema.StringAttribute{
 		Optional:            true,
-		Computed: 	  true,
+		Computed:            true,
 		Default:             stringdefault.StaticString("NONE"),
 		MarkdownDescription: "The type of server that is going to serve the range.",
 	},
@@ -539,7 +593,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:   true,
 	},
 	"template": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set on creation, the range will be created according to the values specified in the named template.",
 	},
 	"total_hosts": schema.Int64Attribute{
@@ -548,110 +602,163 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"unknown_clients": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Permission for unknown clients. This can be 'Allow' or 'Deny'. If set to 'Deny', unknown clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.",
 	},
 	"use_blackout_setting": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Use flag for: discovery_blackout_setting , port_control_blackout_setting, same_port_control_discovery_blackout",
 	},
 	"use_bootfile": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: bootfile",
 	},
 	"use_bootserver": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: bootserver",
 	},
 	"use_ddns_domainname": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ddns_domainname",
 	},
 	"use_ddns_generate_hostname": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Use flag for: ddns_generate_hostname",
 	},
 	"use_deny_bootp": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: deny_bootp",
 	},
 	"use_discovery_basic_polling_settings": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: discovery_basic_poll_settings",
 	},
 	"use_email_list": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: email_list",
 	},
 	"use_enable_ddns": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: enable_ddns",
 	},
 	"use_enable_dhcp_thresholds": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: enable_dhcp_thresholds",
 	},
 	"use_enable_discovery": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Use flag for: discovery_member , enable_discovery",
 	},
 	"use_enable_ifmap_publishing": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: enable_ifmap_publishing",
 	},
 	"use_ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ignore_dhcp_option_list_request",
 	},
 	"use_ignore_id": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ignore_id",
 	},
 	"use_known_clients": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: known_clients",
 	},
 	"use_lease_scavenge_time": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Use flag for: lease_scavenge_time",
 	},
 	"use_logic_filter_rules": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: logic_filter_rules",
 	},
 	"use_ms_options": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ms_options",
 	},
 	"use_nextserver": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: nextserver",
 	},
 	"use_options": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: options",
 	},
 	"use_pxe_lease_time": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: pxe_lease_time",
 	},
 	"use_recycle_leases": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: recycle_leases",
 	},
 	"use_subscribe_settings": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: subscribe_settings",
 	},
 	"use_unknown_clients": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: unknown_clients",
 	},
 	"use_update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: update_dns_on_lease_renewal",
 	},
 }
