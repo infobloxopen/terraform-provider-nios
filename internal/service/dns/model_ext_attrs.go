@@ -66,7 +66,7 @@ func FlattenExtAttrsAll(ctx context.Context, extattrs *map[string]dns.ExtAttrs, 
 	return mapVal
 }
 
-// FlattenExtAttrs flattens the updated external attributes based on the plan and existing attributes.
+// FlattenExtAttrs flattens the external attributes based on the plan and existing attributes.
 func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[string]dns.ExtAttrs, diags *diag.Diagnostics) types.Map {
 	if extattrs == nil || len(*extattrs) == 0 {
 		return types.MapNull(types.StringType)
