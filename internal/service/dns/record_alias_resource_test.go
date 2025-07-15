@@ -449,30 +449,6 @@ resource "nios_dns_record_alias" "test" {
 `, name, target_name, target_type, view)
 }
 
-func testAccRecordAliasRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_alias" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
-func testAccRecordAliasAwsRte53RecordInfo(awsRte53RecordInfo string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_alias" "test_aws_rte53_record_info" {
-    aws_rte53_record_info = %q
-}
-`, awsRte53RecordInfo)
-}
-
-func testAccRecordAliasCloudInfo(cloudInfo string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_alias" "test_cloud_info" {
-    cloud_info = %q
-}
-`, cloudInfo)
-}
-
 func testAccRecordAliasComment(name, target_name, target_type, view, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_comment" {
