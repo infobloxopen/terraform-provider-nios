@@ -3,8 +3,6 @@ package ipam
 import (
 	"context"
 
-	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -21,6 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type Ipv6networkcontainerModel struct {
@@ -54,6 +54,7 @@ type Ipv6networkcontainerModel struct {
 	MgmPrivateOverridable            types.Bool   `tfsdk:"mgm_private_overridable"`
 	MsAdUserData                     types.Object `tfsdk:"ms_ad_user_data"`
 	Network                          types.String `tfsdk:"network"`
+	FuncCall                         types.Object `tfsdk:"func_call"`
 	NetworkContainer                 types.String `tfsdk:"network_container"`
 	NetworkView                      types.String `tfsdk:"network_view"`
 	Options                          types.List   `tfsdk:"options"`
@@ -123,6 +124,7 @@ var Ipv6networkcontainerAttrTypes = map[string]attr.Type{
 	"mgm_private_overridable":              types.BoolType,
 	"ms_ad_user_data":                      types.ObjectType{AttrTypes: Ipv6networkcontainerMsAdUserDataAttrTypes},
 	"network":                              types.StringType,
+	"func_call":                            types.ObjectType{AttrTypes: FuncCallAttrTypes},
 	"network_container":                    types.StringType,
 	"network_view":                         types.StringType,
 	"options":                              types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6networkcontainerOptionsAttrTypes}},
@@ -341,9 +343,10 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Computed:   true,
-		Attributes: FuncCallResourceSchemaAttributes,
-		Optional:   true,
+		Computed:            true,
+		Attributes:          FuncCallResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "The function call to be executed on the object.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,
@@ -606,7 +609,8 @@ func (m *Ipv6networkcontainerModel) Expand(ctx context.Context, diags *diag.Diag
 		LogicFilterRules:                 flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6networkcontainerLogicFilterRules),
 		MgmPrivate:                       flex.ExpandBoolPointer(m.MgmPrivate),
 		MsAdUserData:                     ExpandIpv6networkcontainerMsAdUserData(ctx, m.MsAdUserData, diags),
-		Network:                          flex.ExpandStringPointer(m.Network),
+		Network:                          ExpandIpv6NetworkcontainerNetwork(m.Network),
+		FuncCall:                         ExpandFuncCall(ctx, m.FuncCall, diags),
 		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
 		Options:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6networkcontainerOptions),
 		PortControlBlackoutSetting:       ExpandIpv6networkcontainerPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
@@ -644,6 +648,7 @@ func (m *Ipv6networkcontainerModel) Expand(ctx context.Context, diags *diag.Diag
 	if isCreate {
 		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
 		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
+		to.Network = ExpandIpv6NetworkcontainerNetwork(m.Network)
 	}
 	return to
 }
@@ -695,7 +700,10 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.MgmPrivate = types.BoolPointerValue(from.MgmPrivate)
 	m.MgmPrivateOverridable = types.BoolPointerValue(from.MgmPrivateOverridable)
 	m.MsAdUserData = FlattenIpv6networkcontainerMsAdUserData(ctx, from.MsAdUserData, diags)
-	m.Network = flex.FlattenStringPointer(from.Network)
+	m.Network = FlattenIpv6NetworkcontainerNetwork(from.Network)
+	if m.FuncCall.IsNull() || m.FuncCall.IsUnknown() {
+		m.FuncCall = FlattenFuncCall(ctx, from.FuncCall, diags)
+	}
 	m.NetworkContainer = flex.FlattenStringPointer(from.NetworkContainer)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, Ipv6networkcontainerOptionsAttrTypes, diags, FlattenIpv6networkcontainerOptions)
@@ -734,16 +742,16 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, Ipv6networkcontainerZoneAssociationsAttrTypes, diags, FlattenIpv6networkcontainerZoneAssociations)
 }
 
-func ExpandIpv6NetworkcontainerNetwork(str types.String) *ipam.NetworkcontainerNetwork {
+func ExpandIpv6NetworkcontainerNetwork(str types.String) *ipam.Ipv6networkcontainerNetwork {
 	if str.IsNull() {
-		return &ipam.NetworkcontainerNetwork{}
+		return &ipam.Ipv6networkcontainerNetwork{}
 	}
-	var m ipam.NetworkcontainerNetwork
+	var m ipam.Ipv6networkcontainerNetwork
 	m.String = flex.ExpandStringPointer(str)
 	return &m
 }
 
-func FlattenNetworkcontainerNetwork(from *ipam.NetworkcontainerNetwork) types.String {
+func FlattenIpv6NetworkcontainerNetwork(from *ipam.Ipv6networkcontainerNetwork) types.String {
 	if from.String == nil {
 		return types.StringNull()
 	}
