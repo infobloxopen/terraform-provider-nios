@@ -33,7 +33,7 @@ func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnost
 	return &result
 }
 
-func FlattenExtAttr(ctx context.Context, extattrs *map[string]dns.ExtAttrs, diags *diag.Diagnostics) types.Map {
+func FlattenExtAttrsAll(ctx context.Context, extattrs *map[string]dns.ExtAttrs, diags *diag.Diagnostics) types.Map {
 	result := make(map[string]attr.Value)
 
 	for key, extAttr := range *extattrs {
@@ -66,8 +66,8 @@ func FlattenExtAttr(ctx context.Context, extattrs *map[string]dns.ExtAttrs, diag
 	return mapVal
 }
 
-// FlattenUpdatedExtAttrs flattens the updated external attributes based on the plan and existing attributes.
-func FlattenUpdatedExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[string]dns.ExtAttrs, diags *diag.Diagnostics) types.Map {
+// FlattenExtAttrs flattens the updated external attributes based on the plan and existing attributes.
+func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[string]dns.ExtAttrs, diags *diag.Diagnostics) types.Map {
 	if extattrs == nil || len(*extattrs) == 0 {
 		return types.MapNull(types.StringType)
 	}
@@ -78,15 +78,16 @@ func FlattenUpdatedExtAttrs(ctx context.Context, planExtAttrs types.Map, extattr
 
 	userExtAttrs := make(map[string]dns.ExtAttrs, len(*extattrs))
 	for key, extAttrVal := range *extattrs {
-		if _, ok := (*planExtAttrsMapPtr)[key]; ok {
-			userExtAttrs[key] = extAttrVal
+		if key == "Terraform Internal ID" {
+			continue // Skip the internal ID as it is not part of user-defined attributes
 		}
+		userExtAttrs[key] = extAttrVal
 	}
 
 	if len(userExtAttrs) == 0 {
 		return types.MapNull(types.StringType)
 	}
-	return FlattenExtAttr(ctx, &userExtAttrs, diags)
+	return FlattenExtAttrsAll(ctx, &userExtAttrs, diags)
 }
 
 func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dns.ExtAttrs) (*map[string]dns.ExtAttrs, diag.Diagnostics) {

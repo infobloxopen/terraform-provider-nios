@@ -320,6 +320,7 @@ func (r *RecordAResource) Delete(ctx context.Context, req resource.DeleteRequest
 }
 
 func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *RecordAModel) error {
+	var diags diag.Diagnostics
 	var internalId string
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
@@ -338,9 +339,14 @@ func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *Rec
 		}
 	}
 
-	r.client.DNSAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
-		"Terraform Internal ID": {Value: internalId},
+	extAttrsMap := data.ExtAttrs.Elements()
+	extAttrsMap["Terraform Internal ID"] = types.StringValue(internalId)
+
+	data.ExtAttrs, diags = types.MapValue(types.StringType, extAttrsMap)
+	if diags.HasError() {
+		return fmt.Errorf("error while setting Extensible Attributes: %s", diags.Errors())
 	}
+
 	return nil
 }
 func (r *RecordAResource) UpdateFuncCallAttributeName(ctx context.Context, data RecordAModel, diags *diag.Diagnostics) types.Object {
