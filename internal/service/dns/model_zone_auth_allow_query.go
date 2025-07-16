@@ -16,6 +16,7 @@ import (
 
 type ZoneAuthAllowQueryModel struct {
 	Address        types.String `tfsdk:"address"`
+	Struct         types.String `tfsdk:"struct"`
 	Permission     types.String `tfsdk:"permission"`
 	TsigKey        types.String `tfsdk:"tsig_key"`
 	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
@@ -25,6 +26,7 @@ type ZoneAuthAllowQueryModel struct {
 
 var ZoneAuthAllowQueryAttrTypes = map[string]attr.Type{
 	"address":           types.StringType,
+	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
 	"tsig_key_alg":      types.StringType,
@@ -37,6 +39,11 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
+	},
+	"struct": schema.StringAttribute{
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The struct type of the object",
 	},
 	"permission": schema.StringAttribute{
 		Optional:            true,
@@ -83,6 +90,7 @@ func (m *ZoneAuthAllowQueryModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &dns.ZoneAuthAllowQuery{
 		Address:        flex.ExpandStringPointer(m.Address),
+		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
 		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
@@ -111,6 +119,7 @@ func (m *ZoneAuthAllowQueryModel) Flatten(ctx context.Context, from *dns.ZoneAut
 		*m = ZoneAuthAllowQueryModel{}
 	}
 	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
 	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)
