@@ -158,8 +158,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneForwardForwardingServersResourceSchemaAttributes,
 		},
-		Optional: true,
-		//Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The information for the Grid members to which you want the Infoblox appliance to forward queries for a specified domain name.",
 	},
 	"fqdn": schema.StringAttribute{
