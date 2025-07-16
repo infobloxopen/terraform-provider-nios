@@ -361,7 +361,7 @@ func ExpandFrameworkListNestedBlock[T any, U any](ctx context.Context, tfList in
 	ElementsAs(ctx context.Context, target interface{}, allowUnhandled bool) diag.Diagnostics
 }, diags *diag.Diagnostics, f FrameworkElementFlExFunc[T, *U]) []U {
 	if tfList.IsNull() || tfList.IsUnknown() {
-		return nil
+			return make([]U, 0) 
 	}
 
 	var data []T
