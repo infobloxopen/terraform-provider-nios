@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -177,8 +178,10 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This flag controls whether reverse zones are automatically created when the network is added.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: Ipv6networkcontainerCloudInfoResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          Ipv6networkcontainerCloudInfoResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -197,10 +200,20 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ddns_enable_option_fqdn": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the ddns_enable_option_fqdn flag of a DHCP IPv6 Network Container object. This method controls whether the FQDN option sent by the client is to be used, or if the server can automatically generate the FQDN. This setting overrides the upper-level settings.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_enable_option_fqdn")),
+		},
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "If this field is set to True, the DHCP server generates a hostname and updates DNS with it when the DHCP client request does not contain a hostname.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_generate_hostname")),
+		},
 	},
 	"ddns_server_always_updates": schema.BoolAttribute{
 		Optional:            true,
@@ -240,6 +253,11 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkcontainerDiscoveryBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_blackout_settings")),
+		},
+		MarkdownDescription: "The discovery blackout setting for this network container.",
 	},
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
@@ -380,6 +398,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"preferred_lifetime": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network Container object.",
+		Computed:            true,
 	},
 	"remove_subnets": schema.BoolAttribute{
 		Optional:            true,
@@ -548,7 +567,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use flag for: zone_associations",
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(true),
 	},
 	"utilization": schema.Int64Attribute{
 		Computed:            true,
@@ -557,6 +576,11 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"valid_lifetime": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the valid lifetime value of a DHCP IPv6 Network Container object.",
+		Computed:            true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
+		},
+		Default: int64default.StaticInt64(43200),
 	},
 	"zone_associations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -681,7 +705,7 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.DdnsGenerateHostname = types.BoolPointerValue(from.DdnsGenerateHostname)
 	m.DdnsServerAlwaysUpdates = types.BoolPointerValue(from.DdnsServerAlwaysUpdates)
 	m.DdnsTtl = flex.FlattenInt64Pointer(from.DdnsTtl)
-	m.DeleteReason = flex.FlattenStringPointer(from.DeleteReason)
+	// m.DeleteReason = flex.FlattenStringPointer(from.DeleteReason)
 	m.DiscoverNowStatus = flex.FlattenStringPointer(from.DiscoverNowStatus)
 	m.DiscoveryBasicPollSettings = FlattenIpv6networkcontainerDiscoveryBasicPollSettings(ctx, from.DiscoveryBasicPollSettings, diags)
 	m.DiscoveryBlackoutSetting = FlattenIpv6networkcontainerDiscoveryBlackoutSetting(ctx, from.DiscoveryBlackoutSetting, diags)
@@ -710,7 +734,7 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.PortControlBlackoutSetting = FlattenIpv6networkcontainerPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
-	m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
+	// m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
