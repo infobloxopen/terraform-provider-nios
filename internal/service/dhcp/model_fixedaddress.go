@@ -6,14 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	internalplanmodifier "github.com/infobloxopen/terraform-provider-nios/internal/planmodifier"
+	//internalplanmodifier "github.com/infobloxopen/terraform-provider-nios/internal/planmodifier"
 )
 
 type FixedaddressModel struct {
@@ -373,9 +372,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional: true,
 		Computed: true,
-		PlanModifiers: []planmodifier.List{
-			internalplanmodifier.UpdateDefaultForDHCPOptions(),
-		},
+		//PlanModifiers: []planmodifier.List{
+		//	internalplanmodifier.UpdateDefaultForDHCPOptions(),
+		//},
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{

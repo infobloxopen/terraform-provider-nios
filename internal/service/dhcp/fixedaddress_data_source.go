@@ -36,6 +36,7 @@ type FixedaddressModelWithFilter struct {
 	Filters        types.Map  `tfsdk:"filters"`
 	ExtAttrFilters types.Map  `tfsdk:"extattrfilters"`
 	Result         types.List `tfsdk:"result"`
+	Body           types.Map  `tfsdk:"body"`
 }
 
 func (m *FixedaddressModelWithFilter) FlattenResults(ctx context.Context, from []dhcp.Fixedaddress, diags *diag.Diagnostics) {
@@ -64,6 +65,11 @@ func (d *FixedaddressDataSource) Schema(ctx context.Context, req datasource.Sche
 					Attributes: utils.DataSourceAttributeMap(FixedaddressResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
+			},
+			"body": schema.MapAttribute{
+				Description: "The body of the request to be sent to the API. This is used for creating or updating resources.",
+				ElementType: types.StringType,
+				Optional:    true,
 			},
 		},
 	}
@@ -99,7 +105,29 @@ func (d *FixedaddressDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	apiRes, httpRes, err := d.client.DHCPAPI.
+	if !data.Body.IsNull() && !data.Body.IsUnknown() {
+		// If body is provided, we will use it to create a new fixed address
+		apiRes, _, err := d.client.DHCPAPI.
+			FixedaddressAPI.
+			StructUpdate(ctx).
+			StructUpdate(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
+			ReturnAsObject(1).
+			ReturnFieldsPlus(readableAttributesForFixedaddress).
+			Execute()
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Fixedaddress, got error: %s", err))
+			return
+		}
+
+		res := apiRes.UpdateFixedaddressResponseAsObject.GetResult()
+		data.FlattenResults(ctx, res, &resp.Diagnostics)
+
+		// Save updated data into Terraform state
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		return
+	}
+
+	apiRes, _, err := d.client.DHCPAPI.
 		FixedaddressAPI.
 		List(ctx).
 		Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
@@ -108,10 +136,6 @@ func (d *FixedaddressDataSource) Read(ctx context.Context, req datasource.ReadRe
 		ReturnFieldsPlus(readableAttributesForFixedaddress).
 		Execute()
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			resp.State.RemoveResource(ctx)
-			return
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Fixedaddress, got error: %s", err))
 		return
 	}
