@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/go-uuid"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -375,10 +376,28 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
 
 	// Initialize model and flatten initial response
 	var data RecordAModel
+	var diags diag.Diagnostics
 	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-	data.ExtAttrs = data.ExtAttrsAll
 
+	 // Handle extattrs correctly - get elements as native map
+	 if !data.ExtAttrsAll.IsNull() && !data.ExtAttrsAll.IsUnknown() {
+        elements := data.ExtAttrsAll.Elements()
+        // Create a new map without the Terraform Internal ID
+        newElements := make(map[string]attr.Value)
+        for k, v := range elements {
+            if k != "Terraform Internal ID" {
+                newElements[k] = v
+            }
+        }
+        // Convert back to types.Map
+        extAttrs, diags := types.MapValue(types.StringType, newElements)
+        if diags.HasError() {
+            resp.Diagnostics.Append(diags...)
+            return
+        }
+        data.ExtAttrs = extAttrs
+    }
 	// Add internal ID to ExtAttrs
 	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
 		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to add internal ID: %s", err))
@@ -400,6 +419,11 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
 
 	// Flatten final response into model and set state
 	res = updateRes.UpdateRecordAResponseAsObject.GetResult()
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
+		return
+	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	if resp.Diagnostics.HasError() {
