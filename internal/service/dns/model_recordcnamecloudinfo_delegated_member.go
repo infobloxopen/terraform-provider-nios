@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type RecordcnamecloudinfoDelegatedMemberModel struct {
@@ -29,14 +29,17 @@ var RecordcnamecloudinfoDelegatedMemberAttrTypes = map[string]attr.Type{
 var RecordcnamecloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
 	},
 	"ipv6addr": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv6 Address of the Grid Member.",
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Grid member name",
 	},
 }

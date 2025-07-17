@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -78,16 +79,18 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
-		Attributes: RecordCnameAwsRte53RecordInfoResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RecordCnameAwsRte53RecordInfoResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The AWS Route53 record information associated with the record.",
 	},
 	"canonical": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Canonical name in FQDN format. This value can be in unicode format.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: RecordCnameCloudInfoResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          RecordCnameCloudInfoResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -133,9 +136,11 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name for the CNAME record in punycode format.",
 	},
 	"extattrs": schema.MapAttribute{
-		ElementType:         types.StringType,
 		Optional:            true,
-		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		Computed:            true,
+		MarkdownDescription: "Extensible attributes associated with the object.",
+		ElementType:         types.StringType,
+		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 	},
 	"extattrs_all": schema.MapAttribute{
 		ElementType:         types.StringType,
@@ -154,6 +159,7 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name for a CNAME record in FQDN format. This value can be in unicode format. Regular expression search is not supported for unicode values.",
 	},
 	"reclaimable": schema.BoolAttribute{

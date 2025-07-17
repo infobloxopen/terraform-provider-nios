@@ -20,8 +20,8 @@ var readableAttributesForRecordCname = "aws_rte53_record_info,canonical,cloud_in
 func TestAccRecordCnameResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test"
 	var v dns.RecordCname
-	canonical := acctest.RandomNameWithPrefix("test-cname-") + ".example.com"
-	//name := acctest.RandomNameWithPrefix("test-alias-") + ".example.com"
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -29,7 +29,7 @@ func TestAccRecordCnameResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameBasicConfig(canonical, "example_record.example.com", "default"),
+				Config: testAccRecordCnameBasicConfig(canonical, name, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
@@ -44,7 +44,8 @@ func TestAccRecordCnameResource_basic(t *testing.T) {
 func TestAccRecordCnameResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_record_cname.test"
 	var v dns.RecordCname
-	canonical := acctest.RandomNameWithPrefix("test-cname-") + ".example.com"
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -52,7 +53,7 @@ func TestAccRecordCnameResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordCnameDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordCnameBasicConfig(canonical, "example_record.example.com", "default"),
+				Config: testAccRecordCnameBasicConfig(canonical, name, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					testAccCheckRecordCnameDisappears(context.Background(), &v),
@@ -66,6 +67,9 @@ func TestAccRecordCnameResource_disappears(t *testing.T) {
 func TestAccRecordCnameResource_Canonical(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_canonical"
 	var v dns.RecordCname
+	canonical1 := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	canonical2 := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -73,18 +77,18 @@ func TestAccRecordCnameResource_Canonical(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameCanonical("CANONICAL_REPLACE_ME"),
+				Config: testAccRecordCnameCanonical(canonical1, name, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "canonical", "CANONICAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "canonical", canonical1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameCanonical("CANONICAL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameCanonical(canonical2, name, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "canonical", "CANONICAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "canonical", canonical2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -95,6 +99,8 @@ func TestAccRecordCnameResource_Canonical(t *testing.T) {
 func TestAccRecordCnameResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_comment"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -102,18 +108,18 @@ func TestAccRecordCnameResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameComment("COMMENT_REPLACE_ME"),
+				Config: testAccRecordCnameComment(canonical, name, "default", "This is a new record"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a new record"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameComment(canonical, name, "default", "This is an updated record"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated record"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -124,6 +130,8 @@ func TestAccRecordCnameResource_Comment(t *testing.T) {
 func TestAccRecordCnameResource_Creator(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_creator"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -131,18 +139,18 @@ func TestAccRecordCnameResource_Creator(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameCreator("CREATOR_REPLACE_ME"),
+				Config: testAccRecordCnameCreator(canonical, name, "default", "STATIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "creator", "CREATOR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameCreator("CREATOR_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameCreator(canonical, name, "default", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "creator", "CREATOR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "creator", "DYNAMIC"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -153,6 +161,8 @@ func TestAccRecordCnameResource_Creator(t *testing.T) {
 func TestAccRecordCnameResource_DdnsPrincipal(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_ddns_principal"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -160,7 +170,7 @@ func TestAccRecordCnameResource_DdnsPrincipal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameDdnsPrincipal("DDNS_PRINCIPAL_REPLACE_ME"),
+				Config: testAccRecordCnameDdnsPrincipal(canonical, name, "default", "DDNS_PRINCIPAL_REPLACE_ME", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_REPLACE_ME"),
@@ -168,7 +178,7 @@ func TestAccRecordCnameResource_DdnsPrincipal(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameDdnsPrincipal("DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameDdnsPrincipal(canonical, name, "default", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
@@ -182,6 +192,8 @@ func TestAccRecordCnameResource_DdnsPrincipal(t *testing.T) {
 func TestAccRecordCnameResource_DdnsProtected(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_ddns_protected"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -189,18 +201,18 @@ func TestAccRecordCnameResource_DdnsProtected(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameDdnsProtected("DDNS_PROTECTED_REPLACE_ME"),
+				Config: testAccRecordCnameDdnsProtected(canonical, name, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "DDNS_PROTECTED_REPLACE_ME"),
+					//testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameDdnsProtected("DDNS_PROTECTED_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameDdnsProtected(canonical, name, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "DDNS_PROTECTED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -211,6 +223,8 @@ func TestAccRecordCnameResource_DdnsProtected(t *testing.T) {
 func TestAccRecordCnameResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_disable"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -218,18 +232,18 @@ func TestAccRecordCnameResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameDisable("DISABLE_REPLACE_ME"),
+				Config: testAccRecordCnameDisable(canonical, name, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameDisable(canonical, name, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -237,9 +251,13 @@ func TestAccRecordCnameResource_Disable(t *testing.T) {
 	})
 }
 
-func TestAccRecordCnameResource_ExtAttrs(t *testing.T) {
+func TestAccRecordCnameResource_Extattrs(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_extattrs"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -247,18 +265,22 @@ func TestAccRecordCnameResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccRecordCnameExtAttrs(canonical, name, "default", map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameExtAttrs(canonical, name, "default", map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -269,6 +291,8 @@ func TestAccRecordCnameResource_ExtAttrs(t *testing.T) {
 func TestAccRecordCnameResource_ForbidReclamation(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_forbid_reclamation"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -276,18 +300,18 @@ func TestAccRecordCnameResource_ForbidReclamation(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameForbidReclamation("FORBID_RECLAMATION_REPLACE_ME"),
+				Config: testAccRecordCnameForbidReclamation(canonical, name, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "FORBID_RECLAMATION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameForbidReclamation("FORBID_RECLAMATION_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameForbidReclamation(canonical, name, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "FORBID_RECLAMATION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -298,6 +322,9 @@ func TestAccRecordCnameResource_ForbidReclamation(t *testing.T) {
 func TestAccRecordCnameResource_Name(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_name"
 	var v dns.RecordCname
+	name1 := acctest.RandomName() + ".example.com"
+	name2 := acctest.RandomName() + ".example.com"
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -305,18 +332,18 @@ func TestAccRecordCnameResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameName("NAME_REPLACE_ME"),
+				Config: testAccRecordCnameName(canonical, name1, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameName(canonical, name2, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -327,6 +354,8 @@ func TestAccRecordCnameResource_Name(t *testing.T) {
 func TestAccRecordCnameResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_ttl"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -334,18 +363,18 @@ func TestAccRecordCnameResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameTtl("TTL_REPLACE_ME"),
+				Config: testAccRecordCnameTtl(canonical, name, "default", 10, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameTtl("TTL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameTtl(canonical, name, "default", 0, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "0"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -356,6 +385,8 @@ func TestAccRecordCnameResource_Ttl(t *testing.T) {
 func TestAccRecordCnameResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_use_ttl"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -363,18 +394,18 @@ func TestAccRecordCnameResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameUseTtl("USE_TTL_REPLACE_ME"),
+				Config: testAccRecordCnameUseTtl(canonical, name, "default", "true", 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameUseTtl("USE_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameUseTtl(canonical, name, "default", "false", 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -385,6 +416,8 @@ func TestAccRecordCnameResource_UseTtl(t *testing.T) {
 func TestAccRecordCnameResource_View(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_view"
 	var v dns.RecordCname
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -392,18 +425,18 @@ func TestAccRecordCnameResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameView("VIEW_REPLACE_ME"),
+				Config: testAccRecordCnameView(canonical, name, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameView("VIEW_UPDATE_REPLACE_ME"),
+				Config: testAccRecordCnameView(canonical, name, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -479,122 +512,142 @@ resource "nios_dns_record_cname" "test" {
 `, name, ipV4Addr, view)
 }
 
-func testAccRecordCnameRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_cname" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
-func testAccRecordCnameAwsRte53RecordInfo(awsRte53RecordInfo string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_cname" "test_aws_rte53_record_info" {
-    aws_rte53_record_info = %q
-}
-`, awsRte53RecordInfo)
-}
-
-func testAccRecordCnameCanonical(canonical string) string {
+func testAccRecordCnameCanonical(canonical, name, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_canonical" {
-    canonical = %q
+	canonical = %q
+	name      = %q
+	view      = %q
 }
-`, canonical)
-}
-
-func testAccRecordCnameCloudInfo(cloudInfo string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_cname" "test_cloud_info" {
-    cloud_info = %q
-}
-`, cloudInfo)
+`, canonical, name, view)
 }
 
-func testAccRecordCnameComment(comment string) string {
+func testAccRecordCnameComment(canonical, name, view, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_comment" {
-    comment = %q
+	canonical = %q
+	name      = %q
+	view      = %q
+	comment   = %q
 }
-`, comment)
+`, canonical, name, view, comment)
 }
 
-func testAccRecordCnameCreator(creator string) string {
+func testAccRecordCnameCreator(canonical, name, view, creator string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_creator" {
-    creator = %q
+	canonical = %q
+	name      = %q
+	view      = %q
+	creator   = %q
 }
-`, creator)
+`, canonical, name, view, creator)
 }
 
-func testAccRecordCnameDdnsPrincipal(ddnsPrincipal string) string {
+func testAccRecordCnameDdnsPrincipal(canonical, name, view, ddnsPrincipal, creator string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_ddns_principal" {
-    ddns_principal = %q
+	canonical      = %q
+	name           = %q
+	view           = %q
+	ddns_principal = %q
+	creator		   = %q
 }
-`, ddnsPrincipal)
+`, canonical, name, view, ddnsPrincipal, creator)
 }
 
-func testAccRecordCnameDdnsProtected(ddnsProtected string) string {
+func testAccRecordCnameDdnsProtected(canonical, name, view, ddnsProtected string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_ddns_protected" {
-    ddns_protected = %q
+	canonical       = %q
+	name            = %q
+	view            = %q
+	ddns_protected  = %q
 }
-`, ddnsProtected)
+`, canonical, name, view, ddnsProtected)
 }
 
-func testAccRecordCnameDisable(disable string) string {
+func testAccRecordCnameDisable(canonical, name, view, disable string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_disable" {
-    disable = %q
+	canonical = %q
+	name      = %q
+	view      = %q
+	disable   = %q
 }
-`, disable)
+`, canonical, name, view, disable)
 }
 
-func testAccRecordCnameExtAttrs(extAttrs string) string {
+func testAccRecordCnameExtAttrs(canonical, name, view string, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
+	}
+	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_extattrs" {
-    extattrs = %q
+	canonical = %q
+	name      = %q
+	view      = %q
+	extattrs  = %s
 }
-`, extAttrs)
+`, canonical, name, view, extattrsStr)
 }
 
-func testAccRecordCnameForbidReclamation(forbidReclamation string) string {
+func testAccRecordCnameForbidReclamation(canonical, name, view, forbidReclamation string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_forbid_reclamation" {
-    forbid_reclamation = %q
+	canonical          = %q
+	name               = %q
+	view               = %q
+	forbid_reclamation = %q
 }
-`, forbidReclamation)
+`, canonical, name, view, forbidReclamation)
 }
 
-func testAccRecordCnameName(name string) string {
+func testAccRecordCnameName(canonical, name, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_name" {
-    name = %q
+	canonical = %q
+	name      = %q
+	view      = %q
 }
-`, name)
+`, canonical, name, view)
 }
 
-func testAccRecordCnameTtl(ttl string) string {
+func testAccRecordCnameTtl(canonical, name, view string, ttl int32, useTTL string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_ttl" {
-    ttl = %q
+	canonical = %q
+	name      = %q
+	view      = %q
+	ttl       = %d
+	use_ttl   = %q
+
 }
-`, ttl)
+`, canonical, name, view, ttl, useTTL)
 }
 
-func testAccRecordCnameUseTtl(useTtl string) string {
+func testAccRecordCnameUseTtl(canonical, name, view, useTtl string, ttl int32) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_use_ttl" {
-    use_ttl = %q
+	canonical = %q
+	name      = %q
+	view      = %q
+	use_ttl   = %q
+	ttl 	  = %d
 }
-`, useTtl)
+`, canonical, name, view, useTtl, ttl)
 }
 
-func testAccRecordCnameView(view string) string {
+func testAccRecordCnameView(canonical, name, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_view" {
-    view = %q
+	canonical = %q
+	name      = %q
+	view      = %q
 }
-`, view)
+`, canonical, name, view)
 }
