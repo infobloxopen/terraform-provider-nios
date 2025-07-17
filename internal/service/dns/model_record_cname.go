@@ -15,9 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/Infoblox-CTO/infoblox-nios-go-client/dns"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type RecordCnameModel struct {
@@ -87,7 +87,7 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes: RecordCnameCloudInfoResourceSchemaAttributes,
-		Computed:   true,
+		Optional:   true,
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -256,6 +256,7 @@ func (m *RecordCnameModel) Flatten(ctx context.Context, from *dns.RecordCname, d
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DnsCanonical = flex.FlattenStringPointer(from.DnsCanonical)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
+	//m.ExtAttrs = flex.FlattenFrameworkMapString(ctx, from.ExtAttrs, diags)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)

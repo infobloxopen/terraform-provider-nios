@@ -3,29 +3,19 @@ package dns
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"net/http"
-	"os"
-	"strings"
-	"time"
 
-	niosclient "github.com/Infoblox-CTO/infoblox-nios-go-client/client"
-	"github.com/Infoblox-CTO/infoblox-nios-terraform/internal/utils"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var OperationTimeout = 60 * time.Second
-
-// var d *RecordADataSource
-//var r1 *RecordAResource
-
-// TODO : Add readable attributes for the resource
 var readableAttributesForRecordCname = "aws_rte53_record_info,canonical,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,dns_canonical,dns_name,extattrs,forbid_reclamation,last_queried,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -89,66 +79,26 @@ func (r *RecordCnameResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	filters := map[string]interface{}{
-		"name": data.Name.ValueString(),
-	}
-	err := retry.RetryContext(ctx, OperationTimeout, func() *retry.RetryError {
-		apiRes, _, err := r.client.DNSAPI.
-			RecordCnameAPI.
-			Create(ctx).
-			RecordCname(*data.Expand(ctx, &resp.Diagnostics)).
-			ReturnFieldsPlus(readableAttributesForRecordCname).
-			ReturnAsObject(1).
-			Execute()
-		if err != nil {
-			if strings.Contains(err.Error(), "already exists.") {
-				tflog.Debug(ctx, "Waiting for state to stabilize, will retry", map[string]interface{}{"error": err.Error()})
-				fdip := os.Getenv("REMOVE_RECORDS_IF_FOUND")
-				dimbt := os.Getenv("DELETE_NON_TERRAFORM_RESOURCES")
-				if checkFDIP(fdip) {
-					di, check := r.checkRecords(ctx, diags, filters, dimbt)
-					if check {
-						return retry.RetryableError(err)
-					}
-					resp.Diagnostics.Append(di...)
-				}
-			}
-			//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Record, got error: %s", err))
-			return retry.NonRetryableError(err)
-		}
-		res := apiRes.CreateRecordCnameResponseAsObject.GetResult()
-		res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-		if diags.HasError() {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordCname due inherited Extensible attributes, got error: %s", err))
-			return nil
-		}
-		data.Flatten(ctx, &res, &resp.Diagnostics)
-
-		return nil
-	})
+	apiRes, _, err := r.client.DNSAPI.
+		RecordCnameAPI.
+		Create(ctx).
+		RecordCname(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForRecordCname).
+		ReturnAsObject(1).
+		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordCname due to error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordCname, got error: %s", err))
 		return
 	}
 
-	//apiRes, _, err := r.client.DNSAPI.
-	//	RecordCnameAPI.
-	//	Create(ctx).
-	//	RecordCname(*data.Expand(ctx, &resp.Diagnostics)).
-	//	ReturnFieldsPlus(readableAttributesForRecordCname).
-	//	ReturnAsObject(1).
-	//	Execute()
-	//if err != nil {
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordCname, got error: %s", err))
-	//	return
-	//}
-	//
-	//res := apiRes.CreateRecordCnameResponseAsObject.GetResult()
-	//res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	//if diags.HasError() {
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordCname due inherited Extensible attributes, got error: %s", err))
-	//}
-	//data.Flatten(ctx, &res, &resp.Diagnostics)
+	res := apiRes.CreateRecordCnameResponseAsObject.GetResult()
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordCname due inherited Extensible attributes, got error: %s", err))
+		return
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -249,35 +199,37 @@ func (r *RecordCnameResource) ReadByExtAttrs(ctx context.Context, data *RecordCn
 		"Terraform Internal ID": internalId,
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
+	apiRes, _, err := r.client.DNSAPI.
 		RecordCnameAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordCname).
 		Execute()
-
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			resp.State.RemoveResource(ctx)
-			return true
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordCname by extattrs, got error: %s", err))
 		return true
 	}
 
-	if len(apiRes.ListRecordCnameResponseObject.GetResult()) > 0 {
-		res := apiRes.ListRecordCnameResponseObject.GetResult()[0]
+	results := apiRes.ListRecordCnameResponseObject.GetResult()
 
-		// Remove inherited external attributes and check for errors
-		res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-		if diags.HasError() {
-			return true
-		}
-
-		data.Flatten(ctx, &res, &resp.Diagnostics)
-		resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+	// If the list is empty, the resource no longer exists so remove it from state
+	if len(results) == 0 {
+		resp.State.RemoveResource(ctx)
+		return true
 	}
+
+	res := results[0]
+
+	// Remove inherited external attributes and check for errors
+	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		return true
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+
 	return true
 }
 
@@ -366,9 +318,9 @@ func (r *RecordCnameResource) addInternalIDToExtAttrs(ctx context.Context, data 
 
 	if !data.ExtAttrsAll.IsNull() {
 		elements := data.ExtAttrsAll.Elements()
-		if id, ok := elements["Terraform Internal ID"]; ok {
-			if idStr, ok := id.(types.String); ok {
-				internalId = idStr.ValueString()
+		if tId, ok := elements["Terraform Internal ID"]; ok {
+			if tIdStr, ok := tId.(types.String); ok {
+				internalId = tIdStr.ValueString()
 			}
 		}
 	}
@@ -390,100 +342,4 @@ func (r *RecordCnameResource) addInternalIDToExtAttrs(ctx context.Context, data 
 
 func (r *RecordCnameResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
-}
-
-func checkFDIP(fdip string) bool {
-
-	if fdip == "" {
-		return false
-	}
-	fdipLower := strings.ToLower(fdip)
-	containsA := strings.Contains(fdipLower, "a")
-	containsAAAA := strings.Contains(fdipLower, "aaaa")
-	containsCNAME := strings.Contains(fdipLower, "cname")
-	containsTrue := strings.Contains(fdipLower, "true")
-	if containsA || containsAAAA || containsCNAME || containsTrue {
-		return true
-	}
-	return false
-}
-
-func (r *RecordCnameResource) checkRecords(ctx context.Context, diags diag.Diagnostics, filters map[string]interface{}, dimbt string) (diag.Diagnostics, bool) {
-	records := map[string]string{}
-	mbt := map[string]bool{}
-	apiRes, _, err := r.client.DNSAPI.
-		RecordAAPI.
-		List(ctx).
-		Filters(filters).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForRecordA).
-		Execute()
-	if err == nil && len(apiRes.ListRecordAResponseObject.GetResult()) > 0 {
-		records["A"] = *apiRes.ListRecordAResponseObject.GetResult()[0].Ref
-		mbt["A"] = false
-		if apiRes.ListRecordAResponseObject.GetResult()[0].ExtAttrs != nil {
-			for key, _ := range *apiRes.ListRecordAResponseObject.GetResult()[0].ExtAttrs {
-				if key == "Terraform Internal ID" {
-					mbt["A"] = true
-				}
-			}
-		}
-	}
-
-	//apiRes, _, err = d.client.DNSAPI.
-	//	RecordAAPI.
-	//	List(ctx).
-	//	Extattrfilter(filters).
-	//	ReturnAsObject(1).
-	//	ReturnFieldsPlus(readableAttributesForRecordA).
-	//	Execute()
-	//if err == nil && len(apiRes.ListRecordAResponseObject.GetResult()) > 0 {
-	//	records["AAAA"] = *apiRes.ListRecordAResponseObject.GetResult()[0].Ref
-	//	mbt["AAAA"] = false
-	//	if apiRes.ListRecordAResponseObject.GetResult()[0].ExtAttrs != nil {
-	//		for key, _ := range *apiRes.ListRecordAResponseObject.GetResult()[0].ExtAttrs {
-	//			if key == "Terraform Internal ID" {
-	//				mbt["AAAA"] = true
-	//			}
-	//		}
-	//	}
-	//}
-
-	if len(records) < 0 {
-		return diags, true
-	} else {
-		for key, val := range records {
-			switch key {
-			case "A":
-				if mbt["A"] || dimbt == "true" {
-					_, _ = r.client.DNSAPI.
-						RecordAAPI.
-						Delete(ctx, utils.ExtractResourceRef(val)).
-						Execute()
-					return diags, true
-				} else {
-					//tflog.Error(ctx, "Found Record A with same name, unable to delete as either the record is not managed by terraform or DIMBT is unset")
-					diags.AddError("Client Error", fmt.Sprintf("Found Record A with same name, unable to delete as either the record is not managed by terraform and delete_non_terraform_resources is unset"))
-					//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Found Record A with same name, unable to delete as either the record is not managed by terraform or  DIMBT is unset"))
-					return diags, false
-				}
-			case "AAAA":
-				if mbt["AAAA"] || dimbt == "true" {
-					_, _ = r.client.DNSAPI.
-						RecordAAPI.
-						Delete(ctx, utils.ExtractResourceRef(val)).
-						Execute()
-					return diags, true
-				} else {
-
-					diags.AddError("Client Error", fmt.Sprintf("Found Record AAAA with same name, unable to delete as either the record is not managed by terraform or  DIMBT is unset"))
-					return diags, false
-				}
-			default:
-				diags.AddError("Client Error", fmt.Sprintf("Invalid record type %s found, unable to delete", key))
-				return diags, false
-			}
-		}
-	}
-	return diags, false
 }
