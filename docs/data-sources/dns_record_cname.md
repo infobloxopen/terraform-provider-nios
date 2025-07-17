@@ -70,7 +70,7 @@ Read-Only:
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
 - `dns_canonical` (String) Canonical name in punycode format.
 - `dns_name` (String) The name for the CNAME record in punycode format.
-- `extattrs_all` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
+- `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `reclaimable` (Boolean) Determines if the record is reclaimable or not.
 - `ref` (String) The reference to the object.
@@ -101,7 +101,7 @@ Read-Only:
 
 Optional:
 
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 
 Read-Only:
 
