@@ -26,11 +26,12 @@ var ZoneAuthMsDcNsRecordCreationAttrTypes = map[string]attr.Type{
 
 var ZoneAuthMsDcNsRecordCreationResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The IPv4 address of the domain controller that is allowed to create NS records.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Optional user comment.",
 	},
 }

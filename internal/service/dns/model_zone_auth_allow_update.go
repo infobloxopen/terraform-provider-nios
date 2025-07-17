@@ -7,10 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -22,6 +19,7 @@ import (
 
 type ZoneAuthAllowUpdateModel struct {
 	Address        types.String `tfsdk:"address"`
+	Struct         types.String `tfsdk:"struct"`
 	Permission     types.String `tfsdk:"permission"`
 	TsigKey        types.String `tfsdk:"tsig_key"`
 	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
@@ -31,6 +29,7 @@ type ZoneAuthAllowUpdateModel struct {
 
 var ZoneAuthAllowUpdateAttrTypes = map[string]attr.Type{
 	"address":           types.StringType,
+	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
 	"tsig_key_alg":      types.StringType,
@@ -44,13 +43,21 @@ var ZoneAuthAllowUpdateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
+	"struct": schema.StringAttribute{
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The struct type of the object.",
+		Validators: []validator.String{
+			stringvalidator.OneOf("addressac", "tsigac"),
+		},
+	},
 	"permission": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("ALLOW"),
-		Validators: []validator.String{
-			stringvalidator.OneOf("ALLOW", "DENY"),
-		},
+		// Default:  stringdefault.StaticString("ALLOW"),
+		// Validators: []validator.String{
+		// 	stringvalidator.OneOf("ALLOW", "DENY"),
+		// },
 		MarkdownDescription: "The permission to use for this address.",
 	},
 	"tsig_key": schema.StringAttribute{
@@ -67,10 +74,10 @@ var ZoneAuthAllowUpdateResourceSchemaAttributes = map[string]schema.Attribute{
 	"tsig_key_alg": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("HMAC-MD5"),
-		Validators: []validator.String{
-			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
-		},
+		// Default:  stringdefault.StaticString("HMAC-MD5"),
+		// Validators: []validator.String{
+		// 	stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
+		// },
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
@@ -81,14 +88,14 @@ var ZoneAuthAllowUpdateResourceSchemaAttributes = map[string]schema.Attribute{
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Address should not have leading or trailing whitespace",
 			),
-			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
+			// stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 		},
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		// Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
@@ -111,6 +118,7 @@ func (m *ZoneAuthAllowUpdateModel) Expand(ctx context.Context, diags *diag.Diagn
 	}
 	to := &dns.ZoneAuthAllowUpdate{
 		Address:        flex.ExpandStringPointer(m.Address),
+		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
 		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
@@ -139,6 +147,7 @@ func (m *ZoneAuthAllowUpdateModel) Flatten(ctx context.Context, from *dns.ZoneAu
 		*m = ZoneAuthAllowUpdateModel{}
 	}
 	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
 	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)

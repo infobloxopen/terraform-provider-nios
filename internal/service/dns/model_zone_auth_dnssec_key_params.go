@@ -69,9 +69,9 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		MarkdownDescription: "If set to True, automatic rollovers for the signing key is enabled.",
 	},
 	"ksk_algorithm": schema.StringAttribute{
-		Optional: true,
+		// Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("8"),
+		// Default:  stringdefault.StaticString("8"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("10", "13", "14", "5", "7", "8"),
 		},
@@ -92,9 +92,9 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		MarkdownDescription: "Key Signing Key rollover interval, in seconds.",
 	},
 	"ksk_size": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(2048),
+		// Optional: true,
+		Computed: true,
+		// Default:             int64default.StaticInt64(2048),
 		MarkdownDescription: "Key Signing Key size, in bits. Deprecated.",
 	},
 	"next_secure_type": schema.StringAttribute{
@@ -152,9 +152,9 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		MarkdownDescription: "Signature expiration time, in seconds.",
 	},
 	"zsk_algorithm": schema.StringAttribute{
-		Optional: true,
+		// Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("8"),
+		// Default:  stringdefault.StaticString("8"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("10", "13", "14", "5", "7", "8"),
 		},
@@ -184,9 +184,9 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		MarkdownDescription: "Zone Signing Key rollover mechanism.",
 	},
 	"zsk_size": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1024),
+		// Optional: true,
+		Computed: true,
+		// Default:             int64default.StaticInt64(1024),
 		MarkdownDescription: "Zone Signing Key size, in bits. Deprecated.",
 	},
 }

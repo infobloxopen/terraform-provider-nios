@@ -589,6 +589,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthGridPrimaryResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The grid primary servers for this zone.",
 	},
 	"grid_primary_shared_with_ms_parent_delegation": schema.BoolAttribute{
@@ -631,6 +632,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthLastQueriedAclResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines last queried ACL for the specified IPv4 or IPv6 addresses and networks in scavenging settings.",
 	},
 	"locked": schema.BoolAttribute{
@@ -652,6 +654,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthMemberSoaMnamesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of per-member SOA MNAME information.",
 	},
 	"member_soa_serials": schema.ListNestedAttribute{
@@ -709,6 +712,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthMsPrimariesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list with the Microsoft DNS servers that are primary servers for the zone. Although a zone typically has just one primary name server, you can specify up to ten independent servers for a single zone.",
 	},
 	"ms_read_only": schema.BoolAttribute{
@@ -805,10 +809,12 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"set_soa_serial_number": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
 	},
 	"soa_default_ttl": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_grid_zone_timer")),
 		},
@@ -818,12 +824,13 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_grid_zone_timer")),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_soa_email")),
 		},
 		MarkdownDescription: "The SOA email value for this zone. This value can be in unicode format.",
 	},
 	"soa_expire": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_grid_zone_timer")),
 		},
@@ -831,6 +838,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"soa_negative_ttl": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_grid_zone_timer")),
 		},
@@ -838,6 +846,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"soa_refresh": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_grid_zone_timer")),
 		},
@@ -845,6 +854,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"soa_retry": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_grid_zone_timer")),
 		},
@@ -852,6 +862,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"soa_serial_number": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("set_soa_serial_number")),
 		},
@@ -949,7 +960,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"use_grid_zone_timer": schema.BoolAttribute{
 		Optional: true,
-		// Computed:            true,
+		Computed: true,
 		// Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: soa_default_ttl , soa_expire, soa_negative_ttl, soa_refresh, soa_retry",
 	},
@@ -979,6 +990,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"use_soa_email": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: soa_email",
 	},
 	"using_srg_associations": schema.BoolAttribute{
@@ -1011,43 +1023,43 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		return nil
 	}
 	to := &dns.ZoneAuth{
-		Ref:                                 flex.ExpandStringPointer(m.Ref),
-		AllowActiveDir:                      flex.ExpandFrameworkListNestedBlock(ctx, m.AllowActiveDir, diags, ExpandZoneAuthAllowActiveDir),
-		AllowFixedRrsetOrder:                flex.ExpandBoolPointer(m.AllowFixedRrsetOrder),
-		AllowGssTsigForUnderscoreZone:       flex.ExpandBoolPointer(m.AllowGssTsigForUnderscoreZone),
-		AllowGssTsigZoneUpdates:             flex.ExpandBoolPointer(m.AllowGssTsigZoneUpdates),
-		AllowQuery:                          flex.ExpandFrameworkListNestedBlock(ctx, m.AllowQuery, diags, ExpandZoneAuthAllowQuery),
-		AllowTransfer:                       flex.ExpandFrameworkListNestedBlock(ctx, m.AllowTransfer, diags, ExpandZoneAuthAllowTransfer),
-		AllowUpdate:                         flex.ExpandFrameworkListNestedBlock(ctx, m.AllowUpdate, diags, ExpandZoneAuthAllowUpdate),
-		AllowUpdateForwarding:               flex.ExpandBoolPointer(m.AllowUpdateForwarding),
-		AwsRte53ZoneInfo:                    ExpandZoneAuthAwsRte53ZoneInfo(ctx, m.AwsRte53ZoneInfo, diags),
-		CloudInfo:                           ExpandZoneAuthCloudInfo(ctx, m.CloudInfo, diags),
-		Comment:                             flex.ExpandStringPointer(m.Comment),
-		CopyXferToNotify:                    flex.ExpandBoolPointer(m.CopyXferToNotify),
-		CreatePtrForBulkHosts:               flex.ExpandBoolPointer(m.CreatePtrForBulkHosts),
-		CreatePtrForHosts:                   flex.ExpandBoolPointer(m.CreatePtrForHosts),
-		CreateUnderscoreZones:               flex.ExpandBoolPointer(m.CreateUnderscoreZones),
-		DdnsForceCreationTimestampUpdate:    flex.ExpandBoolPointer(m.DdnsForceCreationTimestampUpdate),
-		DdnsPrincipalGroup:                  flex.ExpandStringPointer(m.DdnsPrincipalGroup),
-		DdnsPrincipalTracking:               flex.ExpandBoolPointer(m.DdnsPrincipalTracking),
-		DdnsRestrictPatterns:                flex.ExpandBoolPointer(m.DdnsRestrictPatterns),
-		DdnsRestrictPatternsList:            flex.ExpandFrameworkListString(ctx, m.DdnsRestrictPatternsList, diags),
-		DdnsRestrictProtected:               flex.ExpandBoolPointer(m.DdnsRestrictProtected),
-		DdnsRestrictSecure:                  flex.ExpandBoolPointer(m.DdnsRestrictSecure),
-		DdnsRestrictStatic:                  flex.ExpandBoolPointer(m.DdnsRestrictStatic),
-		Disable:                             flex.ExpandBoolPointer(m.Disable),
-		DisableForwarding:                   flex.ExpandBoolPointer(m.DisableForwarding),
-		DnsIntegrityEnable:                  flex.ExpandBoolPointer(m.DnsIntegrityEnable),
-		DnsIntegrityFrequency:               flex.ExpandInt64Pointer(m.DnsIntegrityFrequency),
-		DnsIntegrityMember:                  flex.ExpandStringPointer(m.DnsIntegrityMember),
-		DnsIntegrityVerboseLogging:          flex.ExpandBoolPointer(m.DnsIntegrityVerboseLogging),
-		DnssecKeyParams:                     ExpandZoneAuthDnssecKeyParams(ctx, m.DnssecKeyParams, diags),
-		DnssecKeys:                          flex.ExpandFrameworkListNestedBlock(ctx, m.DnssecKeys, diags, ExpandZoneAuthDnssecKeys),
-		DoHostAbstraction:                   flex.ExpandBoolPointer(m.DoHostAbstraction),
-		EffectiveCheckNamesPolicy:           flex.ExpandStringPointer(m.EffectiveCheckNamesPolicy),
-		ExtAttrs:                            ExpandExtAttr(ctx, m.ExtAttrs, diags),
-		ExternalPrimaries:                   flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalPrimaries, diags, ExpandZoneAuthExternalPrimaries),
-		ExternalSecondaries:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneAuthExternalSecondaries),
+		Ref:                              flex.ExpandStringPointer(m.Ref),
+		AllowActiveDir:                   flex.ExpandFrameworkListNestedBlock(ctx, m.AllowActiveDir, diags, ExpandZoneAuthAllowActiveDir),
+		AllowFixedRrsetOrder:             flex.ExpandBoolPointer(m.AllowFixedRrsetOrder),
+		AllowGssTsigForUnderscoreZone:    flex.ExpandBoolPointer(m.AllowGssTsigForUnderscoreZone),
+		AllowGssTsigZoneUpdates:          flex.ExpandBoolPointer(m.AllowGssTsigZoneUpdates),
+		AllowQuery:                       flex.ExpandFrameworkListNestedBlock(ctx, m.AllowQuery, diags, ExpandZoneAuthAllowQuery),
+		AllowTransfer:                    flex.ExpandFrameworkListNestedBlock(ctx, m.AllowTransfer, diags, ExpandZoneAuthAllowTransfer),
+		AllowUpdate:                      flex.ExpandFrameworkListNestedBlock(ctx, m.AllowUpdate, diags, ExpandZoneAuthAllowUpdate),
+		AllowUpdateForwarding:            flex.ExpandBoolPointer(m.AllowUpdateForwarding),
+		AwsRte53ZoneInfo:                 ExpandZoneAuthAwsRte53ZoneInfo(ctx, m.AwsRte53ZoneInfo, diags),
+		CloudInfo:                        ExpandZoneAuthCloudInfo(ctx, m.CloudInfo, diags),
+		Comment:                          flex.ExpandStringPointer(m.Comment),
+		CopyXferToNotify:                 flex.ExpandBoolPointer(m.CopyXferToNotify),
+		CreatePtrForBulkHosts:            flex.ExpandBoolPointer(m.CreatePtrForBulkHosts),
+		CreatePtrForHosts:                flex.ExpandBoolPointer(m.CreatePtrForHosts),
+		CreateUnderscoreZones:            flex.ExpandBoolPointer(m.CreateUnderscoreZones),
+		DdnsForceCreationTimestampUpdate: flex.ExpandBoolPointer(m.DdnsForceCreationTimestampUpdate),
+		DdnsPrincipalGroup:               flex.ExpandStringPointer(m.DdnsPrincipalGroup),
+		DdnsPrincipalTracking:            flex.ExpandBoolPointer(m.DdnsPrincipalTracking),
+		DdnsRestrictPatterns:             flex.ExpandBoolPointer(m.DdnsRestrictPatterns),
+		DdnsRestrictPatternsList:         flex.ExpandFrameworkListString(ctx, m.DdnsRestrictPatternsList, diags),
+		DdnsRestrictProtected:            flex.ExpandBoolPointer(m.DdnsRestrictProtected),
+		DdnsRestrictSecure:               flex.ExpandBoolPointer(m.DdnsRestrictSecure),
+		DdnsRestrictStatic:               flex.ExpandBoolPointer(m.DdnsRestrictStatic),
+		Disable:                          flex.ExpandBoolPointer(m.Disable),
+		DisableForwarding:                flex.ExpandBoolPointer(m.DisableForwarding),
+		DnsIntegrityEnable:               flex.ExpandBoolPointer(m.DnsIntegrityEnable),
+		DnsIntegrityFrequency:            flex.ExpandInt64Pointer(m.DnsIntegrityFrequency),
+		DnsIntegrityMember:               flex.ExpandStringPointer(m.DnsIntegrityMember),
+		DnsIntegrityVerboseLogging:       flex.ExpandBoolPointer(m.DnsIntegrityVerboseLogging),
+		DnssecKeyParams:                  ExpandZoneAuthDnssecKeyParams(ctx, m.DnssecKeyParams, diags),
+		DnssecKeys:                       flex.ExpandFrameworkListNestedBlock(ctx, m.DnssecKeys, diags, ExpandZoneAuthDnssecKeys),
+		DoHostAbstraction:                flex.ExpandBoolPointer(m.DoHostAbstraction),
+		EffectiveCheckNamesPolicy:        flex.ExpandStringPointer(m.EffectiveCheckNamesPolicy),
+		ExtAttrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExternalPrimaries:                flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalPrimaries, diags, ExpandZoneAuthExternalPrimaries),
+		ExternalSecondaries:              flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneAuthExternalSecondaries),
 		//Fqdn:                                flex.ExpandStringPointer(m.Fqdn),
 		GridPrimary:                         flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneAuthGridPrimary),
 		GridSecondaries:                     flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneAuthGridSecondaries),
@@ -1212,7 +1224,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	// m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.RrNotQueriedEnabledTime = flex.FlattenInt64Pointer(from.RrNotQueriedEnabledTime)
 	m.ScavengingSettings = FlattenZoneAuthScavengingSettings(ctx, from.ScavengingSettings, diags)
-	// m.SetSoaSerialNumber = types.BoolPointerValue(from.SetSoaSerialNumber)
+	m.SetSoaSerialNumber = flex.FlattenBoolPointerFalseAsNull(from.SetSoaSerialNumber)
 	m.SoaDefaultTtl = flex.FlattenInt64Pointer(from.SoaDefaultTtl)
 	m.SoaEmail = flex.FlattenStringPointer(from.SoaEmail)
 	m.SoaExpire = flex.FlattenInt64Pointer(from.SoaExpire)

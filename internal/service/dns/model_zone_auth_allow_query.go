@@ -43,7 +43,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 	"struct": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The struct type of the object",
+		MarkdownDescription: "The struct type of the object.",
 	},
 	"permission": schema.StringAttribute{
 		Optional:            true,

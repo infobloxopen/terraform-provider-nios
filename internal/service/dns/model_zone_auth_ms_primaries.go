@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -34,23 +35,27 @@ var ZoneAuthMsPrimariesAttrTypes = map[string]attr.Type{
 
 var ZoneAuthMsPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The address of the server.",
 	},
 	"is_master": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if this server is a synchronization master.",
 	},
 	"ns_ip": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "This address is used when generating the NS record in the zone, which can be different in case of multihomed hosts.",
 	},
 	"ns_name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "This name is used when generating the NS record in the zone, which can be different in case of multihomed hosts.",
 	},
 	"stealth": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{

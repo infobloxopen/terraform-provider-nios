@@ -39,6 +39,7 @@ var ZoneauthdnsseckeyparamsKskAlgorithmsResourceSchemaAttributes = map[string]sc
 		MarkdownDescription: "The signing key algorithm.",
 	},
 	"size": schema.Int64Attribute{
+		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(2048),
 		MarkdownDescription: "The signing key size, in bits.",
