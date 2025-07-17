@@ -1237,6 +1237,9 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	if m == nil {
 		*m = NetworkModel{}
 	}
+
+	from.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
@@ -1376,4 +1379,31 @@ func FlattenNetworkNetwork(from *ipam.NetworkNetwork) types.String {
 	}
 	m := flex.FlattenStringPointer(from.String)
 	return m
+}
+
+func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []ipam.NetworkOptions, planOptions types.List) []ipam.NetworkOptions {
+	defaultOptionName := "dhcp-lease-time"
+	defaultOptionVal := ""
+
+	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandNetworkOptions)
+
+	for i := range planOptionsArr {
+		if *planOptionsArr[i].Name == defaultOptionName {
+			defaultOptionVal = *planOptionsArr[i].Value
+		}
+	}
+	var result []ipam.NetworkOptions
+
+	for i := range options {
+		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
+			continue
+		}
+		result = append(result, options[i])
+	}
+
+	if len(result) == 0 {
+		return options
+	}
+
+	return result
 }
