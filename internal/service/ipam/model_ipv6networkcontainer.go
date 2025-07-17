@@ -221,8 +221,8 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(true),
 		Validators: []validator.Bool{
-			boolvalidator.AlsoRequires(path.MatchRoot("ddns_use_option81")),
-			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_use_option81")),
+			boolvalidator.AlsoRequires(path.MatchRoot("ddns_enable_option_fqdn")),
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_enable_option_fqdn")),
 		},
 	},
 	"ddns_ttl": schema.Int64Attribute{
