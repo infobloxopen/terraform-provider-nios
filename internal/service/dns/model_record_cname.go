@@ -2,22 +2,20 @@ package dns
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -145,7 +143,7 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	"extattrs_all": schema.MapAttribute{
 		ElementType:         types.StringType,
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
@@ -193,18 +191,6 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the zone in which the record resides. Example: \"zone.com\". If a view is not specified when searching by zone, the default view is used.",
 	},
-}
-
-func ExpandRecordCname(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordCname {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RecordCnameModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordCname {
@@ -262,7 +248,6 @@ func (m *RecordCnameModel) Flatten(ctx context.Context, from *dns.RecordCname, d
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DnsCanonical = flex.FlattenStringPointer(from.DnsCanonical)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
-	//m.ExtAttrs = flex.FlattenFrameworkMapString(ctx, from.ExtAttrs, diags)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)

@@ -32,8 +32,15 @@ func TestAccRecordCnameResource_basic(t *testing.T) {
 				Config: testAccRecordCnameBasicConfig(canonical, name, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "canonical", canonical),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -363,7 +370,7 @@ func TestAccRecordCnameResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameTtl(canonical, name, "default", 10, "true"),
+				Config: testAccRecordCnameTtl(canonical, name, "default", 1000, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
@@ -371,7 +378,7 @@ func TestAccRecordCnameResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameTtl(canonical, name, "default", 0, "true"),
+				Config: testAccRecordCnameTtl(canonical, name, "default", 3200, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "0"),

@@ -41,6 +41,7 @@ func TestAccRecordCnameDataSource_ExtAttrFilters(t *testing.T) {
 	var v dns.RecordCname
 	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
 	name := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	extAttrs := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -48,7 +49,7 @@ func TestAccRecordCnameDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordCnameDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordCnameDataSourceConfigExtAttrFilters(canonical, name, "default", "value1"),
+				Config: testAccRecordCnameDataSourceConfigExtAttrFilters(canonical, name, "default", extAttrs),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
