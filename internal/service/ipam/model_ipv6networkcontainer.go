@@ -696,6 +696,8 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	if m == nil {
 		*m = Ipv6networkcontainerModel{}
 	}
+	from.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.AutoCreateReversezone = types.BoolPointerValue(from.AutoCreateReversezone)
 	m.CloudInfo = FlattenIpv6networkcontainerCloudInfo(ctx, from.CloudInfo, diags)
@@ -781,4 +783,31 @@ func FlattenIpv6NetworkcontainerNetwork(from *ipam.Ipv6networkcontainerNetwork) 
 	}
 	m := flex.FlattenStringPointer(from.String)
 	return m
+}
+
+func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []ipam.Ipv6networkcontainerOptions, planOptions types.List) []ipam.Ipv6networkcontainerOptions {
+	defaultOptionName := "dhcp-lease-time"
+	defaultOptionVal := ""
+
+	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandIpv6networkcontainerOptions)
+
+	for i := range planOptionsArr {
+		if *planOptionsArr[i].Name == defaultOptionName {
+			defaultOptionVal = *planOptionsArr[i].Value
+		}
+	}
+	var result []ipam.Ipv6networkcontainerOptions
+
+	for i := range options {
+		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
+			continue
+		}
+		result = append(result, options[i])
+	}
+
+	if len(result) == 0 {
+		return options
+	}
+
+	return result
 }

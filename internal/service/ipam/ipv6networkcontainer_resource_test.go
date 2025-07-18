@@ -587,6 +587,7 @@ func TestAccIpv6networkcontainerResource_NetworkView(t *testing.T) {
 func TestAccIpv6networkcontainerResource_Options(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_options"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -594,18 +595,30 @@ func TestAccIpv6networkcontainerResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerOptions("OPTIONS_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerOptions(network, "dhcp6.fqdn", "39", "test.com", "DHCPv6", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp6.fqdn"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "39"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "test.com"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCPv6"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerOptions("OPTIONS_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerOptions(network, "dhcp-rebinding-time", "59", "100", "DHCP", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-rebinding-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "59"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "100"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -751,6 +764,7 @@ func TestAccIpv6networkcontainerResource_Unmanaged(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_update_dns_on_lease_renewal"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -758,18 +772,22 @@ func TestAccIpv6networkcontainerResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUpdateDnsOnLeaseRenewal("UPDATE_DNS_ON_LEASE_RENEWAL_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUpdateDnsOnLeaseRenewal(network, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "UPDATE_DNS_ON_LEASE_RENEWAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUpdateDnsOnLeaseRenewal("UPDATE_DNS_ON_LEASE_RENEWAL_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUpdateDnsOnLeaseRenewal(network, "true", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "UPDATE_DNS_ON_LEASE_RENEWAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -780,6 +798,7 @@ func TestAccIpv6networkcontainerResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseBlackoutSetting(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_blackout_setting"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -787,18 +806,20 @@ func TestAccIpv6networkcontainerResource_UseBlackoutSetting(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseBlackoutSetting("USE_BLACKOUT_SETTING_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseBlackoutSetting(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "USE_BLACKOUT_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseBlackoutSetting("USE_BLACKOUT_SETTING_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseBlackoutSetting(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "USE_BLACKOUT_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -809,6 +830,7 @@ func TestAccIpv6networkcontainerResource_UseBlackoutSetting(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseDdnsDomainname(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_ddns_domainname"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -816,18 +838,20 @@ func TestAccIpv6networkcontainerResource_UseDdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseDdnsDomainname("USE_DDNS_DOMAINNAME_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDdnsDomainname(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "USE_DDNS_DOMAINNAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseDdnsDomainname("USE_DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDdnsDomainname(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "USE_DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -838,6 +862,7 @@ func TestAccIpv6networkcontainerResource_UseDdnsDomainname(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseDdnsEnableOptionFqdn(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_ddns_enable_option_fqdn"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -845,18 +870,20 @@ func TestAccIpv6networkcontainerResource_UseDdnsEnableOptionFqdn(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseDdnsEnableOptionFqdn("USE_DDNS_ENABLE_OPTION_FQDN_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDdnsEnableOptionFqdn(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_enable_option_fqdn", "USE_DDNS_ENABLE_OPTION_FQDN_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_enable_option_fqdn", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseDdnsEnableOptionFqdn("USE_DDNS_ENABLE_OPTION_FQDN_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDdnsEnableOptionFqdn(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_enable_option_fqdn", "USE_DDNS_ENABLE_OPTION_FQDN_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_enable_option_fqdn", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -867,6 +894,7 @@ func TestAccIpv6networkcontainerResource_UseDdnsEnableOptionFqdn(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseDdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_ddns_generate_hostname"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -874,18 +902,20 @@ func TestAccIpv6networkcontainerResource_UseDdnsGenerateHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseDdnsGenerateHostname("USE_DDNS_GENERATE_HOSTNAME_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDdnsGenerateHostname(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "USE_DDNS_GENERATE_HOSTNAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseDdnsGenerateHostname("USE_DDNS_GENERATE_HOSTNAME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDdnsGenerateHostname(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "USE_DDNS_GENERATE_HOSTNAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -896,6 +926,7 @@ func TestAccIpv6networkcontainerResource_UseDdnsGenerateHostname(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseDdnsTtl(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_ddns_ttl"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -903,18 +934,20 @@ func TestAccIpv6networkcontainerResource_UseDdnsTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseDdnsTtl("USE_DDNS_TTL_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDdnsTtl(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "USE_DDNS_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseDdnsTtl("USE_DDNS_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDdnsTtl(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "USE_DDNS_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -925,6 +958,7 @@ func TestAccIpv6networkcontainerResource_UseDdnsTtl(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseDiscoveryBasicPollingSettings(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_discovery_basic_polling_settings"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -932,18 +966,20 @@ func TestAccIpv6networkcontainerResource_UseDiscoveryBasicPollingSettings(t *tes
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseDiscoveryBasicPollingSettings("USE_DISCOVERY_BASIC_POLLING_SETTINGS_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDiscoveryBasicPollingSettings(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "USE_DISCOVERY_BASIC_POLLING_SETTINGS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseDiscoveryBasicPollingSettings("USE_DISCOVERY_BASIC_POLLING_SETTINGS_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDiscoveryBasicPollingSettings(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "USE_DISCOVERY_BASIC_POLLING_SETTINGS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -954,6 +990,7 @@ func TestAccIpv6networkcontainerResource_UseDiscoveryBasicPollingSettings(t *tes
 func TestAccIpv6networkcontainerResource_UseDomainNameServers(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_domain_name_servers"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -961,18 +998,20 @@ func TestAccIpv6networkcontainerResource_UseDomainNameServers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseDomainNameServers("USE_DOMAIN_NAME_SERVERS_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDomainNameServers(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_domain_name_servers", "USE_DOMAIN_NAME_SERVERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_domain_name_servers", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseDomainNameServers("USE_DOMAIN_NAME_SERVERS_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseDomainNameServers(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_domain_name_servers", "USE_DOMAIN_NAME_SERVERS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_domain_name_servers", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -983,6 +1022,7 @@ func TestAccIpv6networkcontainerResource_UseDomainNameServers(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseEnableDdns(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_enable_ddns"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -990,18 +1030,20 @@ func TestAccIpv6networkcontainerResource_UseEnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseEnableDdns("USE_ENABLE_DDNS_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseEnableDdns(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "USE_ENABLE_DDNS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseEnableDdns("USE_ENABLE_DDNS_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseEnableDdns(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "USE_ENABLE_DDNS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1012,6 +1054,7 @@ func TestAccIpv6networkcontainerResource_UseEnableDdns(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseEnableDiscovery(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_enable_discovery"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1019,18 +1062,20 @@ func TestAccIpv6networkcontainerResource_UseEnableDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseEnableDiscovery("USE_ENABLE_DISCOVERY_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseEnableDiscovery(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "USE_ENABLE_DISCOVERY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseEnableDiscovery("USE_ENABLE_DISCOVERY_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseEnableDiscovery(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "USE_ENABLE_DISCOVERY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1041,6 +1086,7 @@ func TestAccIpv6networkcontainerResource_UseEnableDiscovery(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseLogicFilterRules(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_logic_filter_rules"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1048,18 +1094,20 @@ func TestAccIpv6networkcontainerResource_UseLogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseLogicFilterRules("USE_LOGIC_FILTER_RULES_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseLogicFilterRules(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "USE_LOGIC_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseLogicFilterRules("USE_LOGIC_FILTER_RULES_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseLogicFilterRules(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "USE_LOGIC_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1070,6 +1118,7 @@ func TestAccIpv6networkcontainerResource_UseLogicFilterRules(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseMgmPrivate(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_mgm_private"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1077,18 +1126,11 @@ func TestAccIpv6networkcontainerResource_UseMgmPrivate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseMgmPrivate("USE_MGM_PRIVATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseMgmPrivate(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_mgm_private", "USE_MGM_PRIVATE_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIpv6networkcontainerUseMgmPrivate("USE_MGM_PRIVATE_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_mgm_private", "USE_MGM_PRIVATE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_mgm_private", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1099,6 +1141,7 @@ func TestAccIpv6networkcontainerResource_UseMgmPrivate(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseOptions(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_options"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1106,18 +1149,20 @@ func TestAccIpv6networkcontainerResource_UseOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseOptions("USE_OPTIONS_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseOptions(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "USE_OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseOptions("USE_OPTIONS_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseOptions(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "USE_OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1128,6 +1173,7 @@ func TestAccIpv6networkcontainerResource_UseOptions(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_preferred_lifetime"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1135,18 +1181,20 @@ func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUsePreferredLifetime("USE_PREFERRED_LIFETIME_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "USE_PREFERRED_LIFETIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUsePreferredLifetime("USE_PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "USE_PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1157,6 +1205,7 @@ func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseSubscribeSettings(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_subscribe_settings"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1164,18 +1213,11 @@ func TestAccIpv6networkcontainerResource_UseSubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseSubscribeSettings("USE_SUBSCRIBE_SETTINGS_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseSubscribeSettings(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "USE_SUBSCRIBE_SETTINGS_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIpv6networkcontainerUseSubscribeSettings("USE_SUBSCRIBE_SETTINGS_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "USE_SUBSCRIBE_SETTINGS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1186,6 +1228,7 @@ func TestAccIpv6networkcontainerResource_UseSubscribeSettings(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_update_dns_on_lease_renewal"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1193,18 +1236,20 @@ func TestAccIpv6networkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseUpdateDnsOnLeaseRenewal("USE_UPDATE_DNS_ON_LEASE_RENEWAL_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseUpdateDnsOnLeaseRenewal(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "USE_UPDATE_DNS_ON_LEASE_RENEWAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseUpdateDnsOnLeaseRenewal("USE_UPDATE_DNS_ON_LEASE_RENEWAL_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseUpdateDnsOnLeaseRenewal(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "USE_UPDATE_DNS_ON_LEASE_RENEWAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1215,6 +1260,7 @@ func TestAccIpv6networkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T
 func TestAccIpv6networkcontainerResource_UseValidLifetime(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_valid_lifetime"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1222,18 +1268,20 @@ func TestAccIpv6networkcontainerResource_UseValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseValidLifetime("USE_VALID_LIFETIME_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseValidLifetime(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "USE_VALID_LIFETIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseValidLifetime("USE_VALID_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseValidLifetime(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "USE_VALID_LIFETIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1244,6 +1292,7 @@ func TestAccIpv6networkcontainerResource_UseValidLifetime(t *testing.T) {
 func TestAccIpv6networkcontainerResource_UseZoneAssociations(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_use_zone_associations"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1251,18 +1300,11 @@ func TestAccIpv6networkcontainerResource_UseZoneAssociations(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseZoneAssociations("USE_ZONE_ASSOCIATIONS_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerUseZoneAssociations(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_zone_associations", "USE_ZONE_ASSOCIATIONS_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIpv6networkcontainerUseZoneAssociations("USE_ZONE_ASSOCIATIONS_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_zone_associations", "USE_ZONE_ASSOCIATIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_zone_associations", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1273,6 +1315,7 @@ func TestAccIpv6networkcontainerResource_UseZoneAssociations(t *testing.T) {
 func TestAccIpv6networkcontainerResource_ValidLifetime(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_valid_lifetime"
 	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1280,47 +1323,22 @@ func TestAccIpv6networkcontainerResource_ValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerValidLifetime("VALID_LIFETIME_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerValidLifetime(network, "43200", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "43200"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerValidLifetime("VALID_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networkcontainerValidLifetime(network, "50000", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccIpv6networkcontainerResource_ZoneAssociations(t *testing.T) {
-	var resourceName = "nios_ipam_ipv6network_container.test_zone_associations"
-	var v ipam.Ipv6networkcontainer
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIpv6networkcontainerZoneAssociations("ZONE_ASSOCIATIONS_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations", "ZONE_ASSOCIATIONS_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIpv6networkcontainerZoneAssociations("ZONE_ASSOCIATIONS_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations", "ZONE_ASSOCIATIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "50000"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1561,12 +1579,19 @@ resource "nios_ipam_ipv6network_container" "test_network_view" {
 `, network, networkView)
 }
 
-func testAccIpv6networkcontainerOptions(options string) string {
+func testAccIpv6networkcontainerOptions(network, name, num, value, vendorClass, useOptions string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_options" {
-    options = %q
+    network = %q
+    options = [{
+        name = %q
+        num = %q
+        value = %q
+        vendor_class = %q
+    }]
+    use_options = %q
 }
-`, options)
+`, network, name, num, value, vendorClass, useOptions)
 }
 
 func testAccIpv6networkcontainerPortControlBlackoutSetting(network, portControlBlackoutSetting, useBlackoutSetting string) string {
@@ -1635,162 +1660,175 @@ resource "nios_ipam_ipv6network_container" "test_unmanaged" {
 `, network, unmanaged)
 }
 
-func testAccIpv6networkcontainerUpdateDnsOnLeaseRenewal(updateDnsOnLeaseRenewal string) string {
+func testAccIpv6networkcontainerUpdateDnsOnLeaseRenewal(network, updateDnsOnLeaseRenewal, useUpdateDnsOnLeaseRenewal string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_update_dns_on_lease_renewal" {
+    network = %q
     update_dns_on_lease_renewal = %q
-}
-`, updateDnsOnLeaseRenewal)
-}
-
-func testAccIpv6networkcontainerUseBlackoutSetting(useBlackoutSetting string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_blackout_setting" {
-    use_blackout_setting = %q
-}
-`, useBlackoutSetting)
-}
-
-func testAccIpv6networkcontainerUseDdnsDomainname(useDdnsDomainname string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_ddns_domainname" {
-    use_ddns_domainname = %q
-}
-`, useDdnsDomainname)
-}
-
-func testAccIpv6networkcontainerUseDdnsEnableOptionFqdn(useDdnsEnableOptionFqdn string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_ddns_enable_option_fqdn" {
-    use_ddns_enable_option_fqdn = %q
-}
-`, useDdnsEnableOptionFqdn)
-}
-
-func testAccIpv6networkcontainerUseDdnsGenerateHostname(useDdnsGenerateHostname string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_ddns_generate_hostname" {
-    use_ddns_generate_hostname = %q
-}
-`, useDdnsGenerateHostname)
-}
-
-func testAccIpv6networkcontainerUseDdnsTtl(useDdnsTtl string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_ddns_ttl" {
-    use_ddns_ttl = %q
-}
-`, useDdnsTtl)
-}
-
-func testAccIpv6networkcontainerUseDiscoveryBasicPollingSettings(useDiscoveryBasicPollingSettings string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_discovery_basic_polling_settings" {
-    use_discovery_basic_polling_settings = %q
-}
-`, useDiscoveryBasicPollingSettings)
-}
-
-func testAccIpv6networkcontainerUseDomainNameServers(useDomainNameServers string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_domain_name_servers" {
-    use_domain_name_servers = %q
-}
-`, useDomainNameServers)
-}
-
-func testAccIpv6networkcontainerUseEnableDdns(useEnableDdns string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_enable_ddns" {
-    use_enable_ddns = %q
-}
-`, useEnableDdns)
-}
-
-func testAccIpv6networkcontainerUseEnableDiscovery(useEnableDiscovery string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_enable_discovery" {
-    use_enable_discovery = %q
-}
-`, useEnableDiscovery)
-}
-
-func testAccIpv6networkcontainerUseLogicFilterRules(useLogicFilterRules string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_logic_filter_rules" {
-    use_logic_filter_rules = %q
-}
-`, useLogicFilterRules)
-}
-
-func testAccIpv6networkcontainerUseMgmPrivate(useMgmPrivate string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_mgm_private" {
-    use_mgm_private = %q
-}
-`, useMgmPrivate)
-}
-
-func testAccIpv6networkcontainerUseOptions(useOptions string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_options" {
-    use_options = %q
-}
-`, useOptions)
-}
-
-func testAccIpv6networkcontainerUsePreferredLifetime(usePreferredLifetime string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_preferred_lifetime" {
-    use_preferred_lifetime = %q
-}
-`, usePreferredLifetime)
-}
-
-func testAccIpv6networkcontainerUseSubscribeSettings(useSubscribeSettings string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_subscribe_settings" {
-    use_subscribe_settings = %q
-}
-`, useSubscribeSettings)
-}
-
-func testAccIpv6networkcontainerUseUpdateDnsOnLeaseRenewal(useUpdateDnsOnLeaseRenewal string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_use_update_dns_on_lease_renewal" {
     use_update_dns_on_lease_renewal = %q
 }
-`, useUpdateDnsOnLeaseRenewal)
+`, network, updateDnsOnLeaseRenewal, useUpdateDnsOnLeaseRenewal)
 }
 
-func testAccIpv6networkcontainerUseValidLifetime(useValidLifetime string) string {
+func testAccIpv6networkcontainerUseBlackoutSetting(network, useBlackoutSetting string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_blackout_setting" {
+    network = %q
+    use_blackout_setting = %q
+}
+`, network, useBlackoutSetting)
+}
+
+func testAccIpv6networkcontainerUseDdnsDomainname(network, useDdnsDomainname string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_ddns_domainname" {
+    network = %q
+    use_ddns_domainname = %q
+}
+`, network, useDdnsDomainname)
+}
+
+func testAccIpv6networkcontainerUseDdnsEnableOptionFqdn(network, useDdnsEnableOptionFqdn string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_ddns_enable_option_fqdn" {
+    network = %q
+    use_ddns_enable_option_fqdn = %q
+}
+`, network, useDdnsEnableOptionFqdn)
+}
+
+func testAccIpv6networkcontainerUseDdnsGenerateHostname(network, useDdnsGenerateHostname string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_ddns_generate_hostname" {
+    network = %q
+    use_ddns_generate_hostname = %q
+}
+`, network, useDdnsGenerateHostname)
+}
+
+func testAccIpv6networkcontainerUseDdnsTtl(network, useDdnsTtl string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_ddns_ttl" {
+    network = %q
+    use_ddns_ttl = %q
+}
+`, network, useDdnsTtl)
+}
+
+func testAccIpv6networkcontainerUseDiscoveryBasicPollingSettings(network, useDiscoveryBasicPollingSettings string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_discovery_basic_polling_settings" {
+    network = %q
+    use_discovery_basic_polling_settings = %q
+}
+`, network, useDiscoveryBasicPollingSettings)
+}
+
+func testAccIpv6networkcontainerUseDomainNameServers(network, useDomainNameServers string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_domain_name_servers" {
+    network = %q
+    use_domain_name_servers = %q
+}
+`, network, useDomainNameServers)
+}
+
+func testAccIpv6networkcontainerUseEnableDdns(network, useEnableDdns string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_enable_ddns" {
+    network = %q
+    use_enable_ddns = %q
+}
+`, network, useEnableDdns)
+}
+
+func testAccIpv6networkcontainerUseEnableDiscovery(network, useEnableDiscovery string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_enable_discovery" {
+    network = %q
+    use_enable_discovery = %q
+}
+`, network, useEnableDiscovery)
+}
+
+func testAccIpv6networkcontainerUseLogicFilterRules(network, useLogicFilterRules string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_logic_filter_rules" {
+    network = %q
+    use_logic_filter_rules = %q
+}
+`, network, useLogicFilterRules)
+}
+
+func testAccIpv6networkcontainerUseMgmPrivate(network, useMgmPrivate string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_mgm_private" {
+    network = %q
+    use_mgm_private = %q
+}
+`, network, useMgmPrivate)
+}
+
+func testAccIpv6networkcontainerUseOptions(network, useOptions string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_options" {
+    network = %q
+    use_options = %q
+}
+`, network, useOptions)
+}
+
+func testAccIpv6networkcontainerUsePreferredLifetime(network, usePreferredLifetime string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_preferred_lifetime" {
+    network = %q
+    use_preferred_lifetime = %q
+}
+`, network, usePreferredLifetime)
+}
+
+func testAccIpv6networkcontainerUseSubscribeSettings(network, useSubscribeSettings string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_subscribe_settings" {
+    network = %q
+    use_subscribe_settings = %q
+}
+`, network, useSubscribeSettings)
+}
+
+func testAccIpv6networkcontainerUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_use_update_dns_on_lease_renewal" {
+    network = %q
+    use_update_dns_on_lease_renewal = %q
+}
+`, network, useUpdateDnsOnLeaseRenewal)
+}
+
+func testAccIpv6networkcontainerUseValidLifetime(network, useValidLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_use_valid_lifetime" {
+    network = %q
     use_valid_lifetime = %q
 }
-`, useValidLifetime)
+`, network, useValidLifetime)
 }
 
-func testAccIpv6networkcontainerUseZoneAssociations(useZoneAssociations string) string {
+func testAccIpv6networkcontainerUseZoneAssociations(network, useZoneAssociations string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_use_zone_associations" {
+    network = %q
     use_zone_associations = %q
 }
-`, useZoneAssociations)
+`, network, useZoneAssociations)
 }
 
-func testAccIpv6networkcontainerValidLifetime(validLifetime string) string {
+func testAccIpv6networkcontainerValidLifetime(network, validLifetime, useValidLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_valid_lifetime" {
+    network = %q
     valid_lifetime = %q
+    use_valid_lifetime = %q
 }
-`, validLifetime)
-}
-
-func testAccIpv6networkcontainerZoneAssociations(zoneAssociations string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_zone_associations" {
-    zone_associations = %q
-}
-`, zoneAssociations)
+`, network, validLifetime, useValidLifetime)
 }
