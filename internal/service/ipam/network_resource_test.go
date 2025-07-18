@@ -1297,35 +1297,6 @@ func TestAccNetworkResource_IpamTrapSettings(t *testing.T) {
 	})
 }
 
-// func TestAccNetworkResource_Ipv4addr(t *testing.T) {
-// 	var resourceName = "nios_ipam_network.test_ipv4addr"
-// 	var v ipam.Network
-
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccNetworkIpv4addr("IPV4ADDR_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "IPV4ADDR_REPLACE_ME"),
-// 				),
-// 			},
-// 			// Update and Read
-// 			{
-// 				Config: testAccNetworkIpv4addr("IPV4ADDR_UPDATE_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "IPV4ADDR_UPDATE_REPLACE_ME"),
-// 				),
-// 			},
-// 			// Delete testing automatically occurs in TestCase
-// 		},
-// 	})
-// }
-
 func TestAccNetworkResource_LeaseScavengeTime(t *testing.T) {
 	var resourceName = "nios_ipam_network.test_lease_scavenge_time"
 	var v ipam.Network
@@ -1564,22 +1535,22 @@ func TestAccNetworkResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkOptions(network, "dhcp-lease-time", "51", "7200", "DHCP", "true", "true"),
+				// Config: testAccNetworkOptions(network, "dhcp-lease-time", "51", "7200", "DHCP", "true", "true"),
+				Config: testAccNetworkOptions(network, "fqdn", "81", "test.com", "DHCP", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "fqdn"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "81"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "test.com"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworkOptions(network, "dhcp-lease-time", "51", "7300", "DHCP", "true", "true"),
+				Config: testAccNetworkOptions(network, "dhcp-lease-time", "51", "7300", "DHCP", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
@@ -1588,7 +1559,6 @@ func TestAccNetworkResource_Options(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7300"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
 				),
 			},
@@ -1734,35 +1704,6 @@ func TestAccNetworkResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 		},
 	})
 }
-
-// func TestAccNetworkResource_SubscribeSettings(t *testing.T) {
-// 	var resourceName = "nios_ipam_network.test_subscribe_settings"
-// 	var v ipam.Network
-
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccNetworkSubscribeSettings("SUBSCRIBE_SETTINGS_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings", "SUBSCRIBE_SETTINGS_REPLACE_ME"),
-// 				),
-// 			},
-// 			// Update and Read
-// 			{
-// 				Config: testAccNetworkSubscribeSettings("SUBSCRIBE_SETTINGS_UPDATE_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings", "SUBSCRIBE_SETTINGS_UPDATE_REPLACE_ME"),
-// 				),
-// 			},
-// 			// Delete testing automatically occurs in TestCase
-// 		},
-// 	})
-// }
 
 func TestAccNetworkResource_Unmanaged(t *testing.T) {
 	var resourceName = "nios_ipam_network.test_unmanaged"
@@ -3156,14 +3097,6 @@ resource "nios_ipam_network" "test_ipam_trap_settings" {
 `, network, enableEmailWarnings, enableSnmpWarnings, useIpamTrapSettings)
 }
 
-// func testAccNetworkIpv4addr(ipv4addr string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_ipam_network" "test_ipv4addr" {
-//     ipv4addr = %q
-// }
-// `, ipv4addr)
-// }
-
 func testAccNetworkLeaseScavengeTime(network, leaseScavengeTime, useLeaseScavengeTime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "test_lease_scavenge_time" {
@@ -3237,7 +3170,7 @@ resource "nios_ipam_network" "test_nextserver" {
 `, network, nextserver, useNextserver)
 }
 
-func testAccNetworkOptions(network, name, num, value, vendorClass, useOption, useOptions string) string {
+func testAccNetworkOptions(network, name, num, value, vendorClass, useOptions string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "test_options" {
     network = %q
@@ -3247,12 +3180,11 @@ resource "nios_ipam_network" "test_options" {
 			num = %q
 			value = %q
 			vendor_class = %q
-			use_option = %s
 		}
     ]
     use_options = %q
 }
-`, network, name, num, value, vendorClass, useOption, useOptions)
+`, network, name, num, value, vendorClass, useOptions)
 }
 
 func testAccNetworkPortControlBlackoutSetting(network, enableBlackout, useBlackoutSetting string) string {
