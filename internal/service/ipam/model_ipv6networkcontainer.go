@@ -255,7 +255,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
-			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_blackout_settings")),
+			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
 		MarkdownDescription: "The discovery blackout setting for this network container.",
 	},

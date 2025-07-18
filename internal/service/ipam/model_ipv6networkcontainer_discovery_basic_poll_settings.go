@@ -13,8 +13,8 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type Ipv6networkcontainerDiscoveryBasicPollSettingsModel struct {
@@ -25,7 +25,7 @@ type Ipv6networkcontainerDiscoveryBasicPollSettingsModel struct {
 	NetbiosScanning                         types.Bool   `tfsdk:"netbios_scanning"`
 	CompletePingSweep                       types.Bool   `tfsdk:"complete_ping_sweep"`
 	SmartSubnetPingSweep                    types.Bool   `tfsdk:"smart_subnet_ping_sweep"`
-	AutoArpRefreshBeforeSwitchPortPolling   types.Bool   `tfsdk:"auto_arprefresh_before_switch_port_polling"`
+	AutoArpRefreshBeforeSwitchPortPolling   types.Bool   `tfsdk:"auto_arp_refresh_before_switch_port_polling"`
 	SwitchPortDataCollectionPolling         types.String `tfsdk:"switch_port_data_collection_polling"`
 	SwitchPortDataCollectionPollingSchedule types.Object `tfsdk:"switch_port_data_collection_polling_schedule"`
 	SwitchPortDataCollectionPollingInterval types.Int64  `tfsdk:"switch_port_data_collection_polling_interval"`
@@ -42,7 +42,7 @@ var Ipv6networkcontainerDiscoveryBasicPollSettingsAttrTypes = map[string]attr.Ty
 	"netbios_scanning":                             types.BoolType,
 	"complete_ping_sweep":                          types.BoolType,
 	"smart_subnet_ping_sweep":                      types.BoolType,
-	"auto_arprefresh_before_switch_port_polling":   types.BoolType,
+	"auto_arp_refresh_before_switch_port_polling":  types.BoolType,
 	"switch_port_data_collection_polling":          types.StringType,
 	"switch_port_data_collection_polling_schedule": types.ObjectType{AttrTypes: Ipv6networkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleAttrTypes},
 	"switch_port_data_collection_polling_interval": types.Int64Type,
@@ -94,7 +94,7 @@ var Ipv6networkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 	},
-	"auto_arprefresh_before_switch_port_polling": schema.BoolAttribute{
+	"auto_arp_refresh_before_switch_port_polling": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether auto ARP refresh before switch port polling is enabled or not.",
 		Computed:            true,
