@@ -34,7 +34,7 @@ var ZoneAuthDnssecKeysAttrTypes = map[string]attr.Type{
 
 var ZoneAuthDnssecKeysResourceSchemaAttributes = map[string]schema.Attribute{
 	"tag": schema.Int64Attribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The tag of the key for the zone.",
 	},
 	"status": schema.StringAttribute{

@@ -15,6 +15,7 @@ import (
 )
 
 type ZoneAuthUpdateForwardingModel struct {
+	Struct         types.String `tfsdk:"struct"`
 	Address        types.String `tfsdk:"address"`
 	Permission     types.String `tfsdk:"permission"`
 	TsigKey        types.String `tfsdk:"tsig_key"`
@@ -24,6 +25,7 @@ type ZoneAuthUpdateForwardingModel struct {
 }
 
 var ZoneAuthUpdateForwardingAttrTypes = map[string]attr.Type{
+	"struct":            types.StringType,
 	"address":           types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -33,24 +35,33 @@ var ZoneAuthUpdateForwardingAttrTypes = map[string]attr.Type{
 }
 
 var ZoneAuthUpdateForwardingResourceSchemaAttributes = map[string]schema.Attribute{
-	"address": schema.StringAttribute{
+	"struct": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The struct type of the object.",
+	},
+	"address": schema.StringAttribute{
+		Required:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
 	"permission": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The permission to use for this address.",
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
@@ -76,6 +87,7 @@ func (m *ZoneAuthUpdateForwardingModel) Expand(ctx context.Context, diags *diag.
 		return nil
 	}
 	to := &dns.ZoneAuthUpdateForwarding{
+		Struct:         flex.ExpandStringPointer(m.Struct),
 		Address:        flex.ExpandStringPointer(m.Address),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -104,6 +116,7 @@ func (m *ZoneAuthUpdateForwardingModel) Flatten(ctx context.Context, from *dns.Z
 	if m == nil {
 		*m = ZoneAuthUpdateForwardingModel{}
 	}
+	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

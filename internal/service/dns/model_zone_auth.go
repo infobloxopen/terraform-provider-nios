@@ -521,7 +521,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthDnssecKeysResourceSchemaAttributes,
 		},
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "A list of DNSSEC keys for the zone.",
 	},
@@ -575,6 +574,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthExternalSecondariesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of external secondary servers.",
 	},
 	"fqdn": schema.StringAttribute{
@@ -810,6 +810,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"set_soa_serial_number": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
 	},
 	"soa_default_ttl": schema.Int64Attribute{
@@ -877,7 +878,10 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthUpdateForwardingResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("allow_update_forwarding")),
+		},
 		MarkdownDescription: "Use this field to allow or deny dynamic DNS updates that are forwarded from specific IPv4/IPv6 addresses, networks, or a named ACL. You can also provide TSIG keys for clients that are allowed or denied to perform zone updates. This setting overrides the member-level setting.",
 	},
 	"use_allow_active_dir": schema.BoolAttribute{
@@ -1224,7 +1228,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	// m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.RrNotQueriedEnabledTime = flex.FlattenInt64Pointer(from.RrNotQueriedEnabledTime)
 	m.ScavengingSettings = FlattenZoneAuthScavengingSettings(ctx, from.ScavengingSettings, diags)
-	m.SetSoaSerialNumber = flex.FlattenBoolPointerFalseAsNull(from.SetSoaSerialNumber)
+	// m.SetSoaSerialNumber = flex.FlattenBoolPointerFalseAsNull(from.SetSoaSerialNumber)
 	m.SoaDefaultTtl = flex.FlattenInt64Pointer(from.SoaDefaultTtl)
 	m.SoaEmail = flex.FlattenStringPointer(from.SoaEmail)
 	m.SoaExpire = flex.FlattenInt64Pointer(from.SoaExpire)
