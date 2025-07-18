@@ -15,17 +15,17 @@ import (
 )
 
 type FixedAddressStructMsServerModel struct {
-	Struct   types.String `tfsdk:"_struct"`
+	Struct   types.String `tfsdk:"struct"`
 	Ipv4addr types.String `tfsdk:"ipv4addr"`
 }
 
 var FixedAddressStructMsServerAttrTypes = map[string]attr.Type{
-	"_struct":  types.StringType,
+	"struct":   types.StringType,
 	"ipv4addr": types.StringType,
 }
 
 var FixedAddressStructMsServerResourceSchemaAttributes = map[string]schema.Attribute{
-	"_struct": schema.StringAttribute{
+	"struct": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Struct Field for MS Server",
 	},

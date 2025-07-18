@@ -16,17 +16,19 @@ import (
 )
 
 //TODO
-// Failing Tests due to config becoming NULL
+// Following Objects required configurations to be defined in the grid
 // - CLI Credentials
 // - Restart if Needed
 // - SNMP3 Credential , Use SNMP3 Credential
 // - SNMP Credential , Use SNMP Credential
+// - MS Server
 
 //TODO: add tests
 // The following require additional resource/data source objects to be supported.
 // - Logic Filter Rules
 // - Reserved Interface
-// - Enable Immediate Discovery
+// - Discovery
+// - Fixed Address Template
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // - Network View - default , test_fixed_address
@@ -49,8 +51,33 @@ func TestAccFixedaddressResource_basic(t *testing.T) {
 				Config: testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "ipv4addr", ip),
+					resource.TestCheckResourceAttr(resourceName, "match_client", "CIRCUIT_ID"),
+					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", fmt.Sprintf("%v", agentCircuitID)),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "allow_telnet", "false"),
+					resource.TestCheckResourceAttr(resourceName, "always_update_dns", "false"),
+					resource.TestCheckResourceAttr(resourceName, "client_identifier_prepend_zero", "false"),
+					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "disable_discovery", "false"),
+					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
+					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_cli_credentials", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ms_options", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -973,6 +1000,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.30"
 	agentCircuitID := acctest.RandomNumber(1000)
+	agentRemoteID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -980,7 +1008,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressMatchClient(ip, "CIRCUIT_ID", agentCircuitID),
+				Config: testAccFixedaddressMatchClient(ip, "CIRCUIT_ID", agentCircuitID, agentRemoteID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "match_client", "CIRCUIT_ID"),
@@ -988,7 +1016,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressMatchClient(ip, "REMOTE_ID", agentCircuitID),
+				Config: testAccFixedaddressMatchClient(ip, "REMOTE_ID", agentRemoteID, agentRemoteID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "match_client", "REMOTE_ID"),
@@ -1000,6 +1028,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_MsOptions(t *testing.T) {
+	t.Skip("Skipping test as appropriate MS options are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_ms_options"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.31"
@@ -1011,18 +1040,18 @@ func TestAccFixedaddressResource_MsOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressMsOptions(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressMsOptions(ip, "CIRCUIT_ID", agentCircuitID, "time-offset", "2", "50"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_options", "MS_OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_options", "50"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressMsOptions(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressMsOptions(ip, "CIRCUIT_ID", agentCircuitID, "dhcp-lease-time", "56", "100"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_options", "MS_OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_options", "100"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1034,8 +1063,7 @@ func TestAccFixedaddressResource_MsServer(t *testing.T) {
 	t.Skip("Skipping test as MS Server is supposed to be set up on the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_ms_server"
 	var v dhcp.Fixedaddress
-	ip := "15.0.0.32"
-	agentCircuitID := acctest.RandomNumber(1000)
+	ip := "50.0.0.132"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1043,20 +1071,20 @@ func TestAccFixedaddressResource_MsServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressMsServer(ip, "CIRCUIT_ID", agentCircuitID, "10.34.98.176"),
+				Config: testAccFixedaddressMsServer(ip, "MAC_ADDRESS", "00:1a:6b:3c:4d:5e", "10.34.98.68", "ms_server", "example_fixed_address"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "10.34.98.176"),
+					resource.TestCheckResourceAttr(resourceName, "ms_server", "10.34.98.68"),
 				),
 			},
 			// Update and Read
-			{
-				Config: testAccFixedaddressMsServer(ip, "CIRCUIT_ID", agentCircuitID, "2.2.2.2"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "2.2.2.2"),
-				),
-			},
+			//{
+			//	Config: testAccFixedaddressMsServer(ip, "CIRCUIT_ID", agentCircuitID, "2.2.2.2"),
+			//	Check: resource.ComposeTestCheckFunc(
+			//		testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+			//		resource.TestCheckResourceAttr(resourceName, "ms_server", "2.2.2.2"),
+			//	),
+			//},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -2241,38 +2269,47 @@ resource "nios_dhcp_fixed_address" "test_mac" {
 `, ip, matchClient, agentCircuitID, mac)
 }
 
-func testAccFixedaddressMatchClient(ip, matchClient string, agentCircuitID int) string {
+func testAccFixedaddressMatchClient(ip, matchClient string, agentCircuitID, agentRemoteID int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_match_client" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
+	agent_remote_id = %d
 }
-`, ip, matchClient, agentCircuitID)
+`, ip, matchClient, agentCircuitID, agentRemoteID)
 }
 
-func testAccFixedaddressMsOptions(ip, matchClient string, agentCircuitID int, msOptions string) string {
+func testAccFixedaddressMsOptions(ip, matchClient string, agentCircuitID int, msOptionsName, msOptionsNum, msOptionsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_ms_options" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	ms_options = %q
+	ms_options = [
+		{
+			name  = %q
+			num = %q
+			value = %q
+		}
+	]
 }
-`, ip, matchClient, agentCircuitID, msOptions)
+`, ip, matchClient, agentCircuitID, msOptionsName, msOptionsNum, msOptionsValue)
 }
 
-func testAccFixedaddressMsServer(ip, matchClient string, agentCircuitID int, msServerIpv4Addr string) string {
+func testAccFixedaddressMsServer(ip, matchClient string, macAddress string, msServerIpv4Addr, networkView, name string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_ms_server" {
 	ipv4addr = %q
 	match_client = %q
-	agent_circuit_id = %d
+	mac = %q
 	ms_server = {
 		ipv4addr = %q	
 	}
+	network_view = %q
+	name = %q
 }
-`, ip, matchClient, agentCircuitID, msServerIpv4Addr)
+`, ip, matchClient, macAddress, msServerIpv4Addr, networkView, name)
 }
 
 func testAccFixedaddressName(ip, matchClient string, agentCircuitID int, name string) string {

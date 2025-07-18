@@ -67,7 +67,7 @@ func (d *FixedaddressDataSource) Schema(ctx context.Context, req datasource.Sche
 			},
 			"body": schema.SingleNestedAttribute{
 				Description: "The body of the request to be sent to the API. This is used for creating or updating resources.",
-				Attributes:  FixedAddressStructMsServerResourceSchemaAttributes,
+				Attributes:  FixedAddressStructResourceSchemaAttributes,
 				Optional:    true,
 				Computed:    true,
 			},

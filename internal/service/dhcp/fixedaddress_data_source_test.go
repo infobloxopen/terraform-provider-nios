@@ -69,7 +69,7 @@ func TestAccFixedaddressDataSource_MsServerStruct(t *testing.T) {
 		CheckDestroy:             testAccCheckFixedaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFixedaddressDataSourcConfigeMsServerStruct("msdhcpserver", "192.168.4.21"),
+				Config: testAccFixedaddressDataSourcConfigeMsServerStruct("msdhcpserver", "10.34.98.68"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
