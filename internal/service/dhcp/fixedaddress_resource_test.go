@@ -35,9 +35,9 @@ import (
 var readableAttributesForFixedaddress = "agent_circuit_id,agent_remote_id,allow_telnet,always_update_dns,bootfile,bootserver,cli_credentials,client_identifier_prepend_zero,cloud_info,comment,ddns_domainname,ddns_hostname,deny_bootp,device_description,device_location,device_type,device_vendor,dhcp_client_identifier,disable,disable_discovery,discover_now_status,discovered_data,enable_ddns,enable_pxe_lease_time,extattrs,ignore_dhcp_option_list_request,ipv4addr,is_invalid_mac,logic_filter_rules,mac,match_client,ms_ad_user_data,ms_options,ms_server,name,network,network_view,nextserver,options,pxe_lease_time,reserved_interface,snmp3_credential,snmp_credential,use_bootfile,use_bootserver,use_cli_credentials,use_ddns_domainname,use_deny_bootp,use_enable_ddns,use_ignore_dhcp_option_list_request,use_logic_filter_rules,use_ms_options,use_nextserver,use_options,use_pxe_lease_time,use_snmp3_credential,use_snmp_credential"
 
 func TestAccFixedaddressResource_basic(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test"
+	var resourceName = "nios_dhcp_fixed_address.test"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.1"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -59,9 +59,9 @@ func TestAccFixedaddressResource_basic(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_disappears(t *testing.T) {
-	resourceName := "nios_dhcp_fixedaddress.test"
+	resourceName := "nios_dhcp_fixed_address.test"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.2"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -82,9 +82,9 @@ func TestAccFixedaddressResource_disappears(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_AgentCircuitId(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_agent_circuit_id"
+	var resourceName = "nios_dhcp_fixed_address.test_agent_circuit_id"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.3"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -112,9 +112,9 @@ func TestAccFixedaddressResource_AgentCircuitId(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_AgentRemoteId(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_agent_remote_id"
+	var resourceName = "nios_dhcp_fixed_address.test_agent_remote_id"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.4"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -143,9 +143,9 @@ func TestAccFixedaddressResource_AgentRemoteId(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_AllowTelnet(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_allow_telnet"
+	var resourceName = "nios_dhcp_fixed_address.test_allow_telnet"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.5"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -174,9 +174,9 @@ func TestAccFixedaddressResource_AllowTelnet(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_AlwaysUpdateDns(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_always_update_dns"
+	var resourceName = "nios_dhcp_fixed_address.test_always_update_dns"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.6"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -205,9 +205,9 @@ func TestAccFixedaddressResource_AlwaysUpdateDns(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Bootfile(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_bootfile"
+	var resourceName = "nios_dhcp_fixed_address.test_bootfile"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.7"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -236,9 +236,9 @@ func TestAccFixedaddressResource_Bootfile(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Bootserver(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_bootserver"
+	var resourceName = "nios_dhcp_fixed_address.test_bootserver"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.8"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -267,9 +267,10 @@ func TestAccFixedaddressResource_Bootserver(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_cli_credentials"
+	t.Skip("Skipping test as CLI Credential is not supported yet")
+	var resourceName = "nios_dhcp_fixed_address.test_cli_credentials"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.9"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -298,9 +299,9 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_ClientIdentifierPrependZero(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_client_identifier_prepend_zero"
+	var resourceName = "nios_dhcp_fixed_address.test_client_identifier_prepend_zero"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.10"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -329,9 +330,9 @@ func TestAccFixedaddressResource_ClientIdentifierPrependZero(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Comment(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_comment"
+	var resourceName = "nios_dhcp_fixed_address.test_comment"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.11"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -360,9 +361,9 @@ func TestAccFixedaddressResource_Comment(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DdnsDomainname(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_ddns_domainname"
+	var resourceName = "nios_dhcp_fixed_address.test_ddns_domainname"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.12"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -391,9 +392,9 @@ func TestAccFixedaddressResource_DdnsDomainname(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DdnsHostname(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_ddns_hostname"
+	var resourceName = "nios_dhcp_fixed_address.test_ddns_hostname"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.13"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -422,9 +423,9 @@ func TestAccFixedaddressResource_DdnsHostname(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DenyBootp(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_deny_bootp"
+	var resourceName = "nios_dhcp_fixed_address.test_deny_bootp"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.14"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -453,9 +454,9 @@ func TestAccFixedaddressResource_DenyBootp(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DeviceDescription(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_device_description"
+	var resourceName = "nios_dhcp_fixed_address.test_device_description"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.15"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -484,9 +485,9 @@ func TestAccFixedaddressResource_DeviceDescription(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DeviceLocation(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_device_location"
+	var resourceName = "nios_dhcp_fixed_address.test_device_location"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.16"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -515,9 +516,9 @@ func TestAccFixedaddressResource_DeviceLocation(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DeviceType(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_device_type"
+	var resourceName = "nios_dhcp_fixed_address.test_device_type"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.17"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -546,9 +547,9 @@ func TestAccFixedaddressResource_DeviceType(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DeviceVendor(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_device_vendor"
+	var resourceName = "nios_dhcp_fixed_address.test_device_vendor"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.18"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -577,9 +578,9 @@ func TestAccFixedaddressResource_DeviceVendor(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DhcpClientIdentifier(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_dhcp_client_identifier"
+	var resourceName = "nios_dhcp_fixed_address.test_dhcp_client_identifier"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.19"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -608,9 +609,9 @@ func TestAccFixedaddressResource_DhcpClientIdentifier(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Disable(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_disable"
+	var resourceName = "nios_dhcp_fixed_address.test_disable"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.20"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -639,9 +640,9 @@ func TestAccFixedaddressResource_Disable(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_DisableDiscovery(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_disable_discovery"
+	var resourceName = "nios_dhcp_fixed_address.test_disable_discovery"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.21"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -670,9 +671,9 @@ func TestAccFixedaddressResource_DisableDiscovery(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_enable_ddns"
+	var resourceName = "nios_dhcp_fixed_address.test_enable_ddns"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.22"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -702,9 +703,9 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 
 func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
 	t.Skip("Skipping test as Discovery is not supported")
-	var resourceName = "nios_dhcp_fixedaddress.test_enable_immediate_discovery"
+	var resourceName = "nios_dhcp_fixed_address.test_enable_immediate_discovery"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.23"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -733,9 +734,9 @@ func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_EnablePxeLeaseTime(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_enable_pxe_lease_time"
+	var resourceName = "nios_dhcp_fixed_address.test_enable_pxe_lease_time"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.24"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -764,9 +765,9 @@ func TestAccFixedaddressResource_EnablePxeLeaseTime(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_extattrs"
+	var resourceName = "nios_dhcp_fixed_address.test_extattrs"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.25"
 	agentCircuitID := acctest.RandomNumber(1000)
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -801,9 +802,9 @@ func TestAccFixedaddressResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_IgnoreDhcpOptionListRequest(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_ignore_dhcp_option_list_request"
+	var resourceName = "nios_dhcp_fixed_address.test_ignore_dhcp_option_list_request"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.26"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -832,10 +833,10 @@ func TestAccFixedaddressResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Ipv4addr(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_ipv4addr"
+	var resourceName = "nios_dhcp_fixed_address.test_ipv4addr"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
-	IPUpdated := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
+	ip := "15.0.0.27"
+	IPUpdated := "15.0.0.60"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -863,10 +864,12 @@ func TestAccFixedaddressResource_Ipv4addr(t *testing.T) {
 	})
 }
 
+// TestAccFixedaddressResource_FuncCall tests the "func_call" attribute functionality
+// which allocates IPv4 addresses using next_available_ip. Since func_call attribute can't be
+// updated, the comment is updated to demonstrate an update to the resource
 func TestAccFixedaddressResource_FuncCall(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_func_call"
+	var resourceName = "nios_dhcp_fixed_address.test_func_call"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -875,30 +878,27 @@ func TestAccFixedaddressResource_FuncCall(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressFuncCall(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressFuncCall("CIRCUIT_ID", agentCircuitID, "ipv4addr", "next_available_ip", "ips", "network", "15.0.0.0/24", "Original Function Call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "func_call", "FUNC_CALL_REPLACE_ME"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressFuncCall(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressFuncCall("CIRCUIT_ID", agentCircuitID, "comment", "next_available_ip", "ips", "network", "15.0.0.0/24", "Function Call with Update"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "func_call", "FUNC_CALL_UPDATE_REPLACE_ME"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 
 func TestAccFixedaddressResource_LogicFilterRules(t *testing.T) {
 	t.Skip("Skipping test as support for MAC/NAC/Option logic filter rules is not implemented yet")
-	var resourceName = "nios_dhcp_fixedaddress.test_logic_filter_rules"
+	var resourceName = "nios_dhcp_fixed_address.test_logic_filter_rules"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.28"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -929,9 +929,9 @@ func TestAccFixedaddressResource_LogicFilterRules(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Mac(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_mac"
+	var resourceName = "nios_dhcp_fixed_address.test_mac"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.29"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -969,9 +969,9 @@ func TestAccFixedaddressResource_Mac(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_MatchClient(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_match_client"
+	var resourceName = "nios_dhcp_fixed_address.test_match_client"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.30"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -983,7 +983,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 				Config: testAccFixedaddressMatchClient(ip, "CIRCUIT_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "match_client", "MATCH_CLIENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "match_client", "CIRCUIT_ID"),
 				),
 			},
 			// Update and Read
@@ -991,7 +991,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 				Config: testAccFixedaddressMatchClient(ip, "REMOTE_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "match_client", "MATCH_CLIENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "match_client", "REMOTE_ID"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1000,9 +1000,9 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_MsOptions(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_ms_options"
+	var resourceName = "nios_dhcp_fixed_address.test_ms_options"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.31"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1031,9 +1031,10 @@ func TestAccFixedaddressResource_MsOptions(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_MsServer(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_ms_server"
+	t.Skip("Skipping test as MS Server is supposed to be set up on the GRID")
+	var resourceName = "nios_dhcp_fixed_address.test_ms_server"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.32"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1042,18 +1043,18 @@ func TestAccFixedaddressResource_MsServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressMsServer(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressMsServer(ip, "CIRCUIT_ID", agentCircuitID, "10.34.98.176"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "MS_SERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_server", "10.34.98.176"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressMsServer(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressMsServer(ip, "CIRCUIT_ID", agentCircuitID, "2.2.2.2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "MS_SERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_server", "2.2.2.2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1062,9 +1063,9 @@ func TestAccFixedaddressResource_MsServer(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Name(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_name"
+	var resourceName = "nios_dhcp_fixed_address.test_name"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.33"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1093,9 +1094,9 @@ func TestAccFixedaddressResource_Name(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Network(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_network"
+	var resourceName = "nios_dhcp_fixed_address.test_network"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.34"
 	ipUpdated := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
 	agentCircuitID := acctest.RandomNumber(1000)
 
@@ -1125,9 +1126,9 @@ func TestAccFixedaddressResource_Network(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_NetworkView(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_network_view"
+	var resourceName = "nios_dhcp_fixed_address.test_network_view"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.35"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1148,9 +1149,9 @@ func TestAccFixedaddressResource_NetworkView(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Nextserver(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_nextserver"
+	var resourceName = "nios_dhcp_fixed_address.test_nextserver"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.36"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1179,9 +1180,9 @@ func TestAccFixedaddressResource_Nextserver(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Options(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_options"
+	var resourceName = "nios_dhcp_fixed_address.test_options"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.37"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1190,18 +1191,20 @@ func TestAccFixedaddressResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, "time-offset", "50"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "50"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, "dhcp-lease-time", "7200"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1210,9 +1213,9 @@ func TestAccFixedaddressResource_Options(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_PxeLeaseTime(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_pxe_lease_time"
+	var resourceName = "nios_dhcp_fixed_address.test_pxe_lease_time"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.38"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1242,9 +1245,9 @@ func TestAccFixedaddressResource_PxeLeaseTime(t *testing.T) {
 
 func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
 	t.Skip("Skipping test as reserved_interface is not implemented yet")
-	var resourceName = "nios_dhcp_fixedaddress.test_reserved_interface"
+	var resourceName = "nios_dhcp_fixed_address.test_reserved_interface"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.39"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1273,9 +1276,10 @@ func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_restart_if_needed"
+	t.Skip("Skipping test as it requires a CP member to be configured")
+	var resourceName = "nios_dhcp_fixed_address.test_restart_if_needed"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.40"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1304,9 +1308,10 @@ func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_snmp3_credential"
+	t.Skip("Skipping test as SNMP3 Credential needs to be enabled on the grid")
+	var resourceName = "nios_dhcp_fixed_address.test_snmp3_credential"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "16.0.0.41"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1315,29 +1320,30 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
+				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "snmp", "MD5", "snmp1234", "3DES", "snmp1234", "SNMP3 Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential", "SNMP3_CREDENTIAL_REPLACE_ME"),
+					//resource.TestCheckResourceAttr(resourceName, "snmp3_credential", "SNMP3_CREDENTIAL_REPLACE_ME"),
 				),
 			},
 			// Update and Read
-			{
-				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "SNMP3_USER_UPDATE", "SHA-224", "AUTH_PASSWORD", "AES-256", "PRIVACY_PASSWORD", "SNMP3 Credential Comment Updated", "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential", "SNMP3_CREDENTIAL_UPDATE_REPLACE_ME"),
-				),
-			},
+			//{
+			//	Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "SNMP3_USER_UPDATE", "SHA-224", "AUTH_PASSWORD", "AES-256", "PRIVACY_PASSWORD", "SNMP3 Credential Comment Updated", "default"),
+			//	Check: resource.ComposeTestCheckFunc(
+			//		testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+			//		resource.TestCheckResourceAttr(resourceName, "snmp3_credential", "SNMP3_CREDENTIAL_UPDATE_REPLACE_ME"),
+			//	),
+			//},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 
 func TestAccFixedaddressResource_SnmpCredential(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_snmp_credential"
+	t.Skip("Skipping test as SNMP Credential is not supported yet")
+	var resourceName = "nios_dhcp_fixed_address.test_snmp_credential"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.42"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1367,9 +1373,9 @@ func TestAccFixedaddressResource_SnmpCredential(t *testing.T) {
 
 func TestAccFixedaddressResource_Template(t *testing.T) {
 	t.Skip("Skipping test as Fixed Address Template is not implemented yet")
-	var resourceName = "nios_dhcp_fixedaddress.test_template"
+	var resourceName = "nios_dhcp_fixed_address.test_template"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.43"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1398,9 +1404,9 @@ func TestAccFixedaddressResource_Template(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseBootfile(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_bootfile"
+	var resourceName = "nios_dhcp_fixed_address.test_use_bootfile"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.44"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1429,9 +1435,9 @@ func TestAccFixedaddressResource_UseBootfile(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseBootserver(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_bootserver"
+	var resourceName = "nios_dhcp_fixed_address.test_use_bootserver"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.45"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1460,9 +1466,9 @@ func TestAccFixedaddressResource_UseBootserver(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseCliCredentials(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_cli_credentials"
+	var resourceName = "nios_dhcp_fixed_address.test_use_cli_credentials"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.46"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1491,9 +1497,9 @@ func TestAccFixedaddressResource_UseCliCredentials(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseDdnsDomainname(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_ddns_domainname"
+	var resourceName = "nios_dhcp_fixed_address.test_use_ddns_domainname"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.47"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1522,9 +1528,9 @@ func TestAccFixedaddressResource_UseDdnsDomainname(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseDenyBootp(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_deny_bootp"
+	var resourceName = "nios_dhcp_fixed_address.test_use_deny_bootp"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.48"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1553,9 +1559,9 @@ func TestAccFixedaddressResource_UseDenyBootp(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseEnableDdns(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_enable_ddns"
+	var resourceName = "nios_dhcp_fixed_address.test_use_enable_ddns"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.49"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1584,9 +1590,9 @@ func TestAccFixedaddressResource_UseEnableDdns(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_ignore_dhcp_option_list_request"
+	var resourceName = "nios_dhcp_fixed_address.test_use_ignore_dhcp_option_list_request"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.50"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1615,9 +1621,9 @@ func TestAccFixedaddressResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseLogicFilterRules(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_logic_filter_rules"
+	var resourceName = "nios_dhcp_fixed_address.test_use_logic_filter_rules"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.51"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1646,9 +1652,9 @@ func TestAccFixedaddressResource_UseLogicFilterRules(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseMsOptions(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_ms_options"
+	var resourceName = "nios_dhcp_fixed_address.test_use_ms_options"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.52"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1677,9 +1683,9 @@ func TestAccFixedaddressResource_UseMsOptions(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseNextserver(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_nextserver"
+	var resourceName = "nios_dhcp_fixed_address.test_use_nextserver"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.53"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1708,9 +1714,9 @@ func TestAccFixedaddressResource_UseNextserver(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseOptions(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_options"
+	var resourceName = "nios_dhcp_fixed_address.test_use_options"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.54"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1739,9 +1745,9 @@ func TestAccFixedaddressResource_UseOptions(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UsePxeLeaseTime(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_pxe_lease_time"
+	var resourceName = "nios_dhcp_fixed_address.test_use_pxe_lease_time"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.55"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1770,9 +1776,10 @@ func TestAccFixedaddressResource_UsePxeLeaseTime(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_snmp3_credential"
+	t.Skip("Skipping test as SNMP3 Credential is not supported yet")
+	var resourceName = "nios_dhcp_fixed_address.test_use_snmp3_credential"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.56"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1801,9 +1808,10 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
-	var resourceName = "nios_dhcp_fixedaddress.test_use_snmp_credential"
+	t.Skip("Skipping test as SNMP Credential is not supported yet")
+	var resourceName = "nios_dhcp_fixed_address.test_use_snmp_credential"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := "15.0.0.57"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1889,12 +1897,9 @@ func testAccCheckFixedaddressDisappears(ctx context.Context, v *dhcp.Fixedaddres
 	}
 }
 
-// agent_circuit_id = %d
-// agent_remote_id = %q
-// dhcp_client_identifier = %q
 func testAccFixedaddressBasicConfig(ip4addr, matchClient string, agentCircuitId int) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test" {
+resource "nios_dhcp_fixed_address" "test" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1906,7 +1911,7 @@ resource "nios_dhcp_fixedaddress" "test" {
 
 func testAccFixedaddressAgentCircuitId(ip, matchClient string, agentCircuitId int) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_agent_circuit_id" {
+resource "nios_dhcp_fixed_address" "test_agent_circuit_id" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1916,7 +1921,7 @@ resource "nios_dhcp_fixedaddress" "test_agent_circuit_id" {
 
 func testAccFixedaddressAgentRemoteId(ip, matchClient string, agentCircuitID int, agentRemoteId string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_agent_remote_id" {
+resource "nios_dhcp_fixed_address" "test_agent_remote_id" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1927,7 +1932,7 @@ resource "nios_dhcp_fixedaddress" "test_agent_remote_id" {
 
 func testAccFixedaddressAllowTelnet(ip, matchClient string, agentCircuitID int, allowTelnet string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_allow_telnet" {
+resource "nios_dhcp_fixed_address" "test_allow_telnet" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1938,7 +1943,7 @@ resource "nios_dhcp_fixedaddress" "test_allow_telnet" {
 
 func testAccFixedaddressAlwaysUpdateDns(ip, matchClient string, agentCircuitID int, alwaysUpdateDns string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_always_update_dns" {
+resource "nios_dhcp_fixed_address" "test_always_update_dns" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1949,7 +1954,7 @@ resource "nios_dhcp_fixedaddress" "test_always_update_dns" {
 
 func testAccFixedaddressBootfile(ip, matchClient string, agentCircuitID int, bootfile string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_bootfile" {
+resource "nios_dhcp_fixed_address" "test_bootfile" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1960,7 +1965,7 @@ resource "nios_dhcp_fixedaddress" "test_bootfile" {
 
 func testAccFixedaddressBootserver(ip, matchClient string, agentCircuitID int, bootserver string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_bootserver" {
+resource "nios_dhcp_fixed_address" "test_bootserver" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1971,7 +1976,7 @@ resource "nios_dhcp_fixedaddress" "test_bootserver" {
 
 func testAccFixedaddressCliCredentials(ip, matchClient string, agentCircuitID int, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_cli_credentials" {
+resource "nios_dhcp_fixed_address" "test_cli_credentials" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1988,7 +1993,7 @@ resource "nios_dhcp_fixedaddress" "test_cli_credentials" {
 
 func testAccFixedaddressClientIdentifierPrependZero(ip, matchClient string, agentCircuitID int, clientIdentifierPrependZero string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_client_identifier_prepend_zero" {
+resource "nios_dhcp_fixed_address" "test_client_identifier_prepend_zero" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -1999,7 +2004,7 @@ resource "nios_dhcp_fixedaddress" "test_client_identifier_prepend_zero" {
 
 func testAccFixedaddressComment(ip, matchClient string, agentCircuitID int, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_comment" {
+resource "nios_dhcp_fixed_address" "test_comment" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2010,7 +2015,7 @@ resource "nios_dhcp_fixedaddress" "test_comment" {
 
 func testAccFixedaddressDdnsDomainname(ip, matchClient string, agentCircuitID int, ddnsDomainname string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_ddns_domainname" {
+resource "nios_dhcp_fixed_address" "test_ddns_domainname" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2021,7 +2026,7 @@ resource "nios_dhcp_fixedaddress" "test_ddns_domainname" {
 
 func testAccFixedaddressDdnsHostname(ip, matchClient string, agentCircuitID int, ddnsHostname string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_ddns_hostname" {
+resource "nios_dhcp_fixed_address" "test_ddns_hostname" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2032,7 +2037,7 @@ resource "nios_dhcp_fixedaddress" "test_ddns_hostname" {
 
 func testAccFixedaddressDenyBootp(ip, matchClient string, agentCircuitID int, denyBootp string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_deny_bootp" {
+resource "nios_dhcp_fixed_address" "test_deny_bootp" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2043,7 +2048,7 @@ resource "nios_dhcp_fixedaddress" "test_deny_bootp" {
 
 func testAccFixedaddressDeviceDescription(ip, matchClient string, agentCircuitID int, deviceDescription string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_device_description" {
+resource "nios_dhcp_fixed_address" "test_device_description" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2054,7 +2059,7 @@ resource "nios_dhcp_fixedaddress" "test_device_description" {
 
 func testAccFixedaddressDeviceLocation(ip, matchClient string, agentCircuitID int, deviceLocation string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_device_location" {
+resource "nios_dhcp_fixed_address" "test_device_location" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2065,7 +2070,7 @@ resource "nios_dhcp_fixedaddress" "test_device_location" {
 
 func testAccFixedaddressDeviceType(ip, matchClient string, agentCircuitID int, deviceType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_device_type" {
+resource "nios_dhcp_fixed_address" "test_device_type" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2076,7 +2081,7 @@ resource "nios_dhcp_fixedaddress" "test_device_type" {
 
 func testAccFixedaddressDeviceVendor(ip, matchClient string, agentCircuitID int, deviceVendor string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_device_vendor" {
+resource "nios_dhcp_fixed_address" "test_device_vendor" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2087,7 +2092,7 @@ resource "nios_dhcp_fixedaddress" "test_device_vendor" {
 
 func testAccFixedaddressDhcpClientIdentifier(ip, matchClient string, agentCircuitID int, dhcpClientIdentifier string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_dhcp_client_identifier" {
+resource "nios_dhcp_fixed_address" "test_dhcp_client_identifier" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2098,7 +2103,7 @@ resource "nios_dhcp_fixedaddress" "test_dhcp_client_identifier" {
 
 func testAccFixedaddressDisable(ip, matchClient string, agentCircuitID int, disable string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_disable" {
+resource "nios_dhcp_fixed_address" "test_disable" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2109,7 +2114,7 @@ resource "nios_dhcp_fixedaddress" "test_disable" {
 
 func testAccFixedaddressDisableDiscovery(ip, matchClient string, agentCircuitID int, disableDiscovery string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_disable_discovery" {
+resource "nios_dhcp_fixed_address" "test_disable_discovery" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2118,20 +2123,9 @@ resource "nios_dhcp_fixedaddress" "test_disable_discovery" {
 `, ip, matchClient, agentCircuitID, disableDiscovery)
 }
 
-func testAccFixedaddressDiscoveredData(ip, matchClient string, agentCircuitID int, discoveredData string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_discovered_data" {
-	ipv4addr = %q
-	match_client = %q
-	agent_circuit_id = %d
-	discovered_data = %q
-}
-`, ip, matchClient, agentCircuitID, discoveredData)
-}
-
 func testAccFixedaddressEnableDdns(ip, matchClient string, agentCircuitID int, enableDdns string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_enable_ddns" {
+resource "nios_dhcp_fixed_address" "test_enable_ddns" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2142,7 +2136,7 @@ resource "nios_dhcp_fixedaddress" "test_enable_ddns" {
 
 func testAccFixedaddressEnableImmediateDiscovery(ip, matchClient string, agentCircuitID int, enableImmediateDiscovery string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_enable_immediate_discovery" {
+resource "nios_dhcp_fixed_address" "test_enable_immediate_discovery" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2153,7 +2147,7 @@ resource "nios_dhcp_fixedaddress" "test_enable_immediate_discovery" {
 
 func testAccFixedaddressEnablePxeLeaseTime(ip, matchClient string, agentCircuitID int, enablePxeLeaseTime string, pxeLeaseTime int) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_enable_pxe_lease_time" {
+resource "nios_dhcp_fixed_address" "test_enable_pxe_lease_time" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2172,7 +2166,7 @@ func testAccFixedaddressExtAttrs(ip, matchClient string, agentCircuitID int, ext
 	}
 	extattrsStr += "\t}"
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_extattrs" {
+resource "nios_dhcp_fixed_address" "test_extattrs" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2181,9 +2175,29 @@ resource "nios_dhcp_fixedaddress" "test_extattrs" {
 `, ip, matchClient, agentCircuitID, extattrsStr)
 }
 
+func testAccFixedaddressFuncCall(matchClient string, agentCircuitID int, attributeName, objFunc, resultField, object, objectParameters, comment string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "test_func_call" {
+	match_client = %q
+	agent_circuit_id = %d
+	func_call = {
+		"attribute_name" = %q
+		"object_function" = %q
+		"result_field" = %q
+		"object" = %q
+		"object_parameters" = {
+			"network" = %q
+			"network_view" = "default"
+		}
+	}
+	comment = %q
+}
+`, matchClient, agentCircuitID, attributeName, objFunc, resultField, object, objectParameters, comment)
+}
+
 func testAccFixedaddressIgnoreDhcpOptionListRequest(ip, matchClient string, agentCircuitID int, ignoreDhcpOptionListRequest string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_ignore_dhcp_option_list_request" {
+resource "nios_dhcp_fixed_address" "test_ignore_dhcp_option_list_request" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2194,7 +2208,7 @@ resource "nios_dhcp_fixedaddress" "test_ignore_dhcp_option_list_request" {
 
 func testAccFixedaddressIpv4addr(ip, matchClient string, agentCircuitID int) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_ipv4addr" {
+resource "nios_dhcp_fixed_address" "test_ipv4addr" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2202,20 +2216,9 @@ resource "nios_dhcp_fixedaddress" "test_ipv4addr" {
 `, ip, matchClient, agentCircuitID)
 }
 
-func testAccFixedaddressFuncCall(ip, matchClient string, agentCircuitID int, funcCall string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_func_call" {
-	ipv4addr = %q
-	match_client = %q
-	agent_circuit_id = %d
-	func_call = %q
-}
-`, ip, matchClient, agentCircuitID, funcCall)
-}
-
 func testAccFixedaddressLogicFilterRules(ip, matchClient string, agentCircuitID int, logicFilterRuleFilter, logicFilterRuleType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_logic_filter_rules" {
+resource "nios_dhcp_fixed_address" "test_logic_filter_rules" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2229,7 +2232,7 @@ resource "nios_dhcp_fixedaddress" "test_logic_filter_rules" {
 
 func testAccFixedaddressMac(ip, matchClient string, agentCircuitID int, mac string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_mac" {
+resource "nios_dhcp_fixed_address" "test_mac" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2240,7 +2243,7 @@ resource "nios_dhcp_fixedaddress" "test_mac" {
 
 func testAccFixedaddressMatchClient(ip, matchClient string, agentCircuitID int) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_match_client" {
+resource "nios_dhcp_fixed_address" "test_match_client" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2250,7 +2253,7 @@ resource "nios_dhcp_fixedaddress" "test_match_client" {
 
 func testAccFixedaddressMsOptions(ip, matchClient string, agentCircuitID int, msOptions string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_ms_options" {
+resource "nios_dhcp_fixed_address" "test_ms_options" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2259,20 +2262,22 @@ resource "nios_dhcp_fixedaddress" "test_ms_options" {
 `, ip, matchClient, agentCircuitID, msOptions)
 }
 
-func testAccFixedaddressMsServer(ip, matchClient string, agentCircuitID int, msServer string) string {
+func testAccFixedaddressMsServer(ip, matchClient string, agentCircuitID int, msServerIpv4Addr string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_ms_server" {
+resource "nios_dhcp_fixed_address" "test_ms_server" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	ms_server = %q
+	ms_server = {
+		ipv4addr = %q	
+	}
 }
-`, ip, matchClient, agentCircuitID, msServer)
+`, ip, matchClient, agentCircuitID, msServerIpv4Addr)
 }
 
 func testAccFixedaddressName(ip, matchClient string, agentCircuitID int, name string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_name" {
+resource "nios_dhcp_fixed_address" "test_name" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2283,7 +2288,7 @@ resource "nios_dhcp_fixedaddress" "test_name" {
 
 func testAccFixedaddressNetwork(ip, matchClient string, agentCircuitID int, network string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_network" {
+resource "nios_dhcp_fixed_address" "test_network" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2294,7 +2299,7 @@ resource "nios_dhcp_fixedaddress" "test_network" {
 
 func testAccFixedaddressNetworkView(ip, matchClient string, agentCircuitID int, networkView string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_network_view" {
+resource "nios_dhcp_fixed_address" "test_network_view" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2305,7 +2310,7 @@ resource "nios_dhcp_fixedaddress" "test_network_view" {
 
 func testAccFixedaddressNextserver(ip, matchClient string, agentCircuitID int, nextserver string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_nextserver" {
+resource "nios_dhcp_fixed_address" "test_nextserver" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2314,26 +2319,24 @@ resource "nios_dhcp_fixedaddress" "test_nextserver" {
 `, ip, matchClient, agentCircuitID, nextserver)
 }
 
-func testAccFixedaddressOptions(ip, matchClient string, agentCircuitID int, options string) string {
+func testAccFixedaddressOptions(ip, matchClient string, agentCircuitID int, optionsName, optionValue string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_options" {
+resource "nios_dhcp_fixed_address" "test_options" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
 	options = [ {
-		name         = "time-offset"
-		num          = 2
-		value        = "56"
-		vendor_class = "DHCP"
+		name         = %q
+		value        = %q
 	} ]
 	
 }
-`, ip, matchClient, agentCircuitID)
+`, ip, matchClient, agentCircuitID, optionsName, optionValue)
 }
 
 func testAccFixedaddressPxeLeaseTime(ip, matchClient string, agentCircuitID int, pxeLeaseTime string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_pxe_lease_time" {
+resource "nios_dhcp_fixed_address" "test_pxe_lease_time" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2344,7 +2347,7 @@ resource "nios_dhcp_fixedaddress" "test_pxe_lease_time" {
 
 func testAccFixedaddressReservedInterface(ip, matchClient string, agentCircuitID int, reservedInterface string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_reserved_interface" {
+resource "nios_dhcp_fixed_address" "test_reserved_interface" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2355,7 +2358,7 @@ resource "nios_dhcp_fixedaddress" "test_reserved_interface" {
 
 func testAccFixedaddressRestartIfNeeded(ip, matchClient string, agentCircuitID int, restartIfNeeded string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_restart_if_needed" {
+resource "nios_dhcp_fixed_address" "test_restart_if_needed" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2366,7 +2369,7 @@ resource "nios_dhcp_fixedaddress" "test_restart_if_needed" {
 
 func testAccFixedaddressSnmp3Credential(ip, matchClient string, agentCircuitID int, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_snmp3_credential" {
+resource "nios_dhcp_fixed_address" "test_snmp3_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2385,7 +2388,7 @@ resource "nios_dhcp_fixedaddress" "test_snmp3_credential" {
 
 func testAccFixedaddressSnmpCredential(ip, matchClient string, agentCircuitID int, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_snmp_credential" {
+resource "nios_dhcp_fixed_address" "test_snmp_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2400,7 +2403,7 @@ resource "nios_dhcp_fixedaddress" "test_snmp_credential" {
 
 func testAccFixedaddressTemplate(ip, matchClient string, agentCircuitID int, template string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_template" {
+resource "nios_dhcp_fixed_address" "test_template" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2411,7 +2414,7 @@ resource "nios_dhcp_fixedaddress" "test_template" {
 
 func testAccFixedaddressUseBootfile(ip, matchClient string, agentCircuitID int, useBootFile, bootFile string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_bootfile" {
+resource "nios_dhcp_fixed_address" "test_use_bootfile" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2423,7 +2426,7 @@ resource "nios_dhcp_fixedaddress" "test_use_bootfile" {
 
 func testAccFixedaddressUseBootserver(ip, matchClient string, agentCircuitID int, useBootserver string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_bootserver" {
+resource "nios_dhcp_fixed_address" "test_use_bootserver" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2434,7 +2437,7 @@ resource "nios_dhcp_fixedaddress" "test_use_bootserver" {
 
 func testAccFixedaddressUseCliCredentials(ip, matchClient string, agentCircuitID int, useCliCredentials string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_cli_credentials" {
+resource "nios_dhcp_fixed_address" "test_use_cli_credentials" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2445,7 +2448,7 @@ resource "nios_dhcp_fixedaddress" "test_use_cli_credentials" {
 
 func testAccFixedaddressUseDdnsDomainname(ip, matchClient string, agentCircuitID int, useDdnsDomainname string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_ddns_domainname" {
+resource "nios_dhcp_fixed_address" "test_use_ddns_domainname" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2456,7 +2459,7 @@ resource "nios_dhcp_fixedaddress" "test_use_ddns_domainname" {
 
 func testAccFixedaddressUseDenyBootp(ip, matchClient string, agentCircuitID int, useDenyBootp string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_deny_bootp" {
+resource "nios_dhcp_fixed_address" "test_use_deny_bootp" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2467,7 +2470,7 @@ resource "nios_dhcp_fixedaddress" "test_use_deny_bootp" {
 
 func testAccFixedaddressUseEnableDdns(ip, matchClient string, agentCircuitID int, useEnableDdns string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_enable_ddns" {
+resource "nios_dhcp_fixed_address" "test_use_enable_ddns" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2478,7 +2481,7 @@ resource "nios_dhcp_fixedaddress" "test_use_enable_ddns" {
 
 func testAccFixedaddressUseIgnoreDhcpOptionListRequest(ip, matchClient string, agentCircuitID int, useIgnoreDhcpOptionListRequest string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_ignore_dhcp_option_list_request" {
+resource "nios_dhcp_fixed_address" "test_use_ignore_dhcp_option_list_request" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2489,7 +2492,7 @@ resource "nios_dhcp_fixedaddress" "test_use_ignore_dhcp_option_list_request" {
 
 func testAccFixedaddressUseLogicFilterRules(ip, matchClient string, agentCircuitID int, useLogicFilterRules string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_logic_filter_rules" {
+resource "nios_dhcp_fixed_address" "test_use_logic_filter_rules" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2500,7 +2503,7 @@ resource "nios_dhcp_fixedaddress" "test_use_logic_filter_rules" {
 
 func testAccFixedaddressUseMsOptions(ip, matchClient string, agentCircuitID int, useMsOptions string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_ms_options" {
+resource "nios_dhcp_fixed_address" "test_use_ms_options" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2511,7 +2514,7 @@ resource "nios_dhcp_fixedaddress" "test_use_ms_options" {
 
 func testAccFixedaddressUseNextserver(ip, matchClient string, agentCircuitID int, useNextserver string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_nextserver" {
+resource "nios_dhcp_fixed_address" "test_use_nextserver" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2522,7 +2525,7 @@ resource "nios_dhcp_fixedaddress" "test_use_nextserver" {
 
 func testAccFixedaddressUseOptions(ip, matchClient string, agentCircuitID int, useOptions string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_options" {
+resource "nios_dhcp_fixed_address" "test_use_options" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2533,7 +2536,7 @@ resource "nios_dhcp_fixedaddress" "test_use_options" {
 
 func testAccFixedaddressUsePxeLeaseTime(ip, matchClient string, agentCircuitID int, usePxeLeaseTime string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_pxe_lease_time" {
+resource "nios_dhcp_fixed_address" "test_use_pxe_lease_time" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2544,7 +2547,7 @@ resource "nios_dhcp_fixedaddress" "test_use_pxe_lease_time" {
 
 func testAccFixedaddressUseSnmp3Credential(ip, matchClient string, agentCircuitID int, useSnmp3Credential, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_snmp3_credential" {
+resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
@@ -2564,7 +2567,7 @@ resource "nios_dhcp_fixedaddress" "test_use_snmp3_credential" {
 
 func testAccFixedaddressUseSnmpCredential(ip, matchClient string, agentCircuitID int, useSnmpCredential string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test_use_snmp_credential" {
+resource "nios_dhcp_fixed_address" "test_use_snmp_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d

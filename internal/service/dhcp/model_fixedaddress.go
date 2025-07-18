@@ -7,12 +7,9 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	//internalplanmodifier "github.com/infobloxopen/terraform-provider-nios/internal/planmodifier"
 )
 
 type FixedaddressModel struct {
@@ -367,6 +364,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
+		//CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: FixedaddressOptionsResourceSchemaAttributes,
 		},
@@ -489,18 +487,6 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandFixedaddress(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dhcp.Fixedaddress {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m FixedaddressModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Fixedaddress {
 	if m == nil {
 		return nil
@@ -589,6 +575,8 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	if m == nil {
 		*m = FixedaddressModel{}
 	}
+	from.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.AgentCircuitId = flex.FlattenStringPointer(from.AgentCircuitId)
 	m.AgentRemoteId = flex.FlattenStringPointer(from.AgentRemoteId)
@@ -672,4 +660,32 @@ func FlattenRecordAIpv4addr(from *dhcp.FixedaddressIpv4addr) types.String {
 	}
 	m := flex.FlattenStringPointer(from.String)
 	return m
+}
+
+// RemoveDefaultDHCPOptions removes the default DHCP options from the provided options list.
+func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.FixedaddressOptions, planOptions types.List) []dhcp.FixedaddressOptions {
+	defaultOptionName := "dhcp-lease-time"
+	defaultOptionVal := ""
+
+	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandFixedaddressOptions)
+
+	for i := range planOptionsArr {
+		if *planOptionsArr[i].Name == defaultOptionName {
+			defaultOptionVal = *planOptionsArr[i].Value
+		}
+	}
+	var result []dhcp.FixedaddressOptions
+
+	for i := range options {
+		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
+			continue
+		}
+		result = append(result, options[i])
+	}
+
+	if len(result) == 0 {
+		return options
+	}
+
+	return result
 }

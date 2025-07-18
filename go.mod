@@ -89,4 +89,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
+// TODO : To be removed
 replace github.com/infobloxopen/infoblox-nios-go-client v0.0.0-20250714053712-b8642db973a1 => ../infoblox-nios-go-client

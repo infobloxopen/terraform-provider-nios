@@ -16,20 +16,20 @@ import (
 
 type FuncCallModel struct {
 	AttributeName    types.String `tfsdk:"attribute_name"`
-	ObjectFunction   types.String `tfsdk:"_object_function"`
-	Parameters       types.Map    `tfsdk:"_parameters"`
-	ResultField      types.String `tfsdk:"_result_field"`
-	Object           types.String `tfsdk:"_object"`
-	ObjectParameters types.Map    `tfsdk:"_object_parameters"`
+	ObjectFunction   types.String `tfsdk:"object_function"`
+	Parameters       types.Map    `tfsdk:"parameters"`
+	ResultField      types.String `tfsdk:"result_field"`
+	Object           types.String `tfsdk:"object"`
+	ObjectParameters types.Map    `tfsdk:"object_parameters"`
 }
 
 var FuncCallAttrTypes = map[string]attr.Type{
-	"attribute_name":     types.StringType,
-	"_object_function":   types.StringType,
-	"_parameters":        types.MapType{ElemType: types.StringType},
-	"_result_field":      types.StringType,
-	"_object":            types.StringType,
-	"_object_parameters": types.MapType{ElemType: types.StringType},
+	"attribute_name":    types.StringType,
+	"object_function":   types.StringType,
+	"parameters":        types.MapType{ElemType: types.StringType},
+	"result_field":      types.StringType,
+	"object":            types.StringType,
+	"object_parameters": types.MapType{ElemType: types.StringType},
 }
 
 var FuncCallResourceSchemaAttributes = map[string]schema.Attribute{
@@ -37,27 +37,24 @@ var FuncCallResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "The attribute to be called.",
 	},
-	"_object_function": schema.StringAttribute{
+	"object_function": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The function to be called.",
 	},
-	"_parameters": schema.MapAttribute{
+	"parameters": schema.MapAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The parameters for the function.",
 	},
-	"_result_field": schema.StringAttribute{
+	"result_field": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The result field of the function.",
 	},
-	"_object": schema.StringAttribute{
+	"object": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The object to be called.",
 	},
-	"_object_parameters": schema.MapAttribute{
+	"object_parameters": schema.MapAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The parameters for the object.",

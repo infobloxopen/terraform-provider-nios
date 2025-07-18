@@ -129,8 +129,8 @@ Class | Method | HTTP request | Description
 *FixedaddressAPI* | [**Create**](docs/FixedaddressAPI.md#create) | **Post** /fixedaddress | Create a fixedaddress object
 *FixedaddressAPI* | [**Delete**](docs/FixedaddressAPI.md#delete) | **Delete** /fixedaddress/{reference} | Delete a fixedaddress object
 *FixedaddressAPI* | [**List**](docs/FixedaddressAPI.md#list) | **Get** /fixedaddress | Retrieve fixedaddress objects
+*FixedaddressAPI* | [**MsServerUpdate**](docs/FixedaddressAPI.md#msserverupdate) | **Put** /fixedaddress | Update a fixedaddress object
 *FixedaddressAPI* | [**Read**](docs/FixedaddressAPI.md#read) | **Get** /fixedaddress/{reference} | Get a specific fixedaddress object
-*FixedaddressAPI* | [**StructUpdate**](docs/FixedaddressAPI.md#structupdate) | **Put** /fixedaddress | Update a fixedaddress object
 *FixedaddressAPI* | [**Update**](docs/FixedaddressAPI.md#update) | **Put** /fixedaddress/{reference} | Update a fixedaddress object
 *FixedaddresstemplateAPI* | [**Create**](docs/FixedaddresstemplateAPI.md#create) | **Post** /fixedaddresstemplate | Create a fixedaddresstemplate object
 *FixedaddresstemplateAPI* | [**Delete**](docs/FixedaddresstemplateAPI.md#delete) | **Delete** /fixedaddresstemplate/{reference} | Delete a fixedaddresstemplate object
@@ -274,6 +274,8 @@ Class | Method | HTTP request | Description
  - [FilteroptionOptionList](docs/FilteroptionOptionList.md)
  - [Filterrelayagent](docs/Filterrelayagent.md)
  - [Fingerprint](docs/Fingerprint.md)
+ - [FixedAddressStruct](docs/FixedAddressStruct.md)
+ - [FixedAddressStructMsServer](docs/FixedAddressStructMsServer.md)
  - [Fixedaddress](docs/Fixedaddress.md)
  - [FixedaddressCliCredentials](docs/FixedaddressCliCredentials.md)
  - [FixedaddressCloudInfo](docs/FixedaddressCloudInfo.md)
@@ -492,7 +494,6 @@ Class | Method | HTTP request | Description
  - [SharednetworkLogicFilterRules](docs/SharednetworkLogicFilterRules.md)
  - [SharednetworkMsAdUserData](docs/SharednetworkMsAdUserData.md)
  - [SharednetworkOptions](docs/SharednetworkOptions.md)
- - [StructUpdate](docs/StructUpdate.md)
  - [UpdateDhcpStatisticsResponse](docs/UpdateDhcpStatisticsResponse.md)
  - [UpdateDhcpStatisticsResponseAsObject](docs/UpdateDhcpStatisticsResponseAsObject.md)
  - [UpdateDhcpfailoverResponse](docs/UpdateDhcpfailoverResponse.md)

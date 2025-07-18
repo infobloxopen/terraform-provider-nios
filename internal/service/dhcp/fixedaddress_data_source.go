@@ -3,7 +3,6 @@ package dhcp
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -29,14 +28,14 @@ type FixedaddressDataSource struct {
 }
 
 func (d *FixedaddressDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_fixedaddress"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_fixed_address"
 }
 
 type FixedaddressModelWithFilter struct {
-	Filters        types.Map  `tfsdk:"filters"`
-	ExtAttrFilters types.Map  `tfsdk:"extattrfilters"`
-	Result         types.List `tfsdk:"result"`
-	Body           types.Map  `tfsdk:"body"`
+	Filters        types.Map    `tfsdk:"filters"`
+	ExtAttrFilters types.Map    `tfsdk:"extattrfilters"`
+	Result         types.List   `tfsdk:"result"`
+	Body           types.Object `tfsdk:"body"`
 }
 
 func (m *FixedaddressModelWithFilter) FlattenResults(ctx context.Context, from []dhcp.Fixedaddress, diags *diag.Diagnostics) {
@@ -66,10 +65,11 @@ func (d *FixedaddressDataSource) Schema(ctx context.Context, req datasource.Sche
 				},
 				Computed: true,
 			},
-			"body": schema.MapAttribute{
+			"body": schema.SingleNestedAttribute{
 				Description: "The body of the request to be sent to the API. This is used for creating or updating resources.",
-				ElementType: types.StringType,
+				Attributes:  FixedAddressStructMsServerResourceSchemaAttributes,
 				Optional:    true,
+				Computed:    true,
 			},
 		},
 	}
@@ -106,11 +106,12 @@ func (d *FixedaddressDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 
 	if !data.Body.IsNull() && !data.Body.IsUnknown() {
-		// If body is provided, we will use it to create a new fixed address
+		// If body is provided, Update Call will be used to retrieve the data.
 		apiRes, _, err := d.client.DHCPAPI.
 			FixedaddressAPI.
-			StructUpdate(ctx).
-			StructUpdate(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
+			MsServerUpdate(ctx).
+			FixedAddressStruct(*ExpandFixedAddressStruct(ctx, data.Body, &resp.Diagnostics)).
+			Method("GET").
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForFixedaddress).
 			Execute()
@@ -119,7 +120,7 @@ func (d *FixedaddressDataSource) Read(ctx context.Context, req datasource.ReadRe
 			return
 		}
 
-		res := apiRes.UpdateFixedaddressResponseAsObject.GetResult()
+		res := apiRes.ListFixedaddressResponseObject.GetResult()
 		data.FlattenResults(ctx, res, &resp.Diagnostics)
 
 		// Save updated data into Terraform state

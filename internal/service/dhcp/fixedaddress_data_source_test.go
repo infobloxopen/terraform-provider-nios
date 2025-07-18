@@ -12,10 +12,10 @@ import (
 )
 
 func TestAccFixedaddressDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_fixedaddress.test"
-	resourceName := "nios_dhcp_fixedaddress.test"
+	dataSourceName := "data.nios_dhcp_fixed_address.test"
+	resourceName := "nios_dhcp_fixed_address.test"
 	var v dhcp.Fixedaddress
-	ip := acctest.RandomIPWithSpecificOctetsSet("15.0.0")
+	ip := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
 	agentCircuitID := acctest.RandomNumber(255)
 
 	resource.Test(t, resource.TestCase{
@@ -36,8 +36,32 @@ func TestAccFixedaddressDataSource_Filters(t *testing.T) {
 }
 
 func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_fixedaddress.test"
-	resourceName := "nios_dhcp_fixedaddress.test"
+	dataSourceName := "data.nios_dhcp_fixed_address.test"
+	resourceName := "nios_dhcp_fixed_address.test"
+	var v dhcp.Fixedaddress
+	ip := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
+	agentCircuitID := acctest.RandomNumber(255)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckFixedaddressDestroy(context.Background(), &v),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFixedaddressDataSourceConfigExtAttrFilters(ip, "CIRCUIT_ID", agentCircuitID, "value1"),
+				Check: resource.ComposeTestCheckFunc(
+					append([]resource.TestCheckFunc{
+						testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					}, testAccCheckFixedaddressResourceAttrPair(resourceName, dataSourceName)...)...,
+				),
+			},
+		},
+	})
+}
+
+func TestAccFixedaddressDataSource_MsServerStruct(t *testing.T) {
+	dataSourceName := "data.nios_dhcp_fixed_address.test"
+	resourceName := "nios_dhcp_fixed_address.test"
 	var v dhcp.Fixedaddress
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -45,7 +69,7 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckFixedaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFixedaddressDataSourceConfigExtAttrFilters("value1"),
+				Config: testAccFixedaddressDataSourcConfigeMsServerStruct("msdhcpserver", "192.168.4.21"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
@@ -60,7 +84,7 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 
 func testAccCheckFixedaddressResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
-		resource.TestCheckResourceAttrPair(resourceName, "_ref", dataSourceName, "result.0._ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
 		resource.TestCheckResourceAttrPair(resourceName, "agent_circuit_id", dataSourceName, "result.0.agent_circuit_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "agent_remote_id", dataSourceName, "result.0.agent_remote_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "allow_telnet", dataSourceName, "result.0.allow_telnet"),
@@ -127,34 +151,48 @@ func testAccCheckFixedaddressResourceAttrPair(resourceName, dataSourceName strin
 
 func testAccFixedaddressDataSourceConfigFilters(ip, matchClient string, agentCircuitID int) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test" {
+resource "nios_dhcp_fixed_address" "test" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
 }
 
-data "nios_dhcp_fixedaddress" "test" {
+data "nios_dhcp_fixed_address" "test" {
   filters = {
-	ipv4addr = nios_dhcp_fixedaddress.test.ipv4addr
+	ipv4addr = nios_dhcp_fixed_address.test.ipv4addr
   }
 }
 `, ip, matchClient, agentCircuitID)
 }
 
-func testAccFixedaddressDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccFixedaddressDataSourceConfigExtAttrFilters(ip, matchClient string, agentCircuitID int, extAttrsValue string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_fixedaddress" "test" {
-  extattrs = {
-    Site = {
-        value = %q
-    }
-  	}
+resource "nios_dhcp_fixed_address" "test" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	extattrs = {
+		Site = %q
+	}
 }
 
-data "nios_dhcp_fixedaddress" "test" {
+data "nios_dhcp_fixed_address" "test" {
   extattrfilters = {
-	"Site" = nios_dhcp_fixedaddress.test.tags.tag1
+	Site = nios_dhcp_fixed_address.test.extattrs.Site
   }
 }
-`, extAttrsValue)
+`, ip, matchClient, agentCircuitID, extAttrsValue)
+}
+
+func testAccFixedaddressDataSourcConfigeMsServerStruct(structValue, ipv4Adrr string) string {
+	return fmt.Sprintf(`
+data "nios_dhcp_fixed_address" "test" {
+	body = {
+		ms_server = {
+			struct = %q
+			ipv4addr = %q
+		}
+	}
+}
+`, structValue, ipv4Adrr)
 }
