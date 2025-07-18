@@ -609,6 +609,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_import_from")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The IP address of the Infoblox appliance from which zone data is imported. Setting this address to '255.255.255.255' and do_host_abstraction to 'true' will create Host records from A records in this zone without importing zone data.",
 	},
 	"is_dnssec_enabled": schema.BoolAttribute{
@@ -1064,10 +1065,10 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		ExtAttrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
 		ExternalPrimaries:                flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalPrimaries, diags, ExpandZoneAuthExternalPrimaries),
 		ExternalSecondaries:              flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneAuthExternalSecondaries),
-		//Fqdn:                                flex.ExpandStringPointer(m.Fqdn),
-		GridPrimary:                         flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneAuthGridPrimary),
-		GridSecondaries:                     flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneAuthGridSecondaries),
-		ImportFrom:                          flex.ExpandStringPointer(m.ImportFrom),
+		// Fqdn:                                flex.ExpandStringPointer(m.Fqdn),
+		GridPrimary:     flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneAuthGridPrimary),
+		GridSecondaries: flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneAuthGridSecondaries),
+		// ImportFrom:                          flex.ExpandStringPointer(m.ImportFrom),
 		LastQueriedAcl:                      flex.ExpandFrameworkListNestedBlock(ctx, m.LastQueriedAcl, diags, ExpandZoneAuthLastQueriedAcl),
 		Locked:                              flex.ExpandBoolPointer(m.Locked),
 		MemberSoaMnames:                     flex.ExpandFrameworkListNestedBlock(ctx, m.MemberSoaMnames, diags, ExpandZoneAuthMemberSoaMnames),
@@ -1122,6 +1123,10 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 	if isCreate {
 		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
 		to.ZoneFormat = flex.ExpandStringPointer(m.ZoneFormat)
+	}
+
+	if m.ImportFrom.IsUnknown() && m.ImportFrom.ValueString() != "" {
+		to.ImportFrom = flex.ExpandStringPointer(m.ImportFrom)
 	}
 	return to
 }
@@ -1193,7 +1198,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneAuthGridPrimaryAttrTypes, diags, FlattenZoneAuthGridPrimary)
 	m.GridPrimarySharedWithMsParentDelegation = types.BoolPointerValue(from.GridPrimarySharedWithMsParentDelegation)
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, ZoneAuthGridSecondariesAttrTypes, diags, FlattenZoneAuthGridSecondaries)
-	m.ImportFrom = flex.FlattenStringPointerNilAsNotEmpty(from.ImportFrom)
+	// m.ImportFrom = flex.FlattenStringPointer(from.ImportFrom)
 	m.IsDnssecEnabled = types.BoolPointerValue(from.IsDnssecEnabled)
 	m.IsDnssecSigned = types.BoolPointerValue(from.IsDnssecSigned)
 	m.IsMultimaster = types.BoolPointerValue(from.IsMultimaster)

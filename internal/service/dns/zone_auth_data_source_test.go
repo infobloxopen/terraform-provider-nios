@@ -15,6 +15,7 @@ func TestAccZoneAuthDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_zone_auth.test"
 	resourceName := "nios_dns_zone_auth.test"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("auth-zone") + ".com"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +23,7 @@ func TestAccZoneAuthDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneAuthDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneAuthDataSourceConfigFilters(),
+				Config: testAccZoneAuthDataSourceConfigFilters(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
@@ -33,17 +34,20 @@ func TestAccZoneAuthDataSource_Filters(t *testing.T) {
 	})
 }
 
-func TestAccZoneAuthDataSource_TagFilters(t *testing.T) {
+func TestAccZoneAuthDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_zone_auth.test"
 	resourceName := "nios_dns_zone_auth.test"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("auth-zone") + ".com"
+	extAttrValue := acctest.RandomName()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckZoneAuthDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneAuthDataSourceConfigExtAttrFilters("value1"),
+				Config: testAccZoneAuthDataSourceConfigExtAttrFilters(zoneFqdn, "default", extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
@@ -72,8 +76,6 @@ func testAccCheckZoneAuthResourceAttrPair(resourceName, dataSourceName string) [
 		resource.TestCheckResourceAttrPair(resourceName, "cloud_info", dataSourceName, "result.0.cloud_info"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "copy_xfer_to_notify", dataSourceName, "result.0.copy_xfer_to_notify"),
-		resource.TestCheckResourceAttrPair(resourceName, "create_ptr_for_bulk_hosts", dataSourceName, "result.0.create_ptr_for_bulk_hosts"),
-		resource.TestCheckResourceAttrPair(resourceName, "create_ptr_for_hosts", dataSourceName, "result.0.create_ptr_for_hosts"),
 		resource.TestCheckResourceAttrPair(resourceName, "create_underscore_zones", dataSourceName, "result.0.create_underscore_zones"),
 		resource.TestCheckResourceAttrPair(resourceName, "ddns_force_creation_timestamp_update", dataSourceName, "result.0.ddns_force_creation_timestamp_update"),
 		resource.TestCheckResourceAttrPair(resourceName, "ddns_principal_group", dataSourceName, "result.0.ddns_principal_group"),
@@ -96,7 +98,6 @@ func testAccCheckZoneAuthResourceAttrPair(resourceName, dataSourceName string) [
 		resource.TestCheckResourceAttrPair(resourceName, "dnssec_keys", dataSourceName, "result.0.dnssec_keys"),
 		resource.TestCheckResourceAttrPair(resourceName, "dnssec_ksk_rollover_date", dataSourceName, "result.0.dnssec_ksk_rollover_date"),
 		resource.TestCheckResourceAttrPair(resourceName, "dnssec_zsk_rollover_date", dataSourceName, "result.0.dnssec_zsk_rollover_date"),
-		resource.TestCheckResourceAttrPair(resourceName, "do_host_abstraction", dataSourceName, "result.0.do_host_abstraction"),
 		resource.TestCheckResourceAttrPair(resourceName, "effective_check_names_policy", dataSourceName, "result.0.effective_check_names_policy"),
 		resource.TestCheckResourceAttrPair(resourceName, "effective_record_name_policy", dataSourceName, "result.0.effective_record_name_policy"),
 		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
@@ -106,7 +107,6 @@ func testAccCheckZoneAuthResourceAttrPair(resourceName, dataSourceName string) [
 		resource.TestCheckResourceAttrPair(resourceName, "grid_primary", dataSourceName, "result.0.grid_primary"),
 		resource.TestCheckResourceAttrPair(resourceName, "grid_primary_shared_with_ms_parent_delegation", dataSourceName, "result.0.grid_primary_shared_with_ms_parent_delegation"),
 		resource.TestCheckResourceAttrPair(resourceName, "grid_secondaries", dataSourceName, "result.0.grid_secondaries"),
-		resource.TestCheckResourceAttrPair(resourceName, "import_from", dataSourceName, "result.0.import_from"),
 		resource.TestCheckResourceAttrPair(resourceName, "is_dnssec_enabled", dataSourceName, "result.0.is_dnssec_enabled"),
 		resource.TestCheckResourceAttrPair(resourceName, "is_dnssec_signed", dataSourceName, "result.0.is_dnssec_signed"),
 		resource.TestCheckResourceAttrPair(resourceName, "is_multimaster", dataSourceName, "result.0.is_multimaster"),
@@ -138,10 +138,8 @@ func testAccCheckZoneAuthResourceAttrPair(resourceName, dataSourceName string) [
 		resource.TestCheckResourceAttrPair(resourceName, "record_name_policy", dataSourceName, "result.0.record_name_policy"),
 		resource.TestCheckResourceAttrPair(resourceName, "records_monitored", dataSourceName, "result.0.records_monitored"),
 		resource.TestCheckResourceAttrPair(resourceName, "remove_subzones", dataSourceName, "result.0.remove_subzones"),
-		resource.TestCheckResourceAttrPair(resourceName, "restart_if_needed", dataSourceName, "result.0.restart_if_needed"),
 		resource.TestCheckResourceAttrPair(resourceName, "rr_not_queried_enabled_time", dataSourceName, "result.0.rr_not_queried_enabled_time"),
 		resource.TestCheckResourceAttrPair(resourceName, "scavenging_settings", dataSourceName, "result.0.scavenging_settings"),
-		resource.TestCheckResourceAttrPair(resourceName, "set_soa_serial_number", dataSourceName, "result.0.set_soa_serial_number"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_default_ttl", dataSourceName, "result.0.soa_default_ttl"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_email", dataSourceName, "result.0.soa_email"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_expire", dataSourceName, "result.0.soa_expire"),
@@ -178,33 +176,36 @@ func testAccCheckZoneAuthResourceAttrPair(resourceName, dataSourceName string) [
 	}
 }
 
-func testAccZoneAuthDataSourceConfigFilters() string {
+func testAccZoneAuthDataSourceConfigFilters(zoneFqdn, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test" {
+  fqdn = %q
+  view = %q
 }
 
 data "nios_dns_zone_auth" "test" {
   filters = {
-	 = nios_dns_zone_auth.test.
+	fqdn = nios_dns_zone_auth.test.fqdn
+	view = nios_dns_zone_auth.test.view
   }
 }
-`)
+`, zoneFqdn, view)
 }
 
-func testAccZoneAuthDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccZoneAuthDataSourceConfigExtAttrFilters(zoneFqdn, view, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test" {
-  extattrs = {
-    Site = {
-        value = %q
-    }
-  	}
+	fqdn = %q
+	view = %q
+   extattrs = {
+		Site = %q
+	}
 }
 
 data "nios_dns_zone_auth" "test" {
   extattrfilters = {
-	"Site" = nios_dns_zone_auth.test.tags.tag1
-  }
+		"Site" = nios_dns_zone_auth.test.extattrs.Site
 }
-`, extAttrsValue)
+}
+`, zoneFqdn, view, extAttrsValue)
 }

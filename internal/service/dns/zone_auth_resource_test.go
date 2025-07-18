@@ -43,6 +43,8 @@ func TestAccZoneAuthResource_basic(t *testing.T) {
 				Config: testAccZoneAuthBasicConfig(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					// Test fields with default values
 					resource.TestCheckResourceAttr(resourceName, "allow_fixed_rrset_order", "false"),
 					resource.TestCheckResourceAttr(resourceName, "allow_gss_tsig_for_underscore_zone", "false"),
@@ -116,6 +118,19 @@ func TestAccZoneAuthResource_AllowActiveDir(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_allow_active_dir"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	allowActiveDir := []map[string]any{
+		{
+			"address":    "10.0.0.1",
+			"permission": "ALLOW",
+		},
+	}
+
+	updatedAllowActiveDir := []map[string]any{
+		{
+			"address":    "10.0.0.2",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -123,7 +138,7 @@ func TestAccZoneAuthResource_AllowActiveDir(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthAllowActiveDir(zoneFqdn, "default", "10.0.0.1", "true"),
+				Config: testAccZoneAuthAllowActiveDir(zoneFqdn, "default", allowActiveDir, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_active_dir.#", "1"),
@@ -133,7 +148,7 @@ func TestAccZoneAuthResource_AllowActiveDir(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthAllowActiveDir(zoneFqdn, "default", "10.0.0.2", "true"),
+				Config: testAccZoneAuthAllowActiveDir(zoneFqdn, "default", updatedAllowActiveDir, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_active_dir.#", "1"),
@@ -240,6 +255,20 @@ func TestAccZoneAuthResource_AllowQuery(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_allow_query"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	allowQuery := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "10.0.0.0",
+			"permission": "ALLOW",
+		},
+	}
+	updatedAllowQuery := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "192.168.0.0",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -247,19 +276,19 @@ func TestAccZoneAuthResource_AllowQuery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthAllowQuery(zoneFqdn, "default", "10.0.0.0/8", true),
+				Config: testAccZoneAuthAllowQuery(zoneFqdn, "default", allowQuery, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "allow_query.0.address", "10.0.0.0/8"),
+					resource.TestCheckResourceAttr(resourceName, "allow_query.0.address", "10.0.0.0"),
 					resource.TestCheckResourceAttr(resourceName, "allow_query.0.permission", "ALLOW"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthAllowQuery(zoneFqdn, "default", "192.168.0.0/16", true),
+				Config: testAccZoneAuthAllowQuery(zoneFqdn, "default", updatedAllowQuery, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "allow_query.0.address", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr(resourceName, "allow_query.0.address", "192.168.0.0"),
 					resource.TestCheckResourceAttr(resourceName, "allow_query.0.permission", "ALLOW"),
 				),
 			},
@@ -272,6 +301,20 @@ func TestAccZoneAuthResource_AllowTransfer(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_allow_transfer"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	allowTransfer := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "10.0.0.0",
+			"permission": "ALLOW",
+		},
+	}
+	updatedAllowTransfer := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "192.168.0.0",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -279,19 +322,19 @@ func TestAccZoneAuthResource_AllowTransfer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthAllowTransfer(zoneFqdn, "default", "10.0.0.0/8", true),
+				Config: testAccZoneAuthAllowTransfer(zoneFqdn, "default", allowTransfer, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "allow_transfer.0.address", "10.0.0.0/8"),
+					resource.TestCheckResourceAttr(resourceName, "allow_transfer.0.address", "10.0.0.0"),
 					resource.TestCheckResourceAttr(resourceName, "allow_transfer.0.permission", "ALLOW"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthAllowTransfer(zoneFqdn, "default", "192.168.0.0/16", true),
+				Config: testAccZoneAuthAllowTransfer(zoneFqdn, "default", updatedAllowTransfer, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "allow_transfer.0.address", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr(resourceName, "allow_transfer.0.address", "192.168.0.0"),
 					resource.TestCheckResourceAttr(resourceName, "allow_transfer.0.permission", "ALLOW"),
 				),
 			},
@@ -304,6 +347,20 @@ func TestAccZoneAuthResource_AllowUpdate(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_allow_update"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	allowUpdate := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "10.0.0.0",
+			"permission": "ALLOW",
+		},
+	}
+	updatedAllowUpdate := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "192.168.0.0",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -311,23 +368,23 @@ func TestAccZoneAuthResource_AllowUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthAllowUpdate(zoneFqdn, "default", "10.0.0.0/8", true),
+				Config: testAccZoneAuthAllowUpdate(zoneFqdn, "default", allowUpdate, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_update.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "allow_update.0.struct", "addressac"),
-					resource.TestCheckResourceAttr(resourceName, "allow_update.0.address", "10.0.0.0/8"),
+					resource.TestCheckResourceAttr(resourceName, "allow_update.0.address", "10.0.0.0"),
 					resource.TestCheckResourceAttr(resourceName, "allow_update.0.permission", "ALLOW"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthAllowUpdate(zoneFqdn, "default", "192.168.0.0/16", true),
+				Config: testAccZoneAuthAllowUpdate(zoneFqdn, "default", updatedAllowUpdate, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_update.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "allow_update.0.struct", "addressac"),
-					resource.TestCheckResourceAttr(resourceName, "allow_update.0.address", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr(resourceName, "allow_update.0.address", "192.168.0.0"),
 					resource.TestCheckResourceAttr(resourceName, "allow_update.0.permission", "ALLOW"),
 				),
 			},
@@ -407,7 +464,7 @@ func TestAccZoneAuthResource_CopyXferToNotify(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthCopyXferToNotify(zoneFqdn, "default", "true", "true"),
+				Config: testAccZoneAuthCopyXferToNotify(zoneFqdn, "default", true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "copy_xfer_to_notify", "true"),
@@ -415,7 +472,7 @@ func TestAccZoneAuthResource_CopyXferToNotify(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthCopyXferToNotify(zoneFqdn, "default", "false", "true"),
+				Config: testAccZoneAuthCopyXferToNotify(zoneFqdn, "default", false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "copy_xfer_to_notify", "false"),
@@ -1022,7 +1079,7 @@ func TestAccZoneAuthResource_ExtAttrs(t *testing.T) {
 	})
 }
 
-// A Grid or Microsoft secondary server is required when we try testing dummy values
+// External primaries maynot be configured when not in use
 func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_external_primaries"
 	var v dns.ZoneAuth
@@ -1039,6 +1096,11 @@ func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 			"name":    "primary2.example.com",
 		},
 	}
+	gridSecondaries := []map[string]any{
+		{
+			"name": "infoblox.172_28_83_209",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1046,7 +1108,7 @@ func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthExternalPrimaries(zoneFqdn, "default", externalPrimaries),
+				Config: testAccZoneAuthExternalPrimaries(zoneFqdn, "default", externalPrimaries, gridSecondaries),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.#", "1"),
@@ -1056,7 +1118,7 @@ func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthExternalPrimaries(zoneFqdn, "default", updatedExternalPrimaries),
+				Config: testAccZoneAuthExternalPrimaries(zoneFqdn, "default", updatedExternalPrimaries, gridSecondaries),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "192.168.1.20"),
@@ -2167,6 +2229,13 @@ func TestAccZoneAuthResource_UpdateForwarding(t *testing.T) {
 func TestAccZoneAuthResource_UseAllowActiveDir(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_allow_active_dir"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	allowActiveDir := []map[string]any{
+		{
+			"address":    "10.0.0.1",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2174,18 +2243,18 @@ func TestAccZoneAuthResource_UseAllowActiveDir(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseAllowActiveDir("USE_ALLOW_ACTIVE_DIR_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowActiveDir(zoneFqdn, "default", allowActiveDir, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_active_dir", "USE_ALLOW_ACTIVE_DIR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_active_dir", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseAllowActiveDir("USE_ALLOW_ACTIVE_DIR_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowActiveDir(zoneFqdn, "default", allowActiveDir, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_active_dir", "USE_ALLOW_ACTIVE_DIR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_active_dir", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2196,6 +2265,14 @@ func TestAccZoneAuthResource_UseAllowActiveDir(t *testing.T) {
 func TestAccZoneAuthResource_UseAllowQuery(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_allow_query"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	allowQuery := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "10.0.0.0",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2203,18 +2280,18 @@ func TestAccZoneAuthResource_UseAllowQuery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseAllowQuery("USE_ALLOW_QUERY_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowQuery(zoneFqdn, "default", allowQuery, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_query", "USE_ALLOW_QUERY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_query", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseAllowQuery("USE_ALLOW_QUERY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowQuery(zoneFqdn, "default", allowQuery, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_query", "USE_ALLOW_QUERY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_query", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2225,6 +2302,14 @@ func TestAccZoneAuthResource_UseAllowQuery(t *testing.T) {
 func TestAccZoneAuthResource_UseAllowTransfer(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_allow_transfer"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	allowTransfer := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "10.0.0.0",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2232,18 +2317,18 @@ func TestAccZoneAuthResource_UseAllowTransfer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseAllowTransfer("USE_ALLOW_TRANSFER_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowTransfer(zoneFqdn, "default", allowTransfer, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_transfer", "USE_ALLOW_TRANSFER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_transfer", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseAllowTransfer("USE_ALLOW_TRANSFER_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowTransfer(zoneFqdn, "default", allowTransfer, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_transfer", "USE_ALLOW_TRANSFER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_transfer", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2254,6 +2339,14 @@ func TestAccZoneAuthResource_UseAllowTransfer(t *testing.T) {
 func TestAccZoneAuthResource_UseAllowUpdate(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_allow_update"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	allowUpdate := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "10.0.0.0",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2261,18 +2354,18 @@ func TestAccZoneAuthResource_UseAllowUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseAllowUpdate("USE_ALLOW_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowUpdate(zoneFqdn, "default", allowUpdate, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_update", "USE_ALLOW_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_update", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseAllowUpdate("USE_ALLOW_UPDATE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowUpdate(zoneFqdn, "default", allowUpdate, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_update", "USE_ALLOW_UPDATE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_update", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2283,6 +2376,14 @@ func TestAccZoneAuthResource_UseAllowUpdate(t *testing.T) {
 func TestAccZoneAuthResource_UseAllowUpdateForwarding(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_allow_update_forwarding"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	updateForwarding := []map[string]any{
+		{
+			"struct":     "addressac",
+			"address":    "10.0.0.0",
+			"permission": "ALLOW",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2290,18 +2391,18 @@ func TestAccZoneAuthResource_UseAllowUpdateForwarding(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseAllowUpdateForwarding("USE_ALLOW_UPDATE_FORWARDING_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowUpdateForwarding(zoneFqdn, "default", updateForwarding, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_update_forwarding", "USE_ALLOW_UPDATE_FORWARDING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_update_forwarding", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseAllowUpdateForwarding("USE_ALLOW_UPDATE_FORWARDING_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseAllowUpdateForwarding(zoneFqdn, "default", updateForwarding, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_allow_update_forwarding", "USE_ALLOW_UPDATE_FORWARDING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_allow_update_forwarding", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2312,6 +2413,7 @@ func TestAccZoneAuthResource_UseAllowUpdateForwarding(t *testing.T) {
 func TestAccZoneAuthResource_UseCheckNamesPolicy(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_check_names_policy"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2319,18 +2421,18 @@ func TestAccZoneAuthResource_UseCheckNamesPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseCheckNamesPolicy("USE_CHECK_NAMES_POLICY_REPLACE_ME"),
+				Config: testAccZoneAuthUseCheckNamesPolicy(zoneFqdn, "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_check_names_policy", "USE_CHECK_NAMES_POLICY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_check_names_policy", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseCheckNamesPolicy("USE_CHECK_NAMES_POLICY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseCheckNamesPolicy(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_check_names_policy", "USE_CHECK_NAMES_POLICY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_check_names_policy", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2341,6 +2443,7 @@ func TestAccZoneAuthResource_UseCheckNamesPolicy(t *testing.T) {
 func TestAccZoneAuthResource_UseCopyXferToNotify(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_copy_xfer_to_notify"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2348,18 +2451,18 @@ func TestAccZoneAuthResource_UseCopyXferToNotify(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseCopyXferToNotify("USE_COPY_XFER_TO_NOTIFY_REPLACE_ME"),
+				Config: testAccZoneAuthUseCopyXferToNotify(zoneFqdn, "default", true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_copy_xfer_to_notify", "USE_COPY_XFER_TO_NOTIFY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_copy_xfer_to_notify", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseCopyXferToNotify("USE_COPY_XFER_TO_NOTIFY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseCopyXferToNotify(zoneFqdn, "default", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_copy_xfer_to_notify", "USE_COPY_XFER_TO_NOTIFY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_copy_xfer_to_notify", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2370,6 +2473,7 @@ func TestAccZoneAuthResource_UseCopyXferToNotify(t *testing.T) {
 func TestAccZoneAuthResource_UseDdnsForceCreationTimestampUpdate(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_ddns_force_creation_timestamp_update"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2377,18 +2481,18 @@ func TestAccZoneAuthResource_UseDdnsForceCreationTimestampUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseDdnsForceCreationTimestampUpdate("USE_DDNS_FORCE_CREATION_TIMESTAMP_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsForceCreationTimestampUpdate(zoneFqdn, "default", true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_force_creation_timestamp_update", "USE_DDNS_FORCE_CREATION_TIMESTAMP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_force_creation_timestamp_update", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseDdnsForceCreationTimestampUpdate("USE_DDNS_FORCE_CREATION_TIMESTAMP_UPDATE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsForceCreationTimestampUpdate(zoneFqdn, "default", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_force_creation_timestamp_update", "USE_DDNS_FORCE_CREATION_TIMESTAMP_UPDATE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_force_creation_timestamp_update", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2399,6 +2503,7 @@ func TestAccZoneAuthResource_UseDdnsForceCreationTimestampUpdate(t *testing.T) {
 func TestAccZoneAuthResource_UseDdnsPatternsRestriction(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_ddns_patterns_restriction"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2406,18 +2511,18 @@ func TestAccZoneAuthResource_UseDdnsPatternsRestriction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseDdnsPatternsRestriction("USE_DDNS_PATTERNS_RESTRICTION_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsPatternsRestriction(zoneFqdn, "default", true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_patterns_restriction", "USE_DDNS_PATTERNS_RESTRICTION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_patterns_restriction", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseDdnsPatternsRestriction("USE_DDNS_PATTERNS_RESTRICTION_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsPatternsRestriction(zoneFqdn, "default", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_patterns_restriction", "USE_DDNS_PATTERNS_RESTRICTION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_patterns_restriction", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2428,6 +2533,7 @@ func TestAccZoneAuthResource_UseDdnsPatternsRestriction(t *testing.T) {
 func TestAccZoneAuthResource_UseDdnsPrincipalSecurity(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_ddns_principal_security"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2435,18 +2541,18 @@ func TestAccZoneAuthResource_UseDdnsPrincipalSecurity(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseDdnsPrincipalSecurity("USE_DDNS_PRINCIPAL_SECURITY_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsPrincipalSecurity(zoneFqdn, "default", true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_principal_security", "USE_DDNS_PRINCIPAL_SECURITY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_principal_security", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseDdnsPrincipalSecurity("USE_DDNS_PRINCIPAL_SECURITY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsPrincipalSecurity(zoneFqdn, "default", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_principal_security", "USE_DDNS_PRINCIPAL_SECURITY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_principal_security", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2457,6 +2563,7 @@ func TestAccZoneAuthResource_UseDdnsPrincipalSecurity(t *testing.T) {
 func TestAccZoneAuthResource_UseDdnsRestrictProtected(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_ddns_restrict_protected"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2464,18 +2571,18 @@ func TestAccZoneAuthResource_UseDdnsRestrictProtected(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseDdnsRestrictProtected("USE_DDNS_RESTRICT_PROTECTED_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsRestrictProtected(zoneFqdn, "default", true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_restrict_protected", "USE_DDNS_RESTRICT_PROTECTED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_restrict_protected", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseDdnsRestrictProtected("USE_DDNS_RESTRICT_PROTECTED_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsRestrictProtected(zoneFqdn, "default", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_restrict_protected", "USE_DDNS_RESTRICT_PROTECTED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_restrict_protected", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2486,6 +2593,7 @@ func TestAccZoneAuthResource_UseDdnsRestrictProtected(t *testing.T) {
 func TestAccZoneAuthResource_UseDdnsRestrictStatic(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_ddns_restrict_static"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2493,18 +2601,18 @@ func TestAccZoneAuthResource_UseDdnsRestrictStatic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseDdnsRestrictStatic("USE_DDNS_RESTRICT_STATIC_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsRestrictStatic(zoneFqdn, "default", true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_restrict_static", "USE_DDNS_RESTRICT_STATIC_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_restrict_static", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseDdnsRestrictStatic("USE_DDNS_RESTRICT_STATIC_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseDdnsRestrictStatic(zoneFqdn, "default", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ddns_restrict_static", "USE_DDNS_RESTRICT_STATIC_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ddns_restrict_static", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2515,6 +2623,19 @@ func TestAccZoneAuthResource_UseDdnsRestrictStatic(t *testing.T) {
 func TestAccZoneAuthResource_UseDnssecKeyParams(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_dnssec_key_params"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	kskAlgorithms := []map[string]any{
+		{
+			"algorithm": "RSASHA256",
+			"size":      2048,
+		},
+	}
+	zskAlgorithms := []map[string]any{
+		{
+			"algorithm": "RSASHA256",
+			"size":      1024,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2522,18 +2643,18 @@ func TestAccZoneAuthResource_UseDnssecKeyParams(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseDnssecKeyParams("USE_DNSSEC_KEY_PARAMS_REPLACE_ME"),
+				Config: testAccZoneAuthUseDnssecKeyParams(zoneFqdn, "default", kskAlgorithms, zskAlgorithms, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_dnssec_key_params", "USE_DNSSEC_KEY_PARAMS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_dnssec_key_params", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseDnssecKeyParams("USE_DNSSEC_KEY_PARAMS_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseDnssecKeyParams(zoneFqdn, "default", kskAlgorithms, zskAlgorithms, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_dnssec_key_params", "USE_DNSSEC_KEY_PARAMS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_dnssec_key_params", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2573,6 +2694,12 @@ func TestAccZoneAuthResource_UseExternalPrimary(t *testing.T) {
 func TestAccZoneAuthResource_UseGridZoneTimer(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_grid_zone_timer"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.172_28_82_248",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2580,18 +2707,18 @@ func TestAccZoneAuthResource_UseGridZoneTimer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseGridZoneTimer("USE_GRID_ZONE_TIMER_REPLACE_ME"),
+				Config: testAccZoneAuthUseGridZoneTimer(zoneFqdn, "default", gridPrimary, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "USE_GRID_ZONE_TIMER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseGridZoneTimer("USE_GRID_ZONE_TIMER_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseGridZoneTimer(zoneFqdn, "default", gridPrimary, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "USE_GRID_ZONE_TIMER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2602,6 +2729,7 @@ func TestAccZoneAuthResource_UseGridZoneTimer(t *testing.T) {
 func TestAccZoneAuthResource_UseImportFrom(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_import_from"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2609,18 +2737,18 @@ func TestAccZoneAuthResource_UseImportFrom(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseImportFrom("USE_IMPORT_FROM_REPLACE_ME"),
+				Config: testAccZoneAuthUseImportFrom(zoneFqdn, "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_import_from", "USE_IMPORT_FROM_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_import_from", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseImportFrom("USE_IMPORT_FROM_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseImportFrom(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_import_from", "USE_IMPORT_FROM_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_import_from", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2631,6 +2759,7 @@ func TestAccZoneAuthResource_UseImportFrom(t *testing.T) {
 func TestAccZoneAuthResource_UseNotifyDelay(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_notify_delay"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2638,18 +2767,18 @@ func TestAccZoneAuthResource_UseNotifyDelay(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseNotifyDelay("USE_NOTIFY_DELAY_REPLACE_ME"),
+				Config: testAccZoneAuthUseNotifyDelay(zoneFqdn, "default", 5, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_notify_delay", "USE_NOTIFY_DELAY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_notify_delay", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseNotifyDelay("USE_NOTIFY_DELAY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseNotifyDelay(zoneFqdn, "default", 5, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_notify_delay", "USE_NOTIFY_DELAY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_notify_delay", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2660,6 +2789,7 @@ func TestAccZoneAuthResource_UseNotifyDelay(t *testing.T) {
 func TestAccZoneAuthResource_UseRecordNamePolicy(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_record_name_policy"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2667,18 +2797,18 @@ func TestAccZoneAuthResource_UseRecordNamePolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseRecordNamePolicy("USE_RECORD_NAME_POLICY_REPLACE_ME"),
+				Config: testAccZoneAuthUseRecordNamePolicy(zoneFqdn, "default", "example-policy", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "USE_RECORD_NAME_POLICY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseRecordNamePolicy("USE_RECORD_NAME_POLICY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseRecordNamePolicy(zoneFqdn, "default", "example-policy", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "USE_RECORD_NAME_POLICY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2689,6 +2819,26 @@ func TestAccZoneAuthResource_UseRecordNamePolicy(t *testing.T) {
 func TestAccZoneAuthResource_UseScavengingSettings(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_scavenging_settings"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	scavengingSettings := map[string]any{
+		"enable_scavenging": true,
+		"expression_list": []map[string]any{
+			{
+				"op":       "AND",
+				"op1_type": "LIST",
+			},
+			{
+				"op":       "EQ",
+				"op1":      "rtype",
+				"op1_type": "FIELD",
+				"op2":      "A",
+				"op2_type": "STRING",
+			},
+			{
+				"op": "ENDLIST",
+			},
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2696,18 +2846,18 @@ func TestAccZoneAuthResource_UseScavengingSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseScavengingSettings("USE_SCAVENGING_SETTINGS_REPLACE_ME"),
+				Config: testAccZoneAuthUseScavengingSettings(zoneFqdn, "default", scavengingSettings, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_scavenging_settings", "USE_SCAVENGING_SETTINGS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_scavenging_settings", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseScavengingSettings("USE_SCAVENGING_SETTINGS_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseScavengingSettings(zoneFqdn, "default", scavengingSettings, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_scavenging_settings", "USE_SCAVENGING_SETTINGS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_scavenging_settings", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2718,6 +2868,12 @@ func TestAccZoneAuthResource_UseScavengingSettings(t *testing.T) {
 func TestAccZoneAuthResource_UseSoaEmail(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_soa_email"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.172_28_82_248",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2725,18 +2881,18 @@ func TestAccZoneAuthResource_UseSoaEmail(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseSoaEmail("USE_SOA_EMAIL_REPLACE_ME"),
+				Config: testAccZoneAuthUseSoaEmail(zoneFqdn, "default", gridPrimary, "user@example.com", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_soa_email", "USE_SOA_EMAIL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_soa_email", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseSoaEmail("USE_SOA_EMAIL_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseSoaEmail(zoneFqdn, "default", gridPrimary, "user@example.com", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_soa_email", "USE_SOA_EMAIL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_soa_email", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2747,6 +2903,7 @@ func TestAccZoneAuthResource_UseSoaEmail(t *testing.T) {
 func TestAccZoneAuthResource_View(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_view"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2754,18 +2911,18 @@ func TestAccZoneAuthResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthView("VIEW_REPLACE_ME"),
+				Config: testAccZoneAuthView(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthView("VIEW_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthView(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2776,6 +2933,7 @@ func TestAccZoneAuthResource_View(t *testing.T) {
 func TestAccZoneAuthResource_ZoneFormat(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_zone_format"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2783,18 +2941,18 @@ func TestAccZoneAuthResource_ZoneFormat(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthZoneFormat("ZONE_FORMAT_REPLACE_ME"),
+				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "FORWARD"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "ZONE_FORMAT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthZoneFormat("ZONE_FORMAT_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "FORWARD"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "ZONE_FORMAT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2869,17 +3027,16 @@ resource "nios_dns_zone_auth" "test" {
 `, zoneFqdn, view)
 }
 
-func testAccZoneAuthAllowActiveDir(zoneFqdn, view, address, useAllowActiveDir string) string {
+func testAccZoneAuthAllowActiveDir(zoneFqdn, view string, allowActiveDir []map[string]any, useAllowActiveDir bool) string {
+	allowActiveDirHCL := utils.ConvertSliceOfMapsToHCL(allowActiveDir)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_allow_active_dir" {
     fqdn = %q
     view = %q
-    use_allow_active_dir = %s
-    allow_active_dir = [{
-        address = %q
-    }]
+    use_allow_active_dir = %t
+    allow_active_dir = %s
 }
-`, zoneFqdn, view, useAllowActiveDir, address)
+`, zoneFqdn, view, useAllowActiveDir, allowActiveDirHCL)
 }
 
 func testAccZoneAuthAllowFixedRrsetOrder(zoneFqdn, view string, allowFixedRrsetOrder bool) string {
@@ -2913,55 +3070,40 @@ resource "nios_dns_zone_auth" "test_allow_gss_tsig_zone_updates" {
 `, zoneFqdn, view, allowGssTsigZoneUpdates)
 }
 
-func testAccZoneAuthAllowQuery(zoneFqdn, view, address string, useAllowQuery bool) string {
+func testAccZoneAuthAllowQuery(zoneFqdn, view string, allowQuery []map[string]any, useAllowQuery bool) string {
+	allowQueryHCL := utils.ConvertSliceOfMapsToHCL(allowQuery)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_allow_query" {
     fqdn = %q
     view = %q
-    allow_query = [
-	{
-		"struct": "addressac"
-        "address": %q
-        "permission": "ALLOW"
-    }
-	]
+    allow_query = %s
 	use_allow_query = %t
 }
-`, zoneFqdn, view, address, useAllowQuery)
+`, zoneFqdn, view, allowQueryHCL, useAllowQuery)
 }
 
-func testAccZoneAuthAllowTransfer(zoneFqdn, view, address string, useAllowTransfer bool) string {
+func testAccZoneAuthAllowTransfer(zoneFqdn, view string, allowTransfer []map[string]any, useAllowTransfer bool) string {
+	allowTransferHCL := utils.ConvertSliceOfMapsToHCL(allowTransfer)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_allow_transfer" {
     fqdn = %q
     view = %q
-    allow_transfer = [
-	{
-		struct: "addressac"
-		address: %q
-		permission: "ALLOW"
-	}
-	]
+    allow_transfer = %s
 	use_allow_transfer = %t
 }
-`, zoneFqdn, view, address, useAllowTransfer)
+`, zoneFqdn, view, allowTransferHCL, useAllowTransfer)
 }
 
-func testAccZoneAuthAllowUpdate(zoneFqdn, view, address string, useAllowUpdate bool) string {
+func testAccZoneAuthAllowUpdate(zoneFqdn, view string, allowUpdate []map[string]any, useAllowUpdate bool) string {
+	allowUpdateHCL := utils.ConvertSliceOfMapsToHCL(allowUpdate)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_allow_update" {
     fqdn = %q
     view = %q
-    allow_update = [
-        {
-            struct     = "addressac"
-            address    = %q
-            permission = "ALLOW"
-        }
-    ]
+    allow_update = %s
     use_allow_update = %t
 }
-`, zoneFqdn, view, address, useAllowUpdate)
+`, zoneFqdn, view, allowUpdateHCL, useAllowUpdate)
 }
 
 func testAccZoneAuthAllowUpdateForwarding(zoneFqdn, view string, allowUpdateForwarding, useAllowUpdateForwarding bool) string {
@@ -2984,13 +3126,13 @@ resource "nios_dns_zone_auth" "test_comment" {
 `, zoneFqdn, view, comment)
 }
 
-func testAccZoneAuthCopyXferToNotify(zoneFqdn, view, copyXferToNotify, useCopyXferToNotify string) string {
+func testAccZoneAuthCopyXferToNotify(zoneFqdn, view string, copyXferToNotify, useCopyXferToNotify bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_copy_xfer_to_notify" {
     fqdn = %q
     view = %q
-    copy_xfer_to_notify = %q
-    use_copy_xfer_to_notify = %q
+    copy_xfer_to_notify = %t
+    use_copy_xfer_to_notify = %t
 }
 `, zoneFqdn, view, copyXferToNotify, useCopyXferToNotify)
 }
@@ -3202,14 +3344,16 @@ resource "nios_dns_zone_auth" "test_extattrs" {
 `, zoneFqdn, view, extattrsStr)
 }
 
-func testAccZoneAuthExternalPrimaries(zoneFqdn, view string, externalPrimaries []map[string]any) string {
-	externalPrimariesConfig := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
+func testAccZoneAuthExternalPrimaries(zoneFqdn, view string, externalPrimaries, gridSecondaries []map[string]any) string {
+	externalPrimariesHCL := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
+	gridSecondariesHCL := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_external_primaries" {
 	fqdn = %q
     view = %q
     external_primaries = %s
-}`, zoneFqdn, view, externalPrimariesConfig)
+	grid_secondaries = %s
+}`, zoneFqdn, view, externalPrimariesHCL, gridSecondariesHCL)
 }
 
 func testAccZoneAuthExternalSecondaries(zoneFqdn, view string, externalSecondaries, gridPrimary []map[string]any) string {
@@ -3568,108 +3712,157 @@ resource "nios_dns_zone_auth" "test_update_forwarding" {
 `, zoneFqdn, view, updateForwardingHCL, allowUpdateForwarding, useAllowUpdateForwarding)
 }
 
-func testAccZoneAuthUseAllowActiveDir(useAllowActiveDir string) string {
+func testAccZoneAuthUseAllowActiveDir(zoneFqdn, view string, allowActiveDir []map[string]any, useAllowActiveDir bool) string {
+	allowActiveDirHCL := utils.ConvertSliceOfMapsToHCL(allowActiveDir)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_allow_active_dir" {
-    use_allow_active_dir = %q
+    fqdn = %q
+    view = %q
+    allow_active_dir = %s
+    use_allow_active_dir = %t
 }
-`, useAllowActiveDir)
+`, zoneFqdn, view, allowActiveDirHCL, useAllowActiveDir)
 }
 
-func testAccZoneAuthUseAllowQuery(useAllowQuery string) string {
+func testAccZoneAuthUseAllowQuery(zoneFqdn, view string, allowQuery []map[string]any, useAllowQuery bool) string {
+	allowQueryHCL := utils.ConvertSliceOfMapsToHCL(allowQuery)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_allow_query" {
-    use_allow_query = %q
+    fqdn = %q
+    view = %q
+    allow_query = %s
+    use_allow_query = %t
 }
-`, useAllowQuery)
+`, zoneFqdn, view, allowQueryHCL, useAllowQuery)
 }
 
-func testAccZoneAuthUseAllowTransfer(useAllowTransfer string) string {
+func testAccZoneAuthUseAllowTransfer(zoneFqdn, view string, allowTransfer []map[string]any, useAllowTransfer bool) string {
+	allowTransferHCL := utils.ConvertSliceOfMapsToHCL(allowTransfer)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_allow_transfer" {
-    use_allow_transfer = %q
+    fqdn = %q
+    view = %q
+    allow_transfer = %s
+    use_allow_transfer = %t
 }
-`, useAllowTransfer)
+`, zoneFqdn, view, allowTransferHCL, useAllowTransfer)
 }
 
-func testAccZoneAuthUseAllowUpdate(useAllowUpdate string) string {
+func testAccZoneAuthUseAllowUpdate(zoneFqdn, view string, allowUpdate []map[string]any, useAllowUpdate bool) string {
+	allowUpdateHCL := utils.ConvertSliceOfMapsToHCL(allowUpdate)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_allow_update" {
-    use_allow_update = %q
+    fqdn = %q
+    view = %q
+    allow_update = %s
+    use_allow_update = %t
 }
-`, useAllowUpdate)
+`, zoneFqdn, view, allowUpdateHCL, useAllowUpdate)
 }
 
-func testAccZoneAuthUseAllowUpdateForwarding(useAllowUpdateForwarding string) string {
+func testAccZoneAuthUseAllowUpdateForwarding(zoneFqdn, view string, updateForwarding []map[string]any, allowUpdateForwarding, useAllowUpdateForwarding bool) string {
+	updateForwardingHCL := utils.ConvertSliceOfMapsToHCL(updateForwarding)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_allow_update_forwarding" {
-    use_allow_update_forwarding = %q
+    fqdn = %q
+    view = %q
+    update_forwarding = %s
+    allow_update_forwarding = %t
+    use_allow_update_forwarding = %t
 }
-`, useAllowUpdateForwarding)
+`, zoneFqdn, view, updateForwardingHCL, allowUpdateForwarding, useAllowUpdateForwarding)
 }
 
-func testAccZoneAuthUseCheckNamesPolicy(useCheckNamesPolicy string) string {
+func testAccZoneAuthUseCheckNamesPolicy(zoneFqdn, view string, useCheckNamesPolicy bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_check_names_policy" {
-    use_check_names_policy = %q
+    fqdn = %q
+    view = %q
+    use_check_names_policy = %t
 }
-`, useCheckNamesPolicy)
+`, zoneFqdn, view, useCheckNamesPolicy)
 }
 
-func testAccZoneAuthUseCopyXferToNotify(useCopyXferToNotify string) string {
+func testAccZoneAuthUseCopyXferToNotify(zoneFqdn, view string, copyXfer, useCopyXferToNotify bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_copy_xfer_to_notify" {
-    use_copy_xfer_to_notify = %q
+    fqdn = %q
+    view = %q
+    copy_xfer_to_notify = %t
+    use_copy_xfer_to_notify = %t
+
 }
-`, useCopyXferToNotify)
+`, zoneFqdn, view, copyXfer, useCopyXferToNotify)
 }
 
-func testAccZoneAuthUseDdnsForceCreationTimestampUpdate(useDdnsForceCreationTimestampUpdate string) string {
+func testAccZoneAuthUseDdnsForceCreationTimestampUpdate(zoneFqdn, view string, ddnsForceCreationTimestampUpdate, useDdnsForceCreationTimestampUpdate bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_ddns_force_creation_timestamp_update" {
-    use_ddns_force_creation_timestamp_update = %q
+    fqdn = %q
+    view = %q
+    ddns_force_creation_timestamp_update = %t
+    use_ddns_force_creation_timestamp_update = %t
 }
-`, useDdnsForceCreationTimestampUpdate)
+`, zoneFqdn, view, ddnsForceCreationTimestampUpdate, useDdnsForceCreationTimestampUpdate)
 }
 
-func testAccZoneAuthUseDdnsPatternsRestriction(useDdnsPatternsRestriction string) string {
+func testAccZoneAuthUseDdnsPatternsRestriction(zoneFqdn, view string, ddnsRestrictPatterns, useDdnsPatternsRestriction bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_ddns_patterns_restriction" {
-    use_ddns_patterns_restriction = %q
+    fqdn = %q
+    view = %q
+    ddns_restrict_patterns = %t
+    use_ddns_patterns_restriction = %t
 }
-`, useDdnsPatternsRestriction)
+`, zoneFqdn, view, ddnsRestrictPatterns, useDdnsPatternsRestriction)
 }
 
-func testAccZoneAuthUseDdnsPrincipalSecurity(useDdnsPrincipalSecurity string) string {
+func testAccZoneAuthUseDdnsPrincipalSecurity(zoneFqdn, view string, ddnsRestrictSecure, useDdnsPrincipalSecurity bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_ddns_principal_security" {
-    use_ddns_principal_security = %q
+    fqdn = %q
+    view = %q
+    ddns_restrict_secure = %t
+    use_ddns_principal_security = %t
 }
-`, useDdnsPrincipalSecurity)
+`, zoneFqdn, view, ddnsRestrictSecure, useDdnsPrincipalSecurity)
 }
 
-func testAccZoneAuthUseDdnsRestrictProtected(useDdnsRestrictProtected string) string {
+func testAccZoneAuthUseDdnsRestrictProtected(zoneFqdn, view string, ddnsRestrictProtected, useDdnsRestrictProtected bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_ddns_restrict_protected" {
-    use_ddns_restrict_protected = %q
+    fqdn = %q
+    view = %q
+    ddns_restrict_protected = %t
+    use_ddns_restrict_protected = %t
 }
-`, useDdnsRestrictProtected)
+`, zoneFqdn, view, ddnsRestrictProtected, useDdnsRestrictProtected)
 }
 
-func testAccZoneAuthUseDdnsRestrictStatic(useDdnsRestrictStatic string) string {
+func testAccZoneAuthUseDdnsRestrictStatic(zoneFqdn, view string, ddnsRestrictStatic, useDdnsRestrictStatic bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_ddns_restrict_static" {
-    use_ddns_restrict_static = %q
+    fqdn = %q
+    view = %q
+    ddns_restrict_static = %t
+    use_ddns_restrict_static = %t
 }
-`, useDdnsRestrictStatic)
+`, zoneFqdn, view, ddnsRestrictStatic, useDdnsRestrictStatic)
 }
 
-func testAccZoneAuthUseDnssecKeyParams(useDnssecKeyParams string) string {
+func testAccZoneAuthUseDnssecKeyParams(zoneFqdn, view string, kskAlgorithms, zskAlgorithms []map[string]any, useDnssecKeyParams bool) string {
+	kskAlgorithmsHCL := utils.ConvertSliceOfMapsToHCL(kskAlgorithms)
+	zskAlgorithmsHCL := utils.ConvertSliceOfMapsToHCL(zskAlgorithms)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_dnssec_key_params" {
-    use_dnssec_key_params = %q
-}
-`, useDnssecKeyParams)
+    fqdn = %q
+    view = %q
+    dnssec_key_params = {
+        ksk_algorithms = %s
+        zsk_algorithms = %s
+    }
+	use_dnssec_key_params = %t
+}`, zoneFqdn, view, kskAlgorithmsHCL, zskAlgorithmsHCL, useDnssecKeyParams)
 }
 
 func testAccZoneAuthUseExternalPrimary(useExternalPrimary string) string {
@@ -3680,66 +3873,96 @@ resource "nios_dns_zone_auth" "test_use_external_primary" {
 `, useExternalPrimary)
 }
 
-func testAccZoneAuthUseGridZoneTimer(useGridZoneTimer string) string {
+func testAccZoneAuthUseGridZoneTimer(zoneFqdn, view string, gridPrimary []map[string]any, useGridZoneTimer bool) string {
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_grid_zone_timer" {
-    use_grid_zone_timer = %q
+    fqdn = %q
+    view = %q
+    grid_primary = %s
+	soa_default_ttl = 28800
+	soa_expire = 2419200
+    soa_negative_ttl = 900
+    soa_refresh = 10800
+    soa_retry = 3600
+
+    use_grid_zone_timer = %t
 }
-`, useGridZoneTimer)
+`, zoneFqdn, view, gridPrimaryHCL, useGridZoneTimer)
 }
 
-func testAccZoneAuthUseImportFrom(useImportFrom string) string {
+func testAccZoneAuthUseImportFrom(zoneFqdn, view string, useImportFrom bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_import_from" {
-    use_import_from = %q
+    fqdn = %q
+    view = %q
+	do_host_abstraction = true
+	import_from = "255.255.255.255"
+    use_import_from = %t
+}`, zoneFqdn, view, useImportFrom)
 }
-`, useImportFrom)
-}
-
-func testAccZoneAuthUseNotifyDelay(useNotifyDelay string) string {
+func testAccZoneAuthUseNotifyDelay(zoneFqdn, view string, notifyDelay int64, useNotifyDelay bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_notify_delay" {
-    use_notify_delay = %q
+    fqdn = %q
+    view = %q
+    notify_delay = %d
+    use_notify_delay = %t
 }
-`, useNotifyDelay)
+`, zoneFqdn, view, notifyDelay, useNotifyDelay)
 }
 
-func testAccZoneAuthUseRecordNamePolicy(useRecordNamePolicy string) string {
+func testAccZoneAuthUseRecordNamePolicy(zoneFqdn, view, recordNamePolicy string, useRecordNamePolicy bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_record_name_policy" {
-    use_record_name_policy = %q
+    fqdn = %q
+    view = %q
+    record_name_policy = %q
+    use_record_name_policy = %t
 }
-`, useRecordNamePolicy)
+`, zoneFqdn, view, recordNamePolicy, useRecordNamePolicy)
 }
 
-func testAccZoneAuthUseScavengingSettings(useScavengingSettings string) string {
+func testAccZoneAuthUseScavengingSettings(zoneFqdn, view string, scavengingSettings map[string]any, useScavengingSettings bool) string {
+	scavengingSettingsHCL := utils.ConvertMapToHCL(scavengingSettings)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_scavenging_settings" {
-    use_scavenging_settings = %q
+    fqdn = %q
+    view = %q
+    scavenging_settings = %s
+    use_scavenging_settings = %t
 }
-`, useScavengingSettings)
+`, zoneFqdn, view, scavengingSettingsHCL, useScavengingSettings)
 }
 
-func testAccZoneAuthUseSoaEmail(useSoaEmail string) string {
+func testAccZoneAuthUseSoaEmail(zoneFqdn, view string, gridPrimary []map[string]any, soaEmail string, useSoaEmail bool) string {
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_soa_email" {
-    use_soa_email = %q
+    fqdn = %q
+    view = %q
+    grid_primary = %s
+    soa_email = %q
+    use_soa_email = %t
 }
-`, useSoaEmail)
+`, zoneFqdn, view, gridPrimaryHCL, soaEmail, useSoaEmail)
 }
 
-func testAccZoneAuthView(view string) string {
+func testAccZoneAuthView(zoneFqdn, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_view" {
+    fqdn = %q
     view = %q
 }
-`, view)
+`, zoneFqdn, view)
 }
 
-func testAccZoneAuthZoneFormat(zoneFormat string) string {
+func testAccZoneAuthZoneFormat(zoneFqdn, view, zoneFormat string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_zone_format" {
+    fqdn = %q
+    view = %q
     zone_format = %q
 }
-`, zoneFormat)
+`, zoneFqdn, view, zoneFormat)
 }
