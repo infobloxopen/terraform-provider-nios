@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
@@ -26,71 +27,71 @@ import (
 )
 
 type RangetemplateModel struct {
-	Ref                            types.String `tfsdk:"ref"`
-	Bootfile                       types.String `tfsdk:"bootfile"`
-	Bootserver                     types.String `tfsdk:"bootserver"`
-	CloudApiCompatible             types.Bool   `tfsdk:"cloud_api_compatible"`
-	Comment                        types.String `tfsdk:"comment"`
-	DdnsDomainname                 types.String `tfsdk:"ddns_domainname"`
-	DdnsGenerateHostname           types.Bool   `tfsdk:"ddns_generate_hostname"`
-	DelegatedMember                types.Object `tfsdk:"delegated_member"`
-	DenyAllClients                 types.Bool   `tfsdk:"deny_all_clients"`
-	DenyBootp                      types.Bool   `tfsdk:"deny_bootp"`
-	EmailList                      types.List   `tfsdk:"email_list"`
-	EnableDdns                     types.Bool   `tfsdk:"enable_ddns"`
-	EnableDhcpThresholds           types.Bool   `tfsdk:"enable_dhcp_thresholds"`
-	EnableEmailWarnings            types.Bool   `tfsdk:"enable_email_warnings"`
-	EnablePxeLeaseTime             types.Bool   `tfsdk:"enable_pxe_lease_time"`
-	EnableSnmpWarnings             types.Bool   `tfsdk:"enable_snmp_warnings"`
-	Exclude                        types.List   `tfsdk:"exclude"`
-	ExtAttrs                       types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                    types.Map    `tfsdk:"extattrs_all"`
-	FailoverAssociation            types.String `tfsdk:"failover_association"`
-	FingerprintFilterRules         types.List   `tfsdk:"fingerprint_filter_rules"`
-	HighWaterMark                  types.Int64  `tfsdk:"high_water_mark"`
-	HighWaterMarkReset             types.Int64  `tfsdk:"high_water_mark_reset"`
-	IgnoreDhcpOptionListRequest    types.Bool   `tfsdk:"ignore_dhcp_option_list_request"`
-	KnownClients                   types.String `tfsdk:"known_clients"`
-	LeaseScavengeTime              types.Int64  `tfsdk:"lease_scavenge_time"`
-	LogicFilterRules               types.List   `tfsdk:"logic_filter_rules"`
-	LowWaterMark                   types.Int64  `tfsdk:"low_water_mark"`
-	LowWaterMarkReset              types.Int64  `tfsdk:"low_water_mark_reset"`
-	MacFilterRules                 types.List   `tfsdk:"mac_filter_rules"`
-	Member                         types.Object `tfsdk:"member"`
-	MsOptions                      types.List   `tfsdk:"ms_options"`
-	MsServer                       types.Object `tfsdk:"ms_server"`
-	NacFilterRules                 types.List   `tfsdk:"nac_filter_rules"`
-	Name                           types.String `tfsdk:"name"`
-	Nextserver                     types.String `tfsdk:"nextserver"`
-	NumberOfAddresses              types.Int64  `tfsdk:"number_of_addresses"`
-	Offset                         types.Int64  `tfsdk:"offset"`
-	OptionFilterRules              types.List   `tfsdk:"option_filter_rules"`
-	Options                        types.List   `tfsdk:"options"`
-	PxeLeaseTime                   types.Int64  `tfsdk:"pxe_lease_time"`
-	RecycleLeases                  types.Bool   `tfsdk:"recycle_leases"`
-	RelayAgentFilterRules          types.List   `tfsdk:"relay_agent_filter_rules"`
-	ServerAssociationType          types.String `tfsdk:"server_association_type"`
-	UnknownClients                 types.String `tfsdk:"unknown_clients"`
-	UpdateDnsOnLeaseRenewal        types.Bool   `tfsdk:"update_dns_on_lease_renewal"`
-	UseBootfile                    types.Bool   `tfsdk:"use_bootfile"`
-	UseBootserver                  types.Bool   `tfsdk:"use_bootserver"`
-	UseDdnsDomainname              types.Bool   `tfsdk:"use_ddns_domainname"`
-	UseDdnsGenerateHostname        types.Bool   `tfsdk:"use_ddns_generate_hostname"`
-	UseDenyBootp                   types.Bool   `tfsdk:"use_deny_bootp"`
-	UseEmailList                   types.Bool   `tfsdk:"use_email_list"`
-	UseEnableDdns                  types.Bool   `tfsdk:"use_enable_ddns"`
-	UseEnableDhcpThresholds        types.Bool   `tfsdk:"use_enable_dhcp_thresholds"`
-	UseIgnoreDhcpOptionListRequest types.Bool   `tfsdk:"use_ignore_dhcp_option_list_request"`
-	UseKnownClients                types.Bool   `tfsdk:"use_known_clients"`
-	UseLeaseScavengeTime           types.Bool   `tfsdk:"use_lease_scavenge_time"`
-	UseLogicFilterRules            types.Bool   `tfsdk:"use_logic_filter_rules"`
-	UseMsOptions                   types.Bool   `tfsdk:"use_ms_options"`
-	UseNextserver                  types.Bool   `tfsdk:"use_nextserver"`
-	UseOptions                     types.Bool   `tfsdk:"use_options"`
-	UsePxeLeaseTime                types.Bool   `tfsdk:"use_pxe_lease_time"`
-	UseRecycleLeases               types.Bool   `tfsdk:"use_recycle_leases"`
-	UseUnknownClients              types.Bool   `tfsdk:"use_unknown_clients"`
-	UseUpdateDnsOnLeaseRenewal     types.Bool   `tfsdk:"use_update_dns_on_lease_renewal"`
+	Ref                            types.String                     `tfsdk:"ref"`
+	Bootfile                       types.String                     `tfsdk:"bootfile"`
+	Bootserver                     types.String                     `tfsdk:"bootserver"`
+	CloudApiCompatible             types.Bool                       `tfsdk:"cloud_api_compatible"`
+	Comment                        types.String                     `tfsdk:"comment"`
+	DdnsDomainname                 types.String                     `tfsdk:"ddns_domainname"`
+	DdnsGenerateHostname           types.Bool                       `tfsdk:"ddns_generate_hostname"`
+	DelegatedMember                types.Object                     `tfsdk:"delegated_member"`
+	DenyAllClients                 types.Bool                       `tfsdk:"deny_all_clients"`
+	DenyBootp                      types.Bool                       `tfsdk:"deny_bootp"`
+	EmailList                      internaltypes.UnorderedListValue `tfsdk:"email_list"`
+	EnableDdns                     types.Bool                       `tfsdk:"enable_ddns"`
+	EnableDhcpThresholds           types.Bool                       `tfsdk:"enable_dhcp_thresholds"`
+	EnableEmailWarnings            types.Bool                       `tfsdk:"enable_email_warnings"`
+	EnablePxeLeaseTime             types.Bool                       `tfsdk:"enable_pxe_lease_time"`
+	EnableSnmpWarnings             types.Bool                       `tfsdk:"enable_snmp_warnings"`
+	Exclude                        types.List                       `tfsdk:"exclude"`
+	ExtAttrs                       types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll                    types.Map                        `tfsdk:"extattrs_all"`
+	FailoverAssociation            types.String                     `tfsdk:"failover_association"`
+	FingerprintFilterRules         types.List                       `tfsdk:"fingerprint_filter_rules"`
+	HighWaterMark                  types.Int64                      `tfsdk:"high_water_mark"`
+	HighWaterMarkReset             types.Int64                      `tfsdk:"high_water_mark_reset"`
+	IgnoreDhcpOptionListRequest    types.Bool                       `tfsdk:"ignore_dhcp_option_list_request"`
+	KnownClients                   types.String                     `tfsdk:"known_clients"`
+	LeaseScavengeTime              types.Int64                      `tfsdk:"lease_scavenge_time"`
+	LogicFilterRules               types.List                       `tfsdk:"logic_filter_rules"`
+	LowWaterMark                   types.Int64                      `tfsdk:"low_water_mark"`
+	LowWaterMarkReset              types.Int64                      `tfsdk:"low_water_mark_reset"`
+	MacFilterRules                 types.List                       `tfsdk:"mac_filter_rules"`
+	Member                         types.Object                     `tfsdk:"member"`
+	MsOptions                      types.List                       `tfsdk:"ms_options"`
+	MsServer                       types.Object                     `tfsdk:"ms_server"`
+	NacFilterRules                 types.List                       `tfsdk:"nac_filter_rules"`
+	Name                           types.String                     `tfsdk:"name"`
+	Nextserver                     types.String                     `tfsdk:"nextserver"`
+	NumberOfAddresses              types.Int64                      `tfsdk:"number_of_addresses"`
+	Offset                         types.Int64                      `tfsdk:"offset"`
+	OptionFilterRules              types.List                       `tfsdk:"option_filter_rules"`
+	Options                        types.List                       `tfsdk:"options"`
+	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
+	RecycleLeases                  types.Bool                       `tfsdk:"recycle_leases"`
+	RelayAgentFilterRules          types.List                       `tfsdk:"relay_agent_filter_rules"`
+	ServerAssociationType          types.String                     `tfsdk:"server_association_type"`
+	UnknownClients                 types.String                     `tfsdk:"unknown_clients"`
+	UpdateDnsOnLeaseRenewal        types.Bool                       `tfsdk:"update_dns_on_lease_renewal"`
+	UseBootfile                    types.Bool                       `tfsdk:"use_bootfile"`
+	UseBootserver                  types.Bool                       `tfsdk:"use_bootserver"`
+	UseDdnsDomainname              types.Bool                       `tfsdk:"use_ddns_domainname"`
+	UseDdnsGenerateHostname        types.Bool                       `tfsdk:"use_ddns_generate_hostname"`
+	UseDenyBootp                   types.Bool                       `tfsdk:"use_deny_bootp"`
+	UseEmailList                   types.Bool                       `tfsdk:"use_email_list"`
+	UseEnableDdns                  types.Bool                       `tfsdk:"use_enable_ddns"`
+	UseEnableDhcpThresholds        types.Bool                       `tfsdk:"use_enable_dhcp_thresholds"`
+	UseIgnoreDhcpOptionListRequest types.Bool                       `tfsdk:"use_ignore_dhcp_option_list_request"`
+	UseKnownClients                types.Bool                       `tfsdk:"use_known_clients"`
+	UseLeaseScavengeTime           types.Bool                       `tfsdk:"use_lease_scavenge_time"`
+	UseLogicFilterRules            types.Bool                       `tfsdk:"use_logic_filter_rules"`
+	UseMsOptions                   types.Bool                       `tfsdk:"use_ms_options"`
+	UseNextserver                  types.Bool                       `tfsdk:"use_nextserver"`
+	UseOptions                     types.Bool                       `tfsdk:"use_options"`
+	UsePxeLeaseTime                types.Bool                       `tfsdk:"use_pxe_lease_time"`
+	UseRecycleLeases               types.Bool                       `tfsdk:"use_recycle_leases"`
+	UseUnknownClients              types.Bool                       `tfsdk:"use_unknown_clients"`
+	UseUpdateDnsOnLeaseRenewal     types.Bool                       `tfsdk:"use_update_dns_on_lease_renewal"`
 }
 
 var RangetemplateAttrTypes = map[string]attr.Type{
@@ -104,7 +105,7 @@ var RangetemplateAttrTypes = map[string]attr.Type{
 	"delegated_member":                    types.ObjectType{AttrTypes: RangetemplateDelegatedMemberAttrTypes},
 	"deny_all_clients":                    types.BoolType,
 	"deny_bootp":                          types.BoolType,
-	"email_list":                          types.ListType{ElemType: types.StringType},
+	"email_list":                          internaltypes.UnorderedListOfStringType,
 	"enable_ddns":                         types.BoolType,
 	"enable_dhcp_thresholds":              types.BoolType,
 	"enable_email_warnings":               types.BoolType,
@@ -236,6 +237,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if BOOTP settings are disabled and BOOTP requests will be denied.",
 	},
 	"email_list": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		ElementType: types.StringType,
 		Optional:    true,
 		Computed:    true,
@@ -725,6 +727,18 @@ func (m *RangetemplateModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	return to
 }
 
+func FlattenRangetemplate(ctx context.Context, from *dhcp.Rangetemplate, diags *diag.Diagnostics) types.Object {
+	if from == nil {
+		return types.ObjectNull(RangetemplateAttrTypes)
+	}
+	m := RangetemplateModel{}
+	m.Flatten(ctx, from, diags)
+	m.ExtAttrs = m.ExtAttrsAll
+	t, d := types.ObjectValueFrom(ctx, RangetemplateAttrTypes, m)
+	diags.Append(d...)
+	return t
+}
+
 func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetemplate, diags *diag.Diagnostics) {
 	if from == nil {
 		return
@@ -742,14 +756,14 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.DelegatedMember = FlattenRangetemplateDelegatedMember(ctx, from.DelegatedMember, diags)
 	m.DenyAllClients = types.BoolPointerValue(from.DenyAllClients)
 	m.DenyBootp = types.BoolPointerValue(from.DenyBootp)
-	m.EmailList = flex.FlattenFrameworkListString(ctx, from.EmailList, diags)
+	m.EmailList = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.EmailList, diags)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.EnableDhcpThresholds = types.BoolPointerValue(from.EnableDhcpThresholds)
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.Exclude = flex.FlattenFrameworkListNestedBlock(ctx, from.Exclude, RangetemplateExcludeAttrTypes, diags, FlattenRangetemplateExclude)
-	m.ExtAttrs = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
 	m.FailoverAssociation = flex.FlattenStringPointer(from.FailoverAssociation)
 	m.FingerprintFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.FingerprintFilterRules, RangetemplateFingerprintFilterRulesAttrTypes, diags, FlattenRangetemplateFingerprintFilterRules)
 	m.HighWaterMark = flex.FlattenInt64Pointer(from.HighWaterMark)
@@ -770,7 +784,8 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.NumberOfAddresses = flex.FlattenInt64Pointer(from.NumberOfAddresses)
 	m.Offset = flex.FlattenInt64Pointer(from.Offset)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangetemplateOptionFilterRulesAttrTypes, diags, FlattenRangetemplateOptionFilterRules)
-	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
+	//m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
+	from.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangetemplateRelayAgentFilterRulesAttrTypes, diags, FlattenRangetemplateRelayAgentFilterRules)
@@ -796,4 +811,31 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.UseRecycleLeases = types.BoolPointerValue(from.UseRecycleLeases)
 	m.UseUnknownClients = types.BoolPointerValue(from.UseUnknownClients)
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
+}
+
+func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.RangetemplateOptions, planOptions types.List) []dhcp.RangetemplateOptions {
+	defaultOptionName := "dhcp-lease-time"
+	defaultOptionVal := ""
+
+	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandRangetemplateOptions)
+
+	for i := range planOptionsArr {
+		if *planOptionsArr[i].Name == defaultOptionName {
+			defaultOptionVal = *planOptionsArr[i].Value
+		}
+	}
+	var result []dhcp.RangetemplateOptions
+
+	for i := range options {
+		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
+			continue
+		}
+		result = append(result, options[i])
+	}
+
+	if len(result) == 0 {
+		return options
+	}
+
+	return result
 }
