@@ -82,7 +82,7 @@ func (d *FixedaddressDataSource) Schema(ctx context.Context, req datasource.Sche
 				Description: "Maximum number of objects to be returned. Defaults to 1000.",
 			},
 			"body": schema.SingleNestedAttribute{
-				Description: "The body of the request to be sent to the API. This is used for creating or updating resources.",
+				Description: "The body of the request to Search Fixed Address using Microsoft Server.",
 				Attributes:  FixedAddressStructResourceSchemaAttributes,
 				Optional:    true,
 				Computed:    true,

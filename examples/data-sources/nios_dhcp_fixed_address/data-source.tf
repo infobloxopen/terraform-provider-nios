@@ -14,13 +14,13 @@ data "nios_dhcp_fixed_address" "get_fixed_address_using_extensible_attributes" {
 
 // Search for a fixed address by Microsoft Server
 data "nios_dhcp_fixed_address" "get_fixed_address_using_microsoft_server" {
-	body = {
-		ms_server = {
-			struct = "msdhcpserver"
-			ipv4addr = "10.1.1.10"  // Specify the IP address of the Microsoft DHCP server
-		}
-	}
+  body = {
+    ms_server = {
+      struct   = "msdhcpserver"
+      ipv4addr = "1.1.1.1" // Specify the IP address of the Microsoft DHCP server
+    }
+  }
 }
 
 // Retrieve all Fixed Addresses
-data "nios_dhcp_fixed_address" "get_all_records_in_default_view" {}
+data "nios_dhcp_fixed_address" "get_all_fixed_address" {}

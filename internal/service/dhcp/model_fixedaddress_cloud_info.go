@@ -38,9 +38,10 @@ var FixedaddressCloudInfoAttrTypes = map[string]attr.Type{
 
 var FixedaddressCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes: FixedaddresscloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          FixedaddresscloudinfoDelegatedMemberResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The Cloud Platform Appliance to which authority of the object is delegated.",
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,

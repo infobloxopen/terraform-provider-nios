@@ -2,10 +2,12 @@ package dhcp
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
@@ -196,9 +198,10 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field controls whether there is a prepend for the dhcp-client-identifier of a fixed address.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: FixedaddressCloudInfoResourceSchemaAttributes,
-		Computed:   true,
-		Optional:   true,
+		Attributes:          FixedaddressCloudInfoResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -263,8 +266,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The discovery status of this fixed address.",
 	},
 	"discovered_data": schema.SingleNestedAttribute{
-		Attributes: FixedaddressDiscoveredDataResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          FixedaddressDiscoveredDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The discovered data for this fixed address.",
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional:            true,
@@ -283,9 +287,11 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Set this to True if you want the DHCP server to use a different lease time for PXE clients.",
 	},
 	"extattrs": schema.MapAttribute{
-		ElementType:         types.StringType,
 		Optional:            true,
-		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		Computed:            true,
+		MarkdownDescription: "Extensible attributes associated with the object.",
+		ElementType:         types.StringType,
+		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 	},
 	"extattrs_all": schema.MapAttribute{
 		ElementType:         types.StringType,
@@ -304,8 +310,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The IPv4 Address of the record.",
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Attributes: FuncCallResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          FuncCallResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "Function call to be executed for Fixed Address",
 	},
 	"is_invalid_mac": schema.BoolAttribute{
 		Computed:            true,
@@ -340,8 +347,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the Microsoft DHCP options for this fixed address.",
 	},
 	"ms_server": schema.SingleNestedAttribute{
-		Attributes: FixedaddressMsServerResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          FixedaddressMsServerResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "The Microsoft server associated with this fixed address.",
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
@@ -364,15 +372,11 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
-		//CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: FixedaddressOptionsResourceSchemaAttributes,
 		},
-		Optional: true,
-		Computed: true,
-		//PlanModifiers: []planmodifier.List{
-		//	internalplanmodifier.UpdateDefaultForDHCPOptions(),
-		//},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
@@ -389,12 +393,14 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.",
 	},
 	"snmp3_credential": schema.SingleNestedAttribute{
-		Attributes: FixedaddressSnmp3CredentialResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          FixedaddressSnmp3CredentialResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "The SNMPv3 credential for this fixed address.",
 	},
 	"snmp_credential": schema.SingleNestedAttribute{
-		Attributes: FixedaddressSnmpCredentialResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          FixedaddressSnmpCredentialResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "The SNMP credential for this fixed address. If set to true, the SNMP credential will override member-level settings.",
 	},
 	"template": schema.StringAttribute{
 		Optional:            true,

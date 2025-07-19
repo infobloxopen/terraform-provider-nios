@@ -1,4 +1,4 @@
-// Model functions for ExtAttrs
+// Package dhcp Model functions for ExtAttrs
 package dhcp
 
 import (

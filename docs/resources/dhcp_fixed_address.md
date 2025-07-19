@@ -96,7 +96,7 @@ resource "nios_dhcp_fixed_address" "create__address_with_func_call" {
 - `bootserver` (String) The bootserver address for the fixed address. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.
 - `cli_credentials` (Attributes List) The CLI credentials for the fixed address. (see [below for nested schema](#nestedatt--cli_credentials))
 - `client_identifier_prepend_zero` (Boolean) This field controls whether there is a prepend for the dhcp-client-identifier of a fixed address.
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--cloud_info))
+- `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--cloud_info))
 - `comment` (String) Comment for the fixed address; maximum 256 characters.
 - `ddns_domainname` (String) The dynamic DNS domain name the appliance uses specifically for DDNS updates for this fixed address.
 - `ddns_hostname` (String) The DDNS host name for this fixed address.
@@ -111,8 +111,8 @@ resource "nios_dhcp_fixed_address" "create__address_with_func_call" {
 - `enable_ddns` (Boolean) The dynamic DNS updates flag of a DHCP Fixed Address object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.
 - `enable_immediate_discovery` (Boolean) Determines if the discovery for the fixed address should be immediately enabled.
 - `enable_pxe_lease_time` (Boolean) Set this to True if you want the DHCP server to use a different lease time for PXE clients.
-- `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
-- `func_call` (Attributes) (see [below for nested schema](#nestedatt--func_call))
+- `extattrs` (Map of String) Extensible attributes associated with the object.
+- `func_call` (Attributes) Function call to be executed for Fixed Address (see [below for nested schema](#nestedatt--func_call))
 - `ignore_dhcp_option_list_request` (Boolean) If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.
 - `ipv4addr` (String) The IPv4 Address of the record.
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file. (see [below for nested schema](#nestedatt--logic_filter_rules))
@@ -120,7 +120,7 @@ resource "nios_dhcp_fixed_address" "create__address_with_func_call" {
 - `match_client` (String) The match_client value for this fixed address. Valid values are: "MAC_ADDRESS": The fixed IP address is leased to the matching MAC address. "CLIENT_ID": The fixed IP address is leased to the matching DHCP client identifier. "RESERVED": The fixed IP address is reserved for later use with a MAC address that only has zeros. "CIRCUIT_ID": The fixed IP address is leased to the DHCP client with a matching circuit ID. Note that the "agent_circuit_id" field must be set in this case. "REMOTE_ID": The fixed IP address is leased to the DHCP client with a matching remote ID. Note that the "agent_remote_id" field must be set in this case.
 - `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `ms_options` (Attributes List) This field contains the Microsoft DHCP options for this fixed address. (see [below for nested schema](#nestedatt--ms_options))
-- `ms_server` (Attributes) (see [below for nested schema](#nestedatt--ms_server))
+- `ms_server` (Attributes) The Microsoft server associated with this fixed address. (see [below for nested schema](#nestedatt--ms_server))
 - `name` (String) This field contains the name of this fixed address.
 - `network` (String) The network to which this fixed address belongs, in IPv4 Address/CIDR format.
 - `network_view` (String) The name of the network view in which this fixed address resides.
@@ -130,8 +130,8 @@ resource "nios_dhcp_fixed_address" "create__address_with_func_call" {
 - `ref` (String) The reference to the object.
 - `reserved_interface` (String) The ref to the reserved interface to which the device belongs.
 - `restart_if_needed` (Boolean) Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.
-- `snmp3_credential` (Attributes) (see [below for nested schema](#nestedatt--snmp3_credential))
-- `snmp_credential` (Attributes) (see [below for nested schema](#nestedatt--snmp_credential))
+- `snmp3_credential` (Attributes) The SNMPv3 credential for this fixed address. (see [below for nested schema](#nestedatt--snmp3_credential))
+- `snmp_credential` (Attributes) The SNMP credential for this fixed address. If set to true, the SNMP credential will override member-level settings. (see [below for nested schema](#nestedatt--snmp_credential))
 - `template` (String) If set on creation, the fixed address will be created according to the values specified in the named template.
 - `use_bootfile` (Boolean) Use flag for: bootfile
 - `use_bootserver` (Boolean) Use flag for: bootserver
@@ -151,7 +151,7 @@ resource "nios_dhcp_fixed_address" "create__address_with_func_call" {
 ### Read-Only
 
 - `discover_now_status` (String) The discovery status of this fixed address.
-- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--discovered_data))
+- `discovered_data` (Attributes) The discovered data for this fixed address. (see [below for nested schema](#nestedatt--discovered_data))
 - `extattrs_all` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `is_invalid_mac` (Boolean) This flag reflects whether the MAC address for this fixed address is invalid.
 
@@ -176,7 +176,7 @@ Read-Only:
 
 Optional:
 
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
 
 Read-Only:
 
@@ -285,10 +285,13 @@ Optional:
 <a id="nestedatt--snmp_credential"></a>
 ### Nested Schema for `snmp_credential`
 
+Required:
+
+- `community_string` (String) The public community string.
+
 Optional:
 
 - `comment` (String) Comments for the SNMPv1 and SNMPv2 users.
-- `community_string` (String) The public community string.
 - `credential_group` (String) Group for the SNMPv1 and SNMPv2 credential.
 
 

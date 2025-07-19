@@ -22,8 +22,9 @@ var FixedAddressStructAttrTypes = map[string]attr.Type{
 
 var FixedAddressStructResourceSchemaAttributes = map[string]schema.Attribute{
 	"ms_server": schema.SingleNestedAttribute{
-		Attributes: FixedAddressStructMsServerResourceSchemaAttributes,
-		Required:   true,
+		Attributes:          FixedAddressStructMsServerResourceSchemaAttributes,
+		Required:            true,
+		MarkdownDescription: "Microsoft server information for the fixed address.",
 	},
 }
 
@@ -47,17 +48,6 @@ func (m *FixedAddressStructModel) Expand(ctx context.Context, diags *diag.Diagno
 		MsServer: *ExpandFixedAddressStructMsServer(ctx, m.MsServer, diags),
 	}
 	return to
-}
-
-func FlattenFixedAddressStruct(ctx context.Context, from *dhcp.FixedAddressStruct, diags *diag.Diagnostics) types.Object {
-	if from == nil {
-		return types.ObjectNull(FixedAddressStructAttrTypes)
-	}
-	m := FixedAddressStructModel{}
-	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, FixedAddressStructAttrTypes, m)
-	diags.Append(d...)
-	return t
 }
 
 func (m *FixedAddressStructModel) Flatten(ctx context.Context, from *dhcp.FixedAddressStruct, diags *diag.Diagnostics) {

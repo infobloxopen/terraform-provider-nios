@@ -21,7 +21,7 @@ import (
 // - Restart if Needed
 // - SNMP3 Credential , Use SNMP3 Credential
 // - SNMP Credential , Use SNMP Credential
-// - MS Server
+// - MS Server , Options
 
 //TODO: add tests
 // The following require additional resource/data source objects to be supported.

@@ -2,6 +2,7 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -28,8 +29,7 @@ var FixedaddressSnmpCredentialAttrTypes = map[string]attr.Type{
 
 var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attribute{
 	"community_string": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The public community string.",
 	},
 	"comment": schema.StringAttribute{
@@ -40,6 +40,7 @@ var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attri
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the SNMPv1 and SNMPv2 credential.",
 	},
 }
