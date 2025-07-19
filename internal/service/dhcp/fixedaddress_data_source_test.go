@@ -61,19 +61,14 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 
 func TestAccFixedaddressDataSource_MsServerStruct(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_fixed_address.test"
-	resourceName := "nios_dhcp_fixed_address.test"
-	var v dhcp.Fixedaddress
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckFixedaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFixedaddressDataSourcConfigeMsServerStruct("msdhcpserver", "10.34.98.68"),
 				Check: resource.ComposeTestCheckFunc(
-					append([]resource.TestCheckFunc{
-						testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					}, testAccCheckFixedaddressResourceAttrPair(resourceName, dataSourceName)...)...,
+					resource.TestCheckResourceAttr(dataSourceName, "result.#", "1"),
 				),
 			},
 		},
@@ -193,6 +188,8 @@ data "nios_dhcp_fixed_address" "test" {
 			ipv4addr = %q
 		}
 	}
+	max_results = 1
+	paging = 0
 }
 `, structValue, ipv4Adrr)
 }

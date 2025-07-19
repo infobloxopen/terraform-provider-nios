@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
@@ -35,6 +38,8 @@ type FixedaddressModelWithFilter struct {
 	Filters        types.Map    `tfsdk:"filters"`
 	ExtAttrFilters types.Map    `tfsdk:"extattrfilters"`
 	Result         types.List   `tfsdk:"result"`
+	MaxResults     types.Int32  `tfsdk:"max_results"`
+	Paging         types.Int32  `tfsdk:"paging"`
 	Body           types.Object `tfsdk:"body"`
 }
 
@@ -64,6 +69,17 @@ func (d *FixedaddressDataSource) Schema(ctx context.Context, req datasource.Sche
 					Attributes: utils.DataSourceAttributeMap(FixedaddressResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
+			},
+			"paging": schema.Int32Attribute{
+				Optional:    true,
+				Description: "Enable (1) or disable (0) paging for the data source query. When enabled, the system retrieves results in pages, allowing efficient handling of large result sets. Paging is enabled by default.",
+				Validators: []validator.Int32{
+					int32validator.OneOf(0, 1),
+				},
+			},
+			"max_results": schema.Int32Attribute{
+				Optional:    true,
+				Description: "Maximum number of objects to be returned. Defaults to 1000.",
 			},
 			"body": schema.SingleNestedAttribute{
 				Description: "The body of the request to be sent to the API. This is used for creating or updating resources.",
@@ -97,6 +113,7 @@ func (d *FixedaddressDataSource) Configure(ctx context.Context, req datasource.C
 
 func (d *FixedaddressDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data FixedaddressModelWithFilter
+	pageCount := 0
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -105,44 +122,110 @@ func (d *FixedaddressDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	if !data.Body.IsNull() && !data.Body.IsUnknown() {
-		// If body is provided, Update Call will be used to retrieve the data.
-		apiRes, _, err := d.client.DHCPAPI.
-			FixedaddressAPI.
-			MsServerUpdate(ctx).
-			FixedAddressStruct(*ExpandFixedAddressStruct(ctx, data.Body, &resp.Diagnostics)).
-			Method("GET").
-			ReturnAsObject(1).
-			ReturnFieldsPlus(readableAttributesForFixedaddress).
-			Execute()
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Fixedaddress, got error: %s", err))
-			return
-		}
+	allResults, err := utils.ReadWithPages(
+		func(pageID string, maxResults int32) ([]dhcp.Fixedaddress, string, error) {
 
-		res := apiRes.ListFixedaddressResponseObject.GetResult()
-		data.FlattenResults(ctx, res, &resp.Diagnostics)
+			if !data.MaxResults.IsNull() {
+				maxResults = data.MaxResults.ValueInt32()
+			}
+			var paging int32 = 1
+			if !data.Paging.IsNull() {
+				paging = data.Paging.ValueInt32()
+			}
 
-		// Save updated data into Terraform state
-		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-		return
-	}
+			//Increment the page count
+			pageCount++
 
-	apiRes, _, err := d.client.DHCPAPI.
-		FixedaddressAPI.
-		List(ctx).
-		Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-		Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForFixedaddress).
-		Execute()
+			if !data.Body.IsNull() && !data.Body.IsUnknown() {
+				// If body is provided, Update Call will be used to retrieve the data.
+				request := d.client.DHCPAPI.
+					FixedaddressAPI.
+					MsServerUpdate(ctx).
+					FixedAddressStruct(*ExpandFixedAddressStruct(ctx, data.Body, &resp.Diagnostics)).
+					Method("GET").
+					ReturnAsObject(1).
+					ReturnFieldsPlus(readableAttributesForFixedaddress).
+					Paging(paging).
+					MaxResults(maxResults)
+
+				// Add page ID if provided
+				if pageID != "" {
+					request = request.PageId(pageID)
+				}
+
+				// Execute the request
+				apiRes, _, err := request.Execute()
+				if err != nil {
+					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Fixedaddress by extattrs, got error: %s", err))
+					return nil, "", err
+				}
+
+				res := apiRes.ListFixedaddressResponseObject.GetResult()
+				tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
+
+				// Check for next page ID in additional properties
+				additionalProperties := apiRes.ListFixedaddressResponseObject.AdditionalProperties
+				var nextPageID string
+				npId, ok := additionalProperties["next_page_id"]
+				if ok {
+					if npIdStr, ok := npId.(string); ok {
+						nextPageID = npIdStr
+					}
+				} else {
+					tflog.Info(ctx, "No next page ID found. This is the last page.")
+				}
+				return res, nextPageID, nil
+
+			}
+
+			request := d.client.DHCPAPI.
+				FixedaddressAPI.
+				List(ctx).
+				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
+				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
+				ReturnAsObject(1).
+				ReturnFieldsPlus(readableAttributesForFixedaddress).
+				Paging(paging).
+				MaxResults(maxResults)
+
+			// Add page ID if provided
+			if pageID != "" {
+				request = request.PageId(pageID)
+			}
+
+			// Execute the request
+			apiRes, _, err := request.Execute()
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Fixedaddress by extattrs, got error: %s", err))
+				return nil, "", err
+			}
+
+			res := apiRes.ListFixedaddressResponseObject.GetResult()
+			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
+
+			// Check for next page ID in additional properties
+			additionalProperties := apiRes.ListFixedaddressResponseObject.AdditionalProperties
+			var nextPageID string
+			npId, ok := additionalProperties["next_page_id"]
+			if ok {
+				if npIdStr, ok := npId.(string); ok {
+					nextPageID = npIdStr
+				}
+			} else {
+				tflog.Info(ctx, "No next page ID found. This is the last page.")
+			}
+			return res, nextPageID, nil
+		},
+	)
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Fixedaddress, got error: %s", err))
 		return
 	}
+	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
 
-	res := apiRes.ListFixedaddressResponseObject.GetResult()
-	data.FlattenResults(ctx, res, &resp.Diagnostics)
+	// Process the results
+	data.FlattenResults(ctx, allResults, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

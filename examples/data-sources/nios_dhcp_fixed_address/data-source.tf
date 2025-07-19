@@ -1,15 +1,25 @@
 // Retrieve a specific Fixed Addresses by filters
-data "nios_dhcp_fixed_address" "get_record_using_filters" {
+data "nios_dhcp_fixed_address" "get_fixed_address_using_filters" {
   filters = {
     name = "example_fixed_address"
   }
 }
 
 // Retrieve specific Fixed Addresses using Extensible Attributes
-data "nios_dhcp_fixed_address" "get_record_using_extensible_attributes" {
+data "nios_dhcp_fixed_address" "get_fixed_address_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }
+}
+
+// Search for a fixed address by Microsoft Server
+data "nios_dhcp_fixed_address" "get_fixed_address_using_microsoft_server" {
+	body = {
+		ms_server = {
+			struct = "msdhcpserver"
+			ipv4addr = "10.1.1.10"  // Specify the IP address of the Microsoft DHCP server
+		}
+	}
 }
 
 // Retrieve all Fixed Addresses
