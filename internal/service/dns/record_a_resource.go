@@ -344,7 +344,7 @@ func (r *RecordAResource) addInternalIDToExtAttrs(ctx context.Context, data *Rec
 
 	data.ExtAttrs, diags = types.MapValue(types.StringType, extAttrsMap)
 	if diags.HasError() {
-		return fmt.Errorf("error while setting Extensible Attributes: %s", diags.Errors())
+		return fmt.Errorf("error while setting Extensible Attributes: %v", diags.Errors())
 	}
 
 	return nil
