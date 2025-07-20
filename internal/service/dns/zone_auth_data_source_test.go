@@ -204,7 +204,7 @@ resource "nios_dns_zone_auth" "test" {
 
 data "nios_dns_zone_auth" "test" {
   extattrfilters = {
-		"Site" = nios_dns_zone_auth.test.extattrs.Site
+		Site = nios_dns_zone_auth.test.extattrs.Site
 }
 }
 `, zoneFqdn, view, extAttrsValue)

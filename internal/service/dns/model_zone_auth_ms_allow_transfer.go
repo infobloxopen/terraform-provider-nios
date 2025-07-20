@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -31,6 +32,12 @@ var ZoneAuthMsAllowTransferResourceSchemaAttributes = map[string]schema.Attribut
 	"address": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"permission": schema.StringAttribute{
 		Optional: true,

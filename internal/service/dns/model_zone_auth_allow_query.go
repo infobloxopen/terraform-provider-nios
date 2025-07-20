@@ -2,10 +2,15 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -39,6 +44,17 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+			),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"struct": schema.StringAttribute{
 		Optional:            true,
@@ -49,26 +65,66 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The permission to use for this address.",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+			),
+		},
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+			),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"tsig_key_alg": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+			),
+		},
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+			),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
+		Validators: []validator.Bool{
+			boolvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+			),
+		},
 	},
 }
 

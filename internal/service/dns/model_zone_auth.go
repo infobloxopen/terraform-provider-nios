@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -361,6 +362,10 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Comment for the zone; maximum 256 characters.",
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
 		},
 	},
 	"copy_xfer_to_notify": schema.BoolAttribute{
@@ -765,8 +770,14 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The parent zone of this zone. Note that when searching for reverse zones, the \"in-addr.arpa\" notation should be used.",
 	},
 	"prefix": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.",
 	},
 	"primary_type": schema.StringAttribute{
@@ -827,6 +838,10 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_soa_email")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
 		},
 		MarkdownDescription: "The SOA email value for this zone. This value can be in unicode format.",
 	},
@@ -1003,8 +1018,14 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This is true if the zone is associated with a shared record group.",
 	},
 	"view": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the DNS view in which the zone resides. Example \"external\".",
 	},
@@ -1065,7 +1086,7 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		ExtAttrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
 		ExternalPrimaries:                flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalPrimaries, diags, ExpandZoneAuthExternalPrimaries),
 		ExternalSecondaries:              flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneAuthExternalSecondaries),
-		// Fqdn:                                flex.ExpandStringPointer(m.Fqdn),
+		// Fqdn:                             flex.ExpandStringPointer(m.Fqdn),
 		GridPrimary:     flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneAuthGridPrimary),
 		GridSecondaries: flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneAuthGridSecondaries),
 		// ImportFrom:                          flex.ExpandStringPointer(m.ImportFrom),

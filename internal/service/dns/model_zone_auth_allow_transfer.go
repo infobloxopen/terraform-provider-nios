@@ -4,9 +4,11 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -39,8 +41,19 @@ var ZoneAuthAllowTransferAttrTypes = map[string]attr.Type{
 
 var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+			),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
 	"struct": schema.StringAttribute{
@@ -51,18 +64,25 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"permission": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		// Default:  stringdefault.StaticString("ALLOW"),
-		// Validators: []validator.String{
-		// 	stringvalidator.OneOf("ALLOW", "DENY"),
-		// },
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The permission to use for this address.",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+			),
+		},
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+			),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Address should not have leading or trailing whitespace",
@@ -71,32 +91,41 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		// Default:  stringdefault.StaticString("HMAC-MD5"),
-		// Validators: []validator.String{
-		// 	stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
-		// 	stringvalidator.ConflictsWith(path.MatchRoot("address"), path.MatchRoot("permission")),
-		// },
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+			),
+		},
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		// Validators: []validator.String{
-		// 	stringvalidator.RegexMatches(
-		// 		regexp.MustCompile(`^[^\s].*[^\s]$`),
-		// 		"Address should not have leading or trailing whitespace",
-		// 	),
-		// 	stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
-		// },
-		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+			),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Address should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		// Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
+		Validators: []validator.Bool{
+			boolvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+			),
+		},
 	},
 }
 

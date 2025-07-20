@@ -37,7 +37,7 @@ func (r *ZoneAuthResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *ZoneAuthResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages Auth Zones.",
 		Attributes:          ZoneAuthResourceSchemaAttributes,
 	}
 }

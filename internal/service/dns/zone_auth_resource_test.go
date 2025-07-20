@@ -2949,10 +2949,10 @@ func TestAccZoneAuthResource_ZoneFormat(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "FORWARD"),
+				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "IPV4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV4"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
