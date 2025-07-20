@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 type FrameworkElementFlExFunc[T any, U any] func(context.Context, T, *diag.Diagnostics) U
@@ -295,6 +296,27 @@ func ExpandFrameworkMapString(ctx context.Context, tfMap types.Map, diags *diag.
 	elementsNew := make(map[string]interface{}, len(tfMap.Elements()))
 	for k, v := range elements {
 		elementsNew[k] = v
+	}
+	return elementsNew
+}
+
+// ExpandParsedFrameworkMapString parses interface value and expands a Terraform map of strings into a map of interface{}.
+func ExpandParsedFrameworkMapString(ctx context.Context, tfMap types.Map, diags *diag.Diagnostics) map[string]interface{} {
+	if tfMap.IsNull() || tfMap.IsUnknown() {
+		return nil
+	}
+	var elements map[string]string
+	diags.Append(tfMap.ElementsAs(ctx, &elements, false)...)
+	if diags.HasError() {
+		return nil
+
+	}
+
+	elementsNew := make(map[string]interface{})
+
+	for key, valStr := range elements {
+		parsedValue := utils.ParseInterfaceValue(valStr)
+		elementsNew[key] = parsedValue
 	}
 	return elementsNew
 }
