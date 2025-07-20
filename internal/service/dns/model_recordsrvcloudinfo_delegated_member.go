@@ -14,19 +14,19 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type RecordacloudinfoDelegatedMemberModel struct {
+type RecordsrvcloudinfoDelegatedMemberModel struct {
 	Ipv4addr types.String `tfsdk:"ipv4addr"`
 	Ipv6addr types.String `tfsdk:"ipv6addr"`
 	Name     types.String `tfsdk:"name"`
 }
 
-var RecordacloudinfoDelegatedMemberAttrTypes = map[string]attr.Type{
+var RecordsrvcloudinfoDelegatedMemberAttrTypes = map[string]attr.Type{
 	"ipv4addr": types.StringType,
 	"ipv6addr": types.StringType,
 	"name":     types.StringType,
 }
 
-var RecordacloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schema.Attribute{
+var RecordsrvcloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -44,11 +44,11 @@ var RecordacloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schema.
 	},
 }
 
-func ExpandRecordacloudinfoDelegatedMember(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordacloudinfoDelegatedMember {
+func ExpandRecordsrvcloudinfoDelegatedMember(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordsrvcloudinfoDelegatedMember {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m RecordacloudinfoDelegatedMemberModel
+	var m RecordsrvcloudinfoDelegatedMemberModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -56,11 +56,11 @@ func ExpandRecordacloudinfoDelegatedMember(ctx context.Context, o types.Object, 
 	return m.Expand(ctx, diags)
 }
 
-func (m *RecordacloudinfoDelegatedMemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordacloudinfoDelegatedMember {
+func (m *RecordsrvcloudinfoDelegatedMemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordsrvcloudinfoDelegatedMember {
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordacloudinfoDelegatedMember{
+	to := &dns.RecordsrvcloudinfoDelegatedMember{
 		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
 		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
@@ -68,23 +68,23 @@ func (m *RecordacloudinfoDelegatedMemberModel) Expand(ctx context.Context, diags
 	return to
 }
 
-func FlattenRecordacloudinfoDelegatedMember(ctx context.Context, from *dns.RecordacloudinfoDelegatedMember, diags *diag.Diagnostics) types.Object {
+func FlattenRecordsrvcloudinfoDelegatedMember(ctx context.Context, from *dns.RecordsrvcloudinfoDelegatedMember, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(RecordacloudinfoDelegatedMemberAttrTypes)
+		return types.ObjectNull(RecordsrvcloudinfoDelegatedMemberAttrTypes)
 	}
-	m := RecordacloudinfoDelegatedMemberModel{}
+	m := RecordsrvcloudinfoDelegatedMemberModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, RecordacloudinfoDelegatedMemberAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, RecordsrvcloudinfoDelegatedMemberAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *RecordacloudinfoDelegatedMemberModel) Flatten(ctx context.Context, from *dns.RecordacloudinfoDelegatedMember, diags *diag.Diagnostics) {
+func (m *RecordsrvcloudinfoDelegatedMemberModel) Flatten(ctx context.Context, from *dns.RecordsrvcloudinfoDelegatedMember, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = RecordacloudinfoDelegatedMemberModel{}
+		*m = RecordsrvcloudinfoDelegatedMemberModel{}
 	}
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
