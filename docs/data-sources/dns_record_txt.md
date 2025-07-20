@@ -16,7 +16,7 @@ description: |-
 // Retrieve a specific TXT record by filters
 data "nios_dns_record_txt" "get_record_using_filters" {
   filters = {
-    name = "example_record.example.com"
+    name = "example-txt-record.example.com"
   }
 }
 
