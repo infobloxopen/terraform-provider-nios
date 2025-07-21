@@ -380,7 +380,6 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
 	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	 // Handle extattrs correctly - get elements as native map
 	 if !data.ExtAttrsAll.IsNull() && !data.ExtAttrsAll.IsUnknown() {
         elements := data.ExtAttrsAll.Elements()
         // Create a new map without the Terraform Internal ID
@@ -390,7 +389,7 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
                 newElements[k] = v
             }
         }
-        // Convert back to types.Map
+        
         extAttrs, diags := types.MapValue(types.StringType, newElements)
         if diags.HasError() {
             resp.Diagnostics.Append(diags...)
