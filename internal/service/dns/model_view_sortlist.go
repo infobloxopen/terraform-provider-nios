@@ -65,7 +65,6 @@ func FlattenViewSortlist(ctx context.Context, from *dns.ViewSortlist, diags *dia
 	}
 	m := ViewSortlistModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewSortlistAttrTypes, m)
 	diags.Append(d...)
 	return t

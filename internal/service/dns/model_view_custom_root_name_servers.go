@@ -105,7 +105,6 @@ func FlattenViewCustomRootNameServers(ctx context.Context, from *dns.ViewCustomR
 	}
 	m := ViewCustomRootNameServersModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewCustomRootNameServersAttrTypes, m)
 	diags.Append(d...)
 	return t

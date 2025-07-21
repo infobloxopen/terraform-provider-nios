@@ -99,7 +99,6 @@ func FlattenViewCloudInfo(ctx context.Context, from *dns.ViewCloudInfo, diags *d
 	}
 	m := ViewCloudInfoModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewCloudInfoAttrTypes, m)
 	diags.Append(d...)
 	return t

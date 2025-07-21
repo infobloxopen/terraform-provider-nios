@@ -85,7 +85,6 @@ func FlattenViewResponseRateLimiting(ctx context.Context, from *dns.ViewResponse
 	}
 	m := ViewResponseRateLimitingModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewResponseRateLimitingAttrTypes, m)
 	diags.Append(d...)
 	return t
