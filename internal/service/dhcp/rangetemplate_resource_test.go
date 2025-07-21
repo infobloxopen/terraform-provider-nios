@@ -16,6 +16,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+//TODO : Required parents for the execution of tests
+// - failover_association
+// - mac_filter_rules (mac_filter), nac_filter_rules (nac_filter), option_filter_rules,
+// - logic_filter_rules, fingerprint_filter_rules (finger_print_filter1), relay_agent_filter_rules (relay_agent_filter)
+
 var readableAttributesForRangetemplate = "bootfile,bootserver,cloud_api_compatible,comment,ddns_domainname,ddns_generate_hostname,delegated_member,deny_all_clients,deny_bootp,email_list,enable_ddns,enable_dhcp_thresholds,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,exclude,extattrs,failover_association,fingerprint_filter_rules,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,known_clients,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,mac_filter_rules,member,ms_options,ms_server,nac_filter_rules,name,nextserver,number_of_addresses,offset,option_filter_rules,options,pxe_lease_time,recycle_leases,relay_agent_filter_rules,server_association_type,unknown_clients,update_dns_on_lease_renewal,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_deny_bootp,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_ignore_dhcp_option_list_request,use_known_clients,use_lease_scavenge_time,use_logic_filter_rules,use_ms_options,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_unknown_clients,use_update_dns_on_lease_renewal"
 
 func TestAccRangetemplateResource_basic(t *testing.T) {
@@ -187,6 +192,9 @@ func TestAccRangetemplateResource_Bootserver(t *testing.T) {
 	})
 }
 
+// This is a known issue
+// If the user is a cloud-user, then they need Terraform internal ID with cloud permission and enable cloud delegation for the user to create a range template.
+// if the user is a non cloud-user, they need to have  Terraform internal ID without cloud permission.
 func TestAccRangetemplateResource_CloudApiCompatible(t *testing.T) {
 	var resourceName = "nios_dhcp_rangetemplate.test_cloud_api_compatible"
 	var v dhcp.Rangetemplate
@@ -273,7 +281,7 @@ func TestAccRangetemplateResource_DdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateDdnsDomainname(ddnsDomainName, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateDdnsDomainname(true, ddnsDomainName, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", ddnsDomainName),
@@ -281,7 +289,7 @@ func TestAccRangetemplateResource_DdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateDdnsDomainname(ddnsDomainNameUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateDdnsDomainname(true, ddnsDomainNameUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", ddnsDomainNameUpdated),
@@ -307,7 +315,7 @@ func TestAccRangetemplateResource_DdnsGenerateHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateDdnsGenerateHostname(ddnsGenerateHostname, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateDdnsGenerateHostname(true, ddnsGenerateHostname, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "true"),
@@ -315,7 +323,7 @@ func TestAccRangetemplateResource_DdnsGenerateHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateDdnsGenerateHostname(ddnsGenerateHostnameUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateDdnsGenerateHostname(true, ddnsGenerateHostnameUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
@@ -332,8 +340,14 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := int64(100)
 	offset := int64(50)
-	delegatedMember := ""
-	delegatedMemberUpdated := ""
+	delegatedMember := map[string]string{
+		"name":     "infoblox.172_28_83_209",
+		"ipv4addr": "172.28.83.209",
+	}
+	delegatedMemberUpdated := map[string]string{
+		"name":     "infoblox.172_28_83_235",
+		"ipv4addr": "172.28.83.235",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -344,7 +358,8 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccRangetemplateDelegatedMember(delegatedMember, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member", ""),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_83_209"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.83.209"),
 				),
 			},
 			// Update and Read
@@ -352,7 +367,8 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccRangetemplateDelegatedMember(delegatedMemberUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member", ""),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_83_235"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.83.235"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -410,7 +426,7 @@ func TestAccRangetemplateResource_DenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateDenyBootp(denyBootp, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateDenyBootp(true, denyBootp, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "true"),
@@ -418,7 +434,7 @@ func TestAccRangetemplateResource_DenyBootp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateDenyBootp(denyBootpUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateDenyBootp(true, denyBootpUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "false"),
@@ -445,7 +461,7 @@ func TestAccRangetemplateResource_EmailList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateEmailList(emailList, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateEmailList(true, emailList, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "email_list.0", "bbb@info.com"),
@@ -454,7 +470,7 @@ func TestAccRangetemplateResource_EmailList(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateEmailList(emailListUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateEmailList(true, emailListUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "email_list.0", "abc@info.com"),
@@ -483,7 +499,7 @@ func TestAccRangetemplateResource_EnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateEnableDdns(enableDdns, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateEnableDdns(true, enableDdns, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "true"),
@@ -491,7 +507,7 @@ func TestAccRangetemplateResource_EnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateEnableDdns(enableDdnsUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateEnableDdns(true, enableDdnsUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
@@ -519,7 +535,7 @@ func TestAccRangetemplateResource_EnableDhcpThresholds(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateEnableDhcpThresholds(enableDhcpThresholds, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateEnableDhcpThresholds(true, enableDhcpThresholds, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_dhcp_thresholds", "true"),
@@ -527,7 +543,7 @@ func TestAccRangetemplateResource_EnableDhcpThresholds(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateEnableDhcpThresholds(enableDhcpThresholdsUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateEnableDhcpThresholds(true, enableDhcpThresholdsUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_dhcp_thresholds", "false"),
@@ -584,6 +600,7 @@ func TestAccRangetemplateResource_EnablePxeLeaseTime(t *testing.T) {
 
 	enablePxeLeaseTime := true
 	enablePxeLeaseTimeUpdated := false
+	pexeLeaseTime := int64(72000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -591,7 +608,7 @@ func TestAccRangetemplateResource_EnablePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateEnablePxeLeaseTime(enablePxeLeaseTime, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateEnablePxeLeaseTime(enablePxeLeaseTime, true, pexeLeaseTime, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "true"),
@@ -599,7 +616,7 @@ func TestAccRangetemplateResource_EnablePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateEnablePxeLeaseTime(enablePxeLeaseTimeUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateEnablePxeLeaseTime(enablePxeLeaseTimeUpdated, true, pexeLeaseTime, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
@@ -646,41 +663,56 @@ func TestAccRangetemplateResource_EnableSnmpWarnings(t *testing.T) {
 	})
 }
 
-//func TestAccRangetemplateResource_Exclude(t *testing.T) {
-//	var resourceName = "nios_dhcp_rangetemplate.test_exclude"
-//	var v dhcp.Rangetemplate
-//
-//	name := acctest.RandomNameWithPrefix("range-template")
-//	numberOfAdresses := int64(100)
-//	offset := int64(50)
-//
-//	exclude := map[string]interface{}{}
-//	excludeUpdated := map[string]interface{}{}
-//
-//	resource.ParallelTest(t, resource.TestCase{
-//		PreCheck:                 func() { acctest.PreCheck(t) },
-//		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-//		Steps: []resource.TestStep{
-//			// Create and Read
-//			{
-//				Config: testAccRangetemplateExclude(exclude, name, numberOfAdresses, offset),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-//					resource.TestCheckResourceAttr(resourceName, "exclude", "EXCLUDE_REPLACE_ME"),
-//				),
-//			},
-//			// Update and Read
-//			{
-//				Config: testAccRangetemplateExclude(excludeUpdated, name, numberOfAdresses, offset),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-//					resource.TestCheckResourceAttr(resourceName, "exclude", "EXCLUDE_UPDATE_REPLACE_ME"),
-//				),
-//			},
-//			// Delete testing automatically occurs in TestCase
-//		},
-//	})
-//}
+func TestAccRangetemplateResource_Exclude(t *testing.T) {
+	var resourceName = "nios_dhcp_rangetemplate.test_exclude"
+	var v dhcp.Rangetemplate
+
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := int64(100)
+	offset := int64(50)
+
+	exclude := []map[string]any{
+		{
+			"number_of_addresses": 10,
+			"offset":              20,
+		},
+	}
+	excludeUpdated := []map[string]any{
+		{
+			"number_of_addresses": 15,
+			"offset":              25,
+			"comment":             "exclude for range template",
+		},
+	}
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRangetemplateExclude(exclude, name, numberOfAdresses, offset),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "exclude.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.number_of_addresses", "10"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.offset", "20"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRangetemplateExclude(excludeUpdated, name, numberOfAdresses, offset),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "exclude.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.number_of_addresses", "15"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.offset", "25"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.comment", "exclude for range template"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
 
 func TestAccRangetemplateResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dhcp_rangetemplate.test_extattrs"
@@ -725,8 +757,9 @@ func TestAccRangetemplateResource_FailoverAssociation(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := int64(100)
 	offset := int64(50)
-	failoverAssociation := "FALOVER"
-	failoverAssociationUpdated := "FAILOVER_MS"
+	failoverAssociation := "failover_association"
+	failoverAssociationUpdated := "failover_association_1"
+	serverAssociationType := "FAILOVER"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -734,18 +767,18 @@ func TestAccRangetemplateResource_FailoverAssociation(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateFailoverAssociation(failoverAssociation, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateFailoverAssociation(serverAssociationType, failoverAssociation, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "failover_association", "FAILOVER"),
+					resource.TestCheckResourceAttr(resourceName, "failover_association", failoverAssociation),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateFailoverAssociation(failoverAssociationUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateFailoverAssociation(serverAssociationType, failoverAssociationUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "failover_association", "FAILOVER_MS"),
+					resource.TestCheckResourceAttr(resourceName, "failover_association", failoverAssociationUpdated),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -760,8 +793,18 @@ func TestAccRangetemplateResource_FingerprintFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := int64(100)
 	offset := int64(50)
-	fingerPrintRules := ""
-	fingerPrintRulesUpdated := ""
+	fingerPrintRules := []map[string]any{
+		{
+			"filter":     "finger_print_filter1",
+			"permission": "Allow",
+		},
+	}
+	fingerPrintRulesUpdated := []map[string]any{
+		{
+			"filter":     "finger_print_filter1",
+			"permission": "Deny",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -772,7 +815,9 @@ func TestAccRangetemplateResource_FingerprintFilterRules(t *testing.T) {
 				Config: testAccRangetemplateFingerprintFilterRules(fingerPrintRules, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules", ""),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "finger_print_filter1"),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.permission", "Allow"),
 				),
 			},
 			// Update and Read
@@ -780,7 +825,9 @@ func TestAccRangetemplateResource_FingerprintFilterRules(t *testing.T) {
 				Config: testAccRangetemplateFingerprintFilterRules(fingerPrintRulesUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules", ""),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "finger_print_filter1"),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.permission", "Deny"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -796,8 +843,8 @@ func TestAccRangetemplateResource_HighWaterMark(t *testing.T) {
 	numberOfAdresses := int64(100)
 	offset := int64(50)
 
-	highWaterMark := int64(1000)
-	highWaterMarkUpdated := int64(2000)
+	highWaterMark := int64(55)
+	highWaterMarkUpdated := int64(70)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -808,7 +855,7 @@ func TestAccRangetemplateResource_HighWaterMark(t *testing.T) {
 				Config: testAccRangetemplateHighWaterMark(highWaterMark, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "1000"),
+					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "55"),
 				),
 			},
 			// Update and Read
@@ -816,7 +863,7 @@ func TestAccRangetemplateResource_HighWaterMark(t *testing.T) {
 				Config: testAccRangetemplateHighWaterMark(highWaterMarkUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "2000"),
+					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "70"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -832,8 +879,8 @@ func TestAccRangetemplateResource_HighWaterMarkReset(t *testing.T) {
 	numberOfAdresses := int64(100)
 	offset := int64(50)
 
-	highWaterMarkReset := int64(1000)
-	highWaterMarkResetUpdated := int64(2000)
+	highWaterMarkReset := int64(10)
+	highWaterMarkResetUpdated := int64(20)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -844,7 +891,7 @@ func TestAccRangetemplateResource_HighWaterMarkReset(t *testing.T) {
 				Config: testAccRangetemplateHighWaterMarkReset(highWaterMarkReset, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "1000"),
+					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "10"),
 				),
 			},
 			// Update and Read
@@ -852,7 +899,7 @@ func TestAccRangetemplateResource_HighWaterMarkReset(t *testing.T) {
 				Config: testAccRangetemplateHighWaterMarkReset(highWaterMarkResetUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "2000"),
+					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "20"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -877,7 +924,7 @@ func TestAccRangetemplateResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateIgnoreDhcpOptionListRequest(ignoreDhcpOptionListRequest, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateIgnoreDhcpOptionListRequest(true, ignoreDhcpOptionListRequest, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "true"),
@@ -885,7 +932,7 @@ func TestAccRangetemplateResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateIgnoreDhcpOptionListRequest(ignoreDhcpOptionListRequestUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateIgnoreDhcpOptionListRequest(true, ignoreDhcpOptionListRequestUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "false"),
@@ -913,7 +960,7 @@ func TestAccRangetemplateResource_KnownClients(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateKnownClients(knownClients, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateKnownClients(true, knownClients, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "known_clients", "Allow"),
@@ -921,7 +968,7 @@ func TestAccRangetemplateResource_KnownClients(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateKnownClients(knownClientsUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateKnownClients(true, knownClientsUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "known_clients", "Deny"),
@@ -940,8 +987,8 @@ func TestAccRangetemplateResource_LeaseScavengeTime(t *testing.T) {
 	numberOfAdresses := int64(100)
 	offset := int64(50)
 
-	leastScavngeTime := int64(3600)
-	leaseScavengeTimeUpdated := int64(7200)
+	leastScavngeTime := int64(86700)
+	leaseScavengeTimeUpdated := int64(98400)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -949,18 +996,18 @@ func TestAccRangetemplateResource_LeaseScavengeTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateLeaseScavengeTime(leastScavngeTime, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateLeaseScavengeTime(true, leastScavngeTime, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "3600"),
+					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "86700"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateLeaseScavengeTime(leaseScavengeTimeUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateLeaseScavengeTime(true, leaseScavengeTimeUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "98400"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -975,8 +1022,18 @@ func TestAccRangetemplateResource_LogicFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := int64(100)
 	offset := int64(50)
-	logicFilterRules := ""
-	logicFilterRulesUpdated := ""
+	logicFilterRules := []map[string]any{
+		{
+			"filter": "option_filter",
+			"type":   "Option",
+		},
+	}
+	logicFilterRulesUpdated := []map[string]any{
+		{
+			"filter": "option_logic_filter",
+			"type":   "Option",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -984,18 +1041,22 @@ func TestAccRangetemplateResource_LogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateLogicFilterRules(logicFilterRules, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateLogicFilterRules(logicFilterRules, true, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateLogicFilterRules(logicFilterRulesUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateLogicFilterRules(logicFilterRulesUpdated, true, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_logic_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1011,8 +1072,8 @@ func TestAccRangetemplateResource_LowWaterMark(t *testing.T) {
 	numberOfAdresses := int64(100)
 	offset := int64(50)
 
-	lowWaterMark := int64(7200)
-	lowWaterMarkUpdated := int64(14400)
+	lowWaterMark := int64(71)
+	lowWaterMarkUpdated := int64(33)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1023,7 +1084,7 @@ func TestAccRangetemplateResource_LowWaterMark(t *testing.T) {
 				Config: testAccRangetemplateLowWaterMark(lowWaterMark, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "71"),
 				),
 			},
 			// Update and Read
@@ -1031,7 +1092,7 @@ func TestAccRangetemplateResource_LowWaterMark(t *testing.T) {
 				Config: testAccRangetemplateLowWaterMark(lowWaterMarkUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "14400"),
+					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "33"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1047,8 +1108,8 @@ func TestAccRangetemplateResource_LowWaterMarkReset(t *testing.T) {
 	numberOfAdresses := int64(100)
 	offset := int64(50)
 
-	lowMaterkReset := int64(36000)
-	lowMaterkResetUpdated := int64(144000)
+	lowMaterkReset := int64(36)
+	lowMaterkResetUpdated := int64(14)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1059,7 +1120,7 @@ func TestAccRangetemplateResource_LowWaterMarkReset(t *testing.T) {
 				Config: testAccRangetemplateLowWaterMarkReset(lowMaterkReset, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "36000"),
+					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "36"),
 				),
 			},
 			// Update and Read
@@ -1067,7 +1128,7 @@ func TestAccRangetemplateResource_LowWaterMarkReset(t *testing.T) {
 				Config: testAccRangetemplateLowWaterMarkReset(lowMaterkResetUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "144000"),
+					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "14"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1083,8 +1144,18 @@ func TestAccRangetemplateResource_MacFilterRules(t *testing.T) {
 	numberOfAdresses := int64(100)
 	offset := int64(50)
 
-	macFilterRules := ""
-	macFilterRulesUpdated := ""
+	macFilterRules := []map[string]any{
+		{
+			"filter":     "mac_filter",
+			"permission": "Allow",
+		},
+	}
+	macFilterRulesUpdated := []map[string]any{
+		{
+			"filter":     "mac_filter",
+			"permission": "Deny",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1095,7 +1166,9 @@ func TestAccRangetemplateResource_MacFilterRules(t *testing.T) {
 				Config: testAccRangetemplateMacFilterRules(macFilterRules, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules", "MAC_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.filter", "mac_filter"),
+					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.permission", "Allow"),
 				),
 			},
 			// Update and Read
@@ -1103,7 +1176,9 @@ func TestAccRangetemplateResource_MacFilterRules(t *testing.T) {
 				Config: testAccRangetemplateMacFilterRules(macFilterRulesUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules", "MAC_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.filter", "mac_filter"),
+					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.permission", "Deny"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1119,8 +1194,14 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 	numberOfAdresses := int64(100)
 	offset := int64(50)
 
-	member := ""
-	memberUpdated := ""
+	member := map[string]string{
+		"name":     "infoblox.172_28_83_209",
+		"ipv4addr": "172.28.83.209",
+	}
+	memberUpdated := map[string]string{
+		"name":     "infoblox.172_28_83_235",
+		"ipv4addr": "172.28.83.235",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1131,7 +1212,8 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 				Config: testAccRangetemplateMember(member, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member", "MEMBER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_83_209"),
+					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.209"),
 				),
 			},
 			// Update and Read
@@ -1139,7 +1221,8 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 				Config: testAccRangetemplateMember(memberUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member", "MEMBER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_83_235"),
+					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.235"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1190,8 +1273,12 @@ func TestAccRangetemplateResource_MsServer(t *testing.T) {
 	numberOfAdresses := int64(100)
 	offset := int64(50)
 
-	msServer := "ms_server1"
-	msServerUpdated := "ms_server2"
+	msServer := map[string]string{
+		"ipv4addr": "10.120.23.22",
+	}
+	msServerUpdated := map[string]string{
+		"ipv4addr": "11.120.23.23",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1202,7 +1289,7 @@ func TestAccRangetemplateResource_MsServer(t *testing.T) {
 				Config: testAccRangetemplateMsServer(msServer, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "ms_server1"),
+					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.120.23.22"),
 				),
 			},
 			// Update and Read
@@ -1210,7 +1297,7 @@ func TestAccRangetemplateResource_MsServer(t *testing.T) {
 				Config: testAccRangetemplateMsServer(msServerUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "ms_server2"),
+					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.120.23.23"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1225,9 +1312,18 @@ func TestAccRangetemplateResource_NacFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := int64(100)
 	offset := int64(50)
-
-	nacFilterRules := ""
-	nacFilterRulesUpdated := ""
+	nacFilterRules := []map[string]any{
+		{
+			"filter":     "nac_filter",
+			"permission": "Allow",
+		},
+	}
+	nacFilterRulesUpdated := []map[string]any{
+		{
+			"filter":     "nac_filter",
+			"permission": "Deny",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1238,7 +1334,9 @@ func TestAccRangetemplateResource_NacFilterRules(t *testing.T) {
 				Config: testAccRangetemplateNacFilterRules(nacFilterRules, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nac_filter_rules", "NAC_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "nac_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "nac_filter_rules.0.filter", "nac_filter"),
+					resource.TestCheckResourceAttr(resourceName, "nac_filter_rules.0.permission", "Allow"),
 				),
 			},
 			// Update and Read
@@ -1246,7 +1344,9 @@ func TestAccRangetemplateResource_NacFilterRules(t *testing.T) {
 				Config: testAccRangetemplateNacFilterRules(nacFilterRulesUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nac_filter_rules", "NAC_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "nac_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "nac_filter_rules.0.filter", "nac_filter"),
+					resource.TestCheckResourceAttr(resourceName, "nac_filter_rules.0.permission", "Deny"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1305,7 +1405,7 @@ func TestAccRangetemplateResource_Nextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateNextserver(nextServer, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateNextserver(true, nextServer, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nextserver", nextServer),
@@ -1313,7 +1413,7 @@ func TestAccRangetemplateResource_Nextserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateNextserver(nextServerUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateNextserver(true, nextServerUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nextserver", nextServerUpdated),
@@ -1342,7 +1442,7 @@ func TestAccRangetemplateResource_NumberOfAddresses(t *testing.T) {
 				Config: testAccRangetemplateNumberOfAddresses(name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "number_of_addresses", "50"),
+					resource.TestCheckResourceAttr(resourceName, "number_of_addresses", "100"),
 				),
 			},
 			// Update and Read
@@ -1399,8 +1499,18 @@ func TestAccRangetemplateResource_OptionFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := int64(100)
 	offset := int64(50)
-	optionFilterRules := ""
-	optionFilterRulesUpdated := ""
+	optionFilterRules := []map[string]any{
+		{
+			"filter":     "option_filter",
+			"permission": "Allow",
+		},
+	}
+	optionFilterRulesUpdated := []map[string]any{
+		{
+			"filter":     "option_filter",
+			"permission": "Deny",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1411,7 +1521,9 @@ func TestAccRangetemplateResource_OptionFilterRules(t *testing.T) {
 				Config: testAccRangetemplateOptionFilterRules(optionFilterRules, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules", "OPTION_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Allow"),
 				),
 			},
 			// Update and Read
@@ -1419,7 +1531,9 @@ func TestAccRangetemplateResource_OptionFilterRules(t *testing.T) {
 				Config: testAccRangetemplateOptionFilterRules(optionFilterRulesUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules", "OPTION_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Deny"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1430,12 +1544,29 @@ func TestAccRangetemplateResource_OptionFilterRules(t *testing.T) {
 func TestAccRangetemplateResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_rangetemplate.test_options"
 	var v dhcp.Rangetemplate
-
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := int64(100)
 	offset := int64(50)
-	options := ""
-	optionsUpdated := ""
+	options := []map[string]any{
+		{
+			"name":  "domain-name",
+			"value": "aa.bb.com",
+		},
+		{
+			"name":  "dhcp-lease-time",
+			"value": "72000",
+		},
+	}
+	optionsUpdated := []map[string]any{
+		{
+			"name":  "domain-name",
+			"value": "cc.dd.com",
+		},
+		{
+			"name":  "dhcp-lease-time",
+			"value": "82000",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1443,18 +1574,26 @@ func TestAccRangetemplateResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateOptions(options, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateOptions(options, true, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "aa.bb.com"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "dhcp-lease-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "72000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateOptions(optionsUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateOptions(optionsUpdated, true, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "cc.dd.com"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "dhcp-lease-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "82000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1477,7 +1616,7 @@ func TestAccRangetemplateResource_PxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplatePxeLeaseTime(pxeLeaseTime, name, numberOfAdresses, offset),
+				Config: testAccRangetemplatePxeLeaseTime(true, pxeLeaseTime, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "3600"),
@@ -1485,7 +1624,7 @@ func TestAccRangetemplateResource_PxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplatePxeLeaseTime(pxeLeaseTimeUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplatePxeLeaseTime(true, pxeLeaseTimeUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "7200"),
@@ -1512,7 +1651,7 @@ func TestAccRangetemplateResource_RecycleLeases(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateRecycleLeases(recycleLeases, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateRecycleLeases(true, recycleLeases, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "false"),
@@ -1520,7 +1659,7 @@ func TestAccRangetemplateResource_RecycleLeases(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateRecycleLeases(recycleLeasesUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateRecycleLeases(true, recycleLeasesUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
@@ -1538,8 +1677,18 @@ func TestAccRangetemplateResource_RelayAgentFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := int64(100)
 	offset := int64(50)
-	relayAgentFilterRules := ""
-	relayAgentFilterRulesUpdated := ""
+	relayAgentFilterRules := []map[string]any{
+		{
+			"filter":     "relay_agent_filter",
+			"permission": "Allow",
+		},
+	}
+	relayAgentFilterRulesUpdated := []map[string]any{
+		{
+			"filter":     "relay_agent_filter",
+			"permission": "Deny",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1550,7 +1699,9 @@ func TestAccRangetemplateResource_RelayAgentFilterRules(t *testing.T) {
 				Config: testAccRangetemplateRelayAgentFilterRules(relayAgentFilterRules, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules", "RELAY_AGENT_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.0.filter", "relay_agent_filter"),
+					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.0.permission", "Allow"),
 				),
 			},
 			// Update and Read
@@ -1558,7 +1709,9 @@ func TestAccRangetemplateResource_RelayAgentFilterRules(t *testing.T) {
 				Config: testAccRangetemplateRelayAgentFilterRules(relayAgentFilterRulesUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules", "RELAY_AGENT_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.0.filter", "relay_agent_filter"),
+					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.0.permission", "Deny"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1575,6 +1728,7 @@ func TestAccRangetemplateResource_ServerAssociationType(t *testing.T) {
 	offset := int64(50)
 	servserAssociationType := "FAILOVER"
 	servserAssociationTypeUpdated := "NONE"
+	failoverAssociation := "failover_association"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1582,7 +1736,7 @@ func TestAccRangetemplateResource_ServerAssociationType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateServerAssociationType(servserAssociationType, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateServerAssociationType(&failoverAssociation, servserAssociationType, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "FAILOVER"),
@@ -1590,7 +1744,7 @@ func TestAccRangetemplateResource_ServerAssociationType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateServerAssociationType(servserAssociationTypeUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateServerAssociationType(nil, servserAssociationTypeUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "NONE"),
@@ -1617,7 +1771,7 @@ func TestAccRangetemplateResource_UnknownClients(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateUnknownClients(unknownClients, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateUnknownClients(true, unknownClients, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "unknown_clients", "Deny"),
@@ -1625,7 +1779,7 @@ func TestAccRangetemplateResource_UnknownClients(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateUnknownClients(unknownClientsUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateUnknownClients(true, unknownClientsUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "unknown_clients", "Allow"),
@@ -1651,7 +1805,7 @@ func TestAccRangetemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateUpdateDnsOnLeaseRenewal(updateDnsOnLeaseRenewal, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateUpdateDnsOnLeaseRenewal(true, updateDnsOnLeaseRenewal, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "true"),
@@ -1659,7 +1813,7 @@ func TestAccRangetemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateUpdateDnsOnLeaseRenewal(updateDnsOnLeaseRenewalUpdated, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateUpdateDnsOnLeaseRenewal(true, updateDnsOnLeaseRenewalUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "false"),
@@ -2376,7 +2530,6 @@ func testAccCheckRangetemplateDisappears(ctx context.Context, v *dhcp.Rangetempl
 }
 
 func testAccRangetemplateBasicConfig(name string, numberOfAddresses, offset int64) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test" {
 	name = %q
@@ -2432,37 +2585,49 @@ resource "nios_dhcp_rangetemplate" "test_comment" {
 `, comment, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateDdnsDomainname(ddnsDomainname, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateDdnsDomainname(useDdnsDomainname bool, ddnsDomainname, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_ddns_domainname" {
+   use_ddns_domainname = %t
    ddns_domainname = %q
-	name = %q
-	number_of_addresses = %d
-	offset = %d
+   name = %q
+   number_of_addresses = %d
+   offset = %d
 }
-`, ddnsDomainname, name, numberOfAddresses, offset)
+`, useDdnsDomainname, ddnsDomainname, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateDdnsGenerateHostname(ddnsGenerateHostname bool, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateDdnsGenerateHostname(useDdnsGenerateHostname bool, ddnsGenerateHostname bool, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_ddns_generate_hostname" {
+   use_ddns_generate_hostname = %t
    ddns_generate_hostname = %t
-	name = %q
-	number_of_addresses = %d
-	offset = %d
+   name = %q
+   number_of_addresses = %d
+   offset = %d
 }
-`, ddnsGenerateHostname, name, numberOfAddresses, offset)
+`, useDdnsGenerateHostname, ddnsGenerateHostname, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateDelegatedMember(delegatedMember, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateDelegatedMember(delegatedMember map[string]string, name string, numberOfAddresses, offset int64) string {
+	delegatedMemberStr := formatMapOfStrings(delegatedMember)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_delegated_member" {
-   delegated_member = %q
-	name = %q
-	number_of_addresses = %d
-	offset = %d
+   delegated_member = %s
+   name = %q
+   number_of_addresses = %d
+   offset = %d
 }
-`, delegatedMember, name, numberOfAddresses, offset)
+`, delegatedMemberStr, name, numberOfAddresses, offset)
+}
+
+func formatMapOfStrings(delegatedMember map[string]string) string {
+	delegatedMemberStr := "{\n"
+	for k, v := range delegatedMember {
+		delegatedMemberStr += fmt.Sprintf("  %s = %q\n", k, v)
+	}
+	delegatedMemberStr += "}"
+	return delegatedMemberStr
 }
 
 func testAccRangetemplateDenyAllClients(denyAllClients bool, name string, numberOfAddresses, offset int64) string {
@@ -2476,49 +2641,63 @@ resource "nios_dhcp_rangetemplate" "test_deny_all_clients" {
 `, denyAllClients, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateDenyBootp(denyBootp bool, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateDenyBootp(useDenyBootp, denyBootp bool, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_deny_bootp" {
+   use_deny_bootp = %t
    deny_bootp = %t
-	name = %q
-	number_of_addresses = %d
-	offset = %d
-}
-`, denyBootp, name, numberOfAddresses, offset)
-}
-
-func testAccRangetemplateEmailList(emailList []string, name string, numberOfAddresses, offset int64) string {
-	emailListStr := `{"` + strings.Join(emailList, `", "`) + `"}`
-	return fmt.Sprintf(`
-resource "nios_dhcp_rangetemplate" "test_email_list" {
-   email_list = %q
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, emailListStr, name, numberOfAddresses, offset)
+`, useDenyBootp, denyBootp, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateEnableDdns(enableDdns bool, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateEmailList(useEmailList bool, emailList []string, name string, numberOfAddresses, offset int64) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_rangetemplate" "test_email_list" {
+   use_email_list = %t
+   email_list = %s
+   name = %q
+   number_of_addresses = %d
+   offset = %d
+}
+`, useEmailList, formatHCLList(emailList), name, numberOfAddresses, offset)
+}
+
+func formatHCLList(input []string) string {
+	// Quote each string in the slice
+	quoted := make([]string, len(input))
+	for i, s := range input {
+		quoted[i] = fmt.Sprintf("%q", s) // Add quotes around each string
+	}
+
+	// Join the quoted strings with commas and wrap in square brackets
+	return fmt.Sprintf("[%s]", strings.Join(quoted, ", "))
+}
+
+func testAccRangetemplateEnableDdns(useEnableDdns, enableDdns bool, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_enable_ddns" {
+   use_enable_ddns = %t
    enable_ddns = %t
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, enableDdns, name, numberOfAddresses, offset)
+`, useEnableDdns, enableDdns, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateEnableDhcpThresholds(enableDhcpThresholds bool, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateEnableDhcpThresholds(useEnableDhcpThresholds, enableDhcpThresholds bool, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_enable_dhcp_thresholds" {
+   use_enable_dhcp_thresholds = %t
    enable_dhcp_thresholds = %t
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, enableDhcpThresholds, name, numberOfAddresses, offset)
+`, useEnableDhcpThresholds, enableDhcpThresholds, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateEnableEmailWarnings(enableEmailWarnings bool, name string, numberOfAddresses, offset int64) string {
@@ -2532,15 +2711,17 @@ resource "nios_dhcp_rangetemplate" "test_enable_email_warnings" {
 `, enableEmailWarnings, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateEnablePxeLeaseTime(enablePxeLeaseTime bool, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateEnablePxeLeaseTime(enablePxeLeaseTime bool, usePxeLeaseTime bool, pexLeaseTime int64, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_enable_pxe_lease_time" {
    enable_pxe_lease_time = %t
+   use_pxe_lease_time = %t
+   pxe_lease_time = %d
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, enablePxeLeaseTime, name, numberOfAddresses, offset)
+`, enablePxeLeaseTime, usePxeLeaseTime, pexLeaseTime, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateEnableSnmpWarnings(enableSnmpWarnings bool, name string, numberOfAddresses, offset int64) string {
@@ -2548,21 +2729,39 @@ func testAccRangetemplateEnableSnmpWarnings(enableSnmpWarnings bool, name string
 resource "nios_dhcp_rangetemplate" "test_enable_snmp_warnings" {
    enable_snmp_warnings = %t
    name = %q
-	number_of_addresses = %d
-	offset = %d
+   number_of_addresses = %d
+   offset = %d
 }
 `, enableSnmpWarnings, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateExclude(exclude, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateExclude(exclude []map[string]any, name string, numberOfAddresses, offset int64) string {
+	excludeStr := convertSliceOfMapsToString(exclude)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_exclude" {
-   exclude = %q
+   exclude = %s
    name = %q
-	number_of_addresses = %d
-	offset = %d
+   number_of_addresses = %d
+   offset = %d
 }
-`, exclude, name, numberOfAddresses, offset)
+`, excludeStr, name, numberOfAddresses, offset)
+}
+
+func convertSliceOfMapsToString(maps []map[string]any) string {
+	mapsStr := "[\n"
+	for _, obj := range maps {
+		mapsStr += "  {\n"
+		for k, v := range obj {
+			if strVal, ok := v.(string); ok {
+				mapsStr += fmt.Sprintf("    %s = %q\n", k, strVal) // Enclose string values in quotes
+			} else {
+				mapsStr += fmt.Sprintf("    %s = %v\n", k, v)
+			}
+		}
+		mapsStr += "  },\n"
+	}
+	mapsStr += "]"
+	return mapsStr
 }
 
 func testAccRangetemplateExtAttrs(extAttrs map[string]string, name string, numberOfAddresses, offset int64) string {
@@ -2573,7 +2772,7 @@ func testAccRangetemplateExtAttrs(extAttrs map[string]string, name string, numbe
 	extattrsStr += "}"
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_extattrs" {
-   extattrs = %q
+   extattrs = %s
    name = %q
    number_of_addresses = %d
    offset = %d
@@ -2581,26 +2780,28 @@ resource "nios_dhcp_rangetemplate" "test_extattrs" {
 `, extattrsStr, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateFailoverAssociation(failoverAssociation, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateFailoverAssociation(serverAssociationType, failoverAssociation, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_failover_association" {
+   server_association_type = %q
    failover_association = %q
    name = %q
-	number_of_addresses = %d
-	offset = %d
+   number_of_addresses = %d
+   offset = %d
 }
-`, failoverAssociation, name, numberOfAddresses, offset)
+`, serverAssociationType, failoverAssociation, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateFingerprintFilterRules(fingerprintFilterRules, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateFingerprintFilterRules(fingerprintFilterRules []map[string]any, name string, numberOfAddresses, offset int64) string {
+	fingerprintFilterRulesStr := convertSliceOfMapsToString(fingerprintFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_fingerprint_filter_rules" {
-   fingerprint_filter_rules = %q
+   fingerprint_filter_rules = %s
    name = %q
-	number_of_addresses = %d
-	offset = %d
+   number_of_addresses = %d
+   offset = %d
 }
-`, fingerprintFilterRules, name, numberOfAddresses, offset)
+`, fingerprintFilterRulesStr, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateHighWaterMark(highWaterMark int64, name string, numberOfAddresses, offset int64) string {
@@ -2625,48 +2826,53 @@ resource "nios_dhcp_rangetemplate" "test_high_water_mark_reset" {
 `, highWaterMarkReset, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateIgnoreDhcpOptionListRequest(ignoreDhcpOptionListRequest bool, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateIgnoreDhcpOptionListRequest(useIgnoreDhcpOptionListRequest, ignoreDhcpOptionListRequest bool, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_ignore_dhcp_option_list_request" {
+   use_ignore_dhcp_option_list_request = %t
    ignore_dhcp_option_list_request = %t
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, ignoreDhcpOptionListRequest, name, numberOfAddresses, offset)
+`, useIgnoreDhcpOptionListRequest, ignoreDhcpOptionListRequest, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateKnownClients(knownClients, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateKnownClients(useKnownClients bool, knownClients, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_known_clients" {
+   use_known_clients = %t
    known_clients = %q
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, knownClients, name, numberOfAddresses, offset)
+`, useKnownClients, knownClients, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateLeaseScavengeTime(leaseScavengeTime int64, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateLeaseScavengeTime(useLeaseScavengeTime bool, leaseScavengeTime int64, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_lease_scavenge_time" {
+   use_lease_scavenge_time = %t
    lease_scavenge_time = %d
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, leaseScavengeTime, name, numberOfAddresses, offset)
+`, useLeaseScavengeTime, leaseScavengeTime, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateLogicFilterRules(logicFilterRules, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateLogicFilterRules(logicFilterRules []map[string]any, useLogicFilterRules bool, name string, numberOfAddresses, offset int64) string {
+	logicFilterRulesStr := convertSliceOfMapsToString(logicFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_logic_filter_rules" {
-   logic_filter_rules = %q
+   logic_filter_rules = %s
+   use_logic_filter_rules = %t
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, logicFilterRules, name, numberOfAddresses, offset)
+`, logicFilterRulesStr, useLogicFilterRules, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateLowWaterMark(lowWaterMark int64, name string, numberOfAddresses, offset int64) string {
@@ -2691,26 +2897,28 @@ resource "nios_dhcp_rangetemplate" "test_low_water_mark_reset" {
 `, lowWaterMarkReset, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateMacFilterRules(macFilterRules, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateMacFilterRules(macFilterRules []map[string]any, name string, numberOfAddresses, offset int64) string {
+	macFilterRulesStr := convertSliceOfMapsToString(macFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_mac_filter_rules" {
-   mac_filter_rules = %q
+   mac_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, macFilterRules, name, numberOfAddresses, offset)
+`, macFilterRulesStr, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateMember(member, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateMember(member map[string]string, name string, numberOfAddresses, offset int64) string {
+	memberStr := formatMapOfStrings(member)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_member" {
-   member = %q
+   member = %s
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, member, name, numberOfAddresses, offset)
+`, memberStr, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateMsOptions(msOptions, name string, numberOfAddresses, offset int64) string {
@@ -2724,26 +2932,28 @@ resource "nios_dhcp_rangetemplate" "test_ms_options" {
 `, msOptions, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateMsServer(msServer, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateMsServer(msServer map[string]string, name string, numberOfAddresses, offset int64) string {
+	msServerStr := formatMapOfStrings(msServer)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_ms_server" {
-   ms_server = %q
+   ms_server = %s
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, msServer, name, numberOfAddresses, offset)
+`, msServerStr, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateNacFilterRules(nacFilterRules, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateNacFilterRules(nacFilterRules []map[string]any, name string, numberOfAddresses, offset int64) string {
+	nacFilterRulesStr := convertSliceOfMapsToString(nacFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_nac_filter_rules" {
-   nac_filter_rules = %q
+   nac_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, nacFilterRules, name, numberOfAddresses, offset)
+`, nacFilterRulesStr, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateName(name string, numberOfAddresses, offset int64) string {
@@ -2756,15 +2966,16 @@ resource "nios_dhcp_rangetemplate" "test_name" {
 `, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateNextserver(nextserver, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateNextserver(useNextserver bool, nextserver, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_nextserver" {
+   use_nextserver = %t
    nextserver = %q
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, nextserver, name, numberOfAddresses, offset)
+`, useNextserver, nextserver, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateNumberOfAddresses(name string, numberOfAddresses, offset int64) string {
@@ -2787,92 +2998,105 @@ resource "nios_dhcp_rangetemplate" "test_offset" {
 `, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateOptionFilterRules(optionFilterRules, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateOptionFilterRules(optionFilterRules []map[string]any, name string, numberOfAddresses, offset int64) string {
+	optionFilterRulesStr := convertSliceOfMapsToString(optionFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_option_filter_rules" {
-   option_filter_rules = %q
+   option_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, optionFilterRules, name, numberOfAddresses, offset)
+`, optionFilterRulesStr, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateOptions(options, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateOptions(options []map[string]any, useOptions bool, name string, numberOfAddresses, offset int64) string {
+	optionsStr := convertSliceOfMapsToString(options)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_options" {
-   options = %q
+   options = %s
+   use_options = %t
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, options, name, numberOfAddresses, offset)
+`, optionsStr, useOptions, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplatePxeLeaseTime(pxeLeaseTime int64, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplatePxeLeaseTime(usePxeLeaseTime bool, pxeLeaseTime int64, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_pxe_lease_time" {
+   use_pxe_lease_time = %t
    pxe_lease_time = %d
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, pxeLeaseTime, name, numberOfAddresses, offset)
+`, usePxeLeaseTime, pxeLeaseTime, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateRecycleLeases(recycleLeases bool, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateRecycleLeases(useRecycleLeases, recycleLeases bool, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_recycle_leases" {
+   use_recycle_leases = %t
    recycle_leases = %t
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, recycleLeases, name, numberOfAddresses, offset)
+`, useRecycleLeases, recycleLeases, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateRelayAgentFilterRules(relayAgentFilterRules, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateRelayAgentFilterRules(relayAgentFilterRules []map[string]any, name string, numberOfAddresses, offset int64) string {
+	relayAgentFilterRulesStr := convertSliceOfMapsToString(relayAgentFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_relay_agent_filter_rules" {
-   relay_agent_filter_rules = %q
+   relay_agent_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, relayAgentFilterRules, name, numberOfAddresses, offset)
+`, relayAgentFilterRulesStr, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateServerAssociationType(serverAssociationType, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateServerAssociationType(failoverAssociation *string, serverAssociationType, name string, numberOfAddresses, offset int64) string {
+	var extraConfig string
+	if serverAssociationType != "NONE" && failoverAssociation != nil {
+		extraConfig = fmt.Sprintf(`failover_association = %q`, *failoverAssociation)
+	}
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_server_association_type" {
    server_association_type = %q
    name = %q
    number_of_addresses = %d
    offset = %d
+   %s
 }
-`, serverAssociationType, name, numberOfAddresses, offset)
+`, serverAssociationType, name, numberOfAddresses, offset, extraConfig)
 }
 
-func testAccRangetemplateUnknownClients(unknownClients, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateUnknownClients(useUnknownClients bool, unknownClients, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_unknown_clients" {
+   use_unknown_clients = %t
    unknown_clients = %q
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, unknownClients, name, numberOfAddresses, offset)
+`, useUnknownClients, unknownClients, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateUpdateDnsOnLeaseRenewal(updateDnsOnLeaseRenewal bool, name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateUpdateDnsOnLeaseRenewal(useUpdateDnsOnLeaseRenewal, updateDnsOnLeaseRenewal bool, name string, numberOfAddresses, offset int64) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_rangetemplate" "test_update_dns_on_lease_renewal" {
+   use_update_dns_on_lease_renewal = %t
    update_dns_on_lease_renewal = %t
    name = %q
    number_of_addresses = %d
    offset = %d
 }
-`, updateDnsOnLeaseRenewal, name, numberOfAddresses, offset)
+`, useUpdateDnsOnLeaseRenewal, updateDnsOnLeaseRenewal, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateUseBootfile(useBootfile bool, name string, numberOfAddresses, offset int64) string {

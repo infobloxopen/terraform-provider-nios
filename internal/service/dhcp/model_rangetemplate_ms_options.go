@@ -43,14 +43,17 @@ var RangetemplateMsOptionsResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the DHCP option.",
 	},
 	"vendor_class": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the vendor class with which this DHCP option is associated.",
 	},
 	"user_class": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the user class with which this DHCP option is associated.",
 	},
 	"type": schema.StringAttribute{

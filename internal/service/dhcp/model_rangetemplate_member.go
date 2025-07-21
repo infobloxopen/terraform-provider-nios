@@ -29,14 +29,17 @@ var RangetemplateMemberAttrTypes = map[string]attr.Type{
 var RangetemplateMemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
 	},
 	"ipv6addr": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv6 Address of the Grid Member.",
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Grid member name",
 	},
 }
@@ -83,7 +86,7 @@ func (m *RangetemplateMemberModel) Flatten(ctx context.Context, from *dhcp.Range
 	if m == nil {
 		*m = RangetemplateMemberModel{}
 	}
-	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
-	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
+	m.Ipv4addr = flex.FlattenStringPointerNilAsNotEmpty(from.Ipv4addr)
+	m.Ipv6addr = flex.FlattenStringPointerNilAsNotEmpty(from.Ipv6addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }
