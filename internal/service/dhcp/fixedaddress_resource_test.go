@@ -294,7 +294,7 @@ func TestAccFixedaddressResource_Bootserver(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
-	t.Skip("Skipping test as CLI Credential is not supported yet")
+	t.Skip("Skipping test as CLI Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_cli_credentials"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.9"
@@ -1014,7 +1014,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressMatchClientRemoteID(ip, "REMOTE_ID", agentRemote),
+				Config: testAccFixedaddressMatchClientRemoteID(ip, "REMOTE_ID", agentRemoteID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "match_client", "REMOTE_ID"),
@@ -1366,7 +1366,7 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_SnmpCredential(t *testing.T) {
-	t.Skip("Skipping test as SNMP Credential is not supported yet")
+	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_snmp_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.42"
@@ -1834,7 +1834,7 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
-	t.Skip("Skipping test as SNMP Credential is not supported yet")
+	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_use_snmp_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.57"
