@@ -1,17 +1,13 @@
 resource "nios_ipam_network" "example_network" {
-  network       = "10.0.0.0/24"
-  network_view  = "default"
-  comment       = "Created by Terraform"
-  authority     = true
-  use_authority = true
-
-  // Optional: Configure extensible attributes
+  network      = "10.0.0.0/24"
+  network_view = "default"
+  comment      = "Created by Terraform"
   extattrs = {
     "Site" = "location-1"
   }
 }
 
-resource "nios_ipam_networkcontainer" "complete_example" {
+resource "nios_ipam_network" "complete_example" {
   // Required attributes
   network = "11.0.0.0/24"
 

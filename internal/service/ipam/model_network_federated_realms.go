@@ -26,14 +26,12 @@ var NetworkFederatedRealmsAttrTypes = map[string]attr.Type{
 
 var NetworkFederatedRealmsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The federated realm name",
-		Computed:            true,
 	},
 	"id": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The federated realm id",
-		Computed:            true,
 	},
 }
 

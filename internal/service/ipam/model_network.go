@@ -310,7 +310,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
-		Default:  stringdefault.StaticString(""),
 		Computed: true,
 	},
 	"bootserver": schema.StringAttribute{
@@ -341,7 +340,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"conflict_count": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The number of conflicts discovered via network discovery.",
-		Default:             int64default.StaticInt64(0),
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
@@ -349,7 +347,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 		},
-		Default:  stringdefault.StaticString(""),
 		Computed: true,
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
@@ -414,12 +411,14 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"dhcp_utilization": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The percentage of the total DHCP utilization of the network multiplied by 1000. This is the percentage of the total number of available IP addresses belonging to the network versus the total number of all IP addresses in network.",
-		Default:             int64default.StaticInt64(0),
 	},
 	"dhcp_utilization_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "A string describing the utilization level of the network.",
 		Default:             stringdefault.StaticString("LOW"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("LOW", "NORMAL", "HIGH", "FULL"),
+		},
 	},
 	"disable": schema.BoolAttribute{
 		Computed:            true,
@@ -498,7 +497,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"dynamic_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The total number of DHCP leases issued for the network.",
-		Default:             int64default.StaticInt64(0),
 	},
 	"email_list": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -590,6 +588,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		MarkdownDescription: "This field contains the federated realms associated to this network",
+		Computed:            true,
 	},
 	"high_water_mark": schema.Int64Attribute{
 		Optional:            true,
@@ -730,11 +729,12 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"mgm_private_overridable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.",
-		Default:             booldefault.StaticBool(true),
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: NetworkMsAdUserDataResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          NetworkMsAdUserDataResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "A struct that contains information about the Microsoft (r) Active Directory.",
 	},
 	"netmask": schema.Int64Attribute{
 		Optional:            true,
@@ -754,7 +754,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"network_container": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network container to which this network belongs (if any).",
-		// Default:             stringdefault.StaticString("/"),
 	},
 	"network_view": schema.StringAttribute{
 		Optional:            true,
@@ -829,12 +828,18 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CREATE", "MODIFY", "DELETE", "NONE"),
+		},
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The registration status of the network in RIR.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("NOT_REGISTERED"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("REGISTERED", "NOT_REGISTERED"),
+		},
 	},
 	"same_port_control_discovery_blackout": schema.BoolAttribute{
 		Optional:            true,
@@ -852,7 +857,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"static_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The number of static DHCP addresses configured in the network.",
-		Default:             int64default.StaticInt64(0),
 	},
 	"subscribe_settings": schema.SingleNestedAttribute{
 		Attributes: NetworkSubscribeSettingsResourceSchemaAttributes,
@@ -869,7 +873,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"total_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The total number of DHCP addresses configured in the network.",
-		Default:             int64default.StaticInt64(0),
 	},
 	"unmanaged": schema.BoolAttribute{
 		Optional:            true,
@@ -1110,7 +1113,6 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		return nil
 	}
 	to := &ipam.Network{
-		Ref:                              flex.ExpandStringPointer(m.Ref),
 		Authority:                        flex.ExpandBoolPointer(m.Authority),
 		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		Bootfile:                         flex.ExpandStringPointer(m.Bootfile),
@@ -1214,6 +1216,7 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
 		to.Network = ExpandNetworkNetwork(m.Network)
 		to.Template = flex.ExpandStringPointer(m.Template)
+		to.AutoCreateReversezone = flex.ExpandBoolPointer(m.AutoCreateReversezone)
 	}
 	return to
 }
@@ -1238,7 +1241,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 		*m = NetworkModel{}
 	}
 
-	from.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+	from.Options = RemoveDefaultDHCPOptionsNetwork(ctx, diags, from.Options, m.Options)
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Authority = types.BoolPointerValue(from.Authority)
@@ -1381,7 +1384,7 @@ func FlattenNetworkNetwork(from *ipam.NetworkNetwork) types.String {
 	return m
 }
 
-func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []ipam.NetworkOptions, planOptions types.List) []ipam.NetworkOptions {
+func RemoveDefaultDHCPOptionsNetwork(ctx context.Context, diags *diag.Diagnostics, options []ipam.NetworkOptions, planOptions types.List) []ipam.NetworkOptions {
 	defaultOptionName := "dhcp-lease-time"
 	defaultOptionVal := ""
 
