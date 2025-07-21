@@ -40,6 +40,14 @@ var ZoneAuthAllowUpdateAttrTypes = map[string]attr.Type{
 }
 
 var ZoneAuthAllowUpdateResourceSchemaAttributes = map[string]schema.Attribute{
+	"struct": schema.StringAttribute{
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
+		Validators: []validator.String{
+			stringvalidator.OneOf("addressac", "tsigac"),
+		},
+	},
 	"address": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -55,14 +63,6 @@ var ZoneAuthAllowUpdateResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
-	},
-	"struct": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The struct type of the object.",
-		Validators: []validator.String{
-			stringvalidator.OneOf("addressac", "tsigac"),
-		},
 	},
 	"permission": schema.StringAttribute{
 		Optional: true,

@@ -40,6 +40,14 @@ var ZoneAuthAllowQueryAttrTypes = map[string]attr.Type{
 }
 
 var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
+	"struct": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("addressac", "tsigac"),
+		},
+		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
+	},
 	"address": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -55,11 +63,6 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 				"Address should not have leading or trailing whitespace",
 			),
 		},
-	},
-	"struct": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The struct type of the object.",
 	},
 	"permission": schema.StringAttribute{
 		Optional:            true,

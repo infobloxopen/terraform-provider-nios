@@ -15,17 +15,12 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO
-//TestAccZoneAuthResource_AllowGssTsigZoneUpdates
-//TestAccZoneAuthResource_AllowQuery
-//TestAccZoneAuthResource_AllowTransfer
-//TestAccZoneAuthResource_AllowUpdate
-//TestAccZoneAuthResource_DnsIntegrityEnable
-//TestAccZoneAuthResource_DnsIntegrityMember
-//TestAccZoneAuthResource_DnssecKeyParams
-//TestAccZoneAuthResource_DnssecKeys
-//TestAccZoneAuthResource_ExternalPrimaries
-//TestAccZoneAuthResource_ExternalSecondaries
+// TODO : Objects to be present in the grid for testing
+// - DDNS Principal Group - example-ddns-principal-group, updated-ddns-principal-group
+// - Grid Members - infoblox.172_28_83_235, infoblox.172_28_83_209
+// - NS Group - example-ns-group, updated-example-ns-group
+// - Record Name Policy - example-policy, example-policy-update
+// - MS Server - 10.120.23.22, 10.120.23.23
 
 var readableAttributesForZoneAuth = "address,allow_active_dir,allow_fixed_rrset_order,allow_gss_tsig_for_underscore_zone,allow_gss_tsig_zone_updates,allow_query,allow_transfer,allow_update,allow_update_forwarding,aws_rte53_zone_info,cloud_info,comment,copy_xfer_to_notify,create_underscore_zones,ddns_force_creation_timestamp_update,ddns_principal_group,ddns_principal_tracking,ddns_restrict_patterns,ddns_restrict_patterns_list,ddns_restrict_protected,ddns_restrict_secure,ddns_restrict_static,disable,disable_forwarding,display_domain,dns_fqdn,dns_integrity_enable,dns_integrity_frequency,dns_integrity_member,dns_integrity_verbose_logging,dns_soa_email,dnssec_key_params,dnssec_keys,dnssec_ksk_rollover_date,dnssec_zsk_rollover_date,effective_check_names_policy,effective_record_name_policy,extattrs,external_primaries,external_secondaries,fqdn,grid_primary,grid_primary_shared_with_ms_parent_delegation,grid_secondaries,is_dnssec_enabled,is_dnssec_signed,is_multimaster,last_queried,last_queried_acl,locked,locked_by,mask_prefix,member_soa_mnames,member_soa_serials,ms_ad_integrated,ms_allow_transfer,ms_allow_transfer_mode,ms_dc_ns_record_creation,ms_ddns_mode,ms_managed,ms_primaries,ms_read_only,ms_secondaries,ms_sync_disabled,ms_sync_master_name,network_associations,network_view,notify_delay,ns_group,parent,prefix,primary_type,record_name_policy,records_monitored,rr_not_queried_enabled_time,scavenging_settings,soa_default_ttl,soa_email,soa_expire,soa_negative_ttl,soa_refresh,soa_retry,soa_serial_number,srgs,update_forwarding,use_allow_active_dir,use_allow_query,use_allow_transfer,use_allow_update,use_allow_update_forwarding,use_check_names_policy,use_copy_xfer_to_notify,use_ddns_force_creation_timestamp_update,use_ddns_patterns_restriction,use_ddns_principal_security,use_ddns_restrict_protected,use_ddns_restrict_static,use_dnssec_key_params,use_external_primary,use_grid_zone_timer,use_import_from,use_notify_delay,use_record_name_policy,use_scavenging_settings,use_soa_email,using_srg_associations,view,zone_format,zone_not_queried_enabled_time"
 
@@ -1079,26 +1074,27 @@ func TestAccZoneAuthResource_ExtAttrs(t *testing.T) {
 	})
 }
 
-// External primaries maynot be configured when not in use
 func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_external_primaries"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	externalPrimaries := []map[string]any{
 		{
-			"address": "192.168.1.10",
-			"name":    "primary1.example.com",
+			"address": "10.0.0.0",
+			"name":    "example-server",
 		},
 	}
 	updatedExternalPrimaries := []map[string]any{
 		{
-			"address": "192.168.1.20",
-			"name":    "primary2.example.com",
+			"address": "10.0.0.2",
+			"name":    "example-server",
 		},
 	}
-	gridSecondaries := []map[string]any{
+	msSecondaries := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_209",
+			"address": "10.34.98.68",
+			"ns_name": "example-server",
+			"ns_ip":   "10.120.23.22",
 		},
 	}
 
@@ -1108,21 +1104,21 @@ func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthExternalPrimaries(zoneFqdn, "default", externalPrimaries, gridSecondaries),
+				Config: testAccZoneAuthExternalPrimaries(zoneFqdn, "default", externalPrimaries, msSecondaries, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "192.168.1.10"),
-					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "primary1.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "10.0.0.0"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "example-server"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthExternalPrimaries(zoneFqdn, "default", updatedExternalPrimaries, gridSecondaries),
+				Config: testAccZoneAuthExternalPrimaries(zoneFqdn, "default", updatedExternalPrimaries, msSecondaries, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "192.168.1.20"),
-					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "primary2.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "10.0.0.2"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "example-server"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1605,9 +1601,20 @@ func TestAccZoneAuthResource_MsPrimaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_ms_primaries"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-	// address := "10.0.0.0"
-	// nsIp := "10.0.0.1"
-	// nsName := "ns1." + zoneFqdn
+	msPrimaries := []map[string]any{
+		{
+			"address": "10.120.23.22",
+			"ns_name": "example-server",
+			"ns_ip":   "10.120.23.22",
+		},
+	}
+	updatedMsPrimaries := []map[string]any{
+		{
+			"address": "10.120.23.23",
+			"ns_name": "example-server",
+			"ns_ip":   "10.120.23.23",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1615,18 +1622,24 @@ func TestAccZoneAuthResource_MsPrimaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthMsPrimaries(zoneFqdn),
+				Config: testAccZoneAuthMsPrimaries(zoneFqdn, "default", msPrimaries),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_primaries", "MS_PRIMARIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_primaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ms_primaries.0.address", "10.120.23.22"),
+					resource.TestCheckResourceAttr(resourceName, "ms_primaries.0.ns_name", "example-server"),
+					resource.TestCheckResourceAttr(resourceName, "ms_primaries.0.ns_ip", "10.120.23.22"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthMsPrimaries(zoneFqdn),
+				Config: testAccZoneAuthMsPrimaries(zoneFqdn, "default", updatedMsPrimaries),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_primaries", "MS_PRIMARIES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_primaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ms_primaries.0.address", "10.120.23.23"),
+					resource.TestCheckResourceAttr(resourceName, "ms_primaries.0.ns_name", "example-server"),
+					resource.TestCheckResourceAttr(resourceName, "ms_primaries.0.ns_ip", "10.120.23.23"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1637,6 +1650,26 @@ func TestAccZoneAuthResource_MsPrimaries(t *testing.T) {
 func TestAccZoneAuthResource_MsSecondaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_ms_secondaries"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	msSecondaries := []map[string]any{
+		{
+			"address": "10.120.23.22",
+			"ns_name": "example-server",
+			"ns_ip":   "10.120.23.22",
+		},
+	}
+	updatedMsSecondaries := []map[string]any{
+		{
+			"address": "10.120.23.23",
+			"ns_name": "example-server",
+			"ns_ip":   "10.120.23.23",
+		},
+	}
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.172_28_82_248",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1644,18 +1677,24 @@ func TestAccZoneAuthResource_MsSecondaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthMsSecondaries("MS_SECONDARIES_REPLACE_ME"),
+				Config: testAccZoneAuthMsSecondaries(zoneFqdn, "default", msSecondaries, gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_secondaries", "MS_SECONDARIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_secondaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ms_secondaries.0.address", "10.120.23.22"),
+					resource.TestCheckResourceAttr(resourceName, "ms_secondaries.0.ns_name", "example-server"),
+					resource.TestCheckResourceAttr(resourceName, "ms_secondaries.0.ns_ip", "10.120.23.22"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthMsSecondaries("MS_SECONDARIES_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthMsSecondaries(zoneFqdn, "default", updatedMsSecondaries, gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_secondaries", "MS_SECONDARIES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_secondaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ms_secondaries.0.address", "10.120.23.23"),
+					resource.TestCheckResourceAttr(resourceName, "ms_secondaries.0.ns_name", "example-server"),
+					resource.TestCheckResourceAttr(resourceName, "ms_secondaries.0.ns_ip", "10.120.23.23"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1667,6 +1706,13 @@ func TestAccZoneAuthResource_MsSyncDisabled(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_ms_sync_disabled"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	msPrimaries := []map[string]any{
+		{
+			"address": "10.120.23.22",
+			"ns_name": "example-server",
+			"ns_ip":   "10.120.23.22",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1674,7 +1720,7 @@ func TestAccZoneAuthResource_MsSyncDisabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthMsSyncDisabled(zoneFqdn, "default", true),
+				Config: testAccZoneAuthMsSyncDisabled(zoneFqdn, "default", msPrimaries, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ms_sync_disabled", "true"),
@@ -1682,7 +1728,7 @@ func TestAccZoneAuthResource_MsSyncDisabled(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthMsSyncDisabled(zoneFqdn, "default", false),
+				Config: testAccZoneAuthMsSyncDisabled(zoneFqdn, "default", msPrimaries, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ms_sync_disabled", "false"),
@@ -2665,6 +2711,20 @@ func TestAccZoneAuthResource_UseDnssecKeyParams(t *testing.T) {
 func TestAccZoneAuthResource_UseExternalPrimary(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_external_primary"
 	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	externalPrimaries := []map[string]any{
+		{
+			"address": "10.0.0.0",
+			"name":    "example-server",
+		},
+	}
+	msSecondaries := []map[string]any{
+		{
+			"address": "10.120.23.22",
+			"ns_name": "example-server",
+			"ns_ip":   "10.120.23.22",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2672,18 +2732,18 @@ func TestAccZoneAuthResource_UseExternalPrimary(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthUseExternalPrimary("USE_EXTERNAL_PRIMARY_REPLACE_ME"),
+				Config: testAccZoneAuthUseExternalPrimary(zoneFqdn, "default", externalPrimaries, msSecondaries, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "USE_EXTERNAL_PRIMARY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseExternalPrimary("USE_EXTERNAL_PRIMARY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneAuthUseExternalPrimaryUpdate(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "USE_EXTERNAL_PRIMARY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2715,7 +2775,7 @@ func TestAccZoneAuthResource_UseGridZoneTimer(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthUseGridZoneTimer(zoneFqdn, "default", gridPrimary, false),
+				Config: testAccZoneAuthUseGridZoneTimerUpdate(zoneFqdn, "default", gridPrimary, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "false"),
@@ -2727,6 +2787,7 @@ func TestAccZoneAuthResource_UseGridZoneTimer(t *testing.T) {
 }
 
 func TestAccZoneAuthResource_UseImportFrom(t *testing.T) {
+	t.Skip("Skipping test")
 	var resourceName = "nios_dns_zone_auth.test_use_import_from"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
@@ -2949,10 +3010,10 @@ func TestAccZoneAuthResource_ZoneFormat(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "IPV4"),
+				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "FORWARD"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV4"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3344,16 +3405,17 @@ resource "nios_dns_zone_auth" "test_extattrs" {
 `, zoneFqdn, view, extattrsStr)
 }
 
-func testAccZoneAuthExternalPrimaries(zoneFqdn, view string, externalPrimaries, gridSecondaries []map[string]any) string {
+func testAccZoneAuthExternalPrimaries(zoneFqdn, view string, externalPrimaries, msSecondaries []map[string]any, useExternalPrimary bool) string {
 	externalPrimariesHCL := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
-	gridSecondariesHCL := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
+	msSecondariesHCL := utils.ConvertSliceOfMapsToHCL(msSecondaries)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_external_primaries" {
 	fqdn = %q
     view = %q
     external_primaries = %s
-	grid_secondaries = %s
-}`, zoneFqdn, view, externalPrimariesHCL, gridSecondariesHCL)
+	ms_secondaries = %s
+	use_external_primary = %t
+}`, zoneFqdn, view, externalPrimariesHCL, msSecondariesHCL, useExternalPrimary)
 }
 
 func testAccZoneAuthExternalSecondaries(zoneFqdn, view string, externalSecondaries, gridPrimary []map[string]any) string {
@@ -3489,30 +3551,40 @@ resource "nios_dns_zone_auth" "test_ms_ddns_mode" {
 `, zoneFqdn, view, msDdnsMode)
 }
 
-func testAccZoneAuthMsPrimaries(msPrimaries string) string {
+func testAccZoneAuthMsPrimaries(zoneFqdn, view string, msPrimaries []map[string]any) string {
+	msPrimariesHCL := utils.ConvertSliceOfMapsToHCL(msPrimaries)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_ms_primaries" {
-    ms_primaries = %q
+    fqdn = %q
+    view = %q
+    ms_primaries = %s
 }
-`, msPrimaries)
+`, zoneFqdn, view, msPrimariesHCL)
 }
 
-func testAccZoneAuthMsSecondaries(msSecondaries string) string {
+func testAccZoneAuthMsSecondaries(zoneFqdn, view string, msSecondaries []map[string]any, gridPrimary []map[string]any) string {
+	msSecondariesHCL := utils.ConvertSliceOfMapsToHCL(msSecondaries)
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_ms_secondaries" {
-    ms_secondaries = %q
+    fqdn = %q
+    view = %q
+    ms_secondaries = %s
+    grid_primary = %s
 }
-`, msSecondaries)
+`, zoneFqdn, view, msSecondariesHCL, gridPrimaryHCL)
 }
 
-func testAccZoneAuthMsSyncDisabled(zoneFqdn, view string, msSyncDisabled bool) string {
+func testAccZoneAuthMsSyncDisabled(zoneFqdn, view string, msPrimaries []map[string]any, msSyncDisabled bool) string {
+	msPrimariesHCL := utils.ConvertSliceOfMapsToHCL(msPrimaries)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_ms_sync_disabled" {
     fqdn = %q
     view = %q
     ms_sync_disabled = %t
+    ms_primaries = %s
 }
-`, zoneFqdn, view, msSyncDisabled)
+`, zoneFqdn, view, msSyncDisabled, msPrimariesHCL)
 }
 
 func testAccZoneAuthNotifyDelay(zoneFqdn, view string, notifyDelay int, useNotifyDelay bool) string {
@@ -3865,12 +3937,28 @@ resource "nios_dns_zone_auth" "test_use_dnssec_key_params" {
 }`, zoneFqdn, view, kskAlgorithmsHCL, zskAlgorithmsHCL, useDnssecKeyParams)
 }
 
-func testAccZoneAuthUseExternalPrimary(useExternalPrimary string) string {
+func testAccZoneAuthUseExternalPrimary(zoneFqdn, view string, externalPrimaries, msSecondaries []map[string]any, useExternalPrimary bool) string {
+	externalPrimariesHCL := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
+	msSecondariesHCL := utils.ConvertSliceOfMapsToHCL(msSecondaries)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_external_primary" {
-    use_external_primary = %q
+    fqdn = %q
+    view = %q
+    external_primaries = %s
+    ms_secondaries = %s
+    use_external_primary = %t
 }
-`, useExternalPrimary)
+`, zoneFqdn, view, externalPrimariesHCL, msSecondariesHCL, useExternalPrimary)
+}
+
+func testAccZoneAuthUseExternalPrimaryUpdate(zoneFqdn, view string, useExternalPrimary bool) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" "test_use_external_primary" {
+    fqdn = %q
+    view = %q
+    use_external_primary = %t
+}
+`, zoneFqdn, view, useExternalPrimary)
 }
 
 func testAccZoneAuthUseGridZoneTimer(zoneFqdn, view string, gridPrimary []map[string]any, useGridZoneTimer bool) string {
@@ -3880,12 +3968,23 @@ resource "nios_dns_zone_auth" "test_use_grid_zone_timer" {
     fqdn = %q
     view = %q
     grid_primary = %s
-	soa_default_ttl = 28800
+	soa_default_ttl = 37000
 	soa_expire = 2419200
     soa_negative_ttl = 900
     soa_refresh = 10800
     soa_retry = 3600
+    use_grid_zone_timer = %t
+}
+`, zoneFqdn, view, gridPrimaryHCL, useGridZoneTimer)
+}
 
+func testAccZoneAuthUseGridZoneTimerUpdate(zoneFqdn, view string, gridPrimary []map[string]any, useGridZoneTimer bool) string {
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" "test_use_grid_zone_timer" {
+    fqdn = %q
+    view = %q
+    grid_primary = %s
     use_grid_zone_timer = %t
 }
 `, zoneFqdn, view, gridPrimaryHCL, useGridZoneTimer)

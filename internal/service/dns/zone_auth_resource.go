@@ -22,6 +22,8 @@ var readableAttributesForZoneAuth = "address,allow_active_dir,allow_fixed_rrset_
 var _ resource.Resource = &ZoneAuthResource{}
 var _ resource.ResourceWithImportState = &ZoneAuthResource{}
 
+var _ resource.ResourceWithValidateConfig = &ZoneAuthResource{}
+
 func NewZoneAuthResource() resource.Resource {
 	return &ZoneAuthResource{}
 }
@@ -60,6 +62,31 @@ func (r *ZoneAuthResource) Configure(ctx context.Context, req resource.Configure
 	}
 
 	r.client = client
+}
+
+func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var useGridZoneTimer types.Bool
+	req.Config.GetAttribute(ctx, path.Root("use_grid_zone_timer"), &useGridZoneTimer)
+
+	if useGridZoneTimer.IsNull() {
+		return
+	}
+
+	if !useGridZoneTimer.ValueBool() {
+		var soaDefaultTTL, soaExpire, soaNegativeTTL, soaRefresh, soaRetry types.Int64
+		req.Config.GetAttribute(ctx, path.Root("soa_default_ttl"), &soaDefaultTTL)
+		req.Config.GetAttribute(ctx, path.Root("soa_expire"), &soaExpire)
+		req.Config.GetAttribute(ctx, path.Root("soa_negative_ttl"), &soaNegativeTTL)
+		req.Config.GetAttribute(ctx, path.Root("soa_refresh"), &soaRefresh)
+		req.Config.GetAttribute(ctx, path.Root("soa_retry"), &soaRetry)
+
+		if !soaDefaultTTL.IsNull() || !soaExpire.IsNull() || !soaNegativeTTL.IsNull() || !soaRefresh.IsNull() || !soaRetry.IsNull() {
+			resp.Diagnostics.AddError(
+				"SOA Values Not Allowed",
+				"When grid_zone_timer is set to false, the SOA Values (soa_default_ttl, soa_expire, soa_negative_ttl, soa_refresh, soa_retry) cannot be set.",
+			)
+		}
+	}
 }
 
 func (r *ZoneAuthResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

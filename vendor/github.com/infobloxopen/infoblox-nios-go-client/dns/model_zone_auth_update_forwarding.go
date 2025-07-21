@@ -19,7 +19,7 @@ var _ MappedNullable = &ZoneAuthUpdateForwarding{}
 
 // ZoneAuthUpdateForwarding struct for ZoneAuthUpdateForwarding
 type ZoneAuthUpdateForwarding struct {
-	// The struct type of the object.
+	// The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
 	Struct *string `json:"_struct,omitempty"`
 	// The address this rule applies to or \"Any\".
 	Address *string `json:"address,omitempty"`

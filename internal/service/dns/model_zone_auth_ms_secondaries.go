@@ -34,23 +34,25 @@ var ZoneAuthMsSecondariesAttrTypes = map[string]attr.Type{
 
 var ZoneAuthMsSecondariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The address of the server.",
 	},
 	"is_master": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "This flag indicates if this server is a synchronization master.",
 	},
 	"ns_ip": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "This address is used when generating the NS record in the zone, which can be different in case of multihomed hosts.",
 	},
 	"ns_name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "This name is used when generating the NS record in the zone, which can be different in case of multihomed hosts.",
 	},
 	"stealth": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
