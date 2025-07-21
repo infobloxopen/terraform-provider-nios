@@ -14,14 +14,14 @@ description: |-
 
 ```terraform
 // Create DHCP RangeTemplate with required Fields
-resource "nios_dhcp_rangetemplate" "range_required_fields" {
+resource "nios_dhcp_rangetemplate" "rangetemplate_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
 }
 
 // Create DHCP RangeTemplate with additional Fields
-resource "nios_dhcp_rangetemplate" "range_additional_fields" {
+resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields" {
   name                    = "example_range_template_additional_fields"
   number_of_addresses     = 10
   offset                  = 20
@@ -58,6 +58,57 @@ resource "nios_dhcp_rangetemplate" "range_additional_fields" {
   extattrs = {
     Site = "location-1"
   }
+}
+
+// Create DHCP RangeTemplate with filters and exclude fields
+resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields2" {
+  name                = "example_range_template3"
+  number_of_addresses = 60
+  offset              = 70
+  exclude = [
+    {
+      "number_of_addresses" = 50
+      "offset"              = 60
+      "comment"             = "Example comment for range template exclude"
+    }
+  ]
+  fingerprint_filter_rules = [
+    {
+      "filter"     = "finger_print_filter"
+      "permission" = "Allow"
+    }
+  ]
+  use_logic_filter_rules = true
+  logic_filter_rules = [
+    {
+      "filter" = "option_filter"
+      "type"   = "Option"
+    }
+  ]
+  mac_filter_rules = [
+    {
+      "filter"     = "mac_filter"
+      "permission" = "Deny"
+    }
+  ]
+  nac_filter_rules = [
+    {
+      "filter"     = "nac_filter"
+      "permission" = "Allow"
+    }
+  ]
+  option_filter_rules = [
+    {
+      "filter"     = "option_filter"
+      "permission" = "Deny"
+    }
+  ]
+  relay_agent_filter_rules = [
+    {
+      "filter"     = "relay_agent_filter"
+      "permission" = "Allow"
+    }
+  ]
 }
 ```
 
