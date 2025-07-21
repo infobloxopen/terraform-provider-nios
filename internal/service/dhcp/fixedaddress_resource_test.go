@@ -28,6 +28,7 @@ import (
 // - Reserved Interface
 // - Discovery
 // - Fixed Address Template
+// - Network - To randomize the test IPs
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // - Network View - default , test_fixed_address
