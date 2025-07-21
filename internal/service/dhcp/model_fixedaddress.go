@@ -2,6 +2,10 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -153,13 +157,23 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"agent_circuit_id": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(path.MatchRoot("agent_remote_id")),
+			stringvalidator.ConflictsWith(path.MatchRoot("mac")),
+			stringvalidator.ConflictsWith(path.MatchRoot("dhcp_client_identifier")),
+		},
 		MarkdownDescription: "The agent circuit ID for the fixed address.",
 	},
 	"agent_remote_id": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(path.MatchRoot("mac")),
+			stringvalidator.ConflictsWith(path.MatchRoot("agent_circuit_id")),
+			stringvalidator.ConflictsWith(path.MatchRoot("dhcp_client_identifier")),
+		},
 		MarkdownDescription: "The agent remote ID for the fixed address.",
 	},
 	"allow_telnet": schema.BoolAttribute{
@@ -245,8 +259,13 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The vendor of the device.",
 	},
 	"dhcp_client_identifier": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(path.MatchRoot("agent_remote_id")),
+			stringvalidator.ConflictsWith(path.MatchRoot("mac")),
+			stringvalidator.ConflictsWith(path.MatchRoot("agent_circuit_id")),
+		},
 		MarkdownDescription: "The DHCP client ID for the fixed address.",
 	},
 	"disable": schema.BoolAttribute{
@@ -310,8 +329,11 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The IPv4 Address of the record.",
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Attributes:          FuncCallResourceSchemaAttributes,
-		Optional:            true,
+		Attributes: FuncCallResourceSchemaAttributes,
+		Optional:   true,
+		Validators: []validator.Object{
+			objectvalidator.ConflictsWith(path.MatchRoot("ipv4addr")),
+		},
 		MarkdownDescription: "Function call to be executed for Fixed Address",
 	},
 	"is_invalid_mac": schema.BoolAttribute{
@@ -326,13 +348,17 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
 	"mac": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(path.MatchRoot("agent_remote_id")),
+			stringvalidator.ConflictsWith(path.MatchRoot("agent_circuit_id")),
+			stringvalidator.ConflictsWith(path.MatchRoot("dhcp_client_identifier")),
+		},
 		MarkdownDescription: "The MAC address value for this fixed address.",
 	},
 	"match_client": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The match_client value for this fixed address. Valid values are: \"MAC_ADDRESS\": The fixed IP address is leased to the matching MAC address. \"CLIENT_ID\": The fixed IP address is leased to the matching DHCP client identifier. \"RESERVED\": The fixed IP address is reserved for later use with a MAC address that only has zeros. \"CIRCUIT_ID\": The fixed IP address is leased to the DHCP client with a matching circuit ID. Note that the \"agent_circuit_id\" field must be set in this case. \"REMOTE_ID\": The fixed IP address is leased to the DHCP client with a matching remote ID. Note that the \"agent_remote_id\" field must be set in this case.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
