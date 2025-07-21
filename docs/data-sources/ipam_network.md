@@ -98,7 +98,7 @@ Optional:
 - `low_water_mark_reset` (Number) The percentage of DHCP network usage threshold below which network usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.
 - `members` (Attributes List) A list of members or Microsoft (r) servers that serve DHCP for this network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the "_struct" member to the struct type. (see [below for nested schema](#nestedatt--result--members))
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
+- `ms_ad_user_data` (Attributes) A struct that contains information about the Microsoft (r) Active Directory. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `netmask` (Number) The netmask of the network in CIDR format.
 - `network` (String) The IPv4 Address of the record.
 - `network_view` (String) The name of the network view in which this network resides.
@@ -279,7 +279,7 @@ Optional:
 <a id="nestedatt--result--federated_realms"></a>
 ### Nested Schema for `result.federated_realms`
 
-Optional:
+Required:
 
 - `id` (String) The federated realm id
 - `name` (String) The federated realm name

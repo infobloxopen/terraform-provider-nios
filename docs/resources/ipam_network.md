@@ -14,19 +14,15 @@ Manages a Network
 
 ```terraform
 resource "nios_ipam_network" "example_network" {
-  network       = "10.0.0.0/24"
-  network_view  = "default"
-  comment       = "Created by Terraform"
-  authority     = true
-  use_authority = true
-
-  // Optional: Configure extensible attributes
+  network      = "10.0.0.0/24"
+  network_view = "default"
+  comment      = "Created by Terraform"
   extattrs = {
     "Site" = "location-1"
   }
 }
 
-resource "nios_ipam_networkcontainer" "complete_example" {
+resource "nios_ipam_network" "complete_example" {
   // Required attributes
   network = "11.0.0.0/24"
 
@@ -146,7 +142,7 @@ resource "nios_ipam_network" "example_func_call" {
 - `low_water_mark_reset` (Number) The percentage of DHCP network usage threshold below which network usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.
 - `members` (Attributes List) A list of members or Microsoft (r) servers that serve DHCP for this network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the "_struct" member to the struct type. (see [below for nested schema](#nestedatt--members))
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--ms_ad_user_data))
+- `ms_ad_user_data` (Attributes) A struct that contains information about the Microsoft (r) Active Directory. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `netmask` (Number) The netmask of the network in CIDR format.
 - `network` (String) The IPv4 Address of the record.
 - `network_view` (String) The name of the network view in which this network resides.
@@ -327,7 +323,7 @@ Optional:
 <a id="nestedatt--federated_realms"></a>
 ### Nested Schema for `federated_realms`
 
-Optional:
+Required:
 
 - `id` (String) The federated realm id
 - `name` (String) The federated realm name
