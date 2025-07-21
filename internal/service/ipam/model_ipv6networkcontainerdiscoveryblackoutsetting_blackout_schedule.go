@@ -3,9 +3,14 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -49,10 +54,24 @@ var Ipv6networkcontainerdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAt
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
+		Validators: []validator.List{
+			listvalidator.ValueStringsAre(
+				stringvalidator.OneOf(
+					"SUNDAY",
+					"MONDAY",
+					"TUESDAY",
+					"WEDNESDAY",
+					"THURSDAY",
+					"FRIDAY",
+					"SATURDAY",
+				),
+			),
+		},
 	},
 	"time_zone": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
+		Computed:            true,
 	},
 	"recurring_time": schema.Int64Attribute{
 		Optional:            true,
@@ -61,18 +80,33 @@ var Ipv6networkcontainerdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAt
 	"frequency": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The frequency for the scheduled task.",
+		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"DAILY",
+				"HOURLY",
+				"WEEKLY",
+				"MONTHLY",
+			),
+		},
 	},
 	"every": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The number of frequency to wait before repeating the scheduled task.",
+		Default:             int64default.StaticInt64(1),
+		Computed:            true,
 	},
 	"minutes_past_hour": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The minutes past the hour for the scheduled task.",
+		Default:             int64default.StaticInt64(1),
+		Computed:            true,
 	},
 	"hour_of_day": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The hour of day for the scheduled task.",
+		Default:             int64default.StaticInt64(1),
+		Computed:            true,
 	},
 	"year": schema.Int64Attribute{
 		Optional:            true,
@@ -81,18 +115,31 @@ var Ipv6networkcontainerdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAt
 	"month": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The month for the scheduled task.",
+		Default:             int64default.StaticInt64(1),
+		Computed:            true,
 	},
 	"day_of_month": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The day of the month for the scheduled task.",
+		Default:             int64default.StaticInt64(1),
+		Computed:            true,
 	},
 	"repeat": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Indicates if the scheduled task will be repeated or run only once.",
+		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"ONCE",
+				"RECUR",
+			),
+		},
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "If set to True, the scheduled task is disabled.",
+		Default:             booldefault.StaticBool(false),
+		Computed:            true,
 	},
 }
 
