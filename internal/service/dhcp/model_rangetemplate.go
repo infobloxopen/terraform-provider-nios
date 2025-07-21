@@ -15,15 +15,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	validator2 "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RangetemplateModel struct {
@@ -472,7 +472,12 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
 		},
-		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
+		PlanModifiers: []planmodifier.List{
+			validator2.DefaultOptionsModifier{
+				AttrTypes: validator2.ConvertSchemaAttributesToAttrTypes(RangetemplateOptionsResourceSchemaAttributes),
+			},
+		},
+		MarkdownDescription: "An unordered set of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional: true,
@@ -784,8 +789,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.NumberOfAddresses = flex.FlattenInt64Pointer(from.NumberOfAddresses)
 	m.Offset = flex.FlattenInt64Pointer(from.Offset)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangetemplateOptionFilterRulesAttrTypes, diags, FlattenRangetemplateOptionFilterRules)
-	//m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
-	from.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangetemplateRelayAgentFilterRulesAttrTypes, diags, FlattenRangetemplateRelayAgentFilterRules)
