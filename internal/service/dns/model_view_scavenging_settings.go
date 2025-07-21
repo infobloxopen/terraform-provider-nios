@@ -41,26 +41,32 @@ var ViewScavengingSettingsAttrTypes = map[string]attr.Type{
 var ViewScavengingSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_scavenging": schema.BoolAttribute{
 		Optional:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the resource record scavenging is enabled or not.",
 	},
 	"enable_recurrent_scavenging": schema.BoolAttribute{
 		Optional:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the recurrent resource record scavenging is enabled or not.",
 	},
 	"enable_auto_reclamation": schema.BoolAttribute{
 		Optional:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the automatic resource record scavenging is enabled or not.",
 	},
 	"enable_rr_last_queried": schema.BoolAttribute{
 		Optional:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the resource record last queried monitoring in affected zones is enabled or not.",
 	},
 	"enable_zone_last_queried": schema.BoolAttribute{
 		Optional:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the last queried monitoring for affected zones is enabled or not.",
 	},
 	"reclaim_associated_records": schema.BoolAttribute{
 		Optional:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the associated resource record scavenging is enabled or not.",
 	},
 	"scavenging_schedule": schema.SingleNestedAttribute{
@@ -119,7 +125,6 @@ func FlattenViewScavengingSettings(ctx context.Context, from *dns.ViewScavenging
 	}
 	m := ViewScavengingSettingsModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewScavengingSettingsAttrTypes, m)
 	diags.Append(d...)
 	return t

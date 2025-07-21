@@ -64,7 +64,6 @@ func FlattenViewFixedRrsetOrderFqdns(ctx context.Context, from *dns.ViewFixedRrs
 	}
 	m := ViewFixedRrsetOrderFqdnsModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewFixedRrsetOrderFqdnsAttrTypes, m)
 	diags.Append(d...)
 	return t

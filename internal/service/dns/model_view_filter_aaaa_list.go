@@ -64,7 +64,6 @@ func FlattenViewFilterAaaaList(ctx context.Context, from *dns.ViewFilterAaaaList
 	}
 	m := ViewFilterAaaaListModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewFilterAaaaListAttrTypes, m)
 	diags.Append(d...)
 	return t

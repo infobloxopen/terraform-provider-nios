@@ -92,7 +92,6 @@ func FlattenViewMatchClients(ctx context.Context, from *dns.ViewMatchClients, di
 	}
 	m := ViewMatchClientsModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewMatchClientsAttrTypes, m)
 	diags.Append(d...)
 	return t

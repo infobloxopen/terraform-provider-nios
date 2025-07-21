@@ -6,6 +6,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -191,9 +197,6 @@ var ViewAttrTypes = map[string]attr.Type{
 var ViewResourceSchemaAttributes = map[string]schema.Attribute{
    "ref": schema.StringAttribute{
         Computed: true,
-        PlanModifiers: []planmodifier.String{
-            stringplanmodifier.UseStateForUnknown(),
-        },
         MarkdownDescription: "The reference to the object.",
     },
 	"blacklist_action": schema.StringAttribute{
@@ -451,7 +454,6 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The value is used by authoritative DNS servers to never send DNS responses larger than the configured value. The value should be between 512 and 4096 bytes. The recommended value is between 512 and 1220 bytes.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
 		Required:			 true,
 		MarkdownDescription: "Name of the DNS view.",
 	},
@@ -847,7 +849,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.EnableBlacklist = types.BoolPointerValue(from.EnableBlacklist)
 	m.EnableFixedRrsetOrderFqdns = types.BoolPointerValue(from.EnableFixedRrsetOrderFqdns)
 	m.EnableMatchRecursiveOnly = types.BoolPointerValue(from.EnableMatchRecursiveOnly)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
+	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
 	m.FilterAaaa = flex.FlattenStringPointer(from.FilterAaaa)
 	m.FilterAaaaList = flex.FlattenFrameworkListNestedBlock(ctx, from.FilterAaaaList, ViewFilterAaaaListAttrTypes, diags, FlattenViewFilterAaaaList)
 	m.FixedRrsetOrderFqdns = flex.FlattenFrameworkListNestedBlock(ctx, from.FixedRrsetOrderFqdns, ViewFixedRrsetOrderFqdnsAttrTypes, diags, FlattenViewFixedRrsetOrderFqdns)

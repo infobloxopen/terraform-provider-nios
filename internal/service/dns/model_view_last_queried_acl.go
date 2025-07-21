@@ -64,7 +64,6 @@ func FlattenViewLastQueriedAcl(ctx context.Context, from *dns.ViewLastQueriedAcl
 	}
 	m := ViewLastQueriedAclModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ViewLastQueriedAclAttrTypes, m)
 	diags.Append(d...)
 	return t
