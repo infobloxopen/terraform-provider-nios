@@ -1616,14 +1616,6 @@ resource "nios_ipam_ipv6network_container" "test_preferred_lifetime" {
 `, network, preferredLifetime, usePreferredLifetime)
 }
 
-func testAccIpv6networkcontainerRirOrganization(rirOrganization string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_rir_organization" {
-    rir_organization = %q
-}
-`, rirOrganization)
-}
-
 func testAccIpv6networkcontainerRirRegistrationStatus(network, rirRegistrationStatus string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_rir_registration_status" {
@@ -1641,14 +1633,6 @@ resource "nios_ipam_ipv6network_container" "test_same_port_control_discovery_bla
     use_blackout_setting = %q
 }
 `, network, samePortControlDiscoveryBlackout, useBlackoutSetting)
-}
-
-func testAccIpv6networkcontainerSubscribeSettings(subscribeSettings string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_subscribe_settings" {
-    subscribe_settings = %q
-}
-`, subscribeSettings)
 }
 
 func testAccIpv6networkcontainerUnmanaged(network, unmanaged string) string {
