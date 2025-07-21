@@ -594,18 +594,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-// func ExpandIpv6networkcontainer(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.Ipv6networkcontainer {
-// 	if o.IsNull() || o.IsUnknown() {
-// 		return nil
-// 	}
-// 	var m Ipv6networkcontainerModel
-// 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-// 	if diags.HasError() {
-// 		return nil
-// 	}
-// 	return m.Expand(ctx, diags)
-// }
-
 func (m *Ipv6networkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Ipv6networkcontainer {
 	if m == nil {
 		return nil
@@ -707,7 +695,6 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.DdnsGenerateHostname = types.BoolPointerValue(from.DdnsGenerateHostname)
 	m.DdnsServerAlwaysUpdates = types.BoolPointerValue(from.DdnsServerAlwaysUpdates)
 	m.DdnsTtl = flex.FlattenInt64Pointer(from.DdnsTtl)
-	// m.DeleteReason = flex.FlattenStringPointer(from.DeleteReason)
 	m.DiscoverNowStatus = flex.FlattenStringPointer(from.DiscoverNowStatus)
 	m.DiscoveryBasicPollSettings = FlattenIpv6networkcontainerDiscoveryBasicPollSettings(ctx, from.DiscoveryBasicPollSettings, diags)
 	m.DiscoveryBlackoutSetting = FlattenIpv6networkcontainerDiscoveryBlackoutSetting(ctx, from.DiscoveryBlackoutSetting, diags)
@@ -736,7 +723,6 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.PortControlBlackoutSetting = FlattenIpv6networkcontainerPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
-	// m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
