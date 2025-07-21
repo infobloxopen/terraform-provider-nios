@@ -40,6 +40,7 @@ var RecordAliasCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes: RecordaliascloudinfoDelegatedMemberResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,

@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -15,10 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordAliasModel struct {
@@ -124,12 +123,9 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
-		MarkdownDescription: "The Name of the record.",
+		MarkdownDescription: "The Name of the Alias record.",
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.IsValidFQDN(),
 		},
 	},
 	"target_name": schema.StringAttribute{
@@ -166,18 +162,6 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The zone in which the record resides.",
 	},
-}
-
-func ExpandRecordAlias(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordAlias {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RecordAliasModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *RecordAliasModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordAlias {

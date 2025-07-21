@@ -15,6 +15,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// -> Parent Zone: example.com (in default view)
+
 var readableAttributesForRecordAlias = "aws_rte53_record_info,cloud_info,comment,creator,disable,dns_name,dns_target_name,extattrs,last_queried,name,target_name,target_type,ttl,use_ttl,view,zone"
 
 func TestAccRecordAliasResource_basic(t *testing.T) {
@@ -48,7 +51,6 @@ func TestAccRecordAliasResource_basic(t *testing.T) {
 }
 
 func TestAccRecordAliasResource_disappears(t *testing.T) {
-	//t.Skip("Skipping test for disappears")
 	resourceName := "nios_dns_record_alias.test"
 	var v dns.RecordAlias
 	name := acctest.RandomName() + ".example.com"
@@ -440,10 +442,10 @@ func testAccRecordAliasBasicConfig(name, target_name, target_type, view string) 
 	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test" {
-	name = %q
+	name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
+	view 		= %q
 }
 `, name, target_name, target_type, view)
 }
@@ -451,11 +453,11 @@ resource "nios_dns_record_alias" "test" {
 func testAccRecordAliasComment(name, target_name, target_type, view, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_comment" {
-	name = %q
+	name		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
-    comment = %q
+	view 		= %q
+    comment 	= %q
 }
 `, name, target_name, target_type, view, comment)
 }
@@ -463,11 +465,11 @@ resource "nios_dns_record_alias" "test_comment" {
 func testAccRecordAliasCreator(name, target_name, target_type, view, creator string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_creator" {
-	name = %q
+	name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
-    creator = %q
+	view 		= %q
+    creator 	= %q
 }
 `, name, target_name, target_type, view, creator)
 }
@@ -475,11 +477,11 @@ resource "nios_dns_record_alias" "test_creator" {
 func testAccRecordAliasDisable(name, target_name, target_type, view, disable string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_disable" {
-	name = %q
+	name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
-    disable = %q
+	view 		= %q
+    disable 	= %q
 }
 `, name, target_name, target_type, view, disable)
 }
@@ -494,11 +496,11 @@ func testAccRecordAliasExtAttrs(name, target_name, target_type, view string, ext
 	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_extattrs" {
-	name = %q
+	name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
-    extattrs = %s
+	view 		= %q
+    extattrs 	= %s
 }
 `, name, target_name, target_type, view, extattrsStr)
 }
@@ -506,10 +508,10 @@ resource "nios_dns_record_alias" "test_extattrs" {
 func testAccRecordAliasName(name, target_name, target_type, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_name" {
-    name = %q
+    name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
+	view 		= %q
 }
 `, name, target_name, target_type, view)
 }
@@ -517,10 +519,10 @@ resource "nios_dns_record_alias" "test_name" {
 func testAccRecordAliasTargetName(name, target_name, target_type, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_target_name" {
-    name = %q
+    name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
+	view 		= %q
 }
 `, name, target_name, target_type, view)
 }
@@ -528,10 +530,10 @@ resource "nios_dns_record_alias" "test_target_name" {
 func testAccRecordAliasTargetType(name, target_name, target_type, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_target_type" {
-    name = %q
+    name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
+	view 		= %q
 }
 `, name, target_name, target_type, view)
 }
@@ -539,12 +541,12 @@ resource "nios_dns_record_alias" "test_target_type" {
 func testAccRecordAliasTtl(name, target_name, target_type, view string, ttl int32, use_ttl string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_ttl" {
-	name = %q
+	name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
-    ttl = %d
-	use_ttl = %q
+	view 		= %q
+    ttl 		= %d
+	use_ttl 	= %q
 }
 `, name, target_name, target_type, view, ttl, use_ttl)
 }
@@ -552,12 +554,12 @@ resource "nios_dns_record_alias" "test_ttl" {
 func testAccRecordAliasUseTtl(name, target_name, target_type, view, useTtl string, ttl int32) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_use_ttl" {
-	name = %q
+	name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
-    use_ttl = %q
-	ttl = %d
+	view 		= %q
+    use_ttl 	= %q
+	ttl 		= %d
 }
 `, name, target_name, target_type, view, useTtl, ttl)
 }
@@ -565,10 +567,10 @@ resource "nios_dns_record_alias" "test_use_ttl" {
 func testAccRecordAliasView(name, target_name, target_type, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test_view" {
-    name = %q
+    name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
+	view 		= %q
 }
 `, name, target_name, target_type, view)
 }

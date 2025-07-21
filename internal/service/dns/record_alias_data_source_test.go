@@ -85,10 +85,10 @@ func testAccCheckRecordAliasResourceAttrPair(resourceName, dataSourceName string
 func testAccRecordAliasDataSourceConfigFilters(name, target_name, target_type, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test" {
-    name = %q
+    name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
+	view 		= %q
 }
 
 data "nios_dns_record_alias" "test" {
@@ -102,18 +102,18 @@ data "nios_dns_record_alias" "test" {
 func testAccRecordAliasDataSourceConfigExtAttrFilters(name, target_name, target_type, view, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test" {
-	name = %q
+	name 		= %q
 	target_name = %q
 	target_type = %q
-	view = %q
+	view 		= %q
 	extattrs = {
-		Site = %q
+		Site 	= %q
 	} 
 }
 
 data "nios_dns_record_alias" "test" {
   extattrfilters = {
-	"Site" = nios_dns_record_alias.test.extattrs.Site
+	Site = nios_dns_record_alias.test.extattrs.Site
   }
 }
 `, name, target_name, target_type, view, extAttrsValue)
