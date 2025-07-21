@@ -48,9 +48,13 @@ data "nios_dns_record_cname" "get_all_records_in_default_view" {}
 <a id="nestedatt--result"></a>
 ### Nested Schema for `result`
 
-Optional:
+Required:
 
 - `canonical` (String) Canonical name in FQDN format. This value can be in unicode format.
+- `name` (String) The name for a CNAME record in FQDN format. This value can be in unicode format. Regular expression search is not supported for unicode values.
+
+Optional:
+
 - `comment` (String) Comment for the record; maximum 256 characters.
 - `creator` (String) The record creator.
 - `ddns_principal` (String) The GSS-TSIG principal that owns this record.
@@ -58,7 +62,6 @@ Optional:
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `name` (String) The name for a CNAME record in FQDN format. This value can be in unicode format. Regular expression search is not supported for unicode values.
 - `ttl` (Number) The Time To Live (TTL) value for record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Use flag for: ttl
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".

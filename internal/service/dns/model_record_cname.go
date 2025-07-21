@@ -17,6 +17,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordCnameModel struct {
@@ -82,7 +83,10 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The AWS Route53 record information associated with the record.",
 	},
 	"canonical": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "Canonical name in FQDN format. This value can be in unicode format.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
@@ -103,7 +107,7 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("STATIC", "DYNAMIC"),
+			stringvalidator.OneOf("STATIC", "DYNAMIC", "SYSTEM"),
 		},
 		Default:             stringdefault.StaticString("STATIC"),
 		MarkdownDescription: "The record creator.",
@@ -156,8 +160,10 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "The name for a CNAME record in FQDN format. This value can be in unicode format. Regular expression search is not supported for unicode values.",
 	},
 	"reclaimable": schema.BoolAttribute{
@@ -193,7 +199,7 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordCname {
+func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordCname {
 	if m == nil {
 		return nil
 	}
@@ -212,7 +218,9 @@ func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		Name:               flex.ExpandStringPointer(m.Name),
 		Ttl:                flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:             flex.ExpandBoolPointer(m.UseTtl),
-		View:               flex.ExpandStringPointer(m.View),
+	}
+	if isCreate {
+		to.View = flex.ExpandStringPointer(m.View)
 	}
 	return to
 }
