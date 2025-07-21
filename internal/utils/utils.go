@@ -2,8 +2,10 @@ package utils
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -384,4 +386,31 @@ func FindModelFieldByTFSdkTag(model any, tagName string) (string, bool) {
 	}
 
 	return "", false
+}
+
+func ParseInterfaceValue(valStr string) interface{} {
+	// Check if the value appears to be a JSON array (enclosed in square brackets)
+	if strings.HasPrefix(valStr, "[") && strings.HasSuffix(valStr, "]") {
+		var listVal []interface{}
+
+		// Parse as standard JSON with double quotes
+		err := json.Unmarshal([]byte(valStr), &listVal)
+
+		// If that fails and we have single quotes, replace them with double quotes
+		if err != nil && strings.Contains(valStr, "'") {
+			processedStr := strings.ReplaceAll(valStr, "'", "\"")
+			err = json.Unmarshal([]byte(processedStr), &listVal)
+		}
+
+		// If either parsing attempt succeeded, return the list value
+		if err == nil {
+			return listVal
+		}
+	}
+
+	// Try to parse the value as an integer
+	if intVal, err := strconv.ParseInt(valStr, 10, 64); err == nil {
+		return intVal
+	}
+	return valStr
 }
