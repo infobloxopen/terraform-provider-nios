@@ -3,19 +3,19 @@
 page_title: "nios_dns_record_alias Resource - nios"
 subcategory: "DNS"
 description: |-
-  
+  Manages a DNS Alias record.
 ---
 
 # nios_dns_record_alias (Resource)
 
-
+Manages a DNS Alias record.
 
 ## Example Usage
 
 ```terraform
-// Create Record Alias with Basic Required Fields
+// Create Record Alias with Basic Fields
 resource "nios_dns_record_alias" "create_alias_record" {
-  name        = "alias-record1.example.com"
+  name        = "alias-record.example.com"
   target_name = "server.example.com"
   target_type = "A"
   view        = "default"
@@ -32,7 +32,7 @@ resource "nios_dns_record_alias" "create_alias_record_with_additional_fields" {
   comment = "Alias record with additional parameters"
   disable = false
   extattrs = {
-    Site = "site-1"
+    Site = "location-1"
   }
   ttl     = 20
   use_ttl = true
@@ -44,7 +44,7 @@ resource "nios_dns_record_alias" "create_alias_record_with_additional_fields" {
 
 ### Required
 
-- `name` (String) The Name of the record.
+- `name` (String) The Name of the Alias record.
 - `target_name` (String) Target name in FQDN format. This value can be in unicode format.
 - `target_type` (String) Target type.
 

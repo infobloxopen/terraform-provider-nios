@@ -50,7 +50,7 @@ data "nios_dns_record_alias" "get_all_records_in_default_view" {}
 
 Required:
 
-- `name` (String) The Name of the record.
+- `name` (String) The Name of the Alias record.
 - `target_name` (String) Target name in FQDN format. This value can be in unicode format.
 - `target_type` (String) Target type.
 
