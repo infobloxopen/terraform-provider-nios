@@ -284,17 +284,6 @@ resource "nios_dns_record_ns" "test_addresses" {
 `, name, nameserver, addresses, view)
 }
 
-func testAccRecordNsName(name, nameserver, addresses, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_ns" "test_name" {
-    name       = %q
-	nameserver = %q
-	addresses  = %s
-	view       = %q
-}
-`, name, nameserver, addresses, view)
-}
-
 func testAccRecordNsNameserver(name, nameserver, addresses, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_ns" "test_nameserver" {
