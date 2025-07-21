@@ -28,6 +28,7 @@ var RangeSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute
 	"enabled_attributes": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
 	},
 	"mapped_ea_attributes": schema.ListNestedAttribute{
@@ -35,6 +36,7 @@ var RangeSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute
 			Attributes: RangesubscribesettingsMappedEaAttributesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
 	},
 }

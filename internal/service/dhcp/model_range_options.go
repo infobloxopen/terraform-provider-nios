@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -34,21 +37,31 @@ var RangeOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Name of the DHCP option.",
+		Computed:            true,
+		Default:             stringdefault.StaticString("dhcp-lease-time"), // IGNORE
 	},
 	"num": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(51),
 		MarkdownDescription: "The code of the DHCP option.",
 	},
 	"vendor_class": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default: 		   stringdefault.StaticString("DHCP"),
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 	},
 	"value": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString("43200"),
 		MarkdownDescription: "Value of the DHCP option",
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers",
 	},
 }

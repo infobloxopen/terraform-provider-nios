@@ -27,10 +27,12 @@ var RangeRelayAgentFilterRulesAttrTypes = map[string]attr.Type{
 var RangeRelayAgentFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the DHCP filter.",
 	},
 	"permission": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The permission to be applied.",
 	},
 }

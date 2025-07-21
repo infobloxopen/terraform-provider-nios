@@ -29,14 +29,17 @@ var RangeExcludeAttrTypes = map[string]attr.Type{
 var RangeExcludeResourceSchemaAttributes = map[string]schema.Attribute{
 	"start_address": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address starting address of the exclusion range.",
 	},
 	"end_address": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address ending address of the exclusion range.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Comment for the exclusion range; maximum 256 characters.",
 	},
 }

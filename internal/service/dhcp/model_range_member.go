@@ -29,14 +29,17 @@ var RangeMemberAttrTypes = map[string]attr.Type{
 var RangeMemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
 	},
 	"ipv6addr": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv6 Address of the Grid Member.",
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Grid member name",
 	},
 }

@@ -3,15 +3,23 @@ package dhcp
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -21,104 +29,104 @@ import (
 )
 
 type RangeModel struct {
-	Ref                              types.String `tfsdk:"ref"`
-	AlwaysUpdateDns                  types.Bool   `tfsdk:"always_update_dns"`
-	Bootfile                         types.String `tfsdk:"bootfile"`
-	Bootserver                       types.String `tfsdk:"bootserver"`
-	CloudInfo                        types.Object `tfsdk:"cloud_info"`
-	Comment                          types.String `tfsdk:"comment"`
-	DdnsDomainname                   types.String `tfsdk:"ddns_domainname"`
-	DdnsGenerateHostname             types.Bool   `tfsdk:"ddns_generate_hostname"`
-	DenyAllClients                   types.Bool   `tfsdk:"deny_all_clients"`
-	DenyBootp                        types.Bool   `tfsdk:"deny_bootp"`
-	DhcpUtilization                  types.Int64  `tfsdk:"dhcp_utilization"`
-	DhcpUtilizationStatus            types.String `tfsdk:"dhcp_utilization_status"`
-	Disable                          types.Bool   `tfsdk:"disable"`
-	DiscoverNowStatus                types.String `tfsdk:"discover_now_status"`
-	DiscoveryBasicPollSettings       types.Object `tfsdk:"discovery_basic_poll_settings"`
-	DiscoveryBlackoutSetting         types.Object `tfsdk:"discovery_blackout_setting"`
-	DiscoveryMember                  types.String `tfsdk:"discovery_member"`
-	DynamicHosts                     types.Int64  `tfsdk:"dynamic_hosts"`
-	EmailList                        types.List   `tfsdk:"email_list"`
-	EnableDdns                       types.Bool   `tfsdk:"enable_ddns"`
-	EnableDhcpThresholds             types.Bool   `tfsdk:"enable_dhcp_thresholds"`
-	EnableDiscovery                  types.Bool   `tfsdk:"enable_discovery"`
-	EnableEmailWarnings              types.Bool   `tfsdk:"enable_email_warnings"`
-	EnableIfmapPublishing            types.Bool   `tfsdk:"enable_ifmap_publishing"`
-	EnableImmediateDiscovery         types.Bool   `tfsdk:"enable_immediate_discovery"`
-	EnablePxeLeaseTime               types.Bool   `tfsdk:"enable_pxe_lease_time"`
-	EnableSnmpWarnings               types.Bool   `tfsdk:"enable_snmp_warnings"`
-	EndAddr                          types.String `tfsdk:"end_addr"`
-	EndpointSources                  types.List   `tfsdk:"endpoint_sources"`
-	Exclude                          types.List   `tfsdk:"exclude"`
-	ExtAttrs                         types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                      types.Map    `tfsdk:"extattrs_all"`
-	FailoverAssociation              types.String `tfsdk:"failover_association"`
-	FingerprintFilterRules           types.List   `tfsdk:"fingerprint_filter_rules"`
-	HighWaterMark                    types.Int64  `tfsdk:"high_water_mark"`
-	HighWaterMarkReset               types.Int64  `tfsdk:"high_water_mark_reset"`
-	IgnoreDhcpOptionListRequest      types.Bool   `tfsdk:"ignore_dhcp_option_list_request"`
-	IgnoreId                         types.String `tfsdk:"ignore_id"`
-	IgnoreMacAddresses               types.List   `tfsdk:"ignore_mac_addresses"`
-	IsSplitScope                     types.Bool   `tfsdk:"is_split_scope"`
-	KnownClients                     types.String `tfsdk:"known_clients"`
-	LeaseScavengeTime                types.Int64  `tfsdk:"lease_scavenge_time"`
-	LogicFilterRules                 types.List   `tfsdk:"logic_filter_rules"`
-	LowWaterMark                     types.Int64  `tfsdk:"low_water_mark"`
-	LowWaterMarkReset                types.Int64  `tfsdk:"low_water_mark_reset"`
-	MacFilterRules                   types.List   `tfsdk:"mac_filter_rules"`
-	Member                           types.Object `tfsdk:"member"`
-	MsAdUserData                     types.Object `tfsdk:"ms_ad_user_data"`
-	MsOptions                        types.List   `tfsdk:"ms_options"`
-	MsServer                         types.Object `tfsdk:"ms_server"`
-	NacFilterRules                   types.List   `tfsdk:"nac_filter_rules"`
-	Name                             types.String `tfsdk:"name"`
-	Network                          types.String `tfsdk:"network"`
-	NetworkView                      types.String `tfsdk:"network_view"`
-	Nextserver                       types.String `tfsdk:"nextserver"`
-	OptionFilterRules                types.List   `tfsdk:"option_filter_rules"`
-	Options                          types.List   `tfsdk:"options"`
-	PortControlBlackoutSetting       types.Object `tfsdk:"port_control_blackout_setting"`
-	PxeLeaseTime                     types.Int64  `tfsdk:"pxe_lease_time"`
-	RecycleLeases                    types.Bool   `tfsdk:"recycle_leases"`
-	RelayAgentFilterRules            types.List   `tfsdk:"relay_agent_filter_rules"`
-	RestartIfNeeded                  types.Bool   `tfsdk:"restart_if_needed"`
-	SamePortControlDiscoveryBlackout types.Bool   `tfsdk:"same_port_control_discovery_blackout"`
-	ServerAssociationType            types.String `tfsdk:"server_association_type"`
-	SplitMember                      types.Object `tfsdk:"split_member"`
-	SplitScopeExclusionPercent       types.Int64  `tfsdk:"split_scope_exclusion_percent"`
-	StartAddr                        types.String `tfsdk:"start_addr"`
-	StaticHosts                      types.Int64  `tfsdk:"static_hosts"`
-	SubscribeSettings                types.Object `tfsdk:"subscribe_settings"`
-	Template                         types.String `tfsdk:"template"`
-	TotalHosts                       types.Int64  `tfsdk:"total_hosts"`
-	UnknownClients                   types.String `tfsdk:"unknown_clients"`
-	UpdateDnsOnLeaseRenewal          types.Bool   `tfsdk:"update_dns_on_lease_renewal"`
-	UseBlackoutSetting               types.Bool   `tfsdk:"use_blackout_setting"`
-	UseBootfile                      types.Bool   `tfsdk:"use_bootfile"`
-	UseBootserver                    types.Bool   `tfsdk:"use_bootserver"`
-	UseDdnsDomainname                types.Bool   `tfsdk:"use_ddns_domainname"`
-	UseDdnsGenerateHostname          types.Bool   `tfsdk:"use_ddns_generate_hostname"`
-	UseDenyBootp                     types.Bool   `tfsdk:"use_deny_bootp"`
-	UseDiscoveryBasicPollingSettings types.Bool   `tfsdk:"use_discovery_basic_polling_settings"`
-	UseEmailList                     types.Bool   `tfsdk:"use_email_list"`
-	UseEnableDdns                    types.Bool   `tfsdk:"use_enable_ddns"`
-	UseEnableDhcpThresholds          types.Bool   `tfsdk:"use_enable_dhcp_thresholds"`
-	UseEnableDiscovery               types.Bool   `tfsdk:"use_enable_discovery"`
-	UseEnableIfmapPublishing         types.Bool   `tfsdk:"use_enable_ifmap_publishing"`
-	UseIgnoreDhcpOptionListRequest   types.Bool   `tfsdk:"use_ignore_dhcp_option_list_request"`
-	UseIgnoreId                      types.Bool   `tfsdk:"use_ignore_id"`
-	UseKnownClients                  types.Bool   `tfsdk:"use_known_clients"`
-	UseLeaseScavengeTime             types.Bool   `tfsdk:"use_lease_scavenge_time"`
-	UseLogicFilterRules              types.Bool   `tfsdk:"use_logic_filter_rules"`
-	UseMsOptions                     types.Bool   `tfsdk:"use_ms_options"`
-	UseNextserver                    types.Bool   `tfsdk:"use_nextserver"`
-	UseOptions                       types.Bool   `tfsdk:"use_options"`
-	UsePxeLeaseTime                  types.Bool   `tfsdk:"use_pxe_lease_time"`
-	UseRecycleLeases                 types.Bool   `tfsdk:"use_recycle_leases"`
-	UseSubscribeSettings             types.Bool   `tfsdk:"use_subscribe_settings"`
-	UseUnknownClients                types.Bool   `tfsdk:"use_unknown_clients"`
-	UseUpdateDnsOnLeaseRenewal       types.Bool   `tfsdk:"use_update_dns_on_lease_renewal"`
+	Ref                              types.String                     `tfsdk:"ref"`
+	AlwaysUpdateDns                  types.Bool                       `tfsdk:"always_update_dns"`
+	Bootfile                         types.String                     `tfsdk:"bootfile"`
+	Bootserver                       types.String                     `tfsdk:"bootserver"`
+	CloudInfo                        types.Object                     `tfsdk:"cloud_info"`
+	Comment                          types.String                     `tfsdk:"comment"`
+	DdnsDomainname                   types.String                     `tfsdk:"ddns_domainname"`
+	DdnsGenerateHostname             types.Bool                       `tfsdk:"ddns_generate_hostname"`
+	DenyAllClients                   types.Bool                       `tfsdk:"deny_all_clients"`
+	DenyBootp                        types.Bool                       `tfsdk:"deny_bootp"`
+	DhcpUtilization                  types.Int64                      `tfsdk:"dhcp_utilization"`
+	DhcpUtilizationStatus            types.String                     `tfsdk:"dhcp_utilization_status"`
+	Disable                          types.Bool                       `tfsdk:"disable"`
+	DiscoverNowStatus                types.String                     `tfsdk:"discover_now_status"`
+	DiscoveryBasicPollSettings       types.Object                     `tfsdk:"discovery_basic_poll_settings"`
+	DiscoveryBlackoutSetting         types.Object                     `tfsdk:"discovery_blackout_setting"`
+	DiscoveryMember                  types.String                     `tfsdk:"discovery_member"`
+	DynamicHosts                     types.Int64                      `tfsdk:"dynamic_hosts"`
+	EmailList                        internaltypes.UnorderedListValue `tfsdk:"email_list"`
+	EnableDdns                       types.Bool                       `tfsdk:"enable_ddns"`
+	EnableDhcpThresholds             types.Bool                       `tfsdk:"enable_dhcp_thresholds"`
+	EnableDiscovery                  types.Bool                       `tfsdk:"enable_discovery"`
+	EnableEmailWarnings              types.Bool                       `tfsdk:"enable_email_warnings"`
+	EnableIfmapPublishing            types.Bool                       `tfsdk:"enable_ifmap_publishing"`
+	EnableImmediateDiscovery         types.Bool                       `tfsdk:"enable_immediate_discovery"`
+	EnablePxeLeaseTime               types.Bool                       `tfsdk:"enable_pxe_lease_time"`
+	EnableSnmpWarnings               types.Bool                       `tfsdk:"enable_snmp_warnings"`
+	EndAddr                          types.String                     `tfsdk:"end_addr"`
+	EndpointSources                  types.List                       `tfsdk:"endpoint_sources"`
+	Exclude                          types.List                       `tfsdk:"exclude"`
+	ExtAttrs                         types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll                      types.Map                        `tfsdk:"extattrs_all"`
+	FailoverAssociation              types.String                     `tfsdk:"failover_association"`
+	FingerprintFilterRules           types.List                       `tfsdk:"fingerprint_filter_rules"`
+	HighWaterMark                    types.Int64                      `tfsdk:"high_water_mark"`
+	HighWaterMarkReset               types.Int64                      `tfsdk:"high_water_mark_reset"`
+	IgnoreDhcpOptionListRequest      types.Bool                       `tfsdk:"ignore_dhcp_option_list_request"`
+	IgnoreId                         types.String                     `tfsdk:"ignore_id"`
+	IgnoreMacAddresses               types.List                       `tfsdk:"ignore_mac_addresses"`
+	IsSplitScope                     types.Bool                       `tfsdk:"is_split_scope"`
+	KnownClients                     types.String                     `tfsdk:"known_clients"`
+	LeaseScavengeTime                types.Int64                      `tfsdk:"lease_scavenge_time"`
+	LogicFilterRules                 types.List                       `tfsdk:"logic_filter_rules"`
+	LowWaterMark                     types.Int64                      `tfsdk:"low_water_mark"`
+	LowWaterMarkReset                types.Int64                      `tfsdk:"low_water_mark_reset"`
+	MacFilterRules                   types.List                       `tfsdk:"mac_filter_rules"`
+	Member                           types.Object                     `tfsdk:"member"`
+	MsAdUserData                     types.Object                     `tfsdk:"ms_ad_user_data"`
+	MsOptions                        types.List                       `tfsdk:"ms_options"`
+	MsServer                         types.Object                     `tfsdk:"ms_server"`
+	NacFilterRules                   types.List                       `tfsdk:"nac_filter_rules"`
+	Name                             types.String                     `tfsdk:"name"`
+	Network                          types.String                     `tfsdk:"network"`
+	NetworkView                      types.String                     `tfsdk:"network_view"`
+	Nextserver                       types.String                     `tfsdk:"nextserver"`
+	OptionFilterRules                types.List                       `tfsdk:"option_filter_rules"`
+	Options                          types.List                       `tfsdk:"options"`
+	PortControlBlackoutSetting       types.Object                     `tfsdk:"port_control_blackout_setting"`
+	PxeLeaseTime                     types.Int64                      `tfsdk:"pxe_lease_time"`
+	RecycleLeases                    types.Bool                       `tfsdk:"recycle_leases"`
+	RelayAgentFilterRules            types.List                       `tfsdk:"relay_agent_filter_rules"`
+	RestartIfNeeded                  types.Bool                       `tfsdk:"restart_if_needed"`
+	SamePortControlDiscoveryBlackout types.Bool                       `tfsdk:"same_port_control_discovery_blackout"`
+	ServerAssociationType            types.String                     `tfsdk:"server_association_type"`
+	SplitMember                      types.Object                     `tfsdk:"split_member"`
+	SplitScopeExclusionPercent       types.Int64                      `tfsdk:"split_scope_exclusion_percent"`
+	StartAddr                        types.String                     `tfsdk:"start_addr"`
+	StaticHosts                      types.Int64                      `tfsdk:"static_hosts"`
+	SubscribeSettings                types.Object                     `tfsdk:"subscribe_settings"`
+	Template                         types.String                     `tfsdk:"template"`
+	TotalHosts                       types.Int64                      `tfsdk:"total_hosts"`
+	UnknownClients                   types.String                     `tfsdk:"unknown_clients"`
+	UpdateDnsOnLeaseRenewal          types.Bool                       `tfsdk:"update_dns_on_lease_renewal"`
+	UseBlackoutSetting               types.Bool                       `tfsdk:"use_blackout_setting"`
+	UseBootfile                      types.Bool                       `tfsdk:"use_bootfile"`
+	UseBootserver                    types.Bool                       `tfsdk:"use_bootserver"`
+	UseDdnsDomainname                types.Bool                       `tfsdk:"use_ddns_domainname"`
+	UseDdnsGenerateHostname          types.Bool                       `tfsdk:"use_ddns_generate_hostname"`
+	UseDenyBootp                     types.Bool                       `tfsdk:"use_deny_bootp"`
+	UseDiscoveryBasicPollingSettings types.Bool                       `tfsdk:"use_discovery_basic_polling_settings"`
+	UseEmailList                     types.Bool                       `tfsdk:"use_email_list"`
+	UseEnableDdns                    types.Bool                       `tfsdk:"use_enable_ddns"`
+	UseEnableDhcpThresholds          types.Bool                       `tfsdk:"use_enable_dhcp_thresholds"`
+	UseEnableDiscovery               types.Bool                       `tfsdk:"use_enable_discovery"`
+	UseEnableIfmapPublishing         types.Bool                       `tfsdk:"use_enable_ifmap_publishing"`
+	UseIgnoreDhcpOptionListRequest   types.Bool                       `tfsdk:"use_ignore_dhcp_option_list_request"`
+	UseIgnoreId                      types.Bool                       `tfsdk:"use_ignore_id"`
+	UseKnownClients                  types.Bool                       `tfsdk:"use_known_clients"`
+	UseLeaseScavengeTime             types.Bool                       `tfsdk:"use_lease_scavenge_time"`
+	UseLogicFilterRules              types.Bool                       `tfsdk:"use_logic_filter_rules"`
+	UseMsOptions                     types.Bool                       `tfsdk:"use_ms_options"`
+	UseNextserver                    types.Bool                       `tfsdk:"use_nextserver"`
+	UseOptions                       types.Bool                       `tfsdk:"use_options"`
+	UsePxeLeaseTime                  types.Bool                       `tfsdk:"use_pxe_lease_time"`
+	UseRecycleLeases                 types.Bool                       `tfsdk:"use_recycle_leases"`
+	UseSubscribeSettings             types.Bool                       `tfsdk:"use_subscribe_settings"`
+	UseUnknownClients                types.Bool                       `tfsdk:"use_unknown_clients"`
+	UseUpdateDnsOnLeaseRenewal       types.Bool                       `tfsdk:"use_update_dns_on_lease_renewal"`
 }
 
 var RangeAttrTypes = map[string]attr.Type{
@@ -140,7 +148,7 @@ var RangeAttrTypes = map[string]attr.Type{
 	"discovery_blackout_setting":           types.ObjectType{AttrTypes: RangeDiscoveryBlackoutSettingAttrTypes},
 	"discovery_member":                     types.StringType,
 	"dynamic_hosts":                        types.Int64Type,
-	"email_list":                           types.ListType{ElemType: types.StringType},
+	"email_list":                           internaltypes.UnorderedListOfStringType,
 	"enable_ddns":                          types.BoolType,
 	"enable_dhcp_thresholds":               types.BoolType,
 	"enable_discovery":                     types.BoolType,
@@ -237,15 +245,23 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The bootfile name for the range. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
+		},
 	},
 	"bootserver": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The bootserver address for the range. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
+		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: RangeCloudInfoResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RangeCloudInfoResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "A CloudInfo struct that contains information about the cloud provider and region for the range.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -253,8 +269,11 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Comment for the range; maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.",
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
@@ -262,6 +281,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this field is set to True, the DHCP server generates a hostname and updates DNS with it when the DHCP client request does not contain a hostname.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_generate_hostname")),
+		},
 	},
 	"deny_all_clients": schema.BoolAttribute{
 		Optional:            true,
@@ -274,6 +296,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to true, BOOTP settings are disabled and BOOTP requests will be denied.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_deny_bootp")),
+		},
 	},
 	"dhcp_utilization": schema.Int64Attribute{
 		Computed:            true,
@@ -292,47 +317,72 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this range.",
+		Default:             stringdefault.StaticString("NONE"),
 	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: RangeDiscoveryBasicPollSettingsResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_basic_polling_settings")),
+		},
 	},
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: RangeDiscoveryBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
-		Computed:  true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
+		},
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The member that will run discovery for this range.",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
+		},
 	},
 	"dynamic_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The total number of DHCP leases issued for the range.",
 	},
 	"email_list": schema.ListAttribute{
-		ElementType:         types.StringType,
+		CustomType:         internaltypes.UnorderedListOfStringType,
+		ElementType: 	  types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The e-mail lists to which the appliance sends DHCP threshold alarm e-mail messages.",
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("use_email_list")),
+		},
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The dynamic DNS updates flag of a DHCP range object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_ddns")),
+		},
 	},
 	"enable_dhcp_thresholds": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if DHCP thresholds are enabled for the range.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_dhcp_thresholds")),
+		},
 	},
 	"enable_discovery": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a discovery is enabled or not for this range. When this is set to False, the discovery for this range is disabled.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
+		},
 	},
 	"enable_email_warnings": schema.BoolAttribute{
 		Optional:            true,
@@ -345,6 +395,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if IFMAP publishing is enabled for the range.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_ifmap_publishing")),
+		},
 	},
 	"enable_immediate_discovery": schema.BoolAttribute{
 		Optional:            true,
@@ -363,7 +416,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if DHCP threshold warnings are send through SNMP.",
 	},
 	"end_addr": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address end address of the range.",
 	},
 	"endpoint_sources": schema.ListAttribute{
@@ -419,12 +472,19 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.",
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ignore_dhcp_option_list_request")),
+		},
 	},
 	"ignore_id": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             stringdefault.StaticString("NONE"),
 		MarkdownDescription: "Indicates whether the appliance will ignore DHCP client IDs or MAC addresses. Valid values are \"NONE\", \"CLIENT\", or \"MACADDR\". The default is \"NONE\".",
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ignore_id")),
+			stringvalidator.OneOf("CLIENT", "MACADDR", "NONE"),
+		},
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -441,8 +501,15 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Permission for known clients. This can be 'Allow' or 'Deny'. If set to 'Deny' known clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"lease_scavenge_time": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_lease_scavenge_time")),
+			int64validator.Any(
+				int64validator.OneOf(-1),
+				int64validator.Between(86400, 2147472000),
+			),
+		},
 		Default:             int64default.StaticInt64(-1),
 		MarkdownDescription: "An integer that specifies the period of time (in seconds) that frees and backs up leases remained in the database before they are automatically deleted. To disable lease scavenging, set the parameter to -1. The minimum positive value must be greater than 86400 seconds (1 day).",
 	},
@@ -452,17 +519,30 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		MarkdownDescription: "This field contains the logic filters to be applied to this range. This list corresponds to the match rules that are written to the dhcpd configuration file.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+		},
 	},
 	"low_water_mark": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Any(
+				int64validator.Between(0, 100),
+			),
+		},
 		Default:             int64default.StaticInt64(0),
 		MarkdownDescription: "The percentage of DHCP range usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 	},
 	"low_water_mark_reset": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(10),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(10),
+		Validators: []validator.Int64{
+			int64validator.Any(
+				int64validator.Between(1, 100),
+			),
+		},
 		MarkdownDescription: "The percentage of DHCP range usage threshold below which range usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.",
 	},
 	"mac_filter_rules": schema.ListNestedAttribute{
@@ -515,8 +595,11 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the network view in which this range resides.",
 	},
 	"nextserver": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
+		},
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 	},
 	"option_filter_rules": schema.ListNestedAttribute{
@@ -537,16 +620,22 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: RangePortControlBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
-		Computed:  true,
+		Computed:   true,
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The PXE lease time value of a DHCP Range object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_pxe_lease_time")),
+		},
 	},
 	"recycle_leases": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_recycle_leases")),
+		},
 		MarkdownDescription: "If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.",
 	},
 	"relay_agent_filter_rules": schema.ListNestedAttribute{
@@ -561,9 +650,12 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Restarts the member service.",
 	},
 	"same_port_control_discovery_blackout": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
+		},
 		MarkdownDescription: "If the field is set to True, the discovery blackout setting will be used for port control blackout setting.",
 	},
 	"server_association_type": schema.StringAttribute{
@@ -571,6 +663,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             stringdefault.StaticString("NONE"),
 		MarkdownDescription: "The type of server that is going to serve the range.",
+		Validators: []validator.String{
+			stringvalidator.OneOf("MEMBER", "FAILOVER", "MS_FAILOVER", "MS_SERVER", "NONE"),
+		},
 	},
 	"split_member": schema.SingleNestedAttribute{
 		Attributes: RangeSplitMemberResourceSchemaAttributes,
@@ -581,7 +676,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field controls the percentage used when creating a split scope. Valid values are numbers between 1 and 99. If the value is 40, it means that the top 40% of the exclusion will be created on the DHCP range assigned to {next_available_ip:next_available_ip} and the lower 60% of the range will be assigned to DHCP range assigned to {next_available_ip:next_available_ip}",
 	},
 	"start_addr": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address starting address of the range.",
 	},
 	"static_hosts": schema.Int64Attribute{
@@ -614,7 +709,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_blackout_setting": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: discovery_blackout_setting , port_control_blackout_setting, same_port_control_discovery_blackout",
 	},
 	"use_bootfile": schema.BoolAttribute{
@@ -638,7 +733,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_ddns_generate_hostname": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ddns_generate_hostname",
 	},
 	"use_deny_bootp": schema.BoolAttribute{
@@ -674,7 +769,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_enable_discovery": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: discovery_member , enable_discovery",
 	},
 	"use_enable_ifmap_publishing": schema.BoolAttribute{
@@ -704,7 +799,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_lease_scavenge_time": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: lease_scavenge_time",
 	},
 	"use_logic_filter_rules": schema.BoolAttribute{
@@ -910,7 +1005,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.DiscoveryBlackoutSetting = FlattenRangeDiscoveryBlackoutSetting(ctx, from.DiscoveryBlackoutSetting, diags)
 	m.DiscoveryMember = flex.FlattenStringPointer(from.DiscoveryMember)
 	m.DynamicHosts = flex.FlattenInt64Pointer(from.DynamicHosts)
-	m.EmailList = flex.FlattenFrameworkListString(ctx, from.EmailList, diags)
+	m.EmailList = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.EmailList, diags)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.EnableDhcpThresholds = types.BoolPointerValue(from.EnableDhcpThresholds)
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)

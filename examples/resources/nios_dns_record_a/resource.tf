@@ -1,3 +1,18 @@
+terraform {
+  required_providers {
+    nios = {
+      source  = "infobloxopen/nios"
+      version = "1.0.0"
+    }
+  }
+}
+
+provider "nios" {
+  nios_host_url = "https://172.28.82.248"
+  nios_username = "admin"
+  nios_password = "Infoblox@123"
+}
+
 // Create Record A with Basic Fields
 resource "nios_dns_record_a" "create_record" {
   name     = "example_record.example.com"
@@ -23,4 +38,17 @@ resource "nios_dns_record_a" "create_with_func_call" {
   }
   view    = "default"
   comment = "Updated comment"
+}
+
+resource "nios_dns_record_a" "new_rec"{
+
+}
+
+resource "nios_dns_record_a" "create_record23" {
+  name     = "example_record2323.example.com"
+  ipv4addr = "10.20.0.5"  // Updated IP address
+  view     = "default"
+  extattrs = {
+    Site = "Siteblr"
+  }
 }
