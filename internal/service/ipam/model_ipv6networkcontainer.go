@@ -232,6 +232,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ddns_ttl")),
 		},
+		Default: int64default.StaticInt64(0),
 	},
 	"delete_reason": schema.StringAttribute{
 		Optional:            true,
@@ -240,7 +241,8 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this network container.",
-		Default:             stringdefault.StaticString("NONE"),
+		// Default:             stringdefault.StaticString("NONE"),
+
 	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes,
@@ -262,7 +264,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network discovery engine type.",
-		Default:             stringdefault.StaticString("NONE"),
+		// Default:             stringdefault.StaticString("NONE"),
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
@@ -276,6 +278,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the dynamic DNS updates flag of a DHCP IPv6 Network Container object. The DHCP server can send DDNS updates to DNS servers in the same Grid and to external DNS servers. This setting overrides the member level settings.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),
+		},
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional:            true,
@@ -337,6 +342,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		MarkdownDescription: "This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file.",
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+		},
 	},
 	"mgm_private": schema.BoolAttribute{
 		Optional:            true,
@@ -399,6 +407,10 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network Container object.",
 		Computed:            true,
+		Default:             int64default.StaticInt64(27000),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_preferred_lifetime")),
+		},
 	},
 	"remove_subnets": schema.BoolAttribute{
 		Optional:            true,

@@ -26,11 +26,11 @@ var Ipv6networkcontainerFederatedRealmsAttrTypes = map[string]attr.Type{
 
 var Ipv6networkcontainerFederatedRealmsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The federated realm name",
 	},
 	"id": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The federated realm id",
 	},
 }
