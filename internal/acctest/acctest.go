@@ -82,5 +82,6 @@ func PreCheck(t *testing.T) {
 		option.WithNIOSUsername(username),
 		option.WithNIOSPassword(password),
 		option.WithDebug(true),
+		option.WithNIOSWapiVersion("v2.12.3"),
 	)
 }
