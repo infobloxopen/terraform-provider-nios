@@ -12,6 +12,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 )
 
 type ViewScavengingSettingsModel struct {
@@ -41,31 +42,37 @@ var ViewScavengingSettingsAttrTypes = map[string]attr.Type{
 var ViewScavengingSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_scavenging": schema.BoolAttribute{
 		Optional:            true,
+		Computed:			 true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the resource record scavenging is enabled or not.",
 	},
 	"enable_recurrent_scavenging": schema.BoolAttribute{
 		Optional:            true,
+		Computed:			 true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the recurrent resource record scavenging is enabled or not.",
 	},
 	"enable_auto_reclamation": schema.BoolAttribute{
 		Optional:            true,
+		Computed:			 true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the automatic resource record scavenging is enabled or not.",
 	},
 	"enable_rr_last_queried": schema.BoolAttribute{
 		Optional:            true,
+		Computed:			 true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the resource record last queried monitoring in affected zones is enabled or not.",
 	},
 	"enable_zone_last_queried": schema.BoolAttribute{
 		Optional:            true,
+		Computed:			 true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the last queried monitoring for affected zones is enabled or not.",
 	},
 	"reclaim_associated_records": schema.BoolAttribute{
 		Optional:            true,
+		Computed:			 true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if the associated resource record scavenging is enabled or not.",
 	},
