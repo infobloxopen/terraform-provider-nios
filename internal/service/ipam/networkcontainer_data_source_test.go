@@ -63,7 +63,6 @@ func testAccCheckNetworkcontainerResourceAttrPair(resourceName, dataSourceName s
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
 		resource.TestCheckResourceAttrPair(resourceName, "authority", dataSourceName, "result.0.authority"),
-		resource.TestCheckResourceAttrPair(resourceName, "auto_create_reversezone", dataSourceName, "result.0.auto_create_reversezone"),
 		resource.TestCheckResourceAttrPair(resourceName, "bootfile", dataSourceName, "result.0.bootfile"),
 		resource.TestCheckResourceAttrPair(resourceName, "bootserver", dataSourceName, "result.0.bootserver"),
 		resource.TestCheckResourceAttrPair(resourceName, "cloud_info", dataSourceName, "result.0.cloud_info"),

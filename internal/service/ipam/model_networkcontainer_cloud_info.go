@@ -39,7 +39,6 @@ var NetworkcontainerCloudInfoAttrTypes = map[string]attr.Type{
 var NetworkcontainerCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainercloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
 		Computed:   true,
 	},
 	"delegated_scope": schema.StringAttribute{
