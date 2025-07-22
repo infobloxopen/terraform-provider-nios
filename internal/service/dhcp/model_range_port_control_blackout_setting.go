@@ -30,8 +30,8 @@ var RangePortControlBlackoutSettingAttrTypes = map[string]attr.Type{
 var RangePortControlBlackoutSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_blackout": schema.BoolAttribute{
 		Optional:            true,
-		Computed: 		  true,
-		Default: 		   booldefault.StaticBool(false),
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a blackout is enabled or not.",
 	},
 	"blackout_duration": schema.Int64Attribute{
@@ -40,9 +40,9 @@ var RangePortControlBlackoutSettingResourceSchemaAttributes = map[string]schema.
 		MarkdownDescription: "The blackout duration in seconds; minimum value is 1 minute.",
 	},
 	"blackout_schedule": schema.SingleNestedAttribute{
-		Attributes: RangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          RangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The schedule for the blackout period.",
 	},
 }

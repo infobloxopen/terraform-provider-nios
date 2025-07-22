@@ -16,6 +16,8 @@ func TestAccRangeDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_range.test"
 	resourceName := "nios_dhcp_range.test"
 	var v dhcp.Range
+  startAddr := "10.0.0.10"
+  endAddr := "10.0.0.20"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +25,7 @@ func TestAccRangeDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRangeDataSourceConfigFilters(),
+				Config: testAccRangeDataSourceConfigFilters(startAddr, endAddr),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckRangeExists(context.Background(), resourceName, &v),
@@ -38,13 +40,17 @@ func TestAccRangeDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_range.test"
 	resourceName := "nios_dhcp_range.test"
 	var v dhcp.Range
+  startAddr := "10.0.0.10"
+  endAddr := "10.0.0.20"
+  extAttrValue := acctest.RandomName()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckRangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRangeDataSourceConfigExtAttrFilters("value1"),
+				Config: testAccRangeDataSourceConfigExtAttrFilters(startAddr , endAddr, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckRangeExists(context.Background(), resourceName, &v),
@@ -159,22 +165,26 @@ func testAccCheckRangeResourceAttrPair(resourceName, dataSourceName string) []re
     }
 }
 
-func testAccRangeDataSourceConfigFilters() string {
+func testAccRangeDataSourceConfigFilters(startAddr , endAddr string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test" {
+  start_addr = %q
+  end_addr = %q
 }
 
 data "nios_dhcp_range" "test" {
   filters = {
-	 = nios_dhcp_range.test.
+	start_addr = nios_dhcp_range.test.start_addr
   }
 }
-`)
+`, startAddr, endAddr)
 }
 
-func testAccRangeDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccRangeDataSourceConfigExtAttrFilters(startAddr , endAddr ,extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test" {
+  start_addr = %q
+  end_addr = %q
   extattrs = {
     Site = %q
   } 
@@ -185,6 +195,6 @@ data "nios_dhcp_range" "test" {
 	"Site" = nios_dhcp_range.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, startAddr, endAddr, extAttrsValue)
 }
 
