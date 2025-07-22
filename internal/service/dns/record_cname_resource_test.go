@@ -208,7 +208,7 @@ func TestAccRecordCnameResource_DdnsProtected(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameDdnsProtected(canonical, name, "default", "false"),
+				Config: testAccRecordCnameDdnsProtected(canonical, name, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					//testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
@@ -216,7 +216,7 @@ func TestAccRecordCnameResource_DdnsProtected(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameDdnsProtected(canonical, name, "default", "true"),
+				Config: testAccRecordCnameDdnsProtected(canonical, name, "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "true"),
@@ -239,7 +239,7 @@ func TestAccRecordCnameResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameDisable(canonical, name, "default", "false"),
+				Config: testAccRecordCnameDisable(canonical, name, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -247,7 +247,7 @@ func TestAccRecordCnameResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameDisable(canonical, name, "default", "true"),
+				Config: testAccRecordCnameDisable(canonical, name, "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -307,7 +307,7 @@ func TestAccRecordCnameResource_ForbidReclamation(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameForbidReclamation(canonical, name, "default", "true"),
+				Config: testAccRecordCnameForbidReclamation(canonical, name, "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "true"),
@@ -315,7 +315,7 @@ func TestAccRecordCnameResource_ForbidReclamation(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameForbidReclamation(canonical, name, "default", "false"),
+				Config: testAccRecordCnameForbidReclamation(canonical, name, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
@@ -370,7 +370,7 @@ func TestAccRecordCnameResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameTtl(canonical, name, "default", 1000, "true"),
+				Config: testAccRecordCnameTtl(canonical, name, "default", 1000, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "1000"),
@@ -378,7 +378,7 @@ func TestAccRecordCnameResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameTtl(canonical, name, "default", 3200, "true"),
+				Config: testAccRecordCnameTtl(canonical, name, "default", 3200, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "3200"),
@@ -401,7 +401,7 @@ func TestAccRecordCnameResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameUseTtl(canonical, name, "default", "true", 20),
+				Config: testAccRecordCnameUseTtl(canonical, name, "default", true, 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
@@ -409,7 +409,7 @@ func TestAccRecordCnameResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameUseTtl(canonical, name, "default", "false", 20),
+				Config: testAccRecordCnameUseTtl(canonical, name, "default", false, 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -532,24 +532,24 @@ resource "nios_dns_record_cname" "test_ddns_principal" {
 `, canonical, name, view, ddnsPrincipal, creator)
 }
 
-func testAccRecordCnameDdnsProtected(canonical, name, view, ddnsProtected string) string {
+func testAccRecordCnameDdnsProtected(canonical, name, view string, ddnsProtected bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_ddns_protected" {
 	canonical       = %q
 	name            = %q
 	view            = %q
-	ddns_protected  = %q
+	ddns_protected  = %t
 }
 `, canonical, name, view, ddnsProtected)
 }
 
-func testAccRecordCnameDisable(canonical, name, view, disable string) string {
+func testAccRecordCnameDisable(canonical, name, view string, disable bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_disable" {
 	canonical = %q
 	name      = %q
 	view      = %q
-	disable   = %q
+	disable   = %t
 }
 `, canonical, name, view, disable)
 }
@@ -572,13 +572,13 @@ resource "nios_dns_record_cname" "test_extattrs" {
 `, canonical, name, view, extattrsStr)
 }
 
-func testAccRecordCnameForbidReclamation(canonical, name, view, forbidReclamation string) string {
+func testAccRecordCnameForbidReclamation(canonical, name, view string, forbidReclamation bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_forbid_reclamation" {
 	canonical          = %q
 	name               = %q
 	view               = %q
-	forbid_reclamation = %q
+	forbid_reclamation = %t
 }
 `, canonical, name, view, forbidReclamation)
 }
@@ -593,26 +593,26 @@ resource "nios_dns_record_cname" "test_name" {
 `, canonical, name, view)
 }
 
-func testAccRecordCnameTtl(canonical, name, view string, ttl int32, useTTL string) string {
+func testAccRecordCnameTtl(canonical, name, view string, ttl int32, useTTL bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_ttl" {
 	canonical = %q
 	name      = %q
 	view      = %q
 	ttl       = %d
-	use_ttl   = %q
+	use_ttl   = %t
 
 }
 `, canonical, name, view, ttl, useTTL)
 }
 
-func testAccRecordCnameUseTtl(canonical, name, view, useTtl string, ttl int32) string {
+func testAccRecordCnameUseTtl(canonical, name, view string, useTtl bool, ttl int32) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_cname" "test_use_ttl" {
 	canonical = %q
 	name      = %q
 	view      = %q
-	use_ttl   = %q
+	use_ttl   = %t
 	ttl 	  = %d
 }
 `, canonical, name, view, useTtl, ttl)

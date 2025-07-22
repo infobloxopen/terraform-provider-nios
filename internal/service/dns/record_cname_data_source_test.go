@@ -118,7 +118,7 @@ resource "nios_dns_record_cname" "test" {
 
 data "nios_dns_record_cname" "test" {
   extattrfilters = {
-	"Site" = nios_dns_record_cname.test.extattrs.Site
+	Site = nios_dns_record_cname.test.extattrs.Site
   }
 }
 `, canonical, name, view, extAttrsValue)
