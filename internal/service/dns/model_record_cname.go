@@ -211,20 +211,17 @@ func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		return nil
 	}
 	to := &dns.RecordCname{
-		Ref:                flex.ExpandStringPointer(m.Ref),
-		AwsRte53RecordInfo: ExpandRecordCnameAwsRte53RecordInfo(ctx, m.AwsRte53RecordInfo, diags),
-		Canonical:          flex.ExpandStringPointer(m.Canonical),
-		CloudInfo:          ExpandRecordCnameCloudInfo(ctx, m.CloudInfo, diags),
-		Comment:            flex.ExpandStringPointer(m.Comment),
-		Creator:            flex.ExpandStringPointer(m.Creator),
-		DdnsPrincipal:      flex.ExpandStringPointer(m.DdnsPrincipal),
-		DdnsProtected:      flex.ExpandBoolPointer(m.DdnsProtected),
-		Disable:            flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:           ExpandExtAttr(ctx, m.ExtAttrs, diags),
-		ForbidReclamation:  flex.ExpandBoolPointer(m.ForbidReclamation),
-		Name:               flex.ExpandStringPointer(m.Name),
-		Ttl:                flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:             flex.ExpandBoolPointer(m.UseTtl),
+		Canonical:         flex.ExpandStringPointer(m.Canonical),
+		Comment:           flex.ExpandStringPointer(m.Comment),
+		Creator:           flex.ExpandStringPointer(m.Creator),
+		DdnsPrincipal:     flex.ExpandStringPointer(m.DdnsPrincipal),
+		DdnsProtected:     flex.ExpandBoolPointer(m.DdnsProtected),
+		Disable:           flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:          ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ForbidReclamation: flex.ExpandBoolPointer(m.ForbidReclamation),
+		Name:              flex.ExpandStringPointer(m.Name),
+		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
 	}
 	if isCreate {
 		to.View = flex.ExpandStringPointer(m.View)
