@@ -271,7 +271,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkcontainerCloudInfoResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
