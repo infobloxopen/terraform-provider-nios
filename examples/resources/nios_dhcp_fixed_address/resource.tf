@@ -18,7 +18,6 @@ resource "nios_dhcp_fixed_address" "create_address_additional" {
   mac          = "00:6a:7b:8c:9d:5e"
 
   // Additional Fields
-  agent_remote_id = 30
   comment         = "Fixed Address created with additional fields"
 
   bootfile     = "pxelinux.0"
