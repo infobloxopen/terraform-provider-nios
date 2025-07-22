@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_txt Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS TXT Records.
 ---
 
 # nios_dns_record_txt (Data Source)
 
-
+Retrieves information about existing DNS TXT Records.
 
 ## Example Usage
 
@@ -48,6 +48,11 @@ data "nios_dns_record_txt" "get_all_records" {}
 <a id="nestedatt--result"></a>
 ### Nested Schema for `result`
 
+Required:
+
+- `name` (String) Name for the TXT record in FQDN format. This value can be in unicode format.
+- `text` (String) Text associated with the record. It can contain up to 255 bytes per substring, up to a total of 512 bytes. To enter leading, trailing, or embedded spaces in the text, add double quotes (&#92;" &#92;") around the text to preserve the spaces.
+
 Optional:
 
 - `comment` (String) Comment for the record; maximum 256 characters.
@@ -57,8 +62,6 @@ Optional:
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `name` (String) Name for the TXT record in FQDN format. This value can be in unicode format.
-- `text` (String) Text associated with the record. It can contain up to 255 bytes per substring, up to a total of 512 bytes. To enter leading, trailing, or embedded spaces in the text, add double quotes (&#92;" &#92;") around the text to preserve the spaces.
 - `ttl` (Number) The Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Use flag for: ttl
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".
@@ -100,7 +103,7 @@ Read-Only:
 
 Optional:
 
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 
 Read-Only:
 

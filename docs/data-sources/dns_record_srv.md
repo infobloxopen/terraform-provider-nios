@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_srv Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS SRV Records.
 ---
 
 # nios_dns_record_srv (Data Source)
 
-
+Retrieves information about existing DNS SRV Records.
 
 ## Example Usage
 
@@ -51,6 +51,10 @@ data "nios_dns_record_srv" "get_all_records" {}
 Required:
 
 - `name` (String) A name in FQDN format. This value can be in unicode format.
+- `port` (Number) The port of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.
+- `priority` (Number) The priority of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.
+- `target` (String) The target of the SRV record in FQDN format. This value can be in unicode format.
+- `weight` (Number) The weight of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.
 
 Optional:
 
@@ -61,13 +65,9 @@ Optional:
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `port` (Number) The port of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.
-- `priority` (Number) The priority of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.
-- `target` (String) The target of the SRV record in FQDN format. This value can be in unicode format.
 - `ttl` (Number) The Time to Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Use flag for: ttl
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".
-- `weight` (Number) The weight of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.
 
 Read-Only:
 
@@ -107,7 +107,7 @@ Read-Only:
 
 Optional:
 
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 
 Read-Only:
 
