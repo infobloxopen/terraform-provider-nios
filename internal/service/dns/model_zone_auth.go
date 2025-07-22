@@ -286,6 +286,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field allows the zone to receive GSS-TSIG authenticated DDNS updates from DHCP clients and servers in an AD domain. Note that addresses specified in this field ignore the permission set in the struct which will be set to 'ALLOW'.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_active_dir")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"allow_fixed_rrset_order": schema.BoolAttribute{
@@ -315,6 +316,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines whether DNS queries are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_query")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"allow_transfer": schema.ListNestedAttribute{
@@ -326,6 +328,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines whether zone transfers are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_transfer")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"allow_update": schema.ListNestedAttribute{
@@ -337,6 +340,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines whether dynamic DNS updates are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_update")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"allow_update_forwarding": schema.BoolAttribute{
@@ -437,6 +441,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The unordered list of restriction patterns for an option of to restrict DDNS updates based on FQDN patterns.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ddns_patterns_restriction")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"ddns_restrict_protected": schema.BoolAttribute{
@@ -570,16 +575,22 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthExternalPrimariesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of external primary servers.",
 	},
 	"external_secondaries": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthExternalSecondariesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of external secondary servers.",
 	},
 	"fqdn": schema.StringAttribute{
@@ -598,6 +609,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.ConflictsWith(path.MatchRoot("ns_group")),
 			listvalidator.ConflictsWith(path.MatchRoot("external_primaries")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The grid primary servers for this zone.",
 	},
@@ -612,6 +624,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("grid_primary")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The list with Grid members that are secondary servers for this zone.",
 	},
@@ -644,8 +657,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthLastQueriedAclResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "Determines last queried ACL for the specified IPv4 or IPv6 addresses and networks in scavenging settings.",
 	},
 	"locked": schema.BoolAttribute{
@@ -666,8 +682,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthMemberSoaMnamesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of per-member SOA MNAME information.",
 	},
 	"member_soa_serials": schema.ListNestedAttribute{
@@ -687,8 +706,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthMsAllowTransferResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of DNS clients that are allowed to perform zone transfers from a Microsoft DNS server. This setting applies only to zones with Microsoft DNS servers that are either primary or secondary servers. This setting does not inherit any value from the Grid or from any member that defines an allow_transfer value. This setting does not apply to any grid member. Use the allow_transfer field to control which DNS clients are allowed to perform zone transfers on Grid members.",
 	},
 	"ms_allow_transfer_mode": schema.StringAttribute{
@@ -705,6 +727,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthMsDcNsRecordCreationResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of domain controllers that are allowed to create NS records for authoritative zones.",
 	},
 	"ms_ddns_mode": schema.StringAttribute{
@@ -724,8 +747,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthMsPrimariesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list with the Microsoft DNS servers that are primary servers for the zone. Although a zone typically has just one primary name server, you can specify up to ten independent servers for a single zone.",
 	},
 	"ms_read_only": schema.BoolAttribute{
@@ -736,7 +762,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthMsSecondariesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list with the Microsoft DNS servers that are secondary servers for the zone.",
 	},
 	"ms_sync_disabled": schema.BoolAttribute{
@@ -942,6 +972,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("allow_update_forwarding")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "Use this field to allow or deny dynamic DNS updates that are forwarded from specific IPv4/IPv6 addresses, networks, or a named ACL. You can also provide TSIG keys for clients that are allowed or denied to perform zone updates. This setting overrides the member-level setting.",
 	},
