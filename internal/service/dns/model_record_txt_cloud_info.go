@@ -38,8 +38,9 @@ var RecordTxtCloudInfoAttrTypes = map[string]attr.Type{
 
 var RecordTxtCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes: RecordtxtcloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          RecordtxtcloudinfoDelegatedMemberResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "The Cloud Platform Appliance to which authority of the object is delegated.",
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,

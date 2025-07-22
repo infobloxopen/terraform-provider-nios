@@ -37,7 +37,7 @@ func (r *RecordSrvResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *RecordSrvResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a SRV Record.",
 		Attributes:          RecordSrvResourceSchemaAttributes,
 	}
 }
@@ -82,7 +82,7 @@ func (r *RecordSrvResource) Create(ctx context.Context, req resource.CreateReque
 	apiRes, _, err := r.client.DNSAPI.
 		RecordSrvAPI.
 		Create(ctx).
-		RecordSrv(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordSrv(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForRecordSrv).
 		ReturnAsObject(1).
 		Execute()
@@ -266,7 +266,7 @@ func (r *RecordSrvResource) Update(ctx context.Context, req resource.UpdateReque
 	apiRes, _, err := r.client.DNSAPI.
 		RecordSrvAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordSrv(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordSrv(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordSrv).
 		ReturnAsObject(1).
 		Execute()

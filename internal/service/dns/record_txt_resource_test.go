@@ -87,7 +87,7 @@ func TestAccRecordTxtResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTxtComment(name, "Record Text", "This is a updated record"),
+				Config: testAccRecordTxtComment(name, "Record Text", "This is an updated record"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTxtExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated record"),
@@ -139,18 +139,18 @@ func TestAccRecordTxtResource_DdnsPrincipal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTxtDdnsPrincipal(name, "Record Text", "DDNS_PRINCIPAL_REPLACE_ME", "DYNAMIC"),
+				Config: testAccRecordTxtDdnsPrincipal(name, "Record Text", "dhcp/server1@CORP.LOCAL", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTxtExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "dhcp/server1@CORP.LOCAL"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTxtDdnsPrincipal(name, "Record Text", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME", "DYNAMIC"),
+				Config: testAccRecordTxtDdnsPrincipal(name, "Record Text", "dhcp/server2@CORP.LOCAL", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTxtExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "dhcp/server2@CORP.LOCAL"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

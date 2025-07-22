@@ -37,7 +37,7 @@ func (r *RecordTxtResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *RecordTxtResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a TXT Record.",
 		Attributes:          RecordTxtResourceSchemaAttributes,
 	}
 }
@@ -82,7 +82,7 @@ func (r *RecordTxtResource) Create(ctx context.Context, req resource.CreateReque
 	apiRes, _, err := r.client.DNSAPI.
 		RecordTxtAPI.
 		Create(ctx).
-		RecordTxt(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordTxt(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForRecordTxt).
 		ReturnAsObject(1).
 		Execute()
@@ -266,7 +266,7 @@ func (r *RecordTxtResource) Update(ctx context.Context, req resource.UpdateReque
 	apiRes, _, err := r.client.DNSAPI.
 		RecordTxtAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordTxt(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordTxt(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordTxt).
 		ReturnAsObject(1).
 		Execute()

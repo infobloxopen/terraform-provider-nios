@@ -113,7 +113,7 @@ resource "nios_dns_record_txt" "test" {
 
 data "nios_dns_record_txt" "test" {
   extattrfilters = {
-	"Site" = nios_dns_record_txt.test.extattrs.Site
+	Site = nios_dns_record_txt.test.extattrs.Site
   }
 }
 `, name, text, extAttrsValue)

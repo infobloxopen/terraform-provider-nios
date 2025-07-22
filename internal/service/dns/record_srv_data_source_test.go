@@ -125,7 +125,7 @@ resource "nios_dns_record_srv" "test" {
 
 data "nios_dns_record_srv" "test" {
   extattrfilters = {
-	"Site" = nios_dns_record_srv.test.extattrs.Site
+	Site = nios_dns_record_srv.test.extattrs.Site
   }
 }
 `, name, target, port, priority, weight, extAttrsValue)

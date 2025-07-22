@@ -15,8 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -88,8 +86,14 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
@@ -149,8 +153,7 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
 	},
 	"name": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -168,8 +171,13 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the shared record group in which the record resides. This field exists only on db_objects if this record is a shared record.",
 	},
 	"text": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Text associated with the record. It can contain up to 255 bytes per substring, up to a total of 512 bytes. To enter leading, trailing, or embedded spaces in the text, add double quotes (&#92;\" &#92;\") around the text to preserve the spaces.",
 	},
 	"ttl": schema.Int64Attribute{
@@ -197,19 +205,7 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRecordTxt(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordTxt {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RecordTxtModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
-func (m *RecordTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordTxt {
+func (m *RecordTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordTxt {
 	if m == nil {
 		return nil
 	}
@@ -226,6 +222,9 @@ func (m *RecordTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
 		View:              flex.ExpandStringPointer(m.View),
+	}
+	if isCreate {
+		to.View = flex.ExpandStringPointer(m.View)
 	}
 	return to
 }

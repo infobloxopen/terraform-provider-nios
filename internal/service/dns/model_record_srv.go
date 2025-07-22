@@ -94,8 +94,14 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
@@ -169,11 +175,17 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A name in FQDN format. This value can be in unicode format.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 65535),
+		},
 		MarkdownDescription: "The port of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.",
 	},
 	"priority": schema.Int64Attribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 65535),
+		},
 		MarkdownDescription: "The priority of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.",
 	},
 	"reclaimable": schema.BoolAttribute{
@@ -185,8 +197,13 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the shared record group in which the record resides. This field exists only on db_objects if this record is a shared record.",
 	},
 	"target": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The target of the SRV record in FQDN format. This value can be in unicode format.",
 	},
 	"ttl": schema.Int64Attribute{
@@ -204,12 +221,21 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: ttl",
 	},
 	"view": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The name of the DNS view in which the record resides. Example: \"external\".",
 	},
 	"weight": schema.Int64Attribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 65535),
+		},
 		MarkdownDescription: "The weight of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.",
 	},
 	"zone": schema.StringAttribute{
@@ -218,7 +244,7 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordSrv {
+func (m *RecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordSrv {
 	if m == nil {
 		return nil
 	}
@@ -236,8 +262,10 @@ func (m *RecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		Target:            flex.ExpandStringPointer(m.Target),
 		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
-		View:              flex.ExpandStringPointer(m.View),
 		Weight:            flex.ExpandInt64Pointer(m.Weight),
+	}
+	if isCreate {
+		to.View = flex.ExpandStringPointer(m.View)
 	}
 	return to
 }

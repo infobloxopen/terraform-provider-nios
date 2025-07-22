@@ -147,18 +147,18 @@ func TestAccRecordSrvResource_DdnsPrincipal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordSrvDdnsPrincipal(name, target, 80, 10, 360, "DDNS_PRINCIPAL_REPLACE_ME", "DYNAMIC"),
+				Config: testAccRecordSrvDdnsPrincipal(name, target, 80, 10, 360, "dhcp/server1@CORP.LOCAL", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "dhcp/server1@CORP.LOCAL"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordSrvDdnsPrincipal(name, target, 80, 10, 360, "DDNS_PRINCIPAL_UPDATE_REPLACE_ME", "DYNAMIC"),
+				Config: testAccRecordSrvDdnsPrincipal(name, target, 80, 10, 360, "dhcp/server2@CORP.LOCAL", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "dhcp/server2@CORP.LOCAL"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
