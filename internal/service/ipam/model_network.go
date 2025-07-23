@@ -322,7 +322,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkCloudInfoResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "A CloudInfo struct that contains information about the cloud provider and region for the network.",
 	},
@@ -826,7 +825,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
-		Computed:            true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("CREATE", "MODIFY", "DELETE", "NONE"),
 		},
@@ -868,7 +866,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"template": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "If set on creation, the network is created according to the values specified in the selected template.",
-		Computed:            true,
 	},
 	"total_hosts": schema.Int64Attribute{
 		Computed:            true,
@@ -1281,7 +1278,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
+	// m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
@@ -1320,7 +1317,6 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
-	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)

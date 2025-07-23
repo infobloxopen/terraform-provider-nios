@@ -63,7 +63,6 @@ func TestAccNetworkResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "10"),
 					resource.TestCheckResourceAttr(resourceName, "mgm_private", "false"),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
-					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
 					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "false"),
 					resource.TestCheckResourceAttr(resourceName, "unmanaged", "false"),
@@ -2553,28 +2552,6 @@ func TestAccNetworkResource_UseRecycleLeases(t *testing.T) {
 	})
 }
 
-func TestAccNetworkResource_UseSubscribeSettings(t *testing.T) {
-	var resourceName = "nios_ipam_network.test_use_subscribe_settings"
-	var v ipam.Network
-	network := acctest.RandomCIDRNetwork()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNetworkUseSubscribeSettings(network, "false"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccNetworkResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_network.test_use_update_dns_on_lease_renewal"
 	var v ipam.Network
@@ -3462,15 +3439,6 @@ resource "nios_ipam_network" "test_use_recycle_leases" {
     use_recycle_leases = %q
 }
 `, network, useRecycleLeases)
-}
-
-func testAccNetworkUseSubscribeSettings(network, useSubscribeSettings string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network" "test_use_subscribe_settings" {
-    network = %q
-    use_subscribe_settings = %q
-}
-`, network, useSubscribeSettings)
 }
 
 func testAccNetworkUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {

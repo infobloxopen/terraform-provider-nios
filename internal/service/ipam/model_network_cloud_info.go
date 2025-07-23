@@ -39,7 +39,6 @@ var NetworkCloudInfoAttrTypes = map[string]attr.Type{
 var NetworkCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes:          NetworkcloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Contains information about the delegated member of the network. This is only set if the network is delegated to a member.",
 	},

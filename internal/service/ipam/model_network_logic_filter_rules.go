@@ -28,17 +28,15 @@ var NetworkLogicFilterRulesAttrTypes = map[string]attr.Type{
 
 var NetworkLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The filter name.",
-		Computed:            true,
 	},
 	"type": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The filter type. Valid values are: * MAC * NAC * Option",
 		Validators: []validator.String{
 			stringvalidator.OneOf("MAC", "NAC", "Option"),
 		},
-		Computed: true,
 	},
 }
 
