@@ -30,7 +30,8 @@ var ZoneForwardForwardingServersAttrTypes = map[string]attr.Type{
 
 var ZoneForwardForwardingServersResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of this Grid member in FQDN format.",
 	},
 	"forwarders_only": schema.BoolAttribute{
@@ -44,6 +45,7 @@ var ZoneForwardForwardingServersResourceSchemaAttributes = map[string]schema.Att
 			Attributes: ZoneforwardforwardingserversForwardToResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The information for the remote name server to which you want the Infoblox appliance to forward queries for a specified domain name.",
 	},
 	"use_override_forwarders": schema.BoolAttribute{
