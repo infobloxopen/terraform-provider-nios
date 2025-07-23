@@ -16,18 +16,22 @@ func TestAccRecordNsDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dns_record_ns.test"
 	var v dns.RecordNs
 	name := "example.com"
-	addresses :=
-		`[{
-		address = "20.0.0.0"
-		auto_create_ptr = false
-	}]`
+	nameserver := acctest.RandomNameWithPrefix("nameserver") + ".example.com"
+	addresses := []map[string]any{
+		{
+			"address":         "20.0.0.0",
+			"auto_create_ptr": false,
+		},
+	}
+	addressesHCL := FormatZoneNameServersToHCL(addresses)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckRecordNsDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordNsDataSourceConfigFilters(name, "ns1.example.com", addresses, "default"),
+				Config: testAccRecordNsDataSourceConfigFilters(name, nameserver, addressesHCL, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordNsExists(context.Background(), resourceName, &v),
