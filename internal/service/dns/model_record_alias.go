@@ -169,19 +169,16 @@ func (m *RecordAliasModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		return nil
 	}
 	to := &dns.RecordAlias{
-		Ref:                flex.ExpandStringPointer(m.Ref),
-		AwsRte53RecordInfo: ExpandRecordAliasAwsRte53RecordInfo(ctx, m.AwsRte53RecordInfo, diags),
-		CloudInfo:          ExpandRecordAliasCloudInfo(ctx, m.CloudInfo, diags),
-		Comment:            flex.ExpandStringPointer(m.Comment),
-		Creator:            flex.ExpandStringPointer(m.Creator),
-		Disable:            flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:           ExpandExtAttr(ctx, m.ExtAttrs, diags),
-		Name:               flex.ExpandStringPointer(m.Name),
-		TargetName:         flex.ExpandStringPointer(m.TargetName),
-		TargetType:         flex.ExpandStringPointer(m.TargetType),
-		Ttl:                flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:             flex.ExpandBoolPointer(m.UseTtl),
-		View:               flex.ExpandStringPointer(m.View),
+		Comment:    flex.ExpandStringPointer(m.Comment),
+		Creator:    flex.ExpandStringPointer(m.Creator),
+		Disable:    flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:   ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		Name:       flex.ExpandStringPointer(m.Name),
+		TargetName: flex.ExpandStringPointer(m.TargetName),
+		TargetType: flex.ExpandStringPointer(m.TargetType),
+		Ttl:        flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:     flex.ExpandBoolPointer(m.UseTtl),
+		View:       flex.ExpandStringPointer(m.View),
 	}
 	return to
 }
