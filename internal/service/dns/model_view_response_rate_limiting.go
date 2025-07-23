@@ -33,22 +33,27 @@ var ViewResponseRateLimitingAttrTypes = map[string]attr.Type{
 var ViewResponseRateLimitingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_rrl": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if the response rate limiting is enabled or not.",
 	},
 	"log_only": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if logging for response rate limiting without dropping any requests is enabled or not.",
 	},
 	"responses_per_second": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The number of responses per client per second.",
 	},
 	"window": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The time interval in seconds over which responses are tracked.",
 	},
 	"slip": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The response rate limiting slip. Note that if slip is not equal to 0 every n-th rate-limited UDP request is sent a truncated response instead of being dropped.",
 	},
 }

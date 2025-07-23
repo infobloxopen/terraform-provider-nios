@@ -3,14 +3,19 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -51,7 +56,7 @@ type ViewModel struct {
 	EnableFixedRrsetOrderFqdns          types.Bool   `tfsdk:"enable_fixed_rrset_order_fqdns"`
 	EnableMatchRecursiveOnly            types.Bool   `tfsdk:"enable_match_recursive_only"`
 	ExtAttrs                            types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll        					types.Map    `tfsdk:"extattrs_all"`
+	ExtAttrsAll                         types.Map    `tfsdk:"extattrs_all"`
 	FilterAaaa                          types.String `tfsdk:"filter_aaaa"`
 	FilterAaaaList                      types.List   `tfsdk:"filter_aaaa_list"`
 	FixedRrsetOrderFqdns                types.List   `tfsdk:"fixed_rrset_order_fqdns"`
@@ -138,7 +143,7 @@ var ViewAttrTypes = map[string]attr.Type{
 	"enable_fixed_rrset_order_fqdns":           types.BoolType,
 	"enable_match_recursive_only":              types.BoolType,
 	"extattrs":                                 types.MapType{ElemType: types.StringType},
-	"extattrs_all":         					types.MapType{ElemType: types.StringType},
+	"extattrs_all":                             types.MapType{ElemType: types.StringType},
 	"filter_aaaa":                              types.StringType,
 	"filter_aaaa_list":                         types.ListType{ElemType: types.ObjectType{AttrTypes: ViewFilterAaaaListAttrTypes}},
 	"fixed_rrset_order_fqdns":                  types.ListType{ElemType: types.ObjectType{AttrTypes: ViewFixedRrsetOrderFqdnsAttrTypes}},
@@ -195,34 +200,44 @@ var ViewAttrTypes = map[string]attr.Type{
 }
 
 var ViewResourceSchemaAttributes = map[string]schema.Attribute{
-   "ref": schema.StringAttribute{
-        Computed: true,
-        MarkdownDescription: "The reference to the object.",
-    },
-	"blacklist_action": schema.StringAttribute{
-		Optional:            true,
+	"ref": schema.StringAttribute{
 		Computed:            true,
-		Default:             stringdefault.StaticString("REDIRECT"),
+		MarkdownDescription: "The reference to the object.",
+	},
+	"blacklist_action": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("REDIRECT"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("REDIRECT", "REFUSE"),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_blacklist")),
 		},
 		MarkdownDescription: "The action to perform when a domain name matches the pattern defined in a rule that is specified by the blacklist_ruleset method. Valid values are \"REDIRECT\" or \"REFUSE\". The default value is \"REFUSE\".",
 	},
 	"blacklist_log_query": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_blacklist")),
+		},
 		MarkdownDescription: "The flag that indicates whether blacklist redirection queries are logged. Specify \"true\" to enable logging, or \"false\" to disable it. The default value is \"false\".",
 	},
 	"blacklist_redirect_addresses": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_blacklist")),
+		},
 		MarkdownDescription: "The array of IP addresses the appliance includes in the response it sends in place of a blacklisted IP address.",
 	},
 	"blacklist_redirect_ttl": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(60),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(60),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_blacklist")),
+		},
 		MarkdownDescription: "The Time To Live (TTL) value of the synthetic DNS responses resulted from blacklist redirection. The TTL value is a 32-bit unsigned integer that represents the TTL in seconds.",
 	},
 	"blacklist_rulesets": schema.ListAttribute{
@@ -231,7 +246,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the Ruleset object assigned at the Grid level for blacklist redirection.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: ViewCloudInfoResourceSchemaAttributes,
+		Attributes:          ViewCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
@@ -248,26 +263,38 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of customized root name servers. You can either select and use Internet root name servers or specify custom root name servers by providing a host name and IP address to which the Infoblox appliance can send queries. Include the specified parameter to set the attribute value. Omit the parameter to retrieve the attribute value.",
 	},
 	"ddns_force_creation_timestamp_update": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_force_creation_timestamp_update")),
+		},
 		MarkdownDescription: "Defines whether creation timestamp of RR should be updated ' when DDNS update happens even if there is no change to ' the RR.",
 	},
 	"ddns_principal_group": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
+		},
 		MarkdownDescription: "The DDNS Principal cluster group name.",
 	},
 	"ddns_principal_tracking": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
+		},
 		MarkdownDescription: "The flag that indicates whether the DDNS principal track is enabled or disabled.",
 	},
 	"ddns_restrict_patterns": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_patterns_restriction")),
+		},
 		MarkdownDescription: "The flag that indicates whether an option to restrict DDNS update request based on FQDN patterns is enabled or disabled.",
 	},
 	"ddns_restrict_patterns_list": schema.ListAttribute{
@@ -276,21 +303,30 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The unordered list of restriction patterns for an option of to restrict DDNS updates based on FQDN patterns.",
 	},
 	"ddns_restrict_protected": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_restrict_protected")),
+		},
 		MarkdownDescription: "The flag that indicates whether an option to restrict DDNS update request to protected resource records is enabled or disabled.",
 	},
 	"ddns_restrict_secure": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
+		},
 		MarkdownDescription: "The flag that indicates whether DDNS update request for principal other than target resource record's principal is restricted.",
 	},
 	"ddns_restrict_static": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_restrict_static")),
+		},
 		MarkdownDescription: "The flag that indicates whether an option to restrict DDNS update request to resource records which are marked as 'STATIC' is enabled or disabled.",
 	},
 	"disable": schema.BoolAttribute{
@@ -300,26 +336,38 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the DNS view is disabled or not. When this is set to False, the DNS view is enabled.",
 	},
 	"dns64_enabled": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_dns64")),
+		},
 		MarkdownDescription: "Determines if the DNS64 s enabled or not.",
 	},
 	"dns64_groups": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_dns64")),
+		},
 		MarkdownDescription: "The list of DNS64 synthesis groups associated with this DNS view.",
 	},
 	"dnssec_enabled": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_dnssec")),
+		},
 		MarkdownDescription: "Determines if the DNS security extension is enabled or not.",
 	},
 	"dnssec_expired_signatures_enabled": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_dnssec")),
+		},
 		MarkdownDescription: "Determines if the DNS security extension accepts expired signatures or not.",
 	},
 	"dnssec_negative_trust_anchors": schema.ListAttribute{
@@ -331,13 +379,19 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewDnssecTrustedKeysResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_dnssec")),
+		},
 		MarkdownDescription: "The list of trusted keys for the DNS security extension.",
 	},
 	"dnssec_validation_enabled": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_dnssec")),
+		},
 		MarkdownDescription: "Determines if the DNS security validation is enabled or not.",
 	},
 	"edns_udp_size": schema.Int64Attribute{
@@ -347,15 +401,21 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Advertises the EDNS0 buffer size to the upstream server. The value should be between 512 and 4096 bytes. The recommended value is between 512 and 1220 bytes.",
 	},
 	"enable_blacklist": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_blacklist")),
+		},
 		MarkdownDescription: "Determines if the blacklist in a DNS view is enabled or not.",
 	},
 	"enable_fixed_rrset_order_fqdns": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_fixed_rrset_order_fqdns")),
+		},
 		MarkdownDescription: "Determines if the fixed RRset order FQDN is enabled or not.",
 	},
 	"enable_match_recursive_only": schema.BoolAttribute{
@@ -377,11 +437,12 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 	},
 	"filter_aaaa": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("NO"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("NO"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("BREAK_DNSSEC", "NO", "YES"),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_filter_aaaa")),
 		},
 		MarkdownDescription: "The type of AAAA filtering for this DNS view object.",
 	},
@@ -389,7 +450,10 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewFilterAaaaListResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_filter_aaaa")),
+		},
 		MarkdownDescription: "Applies AAAA filtering to a named ACL, or to a list of IPv4/IPv6 addresses and networks from which queries are received. This field does not allow TSIG keys.",
 	},
 	"fixed_rrset_order_fqdns": schema.ListNestedAttribute{
@@ -400,14 +464,20 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The fixed RRset order FQDN. If this field does not contain an empty value, the appliance will automatically set the enable_fixed_rrset_order_fqdns field to 'true', unless the same request sets the enable field to 'false'.",
 	},
 	"forward_only": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_forwarders")),
+		},
 		MarkdownDescription: "Determines if this DNS view sends queries to forwarders only or not. When the value is True, queries are sent to forwarders only, and not to other internal or Internet root servers.",
 	},
 	"forwarders": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_forwarders")),
+		},
 		MarkdownDescription: "The list of forwarders for the DNS view. A forwarder is a name server to which other name servers first send their off-site queries. The forwarder builds up a cache of information, avoiding the need for other name servers to send queries off-site.",
 	},
 	"is_default": schema.BoolAttribute{
@@ -436,30 +506,39 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A list of forwarders for the match destinations. This list specifies a name ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"max_cache_ttl": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(604800),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(604800),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_max_cache_ttl")),
+		},
 		MarkdownDescription: "The maximum number of seconds to cache ordinary (positive) answers.",
 	},
 	"max_ncache_ttl": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(10800),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(10800),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_max_ncache_ttl")),
+		},
 		MarkdownDescription: "The maximum number of seconds to cache negative (NXDOMAIN) answers.",
 	},
 	"max_udp_size": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1220),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(1220),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_max_udp_size")),
+		},
 		MarkdownDescription: "The value is used by authoritative DNS servers to never send DNS responses larger than the configured value. The value should be between 512 and 4096 bytes. The recommended value is between 512 and 1220 bytes.",
 	},
 	"name": schema.StringAttribute{
-		Required:			 true,
+		Required:            true,
 		MarkdownDescription: "Name of the DNS view.",
 	},
 	"network_view": schema.StringAttribute{
 		Optional:            true,
-		Computed:			 true,
+		Computed:            true,
 		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the network view object associated with this DNS view.",
 	},
@@ -470,86 +549,124 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The number of seconds of delay the notify messages are sent to secondaries.",
 	},
 	"nxdomain_log_query": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+		},
 		MarkdownDescription: "The flag that indicates whether NXDOMAIN redirection queries are logged. Specify \"true\" to enable logging, or \"false\" to disable it. The default value is \"false\".",
 	},
 	"nxdomain_redirect": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+		},
 		MarkdownDescription: "Determines if NXDOMAIN redirection in a DNS view is enabled or not.",
 	},
 	"nxdomain_redirect_addresses": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+		},
 		MarkdownDescription: "The array with IPv4 addresses the appliance includes in the response it sends in place of an NXDOMAIN response.",
 	},
 	"nxdomain_redirect_addresses_v6": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+		},
 		MarkdownDescription: "The array with IPv6 addresses the appliance includes in the response it sends in place of an NXDOMAIN response.",
 	},
 	"nxdomain_redirect_ttl": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(60),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(60),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+		},
 		MarkdownDescription: "The Time To Live (TTL) value of the synthetic DNS responses resulted from NXDOMAIN redirection. The TTL value is a 32-bit unsigned integer that represents the TTL in seconds.",
 	},
 	"nxdomain_rulesets": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+		},
 		MarkdownDescription: "The names of the Ruleset objects assigned at the grid level for NXDOMAIN redirection.",
 	},
 	"recursion": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_recursion")),
+		},
 		MarkdownDescription: "Determines if recursion is enabled or not.",
 	},
 	"response_rate_limiting": schema.SingleNestedAttribute{
-		Attributes: 		 ViewResponseRateLimitingResourceSchemaAttributes,
-		Optional:   		 true,
-		Computed:            true,
+		Attributes: ViewResponseRateLimitingResourceSchemaAttributes,
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_response_rate_limiting")),
+		},
+		MarkdownDescription: "The response rate limiting settings for the DNS view. This feature is used to limit the number of responses sent to a client in a given time period.",
 	},
 	"root_name_server_type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("INTERNET"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("INTERNET"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("CUSTOM", "INTERNET"),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_root_name_server")),
 		},
 		MarkdownDescription: "Determines the type of root name servers.",
 	},
 	"rpz_drop_ip_rule_enabled": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_rpz_drop_ip_rule")),
+		},
 		MarkdownDescription: "Enables the appliance to ignore RPZ-IP triggers with prefix lengths less than the specified minimum prefix length.",
 	},
 	"rpz_drop_ip_rule_min_prefix_length_ipv4": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(29),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(29),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_rpz_drop_ip_rule")),
+		},
 		MarkdownDescription: "The minimum prefix length for IPv4 RPZ-IP triggers. The appliance ignores RPZ-IP triggers with prefix lengths less than the specified minimum IPv4 prefix length.",
 	},
 	"rpz_drop_ip_rule_min_prefix_length_ipv6": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(112),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(112),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_rpz_drop_ip_rule")),
+		},
 		MarkdownDescription: "The minimum prefix length for IPv6 RPZ-IP triggers. The appliance ignores RPZ-IP triggers with prefix lengths less than the specified minimum IPv6 prefix length.",
 	},
 	"rpz_qname_wait_recurse": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_rpz_qname_wait_recurse")),
+		},
 		MarkdownDescription: "The flag that indicates whether recursive RPZ lookups are enabled.",
 	},
 	"scavenging_settings": schema.SingleNestedAttribute{
-		Attributes:			 ViewScavengingSettingsResourceSchemaAttributes,
-		Optional:  			 true,
-		Computed:            true,
+		Attributes: ViewScavengingSettingsResourceSchemaAttributes,
+		Optional:   true,
+		Computed:   true,
 	},
 	"sortlist": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -744,7 +861,7 @@ func (m *ViewModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.Vi
 		EnableBlacklist:                     flex.ExpandBoolPointer(m.EnableBlacklist),
 		EnableFixedRrsetOrderFqdns:          flex.ExpandBoolPointer(m.EnableFixedRrsetOrderFqdns),
 		EnableMatchRecursiveOnly:            flex.ExpandBoolPointer(m.EnableMatchRecursiveOnly),
-		ExtAttrs:            				 ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                            ExpandExtAttr(ctx, m.ExtAttrs, diags),
 		FilterAaaa:                          flex.ExpandStringPointer(m.FilterAaaa),
 		FilterAaaaList:                      flex.ExpandFrameworkListNestedBlock(ctx, m.FilterAaaaList, diags, ExpandViewFilterAaaaList),
 		FixedRrsetOrderFqdns:                flex.ExpandFrameworkListNestedBlock(ctx, m.FixedRrsetOrderFqdns, diags, ExpandViewFixedRrsetOrderFqdns),

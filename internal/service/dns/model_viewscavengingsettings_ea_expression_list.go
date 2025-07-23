@@ -11,9 +11,9 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type ViewscavengingsettingsEaExpressionListModel struct {
@@ -34,55 +34,60 @@ var ViewscavengingsettingsEaExpressionListAttrTypes = map[string]attr.Type{
 
 var ViewscavengingsettingsEaExpressionListResourceSchemaAttributes = map[string]schema.Attribute{
 	"op": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
-		stringvalidator.OneOf(
-			"AND",
-			"ENDLIST",
-			"EQ",
-			"EXISTS",
-			"GE",
-			"GT",
-			"LE",
-			"LT",
-			"MATCH_CIDR",
-			"MATCH_IP",
-			"MATCH_RANGE",
-			"NOT_EQ",
-			"NOT_EXISTS",
-			"OR",
-		),
-	},
+			stringvalidator.OneOf(
+				"AND",
+				"ENDLIST",
+				"EQ",
+				"EXISTS",
+				"GE",
+				"GT",
+				"LE",
+				"LT",
+				"MATCH_CIDR",
+				"MATCH_IP",
+				"MATCH_RANGE",
+				"NOT_EQ",
+				"NOT_EXISTS",
+				"OR",
+			),
+		},
 		MarkdownDescription: "The operation name.",
 	},
 	"op1": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the Extensible Attribute Definition object which is used as the first operand value.",
 	},
 	"op1_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
-		stringvalidator.OneOf(
-			"FIELD",
-			"LIST",
-			"STRING",
-		),
-	},
+			stringvalidator.OneOf(
+				"FIELD",
+				"LIST",
+				"STRING",
+			),
+		},
 		MarkdownDescription: "The first operand type.",
 	},
 	"op2": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The second operand value.",
 	},
 	"op2_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
-		stringvalidator.OneOf(
-			"FIELD",
-			"LIST",
-			"STRING",
-		),
-	},
+			stringvalidator.OneOf(
+				"FIELD",
+				"LIST",
+				"STRING",
+			),
+		},
 		MarkdownDescription: "The second operand type.",
 	},
 }

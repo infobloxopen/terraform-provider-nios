@@ -11,12 +11,13 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type ViewscavengingsettingsScavengingScheduleModel struct {
@@ -51,14 +52,17 @@ var ViewscavengingsettingsScavengingScheduleAttrTypes = map[string]attr.Type{
 
 var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[string]schema.Attribute{
 	"weekdays": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.ValueStringsAre(
+				stringvalidator.OneOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"),
+			),
+		},
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 	},
 	"time_zone": schema.StringAttribute{
-		Optional:            true,
-		Computed: 			 true,
-		Default: 			 stringdefault.StaticString("(UTC) Coordinated Universal Time"),
+		Computed:            true,
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
@@ -66,7 +70,8 @@ var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[strin
 		MarkdownDescription: "The recurring time for the schedule in Epoch seconds format. This field is obsolete and is preserved only for backward compatibility purposes. Please use other applicable fields to define the recurring schedule. DO NOT use recurring_time together with these fields. If you use recurring_time with other fields to define the recurring schedule, recurring_time has priority over year, hour_of_day, and minutes_past_hour and will override the values of these fields, although it does not override month and day_of_month. In this case, the recurring time value might be different than the intended value that you define.",
 	},
 	"frequency": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("DAILY", "HOURLY", "MONTHLY", "WEEKLY"),
 		},
@@ -74,19 +79,19 @@ var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[strin
 	},
 	"every": schema.Int64Attribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The number of frequency to wait before repeating the scheduled task.",
 	},
 	"minutes_past_hour": schema.Int64Attribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The minutes past the hour for the scheduled task.",
 	},
 	"hour_of_day": schema.Int64Attribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The hour of day for the scheduled task.",
 	},
@@ -96,20 +101,20 @@ var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[strin
 	},
 	"month": schema.Int64Attribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The month for the scheduled task.",
 	},
 	"day_of_month": schema.Int64Attribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The day of the month for the scheduled task.",
 	},
 	"repeat": schema.StringAttribute{
-		Optional:            true,
-		Computed: 			 true,
-		Default: 			 stringdefault.StaticString("ONCE"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("ONCE"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ONCE", "RECUR"),
 		},
@@ -117,7 +122,7 @@ var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[strin
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to True, the scheduled task is disabled.",
 	},
