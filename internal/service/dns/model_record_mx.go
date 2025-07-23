@@ -111,6 +111,7 @@ var RecordMxResourceSchemaAttributes = map[string]schema.Attribute{
 	"ddns_principal": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The GSS-TSIG principal that owns this record.",
 	},
 	"ddns_protected": schema.BoolAttribute{
@@ -215,22 +216,19 @@ func (m *RecordMxModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dn
 		return nil
 	}
 	to := &dns.RecordMx{
-		Ref:                flex.ExpandStringPointer(m.Ref),
-		AwsRte53RecordInfo: ExpandRecordMxAwsRte53RecordInfo(ctx, m.AwsRte53RecordInfo, diags),
-		CloudInfo:          ExpandRecordMxCloudInfo(ctx, m.CloudInfo, diags),
-		Comment:            flex.ExpandStringPointer(m.Comment),
-		Creator:            flex.ExpandStringPointer(m.Creator),
-		DdnsPrincipal:      flex.ExpandStringPointer(m.DdnsPrincipal),
-		DdnsProtected:      flex.ExpandBoolPointer(m.DdnsProtected),
-		Disable:            flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:           ExpandExtAttr(ctx, m.ExtAttrs, diags),
-		ForbidReclamation:  flex.ExpandBoolPointer(m.ForbidReclamation),
-		MailExchanger:      flex.ExpandStringPointer(m.MailExchanger),
-		Name:               flex.ExpandStringPointer(m.Name),
-		Preference:         flex.ExpandInt64Pointer(m.Preference),
-		Ttl:                flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:             flex.ExpandBoolPointer(m.UseTtl),
-		View:               flex.ExpandStringPointer(m.View),
+		Comment:           flex.ExpandStringPointer(m.Comment),
+		Creator:           flex.ExpandStringPointer(m.Creator),
+		DdnsPrincipal:     flex.ExpandStringPointer(m.DdnsPrincipal),
+		DdnsProtected:     flex.ExpandBoolPointer(m.DdnsProtected),
+		Disable:           flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:          ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ForbidReclamation: flex.ExpandBoolPointer(m.ForbidReclamation),
+		MailExchanger:     flex.ExpandStringPointer(m.MailExchanger),
+		Name:              flex.ExpandStringPointer(m.Name),
+		Preference:        flex.ExpandInt64Pointer(m.Preference),
+		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
+		View:              flex.ExpandStringPointer(m.View),
 	}
 	return to
 }
