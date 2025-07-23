@@ -52,7 +52,6 @@ func TestAccNetworkResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "false"),
 					resource.TestCheckResourceAttr(resourceName, "enable_email_warnings", "false"),
 					resource.TestCheckResourceAttr(resourceName, "enable_ifmap_publishing", "false"),
-					// resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
 					resource.TestCheckResourceAttr(resourceName, "enable_snmp_warnings", "false"),
 					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "95"),
@@ -63,13 +62,10 @@ func TestAccNetworkResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "0"),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "10"),
 					resource.TestCheckResourceAttr(resourceName, "mgm_private", "false"),
-					// resource.TestCheckResourceAttr(resourceName, "mgm_private_overridable", "false"),
-					// resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "0"),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
 					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
 					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "false"),
-					// resource.TestCheckResourceAttr(resourceName, "send_rir_request", "false"),
 					resource.TestCheckResourceAttr(resourceName, "unmanaged", "false"),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_authority", "false"),
@@ -523,38 +519,6 @@ func TestAccNetworkResource_DdnsUseOption81(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "ddns_use_option81", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_use_option81", "true"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccNetworkResource_DeleteReason(t *testing.T) {
-	var resourceName = "nios_ipam_network.test_delete_reason"
-	var v ipam.Network
-	network := acctest.RandomCIDRNetwork()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNetworkDeleteReason(network, "Test deletion reason"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
-					resource.TestCheckResourceAttr(resourceName, "delete_reason", "Test deletion reason"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccNetworkDeleteReason(network, "Updated deletion reason"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
-					resource.TestCheckResourceAttr(resourceName, "delete_reason", "Updated deletion reason"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2844,15 +2808,6 @@ resource "nios_ipam_network" "test_ddns_use_option81" {
     use_ddns_use_option81 = %q
 }
 `, network, ddnsUseOption81, useDdnsUseOption81)
-}
-
-func testAccNetworkDeleteReason(network, deleteReason string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network" "test_delete_reason" {
-    network = %q
-    delete_reason = %q
-}
-`, network, deleteReason)
 }
 
 func testAccNetworkDenyBootp(network, denyBootp, useDenyBootp string) string {

@@ -732,7 +732,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes:          NetworkMsAdUserDataResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "A struct that contains information about the Microsoft (r) Active Directory.",
 	},
@@ -869,6 +868,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"template": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "If set on creation, the network is created according to the values specified in the selected template.",
+		Computed:            true,
 	},
 	"total_hosts": schema.Int64Attribute{
 		Computed:            true,
