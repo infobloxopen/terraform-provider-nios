@@ -28,17 +28,15 @@ var NetworkcontainerLogicFilterRulesAttrTypes = map[string]attr.Type{
 
 var NetworkcontainerLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Optional:            true,
 		MarkdownDescription: "The filter name.",
-		Computed:            true,
+		Required:            true,
 	},
 	"type": schema.StringAttribute{
-		Optional:            true,
 		MarkdownDescription: "The filter type. Valid values are: * MAC * NAC * Option",
 		Validators: []validator.String{
 			stringvalidator.OneOf("MAC", "NAC", "Option"),
 		},
-		Computed: true,
+		Required: true,
 	},
 }
 
