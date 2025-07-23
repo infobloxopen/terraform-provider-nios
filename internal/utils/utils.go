@@ -415,21 +415,18 @@ func ParseInterfaceValue(valStr string) interface{} {
 	return valStr
 }
 
-// ConvertSliceOfMapsToHCL serializes a slice of []map[string]any into an HCL map.
+// ConvertSliceOfMapsToHCL serializes a slice of []map[string]any into an HCL format.
 func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 	var blocks []string
 
 	for _, item := range data {
 		var keyValues []string
 
-		// Iterate through all key-value pairs in the map
 		for key, value := range item {
-			// Format the value based on its type
 			var formattedValue string
 
 			switch v := value.(type) {
 			case []map[string]any:
-				// Handle nested slice of maps recursively
 				nestedHCL := ConvertSliceOfMapsToHCL(v)
 				formattedValue = nestedHCL
 			case string:
@@ -456,7 +453,7 @@ func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 	return result
 }
 
-// ConvertStringSliceToHCL converts a slice of strings to an HCL array of strings.
+// ConvertStringSliceToHCL converts a slice of strings to an HCL format.
 func ConvertStringSliceToHCL(input []string) string {
 	var quotedStrings []string
 	for _, s := range input {
@@ -469,9 +466,7 @@ func ConvertStringSliceToHCL(input []string) string {
 func ConvertMapToHCL(data map[string]any) string {
 	var keyValues []string
 
-	// Iterate through all key-value pairs in the map
 	for key, value := range data {
-		// Format the value based on its type
 		var formattedValue string
 
 		switch v := value.(type) {
