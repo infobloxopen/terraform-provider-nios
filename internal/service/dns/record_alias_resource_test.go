@@ -439,7 +439,6 @@ func testAccCheckRecordAliasDisappears(ctx context.Context, v *dns.RecordAlias) 
 }
 
 func testAccRecordAliasBasicConfig(name, target_name, target_type, view string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dns_record_alias" "test" {
 	name 		= %q
