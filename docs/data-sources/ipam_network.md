@@ -98,7 +98,6 @@ Optional:
 - `low_water_mark_reset` (Number) The percentage of DHCP network usage threshold below which network usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.
 - `members` (Attributes List) A list of members or Microsoft (r) servers that serve DHCP for this network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the "_struct" member to the struct type. (see [below for nested schema](#nestedatt--result--members))
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
-- `ms_ad_user_data` (Attributes) A struct that contains information about the Microsoft (r) Active Directory. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `netmask` (Number) The netmask of the network in CIDR format.
 - `network` (String) The IPv4 Address of the record.
 - `network_view` (String) The name of the network view in which this network resides.
@@ -170,6 +169,7 @@ Read-Only:
 - `last_rir_registration_update_sent` (Number) The timestamp when the last RIR registration update was sent.
 - `last_rir_registration_update_status` (String) Last RIR registration update status.
 - `mgm_private_overridable` (Boolean) This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.
+- `ms_ad_user_data` (Attributes) A struct that contains information about the Microsoft (r) Active Directory. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `network_container` (String) The network container to which this network belongs (if any).
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the network address space.
@@ -184,7 +184,7 @@ Read-Only:
 
 Optional:
 
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
+- `delegated_member` (Attributes) Contains information about the delegated member of the network. This is only set if the network is delegated to a member. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 
 Read-Only:
 
@@ -338,14 +338,6 @@ Optional:
 - `name` (String) The Grid member name
 
 
-<a id="nestedatt--result--ms_ad_user_data"></a>
-### Nested Schema for `result.ms_ad_user_data`
-
-Read-Only:
-
-- `active_users_count` (Number) The number of active users.
-
-
 <a id="nestedatt--result--options"></a>
 ### Nested Schema for `result.options`
 
@@ -426,3 +418,11 @@ Optional:
 - `fqdn` (String) The FQDN of the authoritative forward zone.
 - `is_default` (Boolean) True if this is the default zone.
 - `view` (String) The view to which the zone belongs. If a view is not specified, the default view is used.
+
+
+<a id="nestedatt--result--ms_ad_user_data"></a>
+### Nested Schema for `result.ms_ad_user_data`
+
+Read-Only:
+
+- `active_users_count` (Number) The number of active users.
