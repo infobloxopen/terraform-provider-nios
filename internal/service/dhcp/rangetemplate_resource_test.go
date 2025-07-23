@@ -195,7 +195,7 @@ func TestAccRangetemplateResource_Bootserver(t *testing.T) {
 // The testcase will fail, as this is a known issue
 // If the user is a cloud-user, then they need Terraform internal ID with cloud permission and enable cloud delegation for the user to create a range template.
 // if the user is a non cloud-user, they need to have  Terraform internal ID without cloud permission.
-func testAccRangetemplateResource_CloudApiCompatible(t *testing.T) {
+func TestAccRangetemplateResource_CloudApiCompatible(t *testing.T) {
 	var resourceName = "nios_dhcp_rangetemplate.test_cloud_api_compatible"
 	var v dhcp.Rangetemplate
 
@@ -1223,6 +1223,81 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_83_235"),
 					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.235"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccRangetemplateResource_MsOptions(t *testing.T) {
+	var resourceName = "nios_dhcp_rangetemplate.test_ms_options"
+	var v dhcp.Rangetemplate
+
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := int64(100)
+	offset := int64(50)
+	msOptions := ""
+	msOptionsUpdated := ""
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRangetemplateMsOptions(msOptions, name, numberOfAdresses, offset),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ms_options", "MS_OPTIONS_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRangetemplateMsOptions(msOptionsUpdated, name, numberOfAdresses, offset),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ms_options", "MS_OPTIONS_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccRangetemplateResource_MsServer(t *testing.T) {
+	var resourceName = "nios_dhcp_rangetemplate.test_ms_server"
+	var v dhcp.Rangetemplate
+
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := int64(100)
+	offset := int64(50)
+
+	msServer := map[string]string{
+		"ipv4addr": "10.120.23.22",
+	}
+	msServerUpdated := map[string]string{
+		"ipv4addr": "11.120.23.23",
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRangetemplateMsServer(msServer, name, numberOfAdresses, offset),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.120.23.22"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRangetemplateMsServer(msServerUpdated, name, numberOfAdresses, offset),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.120.23.23"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2844,6 +2919,29 @@ resource "nios_dhcp_rangetemplate" "test_member" {
    offset = %d
 }
 `, memberStr, name, numberOfAddresses, offset)
+}
+
+func testAccRangetemplateMsOptions(msOptions, name string, numberOfAddresses, offset int64) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_rangetemplate" "test_ms_options" {
+   ms_options = %q
+   name = %q
+   number_of_addresses = %d
+   offset = %d
+}
+`, msOptions, name, numberOfAddresses, offset)
+}
+
+func testAccRangetemplateMsServer(msServer map[string]string, name string, numberOfAddresses, offset int64) string {
+	msServerStr := formatMapOfStrings(msServer)
+	return fmt.Sprintf(`
+resource "nios_dhcp_rangetemplate" "test_ms_server" {
+   ms_server = %s
+   name = %q
+   number_of_addresses = %d
+   offset = %d
+}
+`, msServerStr, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateNacFilterRules(nacFilterRules []map[string]any, name string, numberOfAddresses, offset int64) string {
