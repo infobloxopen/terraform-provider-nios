@@ -78,7 +78,6 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	"ms_delegation_name": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The MS delegation point name.",
 	},
 	"name": schema.StringAttribute{
