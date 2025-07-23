@@ -67,8 +67,8 @@ resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields2" {
   offset              = 70
   exclude = [
     {
-      "number_of_addresses" = 50
-      "offset"              = 60
+      "number_of_addresses" = 10
+      "offset"              = 2
       "comment"             = "Example comment for range template exclude"
     }
   ]
