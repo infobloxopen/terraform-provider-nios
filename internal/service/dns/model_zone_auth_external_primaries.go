@@ -85,6 +85,7 @@ var ZoneAuthExternalPrimariesResourceSchemaAttributes = map[string]schema.Attrib
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
