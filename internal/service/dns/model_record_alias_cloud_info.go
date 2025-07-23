@@ -10,10 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type RecordCnameCloudInfoModel struct {
+type RecordAliasCloudInfoModel struct {
 	DelegatedMember types.Object `tfsdk:"delegated_member"`
 	DelegatedScope  types.String `tfsdk:"delegated_scope"`
 	DelegatedRoot   types.String `tfsdk:"delegated_root"`
@@ -24,8 +25,8 @@ type RecordCnameCloudInfoModel struct {
 	AuthorityType   types.String `tfsdk:"authority_type"`
 }
 
-var RecordCnameCloudInfoAttrTypes = map[string]attr.Type{
-	"delegated_member": types.ObjectType{AttrTypes: RecordcnamecloudinfoDelegatedMemberAttrTypes},
+var RecordAliasCloudInfoAttrTypes = map[string]attr.Type{
+	"delegated_member": types.ObjectType{AttrTypes: RecordaliascloudinfoDelegatedMemberAttrTypes},
 	"delegated_scope":  types.StringType,
 	"delegated_root":   types.StringType,
 	"owned_by_adaptor": types.BoolType,
@@ -35,9 +36,9 @@ var RecordCnameCloudInfoAttrTypes = map[string]attr.Type{
 	"authority_type":   types.StringType,
 }
 
-var RecordCnameCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
+var RecordAliasCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes:          RecordcnamecloudinfoDelegatedMemberResourceSchemaAttributes,
+		Attributes:          RecordaliascloudinfoDelegatedMemberResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Cloud Platform Appliance to which authority of the object is delegated.",
 	},
@@ -71,11 +72,11 @@ var RecordCnameCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRecordCnameCloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordCnameCloudInfo {
+func ExpandRecordAliasCloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordAliasCloudInfo {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m RecordCnameCloudInfoModel
+	var m RecordAliasCloudInfoModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -83,35 +84,35 @@ func ExpandRecordCnameCloudInfo(ctx context.Context, o types.Object, diags *diag
 	return m.Expand(ctx, diags)
 }
 
-func (m *RecordCnameCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordCnameCloudInfo {
+func (m *RecordAliasCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordAliasCloudInfo {
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordCnameCloudInfo{
-		DelegatedMember: ExpandRecordcnamecloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
+	to := &dns.RecordAliasCloudInfo{
+		DelegatedMember: ExpandRecordaliascloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
 	}
 	return to
 }
 
-func FlattenRecordCnameCloudInfo(ctx context.Context, from *dns.RecordCnameCloudInfo, diags *diag.Diagnostics) types.Object {
+func FlattenRecordAliasCloudInfo(ctx context.Context, from *dns.RecordAliasCloudInfo, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(RecordCnameCloudInfoAttrTypes)
+		return types.ObjectNull(RecordAliasCloudInfoAttrTypes)
 	}
-	m := RecordCnameCloudInfoModel{}
+	m := RecordAliasCloudInfoModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, RecordCnameCloudInfoAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, RecordAliasCloudInfoAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *RecordCnameCloudInfoModel) Flatten(ctx context.Context, from *dns.RecordCnameCloudInfo, diags *diag.Diagnostics) {
+func (m *RecordAliasCloudInfoModel) Flatten(ctx context.Context, from *dns.RecordAliasCloudInfo, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = RecordCnameCloudInfoModel{}
+		*m = RecordAliasCloudInfoModel{}
 	}
-	m.DelegatedMember = FlattenRecordcnamecloudinfoDelegatedMember(ctx, from.DelegatedMember, diags)
+	m.DelegatedMember = FlattenRecordaliascloudinfoDelegatedMember(ctx, from.DelegatedMember, diags)
 	m.DelegatedScope = flex.FlattenStringPointer(from.DelegatedScope)
 	m.DelegatedRoot = flex.FlattenStringPointer(from.DelegatedRoot)
 	m.OwnedByAdaptor = types.BoolPointerValue(from.OwnedByAdaptor)
