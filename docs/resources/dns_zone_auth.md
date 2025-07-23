@@ -111,8 +111,8 @@ Manages Auth Zones.
 ### Read-Only
 
 - `address` (String) The IP address of the server that is serving this zone.
-- `aws_rte53_zone_info` (Attributes) (see [below for nested schema](#nestedatt--aws_rte53_zone_info))
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--cloud_info))
+- `aws_rte53_zone_info` (Attributes) The AWS Route 53 zone information associated with the zone. (see [below for nested schema](#nestedatt--aws_rte53_zone_info))
+- `cloud_info` (Attributes) The cloud information associated with the zone. (see [below for nested schema](#nestedatt--cloud_info))
 - `display_domain` (String) The displayed name of the DNS zone.
 - `dns_fqdn` (String) The name of this DNS zone in punycode format. For a reverse zone, this is in "address/cidr" format. For other zones, this is in FQDN format in punycode format.
 - `dns_soa_email` (String) The SOA email for the zone in punycode format.
@@ -548,13 +548,10 @@ Read-Only:
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`
 
-Optional:
-
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
-
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.
@@ -565,7 +562,7 @@ Read-Only:
 <a id="nestedatt--cloud_info--delegated_member"></a>
 ### Nested Schema for `cloud_info.delegated_member`
 
-Optional:
+Read-Only:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.

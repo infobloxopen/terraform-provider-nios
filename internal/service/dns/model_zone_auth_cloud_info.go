@@ -39,7 +39,6 @@ var ZoneAuthCloudInfoAttrTypes = map[string]attr.Type{
 var ZoneAuthCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes:          ZoneauthcloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The Cloud Platform Appliance to which authority of the object is delegated.",
 	},
