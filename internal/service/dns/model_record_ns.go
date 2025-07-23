@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -65,10 +64,7 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"creator": schema.StringAttribute{
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("STATIC", "DYNAMIC"),
-		},
+		Computed:            true,
 		MarkdownDescription: "The record creator.",
 	},
 	"dns_name": schema.StringAttribute{
@@ -81,6 +77,7 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ms_delegation_name": schema.StringAttribute{
 		Computed:            true,
+		Optional:            true,
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The MS delegation point name.",
 	},
@@ -102,6 +99,7 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	"view": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the DNS view in which the record resides. Example: \"external\".",
 	},
 	"zone": schema.StringAttribute{
@@ -115,9 +113,7 @@ func (m *RecordNsModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		return nil
 	}
 	to := &dns.RecordNs{
-		Ref:              flex.ExpandStringPointer(m.Ref),
 		Addresses:        flex.ExpandFrameworkListNestedBlock(ctx, m.Addresses, diags, ExpandRecordNsAddresses),
-		CloudInfo:        ExpandRecordNsCloudInfo(ctx, m.CloudInfo, diags),
 		MsDelegationName: flex.ExpandStringPointer(m.MsDelegationName),
 		Nameserver:       flex.ExpandStringPointer(m.Nameserver),
 	}

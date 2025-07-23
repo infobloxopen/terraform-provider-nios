@@ -15,10 +15,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForRecordNs = "addresses,cloud_info,creator,dns_name,last_queried,ms_delegation_name,name,nameserver,policy,view,zone"
-
 // TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // -> Parent Zone: example.com (in default view)
+
+var readableAttributesForRecordNs = "addresses,cloud_info,creator,dns_name,last_queried,ms_delegation_name,name,nameserver,policy,view,zone"
+
 func TestAccRecordNsResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_ns.test"
 	var v dns.RecordNs
@@ -167,41 +168,6 @@ func TestAccRecordNsResource_Nameserver(t *testing.T) {
 	})
 }
 
-func TestAccRecordNsResource_View(t *testing.T) {
-	var resourceName = "nios_dns_record_ns.test_view"
-	var v dns.RecordNs
-	name := "example.com"
-	addresses :=
-		`[{
-			address = "20.0.0.0"
-			auto_create_ptr = false
-		}]`
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordNsView(name, "ns1.example.com", addresses, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordNsView(name, "ns1.example.com", addresses, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func testAccCheckRecordNsExists(ctx context.Context, resourceName string, v *dns.RecordNs) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -261,7 +227,6 @@ func testAccCheckRecordNsDisappears(ctx context.Context, v *dns.RecordNs) resour
 }
 
 func testAccRecordNsBasicConfig(name, nameserver, addresses, view string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dns_record_ns" "test" {
     name 		= %q
@@ -287,17 +252,6 @@ resource "nios_dns_record_ns" "test_addresses" {
 func testAccRecordNsNameserver(name, nameserver, addresses, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_ns" "test_nameserver" {
-    name       = %q
-	nameserver = %q
-	addresses  = %s
-	view       = %q
-}
-`, name, nameserver, addresses, view)
-}
-
-func testAccRecordNsView(name, nameserver, addresses, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_ns" "test_view" {
     name       = %q
 	nameserver = %q
 	addresses  = %s

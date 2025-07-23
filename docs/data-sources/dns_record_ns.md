@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_ns Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS NS Records.
 ---
 
 # nios_dns_record_ns (Data Source)
 
-
+Retrieves information about existing DNS NS Records.
 
 ## Example Usage
 
@@ -49,6 +49,7 @@ Required:
 
 Optional:
 
+- `ms_delegation_name` (String) The MS delegation point name.
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".
 
 Read-Only:
@@ -57,7 +58,6 @@ Read-Only:
 - `creator` (String) The record creator.
 - `dns_name` (String) The name of the NS record in punycode format.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
-- `ms_delegation_name` (String) The MS delegation point name.
 - `policy` (String) The host name policy for the record.
 - `ref` (String) The reference to the object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
@@ -65,22 +65,22 @@ Read-Only:
 <a id="nestedatt--result--addresses"></a>
 ### Nested Schema for `result.addresses`
 
-Optional:
+Required:
 
 - `address` (String) The address of the Zone Name Server.
+
+Optional:
+
 - `auto_create_ptr` (Boolean) Flag to indicate if ptr records need to be auto created.
 
 
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`
 
-Optional:
-
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
-
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.
@@ -91,7 +91,7 @@ Read-Only:
 <a id="nestedatt--result--cloud_info--delegated_member"></a>
 ### Nested Schema for `result.cloud_info.delegated_member`
 
-Optional:
+Read-Only:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.
