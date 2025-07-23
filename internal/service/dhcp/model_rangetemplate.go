@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,7 +22,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
-	validator2 "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RangetemplateModel struct {
@@ -66,7 +64,7 @@ type RangetemplateModel struct {
 	NumberOfAddresses              types.Int64                      `tfsdk:"number_of_addresses"`
 	Offset                         types.Int64                      `tfsdk:"offset"`
 	OptionFilterRules              types.List                       `tfsdk:"option_filter_rules"`
-	Options                        types.List                       `tfsdk:"options"`
+	Options                        internaltypes.UnorderedListValue `tfsdk:"options"`
 	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
 	RecycleLeases                  types.Bool                       `tfsdk:"recycle_leases"`
 	RelayAgentFilterRules          types.List                       `tfsdk:"relay_agent_filter_rules"`
@@ -134,7 +132,7 @@ var RangetemplateAttrTypes = map[string]attr.Type{
 	"number_of_addresses":                 types.Int64Type,
 	"offset":                              types.Int64Type,
 	"option_filter_rules":                 types.ListType{ElemType: types.ObjectType{AttrTypes: RangetemplateOptionFilterRulesAttrTypes}},
-	"options":                             types.ListType{ElemType: types.ObjectType{AttrTypes: RangetemplateOptionsAttrTypes}},
+	"options":                             internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: RangetemplateOptionsAttrTypes}}},
 	"pxe_lease_time":                      types.Int64Type,
 	"recycle_leases":                      types.BoolType,
 	"relay_agent_filter_rules":            types.ListType{ElemType: types.ObjectType{AttrTypes: RangetemplateRelayAgentFilterRulesAttrTypes}},
@@ -464,6 +462,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the Option filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"options": schema.ListNestedAttribute{
+		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: RangetemplateOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangetemplateOptionsResourceSchemaAttributes,
 		},
@@ -471,11 +470,6 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
-		},
-		PlanModifiers: []planmodifier.List{
-			validator2.DefaultOptionsModifier{
-				AttrTypes: validator2.ConvertSchemaAttributesToAttrTypes(RangetemplateOptionsResourceSchemaAttributes),
-			},
 		},
 		MarkdownDescription: "An unordered set of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
@@ -789,7 +783,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.NumberOfAddresses = flex.FlattenInt64Pointer(from.NumberOfAddresses)
 	m.Offset = flex.FlattenInt64Pointer(from.Offset)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangetemplateOptionFilterRulesAttrTypes, diags, FlattenRangetemplateOptionFilterRules)
-	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
+	m.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangetemplateRelayAgentFilterRulesAttrTypes, diags, FlattenRangetemplateRelayAgentFilterRules)
@@ -817,29 +811,74 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
 }
 
-func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.RangetemplateOptions, planOptions types.List) []dhcp.RangetemplateOptions {
+func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.RangetemplateOptions, planOptions internaltypes.UnorderedListValue) internaltypes.UnorderedListValue {
 	defaultOptionName := "dhcp-lease-time"
-	defaultOptionVal := ""
 
-	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandRangetemplateOptions)
+	// If no options, return empty list
+	if len(options) == 0 {
+		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: RangetemplateOptionsAttrTypes})
+	}
 
-	for i := range planOptionsArr {
-		if *planOptionsArr[i].Name == defaultOptionName {
-			defaultOptionVal = *planOptionsArr[i].Value
+	// If plan options is null or unknown, return original options
+	if planOptions.IsNull() || planOptions.IsUnknown() {
+		return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
+	}
+
+	// Convert plan options to a map for easy lookup
+	baseList, err := planOptions.ToListValue(ctx)
+	if err != nil {
+		return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
+	}
+
+	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, baseList, diags, ExpandRangetemplateOptions)
+	planOptionsMap := make(map[string]dhcp.RangetemplateOptions)
+	var planOrder []string
+	for _, opt := range planOptionsArr {
+		if opt.Name != nil {
+			planOptionsMap[*opt.Name] = opt
+			planOrder = append(planOrder, *opt.Name)
 		}
 	}
-	var result []dhcp.RangetemplateOptions
 
-	for i := range options {
-		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
+	// Convert current options to a map
+	currentOptionsMap := make(map[string]dhcp.RangetemplateOptions)
+	for _, opt := range options {
+		if opt.Name != nil {
+			currentOptionsMap[*opt.Name] = opt
+		}
+	}
+
+	// Build result maintaining plan order
+	var result []dhcp.RangetemplateOptions
+	for _, name := range planOrder {
+		if name == defaultOptionName {
+			// For lease-time option, check if values match
+			planOpt, planExists := planOptionsMap[name]
+			currentOpt, currentExists := currentOptionsMap[name]
+
+			if planExists && currentExists &&
+				planOpt.Value != nil && currentOpt.Value != nil &&
+				*planOpt.Value == *currentOpt.Value {
+				result = append(result, currentOpt)
+			}
+		} else {
+			// For non-lease-time options, use current value if exists
+			if opt, exists := currentOptionsMap[name]; exists {
+				result = append(result, opt)
+			}
+		}
+	}
+
+	// Add any remaining options that weren't in the plan but should be kept
+	for _, opt := range options {
+		if opt.Name == nil {
 			continue
 		}
-		result = append(result, options[i])
+		_, inPlan := planOptionsMap[*opt.Name]
+		if !inPlan && *opt.Name != defaultOptionName {
+			result = append(result, opt)
+		}
 	}
 
-	if len(result) == 0 {
-		return options
-	}
-
-	return result
+	return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, result, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
 }
