@@ -668,20 +668,6 @@ resource "nios_dns_zone_delegated" "test_extattrs" {
 `, fqdn, delegateToName, delegateToAddress, extattrsStr)
 }
 
-func testAccZoneDelegatedFqdn(fqdn, delegateToName, delegateToAddress string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_delegated" "test_fqdn" {
-	fqdn = %q
-    delegate_to = [
-		{
-			name = %q
-			address = %q
-		}
-	]
-}
-`, fqdn, delegateToName, delegateToAddress)
-}
-
 func testAccZoneDelegatedLocked(fqdn, delegateToName, delegateToAddress string, locked bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_delegated" "test_locked" {
