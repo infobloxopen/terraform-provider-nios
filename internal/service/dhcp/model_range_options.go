@@ -49,7 +49,7 @@ var RangeOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"vendor_class": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default: 		   stringdefault.StaticString("DHCP"),
+		Default:             stringdefault.StaticString("DHCP"),
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 	},
 	"value": schema.StringAttribute{

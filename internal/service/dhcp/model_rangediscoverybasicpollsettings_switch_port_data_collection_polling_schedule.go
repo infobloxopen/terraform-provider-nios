@@ -83,17 +83,17 @@ var RangediscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResour
 	},
 	"year": schema.Int64Attribute{
 		Optional:            true,
-		Computed:  true,
+		Computed:            true,
 		MarkdownDescription: "The year for the scheduled task.",
 	},
 	"month": schema.Int64Attribute{
 		Optional:            true,
-		Computed:  true,
+		Computed:            true,
 		MarkdownDescription: "The month for the scheduled task.",
 	},
 	"day_of_month": schema.Int64Attribute{
 		Optional:            true,
-		Computed:  true,
+		Computed:            true,
 		MarkdownDescription: "The day of the month for the scheduled task.",
 	},
 	"repeat": schema.StringAttribute{

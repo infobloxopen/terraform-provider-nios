@@ -326,6 +326,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_basic_polling_settings")),
 		},
+		MarkdownDescription: "The basic polling settings for the discovery of this range.",
 	},
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: RangeDiscoveryBlackoutSettingResourceSchemaAttributes,
@@ -334,6 +335,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
+		MarkdownDescription: "The blackout settings for the discovery of this range. If this is set to False, the blackout settings are not used.",
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
@@ -348,8 +350,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The total number of DHCP leases issued for the range.",
 	},
 	"email_list": schema.ListAttribute{
-		CustomType:         internaltypes.UnorderedListOfStringType,
-		ElementType: 	  types.StringType,
+		CustomType:          internaltypes.UnorderedListOfStringType,
+		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The e-mail lists to which the appliance sends DHCP threshold alarm e-mail messages.",
 		Validators: []validator.List{
@@ -553,12 +555,14 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the MAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"member": schema.SingleNestedAttribute{
-		Attributes: RangeMemberResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          RangeMemberResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "This field contains the member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: RangeMsAdUserDataResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          RangeMsAdUserDataResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "This field contains the Microsoft AD user data for this range. This data is used to create a user in the Microsoft AD when a lease is assigned to a host in this range.",
 	},
 	"ms_options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -568,8 +572,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the Microsoft DHCP options for this range.",
 	},
 	"ms_server": schema.SingleNestedAttribute{
-		Attributes: RangeMsServerResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          RangeMsServerResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "This field contains the Microsoft server that will serve this range. This is used for Microsoft failover.",
 	},
 	"nac_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -618,9 +623,10 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
-		Attributes: RangePortControlBlackoutSettingResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          RangePortControlBlackoutSettingResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The port control blackout settings for the range. This field is used to configure the port control blackout settings for the DHCP range. It includes information about the blackout settings, such as the start and end times of the blackout period.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional:            true,
@@ -668,8 +674,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"split_member": schema.SingleNestedAttribute{
-		Attributes: RangeSplitMemberResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          RangeSplitMemberResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "This field contains the split member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network.",
 	},
 	"split_scope_exclusion_percent": schema.Int64Attribute{
 		Optional:            true,
@@ -686,6 +693,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"subscribe_settings": schema.SingleNestedAttribute{
 		Attributes: RangeSubscribeSettingsResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
 		},

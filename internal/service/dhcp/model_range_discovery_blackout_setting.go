@@ -31,7 +31,7 @@ var RangeDiscoveryBlackoutSettingResourceSchemaAttributes = map[string]schema.At
 	"enable_blackout": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default: 		booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a blackout is enabled or not.",
 	},
 	"blackout_duration": schema.Int64Attribute{
@@ -40,9 +40,10 @@ var RangeDiscoveryBlackoutSettingResourceSchemaAttributes = map[string]schema.At
 		MarkdownDescription: "The blackout duration in seconds; minimum value is 1 minute.",
 	},
 	"blackout_schedule": schema.SingleNestedAttribute{
-		Attributes: RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The blackout schedule for the range. This field is used to configure the blackout schedule for the DHCP range. It includes information about the start and end times of the blackout period, as well as the frequency of blackout.",
 	},
 }
 

@@ -447,14 +447,14 @@ func TestAccRangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, true, false,false, false,false, false, false ,false, "PERIODIC"),
+				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, true, false, false, false, false, false, false, false, "PERIODIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arprefresh_before_switch_port_polling","true" ),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arprefresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.netbios_scanning","false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.netbios_scanning", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.port_scanning", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.smart_subnet_ping_sweep", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.snmp_collection", "false"),
@@ -463,14 +463,14 @@ func TestAccRangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, true, true,false, true,false, true, false ,false, "SCHEDULED"),
+				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, true, true, false, true, false, true, false, false, "SCHEDULED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arprefresh_before_switch_port_polling","true" ),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arprefresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "true"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.netbios_scanning","false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.netbios_scanning", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.port_scanning", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.smart_subnet_ping_sweep", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.snmp_collection", "false"),
@@ -488,14 +488,13 @@ func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 	startAddr := "10.0.0.10"
 	endAddr := "10.0.0.20"
 
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDiscoveryBlackoutSetting(startAddr, endAddr,false),
+				Config: testAccRangeDiscoveryBlackoutSetting(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "false"),
@@ -506,6 +505,39 @@ func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 	})
 }
 
+// TODO
+func TestAccRangeResource_DiscoveryMember(t *testing.T) {
+	var resourceName = "nios_dhcp_range.test_discovery_member"
+	var v dhcp.Range
+	startAddr := "10.0.0.10"
+	endAddr := "10.0.0.20"
+	discoveryMember := "infoblox.172_28_83_235"
+	discoveryMemberUpdate := "infoblox.172_28_83_209"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRangeDiscoveryMember(startAddr, endAddr, discoveryMember),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMember),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRangeDiscoveryMember(startAddr, endAddr, discoveryMemberUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMemberUpdate),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
 
 func TestAccRangeResource_EmailList(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_email_list"
@@ -607,7 +639,6 @@ func TestAccRangeResource_EnableDhcpThresholds(t *testing.T) {
 	})
 }
 
-
 func TestAccRangeResource_EnableEmailWarnings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_email_warnings"
 	var v dhcp.Range
@@ -673,7 +704,6 @@ func TestAccRangeResource_EnableIfmapPublishing(t *testing.T) {
 		},
 	})
 }
-
 
 func TestAccRangeResource_EnablePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_pxe_lease_time"
@@ -754,7 +784,7 @@ func TestAccRangeResource_EndAddr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEndAddr(startAddr , endAddr ),
+				Config: testAccRangeEndAddr(startAddr, endAddr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "end_addr", endAddr),
@@ -848,6 +878,74 @@ func TestAccRangeResource_ExtAttrs(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+// TODO
+func TestAccRangeResource_EnableDiscovery(t *testing.T) {
+	var resourceName = "nios_dhcp_range.test_enable_discovery"
+	var v dhcp.Range
+	startAddr := "10.0.0.10"
+	endAddr := "10.0.0.20"
+	enableDiscovery := true
+	enableDiscoveryUpdate := false
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRangeEnableDiscovery(startAddr, endAddr, enableDiscovery),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRangeEnableDiscovery(startAddr, endAddr, enableDiscoveryUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+// TODO
+func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
+	var resourceName = "nios_dhcp_range.test_enable_immediate_discovery"
+	var v dhcp.Range
+	startAddr := "10.0.0.10"
+	endAddr := "10.0.0.20"
+	enableImmediateDiscovery := true
+	enableImmediateDiscoveryUpdate := false
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRangeEnableImmediateDiscovery(startAddr, endAddr, enableImmediateDiscovery),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRangeEnableImmediateDiscovery(startAddr, endAddr, enableImmediateDiscoveryUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1358,7 +1456,7 @@ func TestAccRangeResource_Member(t *testing.T) {
 	})
 }
 
-
+// TODO
 func TestAccRangeResource_MsOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ms_options"
 	var v dhcp.Range
@@ -1388,7 +1486,7 @@ func TestAccRangeResource_MsOptions(t *testing.T) {
 	})
 }
 
-// non empty plan during second terraform apply
+// TODO
 func TestAccRangeResource_MsServer(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ms_server"
 	var v dhcp.Range
@@ -1659,7 +1757,7 @@ func TestAccRangeResource_Options(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "6739"),
-	)},
+				)},
 			// Update and Read
 			{
 				Config: testAccRangeOptions(startAddr, endAddr, "dhcp-lease-time", "51", "7300", "DHCP", true),
@@ -1684,11 +1782,11 @@ func TestAccRangeResource_PortControlBlackoutSetting(t *testing.T) {
 	endAddr := "10.0.0.20"
 
 	portControlBlackoutSetting := map[string]any{
-		"enable_blackout":   false,
+		"enable_blackout": false,
 	}
 
 	portControlBlackoutSettingUpdate := map[string]any{
-		"enable_blackout":   false,
+		"enable_blackout": false,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1876,7 +1974,7 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeServerAssociationType(startAddr, endAddr, serverAssociationType, failoverAssociation,member),
+				Config: testAccRangeServerAssociationType(startAddr, endAddr, serverAssociationType, failoverAssociation, member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "FAILOVER"),
@@ -1885,7 +1983,7 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeServerAssociationType(startAddr, endAddr, serverAssociationTypeUpdate, failoverAssociation,member),
+				Config: testAccRangeServerAssociationType(startAddr, endAddr, serverAssociationTypeUpdate, failoverAssociation, member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "MEMBER"),
@@ -1969,10 +2067,10 @@ func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeSubscribeSettings(startAddr, endAddr,enabledAttribute ),
+				Config: testAccRangeSubscribeSettings(startAddr, endAddr, enabledAttribute),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0",enabledAttribute ),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", enabledAttribute),
 				),
 			},
 			// Update and Read
@@ -3057,7 +3155,7 @@ resource "nios_dhcp_range" "test_disable" {
 `, startAddr, endAddr, disable)
 }
 
-func testAccRangeDiscoveryBasicPollSettings(startAddr , endAddr string ,autoArpRefreshBeforeSwitchPortPolling , cliCollection, completePingSweep, deviceProfile, netbiosScanning,portScanning, smartSubnetPingSweep , snmpCollection bool, switchPortDataCollectionPolling string) string {
+func testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr string, autoArpRefreshBeforeSwitchPortPolling, cliCollection, completePingSweep, deviceProfile, netbiosScanning, portScanning, smartSubnetPingSweep, snmpCollection bool, switchPortDataCollectionPolling string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_discovery_basic_poll_settings" {
 	start_addr = %q
@@ -3081,7 +3179,7 @@ resource "nios_dhcp_range" "test_discovery_basic_poll_settings" {
 		switchPortDataCollectionPolling)
 }
 
-func testAccRangeDiscoveryBlackoutSetting(startAddr , endAddr string,enableBlackout bool) string {
+func testAccRangeDiscoveryBlackoutSetting(startAddr, endAddr string, enableBlackout bool) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_discovery_blackout_setting" {
 	start_addr = %q
@@ -3106,7 +3204,7 @@ resource "nios_dhcp_range" "test_discovery_member" {
 }
 
 func testAccRangeEmailList(startAddr, endAddr string, emailList []string) string {
-	emailListHCL := formatListOfStringsToHCL(emailList)
+	emailListHCL := utils.ConvertStringSliceToHCL(emailList)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_email_list" {
 	start_addr = %q
@@ -3203,8 +3301,8 @@ resource "nios_dhcp_range" "test_enable_snmp_warnings" {
 `, enableSnmpWarnings, startAddr, endAddr)
 }
 
-func testAccRangeEndAddr(startAddr , endAddr string) string {
-    return fmt.Sprintf(`
+func testAccRangeEndAddr(startAddr, endAddr string) string {
+	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_end_addr" {
     start_addr = %q
     end_addr   = %q
@@ -3213,7 +3311,7 @@ resource "nios_dhcp_range" "test_end_addr" {
 }
 
 func testAccRangeExclude(startAddr, endAddr string, exclude []map[string]any) string {
-	excludeHCL := formatExcludeToHCL(exclude)
+	excludeHCL := utils.ConvertSliceOfMapsToHCL(exclude)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_exclude" {
 	start_addr = %q
@@ -3246,7 +3344,7 @@ resource "nios_dhcp_range" "test_failover_association" {
 }
 
 func testAccRangeFingerprintFilterRules(startAddr, endAddr string, fingerprintFilterRules []map[string]any) string {
-	fingerprintFilterRulesHCL := formatFingerprintFilterRulesToHCL(fingerprintFilterRules)
+	fingerprintFilterRulesHCL := utils.ConvertSliceOfMapsToHCL(fingerprintFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_fingerprint_filter_rules" {
     start_addr = %q
@@ -3299,7 +3397,7 @@ resource "nios_dhcp_range" "test_ignore_id" {
 }
 
 func testAccRangeIgnoreMacAddresses(startAddr, endAddr string, ignoreMacAddresses []string) string {
-	ignoreMacAddressesHCL := formatListOfStringsToHCL(ignoreMacAddresses)
+	ignoreMacAddressesHCL := utils.ConvertStringSliceToHCL(ignoreMacAddresses)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_ignore_mac_addresses" {
     start_addr = %q
@@ -3332,7 +3430,7 @@ resource "nios_dhcp_range" "test_lease_scavenge_time" {
 }
 
 func testAccRangeLogicFilterRules(startAddr, endAddr string, logicFilterRules []map[string]any) string {
-	logicFilterRulesHCL := formatLogicFilterRulesToHCL(logicFilterRules)
+	logicFilterRulesHCL := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_logic_filter_rules" {
 	start_addr = %q
@@ -3364,7 +3462,7 @@ resource "nios_dhcp_range" "test_low_water_mark_reset" {
 }
 
 func testAccRangeMacFilterRules(startAddr, endAddr string, macFilterRules []map[string]any) string {
-	macFilterRulesHCL := formatFingerprintFilterRulesToHCL(macFilterRules)
+	macFilterRulesHCL := utils.ConvertSliceOfMapsToHCL(macFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_mac_filter_rules" {
 	start_addr = %q
@@ -3375,7 +3473,7 @@ resource "nios_dhcp_range" "test_mac_filter_rules" {
 }
 
 func testAccRangeMember(startAddr, endAddr string, member map[string]any) string {
-	memberHCL := formatMemberToHCL(member)
+	memberHCL := utils.ConvertMapToHCL(member)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_member" {
 	start_addr = %q
@@ -3416,7 +3514,7 @@ resource "nios_dhcp_range" "test_ms_server" {
 }
 
 func testAccRangeNacFilterRules(startAddr, endAddr string, nacFilterRules []map[string]any) string {
-	nacFilterRulesHCL := formatFingerprintFilterRulesToHCL(nacFilterRules)
+	nacFilterRulesHCL := utils.ConvertSliceOfMapsToHCL(nacFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_nac_filter_rules" {
 	start_addr = %q
@@ -3468,7 +3566,7 @@ resource "nios_dhcp_range" "test_nextserver" {
 }
 
 func testAccRangeOptionFilterRules(startAddr, endAddr string, optionFilterRules []map[string]any) string {
-	optionFilterRulesHCL := formatFingerprintFilterRulesToHCL(optionFilterRules)
+	optionFilterRulesHCL := utils.ConvertSliceOfMapsToHCL(optionFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_option_filter_rules" {
 	start_addr = %q
@@ -3498,7 +3596,7 @@ resource "nios_dhcp_range" "test_options" {
 }
 
 func testAccRangePortControlBlackoutSetting(startAddr, endAddr string, portControlBlackoutSetting map[string]any) string {
-	portControlBlackoutSettingStr := fmt.Sprintf("{\n%s\n    }", formatMapToHCL(portControlBlackoutSetting))
+	portControlBlackoutSettingStr := utils.ConvertMapToHCL(portControlBlackoutSetting)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_port_control_blackout_setting" {
 	start_addr = %q
@@ -3531,7 +3629,7 @@ resource "nios_dhcp_range" "test_recycle_leases" {
 }
 
 func testAccRangeRelayAgentFilterRules(startAddr, endAddr string, relayAgentFilterRules []map[string]any) string {
-	relayAgentFilterRulesHCL := formatFingerprintFilterRulesToHCL(relayAgentFilterRules)
+	relayAgentFilterRulesHCL := utils.ConvertSliceOfMapsToHCL(relayAgentFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_relay_agent_filter_rules" {
 	start_addr = %q
@@ -3562,7 +3660,7 @@ resource "nios_dhcp_range" "test_same_port_control_discovery_blackout" {
 `, startAddr, endAddr, samePortControlDiscoveryBlackout)
 }
 
-func testAccRangeServerAssociationType(startAddr, endAddr, serverAssociationType, failoverAssociation , member string) string {
+func testAccRangeServerAssociationType(startAddr, endAddr, serverAssociationType, failoverAssociation, member string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_server_association_type" {
     start_addr = %q
@@ -3623,9 +3721,8 @@ resource "nios_dhcp_range" "test_subscribe_settings" {
 }
 	use_subscribe_settings = true
 }
-`, startAddr , endAddr , subscribeSettings)
+`, startAddr, endAddr, subscribeSettings)
 }
-
 
 func testAccRangeUnknownClients(startAddr, endAddr string, unknownClients string) string {
 	return fmt.Sprintf(`
@@ -3911,99 +4008,4 @@ func formatExtAttrsForHCL(extAttrs map[string]string) string {
 	}
 	result.WriteString("    }")
 	return result.String()
-}
-
-func formatListOfStringsToHCL(stringList []string) string {
-	stringLists := make([]string, len(stringList))
-	for i, m := range stringList {
-		stringLists[i] = fmt.Sprintf("%q", m)
-	}
-	return fmt.Sprintf("[%s]", strings.Join(stringLists, ", "))
-}
-
-func formatFingerprintFilterRulesToHCL(rules []map[string]interface{}) string {
-	var ruleBlocks []string
-
-	for _, rule := range rules {
-		ruleBlock := fmt.Sprintf(`    {
-      filter = %q
-      permission = %q
-    }`, rule["filter"], rule["permission"])
-		ruleBlocks = append(ruleBlocks, ruleBlock)
-	}
-
-	return fmt.Sprintf(`[
-%s
-  ]`, strings.Join(ruleBlocks, ",\n"))
-}
-
-func formatLogicFilterRulesToHCL(rules []map[string]interface{}) string {
-	var ruleBlocks []string
-
-	for _, rule := range rules {
-		ruleBlock := fmt.Sprintf(`    {
-      filter = %q
-      type = %q
-    }`, rule["filter"], rule["type"])
-		ruleBlocks = append(ruleBlocks, ruleBlock)
-	}
-
-	return fmt.Sprintf(`[
-%s
-  ]`, strings.Join(ruleBlocks, ",\n"))
-}
-func formatExcludeToHCL(excludes []map[string]any) string {
-	var excludeBlocks []string
-
-	for _, exclude := range excludes {
-		excludeBlock := fmt.Sprintf(`    {
-      start_address = %q
-      end_address = %q
-    }`, exclude["start_address"], exclude["end_address"])
-		excludeBlocks = append(excludeBlocks, excludeBlock)
-	}
-
-	return fmt.Sprintf(`[
-%s
-  ]`, strings.Join(excludeBlocks, ",\n"))
-}
-func formatMemberToHCL(member map[string]any) string {
-	return fmt.Sprintf(`{
-      ipv4addr = %q
-      name = %q
-    }`, member["ipv4addr"], member["name"])
-}
-
-func formatMapToHCL(m map[string]any) string {
-	var lines []string
-
-	for k, v := range m {
-		switch value := v.(type) {
-		case bool:
-			lines = append(lines, fmt.Sprintf("      %s = %t", k, value))
-		case int:
-			lines = append(lines, fmt.Sprintf("      %s = %d", k, value))
-		case string:
-			lines = append(lines, fmt.Sprintf("      %s = %q", k, value))
-		case float64:
-			lines = append(lines, fmt.Sprintf("      %s = %g", k, value))
-		case []string:
-			strValues := make([]string, len(value))
-			for i, s := range value {
-				strValues[i] = fmt.Sprintf("%q", s)
-			}
-			lines = append(lines, fmt.Sprintf("      %s = [%s]", k, strings.Join(strValues, ", ")))
-		case map[string]any:
-			nestedMap := formatMapToHCL(value)
-			lines = append(lines, fmt.Sprintf("      %s = {\n%s\n      }", k, nestedMap))
-		case []interface{}:
-			// Handle arrays of different types if needed
-			// This would need more specific implementation based on your needs
-			lines = append(lines, fmt.Sprintf("      %s = []", k))
-		default:
-			lines = append(lines, fmt.Sprintf("      %s = null", k))
-		}
-	}
-
-	return strings.Join(lines, "\n")
 }
