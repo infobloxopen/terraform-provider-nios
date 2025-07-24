@@ -37,7 +37,7 @@ func (r *ViewResource) Metadata(ctx context.Context, req resource.MetadataReques
 
 func (r *ViewResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Managing DNS View",
 		Attributes:          ViewResourceSchemaAttributes,
 	}
 }

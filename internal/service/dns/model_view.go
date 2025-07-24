@@ -667,6 +667,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes: ViewScavengingSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		MarkdownDescription: "Scavenging settings for the DNS view",
 	},
 	"sortlist": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
