@@ -3,12 +3,12 @@
 page_title: "nios_dns_view Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about exisiting DNS Views
 ---
 
 # nios_dns_view (Data Source)
 
-
+Retrieves information about exisiting DNS Views
 
 ## Example Usage
 
@@ -123,7 +123,7 @@ Optional:
 - `rpz_drop_ip_rule_min_prefix_length_ipv4` (Number) The minimum prefix length for IPv4 RPZ-IP triggers. The appliance ignores RPZ-IP triggers with prefix lengths less than the specified minimum IPv4 prefix length.
 - `rpz_drop_ip_rule_min_prefix_length_ipv6` (Number) The minimum prefix length for IPv6 RPZ-IP triggers. The appliance ignores RPZ-IP triggers with prefix lengths less than the specified minimum IPv6 prefix length.
 - `rpz_qname_wait_recurse` (Boolean) The flag that indicates whether recursive RPZ lookups are enabled.
-- `scavenging_settings` (Attributes) (see [below for nested schema](#nestedatt--result--scavenging_settings))
+- `scavenging_settings` (Attributes) Scavenging settings for the DNS view (see [below for nested schema](#nestedatt--result--scavenging_settings))
 - `sortlist` (Attributes List) A sort list that determines the order of IP addresses in responses sent to DNS queries. (see [below for nested schema](#nestedatt--result--sortlist))
 - `use_blacklist` (Boolean) Use flag for: blacklist_action , blacklist_log_query, blacklist_redirect_addresses, blacklist_redirect_ttl, blacklist_rulesets, enable_blacklist
 - `use_ddns_force_creation_timestamp_update` (Boolean) Use flag for: ddns_force_creation_timestamp_update
