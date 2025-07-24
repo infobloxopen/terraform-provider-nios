@@ -1,8 +1,14 @@
 // Create SharedNetwork Record with Basic Fields
 resource "nios_dhcp_sharednetwork" "shared_network_basic_fields" {
   name = "example_shared_network1"
-  networks = ["network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-  "network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"]
+  networks = [
+    {
+      ref = "network/ZG5zLm5ldHdvcmskMTQuMTQuMS4wLzI0LzA:14.14.1.0/24/default"
+    },
+    {
+      ref = "network/ZG5zLm5ldHdvcmskMTUuMTQuMS4wLzI0LzA:15.14.1.0/24/default"
+    }
+  ]
   network_view = "default"
   extattrs = {
     Site = "location-1"
@@ -12,8 +18,15 @@ resource "nios_dhcp_sharednetwork" "shared_network_basic_fields" {
 // Create SharedNetwork Record using function call to retrieve ipv4addr
 resource "nios_dhcp_sharednetwork" "shared_network_additional_fields" {
   name = "example_shared_network2"
-  networks = ["network/ZG5zLm5ldHdvcmskMTQuMTQuMS4wLzI0LzA:14.14.1.0/24/default",
-  "network/ZG5zLm5ldHdvcmskMTUuMTQuMS4wLzI0LzA:15.14.1.0/24/default"]
+  networks = [
+    {
+      ref = "network/ZG5zLm5ldHdvcmskMTUuMTQuMS4wLzI0LzA:15.14.1.0/24/default"
+    },
+    {
+      ref = "network/ZG5zLm5ldHdvcmskMTYuMC4wLjAvMjQvMA:16.0.0.0/24/default"
+    }
+  ]
+  use_options = true
   options = [
     {
       name  = "domain-name-servers"
@@ -28,6 +41,7 @@ resource "nios_dhcp_sharednetwork" "shared_network_additional_fields" {
       value = "aa.bb.com"
     },
   ]
+  use_logic_filter_rules = true
   logic_filter_rules = [
     {
       filter = "option_filter"

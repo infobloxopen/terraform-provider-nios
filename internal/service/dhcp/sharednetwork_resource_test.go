@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -17,6 +18,7 @@ import (
 
 // TODO : Required parents for the execution of tests
 // - logic_filter_rules (option_filter, option_logic_filter)
+// - create NW using GenerateRandomCIDR, and get references of networks using Network resource
 
 var readableAttributesForSharednetwork = "authority,bootfile,bootserver,comment,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,deny_bootp,dhcp_utilization,dhcp_utilization_status,disable,dynamic_hosts,enable_ddns,enable_pxe_lease_time,extattrs,ignore_client_identifier,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,lease_scavenge_time,logic_filter_rules,ms_ad_user_data,name,network_view,networks,nextserver,options,pxe_lease_time,static_hosts,total_hosts,update_dns_on_lease_renewal,use_authority,use_bootfile,use_bootserver,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_enable_ddns,use_ignore_client_identifier,use_ignore_dhcp_option_list_request,use_ignore_id,use_lease_scavenge_time,use_logic_filter_rules,use_nextserver,use_options,use_pxe_lease_time,use_update_dns_on_lease_renewal"
 
@@ -24,8 +26,8 @@ func TestAccSharednetworkResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMTMuMTIuMTIuMC8yNC8w:13.12.12.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMTQuMTQuMS4wLzI0LzA:14.14.1.0/24/default"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -38,8 +40,8 @@ func TestAccSharednetworkResource_basic(t *testing.T) {
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "networks.#", fmt.Sprintf("%d", len(networks))),
-					resource.TestCheckResourceAttr(resourceName, "networks.0", networks[0]),
-					resource.TestCheckResourceAttr(resourceName, "networks.1", networks[1]),
+					resource.TestCheckResourceAttr(resourceName, "networks.0.ref", networks[0]),
+					resource.TestCheckResourceAttr(resourceName, "networks.1.ref", networks[1]),
 					resource.TestCheckResourceAttr(resourceName, "authority", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
@@ -76,7 +78,7 @@ func TestAccSharednetworkResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_lease_scavenge_time", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "false"),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_options", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "false"),
 				),
@@ -90,8 +92,8 @@ func TestAccSharednetworkResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_sharednetwork.test"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuMS4wLzI0LzA:21.21.1.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuMy4wLzI0LzA:21.21.3.0/24/default"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -114,8 +116,8 @@ func TestAccSharednetworkResource_Authority(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_authority"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	authority := true
 	authorityUpdated := false
 
@@ -148,8 +150,8 @@ func TestAccSharednetworkResource_Bootfile(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_bootfile"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	bootFile := "boot.txt"
 	bootFileUpdated := "boot_updated.txt"
 
@@ -182,8 +184,8 @@ func TestAccSharednetworkResource_Bootserver(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_bootserver"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	bootServer := "boot-server1"
 	bootServerUpdated := "boot-server2"
 
@@ -216,8 +218,8 @@ func TestAccSharednetworkResource_Comment(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_comment"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	comment := "shared network comment"
 	commentUpdated := "updated shared network comment"
 	resource.ParallelTest(t, resource.TestCase{
@@ -249,8 +251,8 @@ func TestAccSharednetworkResource_DdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ddns_generate_hostname"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	ddnsGenerateHostName := true
 	ddnsGenerateHostNameUpdated := false
 
@@ -283,10 +285,10 @@ func TestAccSharednetworkResource_DdnsServerAlwaysUpdates(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ddns_server_always_updates"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-	ddnServerAlwaysUpdate := false
-	ddnServerAlwaysUpdateUpdated := true
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
+	ddnServerAlwaysUpdate := true
+	ddnServerAlwaysUpdateUpdated := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -297,7 +299,7 @@ func TestAccSharednetworkResource_DdnsServerAlwaysUpdates(t *testing.T) {
 				Config: testAccSharednetworkDdnsServerAlwaysUpdates(name, networks, ddnServerAlwaysUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
 				),
 			},
 			// Update and Read
@@ -317,8 +319,8 @@ func TestAccSharednetworkResource_DdnsTtl(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ddns_ttl"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	ddnsTtl := int64(3600)
 	ddnsTtlUpdated := int64(7200)
 
@@ -351,8 +353,8 @@ func TestAccSharednetworkResource_DdnsUpdateFixedAddresses(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ddns_update_fixed_addresses"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	ddnsUpdateFixedaddress := true
 	ddnsUpdateFixedaddressUpdated := false
 	resource.ParallelTest(t, resource.TestCase{
@@ -384,8 +386,8 @@ func TestAccSharednetworkResource_DdnsUseOption81(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ddns_use_option81"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	ddnsUseOption81 := true
 	ddnsUseOption81Updated := false
 
@@ -418,8 +420,8 @@ func TestAccSharednetworkResource_DenyBootp(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_deny_bootp"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	denyBootp := true
 	denyBootpUpdated := false
 
@@ -452,8 +454,8 @@ func TestAccSharednetworkResource_Disable(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_disable"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	disable := true
 	disableUpdated := false
 	resource.ParallelTest(t, resource.TestCase{
@@ -485,8 +487,8 @@ func TestAccSharednetworkResource_EnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_enable_ddns"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	enableDdns := true
 	enableDdnsUpdated := false
 	resource.ParallelTest(t, resource.TestCase{
@@ -518,10 +520,11 @@ func TestAccSharednetworkResource_EnablePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_enable_pxe_lease_time"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	enablePxeLeaseTime := true
 	enablePxeLeaseTimeUpdated := false
+	pxeLeaseTime := int64(43200)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -529,7 +532,7 @@ func TestAccSharednetworkResource_EnablePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkEnablePxeLeaseTime(name, networks, enablePxeLeaseTime),
+				Config: testAccSharednetworkEnablePxeLeaseTime(name, networks, enablePxeLeaseTime, true, pxeLeaseTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "true"),
@@ -537,7 +540,7 @@ func TestAccSharednetworkResource_EnablePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkEnablePxeLeaseTime(name, networks, enablePxeLeaseTimeUpdated),
+				Config: testAccSharednetworkEnablePxeLeaseTime(name, networks, enablePxeLeaseTimeUpdated, true, pxeLeaseTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
@@ -552,8 +555,8 @@ func TestAccSharednetworkResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_extattrs"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -563,7 +566,7 @@ func TestAccSharednetworkResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkExtAttrs(name, networks, extAttrValue1),
+				Config: testAccSharednetworkExtAttrs(name, networks, map[string]string{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
@@ -571,7 +574,7 @@ func TestAccSharednetworkResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkExtAttrs(name, networks, extAttrValue2),
+				Config: testAccSharednetworkExtAttrs(name, networks, map[string]string{"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
@@ -586,10 +589,10 @@ func TestAccSharednetworkResource_IgnoreClientIdentifier(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ignore_client_identifier"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-	ignoreClientIdentifier := true
-	ignoreClientIdentifierUpdated := false
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
+	ignoreClientIdentifier := false
+	ignoreClientIdentifierUpdated := true
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -597,18 +600,18 @@ func TestAccSharednetworkResource_IgnoreClientIdentifier(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, ignoreClientIdentifier, true),
+				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, ignoreClientIdentifier, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "true"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, ignoreClientIdentifierUpdated, true),
+				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, ignoreClientIdentifierUpdated, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -620,8 +623,8 @@ func TestAccSharednetworkResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ignore_dhcp_option_list_request"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	idnoreDhcpListRequest := true
 	ignoreDhcpListRequestUpdated := false
 
@@ -654,8 +657,8 @@ func TestAccSharednetworkResource_IgnoreId(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ignore_id"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	ignoreId := "CLIENT"
 	ignoreIdUpdated := "NONE"
 
@@ -665,7 +668,7 @@ func TestAccSharednetworkResource_IgnoreId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkIgnoreId(name, networks, ignoreId, true),
+				Config: testAccSharednetworkIgnoreId(name, networks, ignoreId, true, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_id", "CLIENT"),
@@ -673,7 +676,7 @@ func TestAccSharednetworkResource_IgnoreId(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkIgnoreId(name, networks, ignoreIdUpdated, true),
+				Config: testAccSharednetworkIgnoreId(name, networks, ignoreIdUpdated, true, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_id", "NONE"),
@@ -688,10 +691,10 @@ func TestAccSharednetworkResource_IgnoreMacAddresses(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_ignore_mac_addresses"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-	ignoreMacAddresses := []string{"00:11:22:33:44:55", "66:77:88:99:AA:BB"}
-	ignoreMacAddressesUpdated := []string{"AA:BB:CC:DD:EE:FF", "00:11:22:33:44:55"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
+	ignoreMacAddresses := []string{"00:11:22:33:44:55", "66:77:88:99:aa:bb"}
+	ignoreMacAddressesUpdated := []string{"00:11:22:33:44:88", "00:11:22:33:44:55"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -703,8 +706,8 @@ func TestAccSharednetworkResource_IgnoreMacAddresses(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.#", "2"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "ignore_mac_addresses.0", "00:11:22:33:44:55"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "ignore_mac_addresses.1", "66:77:88:99:AA:BB"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:11:22:33:44:55"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.1", "66:77:88:99:aa:bb"),
 				),
 			},
 			// Update and Read
@@ -713,8 +716,8 @@ func TestAccSharednetworkResource_IgnoreMacAddresses(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.#", "2"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "ignore_mac_addresses.0", "AA:BB:CC:DD:EE:FF"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "ignore_mac_addresses.1", "00:11:22:33:44:55"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:11:22:33:44:88"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.1", "00:11:22:33:44:55"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -726,10 +729,10 @@ func TestAccSharednetworkResource_LeaseScavengeTime(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_lease_scavenge_time"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-	leaseScavengeTime := int64(3600)
-	leaseScavengeTimeUpdated := int64(7200)
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
+	leaseScavengeTime := int64(86420)
+	leaseScavengeTimeUpdated := int64(214440)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -739,7 +742,7 @@ func TestAccSharednetworkResource_LeaseScavengeTime(t *testing.T) {
 				Config: testAccSharednetworkLeaseScavengeTime(name, networks, leaseScavengeTime, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "3600"),
+					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "86420"),
 				),
 			},
 			// Update and Read
@@ -747,7 +750,7 @@ func TestAccSharednetworkResource_LeaseScavengeTime(t *testing.T) {
 				Config: testAccSharednetworkLeaseScavengeTime(name, networks, leaseScavengeTimeUpdated, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "214440"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -759,8 +762,8 @@ func TestAccSharednetworkResource_LogicFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_logic_filter_rules"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNC4wLzI0LzA:21.21.4.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNS4wLzI0LzA:21.21.5.0/24/default"}
 	logicFilterRules := []map[string]any{
 		{
 			"filter": "option_filter",
@@ -784,8 +787,8 @@ func TestAccSharednetworkResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "logic_filter_rules.0.filter", "option_filter"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "logic_filter_rules.0.type", "Option"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
 			// Update and Read
@@ -794,8 +797,8 @@ func TestAccSharednetworkResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "logic_filter_rules.0.filter", "option_logic_filter"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "logic_filter_rules.0.type", "Option"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_logic_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -807,8 +810,8 @@ func TestAccSharednetworkResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_name"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	nameUpdated := acctest.RandomNameWithPrefix("sharednetwork")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -840,10 +843,10 @@ func TestAccSharednetworkResource_Networks(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_networks"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-	networksUpdated := []string{"network/ZG5zLm5ldHdvcmskMTUuMTQuMS4wLzI0LzA:15.14.1.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTYuMC4wLjAvMjQvMA:16.0.0.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
+	networksUpdated := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuOC4wLzI0LzA:21.21.8.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuOS4wLzI0LzA:21.21.9.0/24/default"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -855,8 +858,8 @@ func TestAccSharednetworkResource_Networks(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "networks.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "networks.0", "network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default"),
-					resource.TestCheckResourceAttr(resourceName, "networks.1", "network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"),
+					resource.TestCheckResourceAttr(resourceName, "networks.0.ref", "network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default"),
+					resource.TestCheckResourceAttr(resourceName, "networks.1.ref", "network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"),
 				),
 			},
 			// Update and Read
@@ -865,8 +868,8 @@ func TestAccSharednetworkResource_Networks(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "networks.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "networks.0", "network/ZG5zLm5ldHdvcmskMTUuMTQuMS4wLzI0LzA:15.14.1.0/24/default"),
-					resource.TestCheckResourceAttr(resourceName, "networks.1", "network/ZG5zLm5ldHdvcmskMTYuMC4wLjAvMjQvMA:16.0.0.0/24/default"),
+					resource.TestCheckResourceAttr(resourceName, "networks.0.ref", "network/ZG5zLm5ldHdvcmskMjEuMjEuOC4wLzI0LzA:21.21.8.0/24/default"),
+					resource.TestCheckResourceAttr(resourceName, "networks.1.ref", "network/ZG5zLm5ldHdvcmskMjEuMjEuOS4wLzI0LzA:21.21.9.0/24/default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -878,8 +881,8 @@ func TestAccSharednetworkResource_Nextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_nextserver"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	nextServer := "nest-server1"
 	nextServerUpdated := "next-server2"
 
@@ -912,8 +915,8 @@ func TestAccSharednetworkResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_options"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	options := []map[string]any{
 		{
 			"name":  "domain-name",
@@ -945,10 +948,10 @@ func TestAccSharednetworkResource_Options(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "options.0.name", "domain-name"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "options.0.value", "aa.bb.com"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "options.1.name", "dhcp-lease-time"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "options.1.value", "72000"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "aa.bb.com"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "dhcp-lease-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "72000"),
 				),
 			},
 			// Update and Read
@@ -957,10 +960,10 @@ func TestAccSharednetworkResource_Options(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "options.0.name", "domain-name"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "options.0.value", "cc.dd.com"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "options.1.name", "dhcp-lease-time"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "options.1.value", "82000"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "cc.dd.com"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "dhcp-lease-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "82000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -972,8 +975,8 @@ func TestAccSharednetworkResource_PxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_pxe_lease_time"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	pxeLeaseTime := int64(3600)
 	pxeLeaseTimeUpdated := int64(7200)
 
@@ -1006,8 +1009,8 @@ func TestAccSharednetworkResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_update_dns_on_lease_renewal"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	updateDnsOnLeaseRenewal := true
 	updateDnsOnLeaseRenewalUpdated := false
 	resource.ParallelTest(t, resource.TestCase{
@@ -1039,8 +1042,8 @@ func TestAccSharednetworkResource_UseAuthority(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_authority"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1071,8 +1074,8 @@ func TestAccSharednetworkResource_UseBootfile(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_bootfile"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1103,9 +1106,8 @@ func TestAccSharednetworkResource_UseBootserver(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_bootserver"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1135,9 +1137,8 @@ func TestAccSharednetworkResource_UseDdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_ddns_generate_hostname"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1167,8 +1168,8 @@ func TestAccSharednetworkResource_UseDdnsTtl(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_ddns_ttl"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1199,9 +1200,8 @@ func TestAccSharednetworkResource_UseDdnsUpdateFixedAddresses(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_ddns_update_fixed_addresses"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1231,9 +1231,8 @@ func TestAccSharednetworkResource_UseDdnsUseOption81(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_ddns_use_option81"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1263,9 +1262,8 @@ func TestAccSharednetworkResource_UseDenyBootp(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_deny_bootp"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1295,9 +1293,8 @@ func TestAccSharednetworkResource_UseEnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_enable_ddns"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1327,16 +1324,15 @@ func TestAccSharednetworkResource_UseIgnoreClientIdentifier(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_ignore_client_identifier"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkUseIgnoreClientIdentifier(name, networks, true),
+				Config: testAccSharednetworkUseIgnoreClientIdentifier(name, networks, true, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_client_identifier", "true"),
@@ -1344,7 +1340,7 @@ func TestAccSharednetworkResource_UseIgnoreClientIdentifier(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkUseIgnoreClientIdentifier(name, networks, false),
+				Config: testAccSharednetworkUseIgnoreClientIdentifier(name, networks, false, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_client_identifier", "false"),
@@ -1359,9 +1355,8 @@ func TestAccSharednetworkResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_ignore_dhcp_option_list_request"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1391,16 +1386,15 @@ func TestAccSharednetworkResource_UseIgnoreId(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_ignore_id"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkUseIgnoreId(name, networks, true),
+				Config: testAccSharednetworkUseIgnoreId(name, networks, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_id", "true"),
@@ -1408,7 +1402,7 @@ func TestAccSharednetworkResource_UseIgnoreId(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkUseIgnoreId(name, networks, false),
+				Config: testAccSharednetworkUseIgnoreId(name, networks, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_id", "false"),
@@ -1423,9 +1417,8 @@ func TestAccSharednetworkResource_UseLeaseScavengeTime(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_lease_scavenge_time"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1455,9 +1448,8 @@ func TestAccSharednetworkResource_UseLogicFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_logic_filter_rules"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1487,9 +1479,8 @@ func TestAccSharednetworkResource_UseNextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_nextserver"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1519,9 +1510,8 @@ func TestAccSharednetworkResource_UseOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_options"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1551,9 +1541,8 @@ func TestAccSharednetworkResource_UsePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_pxe_lease_time"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1583,9 +1572,8 @@ func TestAccSharednetworkResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_dhcp_sharednetwork.test_use_update_dns_on_lease_renewal"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
-
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1670,15 +1658,31 @@ func testAccCheckSharednetworkDisappears(ctx context.Context, v *dhcp.Sharednetw
 }
 
 func testAccSharednetworkBasicConfig(name string, networks []string) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test" {
-   name = %q
-   networks = %s
+    name     = %q
+    networks = %s
+}`, name, networksStr)
 }
-`, name, networks)
+
+func formatNetworksToHCL(networks []string) string {
+	networksStr := "["
+	for i, network := range networks {
+		if i > 0 {
+			networksStr += ","
+		}
+		networksStr += fmt.Sprintf(`
+        {
+            ref = %q
+        }`, network)
+	}
+	networksStr += "]"
+	return networksStr
 }
 
 func testAccSharednetworkAuthority(name string, networks []string, authority bool, useAuthority bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_authority" {
    name = %q
@@ -1686,10 +1690,11 @@ resource "nios_dhcp_sharednetwork" "test_authority" {
    authority = %t
    use_authority = %t
 }
-`, name, networks, authority, useAuthority)
+`, name, networksStr, authority, useAuthority)
 }
 
 func testAccSharednetworkBootfile(name string, networks []string, bootfile string, useBootFile bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_bootfile" {
    name = %q
@@ -1697,10 +1702,11 @@ resource "nios_dhcp_sharednetwork" "test_bootfile" {
    bootfile = %q
    use_bootfile = %t
 }
-`, name, networks, bootfile, useBootFile)
+`, name, networksStr, bootfile, useBootFile)
 }
 
 func testAccSharednetworkBootserver(name string, networks []string, bootserver string, useBootServer bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_bootserver" {
    name = %q
@@ -1708,20 +1714,22 @@ resource "nios_dhcp_sharednetwork" "test_bootserver" {
    bootserver = %q
    use_bootserver = %t
 }
-`, name, networks, bootserver, useBootServer)
+`, name, networksStr, bootserver, useBootServer)
 }
 
 func testAccSharednetworkComment(name string, networks []string, comment string) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_comment" {
    name = %q
    networks = %s
    comment = %q
 }
-`, name, networks, comment)
+`, name, networksStr, comment)
 }
 
 func testAccSharednetworkDdnsGenerateHostname(name string, networks []string, ddnsGenerateHostname, useDdnsGenerateHostName bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ddns_generate_hostname" {
    name = %q
@@ -1729,20 +1737,22 @@ resource "nios_dhcp_sharednetwork" "test_ddns_generate_hostname" {
    ddns_generate_hostname = %t
    use_ddns_generate_hostname = %t
 }
-`, name, networks, ddnsGenerateHostname, useDdnsGenerateHostName)
+`, name, networksStr, ddnsGenerateHostname, useDdnsGenerateHostName)
 }
 
 func testAccSharednetworkDdnsServerAlwaysUpdates(name string, networks []string, ddnsServerAlwaysUpdates bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ddns_server_always_updates" {
    name = %q
    networks = %s
    ddns_server_always_updates = %t
 }
-`, name, networks, ddnsServerAlwaysUpdates)
+`, name, networksStr, ddnsServerAlwaysUpdates)
 }
 
 func testAccSharednetworkDdnsTtl(name string, networks []string, ddnsTtl int64, useDdnsTtl bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ddns_ttl" {
    name = %q
@@ -1750,10 +1760,11 @@ resource "nios_dhcp_sharednetwork" "test_ddns_ttl" {
    ddns_ttl = %d
    use_ddns_ttl = %t
 }
-`, name, networks, ddnsTtl, useDdnsTtl)
+`, name, networksStr, ddnsTtl, useDdnsTtl)
 }
 
 func testAccSharednetworkDdnsUpdateFixedAddresses(name string, networks []string, ddnsUpdateFixedAddresses, useDdnsUpdateFixedAddresses bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ddns_update_fixed_addresses" {
    name = %q
@@ -1761,10 +1772,11 @@ resource "nios_dhcp_sharednetwork" "test_ddns_update_fixed_addresses" {
    ddns_update_fixed_addresses = %t
    use_ddns_update_fixed_addresses = %t
 }
-`, name, networks, ddnsUpdateFixedAddresses, useDdnsUpdateFixedAddresses)
+`, name, networksStr, ddnsUpdateFixedAddresses, useDdnsUpdateFixedAddresses)
 }
 
 func testAccSharednetworkDdnsUseOption81(name string, networks []string, ddnsUseOption81, useDdnsUseOption81 bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ddns_use_option81" {
    name = %q
@@ -1772,10 +1784,11 @@ resource "nios_dhcp_sharednetwork" "test_ddns_use_option81" {
    ddns_use_option81 = %t
    use_ddns_use_option81 = %t
 }
-`, name, networks, ddnsUseOption81, useDdnsUseOption81)
+`, name, networksStr, ddnsUseOption81, useDdnsUseOption81)
 }
 
 func testAccSharednetworkDenyBootp(name string, networks []string, denyBootp, useDenyBootp bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_deny_bootp" {
    name = %q
@@ -1783,20 +1796,22 @@ resource "nios_dhcp_sharednetwork" "test_deny_bootp" {
    deny_bootp = %t
    use_deny_bootp = %t
 }
-`, name, networks, denyBootp, useDenyBootp)
+`, name, networksStr, denyBootp, useDenyBootp)
 }
 
 func testAccSharednetworkDisable(name string, networks []string, disable bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_disable" {
    name = %q
    networks = %s
    disable = %t
 }
-`, name, networks, disable)
+`, name, networksStr, disable)
 }
 
 func testAccSharednetworkEnableDdns(name string, networks []string, enableDdns, useEnableDdns bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_enable_ddns" {
    name = %q
@@ -1804,41 +1819,55 @@ resource "nios_dhcp_sharednetwork" "test_enable_ddns" {
    enable_ddns = %t
    use_enable_ddns = %t
 }
-`, name, networks, enableDdns, useEnableDdns)
+`, name, networksStr, enableDdns, useEnableDdns)
 }
 
-func testAccSharednetworkEnablePxeLeaseTime(name string, networks []string, enablePxeLeaseTime bool) string {
+func testAccSharednetworkEnablePxeLeaseTime(name string, networks []string, enablePxeLeaseTime bool, usePxeLeaseTime bool, pxeLeaseTime int64) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_enable_pxe_lease_time" {
    name = %q
    networks = %s
    enable_pxe_lease_time = %t
+   use_pxe_lease_time = %t
+   pxe_lease_time = %d
 }
-`, name, networks, enablePxeLeaseTime)
+`, name, networksStr, enablePxeLeaseTime, usePxeLeaseTime, pxeLeaseTime)
 }
 
-func testAccSharednetworkExtAttrs(name string, networks []string, extAttrs string) string {
+func testAccSharednetworkExtAttrs(name string, networks []string, extAttrs map[string]string) string {
+	networksStr := formatNetworksToHCL(networks)
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
+	}
+	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_extattrs" {
    name = %q
    networks = %s
-   extattrs = %q
+   extattrs = %s
 }
-`, name, networks, extAttrs)
+`, name, networksStr, extattrsStr)
 }
 
-func testAccSharednetworkIgnoreClientIdentifier(name string, networks []string, ignoreClientIdentifier, useIgnoreClientIdentifier bool) string {
+func testAccSharednetworkIgnoreClientIdentifier(name string, networks []string, ignoreClientIdentifier, useIgnoreClientIdentifier, useIgnoreId bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ignore_client_identifier" {
    name = %q
    networks = %s
    ignore_client_identifier = %t
    use_ignore_client_identifier = %t
+   use_ignore_id = %t
 }
-`, name, networks, ignoreClientIdentifier, useIgnoreClientIdentifier)
+`, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier, useIgnoreId)
 }
 
 func testAccSharednetworkIgnoreDhcpOptionListRequest(name string, networks []string, ignoreDhcpOptionListRequest, useIgnoreDhcpOptionListRequest bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ignore_dhcp_option_list_request" {
    name = %q
@@ -1846,31 +1875,45 @@ resource "nios_dhcp_sharednetwork" "test_ignore_dhcp_option_list_request" {
    ignore_dhcp_option_list_request = %t
    use_ignore_dhcp_option_list_request = %t
 }
-`, name, networks, ignoreDhcpOptionListRequest, useIgnoreDhcpOptionListRequest)
+`, name, networksStr, ignoreDhcpOptionListRequest, useIgnoreDhcpOptionListRequest)
 }
 
-func testAccSharednetworkIgnoreId(name string, networks []string, ignoreId string, useIgnoreId bool) string {
+func testAccSharednetworkIgnoreId(name string, networks []string, ignoreId string, useIgnoreId, ignoreClientIdentifier, useIgnoreClientIdentifier bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ignore_id" {
    name = %q
    networks = %s
    ignore_id = %q
    use_ignore_id = %t
+   ignore_client_identifier = %t
+   use_ignore_client_identifier = %t
 }
-`, name, networks, ignoreId, useIgnoreId)
+`, name, networksStr, ignoreId, useIgnoreId, ignoreClientIdentifier, useIgnoreClientIdentifier)
 }
 
 func testAccSharednetworkIgnoreMacAddresses(name string, networks []string, ignoreMacAddresses []string) string {
+	networksStr := formatNetworksToHCL(networks)
+	ignoreMacStr := formatMacAddrToHCL(ignoreMacAddresses)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_ignore_mac_addresses" {
    name = %q
    networks = %s
    ignore_mac_addresses = %s
 }
-`, name, networks, ignoreMacAddresses)
+`, name, networksStr, ignoreMacStr)
+}
+
+func formatMacAddrToHCL(ignoreMacAddresses []string) string {
+	macList := make([]string, len(ignoreMacAddresses))
+	for i, mac := range ignoreMacAddresses {
+		macList[i] = fmt.Sprintf("%q", mac)
+	}
+	return fmt.Sprintf("[%s]", strings.Join(macList, ", "))
 }
 
 func testAccSharednetworkLeaseScavengeTime(name string, networks []string, leaseScavengeTime int64, useLeaseScavengeTime bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_lease_scavenge_time" {
    name = %q
@@ -1878,40 +1921,44 @@ resource "nios_dhcp_sharednetwork" "test_lease_scavenge_time" {
    lease_scavenge_time = %d
    use_lease_scavenge_time = %t
 }
-`, name, networks, leaseScavengeTime, useLeaseScavengeTime)
+`, name, networksStr, leaseScavengeTime, useLeaseScavengeTime)
 }
 
 func testAccSharednetworkLogicFilterRules(name string, networks []string, logicFilterRules []map[string]any, useLogicFilterRules bool) string {
 	logicFilterRulesStr := convertSliceOfMapsToString(logicFilterRules)
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_logic_filter_rules" {
    name = %q
    networks = %s
-   logic_filter_rules = %q
+   logic_filter_rules = %s
    use_logic_filter_rules = %t
 }
-`, name, networks, logicFilterRulesStr, useLogicFilterRules)
+`, name, networksStr, logicFilterRulesStr, useLogicFilterRules)
 }
 
 func testAccSharednetworkName(name string, networks []string) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_name" {
    name = %q
    networks = %s
 }
-`, name, networks)
+`, name, networksStr)
 }
 
 func testAccSharednetworkNetworks(name string, networks []string) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_networks" {
    name = %q
-   networks = %q
+   networks = %s
 }
-`, name, networks)
+`, name, networksStr)
 }
 
 func testAccSharednetworkNextserver(name string, networks []string, nextserver string, useNextserver bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_nextserver" {
    name = %q
@@ -1919,22 +1966,24 @@ resource "nios_dhcp_sharednetwork" "test_nextserver" {
    nextserver = %q
    use_nextserver = %t
 }
-`, name, networks, nextserver, useNextserver)
+`, name, networksStr, nextserver, useNextserver)
 }
 
 func testAccSharednetworkOptions(name string, networks []string, options []map[string]any, useOptions bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	optionsStr := convertSliceOfMapsToString(options)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_options" {
    name = %q
    networks = %s
-   options = %q
+   options = %s
    use_options = %t
 }
-`, name, networks, optionsStr, useOptions)
+`, name, networksStr, optionsStr, useOptions)
 }
 
 func testAccSharednetworkPxeLeaseTime(name string, networks []string, pxeLeaseTime int64, usePxeLeaseTime bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_pxe_lease_time" {
    name = %q
@@ -1942,10 +1991,11 @@ resource "nios_dhcp_sharednetwork" "test_pxe_lease_time" {
    pxe_lease_time = %d
    use_pxe_lease_time = %t
 }
-`, name, networks, pxeLeaseTime, usePxeLeaseTime)
+`, name, networksStr, pxeLeaseTime, usePxeLeaseTime)
 }
 
 func testAccSharednetworkUpdateDnsOnLeaseRenewal(name string, networks []string, updateDnsOnLeaseRenewal, useUpdateDnsOnLeaseRenewal bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_update_dns_on_lease_renewal" {
    name = %q
@@ -1953,187 +2003,207 @@ resource "nios_dhcp_sharednetwork" "test_update_dns_on_lease_renewal" {
    update_dns_on_lease_renewal = %t
    use_update_dns_on_lease_renewal = %t
 }
-`, name, networks, updateDnsOnLeaseRenewal, useUpdateDnsOnLeaseRenewal)
+`, name, networksStr, updateDnsOnLeaseRenewal, useUpdateDnsOnLeaseRenewal)
 }
 
 func testAccSharednetworkUseAuthority(name string, networks []string, useAuthority bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_authority" {
    name = %q
    networks = %s
    use_authority = %t
 }
-`, name, networks, useAuthority)
+`, name, networksStr, useAuthority)
 }
 
 func testAccSharednetworkUseBootfile(name string, networks []string, useBootfile bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_bootfile" {
    name = %q
    networks = %s
    use_bootfile = %t
 }
-`, name, networks, useBootfile)
+`, name, networksStr, useBootfile)
 }
 
 func testAccSharednetworkUseBootserver(name string, networks []string, useBootserver bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_bootserver" {
    name = %q
    networks = %s
    use_bootserver = %t
 }
-`, name, networks, useBootserver)
+`, name, networksStr, useBootserver)
 }
 
 func testAccSharednetworkUseDdnsGenerateHostname(name string, networks []string, useDdnsGenerateHostname bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_ddns_generate_hostname" {
    name = %q
    networks = %s
    use_ddns_generate_hostname = %t
 }
-`, name, networks, useDdnsGenerateHostname)
+`, name, networksStr, useDdnsGenerateHostname)
 }
 
 func testAccSharednetworkUseDdnsTtl(name string, networks []string, useDdnsTtl bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_ddns_ttl" {
    name = %q
    networks = %s
    use_ddns_ttl = %t
 }
-`, name, networks, useDdnsTtl)
+`, name, networksStr, useDdnsTtl)
 }
 
 func testAccSharednetworkUseDdnsUpdateFixedAddresses(name string, networks []string, useDdnsUpdateFixedAddresses bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_ddns_update_fixed_addresses" {
    name = %q
    networks = %s
    use_ddns_update_fixed_addresses = %t
 }
-`, name, networks, useDdnsUpdateFixedAddresses)
+`, name, networksStr, useDdnsUpdateFixedAddresses)
 }
 
 func testAccSharednetworkUseDdnsUseOption81(name string, networks []string, useDdnsUseOption81 bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_ddns_use_option81" {
    name = %q
    networks = %s
    use_ddns_use_option81 = %t
 }
-`, name, networks, useDdnsUseOption81)
+`, name, networksStr, useDdnsUseOption81)
 }
 
 func testAccSharednetworkUseDenyBootp(name string, networks []string, useDenyBootp bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_deny_bootp" {
    name = %q
    networks = %s
    use_deny_bootp = %t
 }
-`, name, networks, useDenyBootp)
+`, name, networksStr, useDenyBootp)
 }
 
 func testAccSharednetworkUseEnableDdns(name string, networks []string, useEnableDdns bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_enable_ddns" {
    name = %q
    networks = %s
    use_enable_ddns = %t
 }
-`, name, networks, useEnableDdns)
+`, name, networksStr, useEnableDdns)
 }
 
-func testAccSharednetworkUseIgnoreClientIdentifier(name string, networks []string, useIgnoreClientIdentifier bool) string {
+func testAccSharednetworkUseIgnoreClientIdentifier(name string, networks []string, useIgnoreClientIdentifier bool, ignoreClientIdentifier bool, useIgnoreId bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_ignore_client_identifier" {
    name = %q
    networks = %s
    use_ignore_client_identifier = %t
+   ignore_client_identifier = %t
 }
-`, name, networks, useIgnoreClientIdentifier)
+`, name, networksStr, useIgnoreClientIdentifier, ignoreClientIdentifier)
 }
 
 func testAccSharednetworkUseIgnoreDhcpOptionListRequest(name string, networks []string, useIgnoreDhcpOptionListRequest bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_ignore_dhcp_option_list_request" {
    name = %q
    networks = %s
    use_ignore_dhcp_option_list_request = %t
 }
-`, name, networks, useIgnoreDhcpOptionListRequest)
+`, name, networksStr, useIgnoreDhcpOptionListRequest)
 }
 
-func testAccSharednetworkUseIgnoreId(name string, networks []string, useIgnoreId bool) string {
+func testAccSharednetworkUseIgnoreId(name string, networks []string, useIgnoreId, useIgnoreClientIdentifier bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_ignore_id" {
    name = %q
    networks = %s
    use_ignore_id = %t
+   use_ignore_client_identifier = %t
 }
-`, name, networks, useIgnoreId)
+`, name, networksStr, useIgnoreId, useIgnoreClientIdentifier)
 }
 
 func testAccSharednetworkUseLeaseScavengeTime(name string, networks []string, useLeaseScavengeTime bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_lease_scavenge_time" {
    name = %q
    networks = %s
    use_lease_scavenge_time = %t
 }
-`, name, networks, useLeaseScavengeTime)
+`, name, networksStr, useLeaseScavengeTime)
 }
 
 func testAccSharednetworkUseLogicFilterRules(name string, networks []string, useLogicFilterRules bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_logic_filter_rules" {
    name = %q
    networks = %s
    use_logic_filter_rules = %t
 }
-`, name, networks, useLogicFilterRules)
+`, name, networksStr, useLogicFilterRules)
 }
 
 func testAccSharednetworkUseNextserver(name string, networks []string, useNextserver bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_nextserver" {
    name = %q
    networks = %s
    use_nextserver = %t
 }
-`, name, networks, useNextserver)
+`, name, networksStr, useNextserver)
 }
 
 func testAccSharednetworkUseOptions(name string, networks []string, useOptions bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_options" {
    name = %q
    networks = %s
    use_options = %t
 }
-`, name, networks, useOptions)
+`, name, networksStr, useOptions)
 }
 
 func testAccSharednetworkUsePxeLeaseTime(name string, networks []string, usePxeLeaseTime bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_pxe_lease_time" {
    name = %q
    networks = %s
    use_pxe_lease_time = %t
 }
-`, name, networks, usePxeLeaseTime)
+`, name, networksStr, usePxeLeaseTime)
 }
 
 func testAccSharednetworkUseUpdateDnsOnLeaseRenewal(name string, networks []string, useUpdateDnsOnLeaseRenewal bool) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test_use_update_dns_on_lease_renewal" {
    name = %q
    networks = %s
    use_update_dns_on_lease_renewal = %t
 }
-`, name, networks, useUpdateDnsOnLeaseRenewal)
+`, name, networksStr, useUpdateDnsOnLeaseRenewal)
 }
 
 func convertSliceOfMapsToString(maps []map[string]any) string {

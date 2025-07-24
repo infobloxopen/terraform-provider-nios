@@ -15,8 +15,8 @@ func TestAccSharednetworkDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dhcp_sharednetwork.test"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -40,8 +40,8 @@ func TestAccSharednetworkDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dhcp_sharednetwork.test"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMTEuMTEuMTIuMC8yNC8w:11.11.12.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMTIuMTIuMTEuMC8yNC8w:12.12.11.0/24/default"}
+	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
+		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{

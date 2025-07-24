@@ -27,10 +27,12 @@ var SharednetworkLogicFilterRulesAttrTypes = map[string]attr.Type{
 var SharednetworkLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The filter name.",
 	},
 	"type": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The filter type. Valid values are: * MAC * NAC * Option",
 	},
 }
