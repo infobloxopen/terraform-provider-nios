@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -123,7 +122,6 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
-		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -297,7 +295,6 @@ func FlattenZoneForward(ctx context.Context, from *dns.ZoneForward, diags *diag.
 	}
 	m := ZoneForwardModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ZoneForwardAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -318,7 +315,6 @@ func (m *ZoneForwardModel) Flatten(ctx context.Context, from *dns.ZoneForward, d
 	m.DisplayDomain = flex.FlattenStringPointer(from.DisplayDomain)
 	m.DnsFqdn = flex.FlattenStringPointer(from.DnsFqdn)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.ExtAttrsAll = FlattenExtAttrsAll(ctx, from.ExtAttrs, diags)
 	m.ExternalNsGroup = flex.FlattenStringPointer(from.ExternalNsGroup)
 	m.ForwardTo = flex.FlattenFrameworkListNestedBlock(ctx, from.ForwardTo, ZoneForwardForwardToAttrTypes, diags, FlattenZoneForwardForwardTo)
 	m.ForwardersOnly = types.BoolPointerValue(from.ForwardersOnly)

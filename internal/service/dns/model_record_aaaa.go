@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -141,7 +140,6 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		ElementType:         types.StringType,
-		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"extattrs_all": schema.MapAttribute{
@@ -257,7 +255,6 @@ func FlattenRecordAaaa(ctx context.Context, from *dns.RecordAaaa, diags *diag.Di
 	}
 	m := RecordAaaaModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, RecordAaaaAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -282,7 +279,6 @@ func (m *RecordAaaaModel) Flatten(ctx context.Context, from *dns.RecordAaaa, dia
 	m.DiscoveredData = FlattenRecordAaaaDiscoveredData(ctx, from.DiscoveredData, diags)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.ExtAttrsAll = FlattenExtAttrsAll(ctx, from.ExtAttrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
 	m.Ipv6addr = FlattenRecordAaaaIpv6addr(from.Ipv6addr)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)

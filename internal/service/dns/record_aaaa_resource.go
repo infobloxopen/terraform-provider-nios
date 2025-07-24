@@ -98,7 +98,7 @@ func (r *RecordAaaaResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	res := apiRes.CreateRecordAaaaResponseAsObject.GetResult()
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordAaaa due inherited Extensible attributes, got error: %s", err))
 		return
@@ -151,12 +151,6 @@ func (r *RecordAaaaResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordAaaa due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
 	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -181,6 +175,12 @@ func (r *RecordAaaaResource) Read(ctx context.Context, req resource.ReadRequest,
 		if r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
+	}
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordAaaa due inherited Extensible attributes, got error: %s", diags))
+		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
@@ -233,7 +233,7 @@ func (r *RecordAaaaResource) ReadByExtAttrs(ctx context.Context, data *RecordAaa
 	res := results[0]
 
 	// Remove inherited external attributes and check for errors
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		return true
 	}
@@ -289,7 +289,7 @@ func (r *RecordAaaaResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	res := apiRes.UpdateRecordAaaaResponseAsObject.GetResult()
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordAaaa due inherited Extensible attributes, got error: %s", diags))
 		return
