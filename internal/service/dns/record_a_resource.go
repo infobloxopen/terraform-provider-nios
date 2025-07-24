@@ -324,5 +324,52 @@ func (r *RecordAResource) UpdateFuncCallAttributeName(ctx context.Context, data 
 }
 
 func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	var data RecordAModel
+	var diags diag.Diagnostics
+
+	resourceRef := utils.ExtractResourceRef(req.ID)
+
+	// Read existing record
+	apiRes, _, err := r.client.DNSAPI.
+		RecordAAPI.
+		Read(ctx, resourceRef).
+		ReturnFieldsPlus(readableAttributesForRecordA).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read record: %s", err))
+		return
+	}
+	// Initialize model and flatten initial response
+
+	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	data.ExtAttrs, diags = addInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	if diags.HasError() {
+		return
+	}
+	// Update record with the new internal ID
+	updateRes, _, err := r.client.DNSAPI.
+		RecordAAPI.
+		Update(ctx, resourceRef).
+		RecordA(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ReturnFieldsPlus(readableAttributesForRecordA).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update record: %s", err))
+		return
+	}
+
+	// Flatten final response into model and set state
+	res = updateRes.UpdateRecordAResponseAsObject.GetResult()
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
+		return
+	}
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
