@@ -1,7 +1,7 @@
 // Retrieve a specific SharedNetwork record by filters
 data "nios_dhcp_sharednetwork" "get_record_using_filters" {
   filters = {
-    name = "example_shared-network1"
+    name = "example_shared_network1"
   }
 }
 

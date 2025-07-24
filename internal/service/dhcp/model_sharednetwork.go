@@ -2,6 +2,7 @@ package dhcp
 
 import (
 	"context"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -28,59 +29,59 @@ import (
 // TODO: networks fields to accept list of IPs (current implementation accepts list of networks' references)
 
 type SharednetworkModel struct {
-	Ref                            types.String `tfsdk:"ref"`
-	Authority                      types.Bool   `tfsdk:"authority"`
-	Bootfile                       types.String `tfsdk:"bootfile"`
-	Bootserver                     types.String `tfsdk:"bootserver"`
-	Comment                        types.String `tfsdk:"comment"`
-	DdnsGenerateHostname           types.Bool   `tfsdk:"ddns_generate_hostname"`
-	DdnsServerAlwaysUpdates        types.Bool   `tfsdk:"ddns_server_always_updates"`
-	DdnsTtl                        types.Int64  `tfsdk:"ddns_ttl"`
-	DdnsUpdateFixedAddresses       types.Bool   `tfsdk:"ddns_update_fixed_addresses"`
-	DdnsUseOption81                types.Bool   `tfsdk:"ddns_use_option81"`
-	DenyBootp                      types.Bool   `tfsdk:"deny_bootp"`
-	DhcpUtilization                types.Int64  `tfsdk:"dhcp_utilization"`
-	DhcpUtilizationStatus          types.String `tfsdk:"dhcp_utilization_status"`
-	Disable                        types.Bool   `tfsdk:"disable"`
-	DynamicHosts                   types.Int64  `tfsdk:"dynamic_hosts"`
-	EnableDdns                     types.Bool   `tfsdk:"enable_ddns"`
-	EnablePxeLeaseTime             types.Bool   `tfsdk:"enable_pxe_lease_time"`
-	ExtAttrs                       types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                    types.Map    `tfsdk:"extattrs_all"`
-	IgnoreClientIdentifier         types.Bool   `tfsdk:"ignore_client_identifier"`
-	IgnoreDhcpOptionListRequest    types.Bool   `tfsdk:"ignore_dhcp_option_list_request"`
-	IgnoreId                       types.String `tfsdk:"ignore_id"`
-	IgnoreMacAddresses             types.List   `tfsdk:"ignore_mac_addresses"`
-	LeaseScavengeTime              types.Int64  `tfsdk:"lease_scavenge_time"`
-	LogicFilterRules               types.List   `tfsdk:"logic_filter_rules"`
-	MsAdUserData                   types.Object `tfsdk:"ms_ad_user_data"`
-	Name                           types.String `tfsdk:"name"`
-	NetworkView                    types.String `tfsdk:"network_view"`
-	Networks                       types.List   `tfsdk:"networks"`
-	Nextserver                     types.String `tfsdk:"nextserver"`
-	Options                        types.List   `tfsdk:"options"`
-	PxeLeaseTime                   types.Int64  `tfsdk:"pxe_lease_time"`
-	StaticHosts                    types.Int64  `tfsdk:"static_hosts"`
-	TotalHosts                     types.Int64  `tfsdk:"total_hosts"`
-	UpdateDnsOnLeaseRenewal        types.Bool   `tfsdk:"update_dns_on_lease_renewal"`
-	UseAuthority                   types.Bool   `tfsdk:"use_authority"`
-	UseBootfile                    types.Bool   `tfsdk:"use_bootfile"`
-	UseBootserver                  types.Bool   `tfsdk:"use_bootserver"`
-	UseDdnsGenerateHostname        types.Bool   `tfsdk:"use_ddns_generate_hostname"`
-	UseDdnsTtl                     types.Bool   `tfsdk:"use_ddns_ttl"`
-	UseDdnsUpdateFixedAddresses    types.Bool   `tfsdk:"use_ddns_update_fixed_addresses"`
-	UseDdnsUseOption81             types.Bool   `tfsdk:"use_ddns_use_option81"`
-	UseDenyBootp                   types.Bool   `tfsdk:"use_deny_bootp"`
-	UseEnableDdns                  types.Bool   `tfsdk:"use_enable_ddns"`
-	UseIgnoreClientIdentifier      types.Bool   `tfsdk:"use_ignore_client_identifier"`
-	UseIgnoreDhcpOptionListRequest types.Bool   `tfsdk:"use_ignore_dhcp_option_list_request"`
-	UseIgnoreId                    types.Bool   `tfsdk:"use_ignore_id"`
-	UseLeaseScavengeTime           types.Bool   `tfsdk:"use_lease_scavenge_time"`
-	UseLogicFilterRules            types.Bool   `tfsdk:"use_logic_filter_rules"`
-	UseNextserver                  types.Bool   `tfsdk:"use_nextserver"`
-	UseOptions                     types.Bool   `tfsdk:"use_options"`
-	UsePxeLeaseTime                types.Bool   `tfsdk:"use_pxe_lease_time"`
-	UseUpdateDnsOnLeaseRenewal     types.Bool   `tfsdk:"use_update_dns_on_lease_renewal"`
+	Ref                            types.String                     `tfsdk:"ref"`
+	Authority                      types.Bool                       `tfsdk:"authority"`
+	Bootfile                       types.String                     `tfsdk:"bootfile"`
+	Bootserver                     types.String                     `tfsdk:"bootserver"`
+	Comment                        types.String                     `tfsdk:"comment"`
+	DdnsGenerateHostname           types.Bool                       `tfsdk:"ddns_generate_hostname"`
+	DdnsServerAlwaysUpdates        types.Bool                       `tfsdk:"ddns_server_always_updates"`
+	DdnsTtl                        types.Int64                      `tfsdk:"ddns_ttl"`
+	DdnsUpdateFixedAddresses       types.Bool                       `tfsdk:"ddns_update_fixed_addresses"`
+	DdnsUseOption81                types.Bool                       `tfsdk:"ddns_use_option81"`
+	DenyBootp                      types.Bool                       `tfsdk:"deny_bootp"`
+	DhcpUtilization                types.Int64                      `tfsdk:"dhcp_utilization"`
+	DhcpUtilizationStatus          types.String                     `tfsdk:"dhcp_utilization_status"`
+	Disable                        types.Bool                       `tfsdk:"disable"`
+	DynamicHosts                   types.Int64                      `tfsdk:"dynamic_hosts"`
+	EnableDdns                     types.Bool                       `tfsdk:"enable_ddns"`
+	EnablePxeLeaseTime             types.Bool                       `tfsdk:"enable_pxe_lease_time"`
+	ExtAttrs                       types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll                    types.Map                        `tfsdk:"extattrs_all"`
+	IgnoreClientIdentifier         types.Bool                       `tfsdk:"ignore_client_identifier"`
+	IgnoreDhcpOptionListRequest    types.Bool                       `tfsdk:"ignore_dhcp_option_list_request"`
+	IgnoreId                       types.String                     `tfsdk:"ignore_id"`
+	IgnoreMacAddresses             internaltypes.UnorderedListValue `tfsdk:"ignore_mac_addresses"`
+	LeaseScavengeTime              types.Int64                      `tfsdk:"lease_scavenge_time"`
+	LogicFilterRules               types.List                       `tfsdk:"logic_filter_rules"`
+	MsAdUserData                   types.Object                     `tfsdk:"ms_ad_user_data"`
+	Name                           types.String                     `tfsdk:"name"`
+	NetworkView                    types.String                     `tfsdk:"network_view"`
+	Networks                       types.List                       `tfsdk:"networks"`
+	Nextserver                     types.String                     `tfsdk:"nextserver"`
+	Options                        internaltypes.UnorderedListValue `tfsdk:"options"`
+	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
+	StaticHosts                    types.Int64                      `tfsdk:"static_hosts"`
+	TotalHosts                     types.Int64                      `tfsdk:"total_hosts"`
+	UpdateDnsOnLeaseRenewal        types.Bool                       `tfsdk:"update_dns_on_lease_renewal"`
+	UseAuthority                   types.Bool                       `tfsdk:"use_authority"`
+	UseBootfile                    types.Bool                       `tfsdk:"use_bootfile"`
+	UseBootserver                  types.Bool                       `tfsdk:"use_bootserver"`
+	UseDdnsGenerateHostname        types.Bool                       `tfsdk:"use_ddns_generate_hostname"`
+	UseDdnsTtl                     types.Bool                       `tfsdk:"use_ddns_ttl"`
+	UseDdnsUpdateFixedAddresses    types.Bool                       `tfsdk:"use_ddns_update_fixed_addresses"`
+	UseDdnsUseOption81             types.Bool                       `tfsdk:"use_ddns_use_option81"`
+	UseDenyBootp                   types.Bool                       `tfsdk:"use_deny_bootp"`
+	UseEnableDdns                  types.Bool                       `tfsdk:"use_enable_ddns"`
+	UseIgnoreClientIdentifier      types.Bool                       `tfsdk:"use_ignore_client_identifier"`
+	UseIgnoreDhcpOptionListRequest types.Bool                       `tfsdk:"use_ignore_dhcp_option_list_request"`
+	UseIgnoreId                    types.Bool                       `tfsdk:"use_ignore_id"`
+	UseLeaseScavengeTime           types.Bool                       `tfsdk:"use_lease_scavenge_time"`
+	UseLogicFilterRules            types.Bool                       `tfsdk:"use_logic_filter_rules"`
+	UseNextserver                  types.Bool                       `tfsdk:"use_nextserver"`
+	UseOptions                     types.Bool                       `tfsdk:"use_options"`
+	UsePxeLeaseTime                types.Bool                       `tfsdk:"use_pxe_lease_time"`
+	UseUpdateDnsOnLeaseRenewal     types.Bool                       `tfsdk:"use_update_dns_on_lease_renewal"`
 }
 
 var SharednetworkAttrTypes = map[string]attr.Type{
@@ -106,15 +107,15 @@ var SharednetworkAttrTypes = map[string]attr.Type{
 	"ignore_client_identifier":            types.BoolType,
 	"ignore_dhcp_option_list_request":     types.BoolType,
 	"ignore_id":                           types.StringType,
-	"ignore_mac_addresses":                types.ListType{ElemType: types.StringType},
+	"ignore_mac_addresses":                internaltypes.UnorderedListOfStringType,
 	"lease_scavenge_time":                 types.Int64Type,
 	"logic_filter_rules":                  types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkLogicFilterRulesAttrTypes}},
 	"ms_ad_user_data":                     types.ObjectType{AttrTypes: SharednetworkMsAdUserDataAttrTypes},
 	"name":                                types.StringType,
 	"network_view":                        types.StringType,
-	"networks":                            types.ListType{ElemType: types.StringType},
+	"networks":                            types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}},
 	"nextserver":                          types.StringType,
-	"options":                             types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}},
+	"options":                             internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}}},
 	"pxe_lease_time":                      types.Int64Type,
 	"static_hosts":                        types.Int64Type,
 	"total_hosts":                         types.Int64Type,
@@ -141,7 +142,7 @@ var SharednetworkAttrTypes = map[string]attr.Type{
 
 var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"authority": schema.BoolAttribute{
@@ -298,6 +299,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Indicates whether the appliance will ignore DHCP client IDs or MAC addresses. Valid values are \"NONE\", \"CLIENT\", or \"MACADDR\". The default is \"NONE\".",
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
+		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
 		Computed:            true,
@@ -342,10 +344,12 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the network view in which this shared network resides.",
 	},
-	"networks": schema.ListAttribute{
-		ElementType:         types.StringType,
+	"networks": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: SharednetworkNetworksResourceSchemaAttributes,
+		},
 		Required:            true,
-		MarkdownDescription: "A list of networks belonging to the shared network Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ \"ref\": \"network/ZG5zLm5ldHdvcmskMTAuMwLvMTYvMA\", }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ \"ref\": { 'network': '10.0.0.0/8', } }] note that in this case the search must match exactly one network for the assignment to be successful.",
+		MarkdownDescription: "A list of networks belonging to the shared network. Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ \"ref\": \"network/ZG5zLm5ldHdvcmskMTAuMwLvMTYvMA\" }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ \"ref\": { 'network': '10.0.0.0/8' } }] note that in this case the search must match exactly one network for the assignment to be successful.",
 	},
 	"nextserver": schema.StringAttribute{
 		Optional: true,
@@ -356,6 +360,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
+		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: SharednetworkOptionsResourceSchemaAttributes,
 		},
@@ -518,30 +523,31 @@ func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		return nil
 	}
 	to := &dhcp.Sharednetwork{
-		Ref:                            flex.ExpandStringPointer(m.Ref),
-		Authority:                      flex.ExpandBoolPointer(m.Authority),
-		Bootfile:                       flex.ExpandStringPointer(m.Bootfile),
-		Bootserver:                     flex.ExpandStringPointer(m.Bootserver),
-		Comment:                        flex.ExpandStringPointer(m.Comment),
-		DdnsGenerateHostname:           flex.ExpandBoolPointer(m.DdnsGenerateHostname),
-		DdnsServerAlwaysUpdates:        flex.ExpandBoolPointer(m.DdnsServerAlwaysUpdates),
-		DdnsTtl:                        flex.ExpandInt64Pointer(m.DdnsTtl),
-		DdnsUpdateFixedAddresses:       flex.ExpandBoolPointer(m.DdnsUpdateFixedAddresses),
-		DdnsUseOption81:                flex.ExpandBoolPointer(m.DdnsUseOption81),
-		DenyBootp:                      flex.ExpandBoolPointer(m.DenyBootp),
-		Disable:                        flex.ExpandBoolPointer(m.Disable),
-		EnableDdns:                     flex.ExpandBoolPointer(m.EnableDdns),
-		EnablePxeLeaseTime:             flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
-		ExtAttrs:                       ExpandExtAttr(ctx, m.ExtAttrs, diags),
-		IgnoreClientIdentifier:         flex.ExpandBoolPointer(m.IgnoreClientIdentifier),
-		IgnoreDhcpOptionListRequest:    flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
-		IgnoreId:                       flex.ExpandStringPointer(m.IgnoreId),
-		IgnoreMacAddresses:             flex.ExpandFrameworkListString(ctx, m.IgnoreMacAddresses, diags),
-		LeaseScavengeTime:              flex.ExpandInt64Pointer(m.LeaseScavengeTime),
-		LogicFilterRules:               flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandSharednetworkLogicFilterRules),
-		MsAdUserData:                   ExpandSharednetworkMsAdUserData(ctx, m.MsAdUserData, diags),
-		Name:                           flex.ExpandStringPointer(m.Name),
-		Networks:                       flex.ExpandFrameworkListString(ctx, m.Networks, diags),
+		Ref:                         flex.ExpandStringPointer(m.Ref),
+		Authority:                   flex.ExpandBoolPointer(m.Authority),
+		Bootfile:                    flex.ExpandStringPointer(m.Bootfile),
+		Bootserver:                  flex.ExpandStringPointer(m.Bootserver),
+		Comment:                     flex.ExpandStringPointer(m.Comment),
+		DdnsGenerateHostname:        flex.ExpandBoolPointer(m.DdnsGenerateHostname),
+		DdnsServerAlwaysUpdates:     flex.ExpandBoolPointer(m.DdnsServerAlwaysUpdates),
+		DdnsTtl:                     flex.ExpandInt64Pointer(m.DdnsTtl),
+		DdnsUpdateFixedAddresses:    flex.ExpandBoolPointer(m.DdnsUpdateFixedAddresses),
+		DdnsUseOption81:             flex.ExpandBoolPointer(m.DdnsUseOption81),
+		DenyBootp:                   flex.ExpandBoolPointer(m.DenyBootp),
+		Disable:                     flex.ExpandBoolPointer(m.Disable),
+		EnableDdns:                  flex.ExpandBoolPointer(m.EnableDdns),
+		EnablePxeLeaseTime:          flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
+		ExtAttrs:                    ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		IgnoreClientIdentifier:      flex.ExpandBoolPointer(m.IgnoreClientIdentifier),
+		IgnoreDhcpOptionListRequest: flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
+		IgnoreId:                    flex.ExpandStringPointer(m.IgnoreId),
+		IgnoreMacAddresses:          flex.ExpandFrameworkListString(ctx, m.IgnoreMacAddresses, diags),
+		LeaseScavengeTime:           flex.ExpandInt64Pointer(m.LeaseScavengeTime),
+		LogicFilterRules:            flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandSharednetworkLogicFilterRules),
+		MsAdUserData:                ExpandSharednetworkMsAdUserData(ctx, m.MsAdUserData, diags),
+		Name:                        flex.ExpandStringPointer(m.Name),
+		//NetworkView:                 flex.ExpandStringPointer(m.NetworkView),
+		Networks:                       flex.ExpandFrameworkListNestedBlock(ctx, m.Networks, diags, ExpandSharednetworkNetworks),
 		Nextserver:                     flex.ExpandStringPointer(m.Nextserver),
 		Options:                        flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandSharednetworkOptions),
 		PxeLeaseTime:                   flex.ExpandInt64Pointer(m.PxeLeaseTime),
@@ -611,15 +617,15 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.IgnoreClientIdentifier = types.BoolPointerValue(from.IgnoreClientIdentifier)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.IgnoreId = flex.FlattenStringPointer(from.IgnoreId)
-	m.IgnoreMacAddresses = flex.FlattenFrameworkListString(ctx, from.IgnoreMacAddresses, diags)
+	m.IgnoreMacAddresses = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.IgnoreMacAddresses, diags)
 	m.LeaseScavengeTime = flex.FlattenInt64Pointer(from.LeaseScavengeTime)
 	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, SharednetworkLogicFilterRulesAttrTypes, diags, FlattenSharednetworkLogicFilterRules)
 	m.MsAdUserData = FlattenSharednetworkMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	m.Networks = flex.FlattenFrameworkListString(ctx, from.Networks, diags)
+	m.Networks = flex.FlattenFrameworkListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, SharednetworkOptionsAttrTypes, diags, FlattenSharednetworkOptions)
+	m.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.TotalHosts = flex.FlattenInt64Pointer(from.TotalHosts)
@@ -642,4 +648,76 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.UseOptions = types.BoolPointerValue(from.UseOptions)
 	m.UsePxeLeaseTime = types.BoolPointerValue(from.UsePxeLeaseTime)
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
+}
+
+func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.SharednetworkOptions, planOptions internaltypes.UnorderedListValue) internaltypes.UnorderedListValue {
+	defaultOptionName := "dhcp-lease-time"
+
+	// If no options, return empty list
+	if len(options) == 0 {
+		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes})
+	}
+
+	// If plan options is null or unknown, return original options
+	if planOptions.IsNull() || planOptions.IsUnknown() {
+		return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, options, SharednetworkOptionsAttrTypes, diags, FlattenSharednetworkOptions)
+	}
+
+	// Convert plan options to a map for easy lookup
+	baseList, err := planOptions.ToListValue(ctx)
+	if err != nil {
+		return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, options, SharednetworkOptionsAttrTypes, diags, FlattenSharednetworkOptions)
+	}
+
+	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, baseList, diags, ExpandSharednetworkOptions)
+	planOptionsMap := make(map[string]dhcp.SharednetworkOptions)
+	var planOrder []string
+	for _, opt := range planOptionsArr {
+		if opt.Name != nil {
+			planOptionsMap[*opt.Name] = opt
+			planOrder = append(planOrder, *opt.Name)
+		}
+	}
+
+	// Convert current options to a map
+	currentOptionsMap := make(map[string]dhcp.SharednetworkOptions)
+	for _, opt := range options {
+		if opt.Name != nil {
+			currentOptionsMap[*opt.Name] = opt
+		}
+	}
+
+	// Build result maintaining plan order
+	var result []dhcp.SharednetworkOptions
+	for _, name := range planOrder {
+		if name == defaultOptionName {
+			// For lease-time option, check if values match
+			planOpt, planExists := planOptionsMap[name]
+			currentOpt, currentExists := currentOptionsMap[name]
+
+			if planExists && currentExists &&
+				planOpt.Value != nil && currentOpt.Value != nil &&
+				*planOpt.Value == *currentOpt.Value {
+				result = append(result, currentOpt)
+			}
+		} else {
+			// For non-lease-time options, use current value if exists
+			if opt, exists := currentOptionsMap[name]; exists {
+				result = append(result, opt)
+			}
+		}
+	}
+
+	// Add any remaining options that weren't in the plan but should be kept
+	for _, opt := range options {
+		if opt.Name == nil {
+			continue
+		}
+		_, inPlan := planOptionsMap[*opt.Name]
+		if !inPlan && *opt.Name != defaultOptionName {
+			result = append(result, opt)
+		}
+	}
+
+	return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, result, SharednetworkOptionsAttrTypes, diags, FlattenSharednetworkOptions)
 }

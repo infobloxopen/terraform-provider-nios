@@ -18,7 +18,7 @@ Manages DHCP SharedNetwork Records.
 ### Required
 
 - `name` (String) The name of the IPv6 Shared Network.
-- `networks` (List of String) A list of networks belonging to the shared network Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ "ref": "network/ZG5zLm5ldHdvcmskMTAuMwLvMTYvMA", }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ "ref": { 'network': '10.0.0.0/8', } }] note that in this case the search must match exactly one network for the assignment to be successful.
+- `networks` (Attributes List) A list of networks belonging to the shared network. Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ "ref": "network/ZG5zLm5ldHdvcmskMTAuMwLvMTYvMA" }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ "ref": { 'network': '10.0.0.0/8' } }] note that in this case the search must match exactly one network for the assignment to be successful. (see [below for nested schema](#nestedatt--networks))
 
 ### Optional
 
@@ -46,7 +46,6 @@ Manages DHCP SharedNetwork Records.
 - `nextserver` (String) The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--options))
 - `pxe_lease_time` (Number) The PXE lease time value of a shared network object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.
-- `ref` (String) The reference to the object.
 - `update_dns_on_lease_renewal` (Boolean) This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.
 - `use_authority` (Boolean) Use flag for: authority
 - `use_bootfile` (Boolean) Use flag for: bootfile
@@ -74,8 +73,17 @@ Manages DHCP SharedNetwork Records.
 - `dynamic_hosts` (Number) The total number of DHCP leases issued for the shared network.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--ms_ad_user_data))
+- `ref` (String) The reference to the object.
 - `static_hosts` (Number) The number of static DHCP addresses configured in the shared network.
 - `total_hosts` (Number) The total number of DHCP addresses configured in the shared network.
+
+<a id="nestedatt--networks"></a>
+### Nested Schema for `networks`
+
+Required:
+
+- `ref` (String) Reference to the Network.
+
 
 <a id="nestedatt--logic_filter_rules"></a>
 ### Nested Schema for `logic_filter_rules`
