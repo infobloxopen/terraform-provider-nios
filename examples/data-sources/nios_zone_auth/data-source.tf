@@ -2,7 +2,7 @@
 data "nios_dns_zone_auth" "get_auth_zone_using_filters" {
   filters = {
     view = "default"
-    fqdn = "example100.com"
+    fqdn = "example1.com"
   }
 }
 
