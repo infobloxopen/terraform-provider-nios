@@ -1700,7 +1700,7 @@ func TestAccRangeResource_PortControlBlackoutSetting(t *testing.T) {
 				Config: testAccRangePortControlBlackoutSetting(startAddr, endAddr, portControlBlackoutSetting),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting", "PORT_CONTROL_BLACKOUT_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "false"),
 				),
 			},
 			// Update and Read
@@ -1708,7 +1708,7 @@ func TestAccRangeResource_PortControlBlackoutSetting(t *testing.T) {
 				Config: testAccRangePortControlBlackoutSetting(startAddr, endAddr, portControlBlackoutSettingUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting", "PORT_CONTROL_BLACKOUT_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1958,6 +1958,10 @@ func TestAccRangeResource_StartAddr(t *testing.T) {
 func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_subscribe_settings"
 	var v dhcp.Range
+	startAddr := "10.0.0.10"
+	endAddr := "10.0.0.20"
+	enabledAttribute := "DOMAINNAME"
+	enabledAttributeUpdate := "ENDPOINT_PROFILE"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1965,18 +1969,18 @@ func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeSubscribeSettings("SUBSCRIBE_SETTINGS_REPLACE_ME"),
+				Config: testAccRangeSubscribeSettings(startAddr, endAddr,enabledAttribute ),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "subscribe_settings", "SUBSCRIBE_SETTINGS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0",enabledAttribute ),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangeSubscribeSettings("SUBSCRIBE_SETTINGS_UPDATE_REPLACE_ME"),
+				Config: testAccRangeSubscribeSettings(startAddr, endAddr, enabledAttributeUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "subscribe_settings", "SUBSCRIBE_SETTINGS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", enabledAttributeUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3609,21 +3613,19 @@ resource "nios_dhcp_range" "test_start_addr" {
 `, startAddr, endAddr)
 }
 
-func testAccRangeSubscribeSettings(subscribeSettings string) string {
+func testAccRangeSubscribeSettings(startAddr, endAddr string, subscribeSettings string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_subscribe_settings" {
-    subscribe_settings = %q
+    start_addr = %q
+    end_addr = %q
+    subscribe_settings = {
+	enabled_attributes = [%q]
 }
-`, subscribeSettings)
+	use_subscribe_settings = true
+}
+`, startAddr , endAddr , subscribeSettings)
 }
 
-func testAccRangeTemplate(template string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_range" "test_template" {
-    template = %q
-}
-`, template)
-}
 
 func testAccRangeUnknownClients(startAddr, endAddr string, unknownClients string) string {
 	return fmt.Sprintf(`

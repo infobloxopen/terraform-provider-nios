@@ -686,6 +686,10 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"subscribe_settings": schema.SingleNestedAttribute{
 		Attributes: RangeSubscribeSettingsResourceSchemaAttributes,
 		Optional:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
+		},
+		MarkdownDescription: "The subscribe settings for the range. This field is used to configure the subscription settings for the DHCP range. It includes information about the subscription, such as the subscriber's email address and whether the subscription is enabled.",
 	},
 	"template": schema.StringAttribute{
 		Computed:            true,
