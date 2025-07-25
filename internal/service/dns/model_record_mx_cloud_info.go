@@ -88,9 +88,7 @@ func (m *RecordMxCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnos
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordMxCloudInfo{
-		DelegatedMember: ExpandRecordmxcloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
-	}
+	to := &dns.RecordMxCloudInfo{}
 	return to
 }
 

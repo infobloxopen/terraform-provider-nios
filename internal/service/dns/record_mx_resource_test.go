@@ -444,10 +444,10 @@ func TestAccRecordMxResource_View(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordMxView(name, mail_exchanger, 10, "default"),
+				Config: testAccRecordMxView(name, mail_exchanger, 10, "default.custom_view"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordMxExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default.custom_view"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

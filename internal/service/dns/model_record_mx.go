@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -91,8 +92,15 @@ var RecordMxResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
