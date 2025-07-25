@@ -176,9 +176,6 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
 		MarkdownDescription: "The monitors related to pool.",
 	},
 	"name": schema.StringAttribute{
