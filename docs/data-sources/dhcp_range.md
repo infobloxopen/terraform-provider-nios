@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_range Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  
+  Retrieves information about existing Range
 ---
 
 # nios_dhcp_range (Data Source)
 
-
+Retrieves information about existing Range
 
 ## Example Usage
 
@@ -65,8 +65,8 @@ Optional:
 - `deny_all_clients` (Boolean) If True, send NAK forcing the client to take the new address.
 - `deny_bootp` (Boolean) If set to true, BOOTP settings are disabled and BOOTP requests will be denied.
 - `disable` (Boolean) Determines whether a range is disabled or not. When this is set to False, the range is enabled.
-- `discovery_basic_poll_settings` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings))
-- `discovery_blackout_setting` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_blackout_setting))
+- `discovery_basic_poll_settings` (Attributes) The basic polling settings for the discovery of this range. (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings))
+- `discovery_blackout_setting` (Attributes) The blackout settings for the discovery of this range. If this is set to False, the blackout settings are not used. (see [below for nested schema](#nestedatt--result--discovery_blackout_setting))
 - `discovery_member` (String) The member that will run discovery for this range.
 - `email_list` (List of String) The e-mail lists to which the appliance sends DHCP threshold alarm e-mail messages.
 - `enable_ddns` (Boolean) The dynamic DNS updates flag of a DHCP range object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.
@@ -92,10 +92,10 @@ Optional:
 - `low_water_mark` (Number) The percentage of DHCP range usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.
 - `low_water_mark_reset` (Number) The percentage of DHCP range usage threshold below which range usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.
 - `mac_filter_rules` (Attributes List) This field contains the MAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--result--mac_filter_rules))
-- `member` (Attributes) (see [below for nested schema](#nestedatt--result--member))
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
+- `member` (Attributes) This field contains the member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network. (see [below for nested schema](#nestedatt--result--member))
+- `ms_ad_user_data` (Attributes) This field contains the Microsoft AD user data for this range. This data is used to create a user in the Microsoft AD when a lease is assigned to a host in this range. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ms_options` (Attributes List) This field contains the Microsoft DHCP options for this range. (see [below for nested schema](#nestedatt--result--ms_options))
-- `ms_server` (Attributes) (see [below for nested schema](#nestedatt--result--ms_server))
+- `ms_server` (Attributes) This field contains the Microsoft server that will serve this range. This is used for Microsoft failover. (see [below for nested schema](#nestedatt--result--ms_server))
 - `nac_filter_rules` (Attributes List) This field contains the NAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--result--nac_filter_rules))
 - `name` (String) This field contains the name of the Microsoft scope.
 - `network` (String) The network to which this range belongs, in IPv4 Address/CIDR format.
@@ -103,16 +103,16 @@ Optional:
 - `nextserver` (String) The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.
 - `option_filter_rules` (Attributes List) This field contains the Option filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--result--option_filter_rules))
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--result--options))
-- `port_control_blackout_setting` (Attributes) (see [below for nested schema](#nestedatt--result--port_control_blackout_setting))
+- `port_control_blackout_setting` (Attributes) The port control blackout settings for the range. This field is used to configure the port control blackout settings for the DHCP range. It includes information about the blackout settings, such as the start and end times of the blackout period. (see [below for nested schema](#nestedatt--result--port_control_blackout_setting))
 - `pxe_lease_time` (Number) The PXE lease time value of a DHCP Range object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.
 - `recycle_leases` (Boolean) If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.
 - `relay_agent_filter_rules` (Attributes List) This field contains the Relay Agent filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--result--relay_agent_filter_rules))
 - `restart_if_needed` (Boolean) Restarts the member service.
 - `same_port_control_discovery_blackout` (Boolean) If the field is set to True, the discovery blackout setting will be used for port control blackout setting.
 - `server_association_type` (String) The type of server that is going to serve the range.
-- `split_member` (Attributes) (see [below for nested schema](#nestedatt--result--split_member))
+- `split_member` (Attributes) This field contains the split member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network. (see [below for nested schema](#nestedatt--result--split_member))
 - `split_scope_exclusion_percent` (Number) This field controls the percentage used when creating a split scope. Valid values are numbers between 1 and 99. If the value is 40, it means that the top 40% of the exclusion will be created on the DHCP range assigned to {next_available_ip:next_available_ip} and the lower 60% of the range will be assigned to DHCP range assigned to {next_available_ip:next_available_ip}
-- `subscribe_settings` (Attributes) (see [below for nested schema](#nestedatt--result--subscribe_settings))
+- `subscribe_settings` (Attributes) The subscribe settings for the range. This field is used to configure the subscription settings for the DHCP range. It includes information about the subscription, such as the subscriber's email address and whether the subscription is enabled. (see [below for nested schema](#nestedatt--result--subscribe_settings))
 - `unknown_clients` (String) Permission for unknown clients. This can be 'Allow' or 'Deny'. If set to 'Deny', unknown clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.
 - `update_dns_on_lease_renewal` (Boolean) This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.
 - `use_blackout_setting` (Boolean) Use flag for: discovery_blackout_setting , port_control_blackout_setting, same_port_control_discovery_blackout
@@ -161,7 +161,7 @@ Read-Only:
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
+- `delegated_member` (Attributes) This field contains the delegated member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.
@@ -197,7 +197,7 @@ Optional:
 - `snmp_collection` (Boolean) Determines whether SNMP collection is enabled or not.
 - `switch_port_data_collection_polling` (String) A switch port data collection polling mode.
 - `switch_port_data_collection_polling_interval` (Number) Indicates the interval for switch port data collection polling.
-- `switch_port_data_collection_polling_schedule` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
+- `switch_port_data_collection_polling_schedule` (Attributes) This field contains the switch port data collection polling schedule. This is used to configure the schedule for switch port data collection polling. It includes information about the start and end times of the polling period, as well as the frequency of polling. (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
 - `use_global_polling_frequency_modifier` (Boolean) Use Global Polling Frequency Modifier.
 
 <a id="nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule"></a>
@@ -226,7 +226,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) The blackout schedule for the range. This field is used to configure the blackout schedule for the DHCP range. It includes information about the start and end times of the blackout period, as well as the frequency of blackout. (see [below for nested schema](#nestedatt--result--discovery_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--result--discovery_blackout_setting--blackout_schedule"></a>
