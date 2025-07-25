@@ -12,19 +12,19 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type RecordaliascloudinfoDelegatedMemberModel struct {
+type RecordsrvcloudinfoDelegatedMemberModel struct {
 	Ipv4addr types.String `tfsdk:"ipv4addr"`
 	Ipv6addr types.String `tfsdk:"ipv6addr"`
 	Name     types.String `tfsdk:"name"`
 }
 
-var RecordaliascloudinfoDelegatedMemberAttrTypes = map[string]attr.Type{
+var RecordsrvcloudinfoDelegatedMemberAttrTypes = map[string]attr.Type{
 	"ipv4addr": types.StringType,
 	"ipv6addr": types.StringType,
 	"name":     types.StringType,
 }
 
-var RecordaliascloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schema.Attribute{
+var RecordsrvcloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
@@ -39,31 +39,31 @@ var RecordaliascloudinfoDelegatedMemberResourceSchemaAttributes = map[string]sch
 	},
 }
 
-func (m *RecordaliascloudinfoDelegatedMemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordaliascloudinfoDelegatedMember {
+func (m *RecordsrvcloudinfoDelegatedMemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordsrvcloudinfoDelegatedMember {
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordaliascloudinfoDelegatedMember{}
+	to := &dns.RecordsrvcloudinfoDelegatedMember{}
 	return to
 }
 
-func FlattenRecordaliascloudinfoDelegatedMember(ctx context.Context, from *dns.RecordaliascloudinfoDelegatedMember, diags *diag.Diagnostics) types.Object {
+func FlattenRecordsrvcloudinfoDelegatedMember(ctx context.Context, from *dns.RecordsrvcloudinfoDelegatedMember, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(RecordaliascloudinfoDelegatedMemberAttrTypes)
+		return types.ObjectNull(RecordsrvcloudinfoDelegatedMemberAttrTypes)
 	}
-	m := RecordaliascloudinfoDelegatedMemberModel{}
+	m := RecordsrvcloudinfoDelegatedMemberModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, RecordaliascloudinfoDelegatedMemberAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, RecordsrvcloudinfoDelegatedMemberAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *RecordaliascloudinfoDelegatedMemberModel) Flatten(ctx context.Context, from *dns.RecordaliascloudinfoDelegatedMember, diags *diag.Diagnostics) {
+func (m *RecordsrvcloudinfoDelegatedMemberModel) Flatten(ctx context.Context, from *dns.RecordsrvcloudinfoDelegatedMember, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = RecordaliascloudinfoDelegatedMemberModel{}
+		*m = RecordsrvcloudinfoDelegatedMemberModel{}
 	}
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)

@@ -116,7 +116,7 @@ Read-Only:
 <a id="nestedatt--result--cloud_info--delegated_member"></a>
 ### Nested Schema for `result.cloud_info.delegated_member`
 
-Optional:
+Read-Only:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.
