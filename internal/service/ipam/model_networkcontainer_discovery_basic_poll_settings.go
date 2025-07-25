@@ -98,7 +98,7 @@ var NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map[str
 		Optional:            true,
 		MarkdownDescription: "Determines whether auto ARP refresh before switch port polling is enabled or not.",
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Default:             booldefault.StaticBool(false),
 	},
 	"switch_port_data_collection_polling": schema.StringAttribute{
 		Optional:            true,

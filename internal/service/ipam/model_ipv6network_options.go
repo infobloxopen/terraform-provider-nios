@@ -34,22 +34,27 @@ var Ipv6networkOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Name of the DHCP option.",
+		Computed:            true,
 	},
 	"num": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The code of the DHCP option.",
+		Computed:            true,
 	},
 	"vendor_class": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
+		Computed:            true,
 	},
 	"value": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Value of the DHCP option",
+		Computed:            true,
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers",
+		Computed:            true,
 	},
 }
 

@@ -10,7 +10,6 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -68,12 +67,12 @@ var Ipv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSchedule
 				),
 			),
 		},
+		Computed: true,
 	},
 	"time_zone": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
 		Computed:            true,
-		Default:             stringdefault.StaticString("UTC"),
 	},
 	"recurring_time": schema.Int64Attribute{
 		Optional:            true,

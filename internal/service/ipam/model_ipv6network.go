@@ -215,6 +215,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(false),
 	},
 	"cloud_info": schema.SingleNestedAttribute{
+		Optional:            true,
 		Attributes:          Ipv6networkCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
@@ -282,9 +283,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this network.",
-		Validators: []validator.String{
-			stringvalidator.OneOf("COMPLETE", "FAILED", "NONE", "PENDING", "RUNNING"),
-		},
+		Default:             stringdefault.StaticString("NONE"),
 	},
 	"discovered_bgp_as": schema.StringAttribute{
 		Computed:            true,
@@ -323,14 +322,25 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkDiscoveryBasicPollSettingsResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_basic_polling_settings")),
+		},
+		MarkdownDescription: "The discovery basic poll settings for this network",
 	},
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkDiscoveryBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
+		},
+		MarkdownDescription: "The discovery blackout setting for this network.",
 	},
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network discovery engine type.",
+		Default:             stringdefault.StaticString("NONE"),
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
@@ -449,6 +459,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"mgm_private_overridable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.",
+		Default:             booldefault.StaticBool(true),
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkMsAdUserDataResourceSchemaAttributes,
@@ -518,6 +529,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the IPv6 network address space.",
+		Default:             stringdefault.StaticString("NONE"),
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
@@ -528,9 +540,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
 		Computed:            true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("CREATE", "DELETE", "MODIFY", "NONE"),
-		},
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
@@ -539,6 +548,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.OneOf("REGISTERED", "NOT_REGISTERED"),
 		},
+		Default: stringdefault.StaticString("NOT_REGISTERED"),
 	},
 	"same_port_control_discovery_blackout": schema.BoolAttribute{
 		Optional:            true,
@@ -708,7 +718,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use flag for: zone_associations",
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(true),
 	},
 	"valid_lifetime": schema.Int64Attribute{
 		Optional:            true,
@@ -738,13 +748,13 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Ipv6network {
+func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Ipv6network {
 	if m == nil {
 		return nil
 	}
 	to := &ipam.Ipv6network{
-		Ref:                              flex.ExpandStringPointer(m.Ref),
-		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
+		Ref: flex.ExpandStringPointer(m.Ref),
+		// AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		CloudInfo:                        ExpandIpv6networkCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:                          flex.ExpandStringPointer(m.Comment),
 		DdnsDomainname:                   flex.ExpandStringPointer(m.DdnsDomainname),
@@ -811,6 +821,12 @@ func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		ValidLifetime:                    flex.ExpandInt64Pointer(m.ValidLifetime),
 		Vlans:                            flex.ExpandFrameworkListNestedBlock(ctx, m.Vlans, diags, ExpandIpv6networkVlans),
 		ZoneAssociations:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZoneAssociations, diags, ExpandIpv6networkZoneAssociations),
+	}
+	if isCreate {
+		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
+		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
+		to.Network = ExpandIpv6NetworkNetwork(m.Network)
+		to.AutoCreateReversezone = flex.ExpandBoolPointer(m.AutoCreateReversezone)
 	}
 	return to
 }
@@ -890,7 +906,7 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	// m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
-	// m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	// m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)

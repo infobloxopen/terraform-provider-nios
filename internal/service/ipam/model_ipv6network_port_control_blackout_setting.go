@@ -42,6 +42,7 @@ var Ipv6networkPortControlBlackoutSettingResourceSchemaAttributes = map[string]s
 	"blackout_schedule": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 }
 
