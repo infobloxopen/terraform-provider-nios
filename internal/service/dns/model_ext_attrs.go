@@ -85,10 +85,7 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 	var extAttrAll types.Map
 
 	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
-		if v, ok := respExtAttrs["Terraform Internal ID"]; ok {
-			extAttrsAllRespMap["Terraform Internal ID"] = v
-		}
-		extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &extAttrsAllRespMap, &diags)
+		extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &respExtAttrs, &diags)
 		return nil, extAttrAll, nil
 	}
 
@@ -108,8 +105,9 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 		if respExtAttrs[k].AdditionalProperties["inheritance_source"] != nil {
 			if planVal, ok := planMap[k]; ok {
 				extAttrsRespMap[k] = planVal
+			} else {
+				extAttrsAllRespMap[k] = respExtAttrs[k]
 			}
-			extAttrsAllRespMap[k] = respExtAttrs[k]
 			continue
 		}
 		extAttrsRespMap[k] = v
