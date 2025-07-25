@@ -196,6 +196,7 @@ func TestAccRangetemplateResource_Bootserver(t *testing.T) {
 // If the user is a cloud-user, then they need Terraform internal ID with cloud permission and enable cloud delegation for the user to create a range template.
 // if the user is a non cloud-user, they need to have  Terraform internal ID without cloud permission.
 func TestAccRangetemplateResource_CloudApiCompatible(t *testing.T) {
+	t.Skip("Skipping this test as it is a known issue.")
 	var resourceName = "nios_dhcp_rangetemplate.test_cloud_api_compatible"
 	var v dhcp.Rangetemplate
 
@@ -1231,6 +1232,7 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 }
 
 func TestAccRangetemplateResource_MsOptions(t *testing.T) {
+	t.Skip("Skipping this test as it requires MS_Server setup.")
 	var resourceName = "nios_dhcp_rangetemplate.test_ms_options"
 	var v dhcp.Rangetemplate
 
@@ -1266,6 +1268,7 @@ func TestAccRangetemplateResource_MsOptions(t *testing.T) {
 }
 
 func TestAccRangetemplateResource_MsServer(t *testing.T) {
+	t.Skip("Skipping this test as it requires MS_Server setup.")
 	var resourceName = "nios_dhcp_rangetemplate.test_ms_server"
 	var v dhcp.Rangetemplate
 

@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_rangetemplate Resource - nios"
 subcategory: "DHCP"
 description: |-
-  
+  Manages a DHCP Range Template record.
 ---
 
 # nios_dhcp_rangetemplate (Resource)
 
-
+Manages a DHCP Range Template record.
 
 ## Example Usage
 
@@ -153,7 +153,7 @@ resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields2" {
 - `mac_filter_rules` (Attributes List) This field contains the MAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--mac_filter_rules))
 - `member` (Attributes) The member that will provide service for this range. (see [below for nested schema](#nestedatt--member))
 - `ms_options` (Attributes List) The Microsoft DHCP options for this range. (see [below for nested schema](#nestedatt--ms_options))
-- `ms_server` (Attributes) (see [below for nested schema](#nestedatt--ms_server))
+- `ms_server` (Attributes) The Microsoft server that will provide service for this range. server_association_type needs to be set to ‘MS_SERVER’ if you want the server specified here to serve the range. For searching by this field you should use a HTTP method that contains a body (POST or PUT) with MS DHCP server structure and the request should have option _method=GET. (see [below for nested schema](#nestedatt--ms_server))
 - `nac_filter_rules` (Attributes List) This field contains the NAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--nac_filter_rules))
 - `nextserver` (String) The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.
 - `option_filter_rules` (Attributes List) This field contains the Option filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--option_filter_rules))
