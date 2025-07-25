@@ -121,10 +121,11 @@ func testAccCheckSharednetworkResourceAttrPair(resourceName, dataSourceName stri
 }
 
 func testAccSharednetworkDataSourceConfigFilters(name string, networks []string) string {
+	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test" {
  name = "%s"
- networks = %q
+ networks = %s
 }
 
 data "nios_dhcp_sharednetwork" "test" {
@@ -132,14 +133,15 @@ data "nios_dhcp_sharednetwork" "test" {
 	 name = nios_dhcp_sharednetwork.test.name
  }
 }
-`, name, networks)
+`, name, networksStr)
 }
 
 func testAccSharednetworkDataSourceConfigExtAttrFilters(name string, netwrorks []string, extAttrsValue string) string {
+	netwrorksStr := formatNetworksToHCL(netwrorks)
 	return fmt.Sprintf(`
 resource "nios_dhcp_sharednetwork" "test" {
  name = %q
- networks = %q
+ networks = %s
  extattrs = {
    Site = %q
  }
@@ -150,5 +152,5 @@ data "nios_dhcp_sharednetwork" "test" {
 	Site = nios_dhcp_sharednetwork.test.extattrs.Site
  }
 }
-`, name, netwrorks, extAttrsValue)
+`, name, netwrorksStr, extAttrsValue)
 }

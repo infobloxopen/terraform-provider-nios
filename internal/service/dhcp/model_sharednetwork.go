@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -24,9 +23,11 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 )
 
 // TODO: networks fields to accept list of IPs (current implementation accepts list of networks' references)
+// TODO: ignore_id, ignore_client_identifier need to be checked as `ignore_id` instead of `ignore_client_identifier` in version WAPI 1.8 or higher.
 
 type SharednetworkModel struct {
 	Ref                            types.String                     `tfsdk:"ref"`
@@ -57,7 +58,7 @@ type SharednetworkModel struct {
 	MsAdUserData                   types.Object                     `tfsdk:"ms_ad_user_data"`
 	Name                           types.String                     `tfsdk:"name"`
 	NetworkView                    types.String                     `tfsdk:"network_view"`
-	Networks                       types.List                       `tfsdk:"networks"`
+	Networks                       internaltypes.UnorderedListValue `tfsdk:"networks"`
 	Nextserver                     types.String                     `tfsdk:"nextserver"`
 	Options                        internaltypes.UnorderedListValue `tfsdk:"options"`
 	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
@@ -85,35 +86,36 @@ type SharednetworkModel struct {
 }
 
 var SharednetworkAttrTypes = map[string]attr.Type{
-	"ref":                                 types.StringType,
-	"authority":                           types.BoolType,
-	"bootfile":                            types.StringType,
-	"bootserver":                          types.StringType,
-	"comment":                             types.StringType,
-	"ddns_generate_hostname":              types.BoolType,
-	"ddns_server_always_updates":          types.BoolType,
-	"ddns_ttl":                            types.Int64Type,
-	"ddns_update_fixed_addresses":         types.BoolType,
-	"ddns_use_option81":                   types.BoolType,
-	"deny_bootp":                          types.BoolType,
-	"dhcp_utilization":                    types.Int64Type,
-	"dhcp_utilization_status":             types.StringType,
-	"disable":                             types.BoolType,
-	"dynamic_hosts":                       types.Int64Type,
-	"enable_ddns":                         types.BoolType,
-	"enable_pxe_lease_time":               types.BoolType,
-	"extattrs":                            types.MapType{ElemType: types.StringType},
-	"extattrs_all":                        types.MapType{ElemType: types.StringType},
-	"ignore_client_identifier":            types.BoolType,
-	"ignore_dhcp_option_list_request":     types.BoolType,
-	"ignore_id":                           types.StringType,
-	"ignore_mac_addresses":                internaltypes.UnorderedListOfStringType,
-	"lease_scavenge_time":                 types.Int64Type,
-	"logic_filter_rules":                  types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkLogicFilterRulesAttrTypes}},
-	"ms_ad_user_data":                     types.ObjectType{AttrTypes: SharednetworkMsAdUserDataAttrTypes},
-	"name":                                types.StringType,
-	"network_view":                        types.StringType,
-	"networks":                            types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}},
+	"ref":                             types.StringType,
+	"authority":                       types.BoolType,
+	"bootfile":                        types.StringType,
+	"bootserver":                      types.StringType,
+	"comment":                         types.StringType,
+	"ddns_generate_hostname":          types.BoolType,
+	"ddns_server_always_updates":      types.BoolType,
+	"ddns_ttl":                        types.Int64Type,
+	"ddns_update_fixed_addresses":     types.BoolType,
+	"ddns_use_option81":               types.BoolType,
+	"deny_bootp":                      types.BoolType,
+	"dhcp_utilization":                types.Int64Type,
+	"dhcp_utilization_status":         types.StringType,
+	"disable":                         types.BoolType,
+	"dynamic_hosts":                   types.Int64Type,
+	"enable_ddns":                     types.BoolType,
+	"enable_pxe_lease_time":           types.BoolType,
+	"extattrs":                        types.MapType{ElemType: types.StringType},
+	"extattrs_all":                    types.MapType{ElemType: types.StringType},
+	"ignore_client_identifier":        types.BoolType,
+	"ignore_dhcp_option_list_request": types.BoolType,
+	"ignore_id":                       types.StringType,
+	"ignore_mac_addresses":            internaltypes.UnorderedListOfStringType,
+	"lease_scavenge_time":             types.Int64Type,
+	"logic_filter_rules":              types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkLogicFilterRulesAttrTypes}},
+	"ms_ad_user_data":                 types.ObjectType{AttrTypes: SharednetworkMsAdUserDataAttrTypes},
+	"name":                            types.StringType,
+	"network_view":                    types.StringType,
+	"networks":                        internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}}},
+	//"networks":                            types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}},
 	"nextserver":                          types.StringType,
 	"options":                             internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}}},
 	"pxe_lease_time":                      types.Int64Type,
@@ -185,9 +187,12 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If this field is set to True, the DHCP server generates a hostname and updates DNS with it when the DHCP client request does not contain a hostname.",
 	},
 	"ddns_server_always_updates": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("ddns_use_option81")),
+		},
 		MarkdownDescription: "This field controls whether only the DHCP server is allowed to update DNS, regardless of the DHCP clients requests. Note that changes for this field take effect only if ddns_use_option81 is True.",
 	},
 	"ddns_ttl": schema.Int64Attribute{
@@ -345,6 +350,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the network view in which this shared network resides.",
 	},
 	"networks": schema.ListNestedAttribute{
+		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: SharednetworkNetworksResourceSchemaAttributes,
 		},
@@ -506,16 +512,23 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandSharednetwork(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dhcp.Sharednetwork {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
+func (m SharednetworkModel) ValidateConfig(ctx context.Context) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if !m.DdnsServerAlwaysUpdates.IsNull() && !m.DdnsServerAlwaysUpdates.IsUnknown() {
+		if m.DdnsServerAlwaysUpdates.ValueBool() {
+			// Check if ddns_use_option81 is set to true
+			if m.DdnsUseOption81.IsNull() || m.DdnsUseOption81.IsUnknown() || !m.DdnsUseOption81.ValueBool() {
+				diags.AddAttributeError(
+					path.Root("ddns_server_always_updates"),
+					"Invalid Configuration",
+					"When ddns_server_always_updates is enabled, ddns_use_option81 must be set to true",
+				)
+			}
+		}
 	}
-	var m SharednetworkModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags, true)
+
+	return diags
 }
 
 func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Sharednetwork {
@@ -623,7 +636,7 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.MsAdUserData = FlattenSharednetworkMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	m.Networks = flex.FlattenFrameworkListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
+	m.Networks = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
 	m.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)

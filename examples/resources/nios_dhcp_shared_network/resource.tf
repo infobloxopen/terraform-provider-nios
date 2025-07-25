@@ -3,10 +3,10 @@ resource "nios_dhcp_sharednetwork" "shared_network_basic_fields" {
   name = "example_shared_network1"
   networks = [
     {
-      ref = "network/ZG5zLm5ldHdvcmskMTQuMTQuMS4wLzI0LzA:14.14.1.0/24/default"
+      ref = "network/ZG5zLm5ldHdvcmskMjEuMjEuMTQuMC8yNC8w:21.21.14.0/24/default"
     },
     {
-      ref = "network/ZG5zLm5ldHdvcmskMTUuMTQuMS4wLzI0LzA:15.14.1.0/24/default"
+      ref = "network/ZG5zLm5ldHdvcmskMjEuMjEuMTMuMC8yNC8w:21.21.13.0/24/default"
     }
   ]
   network_view = "default"
@@ -48,5 +48,8 @@ resource "nios_dhcp_sharednetwork" "shared_network_additional_fields" {
       type   = "Option"
     }
   ]
-  comment = "shared network with additional fields"
+  comment                    = "shared network with additional fields"
+  ddns_server_always_updates = true
+  ddns_use_option81          = true
+  use_ddns_use_option81      = true
 }

@@ -62,6 +62,17 @@ func (r *SharednetworkResource) Configure(ctx context.Context, req resource.Conf
 	r.client = client
 }
 
+func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data SharednetworkModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(data.ValidateConfig(ctx)...)
+}
+
 func (r *SharednetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data SharednetworkModel
