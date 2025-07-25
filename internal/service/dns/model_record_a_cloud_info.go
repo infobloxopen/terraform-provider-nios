@@ -38,7 +38,6 @@ var RecordACloudInfoAttrTypes = map[string]attr.Type{
 var RecordACloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes: RecordacloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
 		Computed:   true,
 	},
 	"delegated_scope": schema.StringAttribute{
