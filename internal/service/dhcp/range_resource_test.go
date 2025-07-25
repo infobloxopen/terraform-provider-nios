@@ -3484,14 +3484,6 @@ resource "nios_dhcp_range" "test_member" {
 `, startAddr, endAddr, memberHCL)
 }
 
-// func testAccRangeMsAdUserData(msAdUserData string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_dhcp_range" "test_ms_ad_user_data" {
-//     ms_ad_user_data = %q
-// }
-// `, msAdUserData)
-// }
-
 func testAccRangeMsOptions(msOptions string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_ms_options" {
@@ -3639,15 +3631,6 @@ resource "nios_dhcp_range" "test_relay_agent_filter_rules" {
 `, startAddr, endAddr, relayAgentFilterRulesHCL)
 }
 
-func testAccRangeRestartIfNeeded(startAddr, endAddr string, restartIfNeeded bool) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_range" "test_restart_if_needed" {
-	start_addr = %q
-	end_addr = %q
-    restart_if_needed = %t
-}
-`, startAddr, endAddr, restartIfNeeded)
-}
 
 func testAccRangeSamePortControlDiscoveryBlackout(startAddr, endAddr string, samePortControlDiscoveryBlackout bool) string {
 	return fmt.Sprintf(`
@@ -3691,16 +3674,6 @@ resource "nios_dhcp_range" "test_split_member" {
 `, startAddr, endAddr, splitMember)
 }
 
-func testAccRangeSplitScopeExclusionPercent(startAddr, endAddr string, splitScopeExclusionPercent int) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_range" "test_split_scope_exclusion_percent" {
-	start_addr = %q
-	end_addr = %q
-    split_scope_exclusion_percent = %d
-	
-}
-`, startAddr, endAddr, splitScopeExclusionPercent)
-}
 
 func testAccRangeStartAddr(startAddr, endAddr string) string {
 	return fmt.Sprintf(`
