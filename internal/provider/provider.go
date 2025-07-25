@@ -90,6 +90,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordAResource,
 		dns.NewRecordAaaaResource,
 		dns.NewRecordAliasResource,
+		dns.NewRecordSrvResource,
+		dns.NewRecordTxtResource,
 		dns.NewZoneForwardResource,
 		dns.NewRecordCnameResource,
 
@@ -106,6 +108,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordADataSource,
 		dns.NewRecordAaaaDataSource,
 		dns.NewRecordAliasDataSource,
+		dns.NewRecordSrvDataSource,
+		dns.NewRecordTxtDataSource,
 		dns.NewZoneForwardDataSource,
 		dns.NewRecordCnameDataSource,
 
