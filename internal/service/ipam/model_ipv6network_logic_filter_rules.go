@@ -3,9 +3,11 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -32,6 +34,9 @@ var Ipv6networkLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attr
 	"type": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The filter type. Valid values are: * MAC * NAC * Option",
+		Validators: []validator.String{
+			stringvalidator.OneOf("MAC", "NAC", "Option"),
+		},
 	},
 }
 
