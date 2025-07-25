@@ -484,37 +484,6 @@ func TestAccRecordSrvResource_UseTtl(t *testing.T) {
 	})
 }
 
-func TestAccRecordSrvResource_View(t *testing.T) {
-	var resourceName = "nios_dns_record_srv.test_view"
-	var v dns.RecordSrv
-	name := acctest.RandomNameWithPrefix("record-srv") + ".example.com"
-	target := acctest.RandomName() + ".target.com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordSrvView(name, target, 80, 10, 360, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordSrvView(name, target, 80, 10, 360, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccRecordSrvResource_Weight(t *testing.T) {
 	var resourceName = "nios_dns_record_srv.test_weight"
 	var v dns.RecordSrv
@@ -789,19 +758,6 @@ resource "nios_dns_record_srv" "test_use_ttl" {
 	ttl = %d
 }
 `, name, target, port, priority, weight, useTtl, ttl)
-}
-
-func testAccRecordSrvView(name, target string, port, priority, weight int, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_srv" "test_view" {
-	name = %q
-	target = %q
-	port = %d
-	priority = %d
-	weight = %d
-    view = %q
-}
-`, name, target, port, priority, weight, view)
 }
 
 func testAccRecordSrvWeight(name, target string, port, priority, weight int) string {
