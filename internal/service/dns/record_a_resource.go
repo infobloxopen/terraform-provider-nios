@@ -343,6 +343,11 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
 	// Initialize model and flatten initial response
 
 	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
+		return
+	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	data.ExtAttrs, diags = addInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
