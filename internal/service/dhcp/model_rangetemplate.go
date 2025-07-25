@@ -19,7 +19,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 )
@@ -348,6 +350,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("Allow", "Deny"),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_known_clients")),
 		},
 		MarkdownDescription: "Permission for known clients. If set to 'Deny' known clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
@@ -415,9 +418,10 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Microsoft DHCP options for this range.",
 	},
 	"ms_server": schema.SingleNestedAttribute{
-		Attributes: RangetemplateMsServerResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          RangetemplateMsServerResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The Microsoft server that will provide service for this range. server_association_type needs to be set to ‘MS_SERVER’ if you want the server specified here to serve the range. For searching by this field you should use a HTTP method that contains a body (POST or PUT) with MS DHCP server structure and the request should have option _method=GET.",
 	},
 	"nac_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -641,24 +645,11 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRangetemplate(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dhcp.Rangetemplate {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RangetemplateModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *RangetemplateModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Rangetemplate {
 	if m == nil {
 		return nil
 	}
 	to := &dhcp.Rangetemplate{
-		Ref:                            flex.ExpandStringPointer(m.Ref),
 		Bootfile:                       flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                     flex.ExpandStringPointer(m.Bootserver),
 		CloudApiCompatible:             flex.ExpandBoolPointer(m.CloudApiCompatible),

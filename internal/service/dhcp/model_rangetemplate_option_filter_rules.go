@@ -2,6 +2,8 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -31,8 +33,11 @@ var RangetemplateOptionFilterRulesResourceSchemaAttributes = map[string]schema.A
 		MarkdownDescription: "The name of the DHCP filter.",
 	},
 	"permission": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("Allow", "Deny"),
+		},
 		MarkdownDescription: "The permission to be applied.",
 	},
 }

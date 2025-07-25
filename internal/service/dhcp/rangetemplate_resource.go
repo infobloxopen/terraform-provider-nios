@@ -37,7 +37,7 @@ func (r *RangetemplateResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *RangetemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DHCP Range Template record.",
 		Attributes:          RangetemplateResourceSchemaAttributes,
 	}
 }
