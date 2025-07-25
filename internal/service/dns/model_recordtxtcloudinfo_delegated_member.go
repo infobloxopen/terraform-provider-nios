@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -41,27 +39,11 @@ var RecordtxtcloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schem
 	},
 }
 
-func ExpandRecordtxtcloudinfoDelegatedMember(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordtxtcloudinfoDelegatedMember {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RecordtxtcloudinfoDelegatedMemberModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *RecordtxtcloudinfoDelegatedMemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordtxtcloudinfoDelegatedMember {
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordtxtcloudinfoDelegatedMember{
-		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
-		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
-		Name:     flex.ExpandStringPointer(m.Name),
-	}
+	to := &dns.RecordtxtcloudinfoDelegatedMember{}
 	return to
 }
 
