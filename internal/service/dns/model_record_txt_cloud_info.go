@@ -8,12 +8,13 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type RecordACloudInfoModel struct {
+type RecordTxtCloudInfoModel struct {
 	DelegatedMember types.Object `tfsdk:"delegated_member"`
 	DelegatedScope  types.String `tfsdk:"delegated_scope"`
 	DelegatedRoot   types.String `tfsdk:"delegated_root"`
@@ -24,8 +25,8 @@ type RecordACloudInfoModel struct {
 	AuthorityType   types.String `tfsdk:"authority_type"`
 }
 
-var RecordACloudInfoAttrTypes = map[string]attr.Type{
-	"delegated_member": types.ObjectType{AttrTypes: RecordacloudinfoDelegatedMemberAttrTypes},
+var RecordTxtCloudInfoAttrTypes = map[string]attr.Type{
+	"delegated_member": types.ObjectType{AttrTypes: RecordtxtcloudinfoDelegatedMemberAttrTypes},
 	"delegated_scope":  types.StringType,
 	"delegated_root":   types.StringType,
 	"owned_by_adaptor": types.BoolType,
@@ -35,10 +36,11 @@ var RecordACloudInfoAttrTypes = map[string]attr.Type{
 	"authority_type":   types.StringType,
 }
 
-var RecordACloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
+var RecordTxtCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes: RecordacloudinfoDelegatedMemberResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          RecordtxtcloudinfoDelegatedMemberResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The Cloud Platform Appliance to which authority of the object is delegated.",
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,
@@ -70,11 +72,11 @@ var RecordACloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRecordACloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordACloudInfo {
+func ExpandRecordTxtCloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordTxtCloudInfo {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m RecordACloudInfoModel
+	var m RecordTxtCloudInfoModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -82,33 +84,33 @@ func ExpandRecordACloudInfo(ctx context.Context, o types.Object, diags *diag.Dia
 	return m.Expand(ctx, diags)
 }
 
-func (m *RecordACloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordACloudInfo {
+func (m *RecordTxtCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordTxtCloudInfo {
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordACloudInfo{}
+	to := &dns.RecordTxtCloudInfo{}
 	return to
 }
 
-func FlattenRecordACloudInfo(ctx context.Context, from *dns.RecordACloudInfo, diags *diag.Diagnostics) types.Object {
+func FlattenRecordTxtCloudInfo(ctx context.Context, from *dns.RecordTxtCloudInfo, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(RecordACloudInfoAttrTypes)
+		return types.ObjectNull(RecordTxtCloudInfoAttrTypes)
 	}
-	m := RecordACloudInfoModel{}
+	m := RecordTxtCloudInfoModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, RecordACloudInfoAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, RecordTxtCloudInfoAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *RecordACloudInfoModel) Flatten(ctx context.Context, from *dns.RecordACloudInfo, diags *diag.Diagnostics) {
+func (m *RecordTxtCloudInfoModel) Flatten(ctx context.Context, from *dns.RecordTxtCloudInfo, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = RecordACloudInfoModel{}
+		*m = RecordTxtCloudInfoModel{}
 	}
-	m.DelegatedMember = FlattenRecordacloudinfoDelegatedMember(ctx, from.DelegatedMember, diags)
+	m.DelegatedMember = FlattenRecordtxtcloudinfoDelegatedMember(ctx, from.DelegatedMember, diags)
 	m.DelegatedScope = flex.FlattenStringPointer(from.DelegatedScope)
 	m.DelegatedRoot = flex.FlattenStringPointer(from.DelegatedRoot)
 	m.OwnedByAdaptor = types.BoolPointerValue(from.OwnedByAdaptor)
