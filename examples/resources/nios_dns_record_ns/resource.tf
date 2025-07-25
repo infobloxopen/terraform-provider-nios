@@ -9,7 +9,7 @@ resource "nios_dns_record_ns" "record1" {
   view = "default"
 }
 
-// Create Record NS with auto_create_ptr set to true
+// Create Record NS with PTR Record creation enabled
 resource "nios_dns_record_ns" "record2" {
   name       = "example.com"
   nameserver = "nsrec2.example.com"

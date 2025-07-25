@@ -57,11 +57,7 @@ func (m *RecordnscloudinfoDelegatedMemberModel) Expand(ctx context.Context, diag
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordnscloudinfoDelegatedMember{
-		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
-		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
-		Name:     flex.ExpandStringPointer(m.Name),
-	}
+	to := &dns.RecordnscloudinfoDelegatedMember{}
 	return to
 }
 
