@@ -1674,14 +1674,6 @@ resource "nios_ipam_ipv6network" "test" {
 `, network)
 }
 
-func testAccIpv6networkAutoCreateReversezone(autoCreateReversezone string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network" "test_auto_create_reversezone" {
-    auto_create_reversezone = %q
-}
-`, autoCreateReversezone)
-}
-
 func testAccIpv6networkCloudInfo(network string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_cloud_info" {
