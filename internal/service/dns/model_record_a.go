@@ -94,8 +94,15 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
@@ -114,6 +121,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"ddns_principal": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The GSS-TSIG principal that owns this record.",
 	},
 	"ddns_protected": schema.BoolAttribute{
@@ -163,6 +171,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The IPv4 Address of the record.",
 	},
 	"last_queried": schema.Int64Attribute{
@@ -214,6 +223,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"view": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "View that this record is part of.",
 	},
 	"zone": schema.StringAttribute{

@@ -91,8 +91,15 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A resource in the pool is available if ANY, at least QUORUM, or ALL monitors for the pool say that it is up.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The comment for the DTC Pool; maximum 256 characters.",
 	},
 	"consolidated_monitors": schema.ListNestedAttribute{
@@ -138,6 +145,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	"lb_alternate_topology": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The alternate topology for load balancing.",
 	},
 	"lb_dynamic_ratio_alternate": schema.SingleNestedAttribute{
@@ -162,6 +170,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	"lb_preferred_topology": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The preferred topology for load balancing.",
 	},
 	"monitors": schema.ListAttribute{

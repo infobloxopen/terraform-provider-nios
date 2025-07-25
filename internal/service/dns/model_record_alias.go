@@ -80,6 +80,7 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creator": schema.StringAttribute{
@@ -156,6 +157,7 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 	"view": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "View that this record is part of.",
 	},
 	"zone": schema.StringAttribute{

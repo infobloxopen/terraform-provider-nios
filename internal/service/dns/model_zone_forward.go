@@ -94,8 +94,15 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The IP address of the server that is serving this zone.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the zone; maximum 256 characters.",
 	},
 	"disable": schema.BoolAttribute{
@@ -143,6 +150,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneForwardForwardToResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.ConflictsWith(path.MatchRoot("external_ns_group")),
 		},
@@ -228,6 +236,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 				"prefix should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.",
 	},
 	"using_srg_associations": schema.BoolAttribute{
