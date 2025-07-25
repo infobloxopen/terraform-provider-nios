@@ -5,12 +5,14 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -140,6 +142,10 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
+		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -159,6 +165,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 	},
 	"ipv4addr": schema.StringAttribute{
+		//CustomType:          iptypes.IPv4AddressType{},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the record.",

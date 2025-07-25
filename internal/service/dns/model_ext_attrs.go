@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-uuid"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/go-uuid"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -37,6 +38,9 @@ func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnost
 func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[string]dns.ExtAttrs, diags *diag.Diagnostics) types.Map {
 	result := make(map[string]attr.Value)
 	planExtAttrsMap := planExtAttrs.Elements()
+	if extattrs == nil || len(*extattrs) == 0 {
+		return types.MapNull(types.StringType)
+	}
 
 	for key, extAttr := range *extattrs {
 		if extAttr.Value == nil {
@@ -76,15 +80,16 @@ func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[
 
 func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dns.ExtAttrs) (*map[string]dns.ExtAttrs, types.Map, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	extAttrsRespMap := make(map[string]dns.ExtAttrs, len(respExtAttrs))
+	extAttrsRespMap := make(map[string]dns.ExtAttrs, len(planExtAttrs.Elements()))
 	extAttrsAllRespMap := make(map[string]dns.ExtAttrs)
-	extAttrAll := FlattenExtAttrs(ctx, planExtAttrs, &respExtAttrs, &diags)
+	var extAttrAll types.Map
 
 	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
 		if v, ok := respExtAttrs["Terraform Internal ID"]; ok {
 			extAttrsAllRespMap["Terraform Internal ID"] = v
 		}
-		return &extAttrsRespMap, extAttrAll, nil
+		extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &extAttrsAllRespMap, &diags)
+		return nil, extAttrAll, nil
 	}
 
 	planMap := *ExpandExtAttr(ctx, planExtAttrs, &diags)
