@@ -17,7 +17,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type NetworkcontainerDiscoveryBasicPollSettingsModel struct {
+type Ipv6networkDiscoveryBasicPollSettingsModel struct {
 	PortScanning                            types.Bool   `tfsdk:"port_scanning"`
 	DeviceProfile                           types.Bool   `tfsdk:"device_profile"`
 	SnmpCollection                          types.Bool   `tfsdk:"snmp_collection"`
@@ -34,7 +34,7 @@ type NetworkcontainerDiscoveryBasicPollSettingsModel struct {
 	UseGlobalPollingFrequencyModifier       types.Bool   `tfsdk:"use_global_polling_frequency_modifier"`
 }
 
-var NetworkcontainerDiscoveryBasicPollSettingsAttrTypes = map[string]attr.Type{
+var Ipv6networkDiscoveryBasicPollSettingsAttrTypes = map[string]attr.Type{
 	"port_scanning":                                types.BoolType,
 	"device_profile":                               types.BoolType,
 	"snmp_collection":                              types.BoolType,
@@ -44,14 +44,14 @@ var NetworkcontainerDiscoveryBasicPollSettingsAttrTypes = map[string]attr.Type{
 	"smart_subnet_ping_sweep":                      types.BoolType,
 	"auto_arp_refresh_before_switch_port_polling":  types.BoolType,
 	"switch_port_data_collection_polling":          types.StringType,
-	"switch_port_data_collection_polling_schedule": types.ObjectType{AttrTypes: NetworkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleAttrTypes},
+	"switch_port_data_collection_polling_schedule": types.ObjectType{AttrTypes: Ipv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleAttrTypes},
 	"switch_port_data_collection_polling_interval": types.Int64Type,
 	"credential_group":                             types.StringType,
 	"polling_frequency_modifier":                   types.StringType,
 	"use_global_polling_frequency_modifier":        types.BoolType,
 }
 
-var NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map[string]schema.Attribute{
+var Ipv6networkDiscoveryBasicPollSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"port_scanning": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether port scanning is enabled or not.",
@@ -98,7 +98,7 @@ var NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map[str
 		Optional:            true,
 		MarkdownDescription: "Determines whether auto ARP refresh before switch port polling is enabled or not.",
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(true),
 	},
 	"switch_port_data_collection_polling": schema.StringAttribute{
 		Optional:            true,
@@ -107,7 +107,7 @@ var NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map[str
 		Default:             stringdefault.StaticString("PERIODIC"),
 	},
 	"switch_port_data_collection_polling_schedule": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
+		Attributes: Ipv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
 		Optional:   true,
 	},
 	"switch_port_data_collection_polling_interval": schema.Int64Attribute{
@@ -136,11 +136,11 @@ var NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map[str
 	},
 }
 
-func ExpandNetworkcontainerDiscoveryBasicPollSettings(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.NetworkcontainerDiscoveryBasicPollSettings {
+func ExpandIpv6networkDiscoveryBasicPollSettings(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.Ipv6networkDiscoveryBasicPollSettings {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m NetworkcontainerDiscoveryBasicPollSettingsModel
+	var m Ipv6networkDiscoveryBasicPollSettingsModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -148,11 +148,11 @@ func ExpandNetworkcontainerDiscoveryBasicPollSettings(ctx context.Context, o typ
 	return m.Expand(ctx, diags)
 }
 
-func (m *NetworkcontainerDiscoveryBasicPollSettingsModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.NetworkcontainerDiscoveryBasicPollSettings {
+func (m *Ipv6networkDiscoveryBasicPollSettingsModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Ipv6networkDiscoveryBasicPollSettings {
 	if m == nil {
 		return nil
 	}
-	to := &ipam.NetworkcontainerDiscoveryBasicPollSettings{
+	to := &ipam.Ipv6networkDiscoveryBasicPollSettings{
 		PortScanning:                            flex.ExpandBoolPointer(m.PortScanning),
 		DeviceProfile:                           flex.ExpandBoolPointer(m.DeviceProfile),
 		SnmpCollection:                          flex.ExpandBoolPointer(m.SnmpCollection),
@@ -162,7 +162,7 @@ func (m *NetworkcontainerDiscoveryBasicPollSettingsModel) Expand(ctx context.Con
 		SmartSubnetPingSweep:                    flex.ExpandBoolPointer(m.SmartSubnetPingSweep),
 		AutoArpRefreshBeforeSwitchPortPolling:   flex.ExpandBoolPointer(m.AutoArpRefreshBeforeSwitchPortPolling),
 		SwitchPortDataCollectionPolling:         flex.ExpandStringPointer(m.SwitchPortDataCollectionPolling),
-		SwitchPortDataCollectionPollingSchedule: ExpandNetworkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSchedule(ctx, m.SwitchPortDataCollectionPollingSchedule, diags),
+		SwitchPortDataCollectionPollingSchedule: ExpandIpv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSchedule(ctx, m.SwitchPortDataCollectionPollingSchedule, diags),
 		SwitchPortDataCollectionPollingInterval: flex.ExpandInt64Pointer(m.SwitchPortDataCollectionPollingInterval),
 		CredentialGroup:                         flex.ExpandStringPointer(m.CredentialGroup),
 		PollingFrequencyModifier:                flex.ExpandStringPointer(m.PollingFrequencyModifier),
@@ -171,23 +171,23 @@ func (m *NetworkcontainerDiscoveryBasicPollSettingsModel) Expand(ctx context.Con
 	return to
 }
 
-func FlattenNetworkcontainerDiscoveryBasicPollSettings(ctx context.Context, from *ipam.NetworkcontainerDiscoveryBasicPollSettings, diags *diag.Diagnostics) types.Object {
+func FlattenIpv6networkDiscoveryBasicPollSettings(ctx context.Context, from *ipam.Ipv6networkDiscoveryBasicPollSettings, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(NetworkcontainerDiscoveryBasicPollSettingsAttrTypes)
+		return types.ObjectNull(Ipv6networkDiscoveryBasicPollSettingsAttrTypes)
 	}
-	m := NetworkcontainerDiscoveryBasicPollSettingsModel{}
+	m := Ipv6networkDiscoveryBasicPollSettingsModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, NetworkcontainerDiscoveryBasicPollSettingsAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, Ipv6networkDiscoveryBasicPollSettingsAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *NetworkcontainerDiscoveryBasicPollSettingsModel) Flatten(ctx context.Context, from *ipam.NetworkcontainerDiscoveryBasicPollSettings, diags *diag.Diagnostics) {
+func (m *Ipv6networkDiscoveryBasicPollSettingsModel) Flatten(ctx context.Context, from *ipam.Ipv6networkDiscoveryBasicPollSettings, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = NetworkcontainerDiscoveryBasicPollSettingsModel{}
+		*m = Ipv6networkDiscoveryBasicPollSettingsModel{}
 	}
 	m.PortScanning = types.BoolPointerValue(from.PortScanning)
 	m.DeviceProfile = types.BoolPointerValue(from.DeviceProfile)
@@ -198,7 +198,7 @@ func (m *NetworkcontainerDiscoveryBasicPollSettingsModel) Flatten(ctx context.Co
 	m.SmartSubnetPingSweep = types.BoolPointerValue(from.SmartSubnetPingSweep)
 	m.AutoArpRefreshBeforeSwitchPortPolling = types.BoolPointerValue(from.AutoArpRefreshBeforeSwitchPortPolling)
 	m.SwitchPortDataCollectionPolling = flex.FlattenStringPointer(from.SwitchPortDataCollectionPolling)
-	m.SwitchPortDataCollectionPollingSchedule = FlattenNetworkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSchedule(ctx, from.SwitchPortDataCollectionPollingSchedule, diags)
+	m.SwitchPortDataCollectionPollingSchedule = FlattenIpv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSchedule(ctx, from.SwitchPortDataCollectionPollingSchedule, diags)
 	m.SwitchPortDataCollectionPollingInterval = flex.FlattenInt64Pointer(from.SwitchPortDataCollectionPollingInterval)
 	m.CredentialGroup = flex.FlattenStringPointer(from.CredentialGroup)
 	m.PollingFrequencyModifier = flex.FlattenStringPointer(from.PollingFrequencyModifier)
