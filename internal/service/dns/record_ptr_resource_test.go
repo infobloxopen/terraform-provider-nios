@@ -312,10 +312,10 @@ func TestAccRecordPtrResource_Ipv4addr(t *testing.T) {
 	})
 }
 
-// TestAccRecordPtrResource_FuncCall tests the "func_call" attribute functionality
+// TestAccRecordPtrResource_FuncCallIpv4Addr tests the "func_call" attribute functionality
 // which allocates IP addresses using next_available_ip. Since func_call attribute can't be
 // updated, the comment is updated to demonstrate an update to the resource
-func TestAccRecordPtrResource_FuncCall(t *testing.T) {
+func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_func_call"
 	var v dns.RecordPtr
 
@@ -325,7 +325,7 @@ func TestAccRecordPtrResource_FuncCall(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrFuncCall("192.168.10.0/24", "ptr.example.com", "default", "Created with func_call"),
+				Config: testAccRecordPtrFuncCallIpv4Addr("192.168.10.0/24", "ptr.example.com", "default", "Created with func_call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "192.168.10.1"),
@@ -336,7 +336,7 @@ func TestAccRecordPtrResource_FuncCall(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrFuncCall("192.168.10.0/24", "ptr2.example.com", "default", "Updated with func_call"),
+				Config: testAccRecordPtrFuncCallIpv4Addr("192.168.10.0/24", "ptr2.example.com", "default", "Updated with func_call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "192.168.10.1"),
@@ -661,7 +661,7 @@ resource "nios_dns_record_ptr" "test_ipv4addr" {
 `, ipv4addr, Ptrdname, View)
 }
 
-func testAccRecordPtrFuncCall(network, ptrdname, view, comment string) string {
+func testAccRecordPtrFuncCallIpv4Addr(network, ptrdname, view, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_record_ptr" "test_func_call" {
 	func_call = {

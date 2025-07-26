@@ -14,7 +14,7 @@ resource "nios_dns_record_ptr" "create_ipv6_record" {
   ipv6addr = "2001::123"
   view     = "default"
   extattrs = {
-    Site = "Siteblr"
+    Site = "location-2"
   }
 }
 
@@ -24,7 +24,7 @@ resource "nios_dns_record_ptr" "create_ptr_record" {
   name     = "22.0.0.11.in-addr.arpa"
   view     = "default"
   extattrs = {
-    Site = "location-1"
+    Site = "location-3"
   }
 }
 
@@ -42,7 +42,7 @@ resource "nios_dns_record_ptr" "create_ptr_record" {
 
   // Extensible Attributes
   extattrs = {
-    Site = "location-2"
+    Site = "location-4"
   }
 }
 

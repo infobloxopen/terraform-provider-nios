@@ -175,7 +175,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
+			stringvalidator.ExactlyOneOf(
 				path.MatchRoot("ipv6addr"),
 				path.MatchRoot("name"),
 				path.MatchRoot("func_call"),
