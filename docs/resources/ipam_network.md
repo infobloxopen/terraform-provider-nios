@@ -23,6 +23,7 @@ resource "nios_ipam_network" "example_network" {
   }
 }
 
+// Create an IPAM Network with Additional Fields
 resource "nios_ipam_network" "complete_example" {
   // Required attributes
   network = "11.0.0.0/24"
@@ -68,7 +69,7 @@ resource "nios_ipam_network" "complete_example" {
   }
 }
 
-
+// Create an IPAM Network with Function Call
 resource "nios_ipam_network" "example_func_call" {
   func_call = {
     attribute_name  = "network"
