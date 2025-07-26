@@ -2,11 +2,14 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	//"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -58,16 +61,31 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 	"tsig_key": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},	
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("HMAC-MD5","HMAC-SHA256"),
+		},
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{

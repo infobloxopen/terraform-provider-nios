@@ -26,7 +26,7 @@ var ViewSortlistAttrTypes = map[string]attr.Type{
 
 var ViewSortlistResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The source address of a sortlist object.",
 	},
 	"match_list": schema.ListAttribute{
