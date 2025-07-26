@@ -38,7 +38,6 @@ var RecordCnameCloudInfoAttrTypes = map[string]attr.Type{
 var RecordCnameCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes:          RecordcnamecloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The Cloud Platform Appliance to which authority of the object is delegated.",
 	},
@@ -88,9 +87,7 @@ func (m *RecordCnameCloudInfoModel) Expand(ctx context.Context, diags *diag.Diag
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordCnameCloudInfo{
-		DelegatedMember: ExpandRecordcnamecloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
-	}
+	to := &dns.RecordCnameCloudInfo{}
 	return to
 }
 
