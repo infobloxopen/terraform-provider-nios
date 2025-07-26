@@ -226,7 +226,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(true),
 		Validators: []validator.Bool{
 			boolvalidator.AlsoRequires(path.MatchRoot("ddns_enable_option_fqdn")),
-			// boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_enable_option_fqdn")),
 		},
 	},
 	"ddns_ttl": schema.Int64Attribute{
@@ -245,8 +244,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this network container.",
-		// Default:             stringdefault.StaticString("NONE"),
-
 	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes,
@@ -268,7 +265,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network discovery engine type.",
-		// Default:             stringdefault.StaticString("NONE"),
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,

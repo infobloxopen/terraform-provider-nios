@@ -1,4 +1,4 @@
-// Create IPV6 Network with Basic Fields
+// Create IPV6 Network Container with Basic Fields
 resource "nios_ipam_ipv6network_container" "example_container" {
   network      = "10::/64"
   network_view = "default"
@@ -10,6 +10,7 @@ resource "nios_ipam_ipv6network_container" "example_container" {
   }
 }
 
+// Create IPV6 Network Container with Additional Fields
 resource "nios_ipam_ipv6network_container" "complete_example" {
   // Required attributes
   network = "11::/64"
@@ -31,11 +32,12 @@ resource "nios_ipam_ipv6network_container" "complete_example" {
 
   // Extensible attributes
   extattrs = {
-    "Site" = "DataCenter1"
+    "Site" = "location-1"
   }
 }
 
 
+// Create IPV6 Network Container with Function Call
 resource "nios_ipam_ipv6network_container" "example_func_call" {
   func_call = {
     attribute_name  = "network"
