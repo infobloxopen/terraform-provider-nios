@@ -74,3 +74,4 @@ resource "nios_ipam_network_container" "example_func_call" {
     nios_ipam_network_container.example_container
   ]
 }
+

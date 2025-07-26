@@ -2423,29 +2423,6 @@ func TestAccNetworkcontainerResource_UseRecycleLeases(t *testing.T) {
 	})
 }
 
-func TestAccNetworkcontainerResource_UseSubscribeSettings(t *testing.T) {
-	var resourceName = "nios_ipam_network_container.test_use_subscribe_settings"
-	var v ipam.Networkcontainer
-	network := acctest.RandomCIDRNetwork()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNetworkcontainerUseSubscribeSettings(network, "false"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccNetworkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_network_container.test_use_update_dns_on_lease_renewal"
 	var v ipam.Networkcontainer
@@ -3275,15 +3252,6 @@ resource "nios_ipam_network_container" "test_use_recycle_leases" {
     use_recycle_leases = %q
 }
 `, network, useRecycleLeases)
-}
-
-func testAccNetworkcontainerUseSubscribeSettings(network, useSubscribeSettings string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network_container" "test_use_subscribe_settings" {
-    network = %q
-    use_subscribe_settings = %q
-}
-`, network, useSubscribeSettings)
 }
 
 func testAccNetworkcontainerUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {

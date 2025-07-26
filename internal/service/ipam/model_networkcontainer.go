@@ -271,7 +271,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkcontainerCloudInfoResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
@@ -897,6 +896,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: subscribe_settings",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("subscribe_settings")),
+		},
 	},
 	"use_update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,
@@ -1048,6 +1050,8 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	if m == nil {
 		*m = NetworkcontainerModel{}
 	}
+	from.Options = RemoveDefaultDHCPOptionsNetwork(ctx, diags, from.Options, m.Options)
+
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
@@ -1071,7 +1075,6 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.EnableDhcpThresholds = types.BoolPointerValue(from.EnableDhcpThresholds)
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
@@ -1111,7 +1114,6 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
-	m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)
 	m.SubscribeSettings = FlattenNetworkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)
 	m.Unmanaged = types.BoolPointerValue(from.Unmanaged)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)
@@ -1165,4 +1167,31 @@ func FlattenNetworkcontainerNetwork(from *ipam.NetworkcontainerNetwork) types.St
 	}
 	m := flex.FlattenStringPointer(from.String)
 	return m
+}
+
+func RemoveDefaultDHCPOptionsNetwork(ctx context.Context, diags *diag.Diagnostics, options []ipam.NetworkcontainerOptions, planOptions types.List) []ipam.NetworkcontainerOptions {
+	defaultOptionName := "dhcp-lease-time"
+	defaultOptionVal := ""
+
+	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandNetworkcontainerOptions)
+
+	for i := range planOptionsArr {
+		if *planOptionsArr[i].Name == defaultOptionName {
+			defaultOptionVal = *planOptionsArr[i].Value
+		}
+	}
+	var result []ipam.NetworkcontainerOptions
+
+	for i := range options {
+		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
+			continue
+		}
+		result = append(result, options[i])
+	}
+
+	if len(result) == 0 {
+		return options
+	}
+
+	return result
 }
