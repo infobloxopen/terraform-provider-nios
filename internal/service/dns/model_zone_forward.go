@@ -156,6 +156,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneForwardForwardToResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.ConflictsWith(path.MatchRoot("external_ns_group")),
 		},
