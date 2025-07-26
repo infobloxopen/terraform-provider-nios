@@ -24,88 +24,10 @@ resource "nios_dns_view" "create_with_additional_fields" {
   comment      = "DNS View"
   network_view = "default"
 
-  //Blacklist settings
-  use_blacklist                = true
-  blacklist_action             = "REDIRECT"
-  blacklist_log_query          = true
-  blacklist_redirect_addresses = ["10.2.3.2", "10.23.2.2"]
-  blacklist_redirect_ttl       = 34
-  blacklist_rulesets           = ["ruleset1", "ruleset2"]
-  enable_blacklist             = true
-
-  //root name server settings
-  root_name_server_type = "CUSTOM"
-  custom_root_name_servers = [
-    {
-      address = "10.0.0.2"
-      name    = "external-server-1"
-    }
-  ]
-  use_root_name_server = true
-
-  //DDNS settings
-  ddns_force_creation_timestamp_update     = true
-  use_ddns_force_creation_timestamp_update = true
-  ddns_principal_group                     = "dynamic_update_grp_1"
-  use_ddns_principal_security              = true
-  ddns_restrict_patterns                   = true
-  use_ddns_patterns_restriction            = true
-  ddns_restrict_patterns_list              = ["pattern2.example.com", "pattern3.example.com"]
-  ddns_restrict_protected                  = true
-  use_ddns_restrict_protected              = true
-  ddns_restrict_secure                     = true
-  ddns_restrict_static                     = true
-  use_ddns_restrict_static                 = true
-
-  //DNS64 settings
-  dns64_enabled = true
-  use_dns64     = true
-  dns64_groups  = ["dns64_group"]
-
-  //DNSSEC settings
-  dnssec_enabled                    = true
-  use_dnssec                        = true
-  dnssec_expired_signatures_enabled = false
-  dnssec_negative_trust_anchors     = ["examplezone2.com", "examplezone3.com"]
-  dnssec_trusted_keys = [
-    {
-      algorithm             = "14"
-      dnssec_must_be_secure = true
-      fqdn                  = "test2.com"
-      key                   = "dsfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfd"
-      secure_entry_point    = true
-    }
-  ]
-  dnssec_validation_enabled = true
-
-  //udp size configuration
-  edns_udp_size     = 1234
-  use_edns_udp_size = true
-  max_udp_size      = 1233
-  use_max_udp_size  = true
-
-  //filter AAAA 
-  filter_aaaa     = "BREAK_DNSSEC"
-  use_filter_aaaa = true
-  filter_aaaa_list = [
-    {
-      address    = "10.0.0.12"
-      permission = "ALLOW"
-    }
-  ]
-
   //forwarders settings 
   use_forwarders = true
   forwarders     = ["10.192.81.23"]
   forward_only   = true
-
-  //last queried ACL
-  last_queried_acl = [
-    {
-      address    = "10.0.0.23"
-      permission = "ALLOW"
-    }
-  ]
 
   //match client and destinations
   match_destinations = [
@@ -123,79 +45,10 @@ resource "nios_dns_view" "create_with_additional_fields" {
     },
   ]
 
-  //cache and ncache ttl settings 
-  max_cache_ttl      = 3454
-  use_max_cache_ttl  = true
-  max_ncache_ttl     = 3600
-  use_max_ncache_ttl = true
-
-  //notify delay settings 
-  notify_delay = 6
-
-  //NXDOMAIN redirect settings
-  nxdomain_log_query             = true
-  use_nxdomain_redirect          = true
-  nxdomain_redirect              = true
-  nxdomain_redirect_addresses    = ["12.0.0.0"]
-  nxdomain_redirect_addresses_v6 = ["2001:db8::1"]
-  nxdomain_redirect_ttl          = 23
-  nxdomain_rulesets              = ["nxdomain_ruleset"]
-
-  //recursion settings 
-  use_recursion = true
-  recursion     = true
-
-  //response rate limiting settings
-  use_response_rate_limiting = true
-  response_rate_limiting = {
-    enable_rrl           = true
-    log_only             = true
-    responses_per_second = 200
-    slip                 = 3
-    window               = 30
-  }
-
-  //Rpz settings
-  rpz_drop_ip_rule_enabled                = true
-  use_rpz_drop_ip_rule                    = true
-  rpz_drop_ip_rule_min_prefix_length_ipv4 = 24
-  rpz_drop_ip_rule_min_prefix_length_ipv6 = 48
-  rpz_qname_wait_recurse                  = true
-  use_rpz_qname_wait_recurse              = true
-
-  //scavenging settings
-  use_scavenging_settings = true
-  scavenging_settings = {
-    enable_scavenging = true
-    expression_list = [
-      {
-        op       = "AND",
-        op1_type = "LIST",
-      },
-      {
-        op       = "EQ",
-        op1      = "rtype",
-        op1_type = "FIELD",
-        op2      = "AAAA",
-        op2_type = "STRING",
-      },
-      {
-        op = "ENDLIST",
-      }
-    ]
-  }
-
-  //sortlist settings
-  sortlist = [
-    {
-      address = "10.0.0.0"
-    }
-  ]
-
+  //extensible attributes
   extattrs = {
     Site = "location-1"
   }
-
 }
 ```
 
@@ -298,10 +151,13 @@ resource "nios_dns_view" "create_with_additional_fields" {
 <a id="nestedatt--custom_root_name_servers"></a>
 ### Nested Schema for `custom_root_name_servers`
 
-Optional:
+Required:
 
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
+
+Optional:
+
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
@@ -316,39 +172,51 @@ Read-Only:
 <a id="nestedatt--dnssec_trusted_keys"></a>
 ### Nested Schema for `dnssec_trusted_keys`
 
-Optional:
+Required:
 
 - `algorithm` (String) The DNSSEC algorithm used to generate the key.
-- `dnssec_must_be_secure` (Boolean) Responses must be DNSSEC secure for this hierarchy/domain.
 - `fqdn` (String) The FQDN of the domain for which the member validates responses to recursive queries.
 - `key` (String) The DNSSEC key.
+
+Optional:
+
+- `dnssec_must_be_secure` (Boolean) Responses must be DNSSEC secure for this hierarchy/domain.
 - `secure_entry_point` (Boolean) The secure entry point flag, if set it means this is a KSK configuration.
 
 
 <a id="nestedatt--filter_aaaa_list"></a>
 ### Nested Schema for `filter_aaaa_list`
 
-Optional:
+Required:
 
 - `address` (String) The address this rule applies to or "Any".
+
+Optional:
+
 - `permission` (String) The permission to use for this address.
 
 
 <a id="nestedatt--fixed_rrset_order_fqdns"></a>
 ### Nested Schema for `fixed_rrset_order_fqdns`
 
-Optional:
+Required:
 
 - `fqdn` (String) The FQDN of the fixed RRset configuration item.
+
+Optional:
+
 - `record_type` (String) The record type for the specified FQDN in the fixed RRset configuration.
 
 
 <a id="nestedatt--last_queried_acl"></a>
 ### Nested Schema for `last_queried_acl`
 
-Optional:
+Required:
 
 - `address` (String) The address this rule applies to or "Any".
+
+Optional:
+
 - `permission` (String) The permission to use for this address.
 
 
@@ -405,7 +273,7 @@ Optional:
 - `enable_zone_last_queried` (Boolean) This flag indicates if the last queried monitoring for affected zones is enabled or not.
 - `expression_list` (Attributes List) The expression list. The particular record is treated as reclaimable if expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. (see [below for nested schema](#nestedatt--scavenging_settings--expression_list))
 - `reclaim_associated_records` (Boolean) This flag indicates if the associated resource record scavenging is enabled or not.
-- `scavenging_schedule` (Attributes) (see [below for nested schema](#nestedatt--scavenging_settings--scavenging_schedule))
+- `scavenging_schedule` (Attributes) The scavenging schedule. The scavenging schedule is used to determine when the scavenging should be performed. If not specified, the default scavenging schedule is used. (see [below for nested schema](#nestedatt--scavenging_settings--scavenging_schedule))
 
 <a id="nestedatt--scavenging_settings--ea_expression_list"></a>
 ### Nested Schema for `scavenging_settings.ea_expression_list`
@@ -460,22 +328,22 @@ Read-Only:
 <a id="nestedatt--sortlist"></a>
 ### Nested Schema for `sortlist`
 
-Optional:
+Required:
 
 - `address` (String) The source address of a sortlist object.
+
+Optional:
+
 - `match_list` (List of String) The match list of a sortlist.
 
 
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`
 
-Optional:
-
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
-
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
+- `delegated_member` (Attributes) Information about the delegated member. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.
@@ -486,7 +354,7 @@ Read-Only:
 <a id="nestedatt--cloud_info--delegated_member"></a>
 ### Nested Schema for `cloud_info.delegated_member`
 
-Optional:
+Read-Only:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.
