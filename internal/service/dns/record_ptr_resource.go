@@ -71,17 +71,19 @@ func (r *RecordPtrResource) ValidateConfig(ctx context.Context, req resource.Val
 	var funccall types.Object
 	req.Config.GetAttribute(ctx, path.Root("func_call"), &funccall)
 
-	if funccall.IsNull() && funccall.IsUnknown() {
+	if funccall.IsNull() {
 		return
 	}
 
-	if attrName, ok := funccall.Attributes()["attribute_name"]; ok || attrName.IsNull() || attrName.IsUnknown() {
-		if attrName == types.StringValue("ipv6addr") {
-			resp.Diagnostics.AddError(
-				"Invalid Function Call Attribute",
-				"Support for Ipv6 address in function call is not implemented yet.",
-			)
-			return
+	if !funccall.IsUnknown() {
+		if attrName, ok := funccall.Attributes()["attribute_name"]; ok || attrName.IsNull() || attrName.IsUnknown() {
+			if attrName == types.StringValue("ipv6addr") {
+				resp.Diagnostics.AddError(
+					"Invalid Function Call Attribute",
+					"Support for Ipv6 address in function call is not implemented yet.",
+				)
+				return
+			}
 		}
 	}
 }
