@@ -173,8 +173,14 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The bootserver address for the shared network. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Comment should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the shared network, maximum 256 characters.",
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
@@ -300,6 +306,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString("NONE"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("CLIENT", "MACADDR", "NONE"),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ignore_id")),
 		},
 		MarkdownDescription: "Indicates whether the appliance will ignore DHCP client IDs or MAC addresses. Valid values are \"NONE\", \"CLIENT\", or \"MACADDR\". The default is \"NONE\".",
 	},
@@ -324,15 +331,15 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: SharednetworkLogicFilterRulesResourceSchemaAttributes,
 		},
 		Optional: true,
-		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
 		},
 		MarkdownDescription: "This field contains the logic filters to be applied on the this shared network. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: SharednetworkMsAdUserDataResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          SharednetworkMsAdUserDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -345,8 +352,14 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the IPv6 Shared Network.",
 	},
 	"network_view": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Comment should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The name of the network view in which this shared network resides.",
 	},
 	"networks": schema.ListNestedAttribute{
@@ -512,54 +525,33 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m SharednetworkModel) ValidateConfig(ctx context.Context) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	if !m.DdnsServerAlwaysUpdates.IsNull() && !m.DdnsServerAlwaysUpdates.IsUnknown() {
-		if m.DdnsServerAlwaysUpdates.ValueBool() {
-			// Check if ddns_use_option81 is set to true
-			if m.DdnsUseOption81.IsNull() || m.DdnsUseOption81.IsUnknown() || !m.DdnsUseOption81.ValueBool() {
-				diags.AddAttributeError(
-					path.Root("ddns_server_always_updates"),
-					"Invalid Configuration",
-					"When ddns_server_always_updates is enabled, ddns_use_option81 must be set to true",
-				)
-			}
-		}
-	}
-
-	return diags
-}
-
 func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Sharednetwork {
 	if m == nil {
 		return nil
 	}
 	to := &dhcp.Sharednetwork{
-		Ref:                         flex.ExpandStringPointer(m.Ref),
-		Authority:                   flex.ExpandBoolPointer(m.Authority),
-		Bootfile:                    flex.ExpandStringPointer(m.Bootfile),
-		Bootserver:                  flex.ExpandStringPointer(m.Bootserver),
-		Comment:                     flex.ExpandStringPointer(m.Comment),
-		DdnsGenerateHostname:        flex.ExpandBoolPointer(m.DdnsGenerateHostname),
-		DdnsServerAlwaysUpdates:     flex.ExpandBoolPointer(m.DdnsServerAlwaysUpdates),
-		DdnsTtl:                     flex.ExpandInt64Pointer(m.DdnsTtl),
-		DdnsUpdateFixedAddresses:    flex.ExpandBoolPointer(m.DdnsUpdateFixedAddresses),
-		DdnsUseOption81:             flex.ExpandBoolPointer(m.DdnsUseOption81),
-		DenyBootp:                   flex.ExpandBoolPointer(m.DenyBootp),
-		Disable:                     flex.ExpandBoolPointer(m.Disable),
-		EnableDdns:                  flex.ExpandBoolPointer(m.EnableDdns),
-		EnablePxeLeaseTime:          flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
-		ExtAttrs:                    ExpandExtAttr(ctx, m.ExtAttrs, diags),
-		IgnoreClientIdentifier:      flex.ExpandBoolPointer(m.IgnoreClientIdentifier),
-		IgnoreDhcpOptionListRequest: flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
-		IgnoreId:                    flex.ExpandStringPointer(m.IgnoreId),
-		IgnoreMacAddresses:          flex.ExpandFrameworkListString(ctx, m.IgnoreMacAddresses, diags),
-		LeaseScavengeTime:           flex.ExpandInt64Pointer(m.LeaseScavengeTime),
-		LogicFilterRules:            flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandSharednetworkLogicFilterRules),
-		MsAdUserData:                ExpandSharednetworkMsAdUserData(ctx, m.MsAdUserData, diags),
-		Name:                        flex.ExpandStringPointer(m.Name),
-		//NetworkView:                 flex.ExpandStringPointer(m.NetworkView),
+		Authority:                      flex.ExpandBoolPointer(m.Authority),
+		Bootfile:                       flex.ExpandStringPointer(m.Bootfile),
+		Bootserver:                     flex.ExpandStringPointer(m.Bootserver),
+		Comment:                        flex.ExpandStringPointer(m.Comment),
+		DdnsGenerateHostname:           flex.ExpandBoolPointer(m.DdnsGenerateHostname),
+		DdnsServerAlwaysUpdates:        flex.ExpandBoolPointer(m.DdnsServerAlwaysUpdates),
+		DdnsTtl:                        flex.ExpandInt64Pointer(m.DdnsTtl),
+		DdnsUpdateFixedAddresses:       flex.ExpandBoolPointer(m.DdnsUpdateFixedAddresses),
+		DdnsUseOption81:                flex.ExpandBoolPointer(m.DdnsUseOption81),
+		DenyBootp:                      flex.ExpandBoolPointer(m.DenyBootp),
+		Disable:                        flex.ExpandBoolPointer(m.Disable),
+		EnableDdns:                     flex.ExpandBoolPointer(m.EnableDdns),
+		EnablePxeLeaseTime:             flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
+		ExtAttrs:                       ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		IgnoreClientIdentifier:         flex.ExpandBoolPointer(m.IgnoreClientIdentifier),
+		IgnoreDhcpOptionListRequest:    flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
+		IgnoreId:                       flex.ExpandStringPointer(m.IgnoreId),
+		IgnoreMacAddresses:             flex.ExpandFrameworkListString(ctx, m.IgnoreMacAddresses, diags),
+		LeaseScavengeTime:              flex.ExpandInt64Pointer(m.LeaseScavengeTime),
+		LogicFilterRules:               flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandSharednetworkLogicFilterRules),
+		MsAdUserData:                   ExpandSharednetworkMsAdUserData(ctx, m.MsAdUserData, diags),
+		Name:                           flex.ExpandStringPointer(m.Name),
 		Networks:                       flex.ExpandFrameworkListNestedBlock(ctx, m.Networks, diags, ExpandSharednetworkNetworks),
 		Nextserver:                     flex.ExpandStringPointer(m.Nextserver),
 		Options:                        flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandSharednetworkOptions),

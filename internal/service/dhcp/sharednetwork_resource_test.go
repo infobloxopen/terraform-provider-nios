@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -42,6 +43,7 @@ func TestAccSharednetworkResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "networks.#", fmt.Sprintf("%d", len(networks))),
 					resource.TestCheckResourceAttr(resourceName, "networks.0.ref", networks[0]),
 					resource.TestCheckResourceAttr(resourceName, "networks.1.ref", networks[1]),
+					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "authority", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
@@ -586,7 +588,7 @@ func TestAccSharednetworkResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccSharednetworkResource_IgnoreClientIdentifier(t *testing.T) {
-	//t.Skip("Skipping test as field ignore_id is used instead of ignore_client_identifier in version WAPI 1.8 or higher.")
+	t.Skip("Skipping test as field ignore_id is used instead of ignore_client_identifier in version WAPI 1.8 or higher.")
 	var resourceName = "nios_dhcp_sharednetwork.test_ignore_client_identifier"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")
@@ -1385,7 +1387,7 @@ func TestAccSharednetworkResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 }
 
 func TestAccSharednetworkResource_UseIgnoreId(t *testing.T) {
-	//t.Skip("Skipping test as field gnore_client_identifier is used in version WAPI 1.8 or higher.")
+	t.Skip("Skipping test as field gnore_client_identifier is used in version WAPI 1.8 or higher.")
 	var resourceName = "nios_dhcp_sharednetwork.test_use_ignore_id"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("sharednetwork")

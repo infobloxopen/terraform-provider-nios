@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_sharednetwork Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  Retrieves information about existing DHCP SharedNetwork Records.
+  Retrieves information about existing DHCP SharedNetworks.
 ---
 
 # nios_dhcp_sharednetwork (Data Source)
 
-Retrieves information about existing DHCP SharedNetwork Records.
+Retrieves information about existing DHCP SharedNetworks.
 
 
 
@@ -86,7 +86,7 @@ Read-Only:
 - `dhcp_utilization_status` (String) A string describing the utilization level of the shared network.
 - `dynamic_hosts` (Number) The total number of DHCP leases issued for the shared network.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
+- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ref` (String) The reference to the object.
 - `static_hosts` (Number) The number of static DHCP addresses configured in the shared network.
 - `total_hosts` (Number) The total number of DHCP addresses configured in the shared network.
@@ -102,7 +102,7 @@ Required:
 <a id="nestedatt--result--logic_filter_rules"></a>
 ### Nested Schema for `result.logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -111,12 +111,15 @@ Optional:
 <a id="nestedatt--result--options"></a>
 ### Nested Schema for `result.options`
 
+Required:
+
+- `value` (String) Value of the DHCP option
+
 Optional:
 
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
-- `value` (String) Value of the DHCP option
 - `vendor_class` (String) The name of the space this DHCP option is associated to.
 
 

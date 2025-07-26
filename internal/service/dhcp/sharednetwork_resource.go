@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -37,7 +38,7 @@ func (r *SharednetworkResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *SharednetworkResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages DHCP SharedNetwork Records.",
+		MarkdownDescription: "Manages DHCP SharedNetwork.",
 		Attributes:          SharednetworkResourceSchemaAttributes,
 	}
 }
@@ -71,6 +72,25 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	resp.Diagnostics.Append(data.ValidateConfig(ctx)...)
+}
+
+func (m *SharednetworkModel) ValidateConfig(ctx context.Context) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if !m.DdnsServerAlwaysUpdates.IsNull() && !m.DdnsServerAlwaysUpdates.IsUnknown() {
+		if m.DdnsServerAlwaysUpdates.ValueBool() {
+			// Check if ddns_use_option81 is set to true
+			if m.DdnsUseOption81.IsNull() || m.DdnsUseOption81.IsUnknown() || !m.DdnsUseOption81.ValueBool() {
+				diags.AddAttributeError(
+					path.Root("ddns_server_always_updates"),
+					"Invalid Configuration",
+					"When ddns_server_always_updates is enabled, ddns_use_option81 must be set to true",
+				)
+			}
+		}
+	}
+
+	return diags
 }
 
 func (r *SharednetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
