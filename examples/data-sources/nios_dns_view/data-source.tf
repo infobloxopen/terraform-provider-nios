@@ -1,19 +1,4 @@
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "1.0.0"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "https://172.28.82.185"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
-}
-
-// Retrieve a specific DNS view  by filters
+// Retrieve a specific DNS view by filters
 data "nios_dns_view" "get_view_using_filters" {
   filters = {
     name = "example_custom_view"
@@ -28,4 +13,4 @@ data "nios_dns_view" "get_view_using_extensible_attributes" {
 }
 
 // Retrieve all DNS views
-data "nios_dns_view" "get_all_views_in_default_view" {}
+data "nios_dns_view" "get_all_views" {}

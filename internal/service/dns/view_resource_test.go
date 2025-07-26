@@ -2035,7 +2035,7 @@ func TestAccViewResource_RpzQnameWaitRecurse(t *testing.T) {
 	})
 }
 
-// TODO
+
 func TestAccViewResource_ScavengingSettings(t *testing.T) {
 	var resourceName = "nios_dns_view.test_scavenging_settings"
 	var v dns.View
@@ -2955,7 +2955,6 @@ func testAccCheckViewDisappears(ctx context.Context, v *dns.View) resource.TestC
 }
 
 func testAccViewBasicConfig(name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test" {
 	name = %q
@@ -3030,6 +3029,7 @@ func testAccViewCustomRootNameServers(name string, customRootNameServers []map[s
 resource "nios_dns_view" "test_custom_root_name_servers" {
 	name = %q
     custom_root_name_servers = %s
+	use_root_name_server =true
 }
 `, name, customRootNameServersStr)
 }
@@ -3203,6 +3203,7 @@ func testAccViewEdnsUdpSize(name string, ednsUdpSize int) string {
 resource "nios_dns_view" "test_edns_udp_size" {
 	name = %q
     edns_udp_size = %d
+	use_edns_udp_size = true
 }
 `, name, ednsUdpSize)
 }
@@ -3275,6 +3276,7 @@ func testAccViewFixedRrsetOrderFqdns(name string, fixedRrsetOrderFqdns []map[str
 resource "nios_dns_view" "test_fixed_rrset_order_fqdns" {
 	name = %q
     fixed_rrset_order_fqdns = %s
+	use_fixed_rrset_order_fqdns = true
 }
 `, name, fixedRrsetOrderFqdnsStr)
 }
@@ -3307,6 +3309,7 @@ func testAccViewLastQueriedAcl(name string, lastQueriedAcl []map[string]any) str
 resource "nios_dns_view" "test_last_queried_acl" {
 	name = %q
 	last_queried_acl = %s
+	use_scavenging_settings = true
 }
 `, name, lastQueriedAclStr)
 }
@@ -3545,6 +3548,7 @@ resource "nios_dns_view" "test_sortlist" {
 	{
 			"address": %q
 		}]
+			use_sortlist = true
 }
 `, name, address)
 }
