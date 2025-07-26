@@ -38,9 +38,10 @@ var Ipv6networkcontainerCloudInfoAttrTypes = map[string]attr.Type{
 
 var Ipv6networkcontainerCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes: Ipv6networkcontainercloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          Ipv6networkcontainercloudinfoDelegatedMemberResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The delegated member information for the IPv6 network container.",
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,

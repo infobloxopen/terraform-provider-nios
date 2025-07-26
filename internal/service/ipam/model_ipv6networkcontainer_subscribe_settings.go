@@ -3,9 +3,12 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -26,9 +29,19 @@ var Ipv6networkcontainerSubscribeSettingsAttrTypes = map[string]attr.Type{
 
 var Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled_attributes": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
-		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.ValueStringsAre(stringvalidator.OneOf(
+				"DOMAINNAME",
+				"ENDPOINT_PROFILE",
+				"SECURITY_GROUP",
+				"SESSION_STATE",
+				"SSID",
+				"USERNAME",
+				"VLAN",
+			)),
+		},
 	},
 	"mapped_ea_attributes": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

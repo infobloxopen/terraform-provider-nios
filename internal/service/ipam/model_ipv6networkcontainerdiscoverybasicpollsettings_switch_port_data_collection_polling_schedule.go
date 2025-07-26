@@ -10,6 +10,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -134,6 +135,7 @@ var Ipv6networkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollin
 				"RECUR",
 			),
 		},
+		Default: stringdefault.StaticString("ONCE"),
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,

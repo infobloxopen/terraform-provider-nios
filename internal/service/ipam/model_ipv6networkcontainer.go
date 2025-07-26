@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -15,11 +16,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
@@ -166,12 +166,8 @@ var Ipv6networkcontainerAttrTypes = map[string]attr.Type{
 
 var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 		Computed:            true,
-		PlanModifiers: []planmodifier.String{
-			stringplanmodifier.UseStateForUnknown(),
-		},
 	},
 	"auto_create_reversezone": schema.BoolAttribute{
 		Optional:            true,
@@ -187,14 +183,22 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Comment for the network; maximum 256 characters.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network container.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace"),
 		},
-		Default:  stringdefault.StaticString(""),
 		Computed: true,
 	},
 	"ddns_enable_option_fqdn": schema.BoolAttribute{
@@ -222,7 +226,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(true),
 		Validators: []validator.Bool{
 			boolvalidator.AlsoRequires(path.MatchRoot("ddns_enable_option_fqdn")),
-			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_enable_option_fqdn")),
+			// boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_enable_option_fqdn")),
 		},
 	},
 	"ddns_ttl": schema.Int64Attribute{
@@ -360,8 +364,10 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: Ipv6networkcontainerMsAdUserDataResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          Ipv6networkcontainerMsAdUserDataResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The Microsoft Active Directory user data associated with the network container.",
 	},
 	"network": schema.StringAttribute{
 		Optional:            true,
@@ -425,7 +431,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the IPv6 network container address space.",
-		Default:             stringdefault.StaticString("NONE"),
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
@@ -442,6 +447,12 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The registration status of the IPv6 network container in RIR.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("NOT_REGISTERED"),
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"NOT_REGISTERED",
+				"REGISTERED",
+			),
+		},
 	},
 	"same_port_control_discovery_blackout": schema.BoolAttribute{
 		Optional:            true,
@@ -611,7 +622,6 @@ func (m *Ipv6networkcontainerModel) Expand(ctx context.Context, diags *diag.Diag
 		return nil
 	}
 	to := &ipam.Ipv6networkcontainer{
-		Ref:                              flex.ExpandStringPointer(m.Ref),
 		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		CloudInfo:                        ExpandIpv6networkcontainerCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:                          flex.ExpandStringPointer(m.Comment),

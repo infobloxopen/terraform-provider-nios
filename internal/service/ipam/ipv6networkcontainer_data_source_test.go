@@ -46,7 +46,7 @@ func TestAccIpv6networkcontainerDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6networkcontainerDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6networkcontainerDataSourceConfigExtAttrFilters(network, "value1"),
+				Config: testAccIpv6networkcontainerDataSourceConfigExtAttrFilters(network, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
@@ -154,7 +154,7 @@ resource "nios_ipam_ipv6network_container" "test" {
 
 data "nios_ipam_ipv6network_container" "test" {
   extattrfilters = {
-	"Site" = nios_ipam_ipv6network_container.test.extattrs.Site
+	Site = nios_ipam_ipv6network_container.test.extattrs.Site
   }
 }
 `, network, extAttrsValue)

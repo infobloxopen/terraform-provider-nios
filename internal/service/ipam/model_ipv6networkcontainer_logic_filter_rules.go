@@ -12,8 +12,8 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type Ipv6networkcontainerLogicFilterRulesModel struct {
@@ -28,11 +28,11 @@ var Ipv6networkcontainerLogicFilterRulesAttrTypes = map[string]attr.Type{
 
 var Ipv6networkcontainerLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The filter name.",
 	},
 	"type": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The filter type. Valid values are: * MAC * NAC * Option",
 		Validators: []validator.String{
 			stringvalidator.OneOf("MAC", "NAC", "Option"),

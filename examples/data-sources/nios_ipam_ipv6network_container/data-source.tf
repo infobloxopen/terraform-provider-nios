@@ -1,4 +1,4 @@
-// Retrieve a specific IPAM network container using filters
+// Retrieve a specific IPAM IPv6 network container using filters
 data "nios_ipam_ipv6network_container" "get_record_using_filters" {
   filters = {
     "network" = "10::/64"

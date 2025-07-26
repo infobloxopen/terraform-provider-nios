@@ -1,3 +1,4 @@
+// Create IPV6 Network with Basic Fields
 resource "nios_ipam_ipv6network_container" "example_container" {
   network      = "10::/64"
   network_view = "default"
@@ -15,7 +16,7 @@ resource "nios_ipam_ipv6network_container" "complete_example" {
 
   // Basic configuration
   network_view = "default"
-  comment      = "Complete network container example with all possible writable attributes"
+  comment      = "IPv6 network container with additional fields"
 
 
   // DDNS settings

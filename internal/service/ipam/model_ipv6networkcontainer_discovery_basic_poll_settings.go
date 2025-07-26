@@ -3,17 +3,19 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -55,14 +57,14 @@ var Ipv6networkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map
 	"port_scanning": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether port scanning is enabled or not.",
-		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Computed:            true,
 	},
 	"device_profile": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether device profile is enabled or not.",
-		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Computed:            true,
 	},
 	"snmp_collection": schema.BoolAttribute{
 		Optional:            true,
@@ -105,10 +107,18 @@ var Ipv6networkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map
 		MarkdownDescription: "A switch port data collection polling mode.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("PERIODIC"),
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"PERIODIC",
+				"DISABLED",
+				"SCHEDULED",
+			),
+		},
 	},
 	"switch_port_data_collection_polling_schedule": schema.SingleNestedAttribute{
-		Attributes: Ipv6networkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          Ipv6networkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "The switch port data collection polling schedule.",
 	},
 	"switch_port_data_collection_polling_interval": schema.Int64Attribute{
 		Optional:            true,

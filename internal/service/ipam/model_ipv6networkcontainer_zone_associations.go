@@ -2,16 +2,20 @@ package ipam
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6networkcontainerZoneAssociationsModel struct {
@@ -30,6 +34,9 @@ var Ipv6networkcontainerZoneAssociationsResourceSchemaAttributes = map[string]sc
 	"fqdn": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The FQDN of the authoritative forward zone.",
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 	},
 	"is_default": schema.BoolAttribute{
 		Optional:            true,
@@ -38,6 +45,12 @@ var Ipv6networkcontainerZoneAssociationsResourceSchemaAttributes = map[string]sc
 	"view": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The view to which the zone belongs. If a view is not specified, the default view is used.",
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 	},
 }
 

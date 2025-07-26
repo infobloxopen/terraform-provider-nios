@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/hashicorp/go-uuid"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -37,7 +37,7 @@ func (r *Ipv6networkcontainerResource) Metadata(ctx context.Context, req resourc
 
 func (r *Ipv6networkcontainerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages an IPv6 Network Container",
 		Attributes:          Ipv6networkcontainerResourceSchemaAttributes,
 	}
 }
