@@ -176,6 +176,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv4addr"),
 				path.MatchRoot("ipv6addr"),
 				path.MatchRoot("name"),
 				path.MatchRoot("func_call"),
@@ -190,15 +191,8 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Function call to be executed.",
 	},
 	"ipv6addr": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
-				path.MatchRoot("ipv4addr"),
-				path.MatchRoot("name"),
-				path.MatchRoot("func_call"),
-			),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv6 Address of the record.",
 	},
 	"last_queried": schema.Int64Attribute{
@@ -211,16 +205,8 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"name": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
-				path.MatchRoot("ipv4addr"),
-				path.MatchRoot("ipv6addr"),
-				path.MatchRoot("func_call"),
-			),
-			customvalidator.IsValidFQDN(),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the DNS PTR record in FQDN format.",
 	},
 	"ptrdname": schema.StringAttribute{
