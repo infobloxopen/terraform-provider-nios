@@ -58,7 +58,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 	},
@@ -85,7 +85,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 	},
@@ -109,10 +109,9 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 	},

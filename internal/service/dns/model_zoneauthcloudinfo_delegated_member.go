@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -57,11 +56,7 @@ func (m *ZoneauthcloudinfoDelegatedMemberModel) Expand(ctx context.Context, diag
 	if m == nil {
 		return nil
 	}
-	to := &dns.ZoneauthcloudinfoDelegatedMember{
-		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
-		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
-		Name:     flex.ExpandStringPointer(m.Name),
-	}
+	to := &dns.ZoneauthcloudinfoDelegatedMember{}
 	return to
 }
 

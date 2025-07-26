@@ -35,7 +35,7 @@ var ZoneAuthLastQueriedAclResourceSchemaAttributes = map[string]schema.Attribute
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 	},

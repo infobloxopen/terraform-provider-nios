@@ -36,7 +36,7 @@ resource "nios_dns_zone_auth" "create_zone5" {
   // Additional fields
   grid_primary = [
     {
-      name = "infoblox.172_28_83_235",
+      name = "infoblox.10_0_0_1",
     }
   ]
   restart_if_needed = true

@@ -9,12 +9,11 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -75,10 +74,12 @@ var ZoneauthgridsecondariesPreferredPrimariesResourceSchemaAttributes = map[stri
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }

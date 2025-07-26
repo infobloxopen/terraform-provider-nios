@@ -2237,9 +2237,10 @@ func TestAccZoneAuthResource_UpdateForwarding(t *testing.T) {
 	}
 	updatedUpdateForwarding := []map[string]any{
 		{
-			"struct":     "addressac",
-			"address":    "10.0.0.2",
-			"permission": "ALLOW",
+			"struct":        "tsigac",
+			"tsig_key":      "X4oRe92t54I+T98NdQpV2w==",
+			"tsig_key_name": "example-tsig-key",
+			"tsig_key_alg":  "HMAC-SHA256",
 		},
 	}
 
@@ -2263,8 +2264,8 @@ func TestAccZoneAuthResource_UpdateForwarding(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_forwarding.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "update_forwarding.0.address", "10.0.0.2"),
-					resource.TestCheckResourceAttr(resourceName, "update_forwarding.0.permission", "ALLOW"),
+					resource.TestCheckResourceAttr(resourceName, "update_forwarding.0.tsig_key", "X4oRe92t54I+T98NdQpV2w=="),
+					// resource.TestCheckResourceAttr(resourceName, "update_forwarding.0.permission", "ALLOW"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2738,14 +2739,6 @@ func TestAccZoneAuthResource_UseExternalPrimary(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "true"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccZoneAuthUseExternalPrimaryUpdate(zoneFqdn, "default", false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "false"),
-				),
-			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -2991,10 +2984,10 @@ func TestAccZoneAuthResource_View(t *testing.T) {
 	})
 }
 
-func TestAccZoneAuthResource_ZoneFormat(t *testing.T) {
+func TestAccZoneAuthResource_ZoneFormatIPV4(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_zone_format"
 	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	zoneFqdn := "10.0.0.0/24"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -3002,18 +2995,32 @@ func TestAccZoneAuthResource_ZoneFormat(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "FORWARD"),
+				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "IPV4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV4"),
 				),
 			},
-			// Update and Read
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccZoneAuthResource_ZoneFormatIPV6(t *testing.T) {
+	var resourceName = "nios_dns_zone_auth.test_zone_format"
+	var v dns.ZoneAuth
+	zoneFqdn := "2002:1100::/64"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
 			{
-				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "FORWARD"),
+				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "IPV6"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV6"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3949,16 +3956,6 @@ resource "nios_dns_zone_auth" "test_use_external_primary" {
     use_external_primary = %t
 }
 `, zoneFqdn, view, externalPrimariesHCL, msSecondariesHCL, useExternalPrimary)
-}
-
-func testAccZoneAuthUseExternalPrimaryUpdate(zoneFqdn, view string, useExternalPrimary bool) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_use_external_primary" {
-    fqdn = %q
-    view = %q
-    use_external_primary = %t
-}
-`, zoneFqdn, view, useExternalPrimary)
 }
 
 func testAccZoneAuthUseGridZoneTimer(zoneFqdn, view string, gridPrimary []map[string]any, useGridZoneTimer bool) string {

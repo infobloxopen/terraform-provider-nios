@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -58,7 +57,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
@@ -85,7 +84,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
@@ -109,10 +108,9 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 	},

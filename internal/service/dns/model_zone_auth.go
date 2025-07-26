@@ -15,12 +15,12 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -372,7 +372,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.LengthBetween(0, 256),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 	},
@@ -568,6 +568,8 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"extattrs": schema.MapAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
+		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
 	"extattrs_all": schema.MapAttribute{
@@ -849,7 +851,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.",
@@ -921,7 +923,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_soa_email")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The SOA email value for this zone. This value can be in unicode format.",
@@ -1037,6 +1039,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_allow_update_forwarding": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: allow_update_forwarding",
 	},
 	"use_check_names_policy": schema.BoolAttribute{
@@ -1048,26 +1051,31 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_copy_xfer_to_notify": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: copy_xfer_to_notify",
 	},
 	"use_ddns_force_creation_timestamp_update": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ddns_force_creation_timestamp_update",
 	},
 	"use_ddns_patterns_restriction": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ddns_restrict_patterns_list , ddns_restrict_patterns",
 	},
 	"use_ddns_principal_security": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ddns_restrict_secure , ddns_principal_tracking, ddns_principal_group",
 	},
 	"use_ddns_restrict_protected": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ddns_restrict_protected",
 	},
 	"use_ddns_restrict_static": schema.BoolAttribute{
@@ -1137,7 +1145,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		Default:             stringdefault.StaticString("default"),
@@ -1254,7 +1262,8 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		to.ZoneFormat = flex.ExpandStringPointer(m.ZoneFormat)
 	}
 
-	if m.ImportFrom.IsUnknown() && m.ImportFrom.ValueString() != "" {
+	// Set ImportFrom only if it has a non-empty value to avoid "Invalid IP address" error when an empty string is sent to the API
+	if !m.ImportFrom.IsUnknown() && m.ImportFrom.ValueString() != "" {
 		to.ImportFrom = flex.ExpandStringPointer(m.ImportFrom)
 	}
 	return to

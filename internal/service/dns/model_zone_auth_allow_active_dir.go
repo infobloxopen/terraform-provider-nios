@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -36,7 +35,7 @@ var ZoneAuthAllowActiveDirResourceSchemaAttributes = map[string]schema.Attribute
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Address should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 	},
