@@ -34,11 +34,11 @@ var RangetemplateMsOptionsAttrTypes = map[string]attr.Type{
 
 var RangetemplateMsOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"num": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The code of the DHCP option.",
 	},
 	"value": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "Value of the DHCP option.",
 	},
 	"name": schema.StringAttribute{

@@ -14,14 +14,14 @@ Manages a DHCP Range Templates.
 
 ```terraform
 // Create DHCP Range Template with required Fields
-resource "nios_dhcp_rangetemplate" "rangetemplate_required_fields" {
+resource "nios_dhcp_rangetemplate" "range_template_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
 }
 
 // Create DHCP Range Template with additional Fields
-resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields" {
+resource "nios_dhcp_rangetemplate" "range_template_additional_fields" {
   name                    = "example_range_template_additional_fields"
   number_of_addresses     = 10
   offset                  = 20
@@ -61,7 +61,7 @@ resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields" {
 }
 
 // Create DHCP Range Template with filters and exclude fields
-resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields2" {
+resource "nios_dhcp_rangetemplate" "range_template_additional_fields2" {
   name                = "example_range_template3"
   number_of_addresses = 60
   offset              = 70
@@ -252,12 +252,15 @@ Optional:
 <a id="nestedatt--ms_options"></a>
 ### Nested Schema for `ms_options`
 
+Required:
+
+- `num` (Number) The code of the DHCP option.
+- `value` (String) Value of the DHCP option.
+
 Optional:
 
 - `name` (String) The name of the DHCP option.
-- `num` (Number) The code of the DHCP option.
 - `user_class` (String) The name of the user class with which this DHCP option is associated.
-- `value` (String) Value of the DHCP option.
 - `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 Read-Only:
