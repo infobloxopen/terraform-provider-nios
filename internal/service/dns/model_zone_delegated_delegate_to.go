@@ -2,13 +2,13 @@ package dns
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -41,11 +41,10 @@ var ZoneDelegatedDelegateToAttrTypes = map[string]attr.Type{
 
 var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				regexp.MustCompile(`^\S.*\S$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
@@ -55,7 +54,7 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				regexp.MustCompile(`^\S.*\S$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
@@ -66,9 +65,8 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		MarkdownDescription: "This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.",
 	},
 	"stealth": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
@@ -76,7 +74,7 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				regexp.MustCompile(`^\S.*\S$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
@@ -88,7 +86,6 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		Validators: []validator.String{
 			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
 		},
-		//Default:             stringdefault.StaticString("HMAC-MD5"),
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
@@ -96,16 +93,15 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				regexp.MustCompile(`^\S.*\S$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }

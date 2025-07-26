@@ -15,6 +15,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+//TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// - IPv4 reverse zone - 10.1.0.0
+// - IPv6 reverse zone - 2001:db8:85a3::8a2e:370:7334/128
+
 var readableAttributesForZoneDelegated = "address,comment,delegate_to,delegated_ttl,disable,display_domain,dns_fqdn,enable_rfc2317_exclusion,extattrs,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed,ms_read_only,ms_sync_master_name,ns_group,parent,prefix,use_delegated_ttl,using_srg_associations,view,zone_format"
 
 func TestAccZoneDelegatedResource_basic(t *testing.T) {
@@ -32,8 +36,15 @@ func TestAccZoneDelegatedResource_basic(t *testing.T) {
 				Config: testAccZoneDelegatedBasicConfig(fqdn, delegatedToName, "10.0.0.1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "enable_rfc2317_exclusion", "false"),
+					resource.TestCheckResourceAttr(resourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ms_ddns_mode", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
+					resource.TestCheckResourceAttr(resourceName, "use_delegated_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -76,18 +87,18 @@ func TestAccZoneDelegatedResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneDelegatedComment(fqdn, delegatedToName, "10.0.0.1", "This is a new record"),
+				Config: testAccZoneDelegatedComment(fqdn, delegatedToName, "10.0.0.1", "This is a delegated zone"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "This is a new record"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a delegated zone"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneDelegatedComment(fqdn, delegatedToName, "10.0.0.1", "This is an updated record"),
+				Config: testAccZoneDelegatedComment(fqdn, delegatedToName, "10.0.0.1", "This is an updated delegated zone"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated record"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated delegated zone"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -372,18 +383,18 @@ func TestAccZoneDelegatedResource_NsGroup(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneDelegatedNsGroup(fqdn, delegatedToName, "10.0.0.1", "NS_GROUP_REPLACE_ME"),
+				Config: testAccZoneDelegatedNsGroup(fqdn, delegatedToName, "10.0.0.1", "example_nsg1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ns_group", "NS_GROUP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ns_group", "example_nsg1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneDelegatedNsGroup(fqdn, delegatedToName, "10.0.0.1", "NS_GROUP_UPDATE_REPLACE_ME"),
+				Config: testAccZoneDelegatedNsGroup(fqdn, delegatedToName, "10.0.0.1", "example_nsg2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ns_group", "NS_GROUP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ns_group", "example_nsg2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -458,7 +469,6 @@ func TestAccZoneDelegatedResource_UseDelegatedTtl(t *testing.T) {
 func TestAccZoneDelegatedResource_ZoneFormatIPV4(t *testing.T) {
 	var resourceName = "nios_dns_zone_delegated.test_zone_format"
 	var v dns.ZoneDelegated
-	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
 	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -467,7 +477,7 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV4(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneDelegatedZoneFormat(fqdn, delegatedToName, "10.0.0.1", "IPV4"),
+				Config: testAccZoneDelegatedZoneFormat("10.1.0.132/32", delegatedToName, "10.0.0.1", "IPV4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV4"),
@@ -481,7 +491,6 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV4(t *testing.T) {
 func TestAccZoneDelegatedResource_ZoneFormatIPV6(t *testing.T) {
 	var resourceName = "nios_dns_zone_delegated.test_zone_format"
 	var v dns.ZoneDelegated
-	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
 	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -490,7 +499,7 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV6(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneDelegatedZoneFormat(fqdn, delegatedToName, "10.0.0.1", "IPV6"),
+				Config: testAccZoneDelegatedZoneFormat("8.0.0.0.3.a.5.8.8.b.d.0.1.0.0.2.ip6.arpa.", delegatedToName, "10.0.0.1", "IPV6"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV6"),

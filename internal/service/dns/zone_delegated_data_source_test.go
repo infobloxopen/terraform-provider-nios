@@ -41,6 +41,7 @@ func TestAccZoneDelegatedDataSource_ExtAttrFilters(t *testing.T) {
 	var v dns.ZoneDelegated
 	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
 	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
+	extAttrs := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -48,7 +49,7 @@ func TestAccZoneDelegatedDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneDelegatedDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneDelegatedDataSourceConfigExtAttrFilters(fqdn, delegatedToName, "10.0.0.1", "value1"),
+				Config: testAccZoneDelegatedDataSourceConfigExtAttrFilters(fqdn, delegatedToName, "10.0.0.1", extAttrs),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),

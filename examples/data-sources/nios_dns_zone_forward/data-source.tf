@@ -13,4 +13,4 @@ data "nios_dns_zone_forward" "get_zones_using_extensible_attributes" {
 }
 
 // Retrieve all DNS zone forward zones
-data "nios_dns_zone_forward" "get_all_zones_in" {}
+data "nios_dns_zone_forward" "get_all_zones" {}

@@ -1,5 +1,5 @@
 // Create a DNS zone delegated with basic fields
-resource "nios_dns_zone_delegated" "zone_forward_basic_fields" {
+resource "nios_dns_zone_delegated" "zone_delegated_basic_fields" {
   fqdn = "zone-delegated.example.com"
   delegate_to = [
     {
@@ -9,8 +9,19 @@ resource "nios_dns_zone_delegated" "zone_forward_basic_fields" {
   ]
 }
 
+// Create a DNS zone delegated with IPv4 mapping
+resource "nios_dns_zone_delegated" "zone_delegated_ip4_mapping" {
+  fqdn = "10.1.0.132/32"
+  delegate_to = [
+    {
+      name    = "ns2.example.com"
+      address = "2.2.2.2"
+    }
+  ]
+}
+
 // Create a DNS zone delegated with additional fields
-resource "nios_dns_zone_delegated" "zone_forward_additional_fields" {
+resource "nios_dns_zone_delegated" "zone_delegated_additional_fields" {
   fqdn = "zone-delegated-example2.example.com"
   delegate_to = [
     {
