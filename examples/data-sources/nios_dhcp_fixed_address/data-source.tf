@@ -1,7 +1,7 @@
 // Retrieve a specific Fixed Addresses by filters
 data "nios_dhcp_fixed_address" "get_fixed_address_using_filters" {
   filters = {
-    name = "example_fixed_address"
+    ipv4addr = "16.0.0.20"
   }
 }
 

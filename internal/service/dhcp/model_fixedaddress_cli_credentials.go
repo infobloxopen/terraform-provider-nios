@@ -2,10 +2,12 @@ package dhcp
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -36,13 +38,27 @@ var FixedaddressCliCredentialsAttrTypes = map[string]attr.Type{
 
 var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attribute{
 	"user": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The CLI user name.",
 	},
 	"password": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The CLI password.",
 	},
 	"credential_type": schema.StringAttribute{
@@ -54,9 +70,16 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		MarkdownDescription: "The type of the credential.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The commment for the credential.",
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
+		MarkdownDescription: "The comment for the credential.",
 	},
 	"id": schema.Int64Attribute{
 		Computed:            true,

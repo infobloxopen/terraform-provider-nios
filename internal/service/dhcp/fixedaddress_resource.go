@@ -38,7 +38,7 @@ func (r *FixedaddressResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *FixedaddressResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Fixed Address.",
 		Attributes:          FixedaddressResourceSchemaAttributes,
 	}
 }
@@ -89,7 +89,7 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 	apiRes, _, err := r.client.DHCPAPI.
 		FixedaddressAPI.
 		Create(ctx).
-		Fixedaddress(*data.Expand(ctx, &resp.Diagnostics)).
+		Fixedaddress(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForFixedaddress).
 		ReturnAsObject(1).
 		Execute()
@@ -278,7 +278,7 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 	apiRes, _, err := r.client.DHCPAPI.
 		FixedaddressAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Fixedaddress(*data.Expand(ctx, &resp.Diagnostics)).
+		Fixedaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForFixedaddress).
 		ReturnAsObject(1).
 		Execute()

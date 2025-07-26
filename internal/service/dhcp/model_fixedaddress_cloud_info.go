@@ -39,7 +39,6 @@ var FixedaddressCloudInfoAttrTypes = map[string]attr.Type{
 var FixedaddressCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes:          FixedaddresscloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The Cloud Platform Appliance to which authority of the object is delegated.",
 	},
@@ -89,9 +88,7 @@ func (m *FixedaddressCloudInfoModel) Expand(ctx context.Context, diags *diag.Dia
 	if m == nil {
 		return nil
 	}
-	to := &dhcp.FixedaddressCloudInfo{
-		DelegatedMember: ExpandFixedaddresscloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
-	}
+	to := &dhcp.FixedaddressCloudInfo{}
 	return to
 }
 

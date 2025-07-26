@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_fixed_address Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  
+  Retrieves information about existing Fixed Address.
 ---
 
 # nios_dhcp_fixed_address (Data Source)
 
-
+Retrieves information about existing Fixed Address.
 
 ## Example Usage
 
@@ -16,7 +16,7 @@ description: |-
 // Retrieve a specific Fixed Addresses by filters
 data "nios_dhcp_fixed_address" "get_fixed_address_using_filters" {
   filters = {
-    name = "example_fixed_address"
+    ipv4addr = "16.0.0.20"
   }
 }
 
@@ -90,7 +90,6 @@ Optional:
 - `bootserver` (String) The bootserver address for the fixed address. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.
 - `cli_credentials` (Attributes List) The CLI credentials for the fixed address. (see [below for nested schema](#nestedatt--result--cli_credentials))
 - `client_identifier_prepend_zero` (Boolean) This field controls whether there is a prepend for the dhcp-client-identifier of a fixed address.
-- `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `comment` (String) Comment for the fixed address; maximum 256 characters.
 - `ddns_domainname` (String) The dynamic DNS domain name the appliance uses specifically for DDNS updates for this fixed address.
 - `ddns_hostname` (String) The DDNS host name for this fixed address.
@@ -111,7 +110,6 @@ Optional:
 - `ipv4addr` (String) The IPv4 Address of the record.
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file. (see [below for nested schema](#nestedatt--result--logic_filter_rules))
 - `mac` (String) The MAC address value for this fixed address.
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ms_options` (Attributes List) This field contains the Microsoft DHCP options for this fixed address. (see [below for nested schema](#nestedatt--result--ms_options))
 - `ms_server` (Attributes) The Microsoft server associated with this fixed address. (see [below for nested schema](#nestedatt--result--ms_server))
 - `name` (String) This field contains the name of this fixed address.
@@ -120,7 +118,6 @@ Optional:
 - `nextserver` (String) The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--result--options))
 - `pxe_lease_time` (Number) The PXE lease time value for a DHCP Fixed Address object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.
-- `ref` (String) The reference to the object.
 - `reserved_interface` (String) The ref to the reserved interface to which the device belongs.
 - `restart_if_needed` (Boolean) Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.
 - `snmp3_credential` (Attributes) The SNMPv3 credential for this fixed address. (see [below for nested schema](#nestedatt--result--snmp3_credential))
@@ -143,17 +140,20 @@ Optional:
 
 Read-Only:
 
+- `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `discover_now_status` (String) The discovery status of this fixed address.
 - `discovered_data` (Attributes) The discovered data for this fixed address. (see [below for nested schema](#nestedatt--result--discovered_data))
 - `extattrs_all` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `is_invalid_mac` (Boolean) This flag reflects whether the MAC address for this fixed address is invalid.
+- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
+- `ref` (String) The reference to the object.
 
 <a id="nestedatt--result--cli_credentials"></a>
 ### Nested Schema for `result.cli_credentials`
 
 Optional:
 
-- `comment` (String) The commment for the credential.
+- `comment` (String) The comment for the credential.
 - `credential_group` (String) Group for the CLI credential.
 - `credential_type` (String) The type of the credential.
 - `password` (String) The CLI password.
@@ -162,34 +162,6 @@ Optional:
 Read-Only:
 
 - `id` (Number) The Credentials ID.
-
-
-<a id="nestedatt--result--cloud_info"></a>
-### Nested Schema for `result.cloud_info`
-
-Optional:
-
-- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
-
-Read-Only:
-
-- `authority_type` (String) Type of authority over the object.
-- `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
-- `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
-- `mgmt_platform` (String) Indicates the specified cloud management platform.
-- `owned_by_adaptor` (Boolean) Determines whether the object was created by the cloud adapter or not.
-- `tenant` (String) Reference to the tenant object associated with the object, if any.
-- `usage` (String) Indicates the cloud origin of the object.
-
-<a id="nestedatt--result--cloud_info--delegated_member"></a>
-### Nested Schema for `result.cloud_info.delegated_member`
-
-Optional:
-
-- `ipv4addr` (String) The IPv4 Address of the Grid Member.
-- `ipv6addr` (String) The IPv6 Address of the Grid Member.
-- `name` (String) The Grid member name
-
 
 
 <a id="nestedatt--result--func_call"></a>
@@ -211,29 +183,24 @@ Optional:
 <a id="nestedatt--result--logic_filter_rules"></a>
 ### Nested Schema for `result.logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
 
 
-<a id="nestedatt--result--ms_ad_user_data"></a>
-### Nested Schema for `result.ms_ad_user_data`
-
-Read-Only:
-
-- `active_users_count` (Number) The number of active users.
-
-
 <a id="nestedatt--result--ms_options"></a>
 ### Nested Schema for `result.ms_options`
+
+Required:
+
+- `value` (String) Value of the DHCP option.
 
 Optional:
 
 - `name` (String) The name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
 - `user_class` (String) The name of the user class with which this DHCP option is associated.
-- `value` (String) Value of the DHCP option.
 - `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 Read-Only:
@@ -244,7 +211,7 @@ Read-Only:
 <a id="nestedatt--result--ms_server"></a>
 ### Nested Schema for `result.ms_server`
 
-Optional:
+Required:
 
 - `ipv4addr` (String) The IPv4 Address or FQDN of the Microsoft server.
 
@@ -286,6 +253,31 @@ Optional:
 
 - `comment` (String) Comments for the SNMPv1 and SNMPv2 users.
 - `credential_group` (String) Group for the SNMPv1 and SNMPv2 credential.
+
+
+<a id="nestedatt--result--cloud_info"></a>
+### Nested Schema for `result.cloud_info`
+
+Read-Only:
+
+- `authority_type` (String) Type of authority over the object.
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
+- `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
+- `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
+- `mgmt_platform` (String) Indicates the specified cloud management platform.
+- `owned_by_adaptor` (Boolean) Determines whether the object was created by the cloud adapter or not.
+- `tenant` (String) Reference to the tenant object associated with the object, if any.
+- `usage` (String) Indicates the cloud origin of the object.
+
+<a id="nestedatt--result--cloud_info--delegated_member"></a>
+### Nested Schema for `result.cloud_info.delegated_member`
+
+Read-Only:
+
+- `ipv4addr` (String) The IPv4 Address of the Grid Member.
+- `ipv6addr` (String) The IPv6 Address of the Grid Member.
+- `name` (String) The Grid member name
+
 
 
 <a id="nestedatt--result--discovered_data"></a>
@@ -389,3 +381,11 @@ Read-Only:
 - `vswitch_tep_type` (String) Type of virtual tunnel endpoint (VTEP) in the virtual switch.
 - `vswitch_tep_vlan` (String) VLAN of the virtual tunnel endpoint (VTEP) in the virtual switch.
 - `vswitch_type` (String) Type of the virtual switch: standard or distributed.
+
+
+<a id="nestedatt--result--ms_ad_user_data"></a>
+### Nested Schema for `result.ms_ad_user_data`
+
+Read-Only:
+
+- `active_users_count` (Number) The number of active users.

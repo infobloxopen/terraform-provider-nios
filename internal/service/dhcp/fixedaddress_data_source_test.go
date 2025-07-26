@@ -41,6 +41,7 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
 	agentCircuitID := acctest.RandomNumber(255)
+	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -48,7 +49,7 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckFixedaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFixedaddressDataSourceConfigExtAttrFilters(ip, "CIRCUIT_ID", agentCircuitID, "value1"),
+				Config: testAccFixedaddressDataSourceConfigExtAttrFilters(ip, "CIRCUIT_ID", agentCircuitID, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckFixedaddressExists(context.Background(), resourceName, &v),

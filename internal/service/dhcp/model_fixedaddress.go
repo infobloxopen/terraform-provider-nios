@@ -2,86 +2,94 @@ package dhcp
 
 import (
 	"context"
+	"regexp"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type FixedaddressModel struct {
-	Ref                            types.String `tfsdk:"ref"`
-	AgentCircuitId                 types.String `tfsdk:"agent_circuit_id"`
-	AgentRemoteId                  types.String `tfsdk:"agent_remote_id"`
-	AllowTelnet                    types.Bool   `tfsdk:"allow_telnet"`
-	AlwaysUpdateDns                types.Bool   `tfsdk:"always_update_dns"`
-	Bootfile                       types.String `tfsdk:"bootfile"`
-	Bootserver                     types.String `tfsdk:"bootserver"`
-	CliCredentials                 types.List   `tfsdk:"cli_credentials"`
-	ClientIdentifierPrependZero    types.Bool   `tfsdk:"client_identifier_prepend_zero"`
-	CloudInfo                      types.Object `tfsdk:"cloud_info"`
-	Comment                        types.String `tfsdk:"comment"`
-	DdnsDomainname                 types.String `tfsdk:"ddns_domainname"`
-	DdnsHostname                   types.String `tfsdk:"ddns_hostname"`
-	DenyBootp                      types.Bool   `tfsdk:"deny_bootp"`
-	DeviceDescription              types.String `tfsdk:"device_description"`
-	DeviceLocation                 types.String `tfsdk:"device_location"`
-	DeviceType                     types.String `tfsdk:"device_type"`
-	DeviceVendor                   types.String `tfsdk:"device_vendor"`
-	DhcpClientIdentifier           types.String `tfsdk:"dhcp_client_identifier"`
-	Disable                        types.Bool   `tfsdk:"disable"`
-	DisableDiscovery               types.Bool   `tfsdk:"disable_discovery"`
-	DiscoverNowStatus              types.String `tfsdk:"discover_now_status"`
-	DiscoveredData                 types.Object `tfsdk:"discovered_data"`
-	EnableDdns                     types.Bool   `tfsdk:"enable_ddns"`
-	EnableImmediateDiscovery       types.Bool   `tfsdk:"enable_immediate_discovery"`
-	EnablePxeLeaseTime             types.Bool   `tfsdk:"enable_pxe_lease_time"`
-	ExtAttrs                       types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                    types.Map    `tfsdk:"extattrs_all"`
-	IgnoreDhcpOptionListRequest    types.Bool   `tfsdk:"ignore_dhcp_option_list_request"`
-	Ipv4addr                       types.String `tfsdk:"ipv4addr"`
-	FuncCall                       types.Object `tfsdk:"func_call"`
-	IsInvalidMac                   types.Bool   `tfsdk:"is_invalid_mac"`
-	LogicFilterRules               types.List   `tfsdk:"logic_filter_rules"`
-	Mac                            types.String `tfsdk:"mac"`
-	MatchClient                    types.String `tfsdk:"match_client"`
-	MsAdUserData                   types.Object `tfsdk:"ms_ad_user_data"`
-	MsOptions                      types.List   `tfsdk:"ms_options"`
-	MsServer                       types.Object `tfsdk:"ms_server"`
-	Name                           types.String `tfsdk:"name"`
-	Network                        types.String `tfsdk:"network"`
-	NetworkView                    types.String `tfsdk:"network_view"`
-	Nextserver                     types.String `tfsdk:"nextserver"`
-	Options                        types.List   `tfsdk:"options"`
-	PxeLeaseTime                   types.Int64  `tfsdk:"pxe_lease_time"`
-	ReservedInterface              types.String `tfsdk:"reserved_interface"`
-	RestartIfNeeded                types.Bool   `tfsdk:"restart_if_needed"`
-	Snmp3Credential                types.Object `tfsdk:"snmp3_credential"`
-	SnmpCredential                 types.Object `tfsdk:"snmp_credential"`
-	Template                       types.String `tfsdk:"template"`
-	UseBootfile                    types.Bool   `tfsdk:"use_bootfile"`
-	UseBootserver                  types.Bool   `tfsdk:"use_bootserver"`
-	UseCliCredentials              types.Bool   `tfsdk:"use_cli_credentials"`
-	UseDdnsDomainname              types.Bool   `tfsdk:"use_ddns_domainname"`
-	UseDenyBootp                   types.Bool   `tfsdk:"use_deny_bootp"`
-	UseEnableDdns                  types.Bool   `tfsdk:"use_enable_ddns"`
-	UseIgnoreDhcpOptionListRequest types.Bool   `tfsdk:"use_ignore_dhcp_option_list_request"`
-	UseLogicFilterRules            types.Bool   `tfsdk:"use_logic_filter_rules"`
-	UseMsOptions                   types.Bool   `tfsdk:"use_ms_options"`
-	UseNextserver                  types.Bool   `tfsdk:"use_nextserver"`
-	UseOptions                     types.Bool   `tfsdk:"use_options"`
-	UsePxeLeaseTime                types.Bool   `tfsdk:"use_pxe_lease_time"`
-	UseSnmp3Credential             types.Bool   `tfsdk:"use_snmp3_credential"`
-	UseSnmpCredential              types.Bool   `tfsdk:"use_snmp_credential"`
+	Ref                            types.String                     `tfsdk:"ref"`
+	AgentCircuitId                 types.String                     `tfsdk:"agent_circuit_id"`
+	AgentRemoteId                  types.String                     `tfsdk:"agent_remote_id"`
+	AllowTelnet                    types.Bool                       `tfsdk:"allow_telnet"`
+	AlwaysUpdateDns                types.Bool                       `tfsdk:"always_update_dns"`
+	Bootfile                       types.String                     `tfsdk:"bootfile"`
+	Bootserver                     types.String                     `tfsdk:"bootserver"`
+	CliCredentials                 types.List                       `tfsdk:"cli_credentials"`
+	ClientIdentifierPrependZero    types.Bool                       `tfsdk:"client_identifier_prepend_zero"`
+	CloudInfo                      types.Object                     `tfsdk:"cloud_info"`
+	Comment                        types.String                     `tfsdk:"comment"`
+	DdnsDomainname                 types.String                     `tfsdk:"ddns_domainname"`
+	DdnsHostname                   types.String                     `tfsdk:"ddns_hostname"`
+	DenyBootp                      types.Bool                       `tfsdk:"deny_bootp"`
+	DeviceDescription              types.String                     `tfsdk:"device_description"`
+	DeviceLocation                 types.String                     `tfsdk:"device_location"`
+	DeviceType                     types.String                     `tfsdk:"device_type"`
+	DeviceVendor                   types.String                     `tfsdk:"device_vendor"`
+	DhcpClientIdentifier           types.String                     `tfsdk:"dhcp_client_identifier"`
+	Disable                        types.Bool                       `tfsdk:"disable"`
+	DisableDiscovery               types.Bool                       `tfsdk:"disable_discovery"`
+	DiscoverNowStatus              types.String                     `tfsdk:"discover_now_status"`
+	DiscoveredData                 types.Object                     `tfsdk:"discovered_data"`
+	EnableDdns                     types.Bool                       `tfsdk:"enable_ddns"`
+	EnableImmediateDiscovery       types.Bool                       `tfsdk:"enable_immediate_discovery"`
+	EnablePxeLeaseTime             types.Bool                       `tfsdk:"enable_pxe_lease_time"`
+	ExtAttrs                       types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll                    types.Map                        `tfsdk:"extattrs_all"`
+	IgnoreDhcpOptionListRequest    types.Bool                       `tfsdk:"ignore_dhcp_option_list_request"`
+	Ipv4addr                       types.String                     `tfsdk:"ipv4addr"`
+	FuncCall                       types.Object                     `tfsdk:"func_call"`
+	IsInvalidMac                   types.Bool                       `tfsdk:"is_invalid_mac"`
+	LogicFilterRules               types.List                       `tfsdk:"logic_filter_rules"`
+	Mac                            types.String                     `tfsdk:"mac"`
+	MatchClient                    types.String                     `tfsdk:"match_client"`
+	MsAdUserData                   types.Object                     `tfsdk:"ms_ad_user_data"`
+	MsOptions                      types.List                       `tfsdk:"ms_options"`
+	MsServer                       types.Object                     `tfsdk:"ms_server"`
+	Name                           types.String                     `tfsdk:"name"`
+	Network                        types.String                     `tfsdk:"network"`
+	NetworkView                    types.String                     `tfsdk:"network_view"`
+	Nextserver                     types.String                     `tfsdk:"nextserver"`
+	Options                        internaltypes.UnorderedListValue `tfsdk:"options"`
+	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
+	ReservedInterface              types.String                     `tfsdk:"reserved_interface"`
+	RestartIfNeeded                types.Bool                       `tfsdk:"restart_if_needed"`
+	Snmp3Credential                types.Object                     `tfsdk:"snmp3_credential"`
+	SnmpCredential                 types.Object                     `tfsdk:"snmp_credential"`
+	Template                       types.String                     `tfsdk:"template"`
+	UseBootfile                    types.Bool                       `tfsdk:"use_bootfile"`
+	UseBootserver                  types.Bool                       `tfsdk:"use_bootserver"`
+	UseCliCredentials              types.Bool                       `tfsdk:"use_cli_credentials"`
+	UseDdnsDomainname              types.Bool                       `tfsdk:"use_ddns_domainname"`
+	UseDenyBootp                   types.Bool                       `tfsdk:"use_deny_bootp"`
+	UseEnableDdns                  types.Bool                       `tfsdk:"use_enable_ddns"`
+	UseIgnoreDhcpOptionListRequest types.Bool                       `tfsdk:"use_ignore_dhcp_option_list_request"`
+	UseLogicFilterRules            types.Bool                       `tfsdk:"use_logic_filter_rules"`
+	UseMsOptions                   types.Bool                       `tfsdk:"use_ms_options"`
+	UseNextserver                  types.Bool                       `tfsdk:"use_nextserver"`
+	UseOptions                     types.Bool                       `tfsdk:"use_options"`
+	UsePxeLeaseTime                types.Bool                       `tfsdk:"use_pxe_lease_time"`
+	UseSnmp3Credential             types.Bool                       `tfsdk:"use_snmp3_credential"`
+	UseSnmpCredential              types.Bool                       `tfsdk:"use_snmp_credential"`
 }
 
 var FixedaddressAttrTypes = map[string]attr.Type{
@@ -127,7 +135,7 @@ var FixedaddressAttrTypes = map[string]attr.Type{
 	"network":                             types.StringType,
 	"network_view":                        types.StringType,
 	"nextserver":                          types.StringType,
-	"options":                             types.ListType{ElemType: types.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes}},
+	"options":                             internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes}}},
 	"pxe_lease_time":                      types.Int64Type,
 	"reserved_interface":                  types.StringType,
 	"restart_if_needed":                   types.BoolType,
@@ -152,7 +160,6 @@ var FixedaddressAttrTypes = map[string]attr.Type{
 
 var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
@@ -189,13 +196,20 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field controls whether only the DHCP server is allowed to update DNS, regardless of the DHCP client requests.",
 	},
 	"bootfile": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
+		},
 		MarkdownDescription: "The bootfile name for the fixed address. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.",
 	},
 	"bootserver": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "The bootserver address for the fixed address. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
 	"cli_credentials": schema.ListNestedAttribute{
@@ -203,6 +217,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: FixedaddressCliCredentialsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The CLI credentials for the fixed address.",
 	},
 	"client_identifier_prepend_zero": schema.BoolAttribute{
@@ -214,48 +229,93 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          FixedaddressCloudInfoResourceSchemaAttributes,
 		Computed:            true,
-		Optional:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the fixed address; maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this fixed address.",
 	},
 	"ddns_hostname": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The DDNS host name for this fixed address.",
 	},
 	"deny_bootp": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_deny_bootp")),
+		},
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to true, BOOTP settings are disabled and BOOTP requests will be denied.",
 	},
 	"device_description": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The description of the device.",
 	},
 	"device_location": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The location of the device.",
 	},
 	"device_type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The type of the device.",
 	},
 	"device_vendor": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The vendor of the device.",
 	},
 	"dhcp_client_identifier": schema.StringAttribute{
@@ -265,6 +325,10 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.ConflictsWith(path.MatchRoot("agent_remote_id")),
 			stringvalidator.ConflictsWith(path.MatchRoot("mac")),
 			stringvalidator.ConflictsWith(path.MatchRoot("agent_circuit_id")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
 		},
 		MarkdownDescription: "The DHCP client ID for the fixed address.",
 	},
@@ -290,9 +354,12 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The discovered data for this fixed address.",
 	},
 	"enable_ddns": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_ddns")),
+		},
 		MarkdownDescription: "The dynamic DNS updates flag of a DHCP Fixed Address object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
 	},
 	"enable_immediate_discovery": schema.BoolAttribute{
@@ -318,9 +385,12 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ignore_dhcp_option_list_request")),
+		},
 		MarkdownDescription: "If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.",
 	},
 	"ipv4addr": schema.StringAttribute{
@@ -344,7 +414,10 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: FixedaddressLogicFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+		},
 		MarkdownDescription: "This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
 	"mac": schema.StringAttribute{
@@ -358,18 +431,26 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The MAC address value for this fixed address.",
 	},
 	"match_client": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CIRCUIT_ID", "CLIENT_ID", "MAC_ADDRESS", "REMOTE_ID", "RESERVED"),
+		},
 		MarkdownDescription: "The match_client value for this fixed address. Valid values are: \"MAC_ADDRESS\": The fixed IP address is leased to the matching MAC address. \"CLIENT_ID\": The fixed IP address is leased to the matching DHCP client identifier. \"RESERVED\": The fixed IP address is reserved for later use with a MAC address that only has zeros. \"CIRCUIT_ID\": The fixed IP address is leased to the DHCP client with a matching circuit ID. Note that the \"agent_circuit_id\" field must be set in this case. \"REMOTE_ID\": The fixed IP address is leased to the DHCP client with a matching remote ID. Note that the \"agent_remote_id\" field must be set in this case.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: FixedaddressMsAdUserDataResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          FixedaddressMsAdUserDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"ms_options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: FixedaddressMsOptionsResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_ms_options")),
+		},
 		MarkdownDescription: "This field contains the Microsoft DHCP options for this fixed address.",
 	},
 	"ms_server": schema.SingleNestedAttribute{
@@ -378,8 +459,14 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Microsoft server associated with this fixed address.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Name should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "This field contains the name of this fixed address.",
 	},
 	"network": schema.StringAttribute{
@@ -390,19 +477,27 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"network_view": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the network view in which this fixed address resides.",
 	},
 	"nextserver": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
+		},
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
+		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: FixedaddressOptionsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
+		},
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
@@ -519,12 +614,11 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Fixedaddress {
+func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Fixedaddress {
 	if m == nil {
 		return nil
 	}
 	to := &dhcp.Fixedaddress{
-		Ref:                            flex.ExpandStringPointer(m.Ref),
 		AgentCircuitId:                 flex.ExpandStringPointer(m.AgentCircuitId),
 		AgentRemoteId:                  flex.ExpandStringPointer(m.AgentRemoteId),
 		AllowTelnet:                    flex.ExpandBoolPointer(m.AllowTelnet),
@@ -533,7 +627,6 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Bootserver:                     flex.ExpandStringPointer(m.Bootserver),
 		CliCredentials:                 flex.ExpandFrameworkListNestedBlock(ctx, m.CliCredentials, diags, ExpandFixedaddressCliCredentials),
 		ClientIdentifierPrependZero:    flex.ExpandBoolPointer(m.ClientIdentifierPrependZero),
-		CloudInfo:                      ExpandFixedaddressCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:                        flex.ExpandStringPointer(m.Comment),
 		DdnsDomainname:                 flex.ExpandStringPointer(m.DdnsDomainname),
 		DdnsHostname:                   flex.ExpandStringPointer(m.DdnsHostname),
@@ -545,7 +638,6 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		DhcpClientIdentifier:           flex.ExpandStringPointer(m.DhcpClientIdentifier),
 		Disable:                        flex.ExpandBoolPointer(m.Disable),
 		DisableDiscovery:               flex.ExpandBoolPointer(m.DisableDiscovery),
-		DiscoveredData:                 ExpandFixedaddressDiscoveredData(ctx, m.DiscoveredData, diags),
 		EnableDdns:                     flex.ExpandBoolPointer(m.EnableDdns),
 		EnableImmediateDiscovery:       flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		EnablePxeLeaseTime:             flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
@@ -584,6 +676,9 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		UsePxeLeaseTime:                flex.ExpandBoolPointer(m.UsePxeLeaseTime),
 		UseSnmp3Credential:             flex.ExpandBoolPointer(m.UseSnmp3Credential),
 		UseSnmpCredential:              flex.ExpandBoolPointer(m.UseSnmpCredential),
+	}
+	if isCreate {
+		to.Template = flex.ExpandStringPointer(m.Template)
 	}
 	return to
 }
@@ -633,8 +728,6 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.DiscoverNowStatus = flex.FlattenStringPointer(from.DiscoverNowStatus)
 	m.DiscoveredData = FlattenFixedaddressDiscoveredData(ctx, from.DiscoveredData, diags)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
-	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.Ipv4addr = FlattenRecordAIpv4addr(from.Ipv4addr)
@@ -649,10 +742,9 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.Network = flex.FlattenStringPointer(from.Network)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, FixedaddressOptionsAttrTypes, diags, FlattenFixedaddressOptions)
+	m.Options = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.Options, FixedaddressOptionsAttrTypes, diags, FlattenFixedaddressOptions)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
-	m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.Snmp3Credential = FlattenFixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
 	m.SnmpCredential = FlattenFixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
 	m.Template = flex.FlattenStringPointer(from.Template)
@@ -695,7 +787,7 @@ func FlattenRecordAIpv4addr(from *dhcp.FixedaddressIpv4addr) types.String {
 }
 
 // RemoveDefaultDHCPOptions removes the default DHCP options from the provided options list.
-func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.FixedaddressOptions, planOptions types.List) []dhcp.FixedaddressOptions {
+func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.FixedaddressOptions, planOptions internaltypes.UnorderedListValue) []dhcp.FixedaddressOptions {
 	defaultOptionName := "dhcp-lease-time"
 	defaultOptionVal := ""
 
