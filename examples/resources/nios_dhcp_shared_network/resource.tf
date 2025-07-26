@@ -1,4 +1,4 @@
-// Create SharedNetwork Record with Basic Fields
+// Create SharedNetwork with Basic Fields
 resource "nios_dhcp_sharednetwork" "shared_network_basic_fields" {
   name = "example_shared_network1"
   networks = [
@@ -15,7 +15,7 @@ resource "nios_dhcp_sharednetwork" "shared_network_basic_fields" {
   }
 }
 
-// Create SharedNetwork Record using function call to retrieve ipv4addr
+// Create SharedNetwork with Additional Fields
 resource "nios_dhcp_sharednetwork" "shared_network_additional_fields" {
   name = "example_shared_network2"
   networks = [
