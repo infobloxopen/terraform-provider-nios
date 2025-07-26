@@ -92,7 +92,7 @@ func (r *ZoneForwardResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	res := apiRes.CreateZoneForwardResponseAsObject.GetResult()
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create ZoneForward due inherited Extensible attributes, got error: %s", err))
 		return
@@ -140,12 +140,6 @@ func (r *ZoneForwardResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading ZoneForward due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
 	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -170,6 +164,12 @@ func (r *ZoneForwardResource) Read(ctx context.Context, req resource.ReadRequest
 		if r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
+	}
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading ZoneForward due inherited Extensible attributes, got error: %s", diags))
+		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
@@ -222,7 +222,7 @@ func (r *ZoneForwardResource) ReadByExtAttrs(ctx context.Context, data *ZoneForw
 	res := results[0]
 
 	// Remove inherited external attributes and check for errors
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		return true
 	}
@@ -278,7 +278,7 @@ func (r *ZoneForwardResource) Update(ctx context.Context, req resource.UpdateReq
 
 	res := apiRes.UpdateZoneForwardResponseAsObject.GetResult()
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update ZoneForward due inherited Extensible attributes, got error: %s", diags))
 		return
