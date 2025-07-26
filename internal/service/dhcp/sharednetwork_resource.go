@@ -71,17 +71,11 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 		return
 	}
 
-	resp.Diagnostics.Append(data.ValidateConfig(ctx)...)
-}
-
-func (m *SharednetworkModel) ValidateConfig(ctx context.Context) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	if !m.DdnsServerAlwaysUpdates.IsNull() && !m.DdnsServerAlwaysUpdates.IsUnknown() {
-		if m.DdnsServerAlwaysUpdates.ValueBool() {
+	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
+		if data.DdnsServerAlwaysUpdates.ValueBool() {
 			// Check if ddns_use_option81 is set to true
-			if m.DdnsUseOption81.IsNull() || m.DdnsUseOption81.IsUnknown() || !m.DdnsUseOption81.ValueBool() {
-				diags.AddAttributeError(
+			if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
+				resp.Diagnostics.AddAttributeError(
 					path.Root("ddns_server_always_updates"),
 					"Invalid Configuration",
 					"When ddns_server_always_updates is enabled, ddns_use_option81 must be set to true",
@@ -89,8 +83,6 @@ func (m *SharednetworkModel) ValidateConfig(ctx context.Context) diag.Diagnostic
 			}
 		}
 	}
-
-	return diags
 }
 
 func (r *SharednetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
