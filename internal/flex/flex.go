@@ -3,7 +3,6 @@ package flex
 import (
 	"context"
 	"fmt"
-
 	"strconv"
 	"strings"
 	"time"
