@@ -167,7 +167,6 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv6addr": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The IPv6 Address of the record.",
 	},
 	"func_call": schema.SingleNestedAttribute{
