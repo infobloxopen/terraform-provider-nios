@@ -224,10 +224,10 @@ Optional:
 
 Read-Only:
 
-- `ksk_algorithm` (String) Key Signing Key algorithm. Deprecated.
-- `ksk_size` (Number) Key Signing Key size, in bits. Deprecated.
-- `zsk_algorithm` (String) Zone Signing Key algorithm. Deprecated.
-- `zsk_size` (Number) Zone Signing Key size, in bits. Deprecated.
+- `ksk_algorithm` (String) Key Signing Key algorithm. Use KSK Algorithms instead.
+- `ksk_size` (Number) Key Signing Key size, in bits. Use KSK Algorithms instead.
+- `zsk_algorithm` (String) Zone Signing Key algorithm. Use ZSK Algorithms instead.
+- `zsk_size` (Number) Zone Signing Key size, in bits. Use ZSK Algorithms instead.
 
 <a id="nestedatt--dnssec_key_params--ksk_algorithms"></a>
 ### Nested Schema for `dnssec_key_params.ksk_algorithms`
@@ -525,11 +525,11 @@ Read-Only:
 
 Required:
 
-- `address` (String) The address this rule applies to or "Any".
 - `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
 
 Optional:
 
+- `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
 - `tsig_key` (String) A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.
 - `tsig_key_alg` (String) The TSIG key algorithm.
@@ -579,13 +579,16 @@ Read-Only:
 <a id="nestedatt--dnssec_keys"></a>
 ### Nested Schema for `dnssec_keys`
 
+Required:
+
+- `tag` (Number) The tag of the key for the zone.
+
 Read-Only:
 
 - `algorithm` (String) The public-key encryption algorithm. Values 1, 3 and 6 are deprecated from NIOS 9.0.
 - `next_event_date` (Number) The next event date for the key, the rollover date for an active key or the removal date for an already rolled one.
 - `public_key` (String) The Base-64 encoding of the public key.
 - `status` (String) The status of the key for the zone.
-- `tag` (Number) The tag of the key for the zone.
 - `type` (String) The key type.
 
 
