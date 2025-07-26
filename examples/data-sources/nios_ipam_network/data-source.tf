@@ -5,12 +5,12 @@ data "nios_ipam_network" "get_network_using_filters" {
   }
 }
 
-// Retrieve specific IPAM network containers using Extensible Attributes
-data "nios_ipam_networkcontainer" "get_network_containers_using_extensible_attributes" {
+// Retrieve specific IPAM network using Extensible Attributes
+data "nios_ipam_network" "get_network_using_extensible_attributes" {
   extattrfilters = {
     "Site" = "location-1"
   }
 }
 
-// Retrieve all IPAM network containers
-data "nios_ipam_networkcontainer" "get_all_network_containers" {}
+// Retrieve all IPAM network
+data "nios_ipam_network" "get_all_network" {}
