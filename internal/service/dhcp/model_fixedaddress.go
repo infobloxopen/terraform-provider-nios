@@ -228,7 +228,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "Comment for the fixed address; maximum 256 characters.",
@@ -240,7 +240,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this fixed address.",
@@ -251,7 +251,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The DDNS host name for this fixed address.",
@@ -271,7 +271,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The description of the device.",
@@ -282,7 +282,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The location of the device.",
@@ -293,7 +293,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The type of the device.",
@@ -304,7 +304,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The vendor of the device.",
@@ -315,7 +315,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The DHCP client ID for the fixed address.",
@@ -454,7 +454,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "This field contains the name of this fixed address.",
