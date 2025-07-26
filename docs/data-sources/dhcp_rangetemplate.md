@@ -185,12 +185,15 @@ Optional:
 <a id="nestedatt--result--ms_options"></a>
 ### Nested Schema for `result.ms_options`
 
+Required:
+
+- `num` (Number) The code of the DHCP option.
+- `value` (String) Value of the DHCP option.
+
 Optional:
 
 - `name` (String) The name of the DHCP option.
-- `num` (Number) The code of the DHCP option.
 - `user_class` (String) The name of the user class with which this DHCP option is associated.
-- `value` (String) Value of the DHCP option.
 - `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 Read-Only:
