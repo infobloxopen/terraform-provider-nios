@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -37,7 +38,7 @@ func (r *RangetemplateResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *RangetemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DHCP Range Template record.",
+		MarkdownDescription: "Manages a DHCP Range Templates.",
 		Attributes:          RangetemplateResourceSchemaAttributes,
 	}
 }

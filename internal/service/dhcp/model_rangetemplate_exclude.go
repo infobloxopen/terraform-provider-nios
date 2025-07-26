@@ -28,13 +28,11 @@ var RangetemplateExcludeAttrTypes = map[string]attr.Type{
 
 var RangetemplateExcludeResourceSchemaAttributes = map[string]schema.Attribute{
 	"offset": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The address offset of the DHCP exclusion range template.",
 	},
 	"number_of_addresses": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The number of addresses in the DHCP exclusion range template.",
 	},
 	"comment": schema.StringAttribute{

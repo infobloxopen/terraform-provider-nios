@@ -3,24 +3,24 @@
 page_title: "nios_dhcp_rangetemplate Resource - nios"
 subcategory: "DHCP"
 description: |-
-  Manages a DHCP Range Template record.
+  Manages a DHCP Range Templates.
 ---
 
 # nios_dhcp_rangetemplate (Resource)
 
-Manages a DHCP Range Template record.
+Manages a DHCP Range Templates.
 
 ## Example Usage
 
 ```terraform
-// Create DHCP RangeTemplate with required Fields
+// Create DHCP Range Template with required Fields
 resource "nios_dhcp_rangetemplate" "rangetemplate_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
 }
 
-// Create DHCP RangeTemplate with additional Fields
+// Create DHCP Range Template with additional Fields
 resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields" {
   name                    = "example_range_template_additional_fields"
   number_of_addresses     = 10
@@ -60,7 +60,7 @@ resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields" {
   }
 }
 
-// Create DHCP RangeTemplate with filters and exclude fields
+// Create DHCP Range Template with filters and exclude fields
 resource "nios_dhcp_rangetemplate" "rangetemplate_additional_fields2" {
   name                = "example_range_template3"
   number_of_addresses = 60
@@ -202,11 +202,14 @@ Optional:
 <a id="nestedatt--exclude"></a>
 ### Nested Schema for `exclude`
 
+Required:
+
+- `number_of_addresses` (Number) The number of addresses in the DHCP exclusion range template.
+- `offset` (Number) The address offset of the DHCP exclusion range template.
+
 Optional:
 
 - `comment` (String) A descriptive comment of a DHCP exclusion range template.
-- `number_of_addresses` (Number) The number of addresses in the DHCP exclusion range template.
-- `offset` (Number) The address offset of the DHCP exclusion range template.
 
 
 <a id="nestedatt--fingerprint_filter_rules"></a>
