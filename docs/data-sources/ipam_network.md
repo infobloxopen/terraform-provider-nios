@@ -14,7 +14,7 @@ Retrieves Information about existing Network
 
 ```terraform
 // Retrieve a specific IPAM network container using filters
-data "nios_ipam_networkcontainer" "get_record_using_filters" {
+data "nios_ipam_network" "get_network_using_filters" {
   filters = {
     "network" = "10.0.0.0/24"
   }
@@ -54,6 +54,7 @@ Optional:
 - `auto_create_reversezone` (Boolean) This flag controls whether reverse zones are automatically created when the network is added.
 - `bootfile` (String) The bootfile name for the network. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.
 - `bootserver` (String) The bootserver address for the network. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.
+- `cloud_info` (Attributes) A CloudInfo struct that contains information about the cloud provider and region for the network. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `cloud_shared` (Boolean) Boolean flag to indicate if the network is shared with cloud.
 - `comment` (String) Comment for the network, maximum 256 characters.
 - `ddns_domainname` (String) The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.
@@ -151,7 +152,6 @@ Optional:
 
 Read-Only:
 
-- `cloud_info` (Attributes) A CloudInfo struct that contains information about the cloud provider and region for the network. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `conflict_count` (Number) The number of conflicts discovered via network discovery.
 - `dhcp_utilization` (Number) The percentage of the total DHCP utilization of the network multiplied by 1000. This is the percentage of the total number of available IP addresses belonging to the network versus the total number of all IP addresses in network.
 - `dhcp_utilization_status` (String) A string describing the utilization level of the network.
@@ -178,6 +178,34 @@ Read-Only:
 - `unmanaged_count` (Number) The number of unmanaged IP addresses as discovered by network discovery.
 - `utilization` (Number) The network utilization in percentage.
 - `utilization_update` (Number) The timestamp when the utilization statistics were last updated.
+
+<a id="nestedatt--result--cloud_info"></a>
+### Nested Schema for `result.cloud_info`
+
+Optional:
+
+- `delegated_member` (Attributes) Contains information about the delegated member of the network. This is only set if the network is delegated to a member. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
+
+Read-Only:
+
+- `authority_type` (String) Type of authority over the object.
+- `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
+- `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
+- `mgmt_platform` (String) Indicates the specified cloud management platform.
+- `owned_by_adaptor` (Boolean) Determines whether the object was created by the cloud adapter or not.
+- `tenant` (String) Reference to the tenant object associated with the object, if any.
+- `usage` (String) Indicates the cloud origin of the object.
+
+<a id="nestedatt--result--cloud_info--delegated_member"></a>
+### Nested Schema for `result.cloud_info.delegated_member`
+
+Optional:
+
+- `ipv4addr` (String) The IPv4 Address of the Grid Member.
+- `ipv6addr` (String) The IPv6 Address of the Grid Member.
+- `name` (String) The Grid member name
+
+
 
 <a id="nestedatt--result--discovery_basic_poll_settings"></a>
 ### Nested Schema for `result.discovery_basic_poll_settings`
@@ -390,31 +418,6 @@ Optional:
 - `fqdn` (String) The FQDN of the authoritative forward zone.
 - `is_default` (Boolean) True if this is the default zone.
 - `view` (String) The view to which the zone belongs. If a view is not specified, the default view is used.
-
-
-<a id="nestedatt--result--cloud_info"></a>
-### Nested Schema for `result.cloud_info`
-
-Read-Only:
-
-- `authority_type` (String) Type of authority over the object.
-- `delegated_member` (Attributes) Contains information about the delegated member of the network. This is only set if the network is delegated to a member. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
-- `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
-- `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
-- `mgmt_platform` (String) Indicates the specified cloud management platform.
-- `owned_by_adaptor` (Boolean) Determines whether the object was created by the cloud adapter or not.
-- `tenant` (String) Reference to the tenant object associated with the object, if any.
-- `usage` (String) Indicates the cloud origin of the object.
-
-<a id="nestedatt--result--cloud_info--delegated_member"></a>
-### Nested Schema for `result.cloud_info.delegated_member`
-
-Read-Only:
-
-- `ipv4addr` (String) The IPv4 Address of the Grid Member.
-- `ipv6addr` (String) The IPv6 Address of the Grid Member.
-- `name` (String) The Grid member name
-
 
 
 <a id="nestedatt--result--ms_ad_user_data"></a>
