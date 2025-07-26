@@ -11,6 +11,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -61,8 +62,15 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Enabling this option will auto-create a single read-only A/AAAA/CNAME record corresponding to the configured hostname and update it if the hostname changes.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the DTC Server; maximum 256 characters.",
 	},
 	"disable": schema.BoolAttribute{
@@ -115,6 +123,7 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_sni_hostname")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The hostname for Server Name Indication (SNI) in FQDN format.",
 	},
 	"use_sni_hostname": schema.BoolAttribute{
