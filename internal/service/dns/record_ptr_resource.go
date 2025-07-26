@@ -23,6 +23,7 @@ var readableAttributesForRecordPtr = "aws_rte53_record_info,cloud_info,comment,c
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RecordPtrResource{}
 var _ resource.ResourceWithImportState = &RecordPtrResource{}
+var _ resource.ResourceWithValidateConfig = &RecordPtrResource{}
 
 func NewRecordPtrResource() resource.Resource {
 	return &RecordPtrResource{}
@@ -70,19 +71,17 @@ func (r *RecordPtrResource) ValidateConfig(ctx context.Context, req resource.Val
 	var funccall types.Object
 	req.Config.GetAttribute(ctx, path.Root("func_call"), &funccall)
 
-	if funccall.IsNull() {
+	if funccall.IsNull() && funccall.IsUnknown() {
 		return
 	}
 
-	if !funccall.IsUnknown() {
-		if attrName, ok := funccall.Attributes()["attribute_name"]; ok || attrName.IsNull() || attrName.IsUnknown() {
-			if attrName == types.StringValue("ipv6addr") {
-				resp.Diagnostics.AddError(
-					"Invalid Function Call Attribute",
-					"Support for Ipv6 address in function call is not implemented yet.",
-				)
-				return
-			}
+	if attrName, ok := funccall.Attributes()["attribute_name"]; ok || attrName.IsNull() || attrName.IsUnknown() {
+		if attrName == types.StringValue("ipv6addr") {
+			resp.Diagnostics.AddError(
+				"Invalid Function Call Attribute",
+				"Support for Ipv6 address in function call is not implemented yet.",
+			)
+			return
 		}
 	}
 }
