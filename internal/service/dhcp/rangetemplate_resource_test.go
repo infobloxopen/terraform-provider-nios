@@ -12,11 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-//TODO : Required parents for the execution of tests
+//TODO : Required parents for the execution of tests and MS_SERVER setup for ms_server and ms_options testcases.
 // - failover_association
 // - mac_filter_rules (mac_filter), nac_filter_rules (nac_filter), option_filter_rules,
 // - logic_filter_rules, fingerprint_filter_rules (finger_print_filter1), relay_agent_filter_rules (relay_agent_filter)
