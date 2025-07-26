@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -101,6 +102,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "List of monitors and associated members statuses of which are shared across members and consolidated in server availability determination.",
 	},
 	"disable": schema.BoolAttribute{
@@ -189,6 +193,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: DtcPoolServersResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The servers related to the pool.",
 	},
 	"ttl": schema.Int64Attribute{
