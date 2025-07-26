@@ -89,7 +89,6 @@ func (m *ViewCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		return nil
 	}
 	to := &dns.ViewCloudInfo{
-		DelegatedMember: ExpandViewcloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
 	}
 	return to
 }
