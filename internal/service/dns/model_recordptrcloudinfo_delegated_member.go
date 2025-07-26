@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 

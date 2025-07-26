@@ -16,6 +16,8 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO : Add support for IPv6 address in function call.
+
 var readableAttributesForRecordPtr = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,dns_ptrdname,extattrs,forbid_reclamation,ipv4addr,ipv6addr,last_queried,ms_ad_user_data,name,ptrdname,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -60,6 +62,29 @@ func (r *RecordPtrResource) Configure(ctx context.Context, req resource.Configur
 	}
 
 	r.client = client
+}
+
+// ValidateConfig validates the configuration of the RecordPtr resource.
+// It checks if the function call attribute is set to "ipv6addr" and returns an error if it is.
+func (r *RecordPtrResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var funccall types.Object
+	req.Config.GetAttribute(ctx, path.Root("func_call"), &funccall)
+
+	if funccall.IsNull() {
+		return
+	}
+
+	if !funccall.IsUnknown() {
+		if attrName, ok := funccall.Attributes()["attribute_name"]; ok || attrName.IsNull() || attrName.IsUnknown() {
+			if attrName == types.StringValue("ipv6addr") {
+				resp.Diagnostics.AddError(
+					"Invalid Function Call Attribute",
+					"Support for Ipv6 address in function call is not implemented yet.",
+				)
+				return
+			}
+		}
+	}
 }
 
 func (r *RecordPtrResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
