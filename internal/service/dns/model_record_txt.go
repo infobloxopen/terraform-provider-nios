@@ -96,6 +96,7 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
@@ -114,6 +115,7 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"ddns_principal": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The GSS-TSIG principal that owns this record.",
 	},
 	"ddns_protected": schema.BoolAttribute{
@@ -221,7 +223,6 @@ func (m *RecordTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 		Text:              flex.ExpandStringPointer(m.Text),
 		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
-		View:              flex.ExpandStringPointer(m.View),
 	}
 	if isCreate {
 		to.View = flex.ExpandStringPointer(m.View)
