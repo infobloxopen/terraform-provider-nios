@@ -1,3 +1,4 @@
+// Create an IPAM Network with Basic Fields 
 resource "nios_ipam_network" "example_network" {
   network      = "10.0.0.0/24"
   network_view = "default"

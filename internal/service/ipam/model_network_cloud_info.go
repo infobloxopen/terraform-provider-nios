@@ -41,6 +41,7 @@ var NetworkCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          NetworkcloudinfoDelegatedMemberResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "Contains information about the delegated member of the network. This is only set if the network is delegated to a member.",
+		Optional:            true,
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,

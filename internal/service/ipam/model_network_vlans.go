@@ -14,6 +14,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
+// TODO: function call support for VLANs
 type NetworkVlansModel struct {
 	Vlan types.Map    `tfsdk:"vlan"`
 	Id   types.Int64  `tfsdk:"id"`

@@ -324,6 +324,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          NetworkCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "A CloudInfo struct that contains information about the cloud provider and region for the network.",
+		Optional:            true,
 	},
 	"cloud_shared": schema.BoolAttribute{
 		Optional:            true,
