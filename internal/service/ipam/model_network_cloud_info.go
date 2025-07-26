@@ -14,7 +14,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type NetworkcontainerCloudInfoModel struct {
+type NetworkCloudInfoModel struct {
 	DelegatedMember types.Object `tfsdk:"delegated_member"`
 	DelegatedScope  types.String `tfsdk:"delegated_scope"`
 	DelegatedRoot   types.String `tfsdk:"delegated_root"`
@@ -25,8 +25,8 @@ type NetworkcontainerCloudInfoModel struct {
 	AuthorityType   types.String `tfsdk:"authority_type"`
 }
 
-var NetworkcontainerCloudInfoAttrTypes = map[string]attr.Type{
-	"delegated_member": types.ObjectType{AttrTypes: NetworkcontainercloudinfoDelegatedMemberAttrTypes},
+var NetworkCloudInfoAttrTypes = map[string]attr.Type{
+	"delegated_member": types.ObjectType{AttrTypes: NetworkcloudinfoDelegatedMemberAttrTypes},
 	"delegated_scope":  types.StringType,
 	"delegated_root":   types.StringType,
 	"owned_by_adaptor": types.BoolType,
@@ -36,12 +36,12 @@ var NetworkcontainerCloudInfoAttrTypes = map[string]attr.Type{
 	"authority_type":   types.StringType,
 }
 
-var NetworkcontainerCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
+var NetworkCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes:          NetworkcontainercloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:            true,
+		Attributes:          NetworkcloudinfoDelegatedMemberResourceSchemaAttributes,
 		Computed:            true,
-		MarkdownDescription: "The Cloud Platform Appliance to which authority of the object is delegated.",
+		MarkdownDescription: "Contains information about the delegated member of the network. This is only set if the network is delegated to a member.",
+		Optional:            true,
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,
@@ -73,11 +73,11 @@ var NetworkcontainerCloudInfoResourceSchemaAttributes = map[string]schema.Attrib
 	},
 }
 
-func ExpandNetworkcontainerCloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.NetworkcontainerCloudInfo {
+func ExpandNetworkCloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.NetworkCloudInfo {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m NetworkcontainerCloudInfoModel
+	var m NetworkCloudInfoModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -85,35 +85,35 @@ func ExpandNetworkcontainerCloudInfo(ctx context.Context, o types.Object, diags 
 	return m.Expand(ctx, diags)
 }
 
-func (m *NetworkcontainerCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.NetworkcontainerCloudInfo {
+func (m *NetworkCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.NetworkCloudInfo {
 	if m == nil {
 		return nil
 	}
-	to := &ipam.NetworkcontainerCloudInfo{
-		DelegatedMember: ExpandNetworkcontainercloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
+	to := &ipam.NetworkCloudInfo{
+		DelegatedMember: ExpandNetworkcloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
 	}
 	return to
 }
 
-func FlattenNetworkcontainerCloudInfo(ctx context.Context, from *ipam.NetworkcontainerCloudInfo, diags *diag.Diagnostics) types.Object {
+func FlattenNetworkCloudInfo(ctx context.Context, from *ipam.NetworkCloudInfo, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(NetworkcontainerCloudInfoAttrTypes)
+		return types.ObjectNull(NetworkCloudInfoAttrTypes)
 	}
-	m := NetworkcontainerCloudInfoModel{}
+	m := NetworkCloudInfoModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, NetworkcontainerCloudInfoAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, NetworkCloudInfoAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *NetworkcontainerCloudInfoModel) Flatten(ctx context.Context, from *ipam.NetworkcontainerCloudInfo, diags *diag.Diagnostics) {
+func (m *NetworkCloudInfoModel) Flatten(ctx context.Context, from *ipam.NetworkCloudInfo, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = NetworkcontainerCloudInfoModel{}
+		*m = NetworkCloudInfoModel{}
 	}
-	m.DelegatedMember = FlattenNetworkcontainercloudinfoDelegatedMember(ctx, from.DelegatedMember, diags)
+	m.DelegatedMember = FlattenNetworkcloudinfoDelegatedMember(ctx, from.DelegatedMember, diags)
 	m.DelegatedScope = flex.FlattenStringPointer(from.DelegatedScope)
 	m.DelegatedRoot = flex.FlattenStringPointer(from.DelegatedRoot)
 	m.OwnedByAdaptor = types.BoolPointerValue(from.OwnedByAdaptor)

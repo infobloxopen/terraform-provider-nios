@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
