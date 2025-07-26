@@ -39,7 +39,8 @@ var ViewCloudInfoAttrTypes = map[string]attr.Type{
 var ViewCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes: ViewcloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
+		MarkdownDescription: "Information about the delegated member.",
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,

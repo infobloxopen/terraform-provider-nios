@@ -64,10 +64,6 @@ var ViewMatchClientsResourceSchemaAttributes = map[string]schema.Attribute{
 	"tsig_key_alg": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		// Default:  stringdefault.StaticString("HMAC-MD5"),
-		// Validators: []validator.String{
-		// 	stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
-		// },
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
@@ -84,7 +80,6 @@ var ViewMatchClientsResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional: true,
 		Computed: true,
-		//Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }

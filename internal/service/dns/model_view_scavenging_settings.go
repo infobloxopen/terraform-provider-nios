@@ -79,6 +79,7 @@ var ViewScavengingSettingsResourceSchemaAttributes = map[string]schema.Attribute
 	"scavenging_schedule": schema.SingleNestedAttribute{
 		Attributes: ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes,
 		Optional:   true,
+		MarkdownDescription: "The scavenging schedule. The scavenging schedule is used to determine when the scavenging should be performed. If not specified, the default scavenging schedule is used.",
 	},
 	"expression_list": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

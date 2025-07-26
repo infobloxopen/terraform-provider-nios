@@ -3,9 +3,11 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -26,11 +28,15 @@ var ViewFixedRrsetOrderFqdnsAttrTypes = map[string]attr.Type{
 
 var ViewFixedRrsetOrderFqdnsResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The FQDN of the fixed RRset configuration item.",
 	},
 	"record_type": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("A", "AAAA","BOTH"),
+		},
 		MarkdownDescription: "The record type for the specified FQDN in the fixed RRset configuration.",
 	},
 }

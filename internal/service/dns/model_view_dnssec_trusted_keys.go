@@ -33,22 +33,27 @@ var ViewDnssecTrustedKeysAttrTypes = map[string]attr.Type{
 var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The FQDN of the domain for which the member validates responses to recursive queries.",
 	},
 	"algorithm": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The DNSSEC algorithm used to generate the key.",
 	},
 	"key": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The DNSSEC key.",
 	},
 	"secure_entry_point": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The secure entry point flag, if set it means this is a KSK configuration.",
 	},
 	"dnssec_must_be_secure": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Responses must be DNSSEC secure for this hierarchy/domain.",
 	},
 }
