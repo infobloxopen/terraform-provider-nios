@@ -3,17 +3,17 @@
 page_title: "nios_ipam_ipv6network_container Data Source - nios"
 subcategory: "IPAM"
 description: |-
-  
+  Retrieves Information about existing IPv6 Network Containers.
 ---
 
 # nios_ipam_ipv6network_container (Data Source)
 
-
+Retrieves Information about existing IPv6 Network Containers.
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific IPAM network container using filters
+// Retrieve a specific IPAM IPv6 network container using filters
 data "nios_ipam_ipv6network_container" "get_record_using_filters" {
   filters = {
     "network" = "10::/64"
@@ -71,13 +71,12 @@ Optional:
 - `func_call` (Attributes) The function call to be executed on the object. (see [below for nested schema](#nestedatt--result--func_call))
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file. (see [below for nested schema](#nestedatt--result--logic_filter_rules))
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
+- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user data associated with the network container. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `network` (String) The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'.
 - `network_view` (String) The name of the network view in which this network resides.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--result--options))
 - `port_control_blackout_setting` (Attributes) (see [below for nested schema](#nestedatt--result--port_control_blackout_setting))
 - `preferred_lifetime` (Number) Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network Container object.
-- `ref` (String) The reference to the object.
 - `remove_subnets` (Boolean) Remove subnets delete option. Determines whether all child objects should be removed alongside with the IPv6 network container or child objects should be assigned to another parental container. By default child objects are deleted with this network container.
 - `restart_if_needed` (Boolean) Restarts the member service.
 - `rir_organization` (String) The RIR organization associated with the IPv6 network container.
@@ -118,6 +117,7 @@ Read-Only:
 - `last_rir_registration_update_status` (String) Last RIR registration update status.
 - `mgm_private_overridable` (Boolean) This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.
 - `network_container` (String) The network container to which this network belongs, if any.
+- `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the IPv6 network container address space.
 - `utilization` (Number) The network container utilization in percentage.
 
@@ -126,7 +126,7 @@ Read-Only:
 
 Optional:
 
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
+- `delegated_member` (Attributes) The delegated member information for the IPv6 network container. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 
 Read-Only:
 
@@ -166,7 +166,7 @@ Optional:
 - `snmp_collection` (Boolean) Determines whether SNMP collection is enabled or not.
 - `switch_port_data_collection_polling` (String) A switch port data collection polling mode.
 - `switch_port_data_collection_polling_interval` (Number) Indicates the interval for switch port data collection polling.
-- `switch_port_data_collection_polling_schedule` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
+- `switch_port_data_collection_polling_schedule` (Attributes) The switch port data collection polling schedule. (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
 - `use_global_polling_frequency_modifier` (Boolean) Use Global Polling Frequency Modifier.
 
 <a id="nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule"></a>
@@ -195,7 +195,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) A Schedule Setting struct that determines blackout schedule. (see [below for nested schema](#nestedatt--result--discovery_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--result--discovery_blackout_setting--blackout_schedule"></a>
@@ -221,7 +221,7 @@ Optional:
 <a id="nestedatt--result--federated_realms"></a>
 ### Nested Schema for `result.federated_realms`
 
-Optional:
+Required:
 
 - `id` (String) The federated realm id
 - `name` (String) The federated realm name
@@ -246,7 +246,7 @@ Optional:
 <a id="nestedatt--result--logic_filter_rules"></a>
 ### Nested Schema for `result.logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -306,13 +306,13 @@ Optional:
 
 Optional:
 
-- `enabled_attributes` (List of String) The list of Cisco ISE attributes allowed for subscription.
+- `enabled_attributes` (List of String)
 - `mapped_ea_attributes` (Attributes List) The list of NIOS extensible attributes to Cisco ISE attributes mappings. (see [below for nested schema](#nestedatt--result--subscribe_settings--mapped_ea_attributes))
 
 <a id="nestedatt--result--subscribe_settings--mapped_ea_attributes"></a>
 ### Nested Schema for `result.subscribe_settings.mapped_ea_attributes`
 
-Optional:
+Required:
 
 - `mapped_ea` (String) The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.
 - `name` (String) The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.
