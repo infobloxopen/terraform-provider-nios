@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -164,23 +165,13 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"agent_circuit_id": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.ConflictsWith(path.MatchRoot("agent_remote_id")),
-			stringvalidator.ConflictsWith(path.MatchRoot("mac")),
-			stringvalidator.ConflictsWith(path.MatchRoot("dhcp_client_identifier")),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The agent circuit ID for the fixed address.",
 	},
 	"agent_remote_id": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.ConflictsWith(path.MatchRoot("mac")),
-			stringvalidator.ConflictsWith(path.MatchRoot("agent_circuit_id")),
-			stringvalidator.ConflictsWith(path.MatchRoot("dhcp_client_identifier")),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The agent remote ID for the fixed address.",
 	},
 	"allow_telnet": schema.BoolAttribute{
@@ -322,9 +313,6 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(path.MatchRoot("agent_remote_id")),
-			stringvalidator.ConflictsWith(path.MatchRoot("mac")),
-			stringvalidator.ConflictsWith(path.MatchRoot("agent_circuit_id")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
 				"Name should not have leading or trailing whitespace",
@@ -424,9 +412,11 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(path.MatchRoot("agent_remote_id")),
-			stringvalidator.ConflictsWith(path.MatchRoot("agent_circuit_id")),
-			stringvalidator.ConflictsWith(path.MatchRoot("dhcp_client_identifier")),
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("mac"),
+				path.MatchRoot("agent_circuit_id"),
+				path.MatchRoot("agent_remote_id"),
+				path.MatchRoot("dhcp_client_identifier")),
 		},
 		MarkdownDescription: "The MAC address value for this fixed address.",
 	},
@@ -501,7 +491,10 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_pxe_lease_time")),
+		},
 		MarkdownDescription: "The PXE lease time value for a DHCP Fixed Address object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
 	},
 	"reserved_interface": schema.StringAttribute{

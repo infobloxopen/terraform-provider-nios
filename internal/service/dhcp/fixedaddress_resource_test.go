@@ -762,7 +762,7 @@ func TestAccFixedaddressResource_EnablePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressEnablePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "true", 3600),
+				Config: testAccFixedaddressEnablePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "true", 3600, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "true"),
@@ -770,7 +770,7 @@ func TestAccFixedaddressResource_EnablePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressEnablePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "false", 3600),
+				Config: testAccFixedaddressEnablePxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "false", 3600, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
@@ -1241,7 +1241,7 @@ func TestAccFixedaddressResource_PxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressPxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "3600"),
+				Config: testAccFixedaddressPxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "3600", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "3600"),
@@ -1249,7 +1249,7 @@ func TestAccFixedaddressResource_PxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressPxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "4800"),
+				Config: testAccFixedaddressPxeLeaseTime(ip, "CIRCUIT_ID", agentCircuitID, "4800", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "4800"),
@@ -2165,7 +2165,7 @@ resource "nios_dhcp_fixed_address" "test_enable_immediate_discovery" {
 `, ip, matchClient, agentCircuitID, enableImmediateDiscovery)
 }
 
-func testAccFixedaddressEnablePxeLeaseTime(ip, matchClient string, agentCircuitID int, enablePxeLeaseTime string, pxeLeaseTime int) string {
+func testAccFixedaddressEnablePxeLeaseTime(ip, matchClient string, agentCircuitID int, enablePxeLeaseTime string, pxeLeaseTime int, usePXELeaseTime bool) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_enable_pxe_lease_time" {
 	ipv4addr = %q
@@ -2173,8 +2173,9 @@ resource "nios_dhcp_fixed_address" "test_enable_pxe_lease_time" {
 	agent_circuit_id = %d
 	enable_pxe_lease_time = %q
 	pxe_lease_time = %d
+	use_pxe_lease_time = %t
 }
-`, ip, matchClient, agentCircuitID, enablePxeLeaseTime, pxeLeaseTime)
+`, ip, matchClient, agentCircuitID, enablePxeLeaseTime, pxeLeaseTime, usePXELeaseTime)
 }
 
 func testAccFixedaddressExtAttrs(ip, matchClient string, agentCircuitID int, extAttrs map[string]string) string {
@@ -2374,15 +2375,16 @@ resource "nios_dhcp_fixed_address" "test_options" {
 `, ip, matchClient, agentCircuitID, optionsName, optionValue, useOptions)
 }
 
-func testAccFixedaddressPxeLeaseTime(ip, matchClient string, agentCircuitID int, pxeLeaseTime string) string {
+func testAccFixedaddressPxeLeaseTime(ip, matchClient string, agentCircuitID int, pxeLeaseTime string, usePXELeaseTime bool) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_pxe_lease_time" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
 	pxe_lease_time = %q
+	use_pxe_lease_time = %t
 }
-`, ip, matchClient, agentCircuitID, pxeLeaseTime)
+`, ip, matchClient, agentCircuitID, pxeLeaseTime, usePXELeaseTime)
 }
 
 func testAccFixedaddressReservedInterface(ip, matchClient string, agentCircuitID int, reservedInterface string) string {
