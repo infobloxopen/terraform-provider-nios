@@ -14,6 +14,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
+// TODO: function call support for VLANs
 type Ipv6networkVlansModel struct {
 	Vlan types.Map    `tfsdk:"vlan"`
 	Id   types.Int64  `tfsdk:"id"`
@@ -39,7 +40,6 @@ var Ipv6networkVlansResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Name of the VLAN.",
-		Optional:            true,
 	},
 }
 

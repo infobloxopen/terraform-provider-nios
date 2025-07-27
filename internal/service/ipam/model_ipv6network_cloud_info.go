@@ -41,6 +41,7 @@ var Ipv6networkCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          Ipv6networkcloudinfoDelegatedMemberResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "Contains information about the delegated member of the object. This is not set if the object is not delegated.",
+		Optional:            true,
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,

@@ -101,7 +101,7 @@ var Ipv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSchedule
 		Optional:            true,
 		MarkdownDescription: "The minutes past the hour for the scheduled task.",
 		Computed:            true,
-		Default:             int64default.StaticInt64(1),
+		Default:             int64default.StaticInt64(0),
 	},
 	"hour_of_day": schema.Int64Attribute{
 		Optional:            true,

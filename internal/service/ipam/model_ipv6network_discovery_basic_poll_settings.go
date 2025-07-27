@@ -3,12 +3,14 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -105,10 +107,19 @@ var Ipv6networkDiscoveryBasicPollSettingsResourceSchemaAttributes = map[string]s
 		MarkdownDescription: "A switch port data collection polling mode.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("PERIODIC"),
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"PERIODIC",
+				"DISABLED",
+				"SCHEDULED",
+			),
+		},
 	},
 	"switch_port_data_collection_polling_schedule": schema.SingleNestedAttribute{
-		Attributes: Ipv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          Ipv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "A switch port data collection polling schedule.",
 	},
 	"switch_port_data_collection_polling_interval": schema.Int64Attribute{
 		Optional:            true,

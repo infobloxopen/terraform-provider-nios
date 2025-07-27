@@ -165,7 +165,7 @@ resource "nios_ipam_ipv6network" "test" {
 
 data "nios_ipam_ipv6network" "test" {
   extattrfilters = {
-	"Site" = nios_ipam_ipv6network.test.extattrs.Site
+	Site = nios_ipam_ipv6network.test.extattrs.Site
   }
 }
 `, network, extAttrsValue)

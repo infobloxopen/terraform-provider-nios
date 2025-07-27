@@ -28,10 +28,12 @@ var Ipv6networksubscribesettingsMappedEaAttributesResourceSchemaAttributes = map
 	"name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.",
+		Computed:            true,
 	},
 	"mapped_ea": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.",
+		Computed:            true,
 	},
 }
 

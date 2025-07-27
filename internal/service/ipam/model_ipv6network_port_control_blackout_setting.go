@@ -40,9 +40,10 @@ var Ipv6networkPortControlBlackoutSettingResourceSchemaAttributes = map[string]s
 		Computed:            true,
 	},
 	"blackout_schedule": schema.SingleNestedAttribute{
-		Attributes: Ipv6networkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          Ipv6networkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "A Schedule Setting struct that determines blackout schedule.",
 	},
 }
 

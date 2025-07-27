@@ -1,3 +1,4 @@
+// Create an IPAM IPv6 Network with Basic Fields
 resource "nios_ipam_ipv6network" "example_network" {
   network      = "10::/64"
   network_view = "default"
@@ -9,6 +10,7 @@ resource "nios_ipam_ipv6network" "example_network" {
   }
 }
 
+// Create an IPAM IPv6 Network with Additional Fields
 resource "nios_ipam_ipv6network" "complete_example" {
   // Required attributes
   network = "11::/64"
@@ -58,7 +60,7 @@ resource "nios_ipam_ipv6network" "complete_example" {
   use_valid_lifetime              = true
 }
 
-
+// Create an IPAM IPv6 Network with Function Call
 resource "nios_ipam_ipv6network" "example_func_call" {
   func_call = {
     attribute_name  = "network"

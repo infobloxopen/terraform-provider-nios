@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -219,12 +220,22 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Comment for the network; maximum 256 characters.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
 		},
 		Computed: true,
 	},
@@ -253,7 +264,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(true),
 		Validators: []validator.Bool{
 			boolvalidator.AlsoRequires(path.MatchRoot("ddns_enable_option_fqdn")),
-			boolvalidator.AlsoRequires(path.MatchRoot("use_ddns_enable_option_fqdn")),
 		},
 	},
 	"ddns_ttl": schema.Int64Attribute{
@@ -288,11 +298,23 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered bridge domain.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"discovered_tenant": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered tenant.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"discovered_vlan_id": schema.StringAttribute{
 		Computed:            true,
@@ -455,12 +477,13 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"mgm_private_overridable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.",
-		Default:             booldefault.StaticBool(true),
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: Ipv6networkMsAdUserDataResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          Ipv6networkMsAdUserDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
+
 	"network": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -525,7 +548,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the IPv6 network address space.",
-		Default:             stringdefault.StaticString("NONE"),
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
@@ -536,6 +558,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CREATE", "MODIFY", "DELETE", "NONE"),
+		},
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
@@ -566,6 +591,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
 		},
+		MarkdownDescription: "The DHCP IPv6 Network Cisco ISE subscribe settings.",
 	},
 	"template": schema.StringAttribute{
 		Optional:            true,
@@ -751,8 +777,6 @@ func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		return nil
 	}
 	to := &ipam.Ipv6network{
-		Ref: flex.ExpandStringPointer(m.Ref),
-		// AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		CloudInfo:                        ExpandIpv6networkCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:                          flex.ExpandStringPointer(m.Comment),
 		DdnsDomainname:                   flex.ExpandStringPointer(m.DdnsDomainname),
@@ -852,7 +876,6 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	from.Options = RemoveDefaultDHCPOptionsIpv6(ctx, diags, from.Options, m.Options)
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	// m.AutoCreateReversezone = types.BoolPointerValue(from.AutoCreateReversezone)
 	m.CloudInfo = FlattenIpv6networkCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DdnsDomainname = flex.FlattenStringPointer(from.DdnsDomainname)
@@ -860,7 +883,6 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.DdnsGenerateHostname = types.BoolPointerValue(from.DdnsGenerateHostname)
 	m.DdnsServerAlwaysUpdates = types.BoolPointerValue(from.DdnsServerAlwaysUpdates)
 	m.DdnsTtl = flex.FlattenInt64Pointer(from.DdnsTtl)
-	// m.DeleteReason = flex.FlattenStringPointer(from.DeleteReason)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DiscoverNowStatus = flex.FlattenStringPointer(from.DiscoverNowStatus)
 	m.DiscoveredBgpAs = flex.FlattenStringPointer(from.DiscoveredBgpAs)
@@ -880,7 +902,6 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
-	// m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, Ipv6networkFederatedRealmsAttrTypes, diags, FlattenIpv6networkFederatedRealms)
@@ -901,15 +922,12 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.PortControlBlackoutSetting = FlattenIpv6networkPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
-	// m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
-	// m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)
 	m.SubscribeSettings = FlattenIpv6networkSubscribeSettings(ctx, from.SubscribeSettings, diags)
-	// m.Template = flex.FlattenStringPointer(from.Template)
 	m.Unmanaged = types.BoolPointerValue(from.Unmanaged)
 	m.UnmanagedCount = flex.FlattenInt64Pointer(from.UnmanagedCount)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)

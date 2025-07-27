@@ -29,6 +29,7 @@ var Ipv6networkSubscribeSettingsResourceSchemaAttributes = map[string]schema.Att
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
+		Computed:            true,
 	},
 	"mapped_ea_attributes": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -36,6 +37,7 @@ var Ipv6networkSubscribeSettingsResourceSchemaAttributes = map[string]schema.Att
 		},
 		Optional:            true,
 		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
+		Computed:            true,
 	},
 }
 
