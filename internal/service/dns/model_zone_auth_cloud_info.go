@@ -87,9 +87,7 @@ func (m *ZoneAuthCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnos
 	if m == nil {
 		return nil
 	}
-	to := &dns.ZoneAuthCloudInfo{
-		DelegatedMember: ExpandZoneauthcloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
-	}
+	to := &dns.ZoneAuthCloudInfo{}
 	return to
 }
 

@@ -502,9 +502,12 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If this is set to True, DNS integrity check is enabled for this zone.",
 	},
 	"dns_integrity_frequency": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(3600),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(3600),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 4294967295),
+		},
 		MarkdownDescription: "The frequency, in seconds, of DNS integrity checks for this zone.",
 	},
 	"dns_integrity_member": schema.StringAttribute{
@@ -641,6 +644,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthGridSecondariesResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.ConflictsWith(
 				path.MatchRoot("ns_group"),
@@ -687,6 +691,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("use_scavenging_settings")),
 		},
 		MarkdownDescription: "Determines last queried ACL for the specified IPv4 or IPv6 addresses and networks in scavenging settings.",
 	},
@@ -830,6 +835,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  int64default.StaticInt64(5),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_notify_delay")),
+			int64validator.Between(5, 86400),
 		},
 		MarkdownDescription: "The number of seconds in delay with which notify messages are sent to secondaries.",
 	},
@@ -1006,6 +1012,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthUpdateForwardingResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("allow_update_forwarding")),
 			listvalidator.SizeAtLeast(1),

@@ -1317,7 +1317,7 @@ func TestAccZoneAuthResource_LastQueriedAcl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthLastQueriedAcl(zoneFqdn, "default", lastQueriedACL),
+				Config: testAccZoneAuthLastQueriedAcl(zoneFqdn, "default", lastQueriedACL, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "last_queried_acl.#", "1"),
@@ -1326,7 +1326,7 @@ func TestAccZoneAuthResource_LastQueriedAcl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthLastQueriedAcl(zoneFqdn, "default", updatedLastQueriedACL),
+				Config: testAccZoneAuthLastQueriedAcl(zoneFqdn, "default", updatedLastQueriedACL, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "last_queried_acl.#", "1"),
@@ -2739,6 +2739,14 @@ func TestAccZoneAuthResource_UseExternalPrimary(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "true"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccZoneAuthUseExternalPrimaryUpdate(zoneFqdn, "default", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "false"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3471,15 +3479,16 @@ resource "nios_dns_zone_auth" "test_grid_secondaries" {
 `, zoneFqdn, view, gridPrimaryHCL, gridSecondaryHCL)
 }
 
-func testAccZoneAuthLastQueriedAcl(zoneFqdn, view string, lastQueriedACL []map[string]any) string {
+func testAccZoneAuthLastQueriedAcl(zoneFqdn, view string, lastQueriedACL []map[string]any, useScavengingSettings bool) string {
 	lastQueriedACLAsHCL := utils.ConvertSliceOfMapsToHCL(lastQueriedACL)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_last_queried_acl" {
     fqdn = %q
     view = %q
     last_queried_acl = %s
+	use_scavenging_settings = %t
 }
-`, zoneFqdn, view, lastQueriedACLAsHCL)
+`, zoneFqdn, view, lastQueriedACLAsHCL, useScavengingSettings)
 }
 
 func testAccZoneAuthLocked(zoneFqdn, view string, locked bool) string {
@@ -3956,6 +3965,16 @@ resource "nios_dns_zone_auth" "test_use_external_primary" {
     use_external_primary = %t
 }
 `, zoneFqdn, view, externalPrimariesHCL, msSecondariesHCL, useExternalPrimary)
+}
+
+func testAccZoneAuthUseExternalPrimaryUpdate(zoneFqdn, view string, useExternalPrimary bool) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" "test_use_external_primary" {
+    fqdn = %q
+    view = %q
+    use_external_primary = %t
+}
+`, zoneFqdn, view, useExternalPrimary)
 }
 
 func testAccZoneAuthUseGridZoneTimer(zoneFqdn, view string, gridPrimary []map[string]any, useGridZoneTimer bool) string {

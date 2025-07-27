@@ -60,6 +60,7 @@ var ZoneAuthGridSecondariesResourceSchemaAttributes = map[string]schema.Attribut
 			Attributes: ZoneauthgridsecondariesPreferredPrimariesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The primary preference list with Grid member names and\\or External Server extserver structs for this member.",
 	},
 	"enable_preferred_primaries": schema.BoolAttribute{

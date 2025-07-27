@@ -21,7 +21,6 @@ var readableAttributesForZoneAuth = "address,allow_active_dir,allow_fixed_rrset_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ZoneAuthResource{}
 var _ resource.ResourceWithImportState = &ZoneAuthResource{}
-
 var _ resource.ResourceWithValidateConfig = &ZoneAuthResource{}
 
 func NewZoneAuthResource() resource.Resource {

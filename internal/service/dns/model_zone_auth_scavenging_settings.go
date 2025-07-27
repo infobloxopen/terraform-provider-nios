@@ -76,14 +76,17 @@ var ZoneAuthScavengingSettingsResourceSchemaAttributes = map[string]schema.Attri
 		MarkdownDescription: "This flag indicates if the associated resource record scavenging is enabled or not.",
 	},
 	"scavenging_schedule": schema.SingleNestedAttribute{
-		Attributes: ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The schedule setting for cloud discovery task.",
 	},
 	"expression_list": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneauthscavengingsettingsExpressionListResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The expression list. The particular record is treated as reclaimable if expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record.",
 	},
 	"ea_expression_list": schema.ListNestedAttribute{
@@ -91,6 +94,7 @@ var ZoneAuthScavengingSettingsResourceSchemaAttributes = map[string]schema.Attri
 			Attributes: ZoneauthscavengingsettingsEaExpressionListResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The extensible attributes expression list. The particular record is treated as reclaimable if extensible attributes expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record.",
 	},
 }
