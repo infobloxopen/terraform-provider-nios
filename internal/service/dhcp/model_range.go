@@ -679,8 +679,6 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"restart_if_needed": schema.BoolAttribute{
 		Optional:            true,
-		Computed: 		  true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Restarts the member service.",
 	},
 	"same_port_control_discovery_blackout": schema.BoolAttribute{
