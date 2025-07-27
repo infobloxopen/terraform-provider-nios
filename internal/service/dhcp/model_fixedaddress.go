@@ -165,13 +165,25 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"agent_circuit_id": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The agent circuit ID for the fixed address.",
 	},
 	"agent_remote_id": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The agent remote ID for the fixed address.",
 	},
 	"allow_telnet": schema.BoolAttribute{
@@ -421,10 +433,12 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The MAC address value for this fixed address.",
 	},
 	"match_client": schema.StringAttribute{
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("CIRCUIT_ID", "CLIENT_ID", "MAC_ADDRESS", "REMOTE_ID", "RESERVED"),
 		},
+		Default:             stringdefault.StaticString("MAC_ADDRESS"),
 		MarkdownDescription: "The match_client value for this fixed address. Valid values are: \"MAC_ADDRESS\": The fixed IP address is leased to the matching MAC address. \"CLIENT_ID\": The fixed IP address is leased to the matching DHCP client identifier. \"RESERVED\": The fixed IP address is reserved for later use with a MAC address that only has zeros. \"CIRCUIT_ID\": The fixed IP address is leased to the DHCP client with a matching circuit ID. Note that the \"agent_circuit_id\" field must be set in this case. \"REMOTE_ID\": The fixed IP address is leased to the DHCP client with a matching remote ID. Note that the \"agent_remote_id\" field must be set in this case.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
@@ -494,6 +508,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_pxe_lease_time")),
+			int64validator.Between(0, 4294967295),
 		},
 		MarkdownDescription: "The PXE lease time value for a DHCP Fixed Address object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
 	},

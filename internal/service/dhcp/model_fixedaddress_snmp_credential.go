@@ -2,11 +2,14 @@ package dhcp
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -29,12 +32,24 @@ var FixedaddressSnmpCredentialAttrTypes = map[string]attr.Type{
 
 var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attribute{
 	"community_string": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The public community string.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comments for the SNMPv1 and SNMPv2 users.",
 	},
 	"credential_group": schema.StringAttribute{

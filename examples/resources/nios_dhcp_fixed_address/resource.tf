@@ -1,5 +1,5 @@
 // Create Fixed Address with Basic Fields
-resource "nios_dhcp_fixed_address" "create_address_basic" {
+resource "nios_dhcp_fixed_address" "create_fixed_address_basic" {
   ipv4addr     = "16.0.0.10"
   match_client = "MAC_ADDRESS"
   mac          = "00:1a:2b:3c:4d:5e"
@@ -11,7 +11,7 @@ resource "nios_dhcp_fixed_address" "create_address_basic" {
 }
 
 // Create Fixed Address with Additional Fields
-resource "nios_dhcp_fixed_address" "create_address_additional" {
+resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
   // Basic Fields
   ipv4addr     = "16.0.0.20"
   match_client = "MAC_ADDRESS"
@@ -50,7 +50,7 @@ resource "nios_dhcp_fixed_address" "create_address_additional" {
 }
 
 // Create Fixed Address using function call to retrieve ipv4addr
-resource "nios_dhcp_fixed_address" "create__address_with_func_call" {
+resource "nios_dhcp_fixed_address" "create_fixed_address_with_func_call" {
   match_client     = "CIRCUIT_ID"
   agent_circuit_id = 250
   func_call = {

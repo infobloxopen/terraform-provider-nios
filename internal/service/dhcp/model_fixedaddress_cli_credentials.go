@@ -44,7 +44,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The CLI user name.",
@@ -56,14 +56,13 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The CLI password.",
 	},
 	"credential_type": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("ENABLE_SSH", "ENABLE_TELNET", "SSH", "TELNET"),
 		},
@@ -76,7 +75,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
-				"Name should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The comment for the credential.",

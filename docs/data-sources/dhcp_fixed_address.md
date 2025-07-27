@@ -76,10 +76,6 @@ Optional:
 <a id="nestedatt--result"></a>
 ### Nested Schema for `result`
 
-Required:
-
-- `match_client` (String) The match_client value for this fixed address. Valid values are: "MAC_ADDRESS": The fixed IP address is leased to the matching MAC address. "CLIENT_ID": The fixed IP address is leased to the matching DHCP client identifier. "RESERVED": The fixed IP address is reserved for later use with a MAC address that only has zeros. "CIRCUIT_ID": The fixed IP address is leased to the DHCP client with a matching circuit ID. Note that the "agent_circuit_id" field must be set in this case. "REMOTE_ID": The fixed IP address is leased to the DHCP client with a matching remote ID. Note that the "agent_remote_id" field must be set in this case.
-
 Optional:
 
 - `agent_circuit_id` (String) The agent circuit ID for the fixed address.
@@ -110,6 +106,7 @@ Optional:
 - `ipv4addr` (String) The IPv4 Address of the record.
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file. (see [below for nested schema](#nestedatt--result--logic_filter_rules))
 - `mac` (String) The MAC address value for this fixed address.
+- `match_client` (String) The match_client value for this fixed address. Valid values are: "MAC_ADDRESS": The fixed IP address is leased to the matching MAC address. "CLIENT_ID": The fixed IP address is leased to the matching DHCP client identifier. "RESERVED": The fixed IP address is reserved for later use with a MAC address that only has zeros. "CIRCUIT_ID": The fixed IP address is leased to the DHCP client with a matching circuit ID. Note that the "agent_circuit_id" field must be set in this case. "REMOTE_ID": The fixed IP address is leased to the DHCP client with a matching remote ID. Note that the "agent_remote_id" field must be set in this case.
 - `ms_options` (Attributes List) This field contains the Microsoft DHCP options for this fixed address. (see [below for nested schema](#nestedatt--result--ms_options))
 - `ms_server` (Attributes) The Microsoft server associated with this fixed address. (see [below for nested schema](#nestedatt--result--ms_server))
 - `name` (String) This field contains the name of this fixed address.
@@ -151,11 +148,14 @@ Read-Only:
 <a id="nestedatt--result--cli_credentials"></a>
 ### Nested Schema for `result.cli_credentials`
 
+Required:
+
+- `credential_type` (String) The type of the credential.
+
 Optional:
 
 - `comment` (String) The comment for the credential.
 - `credential_group` (String) Group for the CLI credential.
-- `credential_type` (String) The type of the credential.
 - `password` (String) The CLI password.
 - `user` (String) The CLI user name.
 
@@ -231,15 +231,18 @@ Optional:
 <a id="nestedatt--result--snmp3_credential"></a>
 ### Nested Schema for `result.snmp3_credential`
 
+Required:
+
+- `authentication_protocol` (String) Authentication protocol for the SNMPv3 user.
+- `privacy_protocol` (String) Privacy protocol for the SNMPv3 user.
+- `user` (String) The SNMPv3 user name.
+
 Optional:
 
 - `authentication_password` (String) Authentication password for the SNMPv3 user.
-- `authentication_protocol` (String) Authentication protocol for the SNMPv3 user.
 - `comment` (String) Comments for the SNMPv3 user.
 - `credential_group` (String) Group for the SNMPv3 credential.
 - `privacy_password` (String) Privacy password for the SNMPv3 user.
-- `privacy_protocol` (String) Privacy protocol for the SNMPv3 user.
-- `user` (String) The SNMPv3 user name.
 
 
 <a id="nestedatt--result--snmp_credential"></a>
