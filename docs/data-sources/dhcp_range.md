@@ -223,14 +223,11 @@ Optional:
 <a id="nestedatt--result--discovery_blackout_setting"></a>
 ### Nested Schema for `result.discovery_blackout_setting`
 
-Required:
-
-- `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
-
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
 - `blackout_schedule` (Attributes) The blackout schedule for the range. This field is used to configure the blackout schedule for the DHCP range. It includes information about the start and end times of the blackout period, as well as the frequency of blackout. (see [below for nested schema](#nestedatt--result--discovery_blackout_setting--blackout_schedule))
+- `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--result--discovery_blackout_setting--blackout_schedule"></a>
 ### Nested Schema for `result.discovery_blackout_setting.blackout_schedule`
