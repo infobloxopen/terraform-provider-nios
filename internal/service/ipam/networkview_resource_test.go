@@ -512,14 +512,6 @@ resource "nios_ipam_network_view" "test" {
 `, name)
 }
 
-func testAccNetworkviewRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network_view" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
 func testAccNetworkviewCloudInfo(name, member_name, member_ipv4, member_ipv6 string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network_view" "test_cloud_info" {
@@ -632,14 +624,6 @@ resource "nios_ipam_network_view" "test_mgm_private" {
     mgm_private = %t
 }
 `, name, mgmPrivate)
-}
-
-func testAccNetworkviewMsAdUserData(msAdUserData string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network_view" "test_ms_ad_user_data" {
-    ms_ad_user_data = %q
-}
-`, msAdUserData)
 }
 
 func testAccNetworkviewName(name string) string {
