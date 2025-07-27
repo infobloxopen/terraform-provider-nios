@@ -1,12 +1,12 @@
 // Retrieve a specific Network View by filters
-data "nios_ipam_network_view" "get_network_view_using_filters" {
+data "nios_ipam_network_view" "get_network_views_using_filters" {
   filters = {
-    name = "my_network_view"
+    name = "example_network_view"
   }
 }
 
 // Retrieve specific Network Views using Extensible Attributes
-data "nios_ipam_network_view" "get_network_view_using_extensible_attributes" {
+data "nios_ipam_network_view" "get_network_views_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }
