@@ -3,16 +3,17 @@
 page_title: "nios_ipam_ipv6network Resource - nios"
 subcategory: "IPAM"
 description: |-
-  
+  Manages IPv6 Network
 ---
 
 # nios_ipam_ipv6network (Resource)
 
-
+Manages IPv6 Network
 
 ## Example Usage
 
 ```terraform
+// Create an IPAM IPv6 Network with Basic Fields
 resource "nios_ipam_ipv6network" "example_network" {
   network      = "10::/64"
   network_view = "default"
@@ -24,6 +25,7 @@ resource "nios_ipam_ipv6network" "example_network" {
   }
 }
 
+// Create an IPAM IPv6 Network with Additional Fields
 resource "nios_ipam_ipv6network" "complete_example" {
   // Required attributes
   network = "11::/64"
@@ -73,7 +75,7 @@ resource "nios_ipam_ipv6network" "complete_example" {
   use_valid_lifetime              = true
 }
 
-
+// Create an IPAM IPv6 Network with Function Call
 resource "nios_ipam_ipv6network" "example_func_call" {
   func_call = {
     attribute_name  = "network"
@@ -139,7 +141,7 @@ resource "nios_ipam_ipv6network" "example_func_call" {
 - `rir_registration_status` (String) The registration status of the IPv6 network in RIR.
 - `same_port_control_discovery_blackout` (Boolean) If the field is set to True, the discovery blackout setting will be used for port control blackout setting.
 - `send_rir_request` (Boolean) Determines whether to send the RIR registration request.
-- `subscribe_settings` (Attributes) (see [below for nested schema](#nestedatt--subscribe_settings))
+- `subscribe_settings` (Attributes) The DHCP IPv6 Network Cisco ISE subscribe settings. (see [below for nested schema](#nestedatt--subscribe_settings))
 - `template` (String) If set on creation, the network is created according to the values specified in the selected template.
 - `unmanaged` (Boolean) Determines whether the DHCP IPv6 Network is unmanaged or not.
 - `update_dns_on_lease_renewal` (Boolean) This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.
@@ -182,7 +184,7 @@ resource "nios_ipam_ipv6network" "example_func_call" {
 - `last_rir_registration_update_sent` (Number) The timestamp when the last RIR registration update was sent.
 - `last_rir_registration_update_status` (String) Last RIR registration update status.
 - `mgm_private_overridable` (Boolean) This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--ms_ad_user_data))
+- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `network_container` (String) The network container to which this network belongs, if any.
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the IPv6 network address space.
@@ -191,10 +193,13 @@ resource "nios_ipam_ipv6network" "example_func_call" {
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`
 
+Optional:
+
+- `delegated_member` (Attributes) Contains information about the delegated member of the object. This is not set if the object is not delegated. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
+
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
-- `delegated_member` (Attributes) Contains information about the delegated member of the object. This is not set if the object is not delegated. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.
@@ -205,7 +210,7 @@ Read-Only:
 <a id="nestedatt--cloud_info--delegated_member"></a>
 ### Nested Schema for `cloud_info.delegated_member`
 
-Read-Only:
+Optional:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.
@@ -230,7 +235,7 @@ Optional:
 - `snmp_collection` (Boolean) Determines whether SNMP collection is enabled or not.
 - `switch_port_data_collection_polling` (String) A switch port data collection polling mode.
 - `switch_port_data_collection_polling_interval` (Number) Indicates the interval for switch port data collection polling.
-- `switch_port_data_collection_polling_schedule` (Attributes) (see [below for nested schema](#nestedatt--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
+- `switch_port_data_collection_polling_schedule` (Attributes) A switch port data collection polling schedule. (see [below for nested schema](#nestedatt--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
 - `use_global_polling_frequency_modifier` (Boolean) Use Global Polling Frequency Modifier.
 
 <a id="nestedatt--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule"></a>
@@ -259,7 +264,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--discovery_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) A Schedule Setting struct that determines blackout schedule. (see [below for nested schema](#nestedatt--discovery_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--discovery_blackout_setting--blackout_schedule"></a>
@@ -285,7 +290,7 @@ Optional:
 <a id="nestedatt--federated_realms"></a>
 ### Nested Schema for `federated_realms`
 
-Optional:
+Required:
 
 - `id` (String) The federated realm id
 - `name` (String) The federated realm name
@@ -344,7 +349,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--port_control_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) A Schedule Setting struct that determines blackout schedule. (see [below for nested schema](#nestedatt--port_control_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--port_control_blackout_setting--blackout_schedule"></a>
@@ -390,20 +395,23 @@ Optional:
 
 Optional:
 
-- `name` (String) Name of the VLAN.
 - `vlan` (Map of String) Reference to the underlying StaticVlan object vlan.
 
 Read-Only:
 
 - `id` (Number) VLAN ID value.
+- `name` (String) Name of the VLAN.
 
 
 <a id="nestedatt--zone_associations"></a>
 ### Nested Schema for `zone_associations`
 
-Optional:
+Required:
 
 - `fqdn` (String) The FQDN of the authoritative forward zone.
+
+Optional:
+
 - `is_default` (Boolean) True if this is the default zone.
 - `view` (String) The view to which the zone belongs. If a view is not specified, the default view is used.
 
