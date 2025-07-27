@@ -12,12 +12,12 @@ import (
 )
 
 func TestAccRangetemplateDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_rangetemplate.test"
-	resourceName := "nios_dhcp_rangetemplate.test"
+	dataSourceName := "data.nios_dhcp_range_template.test"
+	resourceName := "nios_dhcp_range_template.test"
 	var v dhcp.Rangetemplate
 	name := acctest.RandomNameWithPrefix("range-template")
-	numberOfAdresses := int64(100)
-	offset := int64(50)
+	numberOfAdresses := 100
+	offset := 50
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -37,13 +37,13 @@ func TestAccRangetemplateDataSource_Filters(t *testing.T) {
 }
 
 func TestAccRangetemplateDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_rangetemplate.test"
-	resourceName := "nios_dhcp_rangetemplate.test"
+	dataSourceName := "data.nios_dhcp_range_template.test"
+	resourceName := "nios_dhcp_range_template.test"
 	var v dhcp.Rangetemplate
 
 	name := acctest.RandomNameWithPrefix("range-template")
-	numberOfAdresses := int64(100)
-	offset := int64(50)
+	numberOfAdresses := 100
+	offset := 50
 	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
@@ -134,25 +134,25 @@ func testAccCheckRangetemplateResourceAttrPair(resourceName, dataSourceName stri
 	}
 }
 
-func testAccRangetemplateDataSourceConfigFilters(name string, numberOfAddresses, offset int64) string {
+func testAccRangetemplateDataSourceConfigFilters(name string, numberOfAddresses, offset int) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_rangetemplate" "test" {
+resource "nios_dhcp_range_template" "test" {
 	  name = %q
 	  number_of_addresses = %d
 	  offset = %d
 }
 
-data "nios_dhcp_rangetemplate" "test" {
+data "nios_dhcp_range_template" "test" {
   filters = {
-	 name = nios_dhcp_rangetemplate.test.name
+	 name = nios_dhcp_range_template.test.name
   }
 }
 `, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateDataSourceConfigExtAttrFilters(name string, numberOfAddresses, offset int64, extAttrsValue string) string {
+func testAccRangetemplateDataSourceConfigExtAttrFilters(name string, numberOfAddresses, offset int, extAttrsValue string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_rangetemplate" "test" {
+resource "nios_dhcp_range_template" "test" {
   name = %q
   number_of_addresses = %d
   offset = %d
@@ -161,9 +161,9 @@ resource "nios_dhcp_rangetemplate" "test" {
   } 
 }
 
-data "nios_dhcp_rangetemplate" "test" {
+data "nios_dhcp_range_template" "test" {
   extattrfilters = {
-	Site = nios_dhcp_rangetemplate.test.extattrs.Site
+	Site = nios_dhcp_range_template.test.extattrs.Site
   }
 }
 `, name, numberOfAddresses, offset, extAttrsValue)

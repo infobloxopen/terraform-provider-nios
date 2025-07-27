@@ -33,12 +33,12 @@ type RangetemplateResource struct {
 }
 
 func (r *RangetemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_rangetemplate"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_range_template"
 }
 
 func (r *RangetemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DHCP Range Templates.",
+		MarkdownDescription: "Manages a DHCP Range Template.",
 		Attributes:          RangetemplateResourceSchemaAttributes,
 	}
 }

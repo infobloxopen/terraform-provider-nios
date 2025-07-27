@@ -32,7 +32,7 @@ type RangetemplateDataSource struct {
 }
 
 func (d *RangetemplateDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_rangetemplate"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_range_template"
 }
 
 type RangetemplateModelWithFilter struct {

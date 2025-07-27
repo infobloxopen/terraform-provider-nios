@@ -1,12 +1,12 @@
 // Create DHCP Range Template with required Fields
-resource "nios_dhcp_rangetemplate" "range_template_required_fields" {
+resource "nios_dhcp_range_template" "range_template_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
 }
 
 // Create DHCP Range Template with additional Fields
-resource "nios_dhcp_rangetemplate" "range_template_additional_fields" {
+resource "nios_dhcp_range_template" "range_template_additional_fields" {
   name                    = "example_range_template_additional_fields"
   number_of_addresses     = 10
   offset                  = 20
@@ -46,7 +46,7 @@ resource "nios_dhcp_rangetemplate" "range_template_additional_fields" {
 }
 
 // Create DHCP Range Template with filters and exclude fields
-resource "nios_dhcp_rangetemplate" "range_template_additional_fields2" {
+resource "nios_dhcp_range_template" "range_template_additional_fields2" {
   name                = "example_range_template3"
   number_of_addresses = 60
   offset              = 70
