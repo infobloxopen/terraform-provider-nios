@@ -14,7 +14,7 @@ Manages a DNS PTR Record.
 
 ```terraform
 // Create an IPv4 PTR record with Basic fields
-resource "nios_dns_record_ptr" "create_ipv4_record" {
+resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4addr" {
   ptrdname = "example_record.example.com"
   ipv4addr = "10.20.1.2"
   view     = "default"
@@ -24,7 +24,7 @@ resource "nios_dns_record_ptr" "create_ipv4_record" {
 }
 
 // Create an IPv6 PTR record with Basic fields
-resource "nios_dns_record_ptr" "create_ipv6_record" {
+resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6addr" {
   ptrdname = "example_record.example.com"
   ipv6addr = "2001::123"
   view     = "default"
@@ -34,7 +34,7 @@ resource "nios_dns_record_ptr" "create_ipv6_record" {
 }
 
 // Create an IPv4 PTR record by name with Basic fields
-resource "nios_dns_record_ptr" "create_ptr_record" {
+resource "nios_dns_record_ptr" "create_ptr_record_with_name" {
   ptrdname = "example_record.example.com"
   name     = "22.0.0.11.in-addr.arpa"
   view     = "default"
@@ -44,7 +44,7 @@ resource "nios_dns_record_ptr" "create_ptr_record" {
 }
 
 // Create an IPv4 PTR record by name with Additional fields
-resource "nios_dns_record_ptr" "create_ptr_record" {
+resource "nios_dns_record_ptr" "create_ptr_record_with_additional_fields" {
   ptrdname = "example_record.example.com"
   name     = "22.0.0.11.in-addr.arpa"
 
@@ -62,7 +62,7 @@ resource "nios_dns_record_ptr" "create_ptr_record" {
 }
 
 // Create an PTR record using function call to retrieve ipv4addr
-resource "nios_dns_record_ptr" "create_with_func_call" {
+resource "nios_dns_record_ptr" "create_ptr_record_with_func_call" {
   ptrdname = "example_func_call.example.com"
   func_call = {
     attribute_name  = "ipv4addr"

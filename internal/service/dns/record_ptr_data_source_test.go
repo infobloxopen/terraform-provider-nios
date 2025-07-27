@@ -15,6 +15,7 @@ func TestAccRecordPtrDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_ptr.test"
 	resourceName := "nios_dns_record_ptr.test"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +23,7 @@ func TestAccRecordPtrDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordPtrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordPtrDataSourceConfigFilters("192.168.10.22", "ptr.example.com", "default"),
+				Config: testAccRecordPtrDataSourceConfigFilters("192.168.10.22", ptrDName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
@@ -37,6 +38,7 @@ func TestAccRecordPtrDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_ptr.test"
 	resourceName := "nios_dns_record_ptr.test"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
@@ -45,7 +47,7 @@ func TestAccRecordPtrDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordPtrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordPtrDataSourceConfigExtAttrFilters("192.168.10.22", "ptr.example.com", "default", extAttrValue),
+				Config: testAccRecordPtrDataSourceConfigExtAttrFilters("192.168.10.22", ptrDName, "default", extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordPtrExists(context.Background(), resourceName, &v),

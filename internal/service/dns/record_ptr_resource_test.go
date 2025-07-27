@@ -23,9 +23,8 @@ var readableAttributesForRecordPtr = "aws_rte53_record_info,cloud_info,comment,c
 func TestAccRecordPtrResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test"
 	var v dns.RecordPtr
-
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 	Ipv4addr := "192.168.10.22"
-	Ptrdname := "ptr.example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -33,11 +32,11 @@ func TestAccRecordPtrResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrBasicConfig(Ipv4addr, Ptrdname),
+				Config: testAccRecordPtrBasicConfig(Ipv4addr, ptrDName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", Ipv4addr),
-					resource.TestCheckResourceAttr(resourceName, "ptrdname", Ptrdname),
+					resource.TestCheckResourceAttr(resourceName, "ptrdname", ptrDName),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					resource.TestCheckResourceAttr(resourceName, "name", "22.10.168.192.in-addr.arpa"),
 					// Test fields with default value
@@ -57,9 +56,8 @@ func TestAccRecordPtrResource_basic(t *testing.T) {
 func TestAccRecordPtrResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_record_ptr.test"
 	var v dns.RecordPtr
-
-	Ipv4addr := "192.168.10.22"
-	Ptrdname := "ptr.example.com"
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
+	Ipv4addr := "192.168.10.23"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -67,7 +65,7 @@ func TestAccRecordPtrResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordPtrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordPtrBasicConfig(Ipv4addr, Ptrdname),
+				Config: testAccRecordPtrBasicConfig(Ipv4addr, ptrDName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					testAccCheckRecordPtrDisappears(context.Background(), &v),
@@ -81,6 +79,7 @@ func TestAccRecordPtrResource_disappears(t *testing.T) {
 func TestAccRecordPtrResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_comment"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -88,7 +87,7 @@ func TestAccRecordPtrResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrComment("23.10.168.192.in-addr.arpa", "ptr.example.com", "default", "This is a comment"),
+				Config: testAccRecordPtrComment("23.10.168.192.in-addr.arpa", ptrDName, "default", "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -96,7 +95,7 @@ func TestAccRecordPtrResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrComment("23.10.168.192.in-addr.arpa", "ptr.example.com", "default", "This is an updated comment"),
+				Config: testAccRecordPtrComment("23.10.168.192.in-addr.arpa", ptrDName, "default", "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
@@ -110,6 +109,7 @@ func TestAccRecordPtrResource_Comment(t *testing.T) {
 func TestAccRecordPtrResource_Creator(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_creator"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -117,7 +117,7 @@ func TestAccRecordPtrResource_Creator(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrCreator("24.10.168.192.in-addr.arpa", "ptr.example.com", "default", "STATIC"),
+				Config: testAccRecordPtrCreator("24.10.168.192.in-addr.arpa", ptrDName, "default", "STATIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
@@ -125,7 +125,7 @@ func TestAccRecordPtrResource_Creator(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrCreator("24.10.168.192.in-addr.arpa", "ptr.example.com", "default", "DYNAMIC"),
+				Config: testAccRecordPtrCreator("24.10.168.192.in-addr.arpa", ptrDName, "default", "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "creator", "DYNAMIC"),
@@ -139,6 +139,7 @@ func TestAccRecordPtrResource_Creator(t *testing.T) {
 func TestAccRecordPtrResource_DdnsPrincipal(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_ddns_principal"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -146,7 +147,7 @@ func TestAccRecordPtrResource_DdnsPrincipal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrDdnsPrincipal("25.10.168.192.in-addr.arpa", "ptr.example.com", "default", "DYNAMIC", "host/myhost.example.com@EXAMPLE.COM"),
+				Config: testAccRecordPtrDdnsPrincipal("25.10.168.192.in-addr.arpa", ptrDName, "default", "DYNAMIC", "host/myhost.example.com@EXAMPLE.COM"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "host/myhost.example.com@EXAMPLE.COM"),
@@ -154,7 +155,7 @@ func TestAccRecordPtrResource_DdnsPrincipal(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrDdnsPrincipal("25.10.168.192.in-addr.arpa", "ptr.example.com", "default", "DYNAMIC", "host/otherhost.example.net@EXAMPLE.NET"),
+				Config: testAccRecordPtrDdnsPrincipal("25.10.168.192.in-addr.arpa", ptrDName, "default", "DYNAMIC", "host/otherhost.example.net@EXAMPLE.NET"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "host/otherhost.example.net@EXAMPLE.NET"),
@@ -168,6 +169,7 @@ func TestAccRecordPtrResource_DdnsPrincipal(t *testing.T) {
 func TestAccRecordPtrResource_DdnsProtected(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_ddns_protected"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -175,7 +177,7 @@ func TestAccRecordPtrResource_DdnsProtected(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrDdnsProtected("26.10.168.192.in-addr.arpa", "ptr.example.com", "default", "false"),
+				Config: testAccRecordPtrDdnsProtected("26.10.168.192.in-addr.arpa", ptrDName, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
@@ -183,7 +185,7 @@ func TestAccRecordPtrResource_DdnsProtected(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrDdnsProtected("26.10.168.192.in-addr.arpa", "ptr.example.com", "default", "true"),
+				Config: testAccRecordPtrDdnsProtected("26.10.168.192.in-addr.arpa", ptrDName, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "true"),
@@ -197,6 +199,7 @@ func TestAccRecordPtrResource_DdnsProtected(t *testing.T) {
 func TestAccRecordPtrResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_disable"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -204,7 +207,7 @@ func TestAccRecordPtrResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrDisable("27.10.168.192.in-addr.arpa", "ptr.example.com", "default", "false"),
+				Config: testAccRecordPtrDisable("27.10.168.192.in-addr.arpa", ptrDName, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -212,7 +215,7 @@ func TestAccRecordPtrResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrDisable("27.10.168.192.in-addr.arpa", "ptr.example.com", "default", "true"),
+				Config: testAccRecordPtrDisable("27.10.168.192.in-addr.arpa", ptrDName, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -226,6 +229,7 @@ func TestAccRecordPtrResource_Disable(t *testing.T) {
 func TestAccRecordPtrResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_extattrs"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -235,7 +239,7 @@ func TestAccRecordPtrResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrExtAttrs("28.10.168.192.in-addr.arpa", "ptr.example.com", "default", map[string]string{"Site": extAttrValue1}),
+				Config: testAccRecordPtrExtAttrs("28.10.168.192.in-addr.arpa", ptrDName, "default", map[string]string{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
@@ -243,7 +247,7 @@ func TestAccRecordPtrResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrExtAttrs("28.10.168.192.in-addr.arpa", "ptr.example.com", "default", map[string]string{"Site": extAttrValue2}),
+				Config: testAccRecordPtrExtAttrs("28.10.168.192.in-addr.arpa", ptrDName, "default", map[string]string{"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
@@ -257,6 +261,7 @@ func TestAccRecordPtrResource_ExtAttrs(t *testing.T) {
 func TestAccRecordPtrResource_ForbidReclamation(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_forbid_reclamation"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -264,7 +269,7 @@ func TestAccRecordPtrResource_ForbidReclamation(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrForbidReclamation("29.10.168.192.in-addr.arpa", "ptr.example.com", "default", "true"),
+				Config: testAccRecordPtrForbidReclamation("29.10.168.192.in-addr.arpa", ptrDName, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "true"),
@@ -272,7 +277,7 @@ func TestAccRecordPtrResource_ForbidReclamation(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrForbidReclamation("29.10.168.192.in-addr.arpa", "ptr.example.com", "default", "false"),
+				Config: testAccRecordPtrForbidReclamation("29.10.168.192.in-addr.arpa", ptrDName, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
@@ -286,6 +291,7 @@ func TestAccRecordPtrResource_ForbidReclamation(t *testing.T) {
 func TestAccRecordPtrResource_Ipv4addr(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_ipv4addr"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -293,7 +299,7 @@ func TestAccRecordPtrResource_Ipv4addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrIpv4addr("192.168.10.30", "ptr.example.com", "default"),
+				Config: testAccRecordPtrIpv4addr("192.168.10.30", ptrDName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "192.168.10.30"),
@@ -301,7 +307,7 @@ func TestAccRecordPtrResource_Ipv4addr(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrIpv4addr("192.168.10.31", "ptr.example.com", "default"),
+				Config: testAccRecordPtrIpv4addr("192.168.10.31", ptrDName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "192.168.10.31"),
@@ -318,6 +324,7 @@ func TestAccRecordPtrResource_Ipv4addr(t *testing.T) {
 func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_func_call"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -325,11 +332,11 @@ func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrFuncCallIpv4Addr("192.168.10.0/24", "ptr.example.com", "default", "Created with func_call"),
+				Config: testAccRecordPtrFuncCallIpv4Addr("192.168.10.0/24", ptrDName, "default", "Created with func_call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "192.168.10.1"),
-					resource.TestCheckResourceAttr(resourceName, "ptrdname", "ptr.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "ptrdname", ptrDName),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Created with func_call"),
 				),
@@ -386,6 +393,7 @@ func TestAccRecordPtrResource_Ipv6addr(t *testing.T) {
 func TestAccRecordPtrResource_Name(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_name"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -393,7 +401,7 @@ func TestAccRecordPtrResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrName("32.10.168.192.in-addr.arpa", "ptr.example.com", "default"),
+				Config: testAccRecordPtrName("32.10.168.192.in-addr.arpa", ptrDName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", "32.10.168.192.in-addr.arpa"),
@@ -401,7 +409,7 @@ func TestAccRecordPtrResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrName("33.10.168.192.in-addr.arpa", "ptr.example.com", "default"),
+				Config: testAccRecordPtrName("33.10.168.192.in-addr.arpa", ptrDName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", "33.10.168.192.in-addr.arpa"),
@@ -415,6 +423,8 @@ func TestAccRecordPtrResource_Name(t *testing.T) {
 func TestAccRecordPtrResource_Ptrdname(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_ptrdname"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
+	updatedPTRDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -422,15 +432,15 @@ func TestAccRecordPtrResource_Ptrdname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrPtrdname("ptr.example.com", "192.168.10.34", "default"),
+				Config: testAccRecordPtrPtrdname(ptrDName, "192.168.10.34", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ptrdname", "ptr.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "ptrdname", ptrDName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrPtrdname("updated.example.com", "192.168.10.34", "default"),
+				Config: testAccRecordPtrPtrdname(updatedPTRDName, "192.168.10.34", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ptrdname", "updated.example.com"),
@@ -444,6 +454,7 @@ func TestAccRecordPtrResource_Ptrdname(t *testing.T) {
 func TestAccRecordPtrResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_ttl"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -451,7 +462,7 @@ func TestAccRecordPtrResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrTtl("2001::26", "ptr.example.com", "default", 300, "true"),
+				Config: testAccRecordPtrTtl("2001::26", ptrDName, "default", 300, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "300"),
@@ -459,7 +470,7 @@ func TestAccRecordPtrResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrTtl("2001::26", "ptr.example.com", "default", 600, "true"),
+				Config: testAccRecordPtrTtl("2001::26", ptrDName, "default", 600, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "600"),
@@ -473,6 +484,7 @@ func TestAccRecordPtrResource_Ttl(t *testing.T) {
 func TestAccRecordPtrResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_use_ttl"
 	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -480,7 +492,7 @@ func TestAccRecordPtrResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrUseTtl("2001::27", "ptr.example.com", "default", "true", 300),
+				Config: testAccRecordPtrUseTtl("2001::27", ptrDName, "default", "true", 300),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
@@ -488,7 +500,7 @@ func TestAccRecordPtrResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrUseTtl("2001::27", "ptr.example.com", "default", "false", 300),
+				Config: testAccRecordPtrUseTtl("2001::27", ptrDName, "default", "false", 300),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),

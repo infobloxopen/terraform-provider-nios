@@ -205,8 +205,11 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "The name of the DNS PTR record in FQDN format.",
 	},
 	"ptrdname": schema.StringAttribute{
@@ -238,9 +241,15 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Flag to indicate whether the TTL value should be used for the A record.",
 	},
 	"view": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("default"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("default"),
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Name of the DNS View in which the record resides, for example \"external\".",
 	},
 	"zone": schema.StringAttribute{
