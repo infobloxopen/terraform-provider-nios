@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RangeModel struct {
@@ -621,6 +622,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
