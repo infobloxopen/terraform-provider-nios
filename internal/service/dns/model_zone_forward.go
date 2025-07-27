@@ -244,9 +244,15 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This is true if the zone is associated with a shared record group.",
 	},
 	"view": schema.StringAttribute{
-		Computed:            true,
-		Default:             stringdefault.StaticString("default"),
-		Optional:            true,
+		Computed: true,
+		Default:  stringdefault.StaticString("default"),
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The name of the DNS view in which the zone resides. Example \"external\".",
 	},
 	"zone_format": schema.StringAttribute{

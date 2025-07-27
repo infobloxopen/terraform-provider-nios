@@ -100,6 +100,7 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the zone; maximum 256 characters.",
 	},
 	"delegate_to": schema.ListNestedAttribute{

@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -64,6 +65,7 @@ var NetworkcontainerportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttr
 		Optional:            true,
 		MarkdownDescription: "The frequency for the scheduled task.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 	},
 	"every": schema.Int64Attribute{
 		Optional:            true,
@@ -93,6 +95,7 @@ var NetworkcontainerportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttr
 		Optional:            true,
 		MarkdownDescription: "Indicates if the scheduled task will be repeated or run only once.",
 		Computed:            true,
+		Default:             stringdefault.StaticString("ONCE"),
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
