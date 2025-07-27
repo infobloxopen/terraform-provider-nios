@@ -140,21 +140,6 @@ func FlattenFrameworkMapOfMapString(ctx context.Context, m map[string]interface{
 	return tfMap
 }
 
-func FlattenFrameworkUnorderedListNestedBlock[T any, U any](ctx context.Context, data []T, attrTypes map[string]attr.Type, diags *diag.Diagnostics, f FrameworkElementFlExFunc[*T, U]) internaltypes.UnorderedListValue {
-	if len(data) == 0 {
-		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: attrTypes})
-	}
-
-	tfData := ApplyToAll(data, func(t T) U {
-		return f(ctx, &t, diags)
-	})
-
-	tfList, d := internaltypes.NewUnorderedListValueFrom(ctx, types.ObjectType{AttrTypes: attrTypes}, tfData)
-
-	diags.Append(d...)
-	return tfList
-}
-
 func ExpandFrameworkListString(ctx context.Context, tfList interface {
 	basetypes.ListValuable
 	ElementsAs(ctx context.Context, target interface{}, allowUnhandled bool) diag.Diagnostics

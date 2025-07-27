@@ -710,7 +710,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	if m == nil {
 		*m = FixedaddressModel{}
 	}
-	from.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+	from.Options = RemoveDefaultFixedAddressDHCPOptions(ctx, diags, from.Options, m.Options)
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.AgentCircuitId = flex.FlattenStringPointer(from.AgentCircuitId)
@@ -794,8 +794,8 @@ func FlattenRecordAIpv4addr(from *dhcp.FixedaddressIpv4addr) types.String {
 	return m
 }
 
-// RemoveDefaultDHCPOptions removes the default DHCP options from the provided options list.
-func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.FixedaddressOptions, planOptions internaltypes.UnorderedListValue) []dhcp.FixedaddressOptions {
+// RemoveDefaultFixedAddressDHCPOptions removes the default DHCP options from the provided options list.
+func RemoveDefaultFixedAddressDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.FixedaddressOptions, planOptions internaltypes.UnorderedListValue) []dhcp.FixedaddressOptions {
 	defaultOptionName := "dhcp-lease-time"
 	defaultOptionVal := ""
 
