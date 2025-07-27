@@ -3,9 +3,11 @@ package dhcp
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -26,13 +28,14 @@ var RangeRelayAgentFilterRulesAttrTypes = map[string]attr.Type{
 
 var RangeRelayAgentFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: 		   true,
 		MarkdownDescription: "The name of the DHCP filter.",
 	},
 	"permission": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ALLOW", "DENY"),
+		},
 		MarkdownDescription: "The permission to be applied.",
 	},
 }

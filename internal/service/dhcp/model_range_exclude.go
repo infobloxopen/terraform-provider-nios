@@ -2,10 +2,13 @@ package dhcp
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -28,18 +31,22 @@ var RangeExcludeAttrTypes = map[string]attr.Type{
 
 var RangeExcludeResourceSchemaAttributes = map[string]schema.Attribute{
 	"start_address": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: true,
 		MarkdownDescription: "The IPv4 Address starting address of the exclusion range.",
 	},
 	"end_address": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: true,
 		MarkdownDescription: "The IPv4 Address ending address of the exclusion range.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the exclusion range; maximum 256 characters.",
 	},
 }

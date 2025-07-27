@@ -3,9 +3,11 @@ package dhcp
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -64,6 +66,9 @@ var RangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes = ma
 	"frequency": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("DAILY", "HOURLY", "MONTHLY", "WEEKLY"),
+		},
 		MarkdownDescription: "The frequency for the scheduled task.",
 	},
 	"every": schema.Int64Attribute{

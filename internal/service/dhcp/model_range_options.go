@@ -38,7 +38,7 @@ var RangeOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Name of the DHCP option.",
 		Computed:            true,
-		Default:             stringdefault.StaticString("dhcp-lease-time"), // IGNORE
+		Default:             stringdefault.StaticString("dhcp-lease-time"),
 	},
 	"num": schema.Int64Attribute{
 		Optional:            true,

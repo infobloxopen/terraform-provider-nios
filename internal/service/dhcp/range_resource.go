@@ -82,7 +82,7 @@ func (r *RangeResource) Create(ctx context.Context, req resource.CreateRequest, 
 	apiRes, _, err := r.client.DHCPAPI.
 		RangeAPI.
 		Create(ctx).
-		Range_(*data.Expand(ctx, &resp.Diagnostics)).
+		Range_(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForRange).
 		ReturnAsObject(1).
 		Execute()
@@ -266,7 +266,7 @@ func (r *RangeResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	apiRes, _, err := r.client.DHCPAPI.
 		RangeAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Range_(*data.Expand(ctx, &resp.Diagnostics)).
+		Range_(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRange).
 		ReturnAsObject(1).
 		Execute()

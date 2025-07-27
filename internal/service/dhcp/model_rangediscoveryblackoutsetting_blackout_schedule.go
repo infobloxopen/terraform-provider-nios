@@ -6,11 +6,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -49,6 +53,11 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 		ElementType:         types.StringType,
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.ValueStringsAre(
+				stringvalidator.OneOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"),
+			),
+		},
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 	},
 	"time_zone": schema.StringAttribute{
@@ -64,6 +73,9 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 	"frequency": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("DAILY", "HOURLY", "MONTHLY", "WEEKLY"),
+		},
 		MarkdownDescription: "The frequency for the scheduled task.",
 	},
 	"every": schema.Int64Attribute{
@@ -99,6 +111,9 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 	"repeat": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ONCE", "RECUR"),
+		},
 		MarkdownDescription: "Indicates if the scheduled task will be repeated or run only once.",
 	},
 	"disable": schema.BoolAttribute{

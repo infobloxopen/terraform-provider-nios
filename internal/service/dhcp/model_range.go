@@ -2,6 +2,7 @@ package dhcp
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -12,19 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
-
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -266,6 +262,12 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the range; maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
@@ -273,6 +275,10 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
 		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.",
 	},
@@ -500,6 +506,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"known_clients": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_known_clients")),
+		},
 		MarkdownDescription: "Permission for known clients. This can be 'Allow' or 'Deny'. If set to 'Deny' known clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"lease_scavenge_time": schema.Int64Attribute{
@@ -569,6 +578,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangeMsOptionsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_ms_options")),
+		},
 		MarkdownDescription: "This field contains the Microsoft DHCP options for this range.",
 	},
 	"ms_server": schema.SingleNestedAttribute{
@@ -586,6 +598,12 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "This field contains the name of the Microsoft scope.",
 	},
 	"network": schema.StringAttribute{
@@ -620,12 +638,18 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
+		},
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
 		Attributes:          RangePortControlBlackoutSettingResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
+		},
 		MarkdownDescription: "The port control blackout settings for the range. This field is used to configure the port control blackout settings for the DHCP range. It includes information about the blackout settings, such as the start and end times of the blackout period.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
@@ -653,6 +677,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"restart_if_needed": schema.BoolAttribute{
 		Optional:            true,
+		Computed: 		  true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Restarts the member service.",
 	},
 	"same_port_control_discovery_blackout": schema.BoolAttribute{
@@ -710,12 +736,18 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"unknown_clients": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_unknown_clients")),
+		},
 		MarkdownDescription: "Permission for unknown clients. This can be 'Allow' or 'Deny'. If set to 'Deny', unknown clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_update_dns_on_lease_renewal")),
+		},	
 		MarkdownDescription: "This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.",
 	},
 	"use_blackout_setting": schema.BoolAttribute{
@@ -870,19 +902,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRange(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dhcp.Range {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RangeModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
 
-func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Range {
+func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics,isCreate bool) *dhcp.Range {
 	if m == nil {
 		return nil
 	}
@@ -944,11 +965,8 @@ func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.
 		RestartIfNeeded:                  flex.ExpandBoolPointer(m.RestartIfNeeded),
 		SamePortControlDiscoveryBlackout: flex.ExpandBoolPointer(m.SamePortControlDiscoveryBlackout),
 		ServerAssociationType:            flex.ExpandStringPointer(m.ServerAssociationType),
-		SplitMember:                      ExpandRangeSplitMember(ctx, m.SplitMember, diags),
-		SplitScopeExclusionPercent:       flex.ExpandInt64Pointer(m.SplitScopeExclusionPercent),
 		StartAddr:                        flex.ExpandStringPointer(m.StartAddr),
 		SubscribeSettings:                ExpandRangeSubscribeSettings(ctx, m.SubscribeSettings, diags),
-		Template:                         flex.ExpandStringPointer(m.Template),
 		UnknownClients:                   flex.ExpandStringPointer(m.UnknownClients),
 		UpdateDnsOnLeaseRenewal:          flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
 		UseBlackoutSetting:               flex.ExpandBoolPointer(m.UseBlackoutSetting),
@@ -976,6 +994,11 @@ func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.
 		UseSubscribeSettings:             flex.ExpandBoolPointer(m.UseSubscribeSettings),
 		UseUnknownClients:                flex.ExpandBoolPointer(m.UseUnknownClients),
 		UseUpdateDnsOnLeaseRenewal:       flex.ExpandBoolPointer(m.UseUpdateDnsOnLeaseRenewal),
+	}
+	if isCreate {
+		to.SplitMember = ExpandRangeSplitMember(ctx, m.SplitMember, diags)
+		to.SplitScopeExclusionPercent = flex.ExpandInt64Pointer(m.SplitScopeExclusionPercent)
+		to.Template = flex.ExpandStringPointer(m.Template)
 	}
 	return to
 }

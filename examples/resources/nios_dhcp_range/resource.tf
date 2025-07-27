@@ -1,11 +1,11 @@
 //Create a Network Range with basic fields 
-resource "nios_dhcp_range" "test" {
+resource "nios_dhcp_range" "range_basic_fields" {
   start_addr = "10.0.0.170"
   end_addr   = "10.0.0.180"
 }
 
 //Create a Network Range with additional parameters 
-resource "nios_dhcp_range" "test_full" {
+resource "nios_dhcp_range" "range_additional_fields" {
   start_addr        = "10.0.0.190"
   end_addr          = "10.0.0.200"
   comment           = "Full range for testing"
@@ -13,19 +13,6 @@ resource "nios_dhcp_range" "test_full" {
   name              = "range object"
   always_update_dns = true
 
-  // BOOTP/PXE settings 
-  bootfile       = "pxelinux.0"
-  bootserver     = "192.168.1.10"
-  use_bootfile   = true
-  use_bootserver = true
-
-  //DDNS settings
-  enable_ddns                = true
-  use_enable_ddns            = true
-  ddns_domainname            = "example.com"
-  use_ddns_domainname        = true
-  ddns_generate_hostname     = true
-  use_ddns_generate_hostname = true
 
   // Email and notification settings
   email_list     = ["admin@example.com", "network@example.com"]

@@ -14,13 +14,13 @@ Manages a Range
 
 ```terraform
 //Create a Network Range with basic fields 
-resource "nios_dhcp_range" "test" {
+resource "nios_dhcp_range" "range_basic_fields" {
   start_addr = "10.0.0.170"
   end_addr   = "10.0.0.180"
 }
 
 //Create a Network Range with additional parameters 
-resource "nios_dhcp_range" "test_full" {
+resource "nios_dhcp_range" "range_additional_fields" {
   start_addr        = "10.0.0.190"
   end_addr          = "10.0.0.200"
   comment           = "Full range for testing"
@@ -28,19 +28,6 @@ resource "nios_dhcp_range" "test_full" {
   name              = "range object"
   always_update_dns = true
 
-  // BOOTP/PXE settings 
-  bootfile       = "pxelinux.0"
-  bootserver     = "192.168.1.10"
-  use_bootfile   = true
-  use_bootserver = true
-
-  //DDNS settings
-  enable_ddns                = true
-  use_enable_ddns            = true
-  ddns_domainname            = "example.com"
-  use_ddns_domainname        = true
-  ddns_generate_hostname     = true
-  use_ddns_generate_hostname = true
 
   // Email and notification settings
   email_list     = ["admin@example.com", "network@example.com"]
@@ -294,11 +281,14 @@ Optional:
 <a id="nestedatt--discovery_blackout_setting"></a>
 ### Nested Schema for `discovery_blackout_setting`
 
+Required:
+
+- `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
+
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
 - `blackout_schedule` (Attributes) The blackout schedule for the range. This field is used to configure the blackout schedule for the DHCP range. It includes information about the start and end times of the blackout period, as well as the frequency of blackout. (see [below for nested schema](#nestedatt--discovery_blackout_setting--blackout_schedule))
-- `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--discovery_blackout_setting--blackout_schedule"></a>
 ### Nested Schema for `discovery_blackout_setting.blackout_schedule`
@@ -323,17 +313,20 @@ Optional:
 <a id="nestedatt--exclude"></a>
 ### Nested Schema for `exclude`
 
+Required:
+
+- `end_address` (String) The IPv4 Address ending address of the exclusion range.
+- `start_address` (String) The IPv4 Address starting address of the exclusion range.
+
 Optional:
 
 - `comment` (String) Comment for the exclusion range; maximum 256 characters.
-- `end_address` (String) The IPv4 Address ending address of the exclusion range.
-- `start_address` (String) The IPv4 Address starting address of the exclusion range.
 
 
 <a id="nestedatt--fingerprint_filter_rules"></a>
 ### Nested Schema for `fingerprint_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -342,7 +335,7 @@ Optional:
 <a id="nestedatt--logic_filter_rules"></a>
 ### Nested Schema for `logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -351,7 +344,7 @@ Optional:
 <a id="nestedatt--mac_filter_rules"></a>
 ### Nested Schema for `mac_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -378,23 +371,26 @@ Read-Only:
 <a id="nestedatt--ms_options"></a>
 ### Nested Schema for `ms_options`
 
+Required:
+
+- `num` (Number) The code of the DHCP option.
+- `value` (String) Value of the DHCP option.
+
 Optional:
 
 - `name` (String) The name of the DHCP option.
-- `num` (Number) The code of the DHCP option.
 - `user_class` (String) The name of the user class with which this DHCP option is associated.
-- `value` (String) Value of the DHCP option.
-- `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 Read-Only:
 
 - `type` (String) The DHCP option type. Valid values are: * "16-bit signed integer" * "16-bit unsigned integer" * "32-bit signed integer" * "32-bit unsigned integer" * "64-bit unsigned integer" * "8-bit signed integer" * "8-bit unsigned integer (1,2,4,8)" * "8-bit unsigned integer" * "array of 16-bit integer" * "array of 16-bit unsigned integer" * "array of 32-bit integer" * "array of 32-bit unsigned integer" * "array of 64-bit unsigned integer" * "array of 8-bit integer" * "array of 8-bit unsigned integer" * "array of ip-address pair" * "array of ip-address" * "array of string" * "binary" * "boolean array of ip-address" * "boolean" * "boolean-text" * "domain-list" * "domain-name" * "encapsulated" * "ip-address" * "string" * "text"
+- `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 
 <a id="nestedatt--ms_server"></a>
 ### Nested Schema for `ms_server`
 
-Optional:
+Required:
 
 - `ipv4addr` (String) The IPv4 Address or FQDN of the Microsoft server.
 
@@ -402,7 +398,7 @@ Optional:
 <a id="nestedatt--nac_filter_rules"></a>
 ### Nested Schema for `nac_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -461,7 +457,7 @@ Optional:
 <a id="nestedatt--relay_agent_filter_rules"></a>
 ### Nested Schema for `relay_agent_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.

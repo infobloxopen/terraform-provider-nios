@@ -3,9 +3,11 @@ package dhcp
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -26,13 +28,14 @@ var RangeLogicFilterRulesAttrTypes = map[string]attr.Type{
 
 var RangeLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The filter name.",
 	},
 	"type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("MAC", "NAC", "Option"),
+		},
 		MarkdownDescription: "The filter type. Valid values are: * MAC * NAC * Option",
 	},
 }
