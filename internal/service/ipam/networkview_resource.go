@@ -32,12 +32,12 @@ type NetworkviewResource struct {
 }
 
 func (r *NetworkviewResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "ipam_networkview"
+	resp.TypeName = req.ProviderTypeName + "_" + "ipam_network_view"
 }
 
 func (r *NetworkviewResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Network View.",
 		Attributes:          NetworkviewResourceSchemaAttributes,
 	}
 }

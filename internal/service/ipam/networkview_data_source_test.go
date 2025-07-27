@@ -12,10 +12,10 @@ import (
 )
 
 func TestAccNetworkviewDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_ipam_networkview.test"
-	resourceName := "nios_ipam_networkview.test"
+	dataSourceName := "data.nios_ipam_network_view.test"
+	resourceName := "nios_ipam_network_view.test"
 	var v ipam.Networkview
-	name := acctest.RandomNameWithPrefix("test-nview")
+	name := acctest.RandomNameWithPrefix("test-network-view")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -35,10 +35,10 @@ func TestAccNetworkviewDataSource_Filters(t *testing.T) {
 }
 
 func TestAccNetworkviewDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_ipam_networkview.test"
-	resourceName := "nios_ipam_networkview.test"
+	dataSourceName := "data.nios_ipam_network_view.test"
+	resourceName := "nios_ipam_network_view.test"
 	var v ipam.Networkview
-	name := acctest.RandomNameWithPrefix("test-nview")
+	name := acctest.RandomNameWithPrefix("test-network-view")
 	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
@@ -83,13 +83,13 @@ func testAccCheckNetworkviewResourceAttrPair(resourceName, dataSourceName string
 
 func testAccNetworkviewDataSourceConfigFilters(name string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkview" "test" {
+resource "nios_ipam_network_view" "test" {
 	name = %q
 }
 
-data "nios_ipam_networkview" "test" {
+data "nios_ipam_network_view" "test" {
   filters = {
-	name = nios_ipam_networkview.test.name
+	name = nios_ipam_network_view.test.name
   }
 }
 `, name)
@@ -97,16 +97,16 @@ data "nios_ipam_networkview" "test" {
 
 func testAccNetworkviewDataSourceConfigExtAttrFilters(name, extAttrsValue string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_networkview" "test" {
+resource "nios_ipam_network_view" "test" {
   name = %q
     extattrs = {
     	Site = %q
   } 
 }
 
-data "nios_ipam_networkview" "test" {
+data "nios_ipam_network_view" "test" {
   extattrfilters = {
-	"Site" = nios_ipam_networkview.test.extattrs.Site
+	Site = nios_ipam_network_view.test.extattrs.Site
   }
 }
 `, name, extAttrsValue)

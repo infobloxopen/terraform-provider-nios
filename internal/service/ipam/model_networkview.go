@@ -2,12 +2,15 @@ package ipam
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -57,10 +60,10 @@ var NetworkviewAttrTypes = map[string]attr.Type{
 }
 
 var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
-   "ref": schema.StringAttribute{
-        Computed: true,
-        MarkdownDescription: "The reference to the object.",
-    },
+	"ref": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The reference to the object.",
+	},
 	"associated_dns_views": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Computed:            true,
@@ -74,13 +77,20 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of members associated with a network view.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: NetworkviewCloudInfoResourceSchemaAttributes,
-		Optional:   		 true,
-		Computed:            true,
-	},
-	"comment": schema.StringAttribute{
+		Attributes:          NetworkviewCloudInfoResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
+		MarkdownDescription: "The cloud information associated with the view.",
+	},
+	"comment": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the network view; maximum 256 characters.",
 	},
 	"ddns_dns_view": schema.StringAttribute{
@@ -119,7 +129,6 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 	"internal_forward_zones": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The list of linked authoritative DNS zones.",
 	},
 	"is_default": schema.BoolAttribute{
@@ -133,7 +142,7 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: NetworkviewMsAdUserDataResourceSchemaAttributes,
+		Attributes:          NetworkviewMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},

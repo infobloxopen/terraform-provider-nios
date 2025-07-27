@@ -24,7 +24,7 @@ var NetworkviewDdnsZonePrimariesDnsGridZoneAttrTypes = map[string]attr.Type{
 
 var NetworkviewDdnsZonePrimariesDnsGridZoneResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The reference to the DNS zone object.",
 	},
 }

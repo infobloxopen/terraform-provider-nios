@@ -3,15 +3,18 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NetworkviewDdnsZonePrimariesModel struct {
@@ -32,8 +35,10 @@ var NetworkviewDdnsZonePrimariesAttrTypes = map[string]attr.Type{
 
 var NetworkviewDdnsZonePrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"zone_match": schema.StringAttribute{
-		Optional:            true,
-		Computed:			 true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ANY_EXTERNAL", "ANY_GRID", "EXTERNAL", "GRID"),
+		},
 		MarkdownDescription: "Indicate matching type.",
 	},
 	"dns_grid_zone": schema.SingleNestedAttribute{
@@ -42,17 +47,20 @@ var NetworkviewDdnsZonePrimariesResourceSchemaAttributes = map[string]schema.Att
 	},
 	"dns_grid_primary": schema.StringAttribute{
 		Optional:            true,
-		Computed:			 true,
+		Computed:            true,
 		MarkdownDescription: "The name of a Grid member.",
 	},
 	"dns_ext_zone": schema.StringAttribute{
-		Optional:            true,
-		Computed:			 true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "The name of external zone in FQDN format.",
 	},
 	"dns_ext_primary": schema.StringAttribute{
 		Optional:            true,
-		Computed:			 true,
+		Computed:            true,
 		MarkdownDescription: "The IP address of the External server. Valid when zone_match is \"EXTERNAL\" or \"ANY_EXTERNAL\".",
 	},
 }
