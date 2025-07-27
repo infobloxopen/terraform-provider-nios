@@ -129,6 +129,7 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 	"internal_forward_zones": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of linked authoritative DNS zones.",
 	},
 	"is_default": schema.BoolAttribute{
@@ -147,7 +148,13 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Name of the network view.",
 	},
 	"remote_forward_zones": schema.ListNestedAttribute{

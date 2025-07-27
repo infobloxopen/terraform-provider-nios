@@ -3,19 +3,18 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-
 )
 
 type NetworkviewRemoteReverseZonesModel struct {
@@ -51,22 +50,22 @@ var NetworkviewRemoteReverseZonesResourceSchemaAttributes = map[string]schema.At
 	},
 	"gss_tsig_dns_principal": schema.StringAttribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		MarkdownDescription: "The principal name in which GSS-TSIG for dynamic updates is enabled.",
 	},
 	"gss_tsig_domain": schema.StringAttribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		MarkdownDescription: "The domain in which GSS-TSIG for dynamic updates is enabled.",
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key value.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional:            true,
-		Computed: 			 true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
 		},
@@ -74,12 +73,12 @@ var NetworkviewRemoteReverseZonesResourceSchemaAttributes = map[string]schema.At
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
-		Computed: 			 true,
+		Computed:            true,
 		MarkdownDescription: "The name of the TSIG key. The key name entered here must match the TSIG key name on the external name server.",
 	},
 	"key_type": schema.StringAttribute{
-		Optional:            true,
-		Computed: 			 true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("GSS-TSIG", "NONE", "TSIG"),
 		},

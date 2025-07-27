@@ -4,7 +4,7 @@ resource "nios_ipam_network_view" "create_network_view" {
 }
 
 // Create Network View with additional fields
-resource "nios_ipam_network_view" "create_with_additional_fields" {
+resource "nios_ipam_network_view" "create_network_view_with_additional_fields" {
   name    = "example-network-view2"
   comment = "Example Network View with additional fields"
 
@@ -42,6 +42,6 @@ resource "nios_ipam_network_view" "create_with_additional_fields" {
   mgm_private = true
 
   extattrs = {
-    Site = "Mars"
+    Site = "location-1"
   }
 }
