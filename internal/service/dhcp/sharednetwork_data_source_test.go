@@ -13,10 +13,10 @@ import (
 )
 
 func TestAccSharednetworkDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_sharednetwork.test"
-	resourceName := "nios_dhcp_sharednetwork.test"
+	dataSourceName := "data.nios_dhcp_shared_network.test"
+	resourceName := "nios_dhcp_shared_network.test"
 	var v dhcp.Sharednetwork
-	name := acctest.RandomNameWithPrefix("sharednetwork")
+	name := acctest.RandomNameWithPrefix("shared_network")
 	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
 		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 
@@ -38,10 +38,10 @@ func TestAccSharednetworkDataSource_Filters(t *testing.T) {
 }
 
 func TestAccSharednetworkDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_sharednetwork.test"
-	resourceName := "nios_dhcp_sharednetwork.test"
+	dataSourceName := "data.nios_dhcp_shared_network.test"
+	resourceName := "nios_dhcp_shared_network.test"
 	var v dhcp.Sharednetwork
-	name := acctest.RandomNameWithPrefix("sharednetwork")
+	name := acctest.RandomNameWithPrefix("shared_network")
 	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
 		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
 	extAttrValue := acctest.RandomName()
@@ -125,14 +125,14 @@ func testAccCheckSharednetworkResourceAttrPair(resourceName, dataSourceName stri
 func testAccSharednetworkDataSourceConfigFilters(name string, networks []string) string {
 	networksStr := formatNetworksToHCL(networks)
 	return fmt.Sprintf(`
-resource "nios_dhcp_sharednetwork" "test" {
+resource "nios_dhcp_shared_network" "test" {
  name = "%s"
  networks = %s
 }
 
-data "nios_dhcp_sharednetwork" "test" {
+data "nios_dhcp_shared_network" "test" {
  filters = {
-	 name = nios_dhcp_sharednetwork.test.name
+	 name = nios_dhcp_shared_network.test.name
  }
 }
 `, name, networksStr)
@@ -141,7 +141,7 @@ data "nios_dhcp_sharednetwork" "test" {
 func testAccSharednetworkDataSourceConfigExtAttrFilters(name string, netwrorks []string, extAttrsValue string) string {
 	netwrorksStr := formatNetworksToHCL(netwrorks)
 	return fmt.Sprintf(`
-resource "nios_dhcp_sharednetwork" "test" {
+resource "nios_dhcp_shared_network" "test" {
  name = %q
  networks = %s
  extattrs = {
@@ -149,9 +149,9 @@ resource "nios_dhcp_sharednetwork" "test" {
  }
 }
 
-data "nios_dhcp_sharednetwork" "test" {
+data "nios_dhcp_shared_network" "test" {
  extattrfilters = {
-	Site = nios_dhcp_sharednetwork.test.extattrs.Site
+	Site = nios_dhcp_shared_network.test.extattrs.Site
  }
 }
 `, name, netwrorksStr, extAttrsValue)

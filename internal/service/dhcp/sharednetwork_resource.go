@@ -33,12 +33,12 @@ type SharednetworkResource struct {
 }
 
 func (r *SharednetworkResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_sharednetwork"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_shared_network"
 }
 
 func (r *SharednetworkResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages DHCP SharedNetwork.",
+		MarkdownDescription: "Manages a DHCP Shared Network.",
 		Attributes:          SharednetworkResourceSchemaAttributes,
 	}
 }

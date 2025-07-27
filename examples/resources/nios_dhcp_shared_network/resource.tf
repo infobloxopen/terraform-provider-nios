@@ -1,5 +1,5 @@
-// Create SharedNetwork with Basic Fields
-resource "nios_dhcp_sharednetwork" "shared_network_basic_fields" {
+// Create Shared Network with Basic Fields
+resource "nios_dhcp_shared_network" "shared_network_basic_fields" {
   name = "example_shared_network1"
   networks = [
     {
@@ -15,8 +15,8 @@ resource "nios_dhcp_sharednetwork" "shared_network_basic_fields" {
   }
 }
 
-// Create SharedNetwork with Additional Fields
-resource "nios_dhcp_sharednetwork" "shared_network_additional_fields" {
+// Create Shared Network with Additional Fields
+resource "nios_dhcp_shared_network" "shared_network_additional_fields" {
   name = "example_shared_network2"
   networks = [
     {
@@ -26,7 +26,8 @@ resource "nios_dhcp_sharednetwork" "shared_network_additional_fields" {
       ref = "network/ZG5zLm5ldHdvcmskMTYuMC4wLjAvMjQvMA:16.0.0.0/24/default"
     }
   ]
-  use_options = true
+  ignore_mac_addresses = ["66:77:88:99:aa:bb", "00:11:22:33:44:55"]
+  use_options          = true
   options = [
     {
       name  = "domain-name-servers"
@@ -48,7 +49,7 @@ resource "nios_dhcp_sharednetwork" "shared_network_additional_fields" {
       type   = "Option"
     }
   ]
-  comment                    = "shared network with additional fields"
+  comment                    = "Shared network with additional fields"
   ddns_server_always_updates = true
   ddns_use_option81          = true
   use_ddns_use_option81      = true
