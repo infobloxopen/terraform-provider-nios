@@ -97,6 +97,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewZoneForwardResource,
 		dns.NewRecordCnameResource,
 		dns.NewRecordMxResource,
+		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
 
 		dtc.NewDtcLbdnResource,
@@ -118,6 +119,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewZoneForwardDataSource,
 		dns.NewRecordCnameDataSource,
 		dns.NewRecordMxDataSource,
+		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
 
 		dtc.NewDtcLbdnDataSource,
