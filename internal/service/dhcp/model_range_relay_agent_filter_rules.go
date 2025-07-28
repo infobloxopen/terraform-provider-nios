@@ -34,7 +34,7 @@ var RangeRelayAgentFilterRulesResourceSchemaAttributes = map[string]schema.Attri
 	"permission": schema.StringAttribute{
 		Required:            true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("ALLOW", "DENY"),
+			stringvalidator.OneOf("Allow", "Deny"),
 		},
 		MarkdownDescription: "The permission to be applied.",
 	},
