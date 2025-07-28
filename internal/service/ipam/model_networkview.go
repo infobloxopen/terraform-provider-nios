@@ -192,7 +192,6 @@ func (m *NetworkviewModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		return nil
 	}
 	to := &ipam.Networkview{
-		Ref:                  flex.ExpandStringPointer(m.Ref),
 		CloudInfo:            ExpandNetworkviewCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:              flex.ExpandStringPointer(m.Comment),
 		DdnsDnsView:          flex.ExpandStringPointer(m.DdnsDnsView),
@@ -201,7 +200,6 @@ func (m *NetworkviewModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		FederatedRealms:      flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandNetworkviewFederatedRealms),
 		InternalForwardZones: flex.ExpandFrameworkListString(ctx, m.InternalForwardZones, diags),
 		MgmPrivate:           flex.ExpandBoolPointer(m.MgmPrivate),
-		MsAdUserData:         ExpandNetworkviewMsAdUserData(ctx, m.MsAdUserData, diags),
 		Name:                 flex.ExpandStringPointer(m.Name),
 		RemoteForwardZones:   flex.ExpandFrameworkListNestedBlock(ctx, m.RemoteForwardZones, diags, ExpandNetworkviewRemoteForwardZones),
 		RemoteReverseZones:   flex.ExpandFrameworkListNestedBlock(ctx, m.RemoteReverseZones, diags, ExpandNetworkviewRemoteReverseZones),

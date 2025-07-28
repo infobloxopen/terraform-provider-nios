@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NetworkviewRemoteReverseZonesModel struct {
@@ -41,7 +42,10 @@ var NetworkviewRemoteReverseZonesAttrTypes = map[string]attr.Type{
 
 var NetworkviewRemoteReverseZonesResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "The FQDN of the remote server.",
 	},
 	"server_address": schema.StringAttribute{

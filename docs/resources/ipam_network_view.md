@@ -131,7 +131,7 @@ Optional:
 - `dns_ext_primary` (String) The IP address of the External server. Valid when zone_match is "EXTERNAL" or "ANY_EXTERNAL".
 - `dns_ext_zone` (String) The name of external zone in FQDN format.
 - `dns_grid_primary` (String) The name of a Grid member.
-- `dns_grid_zone` (Attributes) (see [below for nested schema](#nestedatt--ddns_zone_primaries--dns_grid_zone))
+- `dns_grid_zone` (Attributes) The ref of a DNS zone. (see [below for nested schema](#nestedatt--ddns_zone_primaries--dns_grid_zone))
 
 <a id="nestedatt--ddns_zone_primaries--dns_grid_zone"></a>
 ### Nested Schema for `ddns_zone_primaries.dns_grid_zone`

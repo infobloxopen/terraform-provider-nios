@@ -42,8 +42,9 @@ var NetworkviewDdnsZonePrimariesResourceSchemaAttributes = map[string]schema.Att
 		MarkdownDescription: "Indicate matching type.",
 	},
 	"dns_grid_zone": schema.SingleNestedAttribute{
-		Attributes: NetworkviewDdnsZonePrimariesDnsGridZoneResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          NetworkviewDdnsZonePrimariesDnsGridZoneResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "The ref of a DNS zone.",
 	},
 	"dns_grid_primary": schema.StringAttribute{
 		Optional:            true,
