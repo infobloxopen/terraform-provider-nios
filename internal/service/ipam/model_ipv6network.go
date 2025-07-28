@@ -523,12 +523,16 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
+		MarkdownDescription: "The port control blackout setting for this network.",
 	},
 	"preferred_lifetime": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network object.",
 		Computed:            true,
 		Default:             int64default.StaticInt64(27000),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_preferred_lifetime")),
+		},
 	},
 	"recycle_leases": schema.BoolAttribute{
 		Optional:            true,
@@ -705,9 +709,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: preferred_lifetime",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
-		Validators: []validator.Bool{
-			boolvalidator.AlsoRequires(path.MatchRoot("preferred_lifetime")),
-		},
 	},
 	"use_recycle_leases": schema.BoolAttribute{
 		Optional:            true,
@@ -720,9 +721,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: subscribe_settings",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
-		Validators: []validator.Bool{
-			boolvalidator.AlsoRequires(path.MatchRoot("subscribe_settings")),
-		},
 	},
 	"use_update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,

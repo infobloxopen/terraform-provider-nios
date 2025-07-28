@@ -6,12 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6networkSubscribeSettingsModel struct {
@@ -30,6 +32,17 @@ var Ipv6networkSubscribeSettingsResourceSchemaAttributes = map[string]schema.Att
 		Optional:            true,
 		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
 		Computed:            true,
+		Validators: []validator.List{
+			customvalidator.StringsInSlice([]string{
+				"DOMAINNAME",
+				"ENDPOINT_PROFILE",
+				"SECURITY_GROUP",
+				"SESSION_STATE",
+				"SSID",
+				"USERNAME",
+				"VLAN",
+			}),
+		},
 	},
 	"mapped_ea_attributes": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

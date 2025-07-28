@@ -6,7 +6,7 @@ resource "nios_ipam_ipv6network" "example_network" {
 
   // Optional: Configure extensible attributes
   extattrs = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
@@ -77,6 +77,6 @@ resource "nios_ipam_ipv6network" "example_func_call" {
   }
   comment = "Network container created with function call"
   depends_on = [
-    nios_ipam_ipv6network.example_network,
+    nios_ipam_ipv6network.example_network
   ]
 }
