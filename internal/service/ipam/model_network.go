@@ -499,6 +499,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
+
 		MarkdownDescription: "The discovery blackout setting for this network.",
 	},
 	"discovery_engine_type": schema.StringAttribute{
@@ -756,7 +757,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          NetworkMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
-	},
+  },
 	"netmask": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The netmask of the network in CIDR format.",
@@ -768,6 +769,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 	},
 	"func_call": schema.SingleNestedAttribute{
+
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
@@ -1304,7 +1306,6 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
-	// m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
