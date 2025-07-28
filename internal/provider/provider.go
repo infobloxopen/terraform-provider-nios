@@ -89,7 +89,6 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-
 		dns.NewRecordAResource,
 		dns.NewRecordAaaaResource,
 		dns.NewRecordAliasResource,
@@ -111,13 +110,13 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
 
+		ipam.NewNetworkResource,
 		ipam.NewNetworkcontainerResource,
 	}
 }
 
 func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-
 		dns.NewRecordADataSource,
 		dns.NewRecordAaaaDataSource,
 		dns.NewRecordAliasDataSource,
@@ -139,6 +138,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewSharednetworkDataSource,
 		dhcp.NewFixedaddressDataSource,
 
+		ipam.NewNetworkDataSource,
 		ipam.NewNetworkcontainerDataSource,
 	}
 }
