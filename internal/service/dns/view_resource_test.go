@@ -3081,6 +3081,7 @@ func testAccViewDdnsRestrictPatternsList(name string, ddnsRestrictPatternsList [
 resource "nios_dns_view" "test_ddns_restrict_patterns_list" {
 	name = %q
     ddns_restrict_patterns_list = %s
+	use_ddns_patterns_restriction = true
 }
 `, name, ddnsRestrictPatternsListStr)
 }
