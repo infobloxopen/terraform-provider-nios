@@ -415,6 +415,7 @@ func ParseInterfaceValue(valStr string) interface{} {
 	return valStr
 }
 
+// ConvertSliceOfMapsToHCL serializes a slice of []map[string]any into an HCL format.
 func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 	var blocks []string
 
