@@ -34,7 +34,7 @@ var RangeNacFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"permission": schema.StringAttribute{
 		Required:            true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("ALLOW", "DENY"),
+			stringvalidator.OneOf("Allow", "Deny"),
 		},
 		MarkdownDescription: "The permission to be applied.",
 	},
