@@ -1,4 +1,4 @@
-package ipam
+package dhcp
 
 import (
 	"context"
@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -60,7 +61,7 @@ var FuncCallResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandFuncCall(ctx context.Context, o types.Object, diags *diag.Diagnostics) *ipam.FuncCall {
+func ExpandFuncCall(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dhcp.FuncCall {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
@@ -72,11 +73,11 @@ func ExpandFuncCall(ctx context.Context, o types.Object, diags *diag.Diagnostics
 	return m.Expand(ctx, diags)
 }
 
-func (m *FuncCallModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.FuncCall {
+func (m *FuncCallModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.FuncCall {
 	if m == nil {
 		return nil
 	}
-	to := &ipam.FuncCall{
+	to := &dhcp.FuncCall{
 		AttributeName:    flex.ExpandString(m.AttributeName),
 		ObjectFunction:   flex.ExpandStringPointer(m.ObjectFunction),
 		Parameters:       flex.ExpandParsedFrameworkMapString(ctx, m.Parameters, diags),
@@ -87,7 +88,7 @@ func (m *FuncCallModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ip
 	return to
 }
 
-func FlattenFuncCall(ctx context.Context, from *ipam.FuncCall, diags *diag.Diagnostics) types.Object {
+func FlattenFuncCall(ctx context.Context, from *dhcp.FuncCall, diags *diag.Diagnostics) types.Object {
 	if from == nil {
 		return types.ObjectNull(FuncCallAttrTypes)
 	}
@@ -98,7 +99,7 @@ func FlattenFuncCall(ctx context.Context, from *ipam.FuncCall, diags *diag.Diagn
 	return t
 }
 
-func (m *FuncCallModel) Flatten(ctx context.Context, from *ipam.FuncCall, diags *diag.Diagnostics) {
+func (m *FuncCallModel) Flatten(ctx context.Context, from *dhcp.FuncCall, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}

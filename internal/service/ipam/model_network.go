@@ -2,37 +2,39 @@ package ipam
 
 import (
 	"context"
-	"regexp"
-
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type NetworkcontainerModel struct {
+type NetworkModel struct {
 	Ref                              types.String `tfsdk:"ref"`
 	Authority                        types.Bool   `tfsdk:"authority"`
 	AutoCreateReversezone            types.Bool   `tfsdk:"auto_create_reversezone"`
 	Bootfile                         types.String `tfsdk:"bootfile"`
 	Bootserver                       types.String `tfsdk:"bootserver"`
 	CloudInfo                        types.Object `tfsdk:"cloud_info"`
+	CloudShared                      types.Bool   `tfsdk:"cloud_shared"`
 	Comment                          types.String `tfsdk:"comment"`
+	ConflictCount                    types.Int64  `tfsdk:"conflict_count"`
 	DdnsDomainname                   types.String `tfsdk:"ddns_domainname"`
 	DdnsGenerateHostname             types.Bool   `tfsdk:"ddns_generate_hostname"`
 	DdnsServerAlwaysUpdates          types.Bool   `tfsdk:"ddns_server_always_updates"`
@@ -41,16 +43,29 @@ type NetworkcontainerModel struct {
 	DdnsUseOption81                  types.Bool   `tfsdk:"ddns_use_option81"`
 	DeleteReason                     types.String `tfsdk:"delete_reason"`
 	DenyBootp                        types.Bool   `tfsdk:"deny_bootp"`
+	DhcpUtilization                  types.Int64  `tfsdk:"dhcp_utilization"`
+	DhcpUtilizationStatus            types.String `tfsdk:"dhcp_utilization_status"`
+	Disable                          types.Bool   `tfsdk:"disable"`
 	DiscoverNowStatus                types.String `tfsdk:"discover_now_status"`
+	DiscoveredBgpAs                  types.String `tfsdk:"discovered_bgp_as"`
+	DiscoveredBridgeDomain           types.String `tfsdk:"discovered_bridge_domain"`
+	DiscoveredTenant                 types.String `tfsdk:"discovered_tenant"`
+	DiscoveredVlanId                 types.String `tfsdk:"discovered_vlan_id"`
+	DiscoveredVlanName               types.String `tfsdk:"discovered_vlan_name"`
+	DiscoveredVrfDescription         types.String `tfsdk:"discovered_vrf_description"`
+	DiscoveredVrfName                types.String `tfsdk:"discovered_vrf_name"`
+	DiscoveredVrfRd                  types.String `tfsdk:"discovered_vrf_rd"`
 	DiscoveryBasicPollSettings       types.Object `tfsdk:"discovery_basic_poll_settings"`
 	DiscoveryBlackoutSetting         types.Object `tfsdk:"discovery_blackout_setting"`
 	DiscoveryEngineType              types.String `tfsdk:"discovery_engine_type"`
 	DiscoveryMember                  types.String `tfsdk:"discovery_member"`
+	DynamicHosts                     types.Int64  `tfsdk:"dynamic_hosts"`
 	EmailList                        types.List   `tfsdk:"email_list"`
 	EnableDdns                       types.Bool   `tfsdk:"enable_ddns"`
 	EnableDhcpThresholds             types.Bool   `tfsdk:"enable_dhcp_thresholds"`
 	EnableDiscovery                  types.Bool   `tfsdk:"enable_discovery"`
 	EnableEmailWarnings              types.Bool   `tfsdk:"enable_email_warnings"`
+	EnableIfmapPublishing            types.Bool   `tfsdk:"enable_ifmap_publishing"`
 	EnableImmediateDiscovery         types.Bool   `tfsdk:"enable_immediate_discovery"`
 	EnablePxeLeaseTime               types.Bool   `tfsdk:"enable_pxe_lease_time"`
 	EnableSnmpWarnings               types.Bool   `tfsdk:"enable_snmp_warnings"`
@@ -66,15 +81,18 @@ type NetworkcontainerModel struct {
 	IpamEmailAddresses               types.List   `tfsdk:"ipam_email_addresses"`
 	IpamThresholdSettings            types.Object `tfsdk:"ipam_threshold_settings"`
 	IpamTrapSettings                 types.Object `tfsdk:"ipam_trap_settings"`
+	Ipv4addr                         types.String `tfsdk:"ipv4addr"`
 	LastRirRegistrationUpdateSent    types.Int64  `tfsdk:"last_rir_registration_update_sent"`
 	LastRirRegistrationUpdateStatus  types.String `tfsdk:"last_rir_registration_update_status"`
 	LeaseScavengeTime                types.Int64  `tfsdk:"lease_scavenge_time"`
 	LogicFilterRules                 types.List   `tfsdk:"logic_filter_rules"`
 	LowWaterMark                     types.Int64  `tfsdk:"low_water_mark"`
 	LowWaterMarkReset                types.Int64  `tfsdk:"low_water_mark_reset"`
+	Members                          types.List   `tfsdk:"members"`
 	MgmPrivate                       types.Bool   `tfsdk:"mgm_private"`
 	MgmPrivateOverridable            types.Bool   `tfsdk:"mgm_private_overridable"`
 	MsAdUserData                     types.Object `tfsdk:"ms_ad_user_data"`
+	Netmask                          types.Int64  `tfsdk:"netmask"`
 	Network                          types.String `tfsdk:"network"`
 	FuncCall                         types.Object `tfsdk:"func_call"`
 	NetworkContainer                 types.String `tfsdk:"network_container"`
@@ -84,7 +102,6 @@ type NetworkcontainerModel struct {
 	PortControlBlackoutSetting       types.Object `tfsdk:"port_control_blackout_setting"`
 	PxeLeaseTime                     types.Int64  `tfsdk:"pxe_lease_time"`
 	RecycleLeases                    types.Bool   `tfsdk:"recycle_leases"`
-	RemoveSubnets                    types.Bool   `tfsdk:"remove_subnets"`
 	RestartIfNeeded                  types.Bool   `tfsdk:"restart_if_needed"`
 	Rir                              types.String `tfsdk:"rir"`
 	RirOrganization                  types.String `tfsdk:"rir_organization"`
@@ -92,8 +109,12 @@ type NetworkcontainerModel struct {
 	RirRegistrationStatus            types.String `tfsdk:"rir_registration_status"`
 	SamePortControlDiscoveryBlackout types.Bool   `tfsdk:"same_port_control_discovery_blackout"`
 	SendRirRequest                   types.Bool   `tfsdk:"send_rir_request"`
+	StaticHosts                      types.Int64  `tfsdk:"static_hosts"`
 	SubscribeSettings                types.Object `tfsdk:"subscribe_settings"`
+	Template                         types.String `tfsdk:"template"`
+	TotalHosts                       types.Int64  `tfsdk:"total_hosts"`
 	Unmanaged                        types.Bool   `tfsdk:"unmanaged"`
+	UnmanagedCount                   types.Int64  `tfsdk:"unmanaged_count"`
 	UpdateDnsOnLeaseRenewal          types.Bool   `tfsdk:"update_dns_on_lease_renewal"`
 	UseAuthority                     types.Bool   `tfsdk:"use_authority"`
 	UseBlackoutSetting               types.Bool   `tfsdk:"use_blackout_setting"`
@@ -110,6 +131,7 @@ type NetworkcontainerModel struct {
 	UseEnableDdns                    types.Bool   `tfsdk:"use_enable_ddns"`
 	UseEnableDhcpThresholds          types.Bool   `tfsdk:"use_enable_dhcp_thresholds"`
 	UseEnableDiscovery               types.Bool   `tfsdk:"use_enable_discovery"`
+	UseEnableIfmapPublishing         types.Bool   `tfsdk:"use_enable_ifmap_publishing"`
 	UseIgnoreDhcpOptionListRequest   types.Bool   `tfsdk:"use_ignore_dhcp_option_list_request"`
 	UseIgnoreId                      types.Bool   `tfsdk:"use_ignore_id"`
 	UseIpamEmailAddresses            types.Bool   `tfsdk:"use_ipam_email_addresses"`
@@ -126,17 +148,21 @@ type NetworkcontainerModel struct {
 	UseUpdateDnsOnLeaseRenewal       types.Bool   `tfsdk:"use_update_dns_on_lease_renewal"`
 	UseZoneAssociations              types.Bool   `tfsdk:"use_zone_associations"`
 	Utilization                      types.Int64  `tfsdk:"utilization"`
+	UtilizationUpdate                types.Int64  `tfsdk:"utilization_update"`
+	Vlans                            types.List   `tfsdk:"vlans"`
 	ZoneAssociations                 types.List   `tfsdk:"zone_associations"`
 }
 
-var NetworkcontainerAttrTypes = map[string]attr.Type{
+var NetworkAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
 	"authority":                            types.BoolType,
 	"auto_create_reversezone":              types.BoolType,
 	"bootfile":                             types.StringType,
 	"bootserver":                           types.StringType,
-	"cloud_info":                           types.ObjectType{AttrTypes: NetworkcontainerCloudInfoAttrTypes},
+	"cloud_info":                           types.ObjectType{AttrTypes: NetworkCloudInfoAttrTypes},
+	"cloud_shared":                         types.BoolType,
 	"comment":                              types.StringType,
+	"conflict_count":                       types.Int64Type,
 	"ddns_domainname":                      types.StringType,
 	"ddns_generate_hostname":               types.BoolType,
 	"ddns_server_always_updates":           types.BoolType,
@@ -145,50 +171,65 @@ var NetworkcontainerAttrTypes = map[string]attr.Type{
 	"ddns_use_option81":                    types.BoolType,
 	"delete_reason":                        types.StringType,
 	"deny_bootp":                           types.BoolType,
+	"dhcp_utilization":                     types.Int64Type,
+	"dhcp_utilization_status":              types.StringType,
+	"disable":                              types.BoolType,
 	"discover_now_status":                  types.StringType,
-	"discovery_basic_poll_settings":        types.ObjectType{AttrTypes: NetworkcontainerDiscoveryBasicPollSettingsAttrTypes},
-	"discovery_blackout_setting":           types.ObjectType{AttrTypes: NetworkcontainerDiscoveryBlackoutSettingAttrTypes},
+	"discovered_bgp_as":                    types.StringType,
+	"discovered_bridge_domain":             types.StringType,
+	"discovered_tenant":                    types.StringType,
+	"discovered_vlan_id":                   types.StringType,
+	"discovered_vlan_name":                 types.StringType,
+	"discovered_vrf_description":           types.StringType,
+	"discovered_vrf_name":                  types.StringType,
+	"discovered_vrf_rd":                    types.StringType,
+	"discovery_basic_poll_settings":        types.ObjectType{AttrTypes: NetworkDiscoveryBasicPollSettingsAttrTypes},
+	"discovery_blackout_setting":           types.ObjectType{AttrTypes: NetworkDiscoveryBlackoutSettingAttrTypes},
 	"discovery_engine_type":                types.StringType,
 	"discovery_member":                     types.StringType,
+	"dynamic_hosts":                        types.Int64Type,
 	"email_list":                           types.ListType{ElemType: types.StringType},
 	"enable_ddns":                          types.BoolType,
 	"enable_dhcp_thresholds":               types.BoolType,
 	"enable_discovery":                     types.BoolType,
 	"enable_email_warnings":                types.BoolType,
+	"enable_ifmap_publishing":              types.BoolType,
 	"enable_immediate_discovery":           types.BoolType,
 	"enable_pxe_lease_time":                types.BoolType,
 	"enable_snmp_warnings":                 types.BoolType,
 	"endpoint_sources":                     types.ListType{ElemType: types.StringType},
 	"extattrs":                             types.MapType{ElemType: types.StringType},
 	"extattrs_all":                         types.MapType{ElemType: types.StringType},
-	"federated_realms":                     types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkcontainerFederatedRealmsAttrTypes}},
+	"federated_realms":                     types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkFederatedRealmsAttrTypes}},
 	"high_water_mark":                      types.Int64Type,
 	"high_water_mark_reset":                types.Int64Type,
 	"ignore_dhcp_option_list_request":      types.BoolType,
 	"ignore_id":                            types.StringType,
 	"ignore_mac_addresses":                 types.ListType{ElemType: types.StringType},
 	"ipam_email_addresses":                 types.ListType{ElemType: types.StringType},
-	"ipam_threshold_settings":              types.ObjectType{AttrTypes: NetworkcontainerIpamThresholdSettingsAttrTypes},
-	"ipam_trap_settings":                   types.ObjectType{AttrTypes: NetworkcontainerIpamTrapSettingsAttrTypes},
+	"ipam_threshold_settings":              types.ObjectType{AttrTypes: NetworkIpamThresholdSettingsAttrTypes},
+	"ipam_trap_settings":                   types.ObjectType{AttrTypes: NetworkIpamTrapSettingsAttrTypes},
+	"ipv4addr":                             types.StringType,
 	"last_rir_registration_update_sent":    types.Int64Type,
 	"last_rir_registration_update_status":  types.StringType,
 	"lease_scavenge_time":                  types.Int64Type,
-	"logic_filter_rules":                   types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkcontainerLogicFilterRulesAttrTypes}},
+	"logic_filter_rules":                   types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkLogicFilterRulesAttrTypes}},
 	"low_water_mark":                       types.Int64Type,
 	"low_water_mark_reset":                 types.Int64Type,
+	"members":                              types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkMembersAttrTypes}},
 	"mgm_private":                          types.BoolType,
 	"mgm_private_overridable":              types.BoolType,
-	"ms_ad_user_data":                      types.ObjectType{AttrTypes: NetworkcontainerMsAdUserDataAttrTypes},
+	"ms_ad_user_data":                      types.ObjectType{AttrTypes: NetworkMsAdUserDataAttrTypes},
+	"netmask":                              types.Int64Type,
 	"network":                              types.StringType,
 	"func_call":                            types.ObjectType{AttrTypes: FuncCallAttrTypes},
 	"network_container":                    types.StringType,
 	"network_view":                         types.StringType,
 	"nextserver":                           types.StringType,
-	"options":                              types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkcontainerOptionsAttrTypes}},
-	"port_control_blackout_setting":        types.ObjectType{AttrTypes: NetworkcontainerPortControlBlackoutSettingAttrTypes},
+	"options":                              types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkOptionsAttrTypes}},
+	"port_control_blackout_setting":        types.ObjectType{AttrTypes: NetworkPortControlBlackoutSettingAttrTypes},
 	"pxe_lease_time":                       types.Int64Type,
 	"recycle_leases":                       types.BoolType,
-	"remove_subnets":                       types.BoolType,
 	"restart_if_needed":                    types.BoolType,
 	"rir":                                  types.StringType,
 	"rir_organization":                     types.StringType,
@@ -196,8 +237,12 @@ var NetworkcontainerAttrTypes = map[string]attr.Type{
 	"rir_registration_status":              types.StringType,
 	"same_port_control_discovery_blackout": types.BoolType,
 	"send_rir_request":                     types.BoolType,
-	"subscribe_settings":                   types.ObjectType{AttrTypes: NetworkcontainerSubscribeSettingsAttrTypes},
+	"static_hosts":                         types.Int64Type,
+	"subscribe_settings":                   types.ObjectType{AttrTypes: NetworkSubscribeSettingsAttrTypes},
+	"template":                             types.StringType,
+	"total_hosts":                          types.Int64Type,
 	"unmanaged":                            types.BoolType,
+	"unmanaged_count":                      types.Int64Type,
 	"update_dns_on_lease_renewal":          types.BoolType,
 	"use_authority":                        types.BoolType,
 	"use_blackout_setting":                 types.BoolType,
@@ -214,6 +259,7 @@ var NetworkcontainerAttrTypes = map[string]attr.Type{
 	"use_enable_ddns":                      types.BoolType,
 	"use_enable_dhcp_thresholds":           types.BoolType,
 	"use_enable_discovery":                 types.BoolType,
+	"use_enable_ifmap_publishing":          types.BoolType,
 	"use_ignore_dhcp_option_list_request":  types.BoolType,
 	"use_ignore_id":                        types.BoolType,
 	"use_ipam_email_addresses":             types.BoolType,
@@ -230,18 +276,20 @@ var NetworkcontainerAttrTypes = map[string]attr.Type{
 	"use_update_dns_on_lease_renewal":      types.BoolType,
 	"use_zone_associations":                types.BoolType,
 	"utilization":                          types.Int64Type,
-	"zone_associations":                    types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkcontainerZoneAssociationsAttrTypes}},
+	"utilization_update":                   types.Int64Type,
+	"vlans":                                types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkVlansAttrTypes}},
+	"zone_associations":                    types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkZoneAssociationsAttrTypes}},
 }
 
-var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
+var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"authority": schema.BoolAttribute{
 		Optional:            true,
+		MarkdownDescription: "Authority for the DHCP network.",
 		Computed:            true,
-		MarkdownDescription: "Authority for the DHCP network container.",
 		Default:             booldefault.StaticBool(false),
 		Validators: []validator.Bool{
 			boolvalidator.AlsoRequires(path.MatchRoot("use_authority")),
@@ -250,52 +298,50 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"auto_create_reversezone": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "This flag controls whether reverse zones are automatically created when the network is added.",
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 	},
 	"bootfile": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "The boot server IPv4 Address or name in FQDN format for the network container. You can specify the name and/or IP address of the boot server that the host needs to boot.",
+		MarkdownDescription: "The bootfile name for the network. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
-		Default:  stringdefault.StaticString(""),
 		Computed: true,
 	},
 	"bootserver": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "The bootserver address for the network container. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
+		MarkdownDescription: "The bootserver address for the network. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 		},
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes:          NetworkcontainerCloudInfoResourceSchemaAttributes,
-		Optional:            true,
+		Attributes:          NetworkCloudInfoResourceSchemaAttributes,
 		Computed:            true,
-		MarkdownDescription: "Structure containing all cloud API related information for this object.",
+		MarkdownDescription: "A CloudInfo struct that contains information about the cloud provider and region for the network.",
+		Optional:            true,
+	},
+	"cloud_shared": schema.BoolAttribute{
+		Optional:            true,
+		MarkdownDescription: "Boolean flag to indicate if the network is shared with cloud.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "Comment for the network container; maximum 256 characters.",
+		MarkdownDescription: "Comment for the network, maximum 256 characters.",
 		Computed:            true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
-		Default: stringdefault.StaticString(""),
+	},
+	"conflict_count": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "The number of conflicts discovered via network discovery.",
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network container.",
+		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 		},
-		Default:  stringdefault.StaticString(""),
 		Computed: true,
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
@@ -309,7 +355,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_server_always_updates": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "This field controls whether the DHCP server is allowed to update DNS, regardless of the DHCP client requests. Note that changes for this field take effect only if ddns_use_option81 is True.",
+		MarkdownDescription: "This field controls whether only the DHCP server is allowed to update DNS, regardless of the DHCP clients requests. Note that changes for this field take effect only if ddns_use_option81 is True.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(true),
 		Validators: []validator.Bool{
@@ -319,11 +365,12 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_ttl": schema.Int64Attribute{
 		Optional:            true,
-		MarkdownDescription: "The DNS update Time to Live (TTL) value of a DHCP network container object. The TTL is a 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
+		MarkdownDescription: "The DNS update Time to Live (TTL) value of a DHCP network object. The TTL is a 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
 		Computed:            true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ddns_ttl")),
 		},
+		Default: int64default.StaticInt64(0),
 	},
 	"ddns_update_fixed_addresses": schema.BoolAttribute{
 		Optional:            true,
@@ -336,7 +383,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_use_option81": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "The support for DHCP Option 81 at the network container level.",
+		MarkdownDescription: "The support for DHCP Option 81 at the network level.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		Validators: []validator.Bool{
@@ -349,35 +396,85 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"deny_bootp": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "If set to True, BOOTP settings are disabled and BOOTP requests will be denied.",
+		MarkdownDescription: "If set to true, BOOTP settings are disabled and BOOTP requests will be denied.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		Validators: []validator.Bool{
 			boolvalidator.AlsoRequires(path.MatchRoot("use_deny_bootp")),
 		},
 	},
+	"dhcp_utilization": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "The percentage of the total DHCP utilization of the network multiplied by 1000. This is the percentage of the total number of available IP addresses belonging to the network versus the total number of all IP addresses in network.",
+	},
+	"dhcp_utilization_status": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "A string describing the utilization level of the network.",
+		Default:             stringdefault.StaticString("LOW"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("LOW", "NORMAL", "HIGH", "FULL"),
+		},
+	},
+	"disable": schema.BoolAttribute{
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "Determines whether a network is disabled or not. When this is set to False, the network is enabled.",
+		Default:             booldefault.StaticBool(false),
+	},
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "Discover now status for this network container.",
+		MarkdownDescription: "Discover now status for this network.",
 		Default:             stringdefault.StaticString("NONE"),
 	},
+	"discovered_bgp_as": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Number of the discovered BGP AS. When multiple BGP autonomous systems are discovered in the network, this field displays \"Multiple\".",
+	},
+	"discovered_bridge_domain": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "Discovered bridge domain.",
+		Computed:            true,
+	},
+	"discovered_tenant": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "Discovered tenant.",
+		Computed:            true,
+	},
+	"discovered_vlan_id": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The identifier of the discovered VLAN. When multiple VLANs are discovered in the network, this field displays \"Multiple\".",
+	},
+	"discovered_vlan_name": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The name of the discovered VLAN. When multiple VLANs are discovered in the network, this field displays \"Multiple\".",
+	},
+	"discovered_vrf_description": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Description of the discovered VRF. When multiple VRFs are discovered in the network, this field displays \"Multiple\".",
+	},
+	"discovered_vrf_name": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The name of the discovered VRF. When multiple VRFs are discovered in the network, this field displays \"Multiple\".",
+	},
+	"discovered_vrf_rd": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Route distinguisher of the discovered VRF. When multiple VRFs are discovered in the network, this field displays \"Multiple\".",
+	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes,
+		Attributes: NetworkDiscoveryBasicPollSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_basic_polling_settings")),
 		},
-		MarkdownDescription: "The discovery basic poll settings for this network container.",
 	},
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerDiscoveryBlackoutSettingResourceSchemaAttributes,
+		Attributes: NetworkDiscoveryBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
-		MarkdownDescription: "The discovery blackout setting for this network container.",
 	},
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
@@ -386,12 +483,15 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "The member that will run discovery for this network container.",
+		MarkdownDescription: "The member that will run discovery for this network.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
 		},
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
+	},
+	"dynamic_hosts": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "The total number of DHCP leases issued for the network.",
 	},
 	"email_list": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -404,7 +504,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "The dynamic DNS updates flag of a DHCP network container object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
+		MarkdownDescription: "The dynamic DNS updates flag of a DHCP network object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		Validators: []validator.Bool{
@@ -413,7 +513,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"enable_dhcp_thresholds": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "Determines if DHCP thresholds are enabled for the network container.",
+		MarkdownDescription: "Determines if DHCP thresholds are enabled for the network.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		Validators: []validator.Bool{
@@ -422,7 +522,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"enable_discovery": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "Determines whether a discovery is enabled or not for this network container. When this is set to False, the network container discovery is disabled.",
+		MarkdownDescription: "Determines whether a discovery is enabled or not for this network. When this is set to False, the network discovery is disabled.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		Validators: []validator.Bool{
@@ -435,9 +535,18 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 	},
+	"enable_ifmap_publishing": schema.BoolAttribute{
+		Optional:            true,
+		MarkdownDescription: "Determines if IFMAP publishing is enabled for the network.",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_ifmap_publishing")),
+		},
+	},
 	"enable_immediate_discovery": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "Determines if the discovery for the network container should be immediately enabled.",
+		MarkdownDescription: "Determines if the discovery for the network should be immediately enabled.",
 	},
 	"enable_pxe_lease_time": schema.BoolAttribute{
 		Optional:            true,
@@ -454,36 +563,39 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"endpoint_sources": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Computed:            true,
-		MarkdownDescription: "The endpoints that provides data for the DHCP Network Container object.",
+		MarkdownDescription: "The endpoints that provides data for the DHCP Network object.",
 	},
 	"extattrs": schema.MapAttribute{
+		ElementType:         types.StringType,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object.",
-		ElementType:         types.StringType,
+		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
 	},
 	"federated_realms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
-			Attributes: NetworkcontainerFederatedRealmsResourceSchemaAttributes,
+			Attributes: NetworkFederatedRealmsResourceSchemaAttributes,
 		},
 		Optional:            true,
-		MarkdownDescription: "This field contains the federated realms associated to this network container.",
+		MarkdownDescription: "This field contains the federated realms associated to this network",
+		Computed:            true,
 	},
 	"high_water_mark": schema.Int64Attribute{
 		Optional:            true,
-		MarkdownDescription: "The percentage of DHCP network container usage threshold above which network container usage is not expected and may warrant your attention. When the high watermark is reached, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
+		MarkdownDescription: "The percentage of DHCP network usage threshold above which network usage is not expected and may warrant your attention. When the high watermark is reached, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 		Computed:            true,
+		Default:             int64default.StaticInt64(95),
 	},
 	"high_water_mark_reset": schema.Int64Attribute{
 		Optional:            true,
-		MarkdownDescription: "The percentage of DHCP network container usage below which the corresponding SNMP trap is reset. A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The high watermark reset value must be lower than the high watermark value.",
+		MarkdownDescription: "The percentage of DHCP network usage below which the corresponding SNMP trap is reset. A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The high watermark reset value must be lower than the high watermark value.",
 		Computed:            true,
+		Default:             int64default.StaticInt64(85),
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional:            true,
@@ -496,7 +608,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ignore_id": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "Indicates whether the appliance will ignore DHCP client IDs or MAC addresses.",
+		MarkdownDescription: "Indicates whether the appliance will ignore DHCP client IDs or MAC addresses. Valid values are \"NONE\", \"CLIENT\", or \"MACADDR\". The default is \"NONE\".",
 		Computed:            true,
 		Default:             stringdefault.StaticString("NONE"),
 		Validators: []validator.String{
@@ -518,22 +630,25 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"ipam_threshold_settings": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerIpamThresholdSettingsResourceSchemaAttributes,
+		Attributes: NetworkIpamThresholdSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_ipam_threshold_settings")),
 		},
-		MarkdownDescription: "The IPAM threshold settings for this network container.",
 	},
 	"ipam_trap_settings": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerIpamTrapSettingsResourceSchemaAttributes,
+		Attributes: NetworkIpamTrapSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_ipam_trap_settings")),
 		},
-		MarkdownDescription: "The IPAM trap settings for this network container.",
+	},
+	"ipv4addr": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The IPv4 Address of the network.",
+		Computed:            true,
 	},
 	"last_rir_registration_update_sent": schema.Int64Attribute{
 		Computed:            true,
@@ -554,30 +669,32 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 				int64validator.Between(86400, 2147472000),
 			),
 		},
+		Default: int64default.StaticInt64(-1),
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
-			Attributes: NetworkcontainerLogicFilterRulesResourceSchemaAttributes,
+			Attributes: NetworkLogicFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
-		MarkdownDescription: "This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file.",
+		MarkdownDescription: "This field contains the logic filters to be applied on the this network. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
 		},
 	},
 	"low_water_mark": schema.Int64Attribute{
 		Optional:            true,
-		MarkdownDescription: "The percentage of DHCP network container usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
+		MarkdownDescription: "The percentage of DHCP network usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 		Computed:            true,
 		Validators: []validator.Int64{
 			int64validator.Any(
 				int64validator.Between(0, 100),
 			),
 		},
+		Default: int64default.StaticInt64(0),
 	},
 	"low_water_mark_reset": schema.Int64Attribute{
 		Optional:            true,
-		MarkdownDescription: "The percentage of DHCP network container usage threshold below which network container usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.",
+		MarkdownDescription: "The percentage of DHCP network usage threshold below which network usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.",
 		Computed:            true,
 		Default:             int64default.StaticInt64(10),
 		Validators: []validator.Int64{
@@ -585,6 +702,15 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 				int64validator.Between(1, 100),
 			),
 		},
+	},
+	"members": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: NetworkMembersResourceSchemaAttributes,
+		},
+		Optional:            true,
+		MarkdownDescription: "A list of members or Microsoft (r) servers that serve DHCP for this network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the \"_struct\" member to the struct type.",
+		Computed:            true,
+		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: NetworkMembersAttrTypes})),
 	},
 	"mgm_private": schema.BoolAttribute{
 		Optional:            true,
@@ -598,11 +724,16 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"mgm_private_overridable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.",
-		Default:             booldefault.StaticBool(true),
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerMsAdUserDataResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          NetworkMsAdUserDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "A struct that contains information about the Microsoft (r) Active Directory.",
+	},
+	"netmask": schema.Int64Attribute{
+		Optional:            true,
+		MarkdownDescription: "The netmask of the network in CIDR format.",
+		Computed:            true,
 	},
 	"network": schema.StringAttribute{
 		Optional:            true,
@@ -610,14 +741,13 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Computed:            true,
-		Attributes:          FuncCallResourceSchemaAttributes,
-		Optional:            true,
-		MarkdownDescription: "Function call to be executed.",
+		Attributes: FuncCallResourceSchemaAttributes,
+		Optional:   true,
+		Computed:   true,
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The network container to which this network belongs, if any.",
+		MarkdownDescription: "The network container to which this network belongs (if any).",
 	},
 	"network_view": schema.StringAttribute{
 		Optional:            true,
@@ -632,11 +762,10 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 	},
 	"options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
-			Attributes: NetworkcontainerOptionsResourceSchemaAttributes,
+			Attributes: NetworkOptionsResourceSchemaAttributes,
 		},
 		Optional:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
@@ -646,17 +775,16 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerPortControlBlackoutSettingResourceSchemaAttributes,
+		Attributes: NetworkPortControlBlackoutSettingResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
-		MarkdownDescription: "The port control blackout setting for this network container.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional:            true,
-		MarkdownDescription: "The PXE lease time value of a DHCP Network container object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
+		MarkdownDescription: "The PXE lease time value of a DHCP Network object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
 		Computed:            true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_pxe_lease_time")),
@@ -674,10 +802,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			boolvalidator.AlsoRequires(path.MatchRoot("use_recycle_leases")),
 		},
 	},
-	"remove_subnets": schema.BoolAttribute{
-		Optional:            true,
-		MarkdownDescription: "Remove subnets delete option. Determines whether all child objects should be removed alongside with the network container or child objects should be assigned to another parental container. By default child objects are deleted with the network container.",
-	},
 	"restart_if_needed": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Restarts the member service.",
@@ -686,25 +810,29 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"rir": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The registry (RIR) that allocated the network container address space.",
+		MarkdownDescription: "The registry (RIR) that allocated the network address space.",
 		Default:             stringdefault.StaticString("NONE"),
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "The RIR organization assoicated with the network container.",
+		MarkdownDescription: "The RIR organization assoicated with the network.",
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
-		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CREATE", "MODIFY", "DELETE", "NONE"),
+		},
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "The registration status of the network container in RIR.",
+		MarkdownDescription: "The registration status of the network in RIR.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("NOT_REGISTERED"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("REGISTERED", "NOT_REGISTERED"),
+		},
 	},
 	"same_port_control_discovery_blackout": schema.BoolAttribute{
 		Optional:            true,
@@ -719,19 +847,36 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Determines whether to send the RIR registration request.",
 	},
+	"static_hosts": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "The number of static DHCP addresses configured in the network.",
+	},
 	"subscribe_settings": schema.SingleNestedAttribute{
-		Attributes: NetworkcontainerSubscribeSettingsResourceSchemaAttributes,
+		Attributes: NetworkSubscribeSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
 		},
 	},
+	"template": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "If set on creation, the network is created according to the values specified in the selected template.",
+	},
+	"total_hosts": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "The total number of DHCP addresses configured in the network.",
+	},
 	"unmanaged": schema.BoolAttribute{
 		Optional:            true,
-		MarkdownDescription: "Determines whether the network container is unmanaged or not.",
+		MarkdownDescription: "Determines whether the DHCP IPv4 Network is unmanaged or not.",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
+	},
+	"unmanaged_count": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "The number of unmanaged IP addresses as discovered by network discovery.",
+		Default:             int64default.StaticInt64(0),
 	},
 	"update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,
@@ -832,6 +977,12 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 	},
+	"use_enable_ifmap_publishing": schema.BoolAttribute{
+		Optional:            true,
+		MarkdownDescription: "Use flag for: enable_ifmap_publishing",
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
+	},
 	"use_ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Use flag for: ignore_dhcp_option_list_request",
@@ -909,9 +1060,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: subscribe_settings",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
-		Validators: []validator.Bool{
-			boolvalidator.AlsoRequires(path.MatchRoot("subscribe_settings")),
-		},
 	},
 	"use_update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,
@@ -927,11 +1075,23 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"utilization": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "The network container utilization in percentage.",
+		MarkdownDescription: "The network utilization in percentage.",
+		Default:             int64default.StaticInt64(0),
+	},
+	"utilization_update": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "The timestamp when the utilization statistics were last updated.",
+	},
+	"vlans": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: NetworkVlansResourceSchemaAttributes,
+		},
+		Optional:            true,
+		MarkdownDescription: "List of VLANs assigned to Network.",
 	},
 	"zone_associations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
-			Attributes: NetworkcontainerZoneAssociationsResourceSchemaAttributes,
+			Attributes: NetworkZoneAssociationsResourceSchemaAttributes,
 		},
 		Optional:            true,
 		MarkdownDescription: "The list of zones associated with this network.",
@@ -941,16 +1101,17 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Networkcontainer {
+func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Network {
 	if m == nil {
 		return nil
 	}
-	to := &ipam.Networkcontainer{
-		Ref:                              flex.ExpandStringPointer(m.Ref),
+	to := &ipam.Network{
 		Authority:                        flex.ExpandBoolPointer(m.Authority),
+		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		Bootfile:                         flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                       flex.ExpandStringPointer(m.Bootserver),
-		CloudInfo:                        ExpandNetworkcontainerCloudInfo(ctx, m.CloudInfo, diags),
+		CloudInfo:                        ExpandNetworkCloudInfo(ctx, m.CloudInfo, diags),
+		CloudShared:                      flex.ExpandBoolPointer(m.CloudShared),
 		Comment:                          flex.ExpandStringPointer(m.Comment),
 		DdnsDomainname:                   flex.ExpandStringPointer(m.DdnsDomainname),
 		DdnsGenerateHostname:             flex.ExpandBoolPointer(m.DdnsGenerateHostname),
@@ -960,48 +1121,53 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 		DdnsUseOption81:                  flex.ExpandBoolPointer(m.DdnsUseOption81),
 		DeleteReason:                     flex.ExpandStringPointer(m.DeleteReason),
 		DenyBootp:                        flex.ExpandBoolPointer(m.DenyBootp),
-		DiscoveryBasicPollSettings:       ExpandNetworkcontainerDiscoveryBasicPollSettings(ctx, m.DiscoveryBasicPollSettings, diags),
-		DiscoveryBlackoutSetting:         ExpandNetworkcontainerDiscoveryBlackoutSetting(ctx, m.DiscoveryBlackoutSetting, diags),
+		Disable:                          flex.ExpandBoolPointer(m.Disable),
+		DiscoveredBridgeDomain:           flex.ExpandStringPointer(m.DiscoveredBridgeDomain),
+		DiscoveredTenant:                 flex.ExpandStringPointer(m.DiscoveredTenant),
+		DiscoveryBasicPollSettings:       ExpandNetworkDiscoveryBasicPollSettings(ctx, m.DiscoveryBasicPollSettings, diags),
+		DiscoveryBlackoutSetting:         ExpandNetworkDiscoveryBlackoutSetting(ctx, m.DiscoveryBlackoutSetting, diags),
 		DiscoveryMember:                  flex.ExpandStringPointer(m.DiscoveryMember),
 		EmailList:                        flex.ExpandFrameworkListString(ctx, m.EmailList, diags),
 		EnableDdns:                       flex.ExpandBoolPointer(m.EnableDdns),
 		EnableDhcpThresholds:             flex.ExpandBoolPointer(m.EnableDhcpThresholds),
 		EnableDiscovery:                  flex.ExpandBoolPointer(m.EnableDiscovery),
 		EnableEmailWarnings:              flex.ExpandBoolPointer(m.EnableEmailWarnings),
+		EnableIfmapPublishing:            flex.ExpandBoolPointer(m.EnableIfmapPublishing),
 		EnableImmediateDiscovery:         flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		EnablePxeLeaseTime:               flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
 		EnableSnmpWarnings:               flex.ExpandBoolPointer(m.EnableSnmpWarnings),
 		ExtAttrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
-		FederatedRealms:                  flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandNetworkcontainerFederatedRealms),
+		FederatedRealms:                  flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandNetworkFederatedRealms),
 		HighWaterMark:                    flex.ExpandInt64Pointer(m.HighWaterMark),
 		HighWaterMarkReset:               flex.ExpandInt64Pointer(m.HighWaterMarkReset),
 		IgnoreDhcpOptionListRequest:      flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
 		IgnoreId:                         flex.ExpandStringPointer(m.IgnoreId),
 		IgnoreMacAddresses:               flex.ExpandFrameworkListString(ctx, m.IgnoreMacAddresses, diags),
 		IpamEmailAddresses:               flex.ExpandFrameworkListString(ctx, m.IpamEmailAddresses, diags),
-		IpamThresholdSettings:            ExpandNetworkcontainerIpamThresholdSettings(ctx, m.IpamThresholdSettings, diags),
-		IpamTrapSettings:                 ExpandNetworkcontainerIpamTrapSettings(ctx, m.IpamTrapSettings, diags),
+		IpamThresholdSettings:            ExpandNetworkIpamThresholdSettings(ctx, m.IpamThresholdSettings, diags),
+		IpamTrapSettings:                 ExpandNetworkIpamTrapSettings(ctx, m.IpamTrapSettings, diags),
+		Ipv4addr:                         flex.ExpandStringPointer(m.Ipv4addr),
 		LeaseScavengeTime:                flex.ExpandInt64Pointer(m.LeaseScavengeTime),
-		LogicFilterRules:                 flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandNetworkcontainerLogicFilterRules),
+		LogicFilterRules:                 flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandNetworkLogicFilterRules),
 		LowWaterMark:                     flex.ExpandInt64Pointer(m.LowWaterMark),
 		LowWaterMarkReset:                flex.ExpandInt64Pointer(m.LowWaterMarkReset),
+		Members:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Members, diags, ExpandNetworkMembers),
 		MgmPrivate:                       flex.ExpandBoolPointer(m.MgmPrivate),
-		MsAdUserData:                     ExpandNetworkcontainerMsAdUserData(ctx, m.MsAdUserData, diags),
-		Network:                          ExpandNetworkcontainerNetwork(m.Network),
+		MsAdUserData:                     ExpandNetworkMsAdUserData(ctx, m.MsAdUserData, diags),
+		Netmask:                          flex.ExpandInt64Pointer(m.Netmask),
 		FuncCall:                         ExpandFuncCall(ctx, m.FuncCall, diags),
 		Nextserver:                       flex.ExpandStringPointer(m.Nextserver),
-		Options:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandNetworkcontainerOptions),
-		PortControlBlackoutSetting:       ExpandNetworkcontainerPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
+		Options:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandNetworkOptions),
+		PortControlBlackoutSetting:       ExpandNetworkPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
 		PxeLeaseTime:                     flex.ExpandInt64Pointer(m.PxeLeaseTime),
 		RecycleLeases:                    flex.ExpandBoolPointer(m.RecycleLeases),
-		RemoveSubnets:                    flex.ExpandBoolPointer(m.RemoveSubnets),
 		RestartIfNeeded:                  flex.ExpandBoolPointer(m.RestartIfNeeded),
 		RirOrganization:                  flex.ExpandStringPointer(m.RirOrganization),
 		RirRegistrationAction:            flex.ExpandStringPointer(m.RirRegistrationAction),
 		RirRegistrationStatus:            flex.ExpandStringPointer(m.RirRegistrationStatus),
 		SamePortControlDiscoveryBlackout: flex.ExpandBoolPointer(m.SamePortControlDiscoveryBlackout),
 		SendRirRequest:                   flex.ExpandBoolPointer(m.SendRirRequest),
-		SubscribeSettings:                ExpandNetworkcontainerSubscribeSettings(ctx, m.SubscribeSettings, diags),
+		SubscribeSettings:                ExpandNetworkSubscribeSettings(ctx, m.SubscribeSettings, diags),
 		Unmanaged:                        flex.ExpandBoolPointer(m.Unmanaged),
 		UpdateDnsOnLeaseRenewal:          flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
 		UseAuthority:                     flex.ExpandBoolPointer(m.UseAuthority),
@@ -1019,6 +1185,7 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 		UseEnableDdns:                    flex.ExpandBoolPointer(m.UseEnableDdns),
 		UseEnableDhcpThresholds:          flex.ExpandBoolPointer(m.UseEnableDhcpThresholds),
 		UseEnableDiscovery:               flex.ExpandBoolPointer(m.UseEnableDiscovery),
+		UseEnableIfmapPublishing:         flex.ExpandBoolPointer(m.UseEnableIfmapPublishing),
 		UseIgnoreDhcpOptionListRequest:   flex.ExpandBoolPointer(m.UseIgnoreDhcpOptionListRequest),
 		UseIgnoreId:                      flex.ExpandBoolPointer(m.UseIgnoreId),
 		UseIpamEmailAddresses:            flex.ExpandBoolPointer(m.UseIpamEmailAddresses),
@@ -1034,41 +1201,49 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 		UseSubscribeSettings:             flex.ExpandBoolPointer(m.UseSubscribeSettings),
 		UseUpdateDnsOnLeaseRenewal:       flex.ExpandBoolPointer(m.UseUpdateDnsOnLeaseRenewal),
 		UseZoneAssociations:              flex.ExpandBoolPointer(m.UseZoneAssociations),
-		ZoneAssociations:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZoneAssociations, diags, ExpandNetworkcontainerZoneAssociations),
+		Vlans:                            flex.ExpandFrameworkListNestedBlock(ctx, m.Vlans, diags, ExpandNetworkVlans),
+		ZoneAssociations:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZoneAssociations, diags, ExpandNetworkZoneAssociations),
 	}
 	if isCreate {
 		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
 		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
-		to.Network = ExpandNetworkcontainerNetwork(m.Network)
+		to.Network = ExpandNetworkNetwork(m.Network)
+		to.Template = flex.ExpandStringPointer(m.Template)
+		to.AutoCreateReversezone = flex.ExpandBoolPointer(m.AutoCreateReversezone)
 	}
 	return to
 }
 
-func FlattenNetworkcontainer(ctx context.Context, from *ipam.Networkcontainer, diags *diag.Diagnostics) types.Object {
+func FlattenNetwork(ctx context.Context, from *ipam.Network, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(NetworkcontainerAttrTypes)
+		return types.ObjectNull(NetworkAttrTypes)
 	}
-	m := NetworkcontainerModel{}
+	m := NetworkModel{}
 	m.Flatten(ctx, from, diags)
 	m.ExtAttrs = m.ExtAttrsAll
-	t, d := types.ObjectValueFrom(ctx, NetworkcontainerAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, NetworkAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkcontainer, diags *diag.Diagnostics) {
+func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = NetworkcontainerModel{}
+		*m = NetworkModel{}
 	}
+
+	from.Options = RemoveDefaultDHCPOptionsNetwork(ctx, diags, from.Options, m.Options)
+
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
-	m.CloudInfo = FlattenNetworkcontainerCloudInfo(ctx, from.CloudInfo, diags)
+	m.CloudInfo = FlattenNetworkCloudInfo(ctx, from.CloudInfo, diags)
+	m.CloudShared = types.BoolPointerValue(from.CloudShared)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
+	m.ConflictCount = flex.FlattenInt64Pointer(from.ConflictCount)
 	m.DdnsDomainname = flex.FlattenStringPointer(from.DdnsDomainname)
 	m.DdnsGenerateHostname = types.BoolPointerValue(from.DdnsGenerateHostname)
 	m.DdnsServerAlwaysUpdates = types.BoolPointerValue(from.DdnsServerAlwaysUpdates)
@@ -1076,59 +1251,75 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.DdnsUpdateFixedAddresses = types.BoolPointerValue(from.DdnsUpdateFixedAddresses)
 	m.DdnsUseOption81 = types.BoolPointerValue(from.DdnsUseOption81)
 	m.DenyBootp = types.BoolPointerValue(from.DenyBootp)
+	m.DhcpUtilization = flex.FlattenInt64Pointer(from.DhcpUtilization)
+	m.DhcpUtilizationStatus = flex.FlattenStringPointer(from.DhcpUtilizationStatus)
+	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DiscoverNowStatus = flex.FlattenStringPointer(from.DiscoverNowStatus)
-	m.DiscoveryBasicPollSettings = FlattenNetworkcontainerDiscoveryBasicPollSettings(ctx, from.DiscoveryBasicPollSettings, diags)
-	m.DiscoveryBlackoutSetting = FlattenNetworkcontainerDiscoveryBlackoutSetting(ctx, from.DiscoveryBlackoutSetting, diags)
+	m.DiscoveredBgpAs = flex.FlattenStringPointer(from.DiscoveredBgpAs)
+	m.DiscoveredBridgeDomain = flex.FlattenStringPointer(from.DiscoveredBridgeDomain)
+	m.DiscoveredTenant = flex.FlattenStringPointer(from.DiscoveredTenant)
+	m.DiscoveredVlanId = flex.FlattenStringPointer(from.DiscoveredVlanId)
+	m.DiscoveredVlanName = flex.FlattenStringPointer(from.DiscoveredVlanName)
+	m.DiscoveredVrfDescription = flex.FlattenStringPointer(from.DiscoveredVrfDescription)
+	m.DiscoveredVrfName = flex.FlattenStringPointer(from.DiscoveredVrfName)
+	m.DiscoveredVrfRd = flex.FlattenStringPointer(from.DiscoveredVrfRd)
+	m.DiscoveryBasicPollSettings = FlattenNetworkDiscoveryBasicPollSettings(ctx, from.DiscoveryBasicPollSettings, diags)
+	m.DiscoveryBlackoutSetting = FlattenNetworkDiscoveryBlackoutSetting(ctx, from.DiscoveryBlackoutSetting, diags)
 	m.DiscoveryEngineType = flex.FlattenStringPointer(from.DiscoveryEngineType)
 	m.DiscoveryMember = flex.FlattenStringPointer(from.DiscoveryMember)
+	m.DynamicHosts = flex.FlattenInt64Pointer(from.DynamicHosts)
 	m.EmailList = flex.FlattenFrameworkListString(ctx, from.EmailList, diags)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.EnableDhcpThresholds = types.BoolPointerValue(from.EnableDhcpThresholds)
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
+	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
 	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
 	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
-	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, NetworkcontainerFederatedRealmsAttrTypes, diags, FlattenNetworkcontainerFederatedRealms)
+	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, NetworkFederatedRealmsAttrTypes, diags, FlattenNetworkFederatedRealms)
 	m.HighWaterMark = flex.FlattenInt64Pointer(from.HighWaterMark)
 	m.HighWaterMarkReset = flex.FlattenInt64Pointer(from.HighWaterMarkReset)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.IgnoreId = flex.FlattenStringPointer(from.IgnoreId)
 	m.IgnoreMacAddresses = flex.FlattenFrameworkListString(ctx, from.IgnoreMacAddresses, diags)
 	m.IpamEmailAddresses = flex.FlattenFrameworkListString(ctx, from.IpamEmailAddresses, diags)
-	m.IpamThresholdSettings = FlattenNetworkcontainerIpamThresholdSettings(ctx, from.IpamThresholdSettings, diags)
-	m.IpamTrapSettings = FlattenNetworkcontainerIpamTrapSettings(ctx, from.IpamTrapSettings, diags)
+	m.IpamThresholdSettings = FlattenNetworkIpamThresholdSettings(ctx, from.IpamThresholdSettings, diags)
+	m.IpamTrapSettings = FlattenNetworkIpamTrapSettings(ctx, from.IpamTrapSettings, diags)
+	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.LastRirRegistrationUpdateSent = flex.FlattenInt64Pointer(from.LastRirRegistrationUpdateSent)
 	m.LastRirRegistrationUpdateStatus = flex.FlattenStringPointer(from.LastRirRegistrationUpdateStatus)
 	m.LeaseScavengeTime = flex.FlattenInt64Pointer(from.LeaseScavengeTime)
-	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, NetworkcontainerLogicFilterRulesAttrTypes, diags, FlattenNetworkcontainerLogicFilterRules)
+	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, NetworkLogicFilterRulesAttrTypes, diags, FlattenNetworkLogicFilterRules)
 	m.LowWaterMark = flex.FlattenInt64Pointer(from.LowWaterMark)
 	m.LowWaterMarkReset = flex.FlattenInt64Pointer(from.LowWaterMarkReset)
+	m.Members = flex.FlattenFrameworkListNestedBlock(ctx, from.Members, NetworkMembersAttrTypes, diags, FlattenNetworkMembers)
 	m.MgmPrivate = types.BoolPointerValue(from.MgmPrivate)
 	m.MgmPrivateOverridable = types.BoolPointerValue(from.MgmPrivateOverridable)
-	m.MsAdUserData = FlattenNetworkcontainerMsAdUserData(ctx, from.MsAdUserData, diags)
-	m.Network = FlattenNetworkcontainerNetwork(from.Network)
+	m.MsAdUserData = FlattenNetworkMsAdUserData(ctx, from.MsAdUserData, diags)
+	m.Netmask = flex.FlattenInt64Pointer(from.Netmask)
+	m.Network = FlattenNetworkNetwork(from.Network)
 	if m.FuncCall.IsNull() || m.FuncCall.IsUnknown() {
 		m.FuncCall = FlattenFuncCall(ctx, from.FuncCall, diags)
 	}
 	m.NetworkContainer = flex.FlattenStringPointer(from.NetworkContainer)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, NetworkcontainerOptionsAttrTypes, diags, FlattenNetworkcontainerOptions)
-	m.PortControlBlackoutSetting = FlattenNetworkcontainerPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
+	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, NetworkOptionsAttrTypes, diags, FlattenNetworkOptions)
+	m.PortControlBlackoutSetting = FlattenNetworkPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
-	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
-	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
-	m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)
-	m.SubscribeSettings = FlattenNetworkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)
+	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
+	m.SubscribeSettings = FlattenNetworkSubscribeSettings(ctx, from.SubscribeSettings, diags)
+	m.TotalHosts = flex.FlattenInt64Pointer(from.TotalHosts)
 	m.Unmanaged = types.BoolPointerValue(from.Unmanaged)
+	m.UnmanagedCount = flex.FlattenInt64Pointer(from.UnmanagedCount)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)
 	m.UseAuthority = types.BoolPointerValue(from.UseAuthority)
 	m.UseBlackoutSetting = types.BoolPointerValue(from.UseBlackoutSetting)
@@ -1145,6 +1336,7 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.UseEnableDdns = types.BoolPointerValue(from.UseEnableDdns)
 	m.UseEnableDhcpThresholds = types.BoolPointerValue(from.UseEnableDhcpThresholds)
 	m.UseEnableDiscovery = types.BoolPointerValue(from.UseEnableDiscovery)
+	m.UseEnableIfmapPublishing = types.BoolPointerValue(from.UseEnableIfmapPublishing)
 	m.UseIgnoreDhcpOptionListRequest = types.BoolPointerValue(from.UseIgnoreDhcpOptionListRequest)
 	m.UseIgnoreId = types.BoolPointerValue(from.UseIgnoreId)
 	m.UseIpamEmailAddresses = types.BoolPointerValue(from.UseIpamEmailAddresses)
@@ -1161,23 +1353,52 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
 	m.UseZoneAssociations = types.BoolPointerValue(from.UseZoneAssociations)
 	m.Utilization = flex.FlattenInt64Pointer(from.Utilization)
-	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, NetworkcontainerZoneAssociationsAttrTypes, diags, FlattenNetworkcontainerZoneAssociations)
+	m.UtilizationUpdate = flex.FlattenInt64Pointer(from.UtilizationUpdate)
+	m.Vlans = flex.FlattenFrameworkListNestedBlock(ctx, from.Vlans, NetworkVlansAttrTypes, diags, FlattenNetworkVlans)
+	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, NetworkZoneAssociationsAttrTypes, diags, FlattenNetworkZoneAssociations)
 }
 
-func ExpandNetworkcontainerNetwork(str types.String) *ipam.NetworkcontainerNetwork {
+func ExpandNetworkNetwork(str types.String) *ipam.NetworkNetwork {
 	if str.IsNull() {
-		return &ipam.NetworkcontainerNetwork{}
+		return &ipam.NetworkNetwork{}
 	}
-	var m ipam.NetworkcontainerNetwork
+	var m ipam.NetworkNetwork
 	m.String = flex.ExpandStringPointer(str)
 
 	return &m
 }
 
-func FlattenNetworkcontainerNetwork(from *ipam.NetworkcontainerNetwork) types.String {
+func FlattenNetworkNetwork(from *ipam.NetworkNetwork) types.String {
 	if from.String == nil {
 		return types.StringNull()
 	}
 	m := flex.FlattenStringPointer(from.String)
 	return m
+}
+
+func RemoveDefaultDHCPOptionsNetwork(ctx context.Context, diags *diag.Diagnostics, options []ipam.NetworkOptions, planOptions types.List) []ipam.NetworkOptions {
+	defaultOptionName := "dhcp-lease-time"
+	defaultOptionVal := ""
+
+	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandNetworkOptions)
+
+	for i := range planOptionsArr {
+		if *planOptionsArr[i].Name == defaultOptionName {
+			defaultOptionVal = *planOptionsArr[i].Value
+		}
+	}
+	var result []ipam.NetworkOptions
+
+	for i := range options {
+		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
+			continue
+		}
+		result = append(result, options[i])
+	}
+
+	if len(result) == 0 {
+		return options
+	}
+
+	return result
 }
