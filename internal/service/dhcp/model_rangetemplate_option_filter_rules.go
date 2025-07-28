@@ -28,13 +28,11 @@ var RangetemplateOptionFilterRulesAttrTypes = map[string]attr.Type{
 
 var RangetemplateOptionFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The name of the DHCP filter.",
 	},
 	"permission": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("Allow", "Deny"),
 		},

@@ -7,9 +7,11 @@ resource "nios_dhcp_range_template" "range_template_required_fields" {
 
 // Create DHCP Range Template with additional Fields
 resource "nios_dhcp_range_template" "range_template_additional_fields" {
-  name                    = "example_range_template_additional_fields"
-  number_of_addresses     = 10
-  offset                  = 20
+  name                = "example_range_template_additional_fields"
+  number_of_addresses = 10
+  offset              = 20
+  // add `cloud_api_compatible = true` if Terraform Internal ID extensible attribute has cloud access
+  cloud_api_compatible    = true
   bootfile                = "bootfile.iso"
   bootserver              = "boot_server1"
   comment                 = "Example comment for range template"
@@ -41,7 +43,7 @@ resource "nios_dhcp_range_template" "range_template_additional_fields" {
     },
   ]
   extattrs = {
-    Site = "location-1"
+    "Tenant ID" = "tenant-1"
   }
 }
 

@@ -22,9 +22,11 @@ resource "nios_dhcp_range_template" "range_template_required_fields" {
 
 // Create DHCP Range Template with additional Fields
 resource "nios_dhcp_range_template" "range_template_additional_fields" {
-  name                    = "example_range_template_additional_fields"
-  number_of_addresses     = 10
-  offset                  = 20
+  name                = "example_range_template_additional_fields"
+  number_of_addresses = 10
+  offset              = 20
+  // add `cloud_api_compatible = true` if Terraform Internal ID extensible attribute has cloud access
+  cloud_api_compatible    = true
   bootfile                = "bootfile.iso"
   bootserver              = "boot_server1"
   comment                 = "Example comment for range template"
@@ -56,7 +58,7 @@ resource "nios_dhcp_range_template" "range_template_additional_fields" {
     },
   ]
   extattrs = {
-    Site = "location-1"
+    "Tenant ID" = "tenant-1"
   }
 }
 
@@ -215,7 +217,7 @@ Optional:
 <a id="nestedatt--fingerprint_filter_rules"></a>
 ### Nested Schema for `fingerprint_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -224,7 +226,7 @@ Optional:
 <a id="nestedatt--logic_filter_rules"></a>
 ### Nested Schema for `logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -233,7 +235,7 @@ Optional:
 <a id="nestedatt--mac_filter_rules"></a>
 ### Nested Schema for `mac_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -252,15 +254,12 @@ Optional:
 <a id="nestedatt--ms_options"></a>
 ### Nested Schema for `ms_options`
 
-Required:
-
-- `num` (Number) The code of the DHCP option.
-- `value` (String) Value of the DHCP option.
-
 Optional:
 
 - `name` (String) The name of the DHCP option.
+- `num` (Number) The code of the DHCP option.
 - `user_class` (String) The name of the user class with which this DHCP option is associated.
+- `value` (String) Value of the DHCP option.
 - `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 Read-Only:
@@ -279,7 +278,7 @@ Optional:
 <a id="nestedatt--nac_filter_rules"></a>
 ### Nested Schema for `nac_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -288,7 +287,7 @@ Optional:
 <a id="nestedatt--option_filter_rules"></a>
 ### Nested Schema for `option_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -309,7 +308,7 @@ Optional:
 <a id="nestedatt--relay_agent_filter_rules"></a>
 ### Nested Schema for `relay_agent_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.

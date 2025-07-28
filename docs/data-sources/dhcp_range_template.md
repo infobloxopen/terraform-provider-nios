@@ -148,7 +148,7 @@ Optional:
 <a id="nestedatt--result--fingerprint_filter_rules"></a>
 ### Nested Schema for `result.fingerprint_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -157,7 +157,7 @@ Optional:
 <a id="nestedatt--result--logic_filter_rules"></a>
 ### Nested Schema for `result.logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -166,7 +166,7 @@ Optional:
 <a id="nestedatt--result--mac_filter_rules"></a>
 ### Nested Schema for `result.mac_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -185,15 +185,12 @@ Optional:
 <a id="nestedatt--result--ms_options"></a>
 ### Nested Schema for `result.ms_options`
 
-Required:
-
-- `num` (Number) The code of the DHCP option.
-- `value` (String) Value of the DHCP option.
-
 Optional:
 
 - `name` (String) The name of the DHCP option.
+- `num` (Number) The code of the DHCP option.
 - `user_class` (String) The name of the user class with which this DHCP option is associated.
+- `value` (String) Value of the DHCP option.
 - `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 Read-Only:
@@ -212,7 +209,7 @@ Optional:
 <a id="nestedatt--result--nac_filter_rules"></a>
 ### Nested Schema for `result.nac_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -221,7 +218,7 @@ Optional:
 <a id="nestedatt--result--option_filter_rules"></a>
 ### Nested Schema for `result.option_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -242,7 +239,7 @@ Optional:
 <a id="nestedatt--result--relay_agent_filter_rules"></a>
 ### Nested Schema for `result.relay_agent_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.

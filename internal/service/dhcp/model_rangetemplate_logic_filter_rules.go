@@ -28,13 +28,11 @@ var RangetemplateLogicFilterRulesAttrTypes = map[string]attr.Type{
 
 var RangetemplateLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The filter name.",
 	},
 	"type": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("MAC", "NAC", "Option"),
 		},
