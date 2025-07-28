@@ -21,7 +21,7 @@ resource "nios_ipam_ipv6network" "example_network" {
 
   // Optional: Configure extensible attributes
   extattrs = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
@@ -92,7 +92,7 @@ resource "nios_ipam_ipv6network" "example_func_call" {
   }
   comment = "Network container created with function call"
   depends_on = [
-    nios_ipam_ipv6network.example_network,
+    nios_ipam_ipv6network.example_network
   ]
 }
 ```
@@ -132,7 +132,7 @@ resource "nios_ipam_ipv6network" "example_func_call" {
 - `network` (String) The IPv6 network address in CIDR notation. The network address must be unique within the network view.
 - `network_view` (String) The name of the network view in which this network resides.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--options))
-- `port_control_blackout_setting` (Attributes) (see [below for nested schema](#nestedatt--port_control_blackout_setting))
+- `port_control_blackout_setting` (Attributes) The port control blackout setting for this network. (see [below for nested schema](#nestedatt--port_control_blackout_setting))
 - `preferred_lifetime` (Number) Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network object.
 - `recycle_leases` (Boolean) If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.
 - `restart_if_needed` (Boolean) Restarts the member service.
