@@ -3,6 +3,7 @@ package dhcp_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -52,7 +53,7 @@ func TestAccRangetemplateDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRangetemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRangetemplateDataSourceConfigExtAttrFilters(name, numberOfAdresses, offset, extAttrValue),
+				Config: testAccRangetemplateDataSourceConfigExtAttrFilters(name, numberOfAdresses, offset, map[string]string{"Tenant ID": extAttrValue}),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
@@ -140,6 +141,7 @@ resource "nios_dhcp_range_template" "test" {
 	  name = %q
 	  number_of_addresses = %d
 	  offset = %d
+      cloud_api_compatible = true
 }
 
 data "nios_dhcp_range_template" "test" {
@@ -150,21 +152,30 @@ data "nios_dhcp_range_template" "test" {
 `, name, numberOfAddresses, offset)
 }
 
-func testAccRangetemplateDataSourceConfigExtAttrFilters(name string, numberOfAddresses, offset int, extAttrsValue string) string {
+func testAccRangetemplateDataSourceConfigExtAttrFilters(name string, numberOfAddresses, offset int, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		key := k
+		if strings.Contains(k, " ") {
+			key = fmt.Sprintf("%q", k)
+		}
+		extattrsStr += fmt.Sprintf("    %s = %q\n", key, v)
+	}
+	extattrsStr += "  }"
+
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test" {
   name = %q
   number_of_addresses = %d
   offset = %d
-  extattrs = {
-    Site = %q
-  } 
+  extattrs = %s
+  cloud_api_compatible = true
 }
 
 data "nios_dhcp_range_template" "test" {
   extattrfilters = {
-	Site = nios_dhcp_range_template.test.extattrs.Site
+	%[5]q = nios_dhcp_range_template.test.extattrs[%[5]q]
   }
 }
-`, name, numberOfAddresses, offset, extAttrsValue)
+`, name, numberOfAddresses, offset, extattrsStr, "Tenant ID")
 }

@@ -774,7 +774,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.NumberOfAddresses = flex.FlattenInt64Pointer(from.NumberOfAddresses)
 	m.Offset = flex.FlattenInt64Pointer(from.Offset)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangetemplateOptionFilterRulesAttrTypes, diags, FlattenRangetemplateOptionFilterRules)
-	m.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+	m.Options = RemoveRangeTemplateDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangetemplateRelayAgentFilterRulesAttrTypes, diags, FlattenRangetemplateRelayAgentFilterRules)
@@ -802,7 +802,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
 }
 
-func RemoveDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.RangetemplateOptions, planOptions internaltypes.UnorderedListValue) internaltypes.UnorderedListValue {
+func RemoveRangeTemplateDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.RangetemplateOptions, planOptions internaltypes.UnorderedListValue) internaltypes.UnorderedListValue {
 	defaultOptionName := "dhcp-lease-time"
 
 	// If no options, return empty list

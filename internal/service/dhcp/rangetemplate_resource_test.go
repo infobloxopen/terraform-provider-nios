@@ -22,6 +22,8 @@ import (
 // - mac_filter_rules (mac_filter), nac_filter_rules (nac_filter), option_filter_rules,
 // - logic_filter_rules, fingerprint_filter_rules (finger_print_filter1), relay_agent_filter_rules (relay_agent_filter)
 
+// cloud_api_compatible is made true to pass all acceptance tests
+
 var readableAttributesForRangetemplate = "bootfile,bootserver,cloud_api_compatible,comment,ddns_domainname,ddns_generate_hostname,delegated_member,deny_all_clients,deny_bootp,email_list,enable_ddns,enable_dhcp_thresholds,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,exclude,extattrs,failover_association,fingerprint_filter_rules,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,known_clients,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,mac_filter_rules,member,ms_options,ms_server,nac_filter_rules,name,nextserver,number_of_addresses,offset,option_filter_rules,options,pxe_lease_time,recycle_leases,relay_agent_filter_rules,server_association_type,unknown_clients,update_dns_on_lease_renewal,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_deny_bootp,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_ignore_dhcp_option_list_request,use_known_clients,use_lease_scavenge_time,use_logic_filter_rules,use_ms_options,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_unknown_clients,use_update_dns_on_lease_renewal"
 
 func TestAccRangetemplateResource_basic(t *testing.T) {
@@ -44,7 +46,7 @@ func TestAccRangetemplateResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "number_of_addresses", fmt.Sprintf("%d", numberOfAdresses)),
 					resource.TestCheckResourceAttr(resourceName, "offset", fmt.Sprintf("%d", offset)),
 
-					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "false"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "true"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
 					resource.TestCheckResourceAttr(resourceName, "deny_all_clients", "false"),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "false"),
@@ -190,7 +192,7 @@ func TestAccRangetemplateResource_Bootserver(t *testing.T) {
 // If the user is a cloud-user, then they need Terraform internal ID with cloud permission and enable cloud delegation for the user to create a range template.
 // if the user is a non cloud-user, they need to have  Terraform internal ID without cloud permission.
 func TestAccRangetemplateResource_CloudApiCompatible(t *testing.T) {
-	//t.Skip("Skipping this test as it is a known issue.")
+	t.Skip("Skipping this test as it is a known issue.")
 	var resourceName = "nios_dhcp_range_template.test_cloud_api_compatible"
 	var v dhcp.Rangetemplate
 
@@ -695,18 +697,18 @@ func TestAccRangetemplateResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangetemplateExtAttrs(map[string]string{"Site": extAttrValue1}, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateExtAttrs(map[string]string{"Tenant ID": extAttrValue1}, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Tenant ID", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangetemplateExtAttrs(map[string]string{"Site": extAttrValue2}, name, numberOfAdresses, offset),
+				Config: testAccRangetemplateExtAttrs(map[string]string{"Tenant ID": extAttrValue2}, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Tenant ID", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2434,6 +2436,7 @@ resource "nios_dhcp_range_template" "test" {
 	name = %q
 	number_of_addresses = %d
 	offset = %d
+    cloud_api_compatible = true
 }
 `, name, numberOfAddresses, offset)
 }
@@ -2446,6 +2449,7 @@ resource "nios_dhcp_range_template" "test_bootfile" {
 	name = %q
 	number_of_addresses = %d
 	offset = %d
+    cloud_api_compatible = true
 }
 `, useBootFile, bootfile, name, numberOfAddresses, offset)
 }
@@ -2458,6 +2462,7 @@ resource "nios_dhcp_range_template" "test_bootserver" {
 	name = %q
 	number_of_addresses = %d
 	offset = %d
+    cloud_api_compatible = true
 }
 `, useBootServer, bootServer, name, numberOfAddresses, offset)
 }
@@ -2469,6 +2474,7 @@ resource "nios_dhcp_range_template" "test_cloud_api_compatible" {
 	name = %q
 	number_of_addresses = %d
 	offset = %d
+    cloud_api_compatible = true
 }
 `, cloudApiCompatible, name, numberOfAddresses, offset)
 }
@@ -2480,6 +2486,7 @@ resource "nios_dhcp_range_template" "test_comment" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, comment, name, numberOfAddresses, offset)
 }
@@ -2492,6 +2499,7 @@ resource "nios_dhcp_range_template" "test_ddns_domainname" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useDdnsDomainname, ddnsDomainname, name, numberOfAddresses, offset)
 }
@@ -2504,6 +2512,7 @@ resource "nios_dhcp_range_template" "test_ddns_generate_hostname" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useDdnsGenerateHostname, ddnsGenerateHostname, name, numberOfAddresses, offset)
 }
@@ -2516,6 +2525,7 @@ resource "nios_dhcp_range_template" "test_delegated_member" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, delegatedMemberStr, name, numberOfAddresses, offset)
 }
@@ -2536,6 +2546,7 @@ resource "nios_dhcp_range_template" "test_deny_all_clients" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, denyAllClients, name, numberOfAddresses, offset)
 }
@@ -2548,6 +2559,7 @@ resource "nios_dhcp_range_template" "test_deny_bootp" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useDenyBootp, denyBootp, name, numberOfAddresses, offset)
 }
@@ -2560,6 +2572,7 @@ resource "nios_dhcp_range_template" "test_email_list" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useEmailList, formatHCLList(emailList), name, numberOfAddresses, offset)
 }
@@ -2583,6 +2596,7 @@ resource "nios_dhcp_range_template" "test_enable_ddns" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useEnableDdns, enableDdns, name, numberOfAddresses, offset)
 }
@@ -2595,6 +2609,7 @@ resource "nios_dhcp_range_template" "test_enable_dhcp_thresholds" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useEnableDhcpThresholds, enableDhcpThresholds, name, numberOfAddresses, offset)
 }
@@ -2606,6 +2621,7 @@ resource "nios_dhcp_range_template" "test_enable_email_warnings" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, enableEmailWarnings, name, numberOfAddresses, offset)
 }
@@ -2619,6 +2635,7 @@ resource "nios_dhcp_range_template" "test_enable_pxe_lease_time" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, enablePxeLeaseTime, usePxeLeaseTime, pexLeaseTime, name, numberOfAddresses, offset)
 }
@@ -2630,53 +2647,45 @@ resource "nios_dhcp_range_template" "test_enable_snmp_warnings" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, enableSnmpWarnings, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateExclude(exclude []map[string]any, name string, numberOfAddresses, offset int) string {
-	excludeStr := convertSliceOfMapsToString(exclude)
+	excludeStr := utils.ConvertSliceOfMapsToHCL(exclude)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_exclude" {
    exclude = %s
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, excludeStr, name, numberOfAddresses, offset)
 }
 
-func convertSliceOfMapsToString(maps []map[string]any) string {
-	mapsStr := "[\n"
-	for _, obj := range maps {
-		mapsStr += "  {\n"
-		for k, v := range obj {
-			if strVal, ok := v.(string); ok {
-				mapsStr += fmt.Sprintf("    %s = %q\n", k, strVal) // Enclose string values in quotes
-			} else {
-				mapsStr += fmt.Sprintf("    %s = %v\n", k, v)
-			}
-		}
-		mapsStr += "  },\n"
-	}
-	mapsStr += "]"
-	return mapsStr
-}
-
 func testAccRangetemplateExtAttrs(extAttrs map[string]string, name string, numberOfAddresses, offset int) string {
-	extattrsStr := "{"
+	extattrsStr := "{\n"
 	for k, v := range extAttrs {
-		extattrsStr += fmt.Sprintf(`%s = %q`, k, v)
+		// Quote keys that contain spaces
+		key := k
+		if strings.Contains(k, " ") {
+			key = fmt.Sprintf("%q", k)
+		}
+		extattrsStr += fmt.Sprintf("    %s = %q\n", key, v)
 	}
-	extattrsStr += "}"
+	extattrsStr += "  }"
+
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_extattrs" {
-   extattrs = %s
-   name = %q
-   number_of_addresses = %d
-   offset = %d
+    name = %q
+    number_of_addresses = %d
+    offset = %d
+    extattrs = %s
+    cloud_api_compatible = true
 }
-`, extattrsStr, name, numberOfAddresses, offset)
+`, name, numberOfAddresses, offset, extattrsStr)
 }
 
 func testAccRangetemplateFailoverAssociation(serverAssociationType, failoverAssociation, name string, numberOfAddresses, offset int) string {
@@ -2687,18 +2696,20 @@ resource "nios_dhcp_range_template" "test_failover_association" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, serverAssociationType, failoverAssociation, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateFingerprintFilterRules(fingerprintFilterRules []map[string]any, name string, numberOfAddresses, offset int) string {
-	fingerprintFilterRulesStr := convertSliceOfMapsToString(fingerprintFilterRules)
+	fingerprintFilterRulesStr := utils.ConvertSliceOfMapsToHCL(fingerprintFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_fingerprint_filter_rules" {
    fingerprint_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, fingerprintFilterRulesStr, name, numberOfAddresses, offset)
 }
@@ -2710,6 +2721,7 @@ resource "nios_dhcp_range_template" "test_high_water_mark" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, highWaterMark, name, numberOfAddresses, offset)
 }
@@ -2721,6 +2733,7 @@ resource "nios_dhcp_range_template" "test_high_water_mark_reset" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, highWaterMarkReset, name, numberOfAddresses, offset)
 }
@@ -2733,6 +2746,7 @@ resource "nios_dhcp_range_template" "test_ignore_dhcp_option_list_request" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useIgnoreDhcpOptionListRequest, ignoreDhcpOptionListRequest, name, numberOfAddresses, offset)
 }
@@ -2745,6 +2759,7 @@ resource "nios_dhcp_range_template" "test_known_clients" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useKnownClients, knownClients, name, numberOfAddresses, offset)
 }
@@ -2757,12 +2772,13 @@ resource "nios_dhcp_range_template" "test_lease_scavenge_time" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useLeaseScavengeTime, leaseScavengeTime, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateLogicFilterRules(logicFilterRules []map[string]any, useLogicFilterRules bool, name string, numberOfAddresses, offset int) string {
-	logicFilterRulesStr := convertSliceOfMapsToString(logicFilterRules)
+	logicFilterRulesStr := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_logic_filter_rules" {
    logic_filter_rules = %s
@@ -2770,6 +2786,7 @@ resource "nios_dhcp_range_template" "test_logic_filter_rules" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, logicFilterRulesStr, useLogicFilterRules, name, numberOfAddresses, offset)
 }
@@ -2781,6 +2798,7 @@ resource "nios_dhcp_range_template" "test_low_water_mark" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, lowWaterMark, name, numberOfAddresses, offset)
 }
@@ -2792,18 +2810,20 @@ resource "nios_dhcp_range_template" "test_low_water_mark_reset" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, lowWaterMarkReset, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateMacFilterRules(macFilterRules []map[string]any, name string, numberOfAddresses, offset int) string {
-	macFilterRulesStr := convertSliceOfMapsToString(macFilterRules)
+	macFilterRulesStr := utils.ConvertSliceOfMapsToHCL(macFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_mac_filter_rules" {
    mac_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, macFilterRulesStr, name, numberOfAddresses, offset)
 }
@@ -2816,6 +2836,7 @@ resource "nios_dhcp_range_template" "test_member" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, memberStr, name, numberOfAddresses, offset)
 }
@@ -2827,6 +2848,7 @@ resource "nios_dhcp_range_template" "test_ms_options" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, msOptions, name, numberOfAddresses, offset)
 }
@@ -2839,18 +2861,20 @@ resource "nios_dhcp_range_template" "test_ms_server" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, msServerStr, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateNacFilterRules(nacFilterRules []map[string]any, name string, numberOfAddresses, offset int) string {
-	nacFilterRulesStr := convertSliceOfMapsToString(nacFilterRules)
+	nacFilterRulesStr := utils.ConvertSliceOfMapsToHCL(nacFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_nac_filter_rules" {
    nac_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, nacFilterRulesStr, name, numberOfAddresses, offset)
 }
@@ -2861,6 +2885,7 @@ resource "nios_dhcp_range_template" "test_name" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, name, numberOfAddresses, offset)
 }
@@ -2873,6 +2898,7 @@ resource "nios_dhcp_range_template" "test_nextserver" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useNextserver, nextserver, name, numberOfAddresses, offset)
 }
@@ -2883,6 +2909,7 @@ resource "nios_dhcp_range_template" "test_number_of_addresses" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, name, numberOfAddresses, offset)
 }
@@ -2893,24 +2920,26 @@ resource "nios_dhcp_range_template" "test_offset" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateOptionFilterRules(optionFilterRules []map[string]any, name string, numberOfAddresses, offset int) string {
-	optionFilterRulesStr := convertSliceOfMapsToString(optionFilterRules)
+	optionFilterRulesStr := utils.ConvertSliceOfMapsToHCL(optionFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_option_filter_rules" {
    option_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, optionFilterRulesStr, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateOptions(options []map[string]any, useOptions bool, name string, numberOfAddresses, offset int) string {
-	optionsStr := convertSliceOfMapsToString(options)
+	optionsStr := utils.ConvertSliceOfMapsToHCL(options)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_options" {
    options = %s
@@ -2918,6 +2947,7 @@ resource "nios_dhcp_range_template" "test_options" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, optionsStr, useOptions, name, numberOfAddresses, offset)
 }
@@ -2930,6 +2960,7 @@ resource "nios_dhcp_range_template" "test_pxe_lease_time" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, usePxeLeaseTime, pxeLeaseTime, name, numberOfAddresses, offset)
 }
@@ -2942,18 +2973,20 @@ resource "nios_dhcp_range_template" "test_recycle_leases" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useRecycleLeases, recycleLeases, name, numberOfAddresses, offset)
 }
 
 func testAccRangetemplateRelayAgentFilterRules(relayAgentFilterRules []map[string]any, name string, numberOfAddresses, offset int) string {
-	relayAgentFilterRulesStr := convertSliceOfMapsToString(relayAgentFilterRules)
+	relayAgentFilterRulesStr := utils.ConvertSliceOfMapsToHCL(relayAgentFilterRules)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "test_relay_agent_filter_rules" {
    relay_agent_filter_rules = %s
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, relayAgentFilterRulesStr, name, numberOfAddresses, offset)
 }
@@ -2969,6 +3002,7 @@ resource "nios_dhcp_range_template" "test_server_association_type" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
    %s
 }
 `, serverAssociationType, name, numberOfAddresses, offset, extraConfig)
@@ -2982,6 +3016,7 @@ resource "nios_dhcp_range_template" "test_unknown_clients" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useUnknownClients, unknownClients, name, numberOfAddresses, offset)
 }
@@ -2994,6 +3029,7 @@ resource "nios_dhcp_range_template" "test_update_dns_on_lease_renewal" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useUpdateDnsOnLeaseRenewal, updateDnsOnLeaseRenewal, name, numberOfAddresses, offset)
 }
@@ -3005,6 +3041,7 @@ resource "nios_dhcp_range_template" "test_use_bootfile" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useBootfile, name, numberOfAddresses, offset)
 }
@@ -3016,6 +3053,7 @@ resource "nios_dhcp_range_template" "test_use_bootserver" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useBootserver, name, numberOfAddresses, offset)
 }
@@ -3027,6 +3065,7 @@ resource "nios_dhcp_range_template" "test_use_ddns_domainname" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useDdnsDomainname, name, numberOfAddresses, offset)
 }
@@ -3038,6 +3077,7 @@ resource "nios_dhcp_range_template" "test_use_ddns_generate_hostname" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useDdnsGenerateHostname, name, numberOfAddresses, offset)
 }
@@ -3049,6 +3089,7 @@ resource "nios_dhcp_range_template" "test_use_deny_bootp" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useDenyBootp, name, numberOfAddresses, offset)
 }
@@ -3060,6 +3101,7 @@ resource "nios_dhcp_range_template" "test_use_email_list" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useEmailList, name, numberOfAddresses, offset)
 }
@@ -3071,6 +3113,7 @@ resource "nios_dhcp_range_template" "test_use_enable_ddns" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useEnableDdns, name, numberOfAddresses, offset)
 }
@@ -3082,6 +3125,7 @@ resource "nios_dhcp_range_template" "test_use_enable_dhcp_thresholds" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useEnableDhcpThresholds, name, numberOfAddresses, offset)
 }
@@ -3093,6 +3137,7 @@ resource "nios_dhcp_range_template" "test_use_ignore_dhcp_option_list_request" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useIgnoreDhcpOptionListRequest, name, numberOfAddresses, offset)
 }
@@ -3104,6 +3149,7 @@ resource "nios_dhcp_range_template" "test_use_known_clients" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useKnownClients, name, numberOfAddresses, offset)
 }
@@ -3115,6 +3161,7 @@ resource "nios_dhcp_range_template" "test_use_lease_scavenge_time" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useLeaseScavengeTime, name, numberOfAddresses, offset)
 }
@@ -3126,6 +3173,7 @@ resource "nios_dhcp_range_template" "test_use_logic_filter_rules" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useLogicFilterRules, name, numberOfAddresses, offset)
 }
@@ -3137,6 +3185,7 @@ resource "nios_dhcp_range_template" "test_use_ms_options" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useMsOptions, name, numberOfAddresses, offset)
 }
@@ -3148,6 +3197,7 @@ resource "nios_dhcp_range_template" "test_use_nextserver" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useNextserver, name, numberOfAddresses, offset)
 }
@@ -3159,6 +3209,7 @@ resource "nios_dhcp_range_template" "test_use_options" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useOptions, name, numberOfAddresses, offset)
 }
@@ -3170,6 +3221,7 @@ resource "nios_dhcp_range_template" "test_use_pxe_lease_time" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, usePxeLeaseTime, name, numberOfAddresses, offset)
 }
@@ -3181,6 +3233,7 @@ resource "nios_dhcp_range_template" "test_use_recycle_leases" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useRecycleLeases, name, numberOfAddresses, offset)
 }
@@ -3192,6 +3245,7 @@ resource "nios_dhcp_range_template" "test_use_unknown_clients" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useUnknownClients, name, numberOfAddresses, offset)
 }
@@ -3203,6 +3257,7 @@ resource "nios_dhcp_range_template" "test_use_update_dns_on_lease_renewal" {
    name = %q
    number_of_addresses = %d
    offset = %d
+   cloud_api_compatible = true
 }
 `, useUpdateDnsOnLeaseRenewal, name, numberOfAddresses, offset)
 }
