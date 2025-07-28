@@ -144,7 +144,7 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
 
-	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
+	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
 		apiTerraformId.Value = ""
 	}
@@ -158,7 +158,7 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	stateTerraformId := (*stateExtAttrs)["Terraform Internal ID"]
+	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
 	if apiTerraformId.Value != stateTerraformId.Value {
 		if r.ReadByExtAttrs(ctx, &data, resp) {
 			return
@@ -189,13 +189,13 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 		return false
 	}
 
-	internalId := internalIdExtAttr["Terraform Internal ID"].Value
+	internalId := internalIdExtAttr[terraformInternalIDEA].Value
 	if internalId == "" {
 		return false
 	}
 
 	idMap := map[string]interface{}{
-		"Terraform Internal ID": internalId,
+		terraformInternalIDEA: internalId,
 	}
 
 	apiRes, _, err := r.client.DNSAPI.
