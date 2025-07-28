@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -120,7 +121,6 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-	//Check if Inh Ea exists in Plan , if yes ,add it to extattrs and then plan should show a modification , not creation
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -144,7 +144,6 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
 
-	// Remove these checks to search by TID when TID is not present in response because record was manually changed !!
 	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
 	if !ok {
 		apiTerraformId.Value = ""
@@ -212,6 +211,7 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 	}
 
 	results := apiRes.ListRecordAResponseObject.GetResult()
+
 	// If the list is empty, the resource no longer exists so remove it from state
 	if len(results) == 0 {
 		resp.State.RemoveResource(ctx)
@@ -220,6 +220,7 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 
 	res := results[0]
 
+	// Remove inherited external attributes from extattrs
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		return true
@@ -255,6 +256,7 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -274,6 +276,7 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	res := apiRes.UpdateRecordAResponseAsObject.GetResult()
+
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
@@ -324,12 +327,11 @@ func (r *RecordAResource) UpdateFuncCallAttributeName(ctx context.Context, data 
 }
 
 func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var data RecordAModel
 	var diags diag.Diagnostics
+	var data RecordAModel
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
 
-	// Read existing record
 	apiRes, _, err := r.client.DNSAPI.
 		RecordAAPI.
 		Read(ctx, resourceRef).
@@ -337,24 +339,32 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read record: %s", err))
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read RecordA for import, got error: %s", err))
 		return
 	}
-	// Initialize model and flatten initial response
 
 	res := apiRes.GetRecordAResponseObjectAsResult.GetResult()
+
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordA for import due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	planExtAttrs := data.ExtAttrs
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
-	// Update record with the new internal ID
+
 	updateRes, _, err := r.client.DNSAPI.
 		RecordAAPI.
 		Update(ctx, resourceRef).
@@ -363,15 +373,15 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update record: %s", err))
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update RecordA for import, got error: %s", err))
 		return
 	}
 
-	// Flatten final response into model and set state
 	res = updateRes.UpdateRecordAResponseAsObject.GetResult()
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes for import, got error: %s", diags))
 		return
 	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
