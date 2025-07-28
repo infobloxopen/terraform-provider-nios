@@ -8,7 +8,7 @@ data "nios_dhcp_range_template" "get_range_template_using_filters" {
 // Retrieve specific Range Templates using Extensible Attributes
 data "nios_dhcp_range_template" "get_range_template_using_extensible_attributes" {
   extattrfilters = {
-    Site = "location-1"
+    "Tenant ID" = "tenant-1"
   }
 }
 
