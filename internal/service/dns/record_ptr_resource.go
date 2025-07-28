@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,10 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
-
-// TODO : Add support for IPv6 address in function call.
 
 var readableAttributesForRecordPtr = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,dns_ptrdname,extattrs,forbid_reclamation,ipv4addr,ipv6addr,last_queried,ms_ad_user_data,name,ptrdname,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
 
@@ -100,8 +98,8 @@ func (r *RecordPtrResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	// Add internal ID exists in the Extensible Attributes if not already present
-	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
+	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	if diags.HasError() {
 		return
 	}
 
@@ -124,7 +122,7 @@ func (r *RecordPtrResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	res := apiRes.CreateRecordPtrResponseAsObject.GetResult()
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordPtr due inherited Extensible attributes, got error: %s", err))
 		return
@@ -169,30 +167,13 @@ func (r *RecordPtrResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	res := apiRes.GetRecordPtrResponseObjectAsResult.GetResult()
-	if res.ExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Extensible Attributes",
-			"Unable to read RecordPtr because no extensible attributes were returned from the API.",
-		)
-		return
-	}
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordPtr due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
+	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
-		resp.Diagnostics.AddError(
-			"Missing Terraform internal id Attributes",
-			"Unable to read RecordPtr because terraform internal id does not exist.",
-		)
-		return
+		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
 	if stateExtAttrs == nil {
 		resp.Diagnostics.AddError(
 			"Missing Internal ID",
@@ -201,12 +182,17 @@ func (r *RecordPtrResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	stateTerraformId := (*stateExtAttrs)["Terraform Internal ID"]
-
+	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
 	if apiTerraformId.Value != stateTerraformId.Value {
 		if r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
+	}
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordPtr due inherited Extensible attributes, got error: %s", diags))
+		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
@@ -222,18 +208,18 @@ func (r *RecordPtrResource) ReadByExtAttrs(ctx context.Context, data *RecordPtrM
 		return false
 	}
 
-	internalIdExtAttr := *ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
 	if diags.HasError() {
 		return false
 	}
 
-	internalId := internalIdExtAttr["Terraform Internal ID"].Value
+	internalId := internalIdExtAttr[terraformInternalIDEA].Value
 	if internalId == "" {
 		return false
 	}
 
 	idMap := map[string]interface{}{
-		"Terraform Internal ID": internalId,
+		terraformInternalIDEA: internalId,
 	}
 
 	apiRes, _, err := r.client.DNSAPI.
@@ -258,8 +244,8 @@ func (r *RecordPtrResource) ReadByExtAttrs(ctx context.Context, data *RecordPtrM
 
 	res := results[0]
 
-	// Remove inherited external attributes and check for errors
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	// Remove inherited external attributes from extattrs
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		return true
 	}
@@ -281,8 +267,8 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
+	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -294,9 +280,10 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	// Add internal ID exists in the Extensible Attributes if not already present
-	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
+	// Add Inherited Extensible Attributes
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -307,7 +294,6 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 		ReturnFieldsPlus(readableAttributesForRecordPtr).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordPtr, got error: %s", err))
 		return
@@ -315,7 +301,7 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 
 	res := apiRes.UpdateRecordPtrResponseAsObject.GetResult()
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordPtr due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -350,39 +336,13 @@ func (r *RecordPtrResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 }
 
-func (r *RecordPtrResource) addInternalIDToExtAttrs(ctx context.Context, data *RecordPtrModel) error {
-	var internalId string
-
-	if !data.ExtAttrsAll.IsNull() {
-		elements := data.ExtAttrsAll.Elements()
-		if tId, ok := elements["Terraform Internal ID"]; ok {
-			if tIdStr, ok := tId.(types.String); ok {
-				internalId = tIdStr.ValueString()
-			}
-		}
-	}
-
-	if internalId == "" {
-		var err error
-		internalId, err = uuid.GenerateUUID()
-		if err != nil {
-			return err
-		}
-	}
-
-	r.client.DNSAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
-		"Terraform Internal ID": {Value: internalId},
-	}
-
-	return nil
-}
 func (r *RecordPtrResource) UpdateFuncCallAttributeName(ctx context.Context, data RecordPtrModel, diags *diag.Diagnostics) types.Object {
 
 	updatedFuncCallAttrs := data.FuncCall.Attributes()
 	attrVal := updatedFuncCallAttrs["attribute_name"].(types.String).ValueString()
 	pathVar, err := utils.FindModelFieldByTFSdkTag(data, attrVal)
 	if !err {
-		diags.AddError("Client Error", fmt.Sprintf("Unable to find attribute '%s' in RecordA model, got error", attrVal))
+		diags.AddError("Client Error", fmt.Sprintf("Unable to find attribute '%s' in RecordPtr model, got error", attrVal))
 		return types.ObjectNull(FuncCallAttrTypes)
 	}
 	updatedFuncCallAttrs["attribute_name"] = types.StringValue(pathVar)
@@ -391,5 +351,64 @@ func (r *RecordPtrResource) UpdateFuncCallAttributeName(ctx context.Context, dat
 }
 
 func (r *RecordPtrResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	var diags diag.Diagnostics
+	var data RecordPtrModel
+
+	resourceRef := utils.ExtractResourceRef(req.ID)
+
+	apiRes, _, err := r.client.DNSAPI.
+		RecordPtrAPI.
+		Read(ctx, resourceRef).
+		ReturnFieldsPlus(readableAttributesForRecordPtr).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read RecordPtr for import, got error: %s", err))
+		return
+	}
+
+	res := apiRes.GetRecordPtrResponseObjectAsResult.GetResult()
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordPtr for import due inherited Extensible attributes, got error: %s", diags))
+		return
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	planExtAttrs := data.ExtAttrs
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	if diags.HasError() {
+		return
+	}
+
+	updateRes, _, err := r.client.DNSAPI.
+		RecordPtrAPI.
+		Update(ctx, resourceRef).
+		RecordPtr(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ReturnFieldsPlus(readableAttributesForRecordPtr).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update RecordPtr for import, got error: %s", err))
+		return
+	}
+
+	res = updateRes.UpdateRecordPtrResponseAsObject.GetResult()
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordPtr due inherited Extensible attributes for import, got error: %s", diags))
+		return
+	}
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

@@ -19,7 +19,7 @@ import (
 
 const terraformInternalIDEA = "Terraform Internal ID"
 
-func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dns.ExtAttrs {
+func ExpandExtAttrs(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dns.ExtAttrs {
 	if extattrs.IsNull() || extattrs.IsUnknown() {
 		return nil
 	}
@@ -92,7 +92,7 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 		return nil, extAttrAll, nil
 	}
 
-	planMap := *ExpandExtAttr(ctx, planExtAttrs, &diags)
+	planMap := *ExpandExtAttrs(ctx, planExtAttrs, &diags)
 	if diags.HasError() {
 		return nil, extAttrAll, diags
 	}

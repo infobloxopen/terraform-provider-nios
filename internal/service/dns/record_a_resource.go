@@ -149,7 +149,7 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
 	if stateExtAttrs == nil {
 		resp.Diagnostics.AddError(
 			"Missing Internal ID",
@@ -184,7 +184,7 @@ func (r *RecordAResource) ReadByExtAttrs(ctx context.Context, data *RecordAModel
 		return false
 	}
 
-	internalIdExtAttr := *ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
 	if diags.HasError() {
 		return false
 	}

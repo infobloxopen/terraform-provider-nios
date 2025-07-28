@@ -5,12 +5,14 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -122,6 +124,10 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
+		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -270,7 +276,7 @@ func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		Comment:             flex.ExpandStringPointer(m.Comment),
 		Disable:             flex.ExpandBoolPointer(m.Disable),
 		DisableNsGeneration: flex.ExpandBoolPointer(m.DisableNsGeneration),
-		ExtAttrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ExternalNsGroup:     flex.ExpandStringPointer(m.ExternalNsGroup),
 		ForwardTo:           flex.ExpandFrameworkListNestedBlock(ctx, m.ForwardTo, diags, ExpandZoneForwardForwardTo),
 		ForwardersOnly:      flex.ExpandBoolPointer(m.ForwardersOnly),

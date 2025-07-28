@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -137,9 +139,13 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name for an AAAA record in punycode format.",
 	},
 	"extattrs": schema.MapAttribute{
-		Optional:            true,
-		Computed:            true,
-		ElementType:         types.StringType,
+		Optional:    true,
+		Computed:    true,
+		ElementType: types.StringType,
+		Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"extattrs_all": schema.MapAttribute{
@@ -233,7 +239,7 @@ func (m *RecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics, i
 		DdnsProtected:       flex.ExpandBoolPointer(m.DdnsProtected),
 		Disable:             flex.ExpandBoolPointer(m.Disable),
 		DiscoveredData:      ExpandRecordAaaaDiscoveredData(ctx, m.DiscoveredData, diags),
-		ExtAttrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ForbidReclamation:   flex.ExpandBoolPointer(m.ForbidReclamation),
 		Ipv6addr:            ExpandRecordAaaaIpv6addr(m.Ipv6addr),
 		FuncCall:            ExpandFuncCall(ctx, m.FuncCall, diags),
