@@ -101,15 +101,16 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordMxResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
-
-		dhcp.NewSharednetworkResource,
 		dns.NewViewResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
 
+		ipam.NewNetworkResource,
 		ipam.NewNetworkcontainerResource,
+    
+    dhcp.NewSharednetworkResource,
 	}
 }
 
@@ -133,9 +134,10 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
 
-		dhcp.NewSharednetworkDataSource,
+		ipam.NewNetworkDataSource,
+    ipam.NewNetworkcontainerDataSource,
 
-		ipam.NewNetworkcontainerDataSource,
+		dhcp.NewSharednetworkDataSource,		
 	}
 }
 
