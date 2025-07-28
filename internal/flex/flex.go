@@ -3,7 +3,6 @@ package flex
 import (
 	"context"
 	"fmt"
-
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 type FrameworkElementFlExFunc[T any, U any] func(context.Context, T, *diag.Diagnostics) U
@@ -150,6 +150,21 @@ func ExpandFrameworkListString(ctx context.Context, tfList interface {
 	var data []string
 	diags.Append(tfList.ElementsAs(ctx, &data, false)...)
 	return data
+}
+
+func FlattenFrameworkUnorderedListNestedBlock[T any, U any](ctx context.Context, data []T, attrTypes map[string]attr.Type, diags *diag.Diagnostics, f FrameworkElementFlExFunc[*T, U]) internaltypes.UnorderedListValue {
+	if len(data) == 0 {
+		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: attrTypes})
+	}
+
+	tfData := ApplyToAll(data, func(t T) U {
+		return f(ctx, &t, diags)
+	})
+
+	tfList, d := internaltypes.NewUnorderedListValueFrom(ctx, types.ObjectType{AttrTypes: attrTypes}, tfData)
+
+	diags.Append(d...)
+	return tfList
 }
 
 func ExpandFrameworkListInt32(ctx context.Context, tfList types.List, diags *diag.Diagnostics) []int32 {
@@ -295,6 +310,27 @@ func ExpandFrameworkMapString(ctx context.Context, tfMap types.Map, diags *diag.
 	elementsNew := make(map[string]interface{}, len(tfMap.Elements()))
 	for k, v := range elements {
 		elementsNew[k] = v
+	}
+	return elementsNew
+}
+
+// ExpandParsedFrameworkMapString parses interface value and expands a Terraform map of strings into a map of interface{}.
+func ExpandParsedFrameworkMapString(ctx context.Context, tfMap types.Map, diags *diag.Diagnostics) map[string]interface{} {
+	if tfMap.IsNull() || tfMap.IsUnknown() {
+		return nil
+	}
+	var elements map[string]string
+	diags.Append(tfMap.ElementsAs(ctx, &elements, false)...)
+	if diags.HasError() {
+		return nil
+
+	}
+
+	elementsNew := make(map[string]interface{})
+
+	for key, valStr := range elements {
+		parsedValue := utils.ParseInterfaceValue(valStr)
+		elementsNew[key] = parsedValue
 	}
 	return elementsNew
 }
