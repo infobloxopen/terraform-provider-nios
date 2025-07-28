@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/go-uuid"
@@ -14,7 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
+
+const terraformInternalIDEA = "Terraform Internal ID"
 
 func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dns.ExtAttrs {
 	if extattrs.IsNull() || extattrs.IsUnknown() {
@@ -29,7 +32,7 @@ func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnost
 	result := make(map[string]dns.ExtAttrs)
 
 	for key, valStr := range extAttrsMap {
-		parsedValue := parseExtAttrValue(valStr)
+		parsedValue := utils.ParseInterfaceValue(valStr)
 		result[key] = dns.ExtAttrs{Value: parsedValue}
 	}
 	return &result
@@ -95,7 +98,7 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 	}
 
 	for k, v := range respExtAttrs {
-		if k == "Terraform Internal ID" {
+		if k == terraformInternalIDEA {
 			extAttrsAllRespMap[k] = v
 			continue
 		}
@@ -140,7 +143,7 @@ func AddInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, stateExtA
 	return newRespMap, diags
 }
 
-func addInternalIDToExtAttrs(ctx context.Context, extAttrs types.Map, diags diag.Diagnostics) (types.Map, diag.Diagnostics) {
+func AddInternalIDToExtAttrs(ctx context.Context, extAttrs types.Map, diags diag.Diagnostics) (types.Map, diag.Diagnostics) {
 
 	internalId, err := uuid.GenerateUUID()
 	if err != nil {
@@ -149,7 +152,7 @@ func addInternalIDToExtAttrs(ctx context.Context, extAttrs types.Map, diags diag
 	}
 
 	extAttrsMap := extAttrs.Elements()
-	extAttrsMap["Terraform Internal ID"] = types.StringValue(internalId)
+	extAttrsMap[terraformInternalIDEA] = types.StringValue(internalId)
 
 	extAttrs, diags = types.MapValue(types.StringType, extAttrsMap)
 	if diags.HasError() {
@@ -157,31 +160,4 @@ func addInternalIDToExtAttrs(ctx context.Context, extAttrs types.Map, diags diag
 	}
 
 	return extAttrs, nil
-}
-
-func parseExtAttrValue(valStr string) interface{} {
-	// Check if the value appears to be a JSON array (enclosed in square brackets)
-	if strings.HasPrefix(valStr, "[") && strings.HasSuffix(valStr, "]") {
-		var listVal []interface{}
-
-		// Parse as standard JSON with double quotes
-		err := json.Unmarshal([]byte(valStr), &listVal)
-
-		// If that fails and we have single quotes, replace them with double quotes
-		if err != nil && strings.Contains(valStr, "'") {
-			processedStr := strings.ReplaceAll(valStr, "'", "\"")
-			err = json.Unmarshal([]byte(processedStr), &listVal)
-		}
-
-		// If either parsing attempt succeeded, return the list value
-		if err == nil {
-			return listVal
-		}
-	}
-
-	// Try to parse the value as an integer
-	if intVal, err := strconv.ParseInt(valStr, 10, 64); err == nil {
-		return intVal
-	}
-	return valStr
 }

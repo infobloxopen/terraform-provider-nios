@@ -73,7 +73,7 @@ func (r *RecordAResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	// Add internal ID exists in the Extensible Attributes if not already present
-	data.ExtAttrs, diags = addInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
@@ -350,7 +350,7 @@ func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportSt
 	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	data.ExtAttrs, diags = addInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
