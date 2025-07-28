@@ -3,12 +3,14 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -105,11 +107,19 @@ var NetworkDiscoveryBasicPollSettingsResourceSchemaAttributes = map[string]schem
 		MarkdownDescription: "A switch port data collection polling mode.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("PERIODIC"),
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"PERIODIC",
+				"DISABLED",
+				"SCHEDULED",
+			),
+		},
 	},
 	"switch_port_data_collection_polling_schedule": schema.SingleNestedAttribute{
 		Attributes:          NetworkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
 		Optional:            true,
-		MarkdownDescription: "A Schedule Setting struct that determines switch port data collection polling schedule.",
+		Computed:            true,
+		MarkdownDescription: "A switch port data collection polling schedule.",
 	},
 	"switch_port_data_collection_polling_interval": schema.Int64Attribute{
 		Optional:            true,

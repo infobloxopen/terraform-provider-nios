@@ -99,7 +99,7 @@ var NetworkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleReso
 	"minutes_past_hour": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The minutes past the hour for the scheduled task.",
-		Default:             int64default.StaticInt64(1),
+		Default:             int64default.StaticInt64(0),
 		Computed:            true,
 	},
 	"hour_of_day": schema.Int64Attribute{

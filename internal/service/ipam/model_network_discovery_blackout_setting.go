@@ -43,6 +43,7 @@ var NetworkDiscoveryBlackoutSettingResourceSchemaAttributes = map[string]schema.
 		Attributes:          NetworkdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes,
 		Optional:            true,
 		MarkdownDescription: "A Schedule Setting struct that determines blackout schedule.",
+		Computed:            true,
 	},
 }
 
