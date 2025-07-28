@@ -63,7 +63,7 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},	
 		MarkdownDescription: "A generated TSIG key.",
@@ -82,7 +82,7 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The TSIG key name.",

@@ -39,7 +39,7 @@ var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The FQDN of the domain for which the member validates responses to recursive queries.",
@@ -49,7 +49,7 @@ var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},	
 		MarkdownDescription: "The DNSSEC algorithm used to generate the key.",
@@ -59,7 +59,7 @@ var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},	
 		MarkdownDescription: "The DNSSEC key.",

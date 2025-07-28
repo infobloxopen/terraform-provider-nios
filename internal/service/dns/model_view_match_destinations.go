@@ -59,7 +59,7 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Shouldnot have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
