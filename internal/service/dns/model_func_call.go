@@ -80,7 +80,7 @@ func (m *FuncCallModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dn
 	to := &dns.FuncCall{
 		AttributeName:    flex.ExpandString(m.AttributeName),
 		ObjectFunction:   flex.ExpandStringPointer(m.ObjectFunction),
-		Parameters:       flex.ExpandFrameworkMapString(ctx, m.Parameters, diags),
+		Parameters:       flex.ExpandParsedFrameworkMapString(ctx, m.Parameters, diags),
 		ResultField:      flex.ExpandStringPointer(m.ResultField),
 		Object:           flex.ExpandStringPointer(m.Object),
 		ObjectParameters: flex.ExpandFrameworkMapString(ctx, m.ObjectParameters, diags),
