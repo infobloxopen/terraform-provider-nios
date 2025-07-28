@@ -57,11 +57,7 @@ func (m *ViewcloudinfoDelegatedMemberModel) Expand(ctx context.Context, diags *d
 	if m == nil {
 		return nil
 	}
-	to := &dns.ViewcloudinfoDelegatedMember{
-		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
-		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
-		Name:     flex.ExpandStringPointer(m.Name),
-	}
+	to := &dns.ViewcloudinfoDelegatedMember{}
 	return to
 }
 

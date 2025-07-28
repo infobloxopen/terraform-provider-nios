@@ -19,7 +19,7 @@ resource "nios_dns_view" "create_view" {
 }
 
 // Create DNS View with additional fields
-resource "nios_dns_view" "create_with_additional_fields" {
+resource "nios_dns_view" "create_view_with_additional_fields" {
   name         = "example_custom_view"
   comment      = "DNS View"
   network_view = "default"
@@ -278,9 +278,12 @@ Optional:
 <a id="nestedatt--scavenging_settings--ea_expression_list"></a>
 ### Nested Schema for `scavenging_settings.ea_expression_list`
 
-Optional:
+Required:
 
 - `op` (String) The operation name.
+
+Optional:
+
 - `op1` (String) The name of the Extensible Attribute Definition object which is used as the first operand value.
 - `op1_type` (String) The first operand type.
 - `op2` (String) The second operand value.

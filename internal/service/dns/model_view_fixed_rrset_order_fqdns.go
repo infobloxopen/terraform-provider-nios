@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -14,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ViewFixedRrsetOrderFqdnsModel struct {
@@ -29,6 +31,9 @@ var ViewFixedRrsetOrderFqdnsAttrTypes = map[string]attr.Type{
 var ViewFixedRrsetOrderFqdnsResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Required:            true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "The FQDN of the fixed RRset configuration item.",
 	},
 	"record_type": schema.StringAttribute{
@@ -37,6 +42,7 @@ var ViewFixedRrsetOrderFqdnsResourceSchemaAttributes = map[string]schema.Attribu
 		Validators: []validator.String{
 			stringvalidator.OneOf("A", "AAAA","BOTH"),
 		},
+		Default : stringdefault.StaticString("A"),
 		MarkdownDescription: "The record type for the specified FQDN in the fixed RRset configuration.",
 	},
 }

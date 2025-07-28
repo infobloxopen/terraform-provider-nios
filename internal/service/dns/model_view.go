@@ -251,8 +251,8 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -265,8 +265,8 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewCustomRootNameServersResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_root_name_server")),
 		},
@@ -308,8 +308,8 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The flag that indicates whether an option to restrict DDNS update request based on FQDN patterns is enabled or disabled.",
 	},
 	"ddns_restrict_patterns_list": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ddns_patterns_restriction")),
 		},
@@ -408,9 +408,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the DNS security validation is enabled or not.",
 	},
 	"edns_udp_size": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1220),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(1220),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_edns_udp_size")),
 		},
@@ -476,7 +476,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewFixedRrsetOrderFqdnsResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_fixed_rrset_order_fqdns")),
 		},
@@ -507,7 +507,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewLastQueriedAclResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_scavenging_settings")),
 		},
@@ -518,6 +518,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ViewMatchClientsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A list of forwarders for the match clients. This list specifies a named ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"match_destinations": schema.ListNestedAttribute{
@@ -525,6 +526,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ViewMatchDestinationsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A list of forwarders for the match destinations. This list specifies a name ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"max_cache_ttl": schema.Int64Attribute{
@@ -555,11 +557,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The value is used by authoritative DNS servers to never send DNS responses larger than the configured value. The value should be between 512 and 4096 bytes. The recommended value is between 512 and 1220 bytes.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "Name of the DNS view.",
@@ -704,7 +706,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewSortlistResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_sortlist")),
 		},
@@ -849,7 +851,6 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: sortlist",
 	},
 }
-
 
 func (m *ViewModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.View {
 	if m == nil {

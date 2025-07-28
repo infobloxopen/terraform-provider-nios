@@ -34,8 +34,7 @@ var ViewscavengingsettingsEaExpressionListAttrTypes = map[string]attr.Type{
 
 var ViewscavengingsettingsEaExpressionListResourceSchemaAttributes = map[string]schema.Attribute{
 	"op": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf(
 				"AND",

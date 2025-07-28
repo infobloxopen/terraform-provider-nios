@@ -4,7 +4,7 @@ resource "nios_dns_view" "create_view" {
 }
 
 // Create DNS View with additional fields
-resource "nios_dns_view" "create_with_additional_fields" {
+resource "nios_dns_view" "create_view_with_additional_fields" {
   name         = "example_custom_view"
   comment      = "DNS View"
   network_view = "default"

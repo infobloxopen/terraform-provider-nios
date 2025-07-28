@@ -16,7 +16,7 @@ import (
 )
 
 // TODO : Objects to be present in the grid for testing
-//DDNS Principal Group = "dynamic_update_grp_1"
+//DDNS Principal Group = "dynamic_update_grp_1" ,"dynamic_update_grp_2"
 //NX Domain Ruleset = "nxdomain_ruleset_1"
 //Blacklist Ruleset = "ruleset1, ruleset2, ruleset3, ruleset4"
 //network view = "custom "
@@ -2225,7 +2225,7 @@ func TestAccViewResource_UseDdnsForceCreationTimestampUpdate(t *testing.T) {
 	})
 }
 
-func TestAccViewResource_UseDdnsPatternsRestriction(t *testing.T) {
+func TestAccViewResource_UseDdnsPatternRestricted(t *testing.T) {
 	var resourceName = "nios_dns_view.test_use_ddns_patterns_restriction"
 	var v dns.View
 	name := acctest.RandomNameWithPrefix("view")
@@ -2256,6 +2256,7 @@ func TestAccViewResource_UseDdnsPatternsRestriction(t *testing.T) {
 		},
 	})
 }
+
 
 func TestAccViewResource_UseDdnsPrincipalSecurity(t *testing.T) {
 	var resourceName = "nios_dns_view.test_use_ddns_principal_security"

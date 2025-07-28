@@ -3,12 +3,12 @@
 page_title: "nios_dns_view Data Source - nios"
 subcategory: "DNS"
 description: |-
-  Retrieves information about exisiting DNS Views
+  Retrieves information about existing DNS Views
 ---
 
 # nios_dns_view (Data Source)
 
-Retrieves information about exisiting DNS Views
+Retrieves information about existing DNS Views
 
 ## Example Usage
 
@@ -271,9 +271,12 @@ Optional:
 <a id="nestedatt--result--scavenging_settings--ea_expression_list"></a>
 ### Nested Schema for `result.scavenging_settings.ea_expression_list`
 
-Optional:
+Required:
 
 - `op` (String) The operation name.
+
+Optional:
+
 - `op1` (String) The name of the Extensible Attribute Definition object which is used as the first operand value.
 - `op1_type` (String) The first operand type.
 - `op2` (String) The second operand value.
