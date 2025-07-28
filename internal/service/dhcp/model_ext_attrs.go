@@ -126,4 +126,3 @@ func parseExtAttrValue(valStr string) interface{} {
 	}
 	return valStr
 }
-

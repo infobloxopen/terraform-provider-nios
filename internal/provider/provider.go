@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
-	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -18,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 )
 
