@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/hwtypes"
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -495,4 +497,52 @@ func ExpandList[U any](ctx context.Context, tfList types.List, u U, diags *diag.
 	diags.Append(diag...)
 	diags.Append(lv.ElementsAs(ctx, &u, false)...)
 	return u
+}
+
+func ExpandMACAddress(mac hwtypes.MACAddress) *string {
+	if mac.IsNull() || mac.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(mac.StringValue)
+}
+
+func FlattenMACAddress(mac *string) hwtypes.MACAddress {
+	if mac == nil {
+		return hwtypes.NewMACAddressNull()
+	}
+	return hwtypes.MACAddress{
+		StringValue: FlattenStringPointer(mac),
+	}
+}
+
+func ExpandIPv4Address(ipv4addr iptypes.IPv4Address) *string {
+	if ipv4addr.IsNull() || ipv4addr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipv4addr.StringValue)
+}
+
+func FlattenIPv4Address(ip *string) iptypes.IPv4Address {
+	if ip == nil {
+		return iptypes.NewIPv4AddressNull()
+	}
+	return iptypes.IPv4Address{
+		StringValue: FlattenStringPointer(ip),
+	}
+}
+
+func ExpandIPv6Address(ipv6addr iptypes.IPv6Address) *string {
+	if ipv6addr.IsNull() || ipv6addr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipv6addr.StringValue)
+}
+
+func FlattenIPv6Address(ip *string) iptypes.IPv6Address {
+	if ip == nil {
+		return iptypes.NewIPv6AddressNull()
+	}
+	return iptypes.IPv6Address{
+		StringValue: FlattenStringPointer(ip),
+	}
 }
