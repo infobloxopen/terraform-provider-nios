@@ -13,41 +13,11 @@ Manages a DHCP Range Template.
 ## Example Usage
 
 ```terraform
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "1.0.0"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "https://172.28.83.91"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
-}
-
 // Create DHCP Range Template with required Fields
 resource "nios_dhcp_range_template" "range_template_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
-  options = [
-    {
-      name       = "domain-name-servers"
-      num        = 6
-      value      = "11.22.1.2"
-      use_option = true
-    },
-    {
-      name  = "time-offset"
-      value = "1000"
-    },
-  ]
-  use_options          = true
-  cloud_api_compatible = true
-
 }
 
 // Create DHCP Range Template with additional Fields
