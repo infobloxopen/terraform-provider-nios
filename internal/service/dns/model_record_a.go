@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -21,32 +22,32 @@ import (
 )
 
 type RecordAModel struct {
-	Ref                 types.String `tfsdk:"ref"`
-	AwsRte53RecordInfo  types.Object `tfsdk:"aws_rte53_record_info"`
-	CloudInfo           types.Object `tfsdk:"cloud_info"`
-	Comment             types.String `tfsdk:"comment"`
-	CreationTime        types.Int64  `tfsdk:"creation_time"`
-	Creator             types.String `tfsdk:"creator"`
-	DdnsPrincipal       types.String `tfsdk:"ddns_principal"`
-	DdnsProtected       types.Bool   `tfsdk:"ddns_protected"`
-	Disable             types.Bool   `tfsdk:"disable"`
-	DiscoveredData      types.Object `tfsdk:"discovered_data"`
-	DnsName             types.String `tfsdk:"dns_name"`
-	ExtAttrs            types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll         types.Map    `tfsdk:"extattrs_all"`
-	ForbidReclamation   types.Bool   `tfsdk:"forbid_reclamation"`
-	FuncCall            types.Object `tfsdk:"func_call"`
-	Ipv4addr            types.String `tfsdk:"ipv4addr"`
-	LastQueried         types.Int64  `tfsdk:"last_queried"`
-	MsAdUserData        types.Object `tfsdk:"ms_ad_user_data"`
-	Name                types.String `tfsdk:"name"`
-	Reclaimable         types.Bool   `tfsdk:"reclaimable"`
-	RemoveAssociatedPtr types.Bool   `tfsdk:"remove_associated_ptr"`
-	SharedRecordGroup   types.String `tfsdk:"shared_record_group"`
-	Ttl                 types.Int64  `tfsdk:"ttl"`
-	UseTtl              types.Bool   `tfsdk:"use_ttl"`
-	View                types.String `tfsdk:"view"`
-	Zone                types.String `tfsdk:"zone"`
+	Ref                 types.String        `tfsdk:"ref"`
+	AwsRte53RecordInfo  types.Object        `tfsdk:"aws_rte53_record_info"`
+	CloudInfo           types.Object        `tfsdk:"cloud_info"`
+	Comment             types.String        `tfsdk:"comment"`
+	CreationTime        types.Int64         `tfsdk:"creation_time"`
+	Creator             types.String        `tfsdk:"creator"`
+	DdnsPrincipal       types.String        `tfsdk:"ddns_principal"`
+	DdnsProtected       types.Bool          `tfsdk:"ddns_protected"`
+	Disable             types.Bool          `tfsdk:"disable"`
+	DiscoveredData      types.Object        `tfsdk:"discovered_data"`
+	DnsName             types.String        `tfsdk:"dns_name"`
+	ExtAttrs            types.Map           `tfsdk:"extattrs"`
+	ExtAttrsAll         types.Map           `tfsdk:"extattrs_all"`
+	ForbidReclamation   types.Bool          `tfsdk:"forbid_reclamation"`
+	FuncCall            types.Object        `tfsdk:"func_call"`
+	Ipv4addr            iptypes.IPv4Address `tfsdk:"ipv4addr"`
+	LastQueried         types.Int64         `tfsdk:"last_queried"`
+	MsAdUserData        types.Object        `tfsdk:"ms_ad_user_data"`
+	Name                types.String        `tfsdk:"name"`
+	Reclaimable         types.Bool          `tfsdk:"reclaimable"`
+	RemoveAssociatedPtr types.Bool          `tfsdk:"remove_associated_ptr"`
+	SharedRecordGroup   types.String        `tfsdk:"shared_record_group"`
+	Ttl                 types.Int64         `tfsdk:"ttl"`
+	UseTtl              types.Bool          `tfsdk:"use_ttl"`
+	View                types.String        `tfsdk:"view"`
+	Zone                types.String        `tfsdk:"zone"`
 }
 
 var RecordAAttrTypes = map[string]attr.Type{
@@ -65,7 +66,7 @@ var RecordAAttrTypes = map[string]attr.Type{
 	"extattrs_all":          types.MapType{ElemType: types.StringType},
 	"forbid_reclamation":    types.BoolType,
 	"func_call":             types.ObjectType{AttrTypes: FuncCallAttrTypes},
-	"ipv4addr":              types.StringType,
+	"ipv4addr":              iptypes.IPv4AddressType{},
 	"last_queried":          types.Int64Type,
 	"ms_ad_user_data":       types.ObjectType{AttrTypes: RecordAMsAdUserDataAttrTypes},
 	"name":                  types.StringType,
@@ -161,6 +162,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 	},
 	"ipv4addr": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the record.",
@@ -296,20 +298,20 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	}
 }
 
-func ExpandRecordAIpv4addr(str types.String) *dns.RecordAIpv4addr {
+func ExpandRecordAIpv4addr(str iptypes.IPv4Address) *dns.RecordAIpv4addr {
 	if str.IsNull() {
 		return &dns.RecordAIpv4addr{}
 	}
 	var m dns.RecordAIpv4addr
-	m.String = flex.ExpandStringPointer(str)
+	m.String = flex.ExpandIPv4Address(str)
 
 	return &m
 }
 
-func FlattenRecordAIpv4addr(from *dns.RecordAIpv4addr) types.String {
+func FlattenRecordAIpv4addr(from *dns.RecordAIpv4addr) iptypes.IPv4Address {
 	if from.String == nil {
-		return types.StringNull()
+		return iptypes.NewIPv4AddressNull()
 	}
-	m := flex.FlattenStringPointer(from.String)
+	m := flex.FlattenIPv4Address(from.String)
 	return m
 }

@@ -522,12 +522,12 @@ func ExpandIPv4Address(ipv4addr iptypes.IPv4Address) *string {
 	return ExpandStringPointer(ipv4addr.StringValue)
 }
 
-func FlattenIPv4Address(ip *string) iptypes.IPv4Address {
-	if ip == nil {
+func FlattenIPv4Address(ipv4addr *string) iptypes.IPv4Address {
+	if ipv4addr == nil || *ipv4addr == "" {
 		return iptypes.NewIPv4AddressNull()
 	}
 	return iptypes.IPv4Address{
-		StringValue: FlattenStringPointer(ip),
+		StringValue: FlattenStringPointer(ipv4addr),
 	}
 }
 
@@ -538,11 +538,27 @@ func ExpandIPv6Address(ipv6addr iptypes.IPv6Address) *string {
 	return ExpandStringPointer(ipv6addr.StringValue)
 }
 
-func FlattenIPv6Address(ip *string) iptypes.IPv6Address {
-	if ip == nil {
+func FlattenIPv6Address(ipv6addr *string) iptypes.IPv6Address {
+	if ipv6addr == nil || *ipv6addr == "" {
 		return iptypes.NewIPv6AddressNull()
 	}
 	return iptypes.IPv6Address{
+		StringValue: FlattenStringPointer(ipv6addr),
+	}
+}
+
+func ExpandIPAddress(ipaddr iptypes.IPAddress) *string {
+	if ipaddr.IsNull() || ipaddr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipaddr.StringValue)
+}
+
+func FlattenIPAddress(ip *string) iptypes.IPAddress {
+	if ip == nil || *ip == "" {
+		return iptypes.NewIPAddressNull()
+	}
+	return iptypes.IPAddress{
 		StringValue: FlattenStringPointer(ip),
 	}
 }
