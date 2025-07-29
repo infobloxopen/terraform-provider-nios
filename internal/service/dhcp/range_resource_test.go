@@ -3557,22 +3557,6 @@ resource "nios_dhcp_range" "test_server_association_type" {
 `, startAddr, endAddr, serverAssociationType, failoverAssociation, member)
 }
 
-func testAccRangeSplitMember(startAddr, endAddr string, splitMember string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_range" "test_split_member" {
-	start_addr = %q
-	end_addr = %q
-    split_member = {
-		ipv4addr = %q
-	}
-		split_scope_exclusion_percent = 40
-		ms_server = {
-			ipv4addr = "10.120.23.22"
-}
-			server_association_type = "MS_SERVER"
-}
-`, startAddr, endAddr, splitMember)
-}
 
 func testAccRangeStartAddr(startAddr, endAddr string) string {
 	return fmt.Sprintf(`
