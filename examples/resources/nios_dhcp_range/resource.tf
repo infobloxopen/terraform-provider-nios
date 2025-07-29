@@ -1,5 +1,5 @@
 //Create a Network Range with basic fields 
-resource "nios_dhcp_range" "range_basic_fields" {
+resource "nios_dhcp_range" "create_range_with_basic_fields" {
   start_addr = "10.0.0.170"
   end_addr   = "10.0.0.180"
 }
