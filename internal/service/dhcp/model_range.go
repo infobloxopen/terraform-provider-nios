@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -447,6 +448,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -940,7 +944,7 @@ func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCrea
 		EnableSnmpWarnings:               flex.ExpandBoolPointer(m.EnableSnmpWarnings),
 		EndAddr:                          flex.ExpandStringPointer(m.EndAddr),
 		Exclude:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Exclude, diags, ExpandRangeExclude),
-		ExtAttrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                         ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FailoverAssociation:              flex.ExpandStringPointer(m.FailoverAssociation),
 		FingerprintFilterRules:           flex.ExpandFrameworkListNestedBlock(ctx, m.FingerprintFilterRules, diags, ExpandRangeFingerprintFilterRules),
 		HighWaterMark:                    flex.ExpandInt64Pointer(m.HighWaterMark),
@@ -1016,7 +1020,6 @@ func FlattenRange(ctx context.Context, from *dhcp.Range, diags *diag.Diagnostics
 	}
 	m := RangeModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, RangeAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -1058,7 +1061,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.EndAddr = flex.FlattenStringPointer(from.EndAddr)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
 	m.Exclude = flex.FlattenFrameworkListNestedBlock(ctx, from.Exclude, RangeExcludeAttrTypes, diags, FlattenRangeExclude)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FailoverAssociation = flex.FlattenStringPointer(from.FailoverAssociation)
 	m.FingerprintFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.FingerprintFilterRules, RangeFingerprintFilterRulesAttrTypes, diags, FlattenRangeFingerprintFilterRules)
 	m.HighWaterMark = flex.FlattenInt64Pointer(from.HighWaterMark)
