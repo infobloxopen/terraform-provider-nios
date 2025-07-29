@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/hwtypes"
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
@@ -559,6 +560,22 @@ func FlattenIPAddress(ip *string) iptypes.IPAddress {
 		return iptypes.NewIPAddressNull()
 	}
 	return iptypes.IPAddress{
+		StringValue: FlattenStringPointer(ip),
+	}
+}
+
+func ExpandIPv4CIDR(ipaddr cidrtypes.IPv4Prefix) *string {
+	if ipaddr.IsNull() || ipaddr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipaddr.StringValue)
+}
+
+func FlattenIPv4CIDR(ip *string) cidrtypes.IPv4Prefix {
+	if ip == nil || *ip == "" {
+		return cidrtypes.NewIPv4PrefixNull()
+	}
+	return cidrtypes.IPv4Prefix{
 		StringValue: FlattenStringPointer(ip),
 	}
 }
