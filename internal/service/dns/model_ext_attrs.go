@@ -122,7 +122,7 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 func AddInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, stateExtAttrs types.Map) (types.Map, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	stateExtAttrsMap := stateExtAttrs.Elements()
-	if stateExtAttrsMap == nil || len(stateExtAttrsMap) == 0 {
+	if len(stateExtAttrsMap) == 0 {
 		return planExtAttrs, diags
 	}
 	planExtAttrsMap := planExtAttrs.Elements()
