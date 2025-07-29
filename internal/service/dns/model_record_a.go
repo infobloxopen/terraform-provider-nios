@@ -165,7 +165,6 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 	},
 	"ipv4addr": schema.StringAttribute{
-		//CustomType:          iptypes.IPv4AddressType{},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the record.",
