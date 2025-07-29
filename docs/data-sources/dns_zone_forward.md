@@ -88,10 +88,13 @@ Read-Only:
 <a id="nestedatt--result--forward_to"></a>
 ### Nested Schema for `result.forward_to`
 
-Optional:
+Required:
 
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
+
+Optional:
+
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
@@ -116,10 +119,13 @@ Optional:
 <a id="nestedatt--result--forwarding_servers--forward_to"></a>
 ### Nested Schema for `result.forwarding_servers.forward_to`
 
-Optional:
+Required:
 
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
+
+Optional:
+
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.

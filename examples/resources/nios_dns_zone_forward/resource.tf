@@ -32,8 +32,8 @@ resource "nios_dns_zone_forward" "zone_forward_additional_fields" {
   }
 }
 
-// Create a IPV4 reverse mapping DNS zone forward
-resource "nios_dns_zone_forward" "zone_forward_ipv4_reverse_mapping" {
+// Create an IPV4 DNS zone forward
+resource "nios_dns_zone_forward" "zone_forward_ipv4" {
   fqdn = "192.1.0.0/24"
   forward_to = [
     {
@@ -44,8 +44,8 @@ resource "nios_dns_zone_forward" "zone_forward_ipv4_reverse_mapping" {
   zone_format = "IPV4"
 }
 
-// Create a IPV6 reverse mapping DNS zone forward
-resource "nios_dns_zone_forward" "zone_forward_ipv6_reverse_mapping" {
+// Create an IPV6 DNS zone forward
+resource "nios_dns_zone_forward" "zone_forward_ipv6_mapping" {
   fqdn = "3001:db8::/64"
   forward_to = [
     {

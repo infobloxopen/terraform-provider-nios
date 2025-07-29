@@ -47,8 +47,8 @@ resource "nios_dns_zone_forward" "zone_forward_additional_fields" {
   }
 }
 
-// Create a IPV4 reverse mapping DNS zone forward
-resource "nios_dns_zone_forward" "zone_forward_ipv4_reverse_mapping" {
+// Create an IPV4 DNS zone forward
+resource "nios_dns_zone_forward" "zone_forward_ipv4" {
   fqdn = "192.1.0.0/24"
   forward_to = [
     {
@@ -59,8 +59,8 @@ resource "nios_dns_zone_forward" "zone_forward_ipv4_reverse_mapping" {
   zone_format = "IPV4"
 }
 
-// Create a IPV6 reverse mapping DNS zone forward
-resource "nios_dns_zone_forward" "zone_forward_ipv6_reverse_mapping" {
+// Create an IPV6 DNS zone forward
+resource "nios_dns_zone_forward" "zone_forward_ipv6_mapping" {
   fqdn = "3001:db8::/64"
   forward_to = [
     {
@@ -115,10 +115,13 @@ resource "nios_dns_zone_forward" "zone_forward_ipv6_reverse_mapping" {
 <a id="nestedatt--forward_to"></a>
 ### Nested Schema for `forward_to`
 
-Optional:
+Required:
 
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
+
+Optional:
+
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
@@ -143,10 +146,13 @@ Optional:
 <a id="nestedatt--forwarding_servers--forward_to"></a>
 ### Nested Schema for `forwarding_servers.forward_to`
 
-Optional:
+Required:
 
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
+
+Optional:
+
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
