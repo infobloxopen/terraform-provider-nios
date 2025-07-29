@@ -24,8 +24,7 @@ var RangeSplitMemberAttrTypes = map[string]attr.Type{
 
 var RangeSplitMemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: 		  true,
 		MarkdownDescription: "The IPv4 Address or FQDN of the Microsoft server.",
 	},
 }

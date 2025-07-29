@@ -191,7 +191,7 @@ resource "nios_dhcp_range" "test" {
 
 data "nios_dhcp_range" "test" {
   extattrfilters = {
-	"Site" = nios_dhcp_range.test.extattrs.Site
+	Site = nios_dhcp_range.test.extattrs.Site
   }
 }
 `, startAddr, endAddr, extAttrsValue)

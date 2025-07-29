@@ -34,11 +34,11 @@ var RangeMsOptionsAttrTypes = map[string]attr.Type{
 
 var RangeMsOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"num": schema.Int64Attribute{
-		Required: 		  true,
+		Required:            true,
 		MarkdownDescription: "The code of the DHCP option.",
 	},
 	"value": schema.StringAttribute{
-		Required: true,
+		Required:            true,
 		MarkdownDescription: "Value of the DHCP option.",
 	},
 	"name": schema.StringAttribute{
@@ -48,6 +48,7 @@ var RangeMsOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"vendor_class": schema.StringAttribute{
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The name of the vendor class with which this DHCP option is associated.",
 	},
 	"user_class": schema.StringAttribute{

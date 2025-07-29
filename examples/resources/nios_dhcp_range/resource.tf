@@ -5,10 +5,10 @@ resource "nios_dhcp_range" "range_basic_fields" {
 }
 
 //Create a Network Range with additional fields 
-resource "nios_dhcp_range" "range_additional_fields" {
+resource "nios_dhcp_range" "create_range_with_basic_fields" {
   start_addr        = "10.0.0.190"
   end_addr          = "10.0.0.200"
-  comment           = "Full range for testing"
+  comment           = "DHCP Range with additional fields"
   network_view      = "default"
   name              = "range object"
   always_update_dns = true

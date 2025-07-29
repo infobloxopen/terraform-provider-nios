@@ -450,7 +450,7 @@ func TestAccRangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, true, false, false, false, false, false, false, false, "PERIODIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arprefresh_before_switch_port_polling", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
@@ -466,7 +466,7 @@ func TestAccRangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, true, true, false, true, false, true, false, false, "SCHEDULED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arprefresh_before_switch_port_polling", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "true"),

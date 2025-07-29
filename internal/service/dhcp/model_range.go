@@ -11,17 +11,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -261,8 +261,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A CloudInfo struct that contains information about the cloud provider and region for the range.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
@@ -324,7 +324,6 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this range.",
-		Default:             stringdefault.StaticString("NONE"),
 	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: RangeDiscoveryBasicPollSettingsResourceSchemaAttributes,
@@ -438,6 +437,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangeExcludeResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "These are ranges of IP addresses that the appliance does not use to assign to clients. You can use these exclusion addresses as static IP addresses. They contain the start and end addresses of the exclusion range, and optionally, information about this exclusion range.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -465,15 +465,21 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the fingerprint filters for this DHCP range. The appliance uses matching rules in these filters to select the address range from which it assigns a lease.",
 	},
 	"high_water_mark": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(95),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(95),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 100),
+		},
 		MarkdownDescription: "The percentage of DHCP range usage threshold above which range usage is not expected and may warrant your attention. When the high watermark is reached, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 	},
 	"high_water_mark_reset": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(85),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(85),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 100),
+		},
 		MarkdownDescription: "The percentage of DHCP range usage below which the corresponding SNMP trap is reset. A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The high watermark reset value must be lower than the high watermark value.",
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
@@ -505,8 +511,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field will be 'true' if this particular range is part of a split scope.",
 	},
 	"known_clients": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_known_clients")),
 		},
@@ -567,18 +573,20 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"member": schema.SingleNestedAttribute{
 		Attributes:          RangeMemberResourceSchemaAttributes,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "This field contains the member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes:          RangeMsAdUserDataResourceSchemaAttributes,
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "This field contains the Microsoft AD user data for this range. This data is used to create a user in the Microsoft AD when a lease is assigned to a host in this range.",
 	},
 	"ms_options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeMsOptionsResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ms_options")),
 		},
@@ -597,8 +605,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the NAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
@@ -638,17 +646,17 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeOptionsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
 		},
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
-		Attributes:          RangePortControlBlackoutSettingResourceSchemaAttributes,
-		Optional:            true,
-		Computed:            true,
+		Attributes: RangePortControlBlackoutSettingResourceSchemaAttributes,
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
@@ -734,20 +742,20 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The total number of DHCP addresses configured in the range.",
 	},
 	"unknown_clients": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_unknown_clients")),
 		},
 		MarkdownDescription: "Permission for unknown clients. This can be 'Allow' or 'Deny'. If set to 'Deny', unknown clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"update_dns_on_lease_renewal": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
 		Validators: []validator.Bool{
 			boolvalidator.AlsoRequires(path.MatchRoot("use_update_dns_on_lease_renewal")),
-		},	
+		},
 		MarkdownDescription: "This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.",
 	},
 	"use_blackout_setting": schema.BoolAttribute{
@@ -902,13 +910,11 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-
-func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics,isCreate bool) *dhcp.Range {
+func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Range {
 	if m == nil {
 		return nil
 	}
 	to := &dhcp.Range{
-		Ref:                              flex.ExpandStringPointer(m.Ref),
 		AlwaysUpdateDns:                  flex.ExpandBoolPointer(m.AlwaysUpdateDns),
 		Bootfile:                         flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                       flex.ExpandStringPointer(m.Bootserver),
@@ -1046,7 +1052,6 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndAddr = flex.FlattenStringPointer(from.EndAddr)

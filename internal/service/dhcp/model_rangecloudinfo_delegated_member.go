@@ -29,14 +29,17 @@ var RangecloudinfoDelegatedMemberAttrTypes = map[string]attr.Type{
 var RangecloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
 	},
 	"ipv6addr": schema.StringAttribute{
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The IPv6 Address of the Grid Member.",
 	},
 	"name": schema.StringAttribute{
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The Grid member name",
 	},
 }

@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_range Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  Retrieves information about existing Range
+  Retrieves information about existing DHCP Ranges.
 ---
 
 # nios_dhcp_range (Data Source)
 
-Retrieves information about existing Range
+Retrieves information about existing DHCP Ranges.
 
 ## Example Usage
 
@@ -93,7 +93,6 @@ Optional:
 - `low_water_mark_reset` (Number) The percentage of DHCP range usage threshold below which range usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.
 - `mac_filter_rules` (Attributes List) This field contains the MAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--result--mac_filter_rules))
 - `member` (Attributes) This field contains the member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network. (see [below for nested schema](#nestedatt--result--member))
-- `ms_ad_user_data` (Attributes) This field contains the Microsoft AD user data for this range. This data is used to create a user in the Microsoft AD when a lease is assigned to a host in this range. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ms_options` (Attributes List) This field contains the Microsoft DHCP options for this range. (see [below for nested schema](#nestedatt--result--ms_options))
 - `ms_server` (Attributes) This field contains the Microsoft server that will serve this range. This is used for Microsoft failover. (see [below for nested schema](#nestedatt--result--ms_server))
 - `nac_filter_rules` (Attributes List) This field contains the NAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--result--nac_filter_rules))
@@ -150,6 +149,7 @@ Read-Only:
 - `endpoint_sources` (List of String) The endpoints that provides data for the DHCP Range object.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `is_split_scope` (Boolean) This field will be 'true' if this particular range is part of a split scope.
+- `ms_ad_user_data` (Attributes) This field contains the Microsoft AD user data for this range. This data is used to create a user in the Microsoft AD when a lease is assigned to a host in this range. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ref` (String) The reference to the object.
 - `static_hosts` (Number) The number of static DHCP addresses configured in the range.
 - `template` (String) If set on creation, the range will be created according to the values specified in the named template.
@@ -172,7 +172,7 @@ Read-Only:
 <a id="nestedatt--result--cloud_info--delegated_member"></a>
 ### Nested Schema for `result.cloud_info.delegated_member`
 
-Read-Only:
+Optional:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.
@@ -185,7 +185,7 @@ Read-Only:
 
 Optional:
 
-- `auto_arprefresh_before_switch_port_polling` (Boolean) Determines whether auto ARP refresh before switch port polling is enabled or not.
+- `auto_arp_refresh_before_switch_port_polling` (Boolean) Determines whether auto ARP refresh before switch port polling is enabled or not.
 - `cli_collection` (Boolean) Determines whether CLI collection is enabled or not.
 - `complete_ping_sweep` (Boolean) Determines whether complete ping sweep is enabled or not.
 - `credential_group` (String) Credential group.
@@ -299,14 +299,6 @@ Optional:
 - `name` (String) The Grid member name
 
 
-<a id="nestedatt--result--ms_ad_user_data"></a>
-### Nested Schema for `result.ms_ad_user_data`
-
-Read-Only:
-
-- `active_users_count` (Number) The number of active users.
-
-
 <a id="nestedatt--result--ms_options"></a>
 ### Nested Schema for `result.ms_options`
 
@@ -319,11 +311,11 @@ Optional:
 
 - `name` (String) The name of the DHCP option.
 - `user_class` (String) The name of the user class with which this DHCP option is associated.
+- `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 Read-Only:
 
 - `type` (String) The DHCP option type. Valid values are: * "16-bit signed integer" * "16-bit unsigned integer" * "32-bit signed integer" * "32-bit unsigned integer" * "64-bit unsigned integer" * "8-bit signed integer" * "8-bit unsigned integer (1,2,4,8)" * "8-bit unsigned integer" * "array of 16-bit integer" * "array of 16-bit unsigned integer" * "array of 32-bit integer" * "array of 32-bit unsigned integer" * "array of 64-bit unsigned integer" * "array of 8-bit integer" * "array of 8-bit unsigned integer" * "array of ip-address pair" * "array of ip-address" * "array of string" * "binary" * "boolean array of ip-address" * "boolean" * "boolean-text" * "domain-list" * "domain-name" * "encapsulated" * "ip-address" * "string" * "text"
-- `vendor_class` (String) The name of the vendor class with which this DHCP option is associated.
 
 
 <a id="nestedatt--result--ms_server"></a>
@@ -346,7 +338,7 @@ Required:
 <a id="nestedatt--result--option_filter_rules"></a>
 ### Nested Schema for `result.option_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The name of the DHCP filter.
 - `permission` (String) The permission to be applied.
@@ -405,7 +397,7 @@ Required:
 <a id="nestedatt--result--split_member"></a>
 ### Nested Schema for `result.split_member`
 
-Optional:
+Required:
 
 - `ipv4addr` (String) The IPv4 Address or FQDN of the Microsoft server.
 
@@ -421,7 +413,16 @@ Optional:
 <a id="nestedatt--result--subscribe_settings--mapped_ea_attributes"></a>
 ### Nested Schema for `result.subscribe_settings.mapped_ea_attributes`
 
-Optional:
+Required:
 
 - `mapped_ea` (String) The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.
 - `name` (String) The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.
+
+
+
+<a id="nestedatt--result--ms_ad_user_data"></a>
+### Nested Schema for `result.ms_ad_user_data`
+
+Read-Only:
+
+- `active_users_count` (Number) The number of active users.

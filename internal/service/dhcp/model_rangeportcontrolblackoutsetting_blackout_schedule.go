@@ -3,6 +3,7 @@ package dhcp
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -51,6 +52,11 @@ var RangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes = ma
 		ElementType:         types.StringType,
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.ValueStringsAre(
+				stringvalidator.OneOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"),
+			),
+		},
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 	},
 	"time_zone": schema.StringAttribute{
@@ -104,6 +110,9 @@ var RangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes = ma
 	"repeat": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ONCE", "RECUR"),
+		},
 		MarkdownDescription: "Indicates if the scheduled task will be repeated or run only once.",
 	},
 	"disable": schema.BoolAttribute{
