@@ -13,11 +13,41 @@ Manages a DHCP Range Template.
 ## Example Usage
 
 ```terraform
+terraform {
+  required_providers {
+    nios = {
+      source  = "infobloxopen/nios"
+      version = "1.0.0"
+    }
+  }
+}
+
+provider "nios" {
+  nios_host_url = "https://172.28.83.91"
+  nios_username = "admin"
+  nios_password = "Infoblox@123"
+}
+
 // Create DHCP Range Template with required Fields
 resource "nios_dhcp_range_template" "range_template_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
+  options = [
+    {
+      name       = "domain-name-servers"
+      num        = 6
+      value      = "11.22.1.2"
+      use_option = true
+    },
+    {
+      name  = "time-offset"
+      value = "1000"
+    },
+  ]
+  use_options          = true
+  cloud_api_compatible = true
+
 }
 
 // Create DHCP Range Template with additional Fields
@@ -296,9 +326,12 @@ Required:
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
+Required:
 
 - `name` (String) Name of the DHCP option.
+
+Optional:
+
 - `num` (Number) The code of the DHCP option.
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `value` (String) Value of the DHCP option
