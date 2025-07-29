@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -64,6 +65,7 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 	"time_zone": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("(UTC) Coordinated Universal Time"),
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
@@ -77,6 +79,7 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 		Validators: []validator.String{
 			stringvalidator.OneOf("DAILY", "HOURLY", "MONTHLY", "WEEKLY"),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The frequency for the scheduled task.",
 	},
 	"every": schema.Int64Attribute{
@@ -115,12 +118,13 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 		Validators: []validator.String{
 			stringvalidator.OneOf("ONCE", "RECUR"),
 		},
+		Default:             stringdefault.StaticString("ONCE"),
 		MarkdownDescription: "Indicates if the scheduled task will be repeated or run only once.",
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default: 		   booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to True, the scheduled task is disabled.",
 	},
 }

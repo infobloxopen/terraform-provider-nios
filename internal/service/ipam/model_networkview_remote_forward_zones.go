@@ -55,16 +55,19 @@ var NetworkviewRemoteForwardZonesResourceSchemaAttributes = map[string]schema.At
 	"gss_tsig_dns_principal": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The principal name in which GSS-TSIG for dynamic updates is enabled.",
 	},
 	"gss_tsig_domain": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The domain in which GSS-TSIG for dynamic updates is enabled.",
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The TSIG key value.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
@@ -78,6 +81,7 @@ var NetworkviewRemoteForwardZonesResourceSchemaAttributes = map[string]schema.At
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name of the TSIG key. The key name entered here must match the TSIG key name on the external name server.",
 	},
 	"key_type": schema.StringAttribute{

@@ -80,9 +80,9 @@ var ZoneForwardForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 	"tsig_key_alg": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		// Validators: []validator.String{
-		// 	stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
-		// },
+		Validators: []validator.String{
+			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
+		},
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{

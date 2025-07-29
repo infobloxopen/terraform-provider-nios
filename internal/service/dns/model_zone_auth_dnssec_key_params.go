@@ -72,6 +72,7 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		Validators: []validator.String{
 			stringvalidator.OneOf("10", "13", "14", "5", "7", "8"),
 		},
+		Default:             stringdefault.StaticString("8"),
 		MarkdownDescription: "Key Signing Key algorithm. Use KSK Algorithms instead.",
 	},
 	"ksk_algorithms": schema.ListNestedAttribute{
@@ -151,6 +152,7 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		Validators: []validator.String{
 			stringvalidator.OneOf("10", "13", "14", "5", "7", "8"),
 		},
+		Default:             stringdefault.StaticString("8"),
 		MarkdownDescription: "Zone Signing Key algorithm. Use ZSK Algorithms instead.",
 	},
 	"zsk_algorithms": schema.ListNestedAttribute{

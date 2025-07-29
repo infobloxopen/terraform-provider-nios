@@ -50,6 +50,7 @@ var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attri
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comments for the SNMPv1 and SNMPv2 users.",
 	},
 	"credential_group": schema.StringAttribute{

@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -306,6 +307,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"bootserver": schema.StringAttribute{
 		Optional:            true,
@@ -314,6 +316,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkCloudInfoResourceSchemaAttributes,
@@ -331,6 +334,13 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Comment for the network, maximum 256 characters.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default: stringdefault.StaticString(""),
 	},
 	"conflict_count": schema.Int64Attribute{
 		Computed:            true,
@@ -343,6 +353,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
 		Optional:            true,
@@ -434,11 +445,19 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered bridge domain.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"discovered_tenant": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered tenant.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 	},
 	"discovered_vlan_id": schema.StringAttribute{
 		Computed:            true,
@@ -488,6 +507,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"dynamic_hosts": schema.Int64Attribute{
 		Computed:            true,
@@ -762,6 +782,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -817,6 +838,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization assoicated with the network.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,

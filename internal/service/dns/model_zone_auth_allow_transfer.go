@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -72,7 +73,9 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
 				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
 			),
+			stringvalidator.OneOf("ALLOW", "DENY"),
 		},
+		Default: stringdefault.StaticString("ALLOW"),
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional: true,
@@ -112,6 +115,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Should not have leading or trailing whitespace",
 			),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{

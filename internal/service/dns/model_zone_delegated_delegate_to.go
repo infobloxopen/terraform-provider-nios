@@ -7,7 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -78,6 +81,7 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
@@ -96,12 +100,15 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 				regexp.MustCompile(`^\S.*\S$`),
 				"Should not have leading or trailing whitespace",
 			),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }

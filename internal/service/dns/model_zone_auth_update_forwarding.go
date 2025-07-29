@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -71,7 +72,9 @@ var ZoneAuthUpdateForwardingResourceSchemaAttributes = map[string]schema.Attribu
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
 				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
 			),
+			stringvalidator.OneOf("ALLOW", "DENY"),
 		},
+		Default:             stringdefault.StaticString("ALLOW"),
 		MarkdownDescription: "The permission to use for this address.",
 	},
 	"tsig_key": schema.StringAttribute{
@@ -97,6 +100,7 @@ var ZoneAuthUpdateForwardingResourceSchemaAttributes = map[string]schema.Attribu
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
+			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
 		},
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
@@ -112,6 +116,7 @@ var ZoneAuthUpdateForwardingResourceSchemaAttributes = map[string]schema.Attribu
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Should not have leading or trailing whitespace",
 			),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 		},
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},

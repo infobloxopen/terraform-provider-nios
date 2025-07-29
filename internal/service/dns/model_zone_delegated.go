@@ -200,6 +200,7 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 	"ns_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The delegation NS group bound with delegated zone.",
 	},
 	"parent": schema.StringAttribute{
@@ -215,6 +216,7 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 				"Must be lowercase and cannot contain spaces or uppercase characters",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.",
 	},
 	"use_delegated_ttl": schema.BoolAttribute{

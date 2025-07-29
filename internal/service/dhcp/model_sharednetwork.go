@@ -161,6 +161,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The bootfile name for the shared network. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.",
 	},
 	"bootserver": schema.StringAttribute{
@@ -169,6 +170,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The bootserver address for the shared network. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
 	"comment": schema.StringAttribute{
@@ -180,6 +182,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 				"Comment should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the shared network, maximum 256 characters.",
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
@@ -375,6 +378,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{

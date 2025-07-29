@@ -56,6 +56,7 @@ var NetworkcontainerportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttr
 		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
 		Computed:            true,
+		Default:             stringdefault.StaticString("UTC Coordinated Universal Time"),
 	},
 	"recurring_time": schema.Int64Attribute{
 		Optional:            true,

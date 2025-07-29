@@ -213,6 +213,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 			customvalidator.IsValidFQDN(),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The bootserver address for the fixed address. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
 	"cli_credentials": schema.ListNestedAttribute{
@@ -243,6 +244,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the fixed address; maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
@@ -255,6 +257,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this fixed address.",
 	},
 	"ddns_hostname": schema.StringAttribute{
@@ -266,6 +269,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The DDNS host name for this fixed address.",
 	},
 	"deny_bootp": schema.BoolAttribute{
@@ -286,6 +290,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The description of the device.",
 	},
 	"device_location": schema.StringAttribute{
@@ -297,6 +302,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The location of the device.",
 	},
 	"device_type": schema.StringAttribute{
@@ -308,6 +314,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The type of the device.",
 	},
 	"device_vendor": schema.StringAttribute{
@@ -319,6 +326,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The vendor of the device.",
 	},
 	"dhcp_client_identifier": schema.StringAttribute{
@@ -471,6 +479,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "This field contains the name of this fixed address.",
 	},
 	"network": schema.StringAttribute{
@@ -490,6 +499,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
@@ -515,6 +525,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"reserved_interface": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The ref to the reserved interface to which the device belongs.",
 	},
 	"restart_if_needed": schema.BoolAttribute{
@@ -534,6 +545,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"template": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "If set on creation, the fixed address will be created according to the values specified in the named template.",
 	},
 	"use_bootfile": schema.BoolAttribute{

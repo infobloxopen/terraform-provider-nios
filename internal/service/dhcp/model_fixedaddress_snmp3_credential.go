@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -64,6 +65,7 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Authentication password for the SNMPv3 user.",
 	},
 	"privacy_protocol": schema.StringAttribute{
@@ -82,16 +84,25 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^\S.*\S$`),
+				"should not have leading or trailing whitespace",
+			),
+		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comments for the SNMPv3 user.",
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the SNMPv3 credential.",
 	},
 }
