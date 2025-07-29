@@ -779,7 +779,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.NumberOfAddresses = flex.FlattenInt64Pointer(from.NumberOfAddresses)
 	m.Offset = flex.FlattenInt64Pointer(from.Offset)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangetemplateOptionFilterRulesAttrTypes, diags, FlattenRangetemplateOptionFilterRules)
-	m.Options = RemoveUnusedDHCPOptions(ctx, diags, from.Options, m.Options)
+	m.Options = filterDHCPOptions(ctx, diags, from.Options, m.Options)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangetemplateRelayAgentFilterRulesAttrTypes, diags, FlattenRangetemplateRelayAgentFilterRules)
@@ -807,7 +807,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
 }
 
-func RemoveUnusedDHCPOptions(ctx context.Context, diags *diag.Diagnostics, fromOptions []dhcp.RangetemplateOptions, tfOptions internaltypes.UnorderedListValue) internaltypes.UnorderedListValue {
+func filterDHCPOptions(ctx context.Context, diags *diag.Diagnostics, fromOptions []dhcp.RangetemplateOptions, tfOptions internaltypes.UnorderedListValue) internaltypes.UnorderedListValue {
 	// If there are no options from API, return null list
 	if len(fromOptions) == 0 {
 		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: RangetemplateOptionsAttrTypes})
