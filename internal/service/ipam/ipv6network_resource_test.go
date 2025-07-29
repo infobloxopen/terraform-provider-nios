@@ -692,6 +692,29 @@ func TestAccIpv6networkResource_ExtAttrs(t *testing.T) {
 	})
 }
 
+func TestAccIpv6networkResource_FuncCall(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network.test_func_call"
+	var v ipam.Ipv6network
+	parentNetwork := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read with func_call
+			{
+				Config: testAccIpv6networkFuncCall(parentNetwork, "network", "next_available_network", "networks", "ipv6network", "126", "Original Function Call"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Original Function Call"),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccIpv6networkResource_MgmPrivate(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network.test_mgm_private"
 	var v ipam.Ipv6network
@@ -1873,6 +1896,36 @@ resource "nios_ipam_ipv6network" "test_extattrs" {
     }
 }
 `, network, extAttrsStr)
+}
+
+func testAccIpv6networkFuncCall(parentNetwork, attributeName, objFunc, resultField, object, cidr, comment string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "parent" {
+    network = %q
+    network_view = "default"
+    comment = "Parent network for func_call test"
+}
+
+resource "nios_ipam_ipv6network" "test_func_call" {
+    func_call = {
+        "attribute_name" = %q
+        "object_function" = %q
+        "result_field" = %q
+        "object" = %q
+        "object_parameters" = {
+            "network" = %q
+            "network_view" = "default"
+        }
+        "parameters" = {
+            "cidr" = %q
+        }
+    }
+    comment = %q
+    depends_on = [
+        nios_ipam_ipv6network.parent
+    ]
+}
+`, parentNetwork, attributeName, objFunc, resultField, object, parentNetwork, cidr, comment)
 }
 
 func testAccIpv6networkMgmPrivate(network, mgmPrivate, useMgmPrivate string) string {
