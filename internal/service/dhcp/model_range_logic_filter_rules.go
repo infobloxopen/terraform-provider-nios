@@ -32,7 +32,7 @@ var RangeLogicFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The filter name.",
 	},
 	"type": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("MAC", "NAC", "Option"),
 		},

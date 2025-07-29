@@ -29,9 +29,9 @@ var RangeSubscribeSettingsAttrTypes = map[string]attr.Type{
 
 var RangeSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled_attributes": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
-		Computed:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.ValueStringsAre(
 				stringvalidator.OneOf(

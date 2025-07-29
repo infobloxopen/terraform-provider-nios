@@ -42,7 +42,7 @@ var RangeDiscoveryBasicPollSettingsAttrTypes = map[string]attr.Type{
 	"netbios_scanning":                             types.BoolType,
 	"complete_ping_sweep":                          types.BoolType,
 	"smart_subnet_ping_sweep":                      types.BoolType,
-	"auto_arp_refresh_before_switch_port_polling":   types.BoolType,
+	"auto_arp_refresh_before_switch_port_polling":  types.BoolType,
 	"switch_port_data_collection_polling":          types.StringType,
 	"switch_port_data_collection_polling_schedule": types.ObjectType{AttrTypes: RangediscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleAttrTypes},
 	"switch_port_data_collection_polling_interval": types.Int64Type,

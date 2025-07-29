@@ -20,7 +20,7 @@ resource "nios_dhcp_range" "range_basic_fields" {
 }
 
 //Create a Network Range with additional fields 
-resource "nios_dhcp_range" "create_range_with_basic_fields" {
+resource "nios_dhcp_range" "create_range_with_additional_fields" {
   start_addr        = "10.0.0.190"
   end_addr          = "10.0.0.200"
   comment           = "DHCP Range with additional fields"

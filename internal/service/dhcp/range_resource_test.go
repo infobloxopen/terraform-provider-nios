@@ -16,16 +16,17 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-//TODO: grid setup to run test cases
-//Cisco ISE settings 
-//failover association:  "failover_association_1",  "failover_association"
-//range filter : "range_network_filter" , "range_network_filter1"
-//mac filter : "mac_filter1" , "mac_logic_filter"
-//logic filter : "option_logic_filter"
-//nac filter : "nac_filter" , "nac_filter_rule"
-//relay agent filter : "relay_agent_filter" , "relay_agent_logic_filter"
-// MS Server - 10.120.23.22, 10.120.23.23
-//Grid Members - infoblox.172_28_83_235, infoblox.172_28_83_209
+// TODO: grid setup to run test cases
+// Cisco ISE settings
+// failover association:  "failover_association_1",  "failover_association"
+// range filter : "range_network_filter" , "range_network_filter1"
+// mac filter : "mac_filter1" , "mac_logic_filter"
+// logic filter : "option_logic_filter"
+// nac filter : "nac_filter" , "nac_filter_rule"
+// relay agent filter : "relay_agent_filter" , "relay_agent_logic_filter"
+// MS Server : 10.120.23.22, 10.120.23.23
+// Grid Members : infoblox.172_28_83_235, infoblox.172_28_83_209
+// network view = custom_view
 var readableAttributesForRange = "always_update_dns,bootfile,bootserver,cloud_info,comment,ddns_domainname,ddns_generate_hostname,deny_all_clients,deny_bootp,dhcp_utilization,dhcp_utilization_status,disable,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_member,dynamic_hosts,email_list,enable_ddns,enable_dhcp_thresholds,enable_discovery,enable_email_warnings,enable_ifmap_publishing,enable_pxe_lease_time,enable_snmp_warnings,end_addr,endpoint_sources,exclude,extattrs,failover_association,fingerprint_filter_rules,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,is_split_scope,known_clients,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,mac_filter_rules,member,ms_ad_user_data,ms_options,ms_server,nac_filter_rules,name,network,network_view,nextserver,option_filter_rules,options,port_control_blackout_setting,pxe_lease_time,recycle_leases,relay_agent_filter_rules,same_port_control_discovery_blackout,server_association_type,start_addr,static_hosts,subscribe_settings,total_hosts,unknown_clients,update_dns_on_lease_renewal,use_blackout_setting,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_deny_bootp,use_discovery_basic_polling_settings,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_enable_discovery,use_enable_ifmap_publishing,use_ignore_dhcp_option_list_request,use_ignore_id,use_known_clients,use_lease_scavenge_time,use_logic_filter_rules,use_ms_options,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_subscribe_settings,use_unknown_clients,use_update_dns_on_lease_renewal"
 
 func TestAccRangeResource_basic(t *testing.T) {
@@ -127,8 +128,6 @@ func TestAccRangeResource_AlwaysUpdateDns(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.15"
 	endAddr := "10.0.0.16"
-	alwaysUpdateDns := false
-	alwaysUpdateDnsUpdate := true
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -136,7 +135,7 @@ func TestAccRangeResource_AlwaysUpdateDns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeAlwaysUpdateDns(startAddr, endAddr, alwaysUpdateDns),
+				Config: testAccRangeAlwaysUpdateDns(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "always_update_dns", "false"),
@@ -144,7 +143,7 @@ func TestAccRangeResource_AlwaysUpdateDns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeAlwaysUpdateDns(startAddr, endAddr, alwaysUpdateDnsUpdate),
+				Config: testAccRangeAlwaysUpdateDns(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "always_update_dns", "true"),
@@ -318,8 +317,6 @@ func TestAccRangeResource_DdnsGenerateHostname(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.27"
 	endAddr := "10.0.0.28"
-	ddnsGenerateHostName := true
-	ddnsGenerateHostNameUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -327,7 +324,7 @@ func TestAccRangeResource_DdnsGenerateHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDdnsGenerateHostname(startAddr, endAddr, ddnsGenerateHostName),
+				Config: testAccRangeDdnsGenerateHostname(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "true"),
@@ -335,7 +332,7 @@ func TestAccRangeResource_DdnsGenerateHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeDdnsGenerateHostname(startAddr, endAddr, ddnsGenerateHostNameUpdate),
+				Config: testAccRangeDdnsGenerateHostname(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
@@ -351,8 +348,6 @@ func TestAccRangeResource_DenyAllClients(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.29"
 	endAddr := "10.0.0.30"
-	denyAllClients := true
-	denyAllClientsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -360,7 +355,7 @@ func TestAccRangeResource_DenyAllClients(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDenyAllClients(startAddr, endAddr, denyAllClients),
+				Config: testAccRangeDenyAllClients(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_all_clients", "true"),
@@ -368,7 +363,7 @@ func TestAccRangeResource_DenyAllClients(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeDenyAllClients(startAddr, endAddr, denyAllClientsUpdate),
+				Config: testAccRangeDenyAllClients(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_all_clients", "false"),
@@ -384,8 +379,6 @@ func TestAccRangeResource_DenyBootp(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.31"
 	endAddr := "10.0.0.32"
-	denyBootp := true
-	denyBootpUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -393,7 +386,7 @@ func TestAccRangeResource_DenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDenyBootp(startAddr, endAddr, denyBootp),
+				Config: testAccRangeDenyBootp(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "true"),
@@ -401,7 +394,7 @@ func TestAccRangeResource_DenyBootp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeDenyBootp(startAddr, endAddr, denyBootpUpdate),
+				Config: testAccRangeDenyBootp(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "false"),
@@ -417,8 +410,6 @@ func TestAccRangeResource_Disable(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.33"
 	endAddr := "10.0.0.34"
-	disable := true
-	disableUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -426,7 +417,7 @@ func TestAccRangeResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDisable(startAddr, endAddr, disable),
+				Config: testAccRangeDisable(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -434,7 +425,7 @@ func TestAccRangeResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeDisable(startAddr, endAddr, disableUpdate),
+				Config: testAccRangeDisable(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -588,8 +579,6 @@ func TestAccRangeResource_EnableDdns(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.43"
 	endAddr := "10.0.0.44"
-	enableDDNS := true
-	enableDDNSUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -597,7 +586,7 @@ func TestAccRangeResource_EnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnableDdns(startAddr, endAddr, enableDDNS),
+				Config: testAccRangeEnableDdns(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "true"),
@@ -605,7 +594,7 @@ func TestAccRangeResource_EnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnableDdns(startAddr, endAddr, enableDDNSUpdate),
+				Config: testAccRangeEnableDdns(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
@@ -621,8 +610,6 @@ func TestAccRangeResource_EnableDhcpThresholds(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.45"
 	endAddr := "10.0.0.46"
-	enableDhcpThreasholds := true
-	enableDhcpThreasholdsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -630,7 +617,7 @@ func TestAccRangeResource_EnableDhcpThresholds(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnableDhcpThresholds(startAddr, endAddr, enableDhcpThreasholds),
+				Config: testAccRangeEnableDhcpThresholds(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_dhcp_thresholds", "true"),
@@ -638,7 +625,7 @@ func TestAccRangeResource_EnableDhcpThresholds(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnableDhcpThresholds(startAddr, endAddr, enableDhcpThreasholdsUpdate),
+				Config: testAccRangeEnableDhcpThresholds(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_dhcp_thresholds", "false"),
@@ -654,8 +641,6 @@ func TestAccRangeResource_EnableEmailWarnings(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.47"
 	endAddr := "10.0.0.48"
-	enableEmailWarnings := true
-	enableEmailWarningsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -663,7 +648,7 @@ func TestAccRangeResource_EnableEmailWarnings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnableEmailWarnings(startAddr, endAddr, enableEmailWarnings),
+				Config: testAccRangeEnableEmailWarnings(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_email_warnings", "true"),
@@ -671,7 +656,7 @@ func TestAccRangeResource_EnableEmailWarnings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnableEmailWarnings(startAddr, endAddr, enableEmailWarningsUpdate),
+				Config: testAccRangeEnableEmailWarnings(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_email_warnings", "false"),
@@ -687,8 +672,6 @@ func TestAccRangeResource_EnableIfmapPublishing(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.49"
 	endAddr := "10.0.0.50"
-	enableIfmapPublishing := true
-	enableIfmapPublishingUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -696,7 +679,7 @@ func TestAccRangeResource_EnableIfmapPublishing(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnableIfmapPublishing(startAddr, endAddr, enableIfmapPublishing),
+				Config: testAccRangeEnableIfmapPublishing(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ifmap_publishing", "true"),
@@ -704,7 +687,7 @@ func TestAccRangeResource_EnableIfmapPublishing(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnableIfmapPublishing(startAddr, endAddr, enableIfmapPublishingUpdate),
+				Config: testAccRangeEnableIfmapPublishing(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ifmap_publishing", "false"),
@@ -720,8 +703,6 @@ func TestAccRangeResource_EnablePxeLeaseTime(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.51"
 	endAddr := "10.0.0.52"
-	enablePxeLeaseTime := true
-	enablePxeLeaseTimeUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -729,7 +710,7 @@ func TestAccRangeResource_EnablePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnablePxeLeaseTime(startAddr, endAddr, enablePxeLeaseTime),
+				Config: testAccRangeEnablePxeLeaseTime(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "true"),
@@ -737,7 +718,7 @@ func TestAccRangeResource_EnablePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnablePxeLeaseTime(startAddr, endAddr, enablePxeLeaseTimeUpdate),
+				Config: testAccRangeEnablePxeLeaseTime(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
@@ -753,8 +734,6 @@ func TestAccRangeResource_EnableSnmpWarnings(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.53"
 	endAddr := "10.0.0.54"
-	enableSnmpWarnings := true
-	enableSnmpWarningsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -762,7 +741,7 @@ func TestAccRangeResource_EnableSnmpWarnings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnableSnmpWarnings(startAddr, endAddr, enableSnmpWarnings),
+				Config: testAccRangeEnableSnmpWarnings(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_snmp_warnings", "true"),
@@ -770,7 +749,7 @@ func TestAccRangeResource_EnableSnmpWarnings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnableSnmpWarnings(startAddr, endAddr, enableSnmpWarningsUpdate),
+				Config: testAccRangeEnableSnmpWarnings(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_snmp_warnings", "false"),
@@ -901,8 +880,6 @@ func TestAccRangeResource_EnableDiscovery(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.63"
 	endAddr := "10.0.0.64"
-	enableDiscovery := true
-	enableDiscoveryUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -910,7 +887,7 @@ func TestAccRangeResource_EnableDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnableDiscovery(startAddr, endAddr, enableDiscovery),
+				Config: testAccRangeEnableDiscovery(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "true"),
@@ -918,7 +895,7 @@ func TestAccRangeResource_EnableDiscovery(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnableDiscovery(startAddr, endAddr, enableDiscoveryUpdate),
+				Config: testAccRangeEnableDiscovery(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "false"),
@@ -935,8 +912,6 @@ func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.65"
 	endAddr := "10.0.0.66"
-	enableImmediateDiscovery := true
-	enableImmediateDiscoveryUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -944,7 +919,7 @@ func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnableImmediateDiscovery(startAddr, endAddr, enableImmediateDiscovery),
+				Config: testAccRangeEnableImmediateDiscovery(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
@@ -952,7 +927,7 @@ func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnableImmediateDiscovery(startAddr, endAddr, enableImmediateDiscoveryUpdate),
+				Config: testAccRangeEnableImmediateDiscovery(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
@@ -1649,7 +1624,6 @@ func TestAccRangeResource_NetworkView(t *testing.T) {
 	startAddr := "10.0.0.103"
 	endAddr := "10.0.0.104"
 	networkView := "custom_view"
-	//networkViewUpdate := "custom_view"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1862,8 +1836,6 @@ func TestAccRangeResource_RecycleLeases(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.115"
 	endAddr := "10.0.0.116"
-	recycleLeases := true
-	recycleLeasesUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1871,7 +1843,7 @@ func TestAccRangeResource_RecycleLeases(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeRecycleLeases(startAddr, endAddr, recycleLeases),
+				Config: testAccRangeRecycleLeases(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
@@ -1879,7 +1851,7 @@ func TestAccRangeResource_RecycleLeases(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeRecycleLeases(startAddr, endAddr, recycleLeasesUpdate),
+				Config: testAccRangeRecycleLeases(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "false"),
@@ -1940,8 +1912,6 @@ func TestAccRangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.119"
 	endAddr := "10.0.0.120"
-	samePortControlDiscoveryBlackout := false
-	samePortControlDiscoveryBlackoutUpdate := true
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1949,7 +1919,7 @@ func TestAccRangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeSamePortControlDiscoveryBlackout(startAddr, endAddr, samePortControlDiscoveryBlackout),
+				Config: testAccRangeSamePortControlDiscoveryBlackout(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "false"),
@@ -1957,7 +1927,7 @@ func TestAccRangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeSamePortControlDiscoveryBlackout(startAddr, endAddr, samePortControlDiscoveryBlackoutUpdate),
+				Config: testAccRangeSamePortControlDiscoveryBlackout(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "true"),
@@ -1999,31 +1969,6 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "MEMBER"),
 					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.209"),
 					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_83_209"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-// split member is not updatable
-func TestAccRangeResource_SplitMember(t *testing.T) {
-	var resourceName = "nios_dhcp_range.test_split_member"
-	var v dhcp.Range
-	startAddr := "10.0.0.123"
-	endAddr := "10.0.0.124"
-	splitMemberipv4Addr := "10.120.23.23"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRangeSplitMember(startAddr, endAddr, splitMemberipv4Addr),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "split_member", "10.120.23.22"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2134,8 +2079,6 @@ func TestAccRangeResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.131"
 	endAddr := "10.0.0.132"
-	updateDnsOnLeaseRenewal := true
-	updateDnsOnLeaseRenewalUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2143,7 +2086,7 @@ func TestAccRangeResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUpdateDnsOnLeaseRenewal(startAddr, endAddr, updateDnsOnLeaseRenewal),
+				Config: testAccRangeUpdateDnsOnLeaseRenewal(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "true"),
@@ -2151,7 +2094,7 @@ func TestAccRangeResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUpdateDnsOnLeaseRenewal(startAddr, endAddr, updateDnsOnLeaseRenewalUpdate),
+				Config: testAccRangeUpdateDnsOnLeaseRenewal(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "false"),
@@ -2167,8 +2110,6 @@ func TestAccRangeResource_UseBlackoutSetting(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.133"
 	endAddr := "10.0.0.134"
-	useBlackoutSetting := true
-	useBlackoutSettingUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2176,7 +2117,7 @@ func TestAccRangeResource_UseBlackoutSetting(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseBlackoutSetting(startAddr, endAddr, useBlackoutSetting),
+				Config: testAccRangeUseBlackoutSetting(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "true"),
@@ -2184,7 +2125,7 @@ func TestAccRangeResource_UseBlackoutSetting(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseBlackoutSetting(startAddr, endAddr, useBlackoutSettingUpdate),
+				Config: testAccRangeUseBlackoutSetting(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "false"),
@@ -2200,9 +2141,7 @@ func TestAccRangeResource_UseBootfile(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.135"
 	endAddr := "10.0.0.136"
-	useBootfile := false
 	bootfile := "bootfile.com"
-	useBootfileUpdate := true
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2210,7 +2149,7 @@ func TestAccRangeResource_UseBootfile(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseBootfile(startAddr, endAddr, bootfile, useBootfile),
+				Config: testAccRangeUseBootfile(startAddr, endAddr, bootfile, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "false"),
@@ -2218,7 +2157,7 @@ func TestAccRangeResource_UseBootfile(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseBootfile(startAddr, endAddr, bootfile, useBootfileUpdate),
+				Config: testAccRangeUseBootfile(startAddr, endAddr, bootfile, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "true"),
@@ -2234,9 +2173,7 @@ func TestAccRangeResource_UseBootserver(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.137"
 	endAddr := "10.0.0.138"
-	useBootServer := false
 	bootServer := "bootfile.com"
-	useBootServerUpdate := true
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2244,7 +2181,7 @@ func TestAccRangeResource_UseBootserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseBootserver(startAddr, endAddr, bootServer, useBootServer),
+				Config: testAccRangeUseBootserver(startAddr, endAddr, bootServer, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "false"),
@@ -2252,7 +2189,7 @@ func TestAccRangeResource_UseBootserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseBootserver(startAddr, endAddr, bootServer, useBootServerUpdate),
+				Config: testAccRangeUseBootserver(startAddr, endAddr, bootServer, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "true"),
@@ -2269,8 +2206,6 @@ func TestAccRangeResource_UseDdnsDomainname(t *testing.T) {
 	startAddr := "10.0.0.139"
 	endAddr := "10.0.0.140"
 	ddnsDomainName := "yourdomain.com"
-	useddnsDomainName := true
-	useddnsDomainNameUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2278,7 +2213,7 @@ func TestAccRangeResource_UseDdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseDdnsDomainname(startAddr, endAddr, ddnsDomainName, useddnsDomainName),
+				Config: testAccRangeUseDdnsDomainname(startAddr, endAddr, ddnsDomainName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "true"),
@@ -2286,7 +2221,7 @@ func TestAccRangeResource_UseDdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseDdnsDomainname(startAddr, endAddr, ddnsDomainName, useddnsDomainNameUpdate),
+				Config: testAccRangeUseDdnsDomainname(startAddr, endAddr, ddnsDomainName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "false"),
@@ -2303,9 +2238,6 @@ func TestAccRangeResource_UseDdnsGenerateHostname(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.141"
 	endAddr := "10.0.0.142"
-	useDdnsGenerateHostname := true
-	useDdnsGenerateHostnameUpdate := false
-	ddnsGeneratedHostname := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2313,7 +2245,7 @@ func TestAccRangeResource_UseDdnsGenerateHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseDdnsGenerateHostname(startAddr, endAddr, useDdnsGenerateHostname, ddnsGeneratedHostname),
+				Config: testAccRangeUseDdnsGenerateHostname(startAddr, endAddr, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "true"),
@@ -2321,7 +2253,7 @@ func TestAccRangeResource_UseDdnsGenerateHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseDdnsGenerateHostname(startAddr, endAddr, useDdnsGenerateHostnameUpdate, ddnsGeneratedHostname),
+				Config: testAccRangeUseDdnsGenerateHostname(startAddr, endAddr, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "false"),
@@ -2337,9 +2269,6 @@ func TestAccRangeResource_UseDenyBootp(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.143"
 	endAddr := "10.0.0.144"
-	useDenyBootp := true
-	useDenyBootpUpdate := false
-	denyBootp := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2347,7 +2276,7 @@ func TestAccRangeResource_UseDenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseDenyBootp(startAddr, endAddr, useDenyBootp, denyBootp),
+				Config: testAccRangeUseDenyBootp(startAddr, endAddr, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "true"),
@@ -2355,7 +2284,7 @@ func TestAccRangeResource_UseDenyBootp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseDenyBootp(startAddr, endAddr, useDenyBootpUpdate, denyBootp),
+				Config: testAccRangeUseDenyBootp(startAddr, endAddr, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "false"),
@@ -2371,8 +2300,6 @@ func TestAccRangeResource_UseDiscoveryBasicPollingSettings(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.145"
 	endAddr := "10.0.0.146"
-	useDiscoveryBasicPollingSettings := true
-	useDiscoveryBasicPollingSettingsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2380,7 +2307,7 @@ func TestAccRangeResource_UseDiscoveryBasicPollingSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseDiscoveryBasicPollingSettings(startAddr, endAddr, useDiscoveryBasicPollingSettings),
+				Config: testAccRangeUseDiscoveryBasicPollingSettings(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "true"),
@@ -2388,7 +2315,7 @@ func TestAccRangeResource_UseDiscoveryBasicPollingSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseDiscoveryBasicPollingSettings(startAddr, endAddr, useDiscoveryBasicPollingSettingsUpdate),
+				Config: testAccRangeUseDiscoveryBasicPollingSettings(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "false"),
@@ -2404,8 +2331,6 @@ func TestAccRangeResource_UseEmailList(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.147"
 	endAddr := "10.0.0.148"
-	useEmailList := true
-	useEmailListUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2413,7 +2338,7 @@ func TestAccRangeResource_UseEmailList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseEmailList(startAddr, endAddr, useEmailList),
+				Config: testAccRangeUseEmailList(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_email_list", "true"),
@@ -2421,7 +2346,7 @@ func TestAccRangeResource_UseEmailList(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseEmailList(startAddr, endAddr, useEmailListUpdate),
+				Config: testAccRangeUseEmailList(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_email_list", "false"),
@@ -2437,9 +2362,6 @@ func TestAccRangeResource_UseEnableDdns(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.149"
 	endAddr := "10.0.0.150"
-	useEnableDdns := true
-	useEnableDdnsUpdate := false
-	enableDdns := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2447,7 +2369,7 @@ func TestAccRangeResource_UseEnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseEnableDdns(startAddr, endAddr, useEnableDdns, enableDdns),
+				Config: testAccRangeUseEnableDdns(startAddr, endAddr, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "true"),
@@ -2455,7 +2377,7 @@ func TestAccRangeResource_UseEnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseEnableDdns(startAddr, endAddr, useEnableDdnsUpdate, enableDdns),
+				Config: testAccRangeUseEnableDdns(startAddr, endAddr, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "false"),
@@ -2471,8 +2393,6 @@ func TestAccRangeResource_UseEnableDhcpThresholds(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.151"
 	endAddr := "10.0.0.152"
-	useEnabledhcpThreasholds := true
-	useEnabledhcpThreasholdsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2480,7 +2400,7 @@ func TestAccRangeResource_UseEnableDhcpThresholds(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseEnableDhcpThresholds(startAddr, endAddr, useEnabledhcpThreasholds),
+				Config: testAccRangeUseEnableDhcpThresholds(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_dhcp_thresholds", "true"),
@@ -2488,7 +2408,7 @@ func TestAccRangeResource_UseEnableDhcpThresholds(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseEnableDhcpThresholds(startAddr, endAddr, useEnabledhcpThreasholdsUpdate),
+				Config: testAccRangeUseEnableDhcpThresholds(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_dhcp_thresholds", "false"),
@@ -2504,8 +2424,6 @@ func TestAccRangeResource_UseEnableDiscovery(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.153"
 	endAddr := "10.0.0.154"
-	useEnableDiscovery := true
-	useEnableDiscoveryUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2513,7 +2431,7 @@ func TestAccRangeResource_UseEnableDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseEnableDiscovery(startAddr, endAddr, useEnableDiscovery),
+				Config: testAccRangeUseEnableDiscovery(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "true"),
@@ -2521,7 +2439,7 @@ func TestAccRangeResource_UseEnableDiscovery(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseEnableDiscovery(startAddr, endAddr, useEnableDiscoveryUpdate),
+				Config: testAccRangeUseEnableDiscovery(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "false"),
@@ -2537,8 +2455,6 @@ func TestAccRangeResource_UseEnableIfmapPublishing(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.155"
 	endAddr := "10.0.0.156"
-	useEnableIfmapPublishing := true
-	useEnableIfmapPublishingUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2546,7 +2462,7 @@ func TestAccRangeResource_UseEnableIfmapPublishing(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseEnableIfmapPublishing(startAddr, endAddr, useEnableIfmapPublishing),
+				Config: testAccRangeUseEnableIfmapPublishing(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ifmap_publishing", "true"),
@@ -2554,7 +2470,7 @@ func TestAccRangeResource_UseEnableIfmapPublishing(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseEnableIfmapPublishing(startAddr, endAddr, useEnableIfmapPublishingUpdate),
+				Config: testAccRangeUseEnableIfmapPublishing(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ifmap_publishing", "false"),
@@ -2570,8 +2486,6 @@ func TestAccRangeResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.157"
 	endAddr := "10.0.0.158"
-	useIgnoreDhcpOptionListRequest := true
-	useIgnoreDhcpOptionListRequestUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2579,7 +2493,7 @@ func TestAccRangeResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseIgnoreDhcpOptionListRequest(startAddr, endAddr, useIgnoreDhcpOptionListRequest),
+				Config: testAccRangeUseIgnoreDhcpOptionListRequest(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "true"),
@@ -2587,7 +2501,7 @@ func TestAccRangeResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseIgnoreDhcpOptionListRequest(startAddr, endAddr, useIgnoreDhcpOptionListRequestUpdate),
+				Config: testAccRangeUseIgnoreDhcpOptionListRequest(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "false"),
@@ -2603,8 +2517,6 @@ func TestAccRangeResource_UseIgnoreId(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.159"
 	endAddr := "10.0.0.160"
-	useIgnoreId := true
-	useIgnoreIdUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2612,7 +2524,7 @@ func TestAccRangeResource_UseIgnoreId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseIgnoreId(startAddr, endAddr, useIgnoreId),
+				Config: testAccRangeUseIgnoreId(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_id", "true"),
@@ -2620,7 +2532,7 @@ func TestAccRangeResource_UseIgnoreId(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseIgnoreId(startAddr, endAddr, useIgnoreIdUpdate),
+				Config: testAccRangeUseIgnoreId(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_id", "false"),
@@ -2636,8 +2548,6 @@ func TestAccRangeResource_UseKnownClients(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.161"
 	endAddr := "10.0.0.162"
-	useKnownClients := true
-	useKnownClientsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2645,7 +2555,7 @@ func TestAccRangeResource_UseKnownClients(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseKnownClients(startAddr, endAddr, useKnownClients),
+				Config: testAccRangeUseKnownClients(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_known_clients", "true"),
@@ -2653,7 +2563,7 @@ func TestAccRangeResource_UseKnownClients(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseKnownClients(startAddr, endAddr, useKnownClientsUpdate),
+				Config: testAccRangeUseKnownClients(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_known_clients", "false"),
@@ -2669,8 +2579,6 @@ func TestAccRangeResource_UseLeaseScavengeTime(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.163"
 	endAddr := "10.0.0.164"
-	useLeaseScavengeTime := true
-	useLeaseScavengeTimeUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2678,7 +2586,7 @@ func TestAccRangeResource_UseLeaseScavengeTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseLeaseScavengeTime(startAddr, endAddr, useLeaseScavengeTime),
+				Config: testAccRangeUseLeaseScavengeTime(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_lease_scavenge_time", "true"),
@@ -2686,7 +2594,7 @@ func TestAccRangeResource_UseLeaseScavengeTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseLeaseScavengeTime(startAddr, endAddr, useLeaseScavengeTimeUpdate),
+				Config: testAccRangeUseLeaseScavengeTime(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_lease_scavenge_time", "false"),
@@ -2702,8 +2610,6 @@ func TestAccRangeResource_UseLogicFilterRules(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.165"
 	endAddr := "10.0.0.166"
-	useLogicFilterRules := true
-	useLogicFilterRulesUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2711,7 +2617,7 @@ func TestAccRangeResource_UseLogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseLogicFilterRules(startAddr, endAddr, useLogicFilterRules),
+				Config: testAccRangeUseLogicFilterRules(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "true"),
@@ -2719,7 +2625,7 @@ func TestAccRangeResource_UseLogicFilterRules(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseLogicFilterRules(startAddr, endAddr, useLogicFilterRulesUpdate),
+				Config: testAccRangeUseLogicFilterRules(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "false"),
@@ -2735,8 +2641,6 @@ func TestAccRangeResource_UseMsOptions(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.167"
 	endAddr := "10.0.0.168"
-	useMsOptions := true
-	useMsOptionsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2744,7 +2648,7 @@ func TestAccRangeResource_UseMsOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseMsOptions(startAddr, endAddr, useMsOptions),
+				Config: testAccRangeUseMsOptions(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ms_options", "true"),
@@ -2752,7 +2656,7 @@ func TestAccRangeResource_UseMsOptions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseMsOptions(startAddr, endAddr, useMsOptionsUpdate),
+				Config: testAccRangeUseMsOptions(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ms_options", "false"),
@@ -2768,8 +2672,6 @@ func TestAccRangeResource_UseNextserver(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.169"
 	endAddr := "10.0.0.170"
-	useNextServer := true
-	useNextServerUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2777,7 +2679,7 @@ func TestAccRangeResource_UseNextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseNextserver(startAddr, endAddr, useNextServer),
+				Config: testAccRangeUseNextserver(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "true"),
@@ -2785,7 +2687,7 @@ func TestAccRangeResource_UseNextserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseNextserver(startAddr, endAddr, useNextServerUpdate),
+				Config: testAccRangeUseNextserver(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "false"),
@@ -2801,8 +2703,6 @@ func TestAccRangeResource_UseOptions(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.171"
 	endAddr := "10.0.0.172"
-	useOptions := true
-	useOptionsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2810,7 +2710,7 @@ func TestAccRangeResource_UseOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseOptions(startAddr, endAddr, useOptions),
+				Config: testAccRangeUseOptions(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
@@ -2818,7 +2718,7 @@ func TestAccRangeResource_UseOptions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseOptions(startAddr, endAddr, useOptionsUpdate),
+				Config: testAccRangeUseOptions(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "false"),
@@ -2834,8 +2734,6 @@ func TestAccRangeResource_UsePxeLeaseTime(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.173"
 	endAddr := "10.0.0.174"
-	usePxeLeaseTime := true
-	usePxeLeaseTimeUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2843,7 +2741,7 @@ func TestAccRangeResource_UsePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUsePxeLeaseTime(startAddr, endAddr, usePxeLeaseTime),
+				Config: testAccRangeUsePxeLeaseTime(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "true"),
@@ -2851,7 +2749,7 @@ func TestAccRangeResource_UsePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUsePxeLeaseTime(startAddr, endAddr, usePxeLeaseTimeUpdate),
+				Config: testAccRangeUsePxeLeaseTime(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "false"),
@@ -2867,8 +2765,6 @@ func TestAccRangeResource_UseRecycleLeases(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.175"
 	endAddr := "10.0.0.176"
-	useRecycleLeases := true
-	useRecycleLeasesUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2876,7 +2772,7 @@ func TestAccRangeResource_UseRecycleLeases(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseRecycleLeases(startAddr, endAddr, useRecycleLeases),
+				Config: testAccRangeUseRecycleLeases(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_recycle_leases", "true"),
@@ -2884,7 +2780,7 @@ func TestAccRangeResource_UseRecycleLeases(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseRecycleLeases(startAddr, endAddr, useRecycleLeasesUpdate),
+				Config: testAccRangeUseRecycleLeases(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_recycle_leases", "false"),
@@ -2900,8 +2796,6 @@ func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.177"
 	endAddr := "10.0.0.178"
-	useSubscribeSettings := true
-	useSubscribeSettingsUpdate := true
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2909,7 +2803,7 @@ func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseSubscribeSettings(startAddr, endAddr, useSubscribeSettings),
+				Config: testAccRangeUseSubscribeSettings(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
@@ -2917,7 +2811,7 @@ func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseSubscribeSettings(startAddr, endAddr, useSubscribeSettingsUpdate),
+				Config: testAccRangeUseSubscribeSettings(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
@@ -2933,8 +2827,6 @@ func TestAccRangeResource_UseUnknownClients(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.179"
 	endAddr := "10.0.0.180"
-	useUnkownClients := true
-	useUnkownClientsUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2942,7 +2834,7 @@ func TestAccRangeResource_UseUnknownClients(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseUnknownClients(startAddr, endAddr, useUnkownClients),
+				Config: testAccRangeUseUnknownClients(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_unknown_clients", "true"),
@@ -2950,7 +2842,7 @@ func TestAccRangeResource_UseUnknownClients(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseUnknownClients(startAddr, endAddr, useUnkownClientsUpdate),
+				Config: testAccRangeUseUnknownClients(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_unknown_clients", "false"),
@@ -2966,8 +2858,6 @@ func TestAccRangeResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.181"
 	endAddr := "10.0.0.182"
-	useUpdateDnsOnLeaseRenewal := true
-	useUpdateDnsOnLeaseRenewalUpdate := false
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2975,7 +2865,7 @@ func TestAccRangeResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeUseUpdateDnsOnLeaseRenewal(startAddr, endAddr, useUpdateDnsOnLeaseRenewal),
+				Config: testAccRangeUseUpdateDnsOnLeaseRenewal(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "true"),
@@ -2983,7 +2873,7 @@ func TestAccRangeResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseUpdateDnsOnLeaseRenewal(startAddr, endAddr, useUpdateDnsOnLeaseRenewalUpdate),
+				Config: testAccRangeUseUpdateDnsOnLeaseRenewal(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "false"),
@@ -3642,7 +3532,6 @@ resource "nios_dhcp_range" "test_relay_agent_filter_rules" {
 `, startAddr, endAddr, relayAgentFilterRulesHCL)
 }
 
-
 func testAccRangeSamePortControlDiscoveryBlackout(startAddr, endAddr string, samePortControlDiscoveryBlackout bool) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_same_port_control_discovery_blackout" {
@@ -3684,7 +3573,6 @@ resource "nios_dhcp_range" "test_split_member" {
 }
 `, startAddr, endAddr, splitMember)
 }
-
 
 func testAccRangeStartAddr(startAddr, endAddr string) string {
 	return fmt.Sprintf(`

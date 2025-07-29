@@ -28,11 +28,11 @@ var RangeNacFilterRulesAttrTypes = map[string]attr.Type{
 
 var RangeNacFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Required: 		  true,
+		Required:            true,
 		MarkdownDescription: "The name of the DHCP filter.",
 	},
 	"permission": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("Allow", "Deny"),
 		},

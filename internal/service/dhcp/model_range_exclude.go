@@ -31,16 +31,16 @@ var RangeExcludeAttrTypes = map[string]attr.Type{
 
 var RangeExcludeResourceSchemaAttributes = map[string]schema.Attribute{
 	"start_address": schema.StringAttribute{
-		Required: true,
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address starting address of the exclusion range.",
 	},
 	"end_address": schema.StringAttribute{
-		Required: true,
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address ending address of the exclusion range.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),

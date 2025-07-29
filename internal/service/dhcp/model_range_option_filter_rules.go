@@ -28,7 +28,7 @@ var RangeOptionFilterRulesAttrTypes = map[string]attr.Type{
 
 var RangeOptionFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Required: 		true,
+		Required:            true,
 		MarkdownDescription: "The name of the DHCP filter.",
 	},
 	"permission": schema.StringAttribute{

@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
@@ -1087,11 +1088,8 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangeRelayAgentFilterRulesAttrTypes, diags, FlattenRangeRelayAgentFilterRules)
-	m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.ServerAssociationType = flex.FlattenStringPointer(from.ServerAssociationType)
-	m.SplitMember = FlattenRangeSplitMember(ctx, from.SplitMember, diags)
-	m.SplitScopeExclusionPercent = flex.FlattenInt64Pointer(from.SplitScopeExclusionPercent)
 	m.StartAddr = flex.FlattenStringPointer(from.StartAddr)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.SubscribeSettings = FlattenRangeSubscribeSettings(ctx, from.SubscribeSettings, diags)
