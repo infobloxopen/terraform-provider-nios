@@ -555,12 +555,12 @@ func ExpandIPAddress(ipaddr iptypes.IPAddress) *string {
 	return ExpandStringPointer(ipaddr.StringValue)
 }
 
-func FlattenIPAddress(ip *string) iptypes.IPAddress {
-	if ip == nil || *ip == "" {
+func FlattenIPAddress(ipaddr *string) iptypes.IPAddress {
+	if ipaddr == nil || *ipaddr == "" {
 		return iptypes.NewIPAddressNull()
 	}
 	return iptypes.IPAddress{
-		StringValue: FlattenStringPointer(ip),
+		StringValue: FlattenStringPointer(ipaddr),
 	}
 }
 
@@ -571,11 +571,11 @@ func ExpandIPv4CIDR(ipaddr cidrtypes.IPv4Prefix) *string {
 	return ExpandStringPointer(ipaddr.StringValue)
 }
 
-func FlattenIPv4CIDR(ip *string) cidrtypes.IPv4Prefix {
-	if ip == nil || *ip == "" {
+func FlattenIPv4CIDR(ipaddr *string) cidrtypes.IPv4Prefix {
+	if ipaddr == nil || *ipaddr == "" {
 		return cidrtypes.NewIPv4PrefixNull()
 	}
 	return cidrtypes.IPv4Prefix{
-		StringValue: FlattenStringPointer(ip),
+		StringValue: FlattenStringPointer(ipaddr),
 	}
 }
