@@ -16,13 +16,23 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+//TODO: grid setup to run test cases
+//Cisco ISE settings 
+//failover association:  "failover_association_1",  "failover_association"
+//range filter : "range_network_filter" , "range_network_filter1"
+//mac filter : "mac_filter1" , "mac_logic_filter"
+//logic filter : "option_logic_filter"
+//nac filter : "nac_filter" , "nac_filter_rule"
+//relay agent filter : "relay_agent_filter" , "relay_agent_logic_filter"
+// MS Server - 10.120.23.22, 10.120.23.23
+//Grid Members - infoblox.172_28_83_235, infoblox.172_28_83_209
 var readableAttributesForRange = "always_update_dns,bootfile,bootserver,cloud_info,comment,ddns_domainname,ddns_generate_hostname,deny_all_clients,deny_bootp,dhcp_utilization,dhcp_utilization_status,disable,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_member,dynamic_hosts,email_list,enable_ddns,enable_dhcp_thresholds,enable_discovery,enable_email_warnings,enable_ifmap_publishing,enable_pxe_lease_time,enable_snmp_warnings,end_addr,endpoint_sources,exclude,extattrs,failover_association,fingerprint_filter_rules,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,is_split_scope,known_clients,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,mac_filter_rules,member,ms_ad_user_data,ms_options,ms_server,nac_filter_rules,name,network,network_view,nextserver,option_filter_rules,options,port_control_blackout_setting,pxe_lease_time,recycle_leases,relay_agent_filter_rules,same_port_control_discovery_blackout,server_association_type,start_addr,static_hosts,subscribe_settings,total_hosts,unknown_clients,update_dns_on_lease_renewal,use_blackout_setting,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_deny_bootp,use_discovery_basic_polling_settings,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_enable_discovery,use_enable_ifmap_publishing,use_ignore_dhcp_option_list_request,use_ignore_id,use_known_clients,use_lease_scavenge_time,use_logic_filter_rules,use_ms_options,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_subscribe_settings,use_unknown_clients,use_update_dns_on_lease_renewal"
 
 func TestAccRangeResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.11"
+	endAddr := "10.0.0.12"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -92,8 +102,8 @@ func TestAccRangeResource_basic(t *testing.T) {
 func TestAccRangeResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_range.test"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.13"
+	endAddr := "10.0.0.14"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -115,8 +125,8 @@ func TestAccRangeResource_disappears(t *testing.T) {
 func TestAccRangeResource_AlwaysUpdateDns(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_always_update_dns"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.15"
+	endAddr := "10.0.0.16"
 	alwaysUpdateDns := false
 	alwaysUpdateDnsUpdate := true
 
@@ -148,8 +158,8 @@ func TestAccRangeResource_AlwaysUpdateDns(t *testing.T) {
 func TestAccRangeResource_Bootfile(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_bootfile"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.17"
+	endAddr := "10.0.0.18"
 	bootFile := "boot.ini"
 	boolFileUpdate := "bootfile_update.ini"
 
@@ -181,7 +191,7 @@ func TestAccRangeResource_Bootfile(t *testing.T) {
 func TestAccRangeResource_Bootserver(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_bootserver"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
+	startAddr := "10.0.0.19"
 	endAddr := "10.0.0.20"
 	bootServer := "bootServer"
 	bootServerUpdate := "bootServerUpdate"
@@ -214,8 +224,8 @@ func TestAccRangeResource_Bootserver(t *testing.T) {
 func TestAccRangeResource_CloudInfo(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_cloud_info"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.21"
+	endAddr := "10.0.0.22"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -240,8 +250,8 @@ func TestAccRangeResource_CloudInfo(t *testing.T) {
 func TestAccRangeResource_Comment(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_comment"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.23"
+	endAddr := "10.0.0.24"
 	comment := "network range"
 	commentUpdate := "network range updated"
 
@@ -273,8 +283,8 @@ func TestAccRangeResource_Comment(t *testing.T) {
 func TestAccRangeResource_DdnsDomainname(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ddns_domainname"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.25"
+	endAddr := "10.0.0.26"
 	ddnsDomainName := "yourdomain.com"
 	ddnsDomainNameUpdate := "yourdomainupdate.com"
 
@@ -306,8 +316,8 @@ func TestAccRangeResource_DdnsDomainname(t *testing.T) {
 func TestAccRangeResource_DdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ddns_generate_hostname"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.27"
+	endAddr := "10.0.0.28"
 	ddnsGenerateHostName := true
 	ddnsGenerateHostNameUpdate := false
 
@@ -339,8 +349,8 @@ func TestAccRangeResource_DdnsGenerateHostname(t *testing.T) {
 func TestAccRangeResource_DenyAllClients(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_deny_all_clients"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.29"
+	endAddr := "10.0.0.30"
 	denyAllClients := true
 	denyAllClientsUpdate := false
 
@@ -372,8 +382,8 @@ func TestAccRangeResource_DenyAllClients(t *testing.T) {
 func TestAccRangeResource_DenyBootp(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_deny_bootp"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.31"
+	endAddr := "10.0.0.32"
 	denyBootp := true
 	denyBootpUpdate := false
 
@@ -405,8 +415,8 @@ func TestAccRangeResource_DenyBootp(t *testing.T) {
 func TestAccRangeResource_Disable(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_disable"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.33"
+	endAddr := "10.0.0.34"
 	disable := true
 	disableUpdate := false
 
@@ -438,8 +448,8 @@ func TestAccRangeResource_Disable(t *testing.T) {
 func TestAccRangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_discovery_basic_poll_settings"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.35"
+	endAddr := "10.0.0.36"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -485,8 +495,8 @@ func TestAccRangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_discovery_blackout_setting"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.37"
+	endAddr := "10.0.0.38"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -509,8 +519,8 @@ func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 func TestAccRangeResource_DiscoveryMember(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_discovery_member"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.39"
+	endAddr := "10.0.0.40"
 	discoveryMember := "infoblox.172_28_83_235"
 	discoveryMemberUpdate := "infoblox.172_28_83_209"
 
@@ -542,8 +552,8 @@ func TestAccRangeResource_DiscoveryMember(t *testing.T) {
 func TestAccRangeResource_EmailList(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_email_list"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.41"
+	endAddr := "10.0.0.42"
 	emailList := []string{"example@infoblox.com"}
 	emailListUpdate := []string{"example2@example.com"}
 
@@ -576,8 +586,8 @@ func TestAccRangeResource_EmailList(t *testing.T) {
 func TestAccRangeResource_EnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_ddns"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.43"
+	endAddr := "10.0.0.44"
 	enableDDNS := true
 	enableDDNSUpdate := false
 
@@ -609,8 +619,8 @@ func TestAccRangeResource_EnableDdns(t *testing.T) {
 func TestAccRangeResource_EnableDhcpThresholds(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_dhcp_thresholds"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.45"
+	endAddr := "10.0.0.46"
 	enableDhcpThreasholds := true
 	enableDhcpThreasholdsUpdate := false
 
@@ -642,8 +652,8 @@ func TestAccRangeResource_EnableDhcpThresholds(t *testing.T) {
 func TestAccRangeResource_EnableEmailWarnings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_email_warnings"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.47"
+	endAddr := "10.0.0.48"
 	enableEmailWarnings := true
 	enableEmailWarningsUpdate := false
 
@@ -675,8 +685,8 @@ func TestAccRangeResource_EnableEmailWarnings(t *testing.T) {
 func TestAccRangeResource_EnableIfmapPublishing(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_ifmap_publishing"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.49"
+	endAddr := "10.0.0.50"
 	enableIfmapPublishing := true
 	enableIfmapPublishingUpdate := false
 
@@ -708,8 +718,8 @@ func TestAccRangeResource_EnableIfmapPublishing(t *testing.T) {
 func TestAccRangeResource_EnablePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_pxe_lease_time"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.51"
+	endAddr := "10.0.0.52"
 	enablePxeLeaseTime := true
 	enablePxeLeaseTimeUpdate := false
 
@@ -741,8 +751,8 @@ func TestAccRangeResource_EnablePxeLeaseTime(t *testing.T) {
 func TestAccRangeResource_EnableSnmpWarnings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_snmp_warnings"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.53"
+	endAddr := "10.0.0.54"
 	enableSnmpWarnings := true
 	enableSnmpWarningsUpdate := false
 
@@ -774,9 +784,9 @@ func TestAccRangeResource_EnableSnmpWarnings(t *testing.T) {
 func TestAccRangeResource_EndAddr(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_end_addr"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
-	updateEndAddr := "10.0.0.30"
+	startAddr := "10.0.0.55"
+	endAddr := "10.0.0.56"
+	updateEndAddr := "10.0.0.58"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -806,18 +816,18 @@ func TestAccRangeResource_EndAddr(t *testing.T) {
 func TestAccRangeResource_Exclude(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_exclude"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.200"
+	endAddr := "10.0.0.210"
 	exclude := []map[string]any{
 		{
-			"start_address": "10.0.0.13",
-			"end_address":   "10.0.0.15",
+			"start_address": "10.0.0.202",
+			"end_address":   "10.0.0.204",
 		},
 	}
 	excludeUpdate := []map[string]any{
 		{
-			"start_address": "10.0.0.16",
-			"end_address":   "10.0.0.18",
+			"start_address": "10.0.0.206",
+			"end_address":   "10.0.0.209",
 		},
 	}
 
@@ -830,8 +840,8 @@ func TestAccRangeResource_Exclude(t *testing.T) {
 				Config: testAccRangeExclude(startAddr, endAddr, exclude),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "exclude.0.start_address", "10.0.0.13"),
-					resource.TestCheckResourceAttr(resourceName, "exclude.0.end_address", "10.0.0.15"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.start_address", "10.0.0.202"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.end_address", "10.0.0.204"),
 				),
 			},
 			// Update and Read
@@ -839,8 +849,8 @@ func TestAccRangeResource_Exclude(t *testing.T) {
 				Config: testAccRangeExclude(startAddr, endAddr, excludeUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "exclude.0.start_address", "10.0.0.16"),
-					resource.TestCheckResourceAttr(resourceName, "exclude.0.end_address", "10.0.0.18"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.start_address", "10.0.0.206"),
+					resource.TestCheckResourceAttr(resourceName, "exclude.0.end_address", "10.0.0.209"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -851,8 +861,8 @@ func TestAccRangeResource_Exclude(t *testing.T) {
 func TestAccRangeResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_extattrs"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.61"
+	endAddr := "10.0.0.62"
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -889,8 +899,8 @@ func TestAccRangeResource_ExtAttrs(t *testing.T) {
 func TestAccRangeResource_EnableDiscovery(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_discovery"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.63"
+	endAddr := "10.0.0.64"
 	enableDiscovery := true
 	enableDiscoveryUpdate := false
 
@@ -923,8 +933,8 @@ func TestAccRangeResource_EnableDiscovery(t *testing.T) {
 func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_enable_immediate_discovery"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.65"
+	endAddr := "10.0.0.66"
 	enableImmediateDiscovery := true
 	enableImmediateDiscoveryUpdate := false
 
@@ -956,8 +966,8 @@ func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
 func TestAccRangeResource_FailoverAssociation(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_failover_association"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.67"
+	endAddr := "10.0.0.68"
 	failoverAssociation := "failover_association"
 	failoverAssociationUpdate := "failover_association_1"
 
@@ -989,8 +999,8 @@ func TestAccRangeResource_FailoverAssociation(t *testing.T) {
 func TestAccRangeResource_FingerprintFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_fingerprint_filter_rules"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.69"
+	endAddr := "10.0.0.70"
 	fingerprintFilterRules := []map[string]any{
 		{
 			"filter":     "range_network_filter",
@@ -1034,8 +1044,8 @@ func TestAccRangeResource_FingerprintFilterRules(t *testing.T) {
 func TestAccRangeResource_HighWaterMark(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_high_water_mark"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.71"
+	endAddr := "10.0.0.72"
 	highWaterMark := 23
 	highWaterMarkUpdate := 42
 
@@ -1067,8 +1077,8 @@ func TestAccRangeResource_HighWaterMark(t *testing.T) {
 func TestAccRangeResource_HighWaterMarkReset(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_high_water_mark_reset"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.73"
+	endAddr := "10.0.0.74"
 	highWaterMarkReset := 23
 	highWaterMarkResetUpdate := 42
 
@@ -1100,8 +1110,8 @@ func TestAccRangeResource_HighWaterMarkReset(t *testing.T) {
 func TestAccRangeResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ignore_dhcp_option_list_request"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.75"
+	endAddr := "10.0.0.76"
 	ignoreDhcpOptionListRequest := true
 	ignoreDhcpOptionListRequestUpdate := false
 
@@ -1133,8 +1143,8 @@ func TestAccRangeResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 func TestAccRangeResource_IgnoreId(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ignore_id"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.77"
+	endAddr := "10.0.0.78"
 	ignoreId := "CLIENT"
 	ignoreIdUpdate := "MACADDR"
 
@@ -1166,8 +1176,8 @@ func TestAccRangeResource_IgnoreId(t *testing.T) {
 func TestAccRangeResource_IgnoreMacAddresses(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ignore_mac_addresses"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.79"
+	endAddr := "10.0.0.80"
 	ignoreMacAddresses := []string{"00:1a:2b:3c:4d:5e"}
 	ignoreMacAddressesUpdate := []string{"00:1a:2b:33:4d:52"}
 
@@ -1199,8 +1209,8 @@ func TestAccRangeResource_IgnoreMacAddresses(t *testing.T) {
 func TestAccRangeResource_KnownClients(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_known_clients"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.81"
+	endAddr := "10.0.0.82"
 	knownClients := "Deny"
 	knownClientsUpdate := "Allow"
 
@@ -1232,8 +1242,8 @@ func TestAccRangeResource_KnownClients(t *testing.T) {
 func TestAccRangeResource_LeaseScavengeTime(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_lease_scavenge_time"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.83"
+	endAddr := "10.0.0.84"
 	leaseScavengeTime := 86420
 	leaseScavengeTimeUpdate := 86430
 	resource.ParallelTest(t, resource.TestCase{
@@ -1264,8 +1274,8 @@ func TestAccRangeResource_LeaseScavengeTime(t *testing.T) {
 func TestAccRangeResource_LogicFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_logic_filter_rules"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.85"
+	endAddr := "10.0.0.86"
 	logicFilterRules := []map[string]any{
 		{
 			"filter": "mac_filter",
@@ -1309,8 +1319,8 @@ func TestAccRangeResource_LogicFilterRules(t *testing.T) {
 func TestAccRangeResource_LowWaterMark(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_low_water_mark"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.87"
+	endAddr := "10.0.0.88"
 	lowWaterMark := 5
 	lowWaterMarkUpdate := 1
 
@@ -1342,8 +1352,8 @@ func TestAccRangeResource_LowWaterMark(t *testing.T) {
 func TestAccRangeResource_LowWaterMarkReset(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_low_water_mark_reset"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.89"
+	endAddr := "10.0.0.90"
 	lowWaterMarkReset := 5
 	lowWaterMarkResetUpdate := 1
 
@@ -1375,8 +1385,8 @@ func TestAccRangeResource_LowWaterMarkReset(t *testing.T) {
 func TestAccRangeResource_MacFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_mac_filter_rules"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.91"
+	endAddr := "10.0.0.92"
 	macFilterRules := []map[string]any{
 		{
 			"filter":     "mac_filter",
@@ -1420,8 +1430,8 @@ func TestAccRangeResource_MacFilterRules(t *testing.T) {
 func TestAccRangeResource_Member(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_member"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.93"
+	endAddr := "10.0.0.94"
 	member := map[string]any{
 		"ipv4addr": "172.28.83.235",
 		"name":     "infoblox.172_28_83_235",
@@ -1490,8 +1500,8 @@ func TestAccRangeResource_MsOptions(t *testing.T) {
 func TestAccRangeResource_MsServer(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ms_server"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.95"
+	endAddr := "10.0.0.96"
 	msServerIp := "10.120.23.22"
 	msServerIpUpdate := "10.120.23.23"
 
@@ -1523,8 +1533,8 @@ func TestAccRangeResource_MsServer(t *testing.T) {
 func TestAccRangeResource_NacFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_nac_filter_rules"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.97"
+	endAddr := "10.0.0.98"
 	nacFilterRules := []map[string]any{
 		{
 			"filter":     "nac_filter",
@@ -1568,8 +1578,8 @@ func TestAccRangeResource_NacFilterRules(t *testing.T) {
 func TestAccRangeResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_name"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.99"
+	endAddr := "10.0.0.100"
 	name := "range 1"
 	nameUpdate := "range 2"
 
@@ -1601,8 +1611,8 @@ func TestAccRangeResource_Name(t *testing.T) {
 func TestAccRangeResource_Network(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_network"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.101"
+	endAddr := "10.0.0.102"
 	network := "10.0.0.0/24"
 	networkUpdate := "20.0.0.0/24"
 	startAddrUpdate := "20.0.0.20"
@@ -1636,8 +1646,8 @@ func TestAccRangeResource_Network(t *testing.T) {
 func TestAccRangeResource_NetworkView(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_network_view"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.103"
+	endAddr := "10.0.0.104"
 	networkView := "custom_view"
 	//networkViewUpdate := "custom_view"
 
@@ -1662,8 +1672,8 @@ func TestAccRangeResource_NetworkView(t *testing.T) {
 func TestAccRangeResource_Nextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_nextserver"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.105"
+	endAddr := "10.0.0.106"
 	nextServer := "next_server.com"
 	nextServerUpdate := "next_server_update.com"
 
@@ -1695,8 +1705,8 @@ func TestAccRangeResource_Nextserver(t *testing.T) {
 func TestAccRangeResource_OptionFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_option_filter_rules"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.107"
+	endAddr := "10.0.0.108"
 	optionFilterRules := []map[string]any{
 		{
 			"filter":     "option_filter",
@@ -1740,8 +1750,8 @@ func TestAccRangeResource_OptionFilterRules(t *testing.T) {
 func TestAccRangeResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_options"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.109"
+	endAddr := "10.0.0.110"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1778,8 +1788,8 @@ func TestAccRangeResource_Options(t *testing.T) {
 func TestAccRangeResource_PortControlBlackoutSetting(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_port_control_blackout_setting"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.111"
+	endAddr := "10.0.0.112"
 
 	portControlBlackoutSetting := map[string]any{
 		"enable_blackout": false,
@@ -1817,8 +1827,8 @@ func TestAccRangeResource_PortControlBlackoutSetting(t *testing.T) {
 func TestAccRangeResource_PxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_pxe_lease_time"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.113"
+	endAddr := "10.0.0.114"
 	pxeLeaseTime := "3400"
 	pxeLeaseTimeUpdate := "3600"
 
@@ -1850,8 +1860,8 @@ func TestAccRangeResource_PxeLeaseTime(t *testing.T) {
 func TestAccRangeResource_RecycleLeases(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_recycle_leases"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.115"
+	endAddr := "10.0.0.116"
 	recycleLeases := true
 	recycleLeasesUpdate := false
 
@@ -1883,8 +1893,8 @@ func TestAccRangeResource_RecycleLeases(t *testing.T) {
 func TestAccRangeResource_RelayAgentFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_relay_agent_filter_rules"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.117"
+	endAddr := "10.0.0.118"
 	relayAgentFilterRules := []map[string]any{
 		{
 			"filter":     "relay_agent_filter",
@@ -1928,8 +1938,8 @@ func TestAccRangeResource_RelayAgentFilterRules(t *testing.T) {
 func TestAccRangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_same_port_control_discovery_blackout"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.119"
+	endAddr := "10.0.0.120"
 	samePortControlDiscoveryBlackout := false
 	samePortControlDiscoveryBlackoutUpdate := true
 
@@ -1961,8 +1971,8 @@ func TestAccRangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_server_association_type"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.121"
+	endAddr := "10.0.0.122"
 	serverAssociationType := "FAILOVER"
 	failoverAssociation := "failover_association"
 	serverAssociationTypeUpdate := "MEMBER"
@@ -2000,8 +2010,8 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 func TestAccRangeResource_SplitMember(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_split_member"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.123"
+	endAddr := "10.0.0.124"
 	splitMemberipv4Addr := "10.120.23.23"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -2024,9 +2034,9 @@ func TestAccRangeResource_SplitMember(t *testing.T) {
 func TestAccRangeResource_StartAddr(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_start_addr"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
-	startAddrUpdate := "10.0.0.14"
+	startAddr := "10.0.0.213"
+	endAddr := "10.0.0.215"
+	startAddrUpdate := "10.0.0.212"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2037,7 +2047,7 @@ func TestAccRangeResource_StartAddr(t *testing.T) {
 				Config: testAccRangeStartAddr(startAddr, endAddr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_addr", "10.0.0.10"),
+					resource.TestCheckResourceAttr(resourceName, "start_addr", "10.0.0.213"),
 				),
 			},
 			// Update and Read
@@ -2045,7 +2055,7 @@ func TestAccRangeResource_StartAddr(t *testing.T) {
 				Config: testAccRangeStartAddr(startAddrUpdate, endAddr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_addr", "10.0.0.14"),
+					resource.TestCheckResourceAttr(resourceName, "start_addr", "10.0.0.212"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2056,8 +2066,8 @@ func TestAccRangeResource_StartAddr(t *testing.T) {
 func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_subscribe_settings"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.127"
+	endAddr := "10.0.0.128"
 	enabledAttribute := "DOMAINNAME"
 	enabledAttributeUpdate := "ENDPOINT_PROFILE"
 
@@ -2089,8 +2099,8 @@ func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 func TestAccRangeResource_UnknownClients(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_unknown_clients"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.129"
+	endAddr := "10.0.0.130"
 	unknownClients := "Allow"
 	unknownClientsUpdate := "Deny"
 
@@ -2122,8 +2132,8 @@ func TestAccRangeResource_UnknownClients(t *testing.T) {
 func TestAccRangeResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_update_dns_on_lease_renewal"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.131"
+	endAddr := "10.0.0.132"
 	updateDnsOnLeaseRenewal := true
 	updateDnsOnLeaseRenewalUpdate := false
 
@@ -2155,8 +2165,8 @@ func TestAccRangeResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 func TestAccRangeResource_UseBlackoutSetting(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_blackout_setting"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.133"
+	endAddr := "10.0.0.134"
 	useBlackoutSetting := true
 	useBlackoutSettingUpdate := false
 
@@ -2188,8 +2198,8 @@ func TestAccRangeResource_UseBlackoutSetting(t *testing.T) {
 func TestAccRangeResource_UseBootfile(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_bootfile"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.135"
+	endAddr := "10.0.0.136"
 	useBootfile := false
 	bootfile := "bootfile.com"
 	useBootfileUpdate := true
@@ -2222,8 +2232,8 @@ func TestAccRangeResource_UseBootfile(t *testing.T) {
 func TestAccRangeResource_UseBootserver(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_bootserver"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.137"
+	endAddr := "10.0.0.138"
 	useBootServer := false
 	bootServer := "bootfile.com"
 	useBootServerUpdate := true
@@ -2256,8 +2266,8 @@ func TestAccRangeResource_UseBootserver(t *testing.T) {
 func TestAccRangeResource_UseDdnsDomainname(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_ddns_domainname"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.139"
+	endAddr := "10.0.0.140"
 	ddnsDomainName := "yourdomain.com"
 	useddnsDomainName := true
 	useddnsDomainNameUpdate := false
@@ -2291,8 +2301,8 @@ func TestAccRangeResource_UseDdnsDomainname(t *testing.T) {
 func TestAccRangeResource_UseDdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_ddns_generate_hostname"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.141"
+	endAddr := "10.0.0.142"
 	useDdnsGenerateHostname := true
 	useDdnsGenerateHostnameUpdate := false
 	ddnsGeneratedHostname := false
@@ -2325,8 +2335,8 @@ func TestAccRangeResource_UseDdnsGenerateHostname(t *testing.T) {
 func TestAccRangeResource_UseDenyBootp(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_deny_bootp"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.143"
+	endAddr := "10.0.0.144"
 	useDenyBootp := true
 	useDenyBootpUpdate := false
 	denyBootp := false
@@ -2359,8 +2369,8 @@ func TestAccRangeResource_UseDenyBootp(t *testing.T) {
 func TestAccRangeResource_UseDiscoveryBasicPollingSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_discovery_basic_polling_settings"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.145"
+	endAddr := "10.0.0.146"
 	useDiscoveryBasicPollingSettings := true
 	useDiscoveryBasicPollingSettingsUpdate := false
 
@@ -2392,8 +2402,8 @@ func TestAccRangeResource_UseDiscoveryBasicPollingSettings(t *testing.T) {
 func TestAccRangeResource_UseEmailList(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_email_list"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.147"
+	endAddr := "10.0.0.148"
 	useEmailList := true
 	useEmailListUpdate := false
 
@@ -2425,8 +2435,8 @@ func TestAccRangeResource_UseEmailList(t *testing.T) {
 func TestAccRangeResource_UseEnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_enable_ddns"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.149"
+	endAddr := "10.0.0.150"
 	useEnableDdns := true
 	useEnableDdnsUpdate := false
 	enableDdns := false
@@ -2459,8 +2469,8 @@ func TestAccRangeResource_UseEnableDdns(t *testing.T) {
 func TestAccRangeResource_UseEnableDhcpThresholds(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_enable_dhcp_thresholds"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.151"
+	endAddr := "10.0.0.152"
 	useEnabledhcpThreasholds := true
 	useEnabledhcpThreasholdsUpdate := false
 
@@ -2492,8 +2502,8 @@ func TestAccRangeResource_UseEnableDhcpThresholds(t *testing.T) {
 func TestAccRangeResource_UseEnableDiscovery(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_enable_discovery"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.153"
+	endAddr := "10.0.0.154"
 	useEnableDiscovery := true
 	useEnableDiscoveryUpdate := false
 
@@ -2525,8 +2535,8 @@ func TestAccRangeResource_UseEnableDiscovery(t *testing.T) {
 func TestAccRangeResource_UseEnableIfmapPublishing(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_enable_ifmap_publishing"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.155"
+	endAddr := "10.0.0.156"
 	useEnableIfmapPublishing := true
 	useEnableIfmapPublishingUpdate := false
 
@@ -2558,8 +2568,8 @@ func TestAccRangeResource_UseEnableIfmapPublishing(t *testing.T) {
 func TestAccRangeResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_ignore_dhcp_option_list_request"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.157"
+	endAddr := "10.0.0.158"
 	useIgnoreDhcpOptionListRequest := true
 	useIgnoreDhcpOptionListRequestUpdate := false
 
@@ -2591,8 +2601,8 @@ func TestAccRangeResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 func TestAccRangeResource_UseIgnoreId(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_ignore_id"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.159"
+	endAddr := "10.0.0.160"
 	useIgnoreId := true
 	useIgnoreIdUpdate := false
 
@@ -2624,8 +2634,8 @@ func TestAccRangeResource_UseIgnoreId(t *testing.T) {
 func TestAccRangeResource_UseKnownClients(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_known_clients"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.161"
+	endAddr := "10.0.0.162"
 	useKnownClients := true
 	useKnownClientsUpdate := false
 
@@ -2657,8 +2667,8 @@ func TestAccRangeResource_UseKnownClients(t *testing.T) {
 func TestAccRangeResource_UseLeaseScavengeTime(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_lease_scavenge_time"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.163"
+	endAddr := "10.0.0.164"
 	useLeaseScavengeTime := true
 	useLeaseScavengeTimeUpdate := false
 
@@ -2690,8 +2700,8 @@ func TestAccRangeResource_UseLeaseScavengeTime(t *testing.T) {
 func TestAccRangeResource_UseLogicFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_logic_filter_rules"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.165"
+	endAddr := "10.0.0.166"
 	useLogicFilterRules := true
 	useLogicFilterRulesUpdate := false
 
@@ -2723,8 +2733,8 @@ func TestAccRangeResource_UseLogicFilterRules(t *testing.T) {
 func TestAccRangeResource_UseMsOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_ms_options"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.167"
+	endAddr := "10.0.0.168"
 	useMsOptions := true
 	useMsOptionsUpdate := false
 
@@ -2756,8 +2766,8 @@ func TestAccRangeResource_UseMsOptions(t *testing.T) {
 func TestAccRangeResource_UseNextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_nextserver"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.169"
+	endAddr := "10.0.0.170"
 	useNextServer := true
 	useNextServerUpdate := false
 
@@ -2789,8 +2799,8 @@ func TestAccRangeResource_UseNextserver(t *testing.T) {
 func TestAccRangeResource_UseOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_options"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.171"
+	endAddr := "10.0.0.172"
 	useOptions := true
 	useOptionsUpdate := false
 
@@ -2822,8 +2832,8 @@ func TestAccRangeResource_UseOptions(t *testing.T) {
 func TestAccRangeResource_UsePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_pxe_lease_time"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.173"
+	endAddr := "10.0.0.174"
 	usePxeLeaseTime := true
 	usePxeLeaseTimeUpdate := false
 
@@ -2855,8 +2865,8 @@ func TestAccRangeResource_UsePxeLeaseTime(t *testing.T) {
 func TestAccRangeResource_UseRecycleLeases(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_recycle_leases"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.175"
+	endAddr := "10.0.0.176"
 	useRecycleLeases := true
 	useRecycleLeasesUpdate := false
 
@@ -2888,10 +2898,10 @@ func TestAccRangeResource_UseRecycleLeases(t *testing.T) {
 func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_subscribe_settings"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.177"
+	endAddr := "10.0.0.178"
 	useSubscribeSettings := true
-	useSubscribeSettingsUpdate := false
+	useSubscribeSettingsUpdate := true
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2910,7 +2920,7 @@ func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 				Config: testAccRangeUseSubscribeSettings(startAddr, endAddr, useSubscribeSettingsUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2921,8 +2931,8 @@ func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 func TestAccRangeResource_UseUnknownClients(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_unknown_clients"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.179"
+	endAddr := "10.0.0.180"
 	useUnkownClients := true
 	useUnkownClientsUpdate := false
 
@@ -2954,8 +2964,8 @@ func TestAccRangeResource_UseUnknownClients(t *testing.T) {
 func TestAccRangeResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_update_dns_on_lease_renewal"
 	var v dhcp.Range
-	startAddr := "10.0.0.10"
-	endAddr := "10.0.0.20"
+	startAddr := "10.0.0.181"
+	endAddr := "10.0.0.182"
 	useUpdateDnsOnLeaseRenewal := true
 	useUpdateDnsOnLeaseRenewalUpdate := false
 
@@ -3594,6 +3604,7 @@ resource "nios_dhcp_range" "test_port_control_blackout_setting" {
 	start_addr = %q
 	end_addr = %q
     port_control_blackout_setting = %s
+	use_blackout_setting = true
 }
 `, startAddr, endAddr, portControlBlackoutSettingStr)
 }
@@ -3703,6 +3714,7 @@ resource "nios_dhcp_range" "test_unknown_clients" {
 	start_addr = %q
 	end_addr = %q
     unknown_clients = %q
+	use_unknown_clients = true
 }
 `, startAddr, endAddr, unknownClients)
 }
@@ -3713,6 +3725,7 @@ resource "nios_dhcp_range" "test_update_dns_on_lease_renewal" {
     start_addr = %q
     end_addr = %q
     update_dns_on_lease_renewal = %t
+	use_update_dns_on_lease_renewal = true
 }
 `, startAddr, endAddr, updateDnsOnLeaseRenewal)
 }
@@ -3949,6 +3962,9 @@ resource "nios_dhcp_range" "test_use_subscribe_settings" {
 	start_addr = %q
 	end_addr = %q
     use_subscribe_settings = %t
+	subscribe_settings = {
+	enabled_attributes = ["DOMAINNAME"]
+}
 }
 `, startAddr, endAddr, useSubscribeSettings)
 }
