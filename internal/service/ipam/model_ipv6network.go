@@ -489,7 +489,10 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The IPv6 network address in CIDR notation. The network address must be unique within the network view.",
 		Validators: []validator.String{
-			stringvalidator.LengthAtLeast(1),
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("network"),
+				path.MatchRoot("func_call"),
+			),
 		},
 	},
 	"func_call": schema.SingleNestedAttribute{
