@@ -8,7 +8,7 @@ data "nios_ipam_ipv6network_container" "get_network_containers_using_filters" {
 // Retrieve specific IPAM IPv6 network containers using Extensible Attributes
 data "nios_ipam_ipv6network_container" "get_network_containers_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 

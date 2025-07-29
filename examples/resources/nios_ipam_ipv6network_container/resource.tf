@@ -6,7 +6,7 @@ resource "nios_ipam_ipv6network_container" "example_container" {
 
   // Optional: Configure extensible attributes
   extattrs = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
@@ -32,7 +32,7 @@ resource "nios_ipam_ipv6network_container" "complete_example" {
 
   // Extensible attributes
   extattrs = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 

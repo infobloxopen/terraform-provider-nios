@@ -15,6 +15,18 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO: DiscoveryMember requires discovering to be enabled.
+// TODO: EnableDiscovery requires a valid discovery member.
+// TODO: EnableImmediateDiscovery requires a valid discovery member.
+// TODO: Federated realms serve need to enabled.
+// TODO: LogicFilterRules Logic filter rule required.
+// TODO: RirOrganization rir organization configuration required.
+// TODO: RirOrganizationAction rir organization configuration required.
+// TODO: ZoneAssociations need dns zone to test associations.
+// TODO: MappedEAAttributes need ISE server to test mapped_ea_attributes.
+// TODO: Members need a valid member to test members and GO client does not support it yet.
+// TODO: SubscribeSettings need a valid subscribe settings to test subscribe settings.
+// TODO: send rir request need rir organization configuration required
 var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,domain_name_servers,enable_ddns,enable_discovery,endpoint_sources,extattrs,last_rir_registration_update_sent,last_rir_registration_update_status,logic_filter_rules,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,options,port_control_blackout_setting,preferred_lifetime,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_blackout_setting,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_discovery_basic_polling_settings,use_domain_name_servers,use_enable_ddns,use_enable_discovery,use_logic_filter_rules,use_mgm_private,use_options,use_preferred_lifetime,use_subscribe_settings,use_update_dns_on_lease_renewal,use_valid_lifetime,use_zone_associations,utilization,valid_lifetime,zone_associations"
 
 func TestAccIpv6networkcontainerResource_basic(t *testing.T) {
@@ -499,6 +511,29 @@ func TestAccIpv6networkcontainerResource_ExtAttrs(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_FuncCall(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_func_call"
+	var v ipam.Ipv6networkcontainer
+	parentNetwork := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read with func_call
+			{
+				Config: testAccIpv6networkcontainerIpv6FuncCall(parentNetwork, "network", "next_available_network", "networks", "ipv6networkcontainer", "126", "Original Function Call"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Original Function Call"),
+				),
+				ExpectNonEmptyPlan: true,
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -1550,6 +1585,36 @@ resource "nios_ipam_ipv6network_container" "test_extattrs" {
     extattrs = %s
 }
 `, network, extattrsStr)
+}
+
+func testAccIpv6networkcontainerIpv6FuncCall(parentNetwork, attributeName, objFunc, resultField, object, cidr, comment string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "parent" {
+    network = %q
+    network_view = "default"
+    comment = "Parent network container for func_call test"
+}
+
+resource "nios_ipam_ipv6network_container" "test_func_call" {
+    func_call = {
+        "attribute_name" = %q
+        "object_function" = %q
+        "result_field" = %q
+        "object" = %q
+        "object_parameters" = {
+            "network" = %q
+            "network_view" = "default"
+        }
+        "parameters" = {
+            "cidr" = %q
+        }
+    }
+    comment = %q
+    depends_on = [
+        nios_ipam_ipv6network_container.parent
+    ]
+}
+`, parentNetwork, attributeName, objFunc, resultField, object, parentNetwork, cidr, comment)
 }
 
 func testAccIpv6networkcontainerMgmPrivate(network, mgmPrivate, useMgmPrivate string) string {
