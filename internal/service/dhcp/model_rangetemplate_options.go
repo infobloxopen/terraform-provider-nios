@@ -2,6 +2,7 @@ package dhcp
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -31,8 +32,7 @@ var RangetemplateOptionsAttrTypes = map[string]attr.Type{
 
 var RangetemplateOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "Name of the DHCP option.",
 	},
 	"num": schema.Int64Attribute{

@@ -362,3 +362,63 @@ func (r *RangetemplateResource) ImportState(ctx context.Context, req resource.Im
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
+
+func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+    var data RangetemplateModel
+    resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    // Check if options are defined
+    if !data.Options.IsNull() && !data.Options.IsUnknown() {
+        // Special DHCP option names that require use_option to be set
+        specialOptions := map[string]bool{
+            "routers":                 true,
+            "router-templates":        true,
+            "domain-name-servers":     true,
+            "domain-name":             true,
+            "broadcast-address":       true,
+            "broadcast-address-offset": true,
+            "dhcp-lease-time":         true,
+            "dhcp6.name-servers":      true,
+        }
+
+        var options []RangetemplateOptionsModel
+        diags := data.Options.ElementsAs(ctx, &options, false)
+        resp.Diagnostics.Append(diags...)
+        if resp.Diagnostics.HasError() {
+            return
+        }
+
+        // Check the use_options field is set when options are configured
+        if !data.UseOptions.IsNull() && !data.UseOptions.IsUnknown() && !data.UseOptions.ValueBool() {
+            resp.Diagnostics.AddAttributeError(
+                path.Root("use_options"),
+                "Invalid configuration",
+                "When configuring options, the use_options attribute must be set to true",
+            )
+        }
+
+        for i, option := range options {
+            if option.Name.IsNull() || option.Name.IsUnknown() {
+                continue
+            }
+
+            optionName := option.Name.ValueString()
+            isSpecialOption := specialOptions[optionName]
+
+            // Only Case 2: Non-special option should not have use_option set
+            if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
+                resp.Diagnostics.AddAttributeError(
+                    path.Root("options").AtListIndex(i).AtName("use_option"),
+                    "Invalid configuration",
+                    fmt.Sprintf("The 'use_option' attribute should not be set for non-special option '%s'. "+
+                        "It is only applicable for special options: routers, router-templates, domain-name-servers, "+
+                        "domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.", 
+                        optionName),
+                )
+            }
+        }
+    }
+}
