@@ -1224,6 +1224,7 @@ func FlattenNetwork(ctx context.Context, from *ipam.Network, diags *diag.Diagnos
 	}
 	m := NetworkModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, NetworkAttrTypes, m)
 	diags.Append(d...)
 	return t

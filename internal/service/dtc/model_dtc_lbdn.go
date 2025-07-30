@@ -220,6 +220,7 @@ func FlattenDtcLbdn(ctx context.Context, from *dtc.DtcLbdn, diags *diag.Diagnost
 	}
 	m := DtcLbdnModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, DtcLbdnAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -1286,6 +1286,7 @@ func FlattenZoneAuth(ctx context.Context, from *dns.ZoneAuth, diags *diag.Diagno
 	}
 	m := ZoneAuthModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ZoneAuthAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -867,6 +867,7 @@ func FlattenIpv6network(ctx context.Context, from *ipam.Ipv6network, diags *diag
 	}
 	m := Ipv6networkModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, Ipv6networkAttrTypes, m)
 	diags.Append(d...)
 	return t
