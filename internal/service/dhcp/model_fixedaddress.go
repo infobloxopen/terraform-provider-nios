@@ -204,6 +204,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The bootfile name for the fixed address. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.",
 	},
 	"bootserver": schema.StringAttribute{
