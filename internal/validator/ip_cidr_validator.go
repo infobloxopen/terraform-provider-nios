@@ -10,25 +10,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-// CidrValidator validates that the provided string is either:
+// IPCIDRValidator validates that the provided string is either:
 // - A valid FQDN
 // - A valid IPv4 address or IPV4 CIDR
 // - A valid IPv6 address or IPV6 CIDR
 // But NOT an IPv6 reverse mapping address
-type CidrValidator struct{}
+type IPCIDRValidator struct{}
 
 // Description returns a plain text description of the validator's behavior.
-func (v CidrValidator) Description(ctx context.Context) string {
+func (v IPCIDRValidator) Description(ctx context.Context) string {
 	return "String must be a valid FQDN, IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR (IPv6 reverse mapping not allowed)"
 }
 
 // MarkdownDescription returns a markdown formatted description of the validator's behavior.
-func (v CidrValidator) MarkdownDescription(ctx context.Context) string {
+func (v IPCIDRValidator) MarkdownDescription(ctx context.Context) string {
 	return "String must be a valid FQDN, IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR (IPv6 reverse mapping not allowed)"
 }
 
 // Validate performs the validation.
-func (v CidrValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
+func (v IPCIDRValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
 	if request.ConfigValue.IsNull() || request.ConfigValue.IsUnknown() {
 		return
 	}
@@ -78,7 +78,7 @@ func isIPv6ReverseMapping(s string) bool {
 	return strings.HasSuffix(s, ".ip6.arpa") || strings.HasSuffix(s, ".ip6.arpa.")
 }
 
-// IsValidCidr returns a validator that ensures the input is a valid FQDN, IPv4, IPv6 address, or CIDR notation.
-func IsValidCidr() validator.String {
-	return CidrValidator{}
+// IsValidIPCIDR returns a validator that ensures the input is a valid FQDN, IPv4, IPv6 address, or CIDR notation.
+func IsValidIPCIDR() validator.String {
+	return IPCIDRValidator{}
 }
