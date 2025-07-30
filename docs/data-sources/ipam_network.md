@@ -54,7 +54,7 @@ Optional:
 - `auto_create_reversezone` (Boolean) This flag controls whether reverse zones are automatically created when the network is added.
 - `bootfile` (String) The bootfile name for the network. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.
 - `bootserver` (String) The bootserver address for the network. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.
-- `cloud_info` (Attributes) A CloudInfo struct that contains information about the cloud provider and region for the network. (see [below for nested schema](#nestedatt--result--cloud_info))
+- `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `cloud_shared` (Boolean) Boolean flag to indicate if the network is shared with cloud.
 - `comment` (String) Comment for the network, maximum 256 characters.
 - `ddns_domainname` (String) The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.
@@ -68,8 +68,8 @@ Optional:
 - `disable` (Boolean) Determines whether a network is disabled or not. When this is set to False, the network is enabled.
 - `discovered_bridge_domain` (String) Discovered bridge domain.
 - `discovered_tenant` (String) Discovered tenant.
-- `discovery_basic_poll_settings` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings))
-- `discovery_blackout_setting` (Attributes) (see [below for nested schema](#nestedatt--result--discovery_blackout_setting))
+- `discovery_basic_poll_settings` (Attributes) The discovery basic poll settings for this network (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings))
+- `discovery_blackout_setting` (Attributes) The discovery blackout setting for this network. (see [below for nested schema](#nestedatt--result--discovery_blackout_setting))
 - `discovery_member` (String) The member that will run discovery for this network.
 - `email_list` (List of String) The e-mail lists to which the appliance sends DHCP threshold alarm e-mail messages.
 - `enable_ddns` (Boolean) The dynamic DNS updates flag of a DHCP network object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.
@@ -82,15 +82,15 @@ Optional:
 - `enable_snmp_warnings` (Boolean) Determines if DHCP threshold warnings are send through SNMP.
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `federated_realms` (Attributes List) This field contains the federated realms associated to this network (see [below for nested schema](#nestedatt--result--federated_realms))
-- `func_call` (Attributes) (see [below for nested schema](#nestedatt--result--func_call))
+- `func_call` (Attributes) A function call to be executed on the object. (see [below for nested schema](#nestedatt--result--func_call))
 - `high_water_mark` (Number) The percentage of DHCP network usage threshold above which network usage is not expected and may warrant your attention. When the high watermark is reached, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.
 - `high_water_mark_reset` (Number) The percentage of DHCP network usage below which the corresponding SNMP trap is reset. A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The high watermark reset value must be lower than the high watermark value.
 - `ignore_dhcp_option_list_request` (Boolean) If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.
 - `ignore_id` (String) Indicates whether the appliance will ignore DHCP client IDs or MAC addresses. Valid values are "NONE", "CLIENT", or "MACADDR". The default is "NONE".
 - `ignore_mac_addresses` (List of String) A list of MAC addresses the appliance will ignore.
 - `ipam_email_addresses` (List of String) The e-mail lists to which the appliance sends IPAM threshold alarm e-mail messages.
-- `ipam_threshold_settings` (Attributes) (see [below for nested schema](#nestedatt--result--ipam_threshold_settings))
-- `ipam_trap_settings` (Attributes) (see [below for nested schema](#nestedatt--result--ipam_trap_settings))
+- `ipam_threshold_settings` (Attributes) The IPAM threshold settings for this network. (see [below for nested schema](#nestedatt--result--ipam_threshold_settings))
+- `ipam_trap_settings` (Attributes) The IPAM trap settings for this network. (see [below for nested schema](#nestedatt--result--ipam_trap_settings))
 - `ipv4addr` (String) The IPv4 Address of the network.
 - `lease_scavenge_time` (Number) An integer that specifies the period of time (in seconds) that frees and backs up leases remained in the database before they are automatically deleted. To disable lease scavenging, set the parameter to -1. The minimum positive value must be greater than 86400 seconds (1 day).
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on the this network. This list corresponds to the match rules that are written to the dhcpd configuration file. (see [below for nested schema](#nestedatt--result--logic_filter_rules))
@@ -103,7 +103,7 @@ Optional:
 - `network_view` (String) The name of the network view in which this network resides.
 - `nextserver` (String) The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--result--options))
-- `port_control_blackout_setting` (Attributes) (see [below for nested schema](#nestedatt--result--port_control_blackout_setting))
+- `port_control_blackout_setting` (Attributes) The port control blackout setting for this network. (see [below for nested schema](#nestedatt--result--port_control_blackout_setting))
 - `pxe_lease_time` (Number) The PXE lease time value of a DHCP Network object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.
 - `recycle_leases` (Boolean) If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.
 - `restart_if_needed` (Boolean) Restarts the member service.
@@ -112,7 +112,7 @@ Optional:
 - `rir_registration_status` (String) The registration status of the network in RIR.
 - `same_port_control_discovery_blackout` (Boolean) If the field is set to True, the discovery blackout setting will be used for port control blackout setting.
 - `send_rir_request` (Boolean) Determines whether to send the RIR registration request.
-- `subscribe_settings` (Attributes) (see [below for nested schema](#nestedatt--result--subscribe_settings))
+- `subscribe_settings` (Attributes) The DHCP Network Cisco ISE subscribe settings. (see [below for nested schema](#nestedatt--result--subscribe_settings))
 - `template` (String) If set on creation, the network is created according to the values specified in the selected template.
 - `unmanaged` (Boolean) Determines whether the DHCP IPv4 Network is unmanaged or not.
 - `update_dns_on_lease_renewal` (Boolean) This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.
@@ -169,7 +169,7 @@ Read-Only:
 - `last_rir_registration_update_sent` (Number) The timestamp when the last RIR registration update was sent.
 - `last_rir_registration_update_status` (String) Last RIR registration update status.
 - `mgm_private_overridable` (Boolean) This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.
-- `ms_ad_user_data` (Attributes) A struct that contains information about the Microsoft (r) Active Directory. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
+- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `network_container` (String) The network container to which this network belongs (if any).
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the network address space.
@@ -224,7 +224,7 @@ Optional:
 - `snmp_collection` (Boolean) Determines whether SNMP collection is enabled or not.
 - `switch_port_data_collection_polling` (String) A switch port data collection polling mode.
 - `switch_port_data_collection_polling_interval` (Number) Indicates the interval for switch port data collection polling.
-- `switch_port_data_collection_polling_schedule` (Attributes) A Schedule Setting struct that determines switch port data collection polling schedule. (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
+- `switch_port_data_collection_polling_schedule` (Attributes) A switch port data collection polling schedule. (see [below for nested schema](#nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule))
 - `use_global_polling_frequency_modifier` (Boolean) Use Global Polling Frequency Modifier.
 
 <a id="nestedatt--result--discovery_basic_poll_settings--switch_port_data_collection_polling_schedule"></a>
@@ -413,9 +413,12 @@ Read-Only:
 <a id="nestedatt--result--zone_associations"></a>
 ### Nested Schema for `result.zone_associations`
 
-Optional:
+Required:
 
 - `fqdn` (String) The FQDN of the authoritative forward zone.
+
+Optional:
+
 - `is_default` (Boolean) True if this is the default zone.
 - `view` (String) The view to which the zone belongs. If a view is not specified, the default view is used.
 

@@ -43,6 +43,7 @@ var NetworkPortControlBlackoutSettingResourceSchemaAttributes = map[string]schem
 		Attributes:          NetworkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes,
 		Optional:            true,
 		MarkdownDescription: "A Schedule Setting struct that determines blackout schedule.",
+		Computed:            true,
 	},
 }
 
