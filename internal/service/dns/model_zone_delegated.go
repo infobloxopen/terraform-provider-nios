@@ -206,7 +206,6 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 	"ns_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The delegation NS group bound with delegated zone.",
 	},
 	"parent": schema.StringAttribute{
