@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -154,10 +155,13 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The domain name of the DNS PTR record in punycode format.",
 	},
 	"extattrs": schema.MapAttribute{
-		Optional:            true,
-		Computed:            true,
-		ElementType:         types.StringType,
-		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Optional:    true,
+		Computed:    true,
+		ElementType: types.StringType,
+		Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"extattrs_all": schema.MapAttribute{
@@ -268,7 +272,7 @@ func (m *RecordPtrModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 		DdnsPrincipal:     flex.ExpandStringPointer(m.DdnsPrincipal),
 		DdnsProtected:     flex.ExpandBoolPointer(m.DdnsProtected),
 		Disable:           flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:          ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ForbidReclamation: flex.ExpandBoolPointer(m.ForbidReclamation),
 		FuncCall:          ExpandFuncCall(ctx, m.FuncCall, diags),
 		Name:              flex.ExpandStringPointer(m.Name),
@@ -305,7 +309,6 @@ func FlattenRecordPtr(ctx context.Context, from *dns.RecordPtr, diags *diag.Diag
 	}
 	m := RecordPtrModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, RecordPtrAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -330,7 +333,7 @@ func (m *RecordPtrModel) Flatten(ctx context.Context, from *dns.RecordPtr, diags
 	m.DiscoveredData = FlattenRecordPtrDiscoveredData(ctx, from.DiscoveredData, diags)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
 	m.DnsPtrdname = flex.FlattenStringPointer(from.DnsPtrdname)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
 	m.Ipv4addr = FlattenRecordPtrIpv4addr(from.Ipv4addr)
 	m.Ipv6addr = FlattenRecordPtrIpv6addr(from.Ipv6addr)
