@@ -77,7 +77,7 @@ func RandomIPv6Network() string {
 	// This is reserved for documentation and testing purposes (RFC 3849)
 	third := rand.Intn(65536)  // 0-FFFF for third hextet
 	fourth := rand.Intn(65536) // 0-FFFF for fourth hextet
-	cidr := 64 + rand.Intn(63) // /48 to /64 (common for IPv6 network containers)
+	cidr := 64 + rand.Intn(60)
 
 	return fmt.Sprintf("2001:db8:%x:%x::/%d", third, fourth, cidr)
 }
