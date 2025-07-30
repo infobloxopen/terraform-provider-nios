@@ -324,7 +324,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkCloudInfoResourceSchemaAttributes,
 		Computed:            true,
-		MarkdownDescription: "A CloudInfo struct that contains information about the cloud provider and region for the network.",
+		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 		Optional:            true,
 	},
 	"cloud_shared": schema.BoolAttribute{
@@ -354,6 +354,10 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
 		},
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
@@ -460,7 +464,13 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered tenant.",
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default: stringdefault.StaticString(""),
 	},
 	"discovered_vlan_id": schema.StringAttribute{
 		Computed:            true,
@@ -489,6 +499,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_discovery_basic_polling_settings")),
 		},
+		MarkdownDescription: "The discovery basic poll settings for this network",
 	},
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
 		Attributes: NetworkDiscoveryBlackoutSettingResourceSchemaAttributes,
@@ -497,6 +508,8 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
+
+		MarkdownDescription: "The discovery blackout setting for this network.",
 	},
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
@@ -661,6 +674,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_ipam_threshold_settings")),
 		},
+		MarkdownDescription: "The IPAM threshold settings for this network.",
 	},
 	"ipam_trap_settings": schema.SingleNestedAttribute{
 		Attributes: NetworkIpamTrapSettingsResourceSchemaAttributes,
@@ -669,6 +683,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_ipam_trap_settings")),
 		},
+		MarkdownDescription: "The IPAM trap settings for this network.",
 	},
 	"ipv4addr": schema.StringAttribute{
 		CustomType:          iptypes.IPv4AddressType{},
@@ -754,7 +769,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes:          NetworkMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
-		MarkdownDescription: "A struct that contains information about the Microsoft (r) Active Directory.",
+		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"netmask": schema.Int64Attribute{
 		Optional:            true,
@@ -768,9 +783,11 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Attributes: FuncCallResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+
+		Attributes:          FuncCallResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "A function call to be executed on the object.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,
@@ -808,6 +825,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
 		},
+		MarkdownDescription: "The port control blackout setting for this network.",
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional:            true,
@@ -885,6 +903,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
 		},
+		MarkdownDescription: "The DHCP Network Cisco ISE subscribe settings.",
 	},
 	"template": schema.StringAttribute{
 		Optional:            true,
@@ -1301,7 +1320,6 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)

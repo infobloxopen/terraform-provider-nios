@@ -32,9 +32,8 @@ var NetworkZoneAssociationsAttrTypes = map[string]attr.Type{
 
 var NetworkZoneAssociationsResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The FQDN of the authoritative forward zone.",
-		Computed:            true,
 		Validators: []validator.String{
 			customvalidator.IsValidFQDN(),
 		},

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -41,23 +42,21 @@ var ZoneForwardForwardToAttrTypes = map[string]attr.Type{
 
 var ZoneForwardForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
+				"prefix should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
+				"prefix should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
@@ -68,11 +67,19 @@ var ZoneForwardForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"stealth": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
@@ -87,12 +94,17 @@ var ZoneForwardForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"prefix should not have leading or trailing whitespace",
+			),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
@@ -148,7 +160,7 @@ func (m *ZoneForwardForwardToModel) Flatten(ctx context.Context, from *dns.ZoneF
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
-	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)
-	m.TsigKeyName = flex.FlattenStringPointer(from.TsigKeyName)
+	m.TsigKeyAlg = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyAlg)
+	m.TsigKeyName = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyName)
 	m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
 }
