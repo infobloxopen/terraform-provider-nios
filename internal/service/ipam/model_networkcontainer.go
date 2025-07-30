@@ -271,6 +271,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkcontainerCloudInfoResourceSchemaAttributes,
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
@@ -899,9 +900,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: subscribe_settings",
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
-		Validators: []validator.Bool{
-			boolvalidator.AlsoRequires(path.MatchRoot("subscribe_settings")),
-		},
 	},
 	"use_update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,
