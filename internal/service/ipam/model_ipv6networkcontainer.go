@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -319,6 +320,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 		Computed:            true,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -706,7 +710,6 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	if m == nil {
 		*m = Ipv6networkcontainerModel{}
 	}
-	// from.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.CloudInfo = FlattenIpv6networkcontainerCloudInfo(ctx, from.CloudInfo, diags)

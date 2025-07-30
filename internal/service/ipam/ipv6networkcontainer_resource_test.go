@@ -533,7 +533,6 @@ func TestAccIpv6networkcontainerResource_FuncCall(t *testing.T) {
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Original Function Call"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 			// Delete testing automatically occurs in TestCase
 		},
