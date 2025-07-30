@@ -23,7 +23,7 @@ data "nios_ipam_ipv6network_container" "get_network_containers_using_filters" {
 // Retrieve specific IPAM IPv6 network containers using Extensible Attributes
 data "nios_ipam_ipv6network_container" "get_network_containers_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
@@ -71,7 +71,6 @@ Optional:
 - `func_call` (Attributes) The function call to be executed on the object. (see [below for nested schema](#nestedatt--result--func_call))
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file. (see [below for nested schema](#nestedatt--result--logic_filter_rules))
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
-- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user data associated with the network container. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `network` (String) The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'.
 - `network_view` (String) The name of the network view in which this network resides.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--result--options))
@@ -116,6 +115,7 @@ Read-Only:
 - `last_rir_registration_update_sent` (Number) The timestamp when the last RIR registration update was sent.
 - `last_rir_registration_update_status` (String) Last RIR registration update status.
 - `mgm_private_overridable` (Boolean) This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.
+- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user data associated with the network container. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `network_container` (String) The network container to which this network belongs, if any.
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the IPv6 network container address space.
@@ -252,14 +252,6 @@ Required:
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
 
 
-<a id="nestedatt--result--ms_ad_user_data"></a>
-### Nested Schema for `result.ms_ad_user_data`
-
-Read-Only:
-
-- `active_users_count` (Number) The number of active users.
-
-
 <a id="nestedatt--result--options"></a>
 ### Nested Schema for `result.options`
 
@@ -278,7 +270,7 @@ Optional:
 Optional:
 
 - `blackout_duration` (Number) The blackout duration in seconds; minimum value is 1 minute.
-- `blackout_schedule` (Attributes) (see [below for nested schema](#nestedatt--result--port_control_blackout_setting--blackout_schedule))
+- `blackout_schedule` (Attributes) A Schedule Setting struct that determines blackout schedule. (see [below for nested schema](#nestedatt--result--port_control_blackout_setting--blackout_schedule))
 - `enable_blackout` (Boolean) Determines whether a blackout is enabled or not.
 
 <a id="nestedatt--result--port_control_blackout_setting--blackout_schedule"></a>
@@ -327,3 +319,11 @@ Optional:
 - `fqdn` (String) The FQDN of the authoritative forward zone.
 - `is_default` (Boolean) True if this is the default zone.
 - `view` (String) The view to which the zone belongs. If a view is not specified, the default view is used.
+
+
+<a id="nestedatt--result--ms_ad_user_data"></a>
+### Nested Schema for `result.ms_ad_user_data`
+
+Read-Only:
+
+- `active_users_count` (Number) The number of active users.
