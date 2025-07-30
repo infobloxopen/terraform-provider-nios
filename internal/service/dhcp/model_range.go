@@ -4,6 +4,8 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -55,7 +57,7 @@ type RangeModel struct {
 	EnableImmediateDiscovery         types.Bool                       `tfsdk:"enable_immediate_discovery"`
 	EnablePxeLeaseTime               types.Bool                       `tfsdk:"enable_pxe_lease_time"`
 	EnableSnmpWarnings               types.Bool                       `tfsdk:"enable_snmp_warnings"`
-	EndAddr                          types.String                     `tfsdk:"end_addr"`
+	EndAddr                          iptypes.IPv4Address              `tfsdk:"end_addr"`
 	EndpointSources                  types.List                       `tfsdk:"endpoint_sources"`
 	Exclude                          types.List                       `tfsdk:"exclude"`
 	ExtAttrs                         types.Map                        `tfsdk:"extattrs"`
@@ -80,7 +82,7 @@ type RangeModel struct {
 	MsServer                         types.Object                     `tfsdk:"ms_server"`
 	NacFilterRules                   types.List                       `tfsdk:"nac_filter_rules"`
 	Name                             types.String                     `tfsdk:"name"`
-	Network                          types.String                     `tfsdk:"network"`
+	Network                          cidrtypes.IPv4Prefix             `tfsdk:"network"`
 	NetworkView                      types.String                     `tfsdk:"network_view"`
 	Nextserver                       types.String                     `tfsdk:"nextserver"`
 	OptionFilterRules                types.List                       `tfsdk:"option_filter_rules"`
@@ -94,7 +96,7 @@ type RangeModel struct {
 	ServerAssociationType            types.String                     `tfsdk:"server_association_type"`
 	SplitMember                      types.Object                     `tfsdk:"split_member"`
 	SplitScopeExclusionPercent       types.Int64                      `tfsdk:"split_scope_exclusion_percent"`
-	StartAddr                        types.String                     `tfsdk:"start_addr"`
+	StartAddr                        iptypes.IPv4Address              `tfsdk:"start_addr"`
 	StaticHosts                      types.Int64                      `tfsdk:"static_hosts"`
 	SubscribeSettings                types.Object                     `tfsdk:"subscribe_settings"`
 	Template                         types.String                     `tfsdk:"template"`
@@ -156,7 +158,7 @@ var RangeAttrTypes = map[string]attr.Type{
 	"enable_immediate_discovery":           types.BoolType,
 	"enable_pxe_lease_time":                types.BoolType,
 	"enable_snmp_warnings":                 types.BoolType,
-	"end_addr":                             types.StringType,
+	"end_addr":                             iptypes.IPv4AddressType{},
 	"endpoint_sources":                     types.ListType{ElemType: types.StringType},
 	"exclude":                              types.ListType{ElemType: types.ObjectType{AttrTypes: RangeExcludeAttrTypes}},
 	"extattrs":                             types.MapType{ElemType: types.StringType},
@@ -181,7 +183,7 @@ var RangeAttrTypes = map[string]attr.Type{
 	"ms_server":                            types.ObjectType{AttrTypes: RangeMsServerAttrTypes},
 	"nac_filter_rules":                     types.ListType{ElemType: types.ObjectType{AttrTypes: RangeNacFilterRulesAttrTypes}},
 	"name":                                 types.StringType,
-	"network":                              types.StringType,
+	"network":                              cidrtypes.IPv4PrefixType{},
 	"network_view":                         types.StringType,
 	"nextserver":                           types.StringType,
 	"option_filter_rules":                  types.ListType{ElemType: types.ObjectType{AttrTypes: RangeOptionFilterRulesAttrTypes}},
@@ -195,7 +197,7 @@ var RangeAttrTypes = map[string]attr.Type{
 	"server_association_type":              types.StringType,
 	"split_member":                         types.ObjectType{AttrTypes: RangeSplitMemberAttrTypes},
 	"split_scope_exclusion_percent":        types.Int64Type,
-	"start_addr":                           types.StringType,
+	"start_addr":                           iptypes.IPv4AddressType{},
 	"static_hosts":                         types.Int64Type,
 	"subscribe_settings":                   types.ObjectType{AttrTypes: RangeSubscribeSettingsAttrTypes},
 	"template":                             types.StringType,
@@ -426,6 +428,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if DHCP threshold warnings are send through SNMP.",
 	},
 	"end_addr": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Required:            true,
 		MarkdownDescription: "The IPv4 Address end address of the range.",
 	},
@@ -621,6 +624,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the name of the Microsoft scope.",
 	},
 	"network": schema.StringAttribute{
+		CustomType:          cidrtypes.IPv4PrefixType{},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The network to which this range belongs, in IPv4 Address/CIDR format.",
@@ -722,6 +726,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field controls the percentage used when creating a split scope. Valid values are numbers between 1 and 99. If the value is 40, it means that the top 40% of the exclusion will be created on the DHCP range assigned to {next_available_ip:next_available_ip} and the lower 60% of the range will be assigned to DHCP range assigned to {next_available_ip:next_available_ip}",
 	},
 	"start_addr": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Required:            true,
 		MarkdownDescription: "The IPv4 Address starting address of the range.",
 	},
@@ -942,7 +947,7 @@ func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCrea
 		EnableImmediateDiscovery:         flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		EnablePxeLeaseTime:               flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
 		EnableSnmpWarnings:               flex.ExpandBoolPointer(m.EnableSnmpWarnings),
-		EndAddr:                          flex.ExpandStringPointer(m.EndAddr),
+		EndAddr:                          flex.ExpandIPv4Address(m.EndAddr),
 		Exclude:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Exclude, diags, ExpandRangeExclude),
 		ExtAttrs:                         ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FailoverAssociation:              flex.ExpandStringPointer(m.FailoverAssociation),
@@ -964,7 +969,7 @@ func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCrea
 		MsServer:                         ExpandRangeMsServer(ctx, m.MsServer, diags),
 		NacFilterRules:                   flex.ExpandFrameworkListNestedBlock(ctx, m.NacFilterRules, diags, ExpandRangeNacFilterRules),
 		Name:                             flex.ExpandStringPointer(m.Name),
-		Network:                          flex.ExpandStringPointer(m.Network),
+		Network:                          flex.ExpandIPv4CIDR(m.Network),
 		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
 		Nextserver:                       flex.ExpandStringPointer(m.Nextserver),
 		OptionFilterRules:                flex.ExpandFrameworkListNestedBlock(ctx, m.OptionFilterRules, diags, ExpandRangeOptionFilterRules),
@@ -976,7 +981,7 @@ func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCrea
 		RestartIfNeeded:                  flex.ExpandBoolPointer(m.RestartIfNeeded),
 		SamePortControlDiscoveryBlackout: flex.ExpandBoolPointer(m.SamePortControlDiscoveryBlackout),
 		ServerAssociationType:            flex.ExpandStringPointer(m.ServerAssociationType),
-		StartAddr:                        flex.ExpandStringPointer(m.StartAddr),
+		StartAddr:                        flex.ExpandIPv4Address(m.StartAddr),
 		SubscribeSettings:                ExpandRangeSubscribeSettings(ctx, m.SubscribeSettings, diags),
 		UnknownClients:                   flex.ExpandStringPointer(m.UnknownClients),
 		UpdateDnsOnLeaseRenewal:          flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
@@ -1059,7 +1064,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
-	m.EndAddr = flex.FlattenStringPointer(from.EndAddr)
+	m.EndAddr = flex.FlattenIPv4Address(from.EndAddr)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
 	m.Exclude = flex.FlattenFrameworkListNestedBlock(ctx, from.Exclude, RangeExcludeAttrTypes, diags, FlattenRangeExclude)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
@@ -1083,7 +1088,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.MsServer = FlattenRangeMsServer(ctx, from.MsServer, diags)
 	m.NacFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.NacFilterRules, RangeNacFilterRulesAttrTypes, diags, FlattenRangeNacFilterRules)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Network = flex.FlattenStringPointer(from.Network)
+	m.Network = flex.FlattenIPv4CIDR(from.Network)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangeOptionFilterRulesAttrTypes, diags, FlattenRangeOptionFilterRules)
@@ -1094,7 +1099,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangeRelayAgentFilterRulesAttrTypes, diags, FlattenRangeRelayAgentFilterRules)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.ServerAssociationType = flex.FlattenStringPointer(from.ServerAssociationType)
-	m.StartAddr = flex.FlattenStringPointer(from.StartAddr)
+	m.StartAddr = flex.FlattenIPv4Address(from.StartAddr)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.SubscribeSettings = FlattenRangeSubscribeSettings(ctx, from.SubscribeSettings, diags)
 	m.Template = flex.FlattenStringPointer(from.Template)

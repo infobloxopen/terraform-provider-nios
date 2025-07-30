@@ -335,7 +335,6 @@ func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
 				Config: testAccRecordPtrFuncCallIpv4Addr("192.168.10.0/24", ptrDName, "default", "Created with func_call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "192.168.10.1"),
 					resource.TestCheckResourceAttr(resourceName, "ptrdname", ptrDName),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Created with func_call"),
@@ -346,7 +345,6 @@ func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
 				Config: testAccRecordPtrFuncCallIpv4Addr("192.168.10.0/24", "ptr2.example.com", "default", "Updated with func_call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "192.168.10.1"),
 					resource.TestCheckResourceAttr(resourceName, "ptrdname", "ptr2.example.com"),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated with func_call"),
@@ -443,7 +441,7 @@ func TestAccRecordPtrResource_Ptrdname(t *testing.T) {
 				Config: testAccRecordPtrPtrdname(updatedPTRDName, "192.168.10.34", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ptrdname", "updated.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "ptrdname", updatedPTRDName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

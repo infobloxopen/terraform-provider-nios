@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -24,34 +25,34 @@ import (
 )
 
 type RecordPtrModel struct {
-	Ref                types.String `tfsdk:"ref"`
-	AwsRte53RecordInfo types.Object `tfsdk:"aws_rte53_record_info"`
-	CloudInfo          types.Object `tfsdk:"cloud_info"`
-	Comment            types.String `tfsdk:"comment"`
-	CreationTime       types.Int64  `tfsdk:"creation_time"`
-	Creator            types.String `tfsdk:"creator"`
-	DdnsPrincipal      types.String `tfsdk:"ddns_principal"`
-	DdnsProtected      types.Bool   `tfsdk:"ddns_protected"`
-	Disable            types.Bool   `tfsdk:"disable"`
-	DiscoveredData     types.Object `tfsdk:"discovered_data"`
-	DnsName            types.String `tfsdk:"dns_name"`
-	DnsPtrdname        types.String `tfsdk:"dns_ptrdname"`
-	ExtAttrs           types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll        types.Map    `tfsdk:"extattrs_all"`
-	ForbidReclamation  types.Bool   `tfsdk:"forbid_reclamation"`
-	Ipv4addr           types.String `tfsdk:"ipv4addr"`
-	FuncCall           types.Object `tfsdk:"func_call"`
-	Ipv6addr           types.String `tfsdk:"ipv6addr"`
-	LastQueried        types.Int64  `tfsdk:"last_queried"`
-	MsAdUserData       types.Object `tfsdk:"ms_ad_user_data"`
-	Name               types.String `tfsdk:"name"`
-	Ptrdname           types.String `tfsdk:"ptrdname"`
-	Reclaimable        types.Bool   `tfsdk:"reclaimable"`
-	SharedRecordGroup  types.String `tfsdk:"shared_record_group"`
-	Ttl                types.Int64  `tfsdk:"ttl"`
-	UseTtl             types.Bool   `tfsdk:"use_ttl"`
-	View               types.String `tfsdk:"view"`
-	Zone               types.String `tfsdk:"zone"`
+	Ref                types.String        `tfsdk:"ref"`
+	AwsRte53RecordInfo types.Object        `tfsdk:"aws_rte53_record_info"`
+	CloudInfo          types.Object        `tfsdk:"cloud_info"`
+	Comment            types.String        `tfsdk:"comment"`
+	CreationTime       types.Int64         `tfsdk:"creation_time"`
+	Creator            types.String        `tfsdk:"creator"`
+	DdnsPrincipal      types.String        `tfsdk:"ddns_principal"`
+	DdnsProtected      types.Bool          `tfsdk:"ddns_protected"`
+	Disable            types.Bool          `tfsdk:"disable"`
+	DiscoveredData     types.Object        `tfsdk:"discovered_data"`
+	DnsName            types.String        `tfsdk:"dns_name"`
+	DnsPtrdname        types.String        `tfsdk:"dns_ptrdname"`
+	ExtAttrs           types.Map           `tfsdk:"extattrs"`
+	ExtAttrsAll        types.Map           `tfsdk:"extattrs_all"`
+	ForbidReclamation  types.Bool          `tfsdk:"forbid_reclamation"`
+	Ipv4addr           iptypes.IPv4Address `tfsdk:"ipv4addr"`
+	FuncCall           types.Object        `tfsdk:"func_call"`
+	Ipv6addr           iptypes.IPv6Address `tfsdk:"ipv6addr"`
+	LastQueried        types.Int64         `tfsdk:"last_queried"`
+	MsAdUserData       types.Object        `tfsdk:"ms_ad_user_data"`
+	Name               types.String        `tfsdk:"name"`
+	Ptrdname           types.String        `tfsdk:"ptrdname"`
+	Reclaimable        types.Bool          `tfsdk:"reclaimable"`
+	SharedRecordGroup  types.String        `tfsdk:"shared_record_group"`
+	Ttl                types.Int64         `tfsdk:"ttl"`
+	UseTtl             types.Bool          `tfsdk:"use_ttl"`
+	View               types.String        `tfsdk:"view"`
+	Zone               types.String        `tfsdk:"zone"`
 }
 
 var RecordPtrAttrTypes = map[string]attr.Type{
@@ -70,9 +71,9 @@ var RecordPtrAttrTypes = map[string]attr.Type{
 	"extattrs":              types.MapType{ElemType: types.StringType},
 	"extattrs_all":          types.MapType{ElemType: types.StringType},
 	"forbid_reclamation":    types.BoolType,
-	"ipv4addr":              types.StringType,
+	"ipv4addr":              iptypes.IPv4AddressType{},
 	"func_call":             types.ObjectType{AttrTypes: FuncCallAttrTypes},
-	"ipv6addr":              types.StringType,
+	"ipv6addr":              iptypes.IPv6AddressType{},
 	"last_queried":          types.Int64Type,
 	"ms_ad_user_data":       types.ObjectType{AttrTypes: RecordPtrMsAdUserDataAttrTypes},
 	"name":                  types.StringType,
@@ -176,8 +177,9 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the reclamation is allowed for the record or not.",
 	},
 	"ipv4addr": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: iptypes.IPv4AddressType{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
 			stringvalidator.ExactlyOneOf(
 				path.MatchRoot("ipv4addr"),
@@ -195,6 +197,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Function call to be executed.",
 	},
 	"ipv6addr": schema.StringAttribute{
+		CustomType:          iptypes.IPv6AddressType{},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The IPv6 Address of the record.",
@@ -353,38 +356,38 @@ func (m *RecordPtrModel) Flatten(ctx context.Context, from *dns.RecordPtr, diags
 	}
 }
 
-func ExpandRecordPtrIpv4addr(str types.String) *dns.RecordPtrIpv4addr {
+func ExpandRecordPtrIpv4addr(str iptypes.IPv4Address) *dns.RecordPtrIpv4addr {
 	if str.IsNull() {
 		return &dns.RecordPtrIpv4addr{}
 	}
 	var m dns.RecordPtrIpv4addr
-	m.String = flex.ExpandStringPointer(str)
+	m.String = flex.ExpandIPv4Address(str)
 
 	return &m
 }
 
-func ExpandRecordPtrIpv6addr(str types.String) *dns.RecordPtrIpv6addr {
+func ExpandRecordPtrIpv6addr(str iptypes.IPv6Address) *dns.RecordPtrIpv6addr {
 	if str.IsNull() {
 		return &dns.RecordPtrIpv6addr{}
 	}
 	var m dns.RecordPtrIpv6addr
-	m.String = flex.ExpandStringPointer(str)
+	m.String = flex.ExpandIPv6Address(str)
 
 	return &m
 }
 
-func FlattenRecordPtrIpv4addr(from *dns.RecordPtrIpv4addr) types.String {
+func FlattenRecordPtrIpv4addr(from *dns.RecordPtrIpv4addr) iptypes.IPv4Address {
 	if from.String == nil {
-		return types.StringNull()
+		return iptypes.NewIPv4AddressNull()
 	}
-	m := flex.FlattenStringPointer(from.String)
+	m := flex.FlattenIPv4Address(from.String)
 	return m
 }
 
-func FlattenRecordPtrIpv6addr(from *dns.RecordPtrIpv6addr) types.String {
+func FlattenRecordPtrIpv6addr(from *dns.RecordPtrIpv6addr) iptypes.IPv6Address {
 	if from.String == nil {
-		return types.StringNull()
+		return iptypes.NewIPv6AddressNull()
 	}
-	m := flex.FlattenStringPointer(from.String)
+	m := flex.FlattenIPv6Address(from.String)
 	return m
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -20,17 +21,17 @@ import (
 )
 
 type ViewMatchDestinationsModel struct {
-	Address        types.String `tfsdk:"address"`
-	Struct         types.String `tfsdk:"struct"`
-	Permission     types.String `tfsdk:"permission"`
-	TsigKey        types.String `tfsdk:"tsig_key"`
-	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
-	TsigKeyName    types.String `tfsdk:"tsig_key_name"`
-	UseTsigKeyName types.Bool   `tfsdk:"use_tsig_key_name"`
+	Address        iptypes.IPAddress `tfsdk:"address"`
+	Struct         types.String      `tfsdk:"struct"`
+	Permission     types.String      `tfsdk:"permission"`
+	TsigKey        types.String      `tfsdk:"tsig_key"`
+	TsigKeyAlg     types.String      `tfsdk:"tsig_key_alg"`
+	TsigKeyName    types.String      `tfsdk:"tsig_key_name"`
+	UseTsigKeyName types.Bool        `tfsdk:"use_tsig_key_name"`
 }
 
 var ViewMatchDestinationsAttrTypes = map[string]attr.Type{
-	"address":           types.StringType,
+	"address":           iptypes.IPAddressType{},
 	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -49,8 +50,9 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
 	},
 	"address": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: iptypes.IPAddressType{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
@@ -65,8 +67,8 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
 	"permission": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
@@ -77,8 +79,8 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The permission to use for this address.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("address"),
@@ -92,8 +94,8 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("address"),
@@ -103,8 +105,8 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("address"),
@@ -118,8 +120,8 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.Bool{
 			boolvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("address"),
@@ -147,7 +149,7 @@ func (m *ViewMatchDestinationsModel) Expand(ctx context.Context, diags *diag.Dia
 		return nil
 	}
 	to := &dns.ViewMatchDestinations{
-		Address:        flex.ExpandStringPointer(m.Address),
+		Address:        flex.ExpandIPAddress(m.Address),
 		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -176,7 +178,7 @@ func (m *ViewMatchDestinationsModel) Flatten(ctx context.Context, from *dns.View
 	if m == nil {
 		*m = ViewMatchDestinationsModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
