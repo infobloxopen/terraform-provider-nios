@@ -227,6 +227,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
@@ -238,6 +239,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:  stringdefault.StaticString(""),
 		Computed: true,
 	},
 	"ddns_enable_option_fqdn": schema.BoolAttribute{
@@ -305,6 +307,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"discovered_tenant": schema.StringAttribute{
 		Optional:            true,
@@ -316,6 +319,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"discovered_vlan_id": schema.StringAttribute{
 		Computed:            true,
@@ -366,6 +370,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
 		},
+		Default:  stringdefault.StaticString(""),
 		Computed: true,
 	},
 	"domain_name": schema.StringAttribute{
@@ -375,6 +380,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_domain_name")),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"domain_name_servers": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -567,6 +573,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization associated with the IPv6 network.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,

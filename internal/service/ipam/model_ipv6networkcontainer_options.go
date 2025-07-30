@@ -2,10 +2,14 @@ package ipam
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -35,6 +39,12 @@ var Ipv6networkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attr
 		Optional:            true,
 		MarkdownDescription: "Name of the DHCP option.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"num": schema.Int64Attribute{
 		Optional:            true,
@@ -45,11 +55,24 @@ var Ipv6networkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attr
 		Optional:            true,
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default: stringdefault.StaticString("DHCP"),
 	},
 	"value": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Value of the DHCP option",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,

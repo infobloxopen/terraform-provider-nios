@@ -3,9 +3,13 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -50,11 +54,25 @@ var NetworkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSch
 		Optional:            true,
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.ValueStringsAre(
+				stringvalidator.OneOf(
+					"SUNDAY",
+					"MONDAY",
+					"TUESDAY",
+					"WEDNESDAY",
+					"THURSDAY",
+					"FRIDAY",
+					"SATURDAY",
+				),
+			),
+		},
 	},
 	"time_zone": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
 		Computed:            true,
+		Default:             stringdefault.StaticString("UTC Coordinated Universal Time"),
 	},
 	"recurring_time": schema.Int64Attribute{
 		Optional:            true,
@@ -64,6 +82,15 @@ var NetworkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSch
 		Optional:            true,
 		MarkdownDescription: "The frequency for the scheduled task.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"DAILY",
+				"HOURLY",
+				"WEEKLY",
+				"MONTHLY",
+			),
+		},
+		Default: stringdefault.StaticString(""),
 	},
 	"every": schema.Int64Attribute{
 		Optional:            true,
@@ -93,6 +120,13 @@ var NetworkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSch
 		Optional:            true,
 		MarkdownDescription: "Indicates if the scheduled task will be repeated or run only once.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"ONCE",
+				"RECUR",
+			),
+		},
+		Default: stringdefault.StaticString("ONCE"),
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
