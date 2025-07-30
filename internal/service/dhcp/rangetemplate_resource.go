@@ -391,15 +391,6 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
             return
         }
 
-        // Check the use_options field is set when options are configured
-        if !data.UseOptions.IsNull() && !data.UseOptions.IsUnknown() && !data.UseOptions.ValueBool() {
-            resp.Diagnostics.AddAttributeError(
-                path.Root("use_options"),
-                "Invalid configuration",
-                "When configuring options, the use_options attribute must be set to true",
-            )
-        }
-
         for i, option := range options {
             if option.Name.IsNull() || option.Name.IsUnknown() {
                 continue
@@ -408,12 +399,11 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
             optionName := option.Name.ValueString()
             isSpecialOption := specialOptions[optionName]
 
-            // Only Case 2: Non-special option should not have use_option set
             if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
                 resp.Diagnostics.AddAttributeError(
                     path.Root("options").AtListIndex(i).AtName("use_option"),
                     "Invalid configuration",
-                    fmt.Sprintf("The 'use_option' attribute should not be set for non-special option '%s'. "+
+                    fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Options '%s'. "+
                         "It is only applicable for special options: routers, router-templates, domain-name-servers, "+
                         "domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.", 
                         optionName),

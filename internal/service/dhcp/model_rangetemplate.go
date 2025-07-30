@@ -779,7 +779,19 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.NumberOfAddresses = flex.FlattenInt64Pointer(from.NumberOfAddresses)
 	m.Offset = flex.FlattenInt64Pointer(from.Offset)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangetemplateOptionFilterRulesAttrTypes, diags, FlattenRangetemplateOptionFilterRules)
-	m.Options = filterDHCPOptions(ctx, diags, from.Options, m.Options)
+	m.Options = flex.FilterDHCPOptions(
+		ctx,
+		diags,
+		from.Options,
+		m.Options,
+		RangetemplateOptionsAttrTypes,
+		func(ctx context.Context, opt *dhcp.RangetemplateOptions, d *diag.Diagnostics) types.Object {
+			return FlattenRangetemplateOptions(ctx, opt, d)
+		},
+		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *dhcp.RangetemplateOptions {
+			return ExpandRangetemplateOptions(ctx, obj, d)
+		},
+	)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangetemplateRelayAgentFilterRulesAttrTypes, diags, FlattenRangetemplateRelayAgentFilterRules)
