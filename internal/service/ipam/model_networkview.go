@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -112,6 +113,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -196,7 +200,7 @@ func (m *NetworkviewModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		Comment:              flex.ExpandStringPointer(m.Comment),
 		DdnsDnsView:          flex.ExpandStringPointer(m.DdnsDnsView),
 		DdnsZonePrimaries:    flex.ExpandFrameworkListNestedBlock(ctx, m.DdnsZonePrimaries, diags, ExpandNetworkviewDdnsZonePrimaries),
-		ExtAttrs:             ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:             ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FederatedRealms:      flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandNetworkviewFederatedRealms),
 		InternalForwardZones: flex.ExpandFrameworkListString(ctx, m.InternalForwardZones, diags),
 		MgmPrivate:           flex.ExpandBoolPointer(m.MgmPrivate),
@@ -213,7 +217,6 @@ func FlattenNetworkview(ctx context.Context, from *ipam.Networkview, diags *diag
 	}
 	m := NetworkviewModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkviewAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -233,7 +236,7 @@ func (m *NetworkviewModel) Flatten(ctx context.Context, from *ipam.Networkview, 
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DdnsDnsView = flex.FlattenStringPointer(from.DdnsDnsView)
 	m.DdnsZonePrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.DdnsZonePrimaries, NetworkviewDdnsZonePrimariesAttrTypes, diags, FlattenNetworkviewDdnsZonePrimaries)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, NetworkviewFederatedRealmsAttrTypes, diags, FlattenNetworkviewFederatedRealms)
 	m.InternalForwardZones = flex.FlattenFrameworkListString(ctx, from.InternalForwardZones, diags)
 	m.IsDefault = types.BoolPointerValue(from.IsDefault)
