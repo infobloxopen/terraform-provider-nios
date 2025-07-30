@@ -47,7 +47,6 @@ var RangeOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
-		Default: stringdefault.StaticString("dhcp-lease-time"),
 	},
 	"num": schema.Int64Attribute{
 		Optional:            true,

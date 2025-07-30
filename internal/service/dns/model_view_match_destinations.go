@@ -94,7 +94,6 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
@@ -122,8 +121,6 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 		},
-		Default: stringdefault.StaticString(""),
-
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{

@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -47,19 +46,16 @@ var RangetemplateMsOptionsResourceSchemaAttributes = map[string]schema.Attribute
 	"name": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name of the DHCP option.",
 	},
 	"vendor_class": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString("DHCP Standard Options"),
 		MarkdownDescription: "The name of the vendor class with which this DHCP option is associated.",
 	},
 	"user_class": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString("Default User Class"),
 		MarkdownDescription: "The name of the user class with which this DHCP option is associated.",
 	},
 	"type": schema.StringAttribute{

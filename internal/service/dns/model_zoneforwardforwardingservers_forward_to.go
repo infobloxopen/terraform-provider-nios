@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -72,7 +71,6 @@ var ZoneforwardforwardingserversForwardToResourceSchemaAttributes = map[string]s
 	"tsig_key": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
@@ -86,7 +84,6 @@ var ZoneforwardforwardingserversForwardToResourceSchemaAttributes = map[string]s
 	"tsig_key_name": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 		},
