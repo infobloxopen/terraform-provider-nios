@@ -288,7 +288,6 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ignore_client_identifier": schema.BoolAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  booldefault.StaticBool(false),
 		Validators: []validator.Bool{
 			boolvalidator.AlsoRequires(path.MatchRoot("use_ignore_client_identifier")),
 		},
@@ -306,7 +305,6 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ignore_id": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("NONE"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("CLIENT", "MACADDR", "NONE"),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ignore_id")),
@@ -475,7 +473,6 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_ignore_client_identifier": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ignore_client_identifier",
 	},
 	"use_ignore_dhcp_option_list_request": schema.BoolAttribute{
@@ -487,7 +484,6 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_ignore_id": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ignore_id",
 	},
 	"use_lease_scavenge_time": schema.BoolAttribute{
