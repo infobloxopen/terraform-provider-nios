@@ -19,7 +19,7 @@ resource "nios_ipam_network" "example_network" {
   network_view = "default"
   comment      = "Created by Terraform"
   extattrs = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
@@ -65,7 +65,7 @@ resource "nios_ipam_network" "complete_example" {
 
   // Extensible attributes
   extattrs = {
-    "Site" = "DataCenter1"
+    Site = "DataCenter1"
   }
 }
 
