@@ -266,6 +266,7 @@ func FlattenRecordA(ctx context.Context, from *dns.RecordA, diags *diag.Diagnost
 	}
 	m := RecordAModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RecordAAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -282,6 +282,7 @@ func FlattenRecordSrv(ctx context.Context, from *dns.RecordSrv, diags *diag.Diag
 	}
 	m := RecordSrvModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RecordSrvAttrTypes, m)
 	diags.Append(d...)
 	return t

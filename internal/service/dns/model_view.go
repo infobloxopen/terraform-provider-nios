@@ -953,6 +953,7 @@ func FlattenView(ctx context.Context, from *dns.View, diags *diag.Diagnostics) t
 	}
 	m := ViewModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ViewAttrTypes, m)
 	diags.Append(d...)
 	return t

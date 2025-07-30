@@ -246,6 +246,7 @@ func FlattenRecordTxt(ctx context.Context, from *dns.RecordTxt, diags *diag.Diag
 	}
 	m := RecordTxtModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RecordTxtAttrTypes, m)
 	diags.Append(d...)
 	return t

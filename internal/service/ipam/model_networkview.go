@@ -220,6 +220,7 @@ func FlattenNetworkview(ctx context.Context, from *ipam.Networkview, diags *diag
 	}
 	m := NetworkviewModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, NetworkviewAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -735,6 +735,7 @@ func FlattenRangetemplate(ctx context.Context, from *dhcp.Rangetemplate, diags *
 	}
 	m := RangetemplateModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RangetemplateAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -164,6 +164,7 @@ func FlattenDtcServer(ctx context.Context, from *dtc.DtcServer, diags *diag.Diag
 	}
 	m := DtcServerModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, DtcServerAttrTypes, m)
 	diags.Append(d...)
 	return t

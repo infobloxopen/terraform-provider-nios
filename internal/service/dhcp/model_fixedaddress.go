@@ -714,6 +714,7 @@ func FlattenFixedaddress(ctx context.Context, from *dhcp.Fixedaddress, diags *di
 	}
 	m := FixedaddressModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, FixedaddressAttrTypes, m)
 	diags.Append(d...)
 	return t
