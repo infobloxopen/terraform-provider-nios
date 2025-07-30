@@ -358,7 +358,6 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
 		},
-		Default: stringdefault.StaticString(""),
 	},
 	"dynamic_hosts": schema.Int64Attribute{
 		Computed:            true,

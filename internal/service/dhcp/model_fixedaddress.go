@@ -533,7 +533,6 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"reserved_interface": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The ref to the reserved interface to which the device belongs.",
 	},
 	"restart_if_needed": schema.BoolAttribute{
@@ -553,7 +552,6 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"template": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "If set on creation, the fixed address will be created according to the values specified in the named template.",
 	},
 	"use_bootfile": schema.BoolAttribute{
