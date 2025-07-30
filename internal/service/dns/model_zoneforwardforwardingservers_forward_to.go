@@ -153,7 +153,7 @@ func (m *ZoneforwardforwardingserversForwardToModel) Flatten(ctx context.Context
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)
-	m.TsigKey = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKey)
+	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
 	m.TsigKeyAlg = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyAlg)
 	m.TsigKeyName = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyName)
 	m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
