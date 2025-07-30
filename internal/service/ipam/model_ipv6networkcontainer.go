@@ -697,7 +697,7 @@ func FlattenIpv6networkcontainer(ctx context.Context, from *ipam.Ipv6networkcont
 	}
 	m := Ipv6networkcontainerModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, Ipv6networkcontainerAttrTypes, m)
 	diags.Append(d...)
 	return t
