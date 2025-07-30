@@ -263,6 +263,8 @@ Class | Method | HTTP request | Description
 *SharedrecordgroupAPI* | [**List**](docs/SharedrecordgroupAPI.md#list) | **Get** /sharedrecordgroup | Retrieve sharedrecordgroup objects
 *SharedrecordgroupAPI* | [**Read**](docs/SharedrecordgroupAPI.md#read) | **Get** /sharedrecordgroup/{reference} | Get a specific sharedrecordgroup object
 *SharedrecordgroupAPI* | [**Update**](docs/SharedrecordgroupAPI.md#update) | **Put** /sharedrecordgroup/{reference} | Update a sharedrecordgroup object
+*ViewAPI* | [**Create**](docs/ViewAPI.md#create) | **Post** /view | Create a view object
+*ViewAPI* | [**Delete**](docs/ViewAPI.md#delete) | **Delete** /view/{reference} | Delete a view object
 *ViewAPI* | [**List**](docs/ViewAPI.md#list) | **Get** /view | Retrieve view objects
 *ViewAPI* | [**Read**](docs/ViewAPI.md#read) | **Get** /view/{reference} | Get a specific view object
 *ViewAPI* | [**Update**](docs/ViewAPI.md#update) | **Put** /view/{reference} | Update a view object
@@ -361,6 +363,8 @@ Class | Method | HTTP request | Description
  - [CreateSharedrecordTxtResponseAsObject](docs/CreateSharedrecordTxtResponseAsObject.md)
  - [CreateSharedrecordgroupResponse](docs/CreateSharedrecordgroupResponse.md)
  - [CreateSharedrecordgroupResponseAsObject](docs/CreateSharedrecordgroupResponseAsObject.md)
+ - [CreateViewResponse](docs/CreateViewResponse.md)
+ - [CreateViewResponseAsObject](docs/CreateViewResponseAsObject.md)
  - [CreateZoneAuthResponse](docs/CreateZoneAuthResponse.md)
  - [CreateZoneAuthResponseAsObject](docs/CreateZoneAuthResponseAsObject.md)
  - [CreateZoneDelegatedResponse](docs/CreateZoneDelegatedResponse.md)
@@ -630,11 +634,15 @@ Class | Method | HTTP request | Description
  - [RecordHostCloudInfo](docs/RecordHostCloudInfo.md)
  - [RecordHostIpv4addr](docs/RecordHostIpv4addr.md)
  - [RecordHostIpv4addrDiscoveredData](docs/RecordHostIpv4addrDiscoveredData.md)
+ - [RecordHostIpv4addrIpv4addr](docs/RecordHostIpv4addrIpv4addr.md)
+ - [RecordHostIpv4addrIpv4addrOneOf](docs/RecordHostIpv4addrIpv4addrOneOf.md)
  - [RecordHostIpv4addrLogicFilterRules](docs/RecordHostIpv4addrLogicFilterRules.md)
  - [RecordHostIpv4addrMsAdUserData](docs/RecordHostIpv4addrMsAdUserData.md)
  - [RecordHostIpv4addrOptions](docs/RecordHostIpv4addrOptions.md)
  - [RecordHostIpv6addr](docs/RecordHostIpv6addr.md)
  - [RecordHostIpv6addrDiscoveredData](docs/RecordHostIpv6addrDiscoveredData.md)
+ - [RecordHostIpv6addrIpv6addr](docs/RecordHostIpv6addrIpv6addr.md)
+ - [RecordHostIpv6addrIpv6addrOneOf](docs/RecordHostIpv6addrIpv6addrOneOf.md)
  - [RecordHostIpv6addrLogicFilterRules](docs/RecordHostIpv6addrLogicFilterRules.md)
  - [RecordHostIpv6addrMsAdUserData](docs/RecordHostIpv6addrMsAdUserData.md)
  - [RecordHostIpv6addrOptions](docs/RecordHostIpv6addrOptions.md)

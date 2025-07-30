@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -77,6 +78,9 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -134,7 +138,7 @@ func (m *DtcServerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		AutoCreateHostRecord: flex.ExpandBoolPointer(m.AutoCreateHostRecord),
 		Comment:              flex.ExpandStringPointer(m.Comment),
 		Disable:              flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:             ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:             ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Health:               ExpandDtcServerHealth(ctx, m.Health, diags),
 		Host:                 flex.ExpandStringPointer(m.Host),
 		Monitors:             flex.ExpandFrameworkListNestedBlock(ctx, m.Monitors, diags, ExpandDtcServerMonitors),
@@ -151,7 +155,6 @@ func FlattenDtcServer(ctx context.Context, from *dtc.DtcServer, diags *diag.Diag
 	}
 	m := DtcServerModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, DtcServerAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -168,7 +171,7 @@ func (m *DtcServerModel) Flatten(ctx context.Context, from *dtc.DtcServer, diags
 	m.AutoCreateHostRecord = types.BoolPointerValue(from.AutoCreateHostRecord)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Health = FlattenDtcServerHealth(ctx, from.Health, diags)
 	m.Host = flex.FlattenStringPointer(from.Host)
 	m.Monitors = flex.FlattenFrameworkListNestedBlock(ctx, from.Monitors, DtcServerMonitorsAttrTypes, diags, FlattenDtcServerMonitors)
