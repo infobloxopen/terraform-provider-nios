@@ -30,8 +30,7 @@ var ZoneForwardForwardingServersAttrTypes = map[string]attr.Type{
 
 var ZoneForwardForwardingServersResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The name of this Grid member in FQDN format.",
 	},
 	"forwarders_only": schema.BoolAttribute{
