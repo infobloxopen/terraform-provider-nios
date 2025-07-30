@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -18,17 +19,18 @@ import (
 )
 
 type ZoneAuthMsDcNsRecordCreationModel struct {
-	Address types.String `tfsdk:"address"`
-	Comment types.String `tfsdk:"comment"`
+	Address iptypes.IPv4Address `tfsdk:"address"`
+	Comment types.String        `tfsdk:"comment"`
 }
 
 var ZoneAuthMsDcNsRecordCreationAttrTypes = map[string]attr.Type{
-	"address": types.StringType,
+	"address": iptypes.IPv4AddressType{},
 	"comment": types.StringType,
 }
 
 var ZoneAuthMsDcNsRecordCreationResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Required:            true,
 		MarkdownDescription: "The IPv4 address of the domain controller that is allowed to create NS records.",
 	},
@@ -63,7 +65,7 @@ func (m *ZoneAuthMsDcNsRecordCreationModel) Expand(ctx context.Context, diags *d
 		return nil
 	}
 	to := &dns.ZoneAuthMsDcNsRecordCreation{
-		Address: flex.ExpandStringPointer(m.Address),
+		Address: flex.ExpandIPv4Address(m.Address),
 		Comment: flex.ExpandStringPointer(m.Comment),
 	}
 	return to
@@ -87,6 +89,6 @@ func (m *ZoneAuthMsDcNsRecordCreationModel) Flatten(ctx context.Context, from *d
 	if m == nil {
 		*m = ZoneAuthMsDcNsRecordCreationModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPv4Address(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 }

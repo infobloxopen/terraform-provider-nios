@@ -3,6 +3,7 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,19 +20,19 @@ import (
 )
 
 type NetworkviewRemoteForwardZonesModel struct {
-	Fqdn                types.String `tfsdk:"fqdn"`
-	ServerAddress       types.String `tfsdk:"server_address"`
-	GssTsigDnsPrincipal types.String `tfsdk:"gss_tsig_dns_principal"`
-	GssTsigDomain       types.String `tfsdk:"gss_tsig_domain"`
-	TsigKey             types.String `tfsdk:"tsig_key"`
-	TsigKeyAlg          types.String `tfsdk:"tsig_key_alg"`
-	TsigKeyName         types.String `tfsdk:"tsig_key_name"`
-	KeyType             types.String `tfsdk:"key_type"`
+	Fqdn                types.String      `tfsdk:"fqdn"`
+	ServerAddress       iptypes.IPAddress `tfsdk:"server_address"`
+	GssTsigDnsPrincipal types.String      `tfsdk:"gss_tsig_dns_principal"`
+	GssTsigDomain       types.String      `tfsdk:"gss_tsig_domain"`
+	TsigKey             types.String      `tfsdk:"tsig_key"`
+	TsigKeyAlg          types.String      `tfsdk:"tsig_key_alg"`
+	TsigKeyName         types.String      `tfsdk:"tsig_key_name"`
+	KeyType             types.String      `tfsdk:"key_type"`
 }
 
 var NetworkviewRemoteForwardZonesAttrTypes = map[string]attr.Type{
 	"fqdn":                   types.StringType,
-	"server_address":         types.StringType,
+	"server_address":         iptypes.IPAddressType{},
 	"gss_tsig_dns_principal": types.StringType,
 	"gss_tsig_domain":        types.StringType,
 	"tsig_key":               types.StringType,
@@ -49,6 +50,7 @@ var NetworkviewRemoteForwardZonesResourceSchemaAttributes = map[string]schema.At
 		MarkdownDescription: "The FQDN of the remote server.",
 	},
 	"server_address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Required:            true,
 		MarkdownDescription: "The remote server IP address.",
 	},
@@ -113,7 +115,7 @@ func (m *NetworkviewRemoteForwardZonesModel) Expand(ctx context.Context, diags *
 	}
 	to := &ipam.NetworkviewRemoteForwardZones{
 		Fqdn:                flex.ExpandStringPointer(m.Fqdn),
-		ServerAddress:       flex.ExpandStringPointer(m.ServerAddress),
+		ServerAddress:       flex.ExpandIPAddress(m.ServerAddress),
 		GssTsigDnsPrincipal: flex.ExpandStringPointer(m.GssTsigDnsPrincipal),
 		GssTsigDomain:       flex.ExpandStringPointer(m.GssTsigDomain),
 		TsigKey:             flex.ExpandStringPointer(m.TsigKey),
@@ -143,7 +145,7 @@ func (m *NetworkviewRemoteForwardZonesModel) Flatten(ctx context.Context, from *
 		*m = NetworkviewRemoteForwardZonesModel{}
 	}
 	m.Fqdn = flex.FlattenStringPointer(from.Fqdn)
-	m.ServerAddress = flex.FlattenStringPointer(from.ServerAddress)
+	m.ServerAddress = flex.FlattenIPAddress(from.ServerAddress)
 	m.GssTsigDnsPrincipal = flex.FlattenStringPointer(from.GssTsigDnsPrincipal)
 	m.GssTsigDomain = flex.FlattenStringPointer(from.GssTsigDomain)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

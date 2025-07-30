@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -20,17 +21,17 @@ import (
 )
 
 type ZoneAuthAllowTransferModel struct {
-	Address        types.String `tfsdk:"address"`
-	Struct         types.String `tfsdk:"struct"`
-	Permission     types.String `tfsdk:"permission"`
-	TsigKey        types.String `tfsdk:"tsig_key"`
-	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
-	TsigKeyName    types.String `tfsdk:"tsig_key_name"`
-	UseTsigKeyName types.Bool   `tfsdk:"use_tsig_key_name"`
+	Address        iptypes.IPAddress `tfsdk:"address"`
+	Struct         types.String      `tfsdk:"struct"`
+	Permission     types.String      `tfsdk:"permission"`
+	TsigKey        types.String      `tfsdk:"tsig_key"`
+	TsigKeyAlg     types.String      `tfsdk:"tsig_key_alg"`
+	TsigKeyName    types.String      `tfsdk:"tsig_key_name"`
+	UseTsigKeyName types.Bool        `tfsdk:"use_tsig_key_name"`
 }
 
 var ZoneAuthAllowTransferAttrTypes = map[string]attr.Type{
-	"address":           types.StringType,
+	"address":           iptypes.IPAddressType{},
 	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -48,8 +49,9 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"address": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: iptypes.IPAddressType{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
@@ -152,7 +154,7 @@ func (m *ZoneAuthAllowTransferModel) Expand(ctx context.Context, diags *diag.Dia
 		Struct: flex.ExpandStringPointer(m.Struct),
 	}
 	if structValue == "addressac" {
-		to.Address = flex.ExpandStringPointer(m.Address)
+		to.Address = flex.ExpandIPAddress(m.Address)
 		to.Permission = flex.ExpandStringPointer(m.Permission)
 	} else if structValue == "tsigac" {
 		to.TsigKey = flex.ExpandStringPointer(m.TsigKey)
@@ -184,7 +186,7 @@ func (m *ZoneAuthAllowTransferModel) Flatten(ctx context.Context, from *dns.Zone
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 
 	if m.Struct.ValueString() == "addressac" {
-		m.Address = flex.FlattenStringPointer(from.Address)
+		m.Address = flex.FlattenIPAddress(from.Address)
 		m.Permission = flex.FlattenStringPointer(from.Permission)
 	} else if m.Struct.ValueString() == "tsigac" {
 		m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

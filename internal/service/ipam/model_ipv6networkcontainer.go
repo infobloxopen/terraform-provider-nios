@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -57,7 +58,7 @@ type Ipv6networkcontainerModel struct {
 	MgmPrivate                       types.Bool                       `tfsdk:"mgm_private"`
 	MgmPrivateOverridable            types.Bool                       `tfsdk:"mgm_private_overridable"`
 	MsAdUserData                     types.Object                     `tfsdk:"ms_ad_user_data"`
-	Network                          types.String                     `tfsdk:"network"`
+	Network                          cidrtypes.IPv6Prefix             `tfsdk:"network"`
 	FuncCall                         types.Object                     `tfsdk:"func_call"`
 	NetworkContainer                 types.String                     `tfsdk:"network_container"`
 	NetworkView                      types.String                     `tfsdk:"network_view"`
@@ -127,7 +128,7 @@ var Ipv6networkcontainerAttrTypes = map[string]attr.Type{
 	"mgm_private":                          types.BoolType,
 	"mgm_private_overridable":              types.BoolType,
 	"ms_ad_user_data":                      types.ObjectType{AttrTypes: Ipv6networkcontainerMsAdUserDataAttrTypes},
-	"network":                              types.StringType,
+	"network":                              cidrtypes.IPv6PrefixType{},
 	"func_call":                            types.ObjectType{AttrTypes: FuncCallAttrTypes},
 	"network_container":                    types.StringType,
 	"network_view":                         types.StringType,
@@ -376,6 +377,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Microsoft Active Directory user data associated with the network container.",
 	},
 	"network": schema.StringAttribute{
+		CustomType:          cidrtypes.IPv6PrefixType{},
 		Optional:            true,
 		MarkdownDescription: "The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'.",
 		Computed:            true,
@@ -782,20 +784,20 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, Ipv6networkcontainerZoneAssociationsAttrTypes, diags, FlattenIpv6networkcontainerZoneAssociations)
 }
 
-func ExpandIpv6NetworkcontainerNetwork(str types.String) *ipam.Ipv6networkcontainerNetwork {
+func ExpandIpv6NetworkcontainerNetwork(str cidrtypes.IPv6Prefix) *ipam.Ipv6networkcontainerNetwork {
 	if str.IsNull() {
 		return &ipam.Ipv6networkcontainerNetwork{}
 	}
 	var m ipam.Ipv6networkcontainerNetwork
-	m.String = flex.ExpandStringPointer(str)
+	m.String = flex.ExpandIPv6CIDR(str)
 	return &m
 }
 
-func FlattenIpv6NetworkcontainerNetwork(from *ipam.Ipv6networkcontainerNetwork) types.String {
+func FlattenIpv6NetworkcontainerNetwork(from *ipam.Ipv6networkcontainerNetwork) cidrtypes.IPv6Prefix {
 	if from.String == nil {
-		return types.StringNull()
+		return cidrtypes.NewIPv6PrefixNull()
 	}
-	m := flex.FlattenStringPointer(from.String)
+	m := flex.FlattenIPv6CIDR(from.String)
 	return m
 }
 
