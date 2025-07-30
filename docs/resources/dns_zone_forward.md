@@ -136,11 +136,14 @@ Read-Only:
 <a id="nestedatt--forwarding_servers"></a>
 ### Nested Schema for `forwarding_servers`
 
+Required:
+
+- `name` (String) The name of this Grid member in FQDN format.
+
 Optional:
 
 - `forward_to` (Attributes List) The information for the remote name server to which you want the Infoblox appliance to forward queries for a specified domain name. (see [below for nested schema](#nestedatt--forwarding_servers--forward_to))
 - `forwarders_only` (Boolean) Determines if the appliance sends queries to forwarders only, and not to other internal or Internet root servers.
-- `name` (String) The name of this Grid member in FQDN format.
 - `use_override_forwarders` (Boolean) Use flag for: forward_to
 
 <a id="nestedatt--forwarding_servers--forward_to"></a>
