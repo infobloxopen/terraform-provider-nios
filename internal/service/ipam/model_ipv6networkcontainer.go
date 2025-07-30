@@ -637,7 +637,7 @@ func (m *Ipv6networkcontainerModel) Expand(ctx context.Context, diags *diag.Diag
 		EnableDdns:                       flex.ExpandBoolPointer(m.EnableDdns),
 		EnableDiscovery:                  flex.ExpandBoolPointer(m.EnableDiscovery),
 		EnableImmediateDiscovery:         flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
-		ExtAttrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                         ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FederatedRealms:                  flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandIpv6networkcontainerFederatedRealms),
 		LogicFilterRules:                 flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6networkcontainerLogicFilterRules),
 		MgmPrivate:                       flex.ExpandBoolPointer(m.MgmPrivate),
@@ -726,7 +726,7 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, Ipv6networkcontainerFederatedRealmsAttrTypes, diags, FlattenIpv6networkcontainerFederatedRealms)
 	m.LastRirRegistrationUpdateSent = flex.FlattenInt64Pointer(from.LastRirRegistrationUpdateSent)
 	m.LastRirRegistrationUpdateStatus = flex.FlattenStringPointer(from.LastRirRegistrationUpdateStatus)
