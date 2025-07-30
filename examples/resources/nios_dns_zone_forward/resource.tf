@@ -31,3 +31,27 @@ resource "nios_dns_zone_forward" "zone_forward_additional_fields" {
     Site = "location-1"
   }
 }
+
+// Create an IPV4 DNS zone forward
+resource "nios_dns_zone_forward" "zone_forward_ipv4" {
+  fqdn = "192.1.0.0/24"
+  forward_to = [
+    {
+      name    = "ns1.example.com"
+      address = "1.1.1.1"
+    }
+  ]
+  zone_format = "IPV4"
+}
+
+// Create an IPV6 DNS zone forward
+resource "nios_dns_zone_forward" "zone_forward_ipv6_mapping" {
+  fqdn = "3001:db8::/64"
+  forward_to = [
+    {
+      name    = "ns1.example.com"
+      address = "1.1.1.1"
+    }
+  ]
+  zone_format = "IPV6"
+}

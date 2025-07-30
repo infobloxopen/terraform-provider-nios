@@ -44,6 +44,7 @@ var ZoneForwardForwardingServersResourceSchemaAttributes = map[string]schema.Att
 			Attributes: ZoneforwardforwardingserversForwardToResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The information for the remote name server to which you want the Infoblox appliance to forward queries for a specified domain name.",
 	},
 	"use_override_forwarders": schema.BoolAttribute{

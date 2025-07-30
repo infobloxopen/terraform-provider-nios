@@ -100,6 +100,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -148,6 +149,10 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("forward_to")),
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"prefix should not have leading or trailing whitespace",
+			),
 		},
 		MarkdownDescription: "A forward stub server name server group.",
 	},
@@ -156,6 +161,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneForwardForwardToResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.ConflictsWith(path.MatchRoot("external_ns_group")),
 		},
@@ -171,8 +177,8 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneForwardForwardingServersResourceSchemaAttributes,
 		},
-		Optional: true,
-		//Computed:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The information for the Grid members to which you want the Infoblox appliance to forward queries for a specified domain name.",
 	},
 	"fqdn": schema.StringAttribute{
@@ -225,8 +231,14 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of MS synchronization master for this zone.",
 	},
 	"ns_group": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"prefix should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "A forwarding member name server group.",
 	},
 	"parent": schema.StringAttribute{
@@ -236,6 +248,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"prefix": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -249,9 +262,15 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This is true if the zone is associated with a shared record group.",
 	},
 	"view": schema.StringAttribute{
-		Computed:            true,
-		Default:             stringdefault.StaticString("default"),
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("default"),
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"prefix should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The name of the DNS view in which the zone resides. Example \"external\".",
 	},
 	"zone_format": schema.StringAttribute{
@@ -332,7 +351,7 @@ func (m *ZoneForwardModel) Flatten(ctx context.Context, from *dns.ZoneForward, d
 	m.DisplayDomain = flex.FlattenStringPointer(from.DisplayDomain)
 	m.DnsFqdn = flex.FlattenStringPointer(from.DnsFqdn)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.ExternalNsGroup = flex.FlattenStringPointer(from.ExternalNsGroup)
+	m.ExternalNsGroup = flex.FlattenStringPointerNilAsNotEmpty(from.ExternalNsGroup)
 	m.ForwardTo = flex.FlattenFrameworkListNestedBlock(ctx, from.ForwardTo, ZoneForwardForwardToAttrTypes, diags, FlattenZoneForwardForwardTo)
 	m.ForwardersOnly = types.BoolPointerValue(from.ForwardersOnly)
 	m.ForwardingServers = flex.FlattenFrameworkListNestedBlock(ctx, from.ForwardingServers, ZoneForwardForwardingServersAttrTypes, diags, FlattenZoneForwardForwardingServers)
@@ -345,7 +364,7 @@ func (m *ZoneForwardModel) Flatten(ctx context.Context, from *dns.ZoneForward, d
 	m.MsManaged = flex.FlattenStringPointer(from.MsManaged)
 	m.MsReadOnly = types.BoolPointerValue(from.MsReadOnly)
 	m.MsSyncMasterName = flex.FlattenStringPointer(from.MsSyncMasterName)
-	m.NsGroup = flex.FlattenStringPointer(from.NsGroup)
+	m.NsGroup = flex.FlattenStringPointerNilAsNotEmpty(from.NsGroup)
 	m.Parent = flex.FlattenStringPointer(from.Parent)
 	m.Prefix = flex.FlattenStringPointer(from.Prefix)
 	m.UsingSrgAssociations = types.BoolPointerValue(from.UsingSrgAssociations)
