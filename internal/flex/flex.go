@@ -564,18 +564,34 @@ func FlattenIPAddress(ipaddr *string) iptypes.IPAddress {
 	}
 }
 
-func ExpandIPv4CIDR(ipaddr cidrtypes.IPv4Prefix) *string {
-	if ipaddr.IsNull() || ipaddr.IsUnknown() {
+func ExpandIPv4CIDR(ipv4addr cidrtypes.IPv4Prefix) *string {
+	if ipv4addr.IsNull() || ipv4addr.IsUnknown() {
 		return nil
 	}
-	return ExpandStringPointer(ipaddr.StringValue)
+	return ExpandStringPointer(ipv4addr.StringValue)
 }
 
-func FlattenIPv4CIDR(ipaddr *string) cidrtypes.IPv4Prefix {
-	if ipaddr == nil || *ipaddr == "" {
+func FlattenIPv4CIDR(ipv4addr *string) cidrtypes.IPv4Prefix {
+	if ipv4addr == nil || *ipv4addr == "" {
 		return cidrtypes.NewIPv4PrefixNull()
 	}
 	return cidrtypes.IPv4Prefix{
-		StringValue: FlattenStringPointer(ipaddr),
+		StringValue: FlattenStringPointer(ipv4addr),
+	}
+}
+
+func ExpandIPv6CIDR(ipv6addr cidrtypes.IPv6Prefix) *string {
+	if ipv6addr.IsNull() || ipv6addr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipv6addr.StringValue)
+}
+
+func FlattenIPv6CIDR(ipv6addr *string) cidrtypes.IPv6Prefix {
+	if ipv6addr == nil || *ipv6addr == "" {
+		return cidrtypes.NewIPv6PrefixNull()
+	}
+	return cidrtypes.IPv6Prefix{
+		StringValue: FlattenStringPointer(ipv6addr),
 	}
 }
