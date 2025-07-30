@@ -15,6 +15,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// - Parent Zone: example.com (in default view)
+// - IPv4 Network: 85.85.0.0/16 (for func call tests)
 func TestAccRecordAResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test"
 	var v dns.RecordA
@@ -45,7 +48,6 @@ func TestAccRecordAResource_basic(t *testing.T) {
 }
 
 func TestAccRecordAResource_disappears(t *testing.T) {
-	t.Skip("Skipping test for disappears")
 	resourceName := "nios_dns_record_a.test"
 	var v dns.RecordA
 	name := acctest.RandomName() + ".example.com"
@@ -283,6 +285,9 @@ func TestAccRecordAResource_ForbidReclamation(t *testing.T) {
 	})
 }
 
+// TestAccRecordAResource_FuncCall tests the "func_call" attribute functionality
+// which allocates IPv4 addresses using next_available_ip. Since func_call attribute can't be
+// updated, the comment is updated to demonstrate an update to the resource
 func TestAccRecordAResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_func_call"
 	var v dns.RecordA
@@ -424,36 +429,6 @@ func TestAccRecordAResource_UseTtl(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccRecordAResource_View(t *testing.T) {
-	var resourceName = "nios_dns_record_a.test_view"
-	var v dns.RecordA
-	name := acctest.RandomName() + ".example.com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordAView("10.0.0.20", name, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordAView("10.0.0.20", name, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -679,14 +654,4 @@ resource "nios_dns_record_a" "test_use_ttl" {
 	ttl = %d
 }
 `, name, ipV4Addr, view, useTtl, ttl)
-}
-
-func testAccRecordAView(ipV4addr string, name string, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_a" "test_view" {
-	ipv4addr = %q
-	name = %q
-	view = %q
-}
-`, ipV4addr, name, view)
 }

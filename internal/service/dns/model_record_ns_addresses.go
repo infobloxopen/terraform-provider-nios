@@ -3,6 +3,7 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -16,17 +17,18 @@ import (
 )
 
 type RecordNsAddressesModel struct {
-	Address       types.String `tfsdk:"address"`
-	AutoCreatePtr types.Bool   `tfsdk:"auto_create_ptr"`
+	Address       iptypes.IPAddress `tfsdk:"address"`
+	AutoCreatePtr types.Bool        `tfsdk:"auto_create_ptr"`
 }
 
 var RecordNsAddressesAttrTypes = map[string]attr.Type{
-	"address":         types.StringType,
+	"address":         iptypes.IPAddressType{},
 	"auto_create_ptr": types.BoolType,
 }
 
 var RecordNsAddressesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Required:            true,
 		MarkdownDescription: "The address of the Zone Name Server.",
 	},
@@ -55,7 +57,7 @@ func (m *RecordNsAddressesModel) Expand(ctx context.Context, diags *diag.Diagnos
 		return nil
 	}
 	to := &dns.RecordNsAddresses{
-		Address:       flex.ExpandStringPointer(m.Address),
+		Address:       flex.ExpandIPAddress(m.Address),
 		AutoCreatePtr: flex.ExpandBoolPointer(m.AutoCreatePtr),
 	}
 	return to
@@ -79,6 +81,6 @@ func (m *RecordNsAddressesModel) Flatten(ctx context.Context, from *dns.RecordNs
 	if m == nil {
 		*m = RecordNsAddressesModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.AutoCreatePtr = types.BoolPointerValue(from.AutoCreatePtr)
 }
