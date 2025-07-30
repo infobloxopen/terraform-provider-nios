@@ -1208,7 +1208,7 @@ func TestAccFixedaddressResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, "time-offset", "50", true),
+				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, "time-offset", "50", true, "2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
@@ -1217,7 +1217,7 @@ func TestAccFixedaddressResource_Options(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, "dhcp-lease-time", "7200", true),
+				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, "dhcp-lease-time", "7200", true, "51"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
@@ -2359,7 +2359,7 @@ resource "nios_dhcp_fixed_address" "test_nextserver" {
 `, ip, matchClient, agentCircuitID, nextserver, useNextServer)
 }
 
-func testAccFixedaddressOptions(ip, matchClient string, agentCircuitID int, optionsName, optionValue string, useOptions bool) string {
+func testAccFixedaddressOptions(ip, matchClient string, agentCircuitID int, optionsName, optionValue string, useOptions bool,  num string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_options" {
 	ipv4addr = %q
@@ -2367,12 +2367,13 @@ resource "nios_dhcp_fixed_address" "test_options" {
 	agent_circuit_id = %d
 	options = [ {
 		name         = %q
+		num 		= %q
 		value        = %q
 	} ]
 	use_options = %t
 	
 }
-`, ip, matchClient, agentCircuitID, optionsName, optionValue, useOptions)
+`, ip, matchClient, agentCircuitID, optionsName, num, optionValue, useOptions)
 }
 
 func testAccFixedaddressPxeLeaseTime(ip, matchClient string, agentCircuitID int, pxeLeaseTime string, usePXELeaseTime bool) string {

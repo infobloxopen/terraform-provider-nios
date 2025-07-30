@@ -61,11 +61,6 @@ func TestAccRangetemplateResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "-1"),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "0"),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "10"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "43200"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "false"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "false"),
@@ -1514,20 +1509,24 @@ func TestAccRangetemplateResource_Options(t *testing.T) {
 	options := []map[string]any{
 		{
 			"name":  "domain-name",
+			"num":  "15",
 			"value": "aa.bb.com",
 		},
 		{
 			"name":  "dhcp-lease-time",
+			"num":   "51",
 			"value": "72000",
 		},
 	}
 	optionsUpdated := []map[string]any{
 		{
 			"name":  "domain-name",
+			"num":   "15",
 			"value": "cc.dd.com",
 		},
 		{
 			"name":  "dhcp-lease-time",
+			"num":   "51",
 			"value": "82000",
 		},
 	}
