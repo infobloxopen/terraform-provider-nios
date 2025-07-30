@@ -62,7 +62,7 @@ var ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[s
 	},
 	"time_zone": schema.StringAttribute{
 		Computed:            true,
-		Default:             stringdefault.StaticString("UTC Coordinated Universal Time"),
+		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{

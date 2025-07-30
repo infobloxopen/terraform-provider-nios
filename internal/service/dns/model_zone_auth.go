@@ -423,7 +423,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
 		},
-		Default: stringdefault.StaticString(""),
 	},
 	"ddns_principal_tracking": schema.BoolAttribute{
 		Optional:            true,
@@ -518,7 +517,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"dns_integrity_member": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The Grid member that performs DNS integrity checks for this zone.",
 	},
 	"dns_integrity_verbose_logging": schema.BoolAttribute{
@@ -855,7 +853,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("grid_primary")),
 		},
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name server group that serves DNS for this zone.",
 	},
 	"parent": schema.StringAttribute{
@@ -884,7 +881,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_record_name_policy")),
 		},
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The hostname policy for records under this zone.",
 	},
 	"records_monitored": schema.BoolAttribute{

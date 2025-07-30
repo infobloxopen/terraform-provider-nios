@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -98,7 +97,6 @@ var ZoneauthgridprimaryPreferredPrimariesResourceSchemaAttributes = map[string]s
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Should not have leading or trailing whitespace",
 			),
-			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},
