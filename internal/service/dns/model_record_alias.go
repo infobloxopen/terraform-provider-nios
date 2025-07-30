@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -119,6 +120,9 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -187,7 +191,7 @@ func (m *RecordAliasModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		Comment:    flex.ExpandStringPointer(m.Comment),
 		Creator:    flex.ExpandStringPointer(m.Creator),
 		Disable:    flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:   ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:       flex.ExpandStringPointer(m.Name),
 		TargetName: flex.ExpandStringPointer(m.TargetName),
 		TargetType: flex.ExpandStringPointer(m.TargetType),
@@ -204,7 +208,6 @@ func FlattenRecordAlias(ctx context.Context, from *dns.RecordAlias, diags *diag.
 	}
 	m := RecordAliasModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, RecordAliasAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -225,7 +228,7 @@ func (m *RecordAliasModel) Flatten(ctx context.Context, from *dns.RecordAlias, d
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
 	m.DnsTargetName = flex.FlattenStringPointer(from.DnsTargetName)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.TargetName = flex.FlattenStringPointer(from.TargetName)

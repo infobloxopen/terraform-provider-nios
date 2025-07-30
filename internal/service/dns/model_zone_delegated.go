@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -138,10 +139,13 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This flag controls whether automatic generation of RFC 2317 CNAMEs for delegated reverse zones overwrite existing PTR records. The default behavior is to overwrite all the existing records in the range; this corresponds to \"allow_ptr_creation_in_parent\" set to False. However, when this flag is set to True the existing PTR records are not overwritten.",
 	},
 	"extattrs": schema.MapAttribute{
-		Optional:            true,
-		Computed:            true,
-		ElementType:         types.StringType,
-		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Optional:    true,
+		Computed:    true,
+		ElementType: types.StringType,
+		Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"extattrs_all": schema.MapAttribute{
@@ -262,7 +266,7 @@ func (m *ZoneDelegatedModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		DelegatedTtl:           flex.ExpandInt64Pointer(m.DelegatedTtl),
 		Disable:                flex.ExpandBoolPointer(m.Disable),
 		EnableRfc2317Exclusion: flex.ExpandBoolPointer(m.EnableRfc2317Exclusion),
-		ExtAttrs:               ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:               ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Locked:                 flex.ExpandBoolPointer(m.Locked),
 		MsAdIntegrated:         flex.ExpandBoolPointer(m.MsAdIntegrated),
 		MsDdnsMode:             flex.ExpandStringPointer(m.MsDdnsMode),
@@ -284,7 +288,6 @@ func FlattenZoneDelegated(ctx context.Context, from *dns.ZoneDelegated, diags *d
 	}
 	m := ZoneDelegatedModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ZoneDelegatedAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -306,7 +309,7 @@ func (m *ZoneDelegatedModel) Flatten(ctx context.Context, from *dns.ZoneDelegate
 	m.DisplayDomain = flex.FlattenStringPointer(from.DisplayDomain)
 	m.DnsFqdn = flex.FlattenStringPointer(from.DnsFqdn)
 	m.EnableRfc2317Exclusion = types.BoolPointerValue(from.EnableRfc2317Exclusion)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Fqdn = flex.FlattenStringPointer(from.Fqdn)
 	m.Locked = types.BoolPointerValue(from.Locked)
 	m.LockedBy = flex.FlattenStringPointer(from.LockedBy)

@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -131,6 +132,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -287,7 +291,7 @@ func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		Comment:             flex.ExpandStringPointer(m.Comment),
 		Disable:             flex.ExpandBoolPointer(m.Disable),
 		DisableNsGeneration: flex.ExpandBoolPointer(m.DisableNsGeneration),
-		ExtAttrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ExternalNsGroup:     flex.ExpandStringPointer(m.ExternalNsGroup),
 		ForwardTo:           flex.ExpandFrameworkListNestedBlock(ctx, m.ForwardTo, diags, ExpandZoneForwardForwardTo),
 		ForwardersOnly:      flex.ExpandBoolPointer(m.ForwardersOnly),
@@ -312,7 +316,6 @@ func FlattenZoneForward(ctx context.Context, from *dns.ZoneForward, diags *diag.
 	}
 	m := ZoneForwardModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, ZoneForwardAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -332,7 +335,7 @@ func (m *ZoneForwardModel) Flatten(ctx context.Context, from *dns.ZoneForward, d
 	m.DisableNsGeneration = types.BoolPointerValue(from.DisableNsGeneration)
 	m.DisplayDomain = flex.FlattenStringPointer(from.DisplayDomain)
 	m.DnsFqdn = flex.FlattenStringPointer(from.DnsFqdn)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.ExternalNsGroup = flex.FlattenStringPointer(from.ExternalNsGroup)
 	m.ForwardTo = flex.FlattenFrameworkListNestedBlock(ctx, from.ForwardTo, ZoneForwardForwardToAttrTypes, diags, FlattenZoneForwardForwardTo)
 	m.ForwardersOnly = types.BoolPointerValue(from.ForwardersOnly)

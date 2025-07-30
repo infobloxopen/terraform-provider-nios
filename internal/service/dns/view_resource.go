@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -74,8 +73,8 @@ func (r *ViewResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	// Add internal ID exists in the Extensible Attributes if not already present
-	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
+	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	if diags.HasError() {
 		return
 	}
 
@@ -92,7 +91,7 @@ func (r *ViewResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	res := apiRes.CreateViewResponseAsObject.GetResult()
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create View due inherited Extensible attributes, got error: %s", err))
 		return
@@ -132,30 +131,13 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	res := apiRes.GetViewResponseObjectAsResult.GetResult()
-	if res.ExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Extensible Attributes",
-			"Unable to read View because no extensible attributes were returned from the API.",
-		)
-		return
-	}
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading View due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
+	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
-		resp.Diagnostics.AddError(
-			"Missing Terraform internal id Attributes",
-			"Unable to read View because terraform internal id does not exist.",
-		)
-		return
+		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
 	if stateExtAttrs == nil {
 		resp.Diagnostics.AddError(
 			"Missing Internal ID",
@@ -164,12 +146,17 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	stateTerraformId := (*stateExtAttrs)["Terraform Internal ID"]
-
+	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
 	if apiTerraformId.Value != stateTerraformId.Value {
 		if r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
+	}
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading View due inherited Extensible attributes, got error: %s", diags))
+		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
@@ -185,18 +172,18 @@ func (r *ViewResource) ReadByExtAttrs(ctx context.Context, data *ViewModel, resp
 		return false
 	}
 
-	internalIdExtAttr := *ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
 	if diags.HasError() {
 		return false
 	}
 
-	internalId := internalIdExtAttr["Terraform Internal ID"].Value
+	internalId := internalIdExtAttr[terraformInternalIDEA].Value
 	if internalId == "" {
 		return false
 	}
 
 	idMap := map[string]interface{}{
-		"Terraform Internal ID": internalId,
+		terraformInternalIDEA: internalId,
 	}
 
 	apiRes, _, err := r.client.DNSAPI.
@@ -221,8 +208,8 @@ func (r *ViewResource) ReadByExtAttrs(ctx context.Context, data *ViewModel, resp
 
 	res := results[0]
 
-	// Remove inherited external attributes and check for errors
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	// Remove inherited external attributes from extattrs
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		return true
 	}
@@ -244,8 +231,8 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
+	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -257,9 +244,10 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	// Add internal ID exists in the Extensible Attributes if not already present
-	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
+	// Add Inherited Extensible Attributes
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -270,7 +258,6 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		ReturnFieldsPlus(readableAttributesForView).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update View, got error: %s", err))
 		return
@@ -278,7 +265,7 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	res := apiRes.UpdateViewResponseAsObject.GetResult()
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update View due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -313,33 +300,65 @@ func (r *ViewResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	}
 }
 
-func (r *ViewResource) addInternalIDToExtAttrs(ctx context.Context, data *ViewModel) error {
-	var internalId string
-
-	if !data.ExtAttrsAll.IsNull() {
-		elements := data.ExtAttrsAll.Elements()
-		if tId, ok := elements["Terraform Internal ID"]; ok {
-			if tIdStr, ok := tId.(types.String); ok {
-				internalId = tIdStr.ValueString()
-			}
-		}
-	}
-
-	if internalId == "" {
-		var err error
-		internalId, err = uuid.GenerateUUID()
-		if err != nil {
-			return err
-		}
-	}
-
-	r.client.DNSAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
-		"Terraform Internal ID": {Value: internalId},
-	}
-
-	return nil
-}
-
 func (r *ViewResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	var diags diag.Diagnostics
+	var data ViewModel
+
+	resourceRef := utils.ExtractResourceRef(req.ID)
+
+	apiRes, _, err := r.client.DNSAPI.
+		ViewAPI.
+		Read(ctx, resourceRef).
+		ReturnFieldsPlus(readableAttributesForView).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read View for import, got error: %s", err))
+		return
+	}
+
+	res := apiRes.GetViewResponseObjectAsResult.GetResult()
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading View for import due inherited Extensible attributes, got error: %s", diags))
+		return
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	planExtAttrs := data.ExtAttrs
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	if diags.HasError() {
+		return
+	}
+
+	updateRes, _, err := r.client.DNSAPI.
+		ViewAPI.
+		Update(ctx, resourceRef).
+		View(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForView).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update View for import, got error: %s", err))
+		return
+	}
+
+	res = updateRes.UpdateViewResponseAsObject.GetResult()
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update View due inherited Extensible attributes for import, got error: %s", diags))
+		return
+	}
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

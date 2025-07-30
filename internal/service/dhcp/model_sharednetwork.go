@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -278,6 +279,9 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -546,7 +550,7 @@ func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		Disable:                        flex.ExpandBoolPointer(m.Disable),
 		EnableDdns:                     flex.ExpandBoolPointer(m.EnableDdns),
 		EnablePxeLeaseTime:             flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
-		ExtAttrs:                       ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                       ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		IgnoreClientIdentifier:         flex.ExpandBoolPointer(m.IgnoreClientIdentifier),
 		IgnoreDhcpOptionListRequest:    flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
 		IgnoreId:                       flex.ExpandStringPointer(m.IgnoreId),
@@ -591,7 +595,6 @@ func FlattenSharednetwork(ctx context.Context, from *dhcp.Sharednetwork, diags *
 	}
 	m := SharednetworkModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, SharednetworkAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -621,7 +624,7 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.DynamicHosts = flex.FlattenInt64Pointer(from.DynamicHosts)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.IgnoreClientIdentifier = types.BoolPointerValue(from.IgnoreClientIdentifier)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.IgnoreId = flex.FlattenStringPointer(from.IgnoreId)
