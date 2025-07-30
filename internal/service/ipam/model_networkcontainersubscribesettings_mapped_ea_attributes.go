@@ -66,7 +66,6 @@ func FlattenNetworkcontainersubscribesettingsMappedEaAttributes(ctx context.Cont
 	}
 	m := NetworkcontainersubscribesettingsMappedEaAttributesModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainersubscribesettingsMappedEaAttributesAttrTypes, m)
 	diags.Append(d...)
 	return t

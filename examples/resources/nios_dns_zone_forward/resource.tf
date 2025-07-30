@@ -1,10 +1,10 @@
-// Create a DNS zone forward record with basic fields
+// Create a DNS zone forward with basic fields
 resource "nios_dns_zone_forward" "zone_forward_basic_fields" {
   fqdn              = "example1.example.com"
   external_ns_group = "nsg1"
 }
 
-// Create a DNS zone forward record with additional fields
+// Create a DNS zone forward with additional fields
 resource "nios_dns_zone_forward" "zone_forward_additional_fields" {
   fqdn = "example2.example.com"
   forward_to = [
@@ -30,4 +30,28 @@ resource "nios_dns_zone_forward" "zone_forward_additional_fields" {
   extattrs = {
     Site = "location-1"
   }
+}
+
+// Create an IPV4 DNS zone forward
+resource "nios_dns_zone_forward" "zone_forward_ipv4" {
+  fqdn = "192.1.0.0/24"
+  forward_to = [
+    {
+      name    = "ns1.example.com"
+      address = "1.1.1.1"
+    }
+  ]
+  zone_format = "IPV4"
+}
+
+// Create an IPV6 DNS zone forward
+resource "nios_dns_zone_forward" "zone_forward_ipv6_mapping" {
+  fqdn = "3001:db8::/64"
+  forward_to = [
+    {
+      name    = "ns1.example.com"
+      address = "1.1.1.1"
+    }
+  ]
+  zone_format = "IPV6"
 }

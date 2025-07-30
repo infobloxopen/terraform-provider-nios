@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -115,6 +116,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -217,7 +221,7 @@ func (m *DtcPoolModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc
 		Comment:                  flex.ExpandStringPointer(m.Comment),
 		ConsolidatedMonitors:     flex.ExpandFrameworkListNestedBlock(ctx, m.ConsolidatedMonitors, diags, ExpandDtcPoolConsolidatedMonitors),
 		Disable:                  flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:                 ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                 ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Health:                   ExpandDtcPoolHealth(ctx, m.Health, diags),
 		LbAlternateMethod:        flex.ExpandStringPointer(m.LbAlternateMethod),
 		LbAlternateTopology:      flex.ExpandStringPointer(m.LbAlternateTopology),
@@ -241,7 +245,7 @@ func FlattenDtcPool(ctx context.Context, from *dtc.DtcPool, diags *diag.Diagnost
 	}
 	m := DtcPoolModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, DtcPoolAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -260,7 +264,7 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ConsolidatedMonitors = flex.FlattenFrameworkListNestedBlock(ctx, from.ConsolidatedMonitors, DtcPoolConsolidatedMonitorsAttrTypes, diags, FlattenDtcPoolConsolidatedMonitors)
 	m.Disable = types.BoolPointerValue(from.Disable)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Health = FlattenDtcPoolHealth(ctx, from.Health, diags)
 	m.LbAlternateMethod = flex.FlattenStringPointer(from.LbAlternateMethod)
 	m.LbAlternateTopology = flex.FlattenStringPointer(from.LbAlternateTopology)

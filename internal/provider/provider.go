@@ -15,6 +15,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
@@ -98,29 +99,69 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		dhcp.NewRangeResource,
+
 		dns.NewRecordAResource,
 		dns.NewRecordAaaaResource,
+		dns.NewRecordAliasResource,
+		dns.NewRecordSrvResource,
+		dns.NewRecordTxtResource,
+		dns.NewRecordPtrResource,
+		dns.NewRecordNsResource,
 		dns.NewZoneForwardResource,
+		dns.NewRecordCnameResource,
+		dns.NewRecordMxResource,
+		dns.NewZoneDelegatedResource,
+		dns.NewZoneAuthResource,
+		dns.NewViewResource,
+
+		dhcp.NewFixedaddressResource,
+		dhcp.NewSharednetworkResource,
+		dhcp.NewRangetemplateResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
 
+		ipam.NewNetworkResource,
 		ipam.NewNetworkcontainerResource,
+		ipam.NewIpv6networkcontainerResource,
+		ipam.NewIpv6networkResource,
+		ipam.NewNetworkviewResource,
 	}
 }
 
 func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		dhcp.NewRangeDataSource,
+
 		dns.NewRecordADataSource,
 		dns.NewRecordAaaaDataSource,
+		dns.NewRecordAliasDataSource,
+		dns.NewRecordSrvDataSource,
+		dns.NewRecordTxtDataSource,
+		dns.NewRecordPtrDataSource,
+		dns.NewRecordNsDataSource,
 		dns.NewZoneForwardDataSource,
+		dns.NewRecordCnameDataSource,
+		dns.NewRecordMxDataSource,
+		dns.NewZoneDelegatedDataSource,
+		dns.NewZoneAuthDataSource,
+		dns.NewViewDataSource,
+
+		dhcp.NewFixedaddressDataSource,
+		dhcp.NewSharednetworkDataSource,
+		dhcp.NewRangetemplateDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
 
+		ipam.NewNetworkDataSource,
 		ipam.NewNetworkcontainerDataSource,
+		ipam.NewIpv6networkcontainerDataSource,
+		ipam.NewIpv6networkDataSource,
+		ipam.NewNetworkviewDataSource,
 	}
 }
 

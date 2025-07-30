@@ -3,11 +3,13 @@ package flex
 import (
 	"context"
 	"fmt"
-
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/hwtypes"
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -151,6 +153,21 @@ func ExpandFrameworkListString(ctx context.Context, tfList interface {
 	var data []string
 	diags.Append(tfList.ElementsAs(ctx, &data, false)...)
 	return data
+}
+
+func FlattenFrameworkUnorderedListNestedBlock[T any, U any](ctx context.Context, data []T, attrTypes map[string]attr.Type, diags *diag.Diagnostics, f FrameworkElementFlExFunc[*T, U]) internaltypes.UnorderedListValue {
+	if len(data) == 0 {
+		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: attrTypes})
+	}
+
+	tfData := ApplyToAll(data, func(t T) U {
+		return f(ctx, &t, diags)
+	})
+
+	tfList, d := internaltypes.NewUnorderedListValueFrom(ctx, types.ObjectType{AttrTypes: attrTypes}, tfData)
+
+	diags.Append(d...)
+	return tfList
 }
 
 func ExpandFrameworkListInt32(ctx context.Context, tfList types.List, diags *diag.Diagnostics) []int32 {
@@ -481,4 +498,100 @@ func ExpandList[U any](ctx context.Context, tfList types.List, u U, diags *diag.
 	diags.Append(diag...)
 	diags.Append(lv.ElementsAs(ctx, &u, false)...)
 	return u
+}
+
+func ExpandMACAddress(mac hwtypes.MACAddress) *string {
+	if mac.IsNull() || mac.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(mac.StringValue)
+}
+
+func FlattenMACAddress(mac *string) hwtypes.MACAddress {
+	if mac == nil {
+		return hwtypes.NewMACAddressNull()
+	}
+	return hwtypes.MACAddress{
+		StringValue: FlattenStringPointer(mac),
+	}
+}
+
+func ExpandIPv4Address(ipv4addr iptypes.IPv4Address) *string {
+	if ipv4addr.IsNull() || ipv4addr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipv4addr.StringValue)
+}
+
+func FlattenIPv4Address(ipv4addr *string) iptypes.IPv4Address {
+	if ipv4addr == nil || *ipv4addr == "" {
+		return iptypes.NewIPv4AddressNull()
+	}
+	return iptypes.IPv4Address{
+		StringValue: FlattenStringPointer(ipv4addr),
+	}
+}
+
+func ExpandIPv6Address(ipv6addr iptypes.IPv6Address) *string {
+	if ipv6addr.IsNull() || ipv6addr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipv6addr.StringValue)
+}
+
+func FlattenIPv6Address(ipv6addr *string) iptypes.IPv6Address {
+	if ipv6addr == nil || *ipv6addr == "" {
+		return iptypes.NewIPv6AddressNull()
+	}
+	return iptypes.IPv6Address{
+		StringValue: FlattenStringPointer(ipv6addr),
+	}
+}
+
+func ExpandIPAddress(ipaddr iptypes.IPAddress) *string {
+	if ipaddr.IsNull() || ipaddr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipaddr.StringValue)
+}
+
+func FlattenIPAddress(ipaddr *string) iptypes.IPAddress {
+	if ipaddr == nil || *ipaddr == "" {
+		return iptypes.NewIPAddressNull()
+	}
+	return iptypes.IPAddress{
+		StringValue: FlattenStringPointer(ipaddr),
+	}
+}
+
+func ExpandIPv4CIDR(ipv4addr cidrtypes.IPv4Prefix) *string {
+	if ipv4addr.IsNull() || ipv4addr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipv4addr.StringValue)
+}
+
+func FlattenIPv4CIDR(ipv4addr *string) cidrtypes.IPv4Prefix {
+	if ipv4addr == nil || *ipv4addr == "" {
+		return cidrtypes.NewIPv4PrefixNull()
+	}
+	return cidrtypes.IPv4Prefix{
+		StringValue: FlattenStringPointer(ipv4addr),
+	}
+}
+
+func ExpandIPv6CIDR(ipv6addr cidrtypes.IPv6Prefix) *string {
+	if ipv6addr.IsNull() || ipv6addr.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(ipv6addr.StringValue)
+}
+
+func FlattenIPv6CIDR(ipv6addr *string) cidrtypes.IPv6Prefix {
+	if ipv6addr == nil || *ipv6addr == "" {
+		return cidrtypes.NewIPv6PrefixNull()
+	}
+	return cidrtypes.IPv6Prefix{
+		StringValue: FlattenStringPointer(ipv6addr),
+	}
 }

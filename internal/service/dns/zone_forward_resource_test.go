@@ -17,8 +17,8 @@ import (
 )
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// - externalNsGroup = ensg1, ensg2
-// - nsGroup = ns_group1, ns_group2
+// - externalNsGroup = ensg1, ensg2 (forward/stub server)
+// - nsGroup = ns_group1, ns_group2 (fowarding member)
 
 var readableAttributesForZoneForward = "address,comment,disable,disable_ns_generation,display_domain,dns_fqdn,extattrs,external_ns_group,forward_to,forwarders_only,forwarding_servers,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed,ms_read_only,ms_sync_master_name,ns_group,parent,prefix,using_srg_associations,view,zone_format"
 
@@ -323,7 +323,7 @@ func TestAccZoneForwardResource_ForwardingServers(t *testing.T) {
 	externalNsGroup := "ensg1"
 	forwardingServer1 := []dns.ZoneForwardForwardingServers{
 		{
-			Name:                  utils.Ptr("infoblox.172_28_82_248"),
+			Name:                  utils.Ptr("infoblox.172_28_82_12"),
 			ForwardersOnly:        utils.Ptr(true),
 			UseOverrideForwarders: utils.Ptr(true),
 			ForwardTo: []dns.ZoneforwardforwardingserversForwardTo{
@@ -336,7 +336,7 @@ func TestAccZoneForwardResource_ForwardingServers(t *testing.T) {
 	}
 	forwardingServer2 := []dns.ZoneForwardForwardingServers{
 		{
-			Name:                  utils.Ptr("infoblox.172_28_82_248"),
+			Name:                  utils.Ptr("infoblox.172_28_82_12"),
 			ForwardersOnly:        utils.Ptr(false),
 			UseOverrideForwarders: utils.Ptr(false),
 			ForwardTo: []dns.ZoneforwardforwardingserversForwardTo{
@@ -357,7 +357,7 @@ func TestAccZoneForwardResource_ForwardingServers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.172_28_82_248"),
+					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.172_28_82_12"),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.forwarders_only", "true"),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.use_override_forwarders", "true"),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.forward_to.0.name", "example1.org"),
@@ -370,7 +370,7 @@ func TestAccZoneForwardResource_ForwardingServers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.172_28_82_248"),
+					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.172_28_82_12"),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.forwarders_only", "false"),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.use_override_forwarders", "false"),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.forward_to.0.name", "example22.org"),

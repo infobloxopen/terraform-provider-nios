@@ -14,17 +14,30 @@ Manages a DNS A record.
 
 ```terraform
 // Create Record A with Basic Fields
-resource "nios_dns_record_a" "create_record" {
+resource "nios_dns_record_a" "create_record_a" {
   name     = "example_record.example.com"
   ipv4addr = "10.20.1.2"
   view     = "default"
   extattrs = {
-    Site = "Siteblr"
+    Site = "location-1"
+  }
+}
+
+// Create Record A with additional fields
+resource "nios_dns_record_a" "create_record_a_with_additional_fields" {
+  name     = "example_record_with_ttl.example.com"
+  ipv4addr = "10.20.1.3"
+  view     = "default"
+  use_ttl  = true
+  ttl      = 10
+  comment  = "Example A record"
+  extattrs = {
+    Site = "location-1"
   }
 }
 
 // Create Record A using function call to retrieve ipv4addr
-resource "nios_dns_record_a" "create_with_func_call" {
+resource "nios_dns_record_a" "create_record_a_with_func_call" {
   name = "example_func_call.example.com"
   func_call = {
     attribute_name  = "ipv4addr"
@@ -117,13 +130,10 @@ Read-Only:
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`
 
-Optional:
-
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
-
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
+- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.
@@ -134,7 +144,7 @@ Read-Only:
 <a id="nestedatt--cloud_info--delegated_member"></a>
 ### Nested Schema for `cloud_info.delegated_member`
 
-Optional:
+Read-Only:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.

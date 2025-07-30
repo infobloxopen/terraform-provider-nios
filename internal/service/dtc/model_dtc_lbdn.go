@@ -5,22 +5,22 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
-
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type DtcLbdnModel struct {
@@ -95,10 +95,13 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines whether the DTC LBDN is disabled or not. When this is set to False, the fixed address is enabled.",
 	},
 	"extattrs": schema.MapAttribute{
-		Optional:            true,
-		Computed:            true,
-		ElementType:         types.StringType,
-		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Optional:    true,
+		Computed:    true,
+		ElementType: types.StringType,
+		Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"extattrs_all": schema.MapAttribute{
@@ -195,7 +198,7 @@ func (m *DtcLbdnModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc
 		AutoConsolidatedMonitors: flex.ExpandBoolPointer(m.AutoConsolidatedMonitors),
 		Comment:                  flex.ExpandStringPointer(m.Comment),
 		Disable:                  flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:                 ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                 ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Health:                   ExpandDtcLbdnHealth(ctx, m.Health, diags),
 		LbMethod:                 flex.ExpandStringPointer(m.LbMethod),
 		Name:                     flex.ExpandStringPointer(m.Name),
@@ -217,7 +220,7 @@ func FlattenDtcLbdn(ctx context.Context, from *dtc.DtcLbdn, diags *diag.Diagnost
 	}
 	m := DtcLbdnModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, DtcLbdnAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -235,7 +238,7 @@ func (m *DtcLbdnModel) Flatten(ctx context.Context, from *dtc.DtcLbdn, diags *di
 	m.AutoConsolidatedMonitors = types.BoolPointerValue(from.AutoConsolidatedMonitors)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Health = FlattenDtcLbdnHealth(ctx, from.Health, diags)
 	m.LbMethod = flex.FlattenStringPointer(from.LbMethod)
 	m.Name = flex.FlattenStringPointer(from.Name)
