@@ -36,8 +36,7 @@ var RangetemplateOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Name of the DHCP option.",
 	},
 	"num": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Required: 		  true,
 		MarkdownDescription: "The code of the DHCP option.",
 	},
 	"vendor_class": schema.StringAttribute{
