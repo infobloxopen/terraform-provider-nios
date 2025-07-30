@@ -2,7 +2,9 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,23 +19,30 @@ import (
 )
 
 type ViewFilterAaaaListModel struct {
-	Address    types.String `tfsdk:"address"`
-	Permission types.String `tfsdk:"permission"`
+	Address    iptypes.IPAddress `tfsdk:"address"`
+	Permission types.String      `tfsdk:"permission"`
 }
 
 var ViewFilterAaaaListAttrTypes = map[string]attr.Type{
-	"address":    types.StringType,
+	"address":    iptypes.IPAddressType{},
 	"permission": types.StringType,
 }
 
 var ViewFilterAaaaListResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Required:            true,
+		CustomType: iptypes.IPAddressType{},
+		Required:   true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
 	"permission": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("ALLOW", "DENY"),
 		},
@@ -58,7 +67,7 @@ func (m *ViewFilterAaaaListModel) Expand(ctx context.Context, diags *diag.Diagno
 		return nil
 	}
 	to := &dns.ViewFilterAaaaList{
-		Address:    flex.ExpandStringPointer(m.Address),
+		Address:    flex.ExpandIPAddress(m.Address),
 		Permission: flex.ExpandStringPointer(m.Permission),
 	}
 	return to
@@ -82,6 +91,6 @@ func (m *ViewFilterAaaaListModel) Flatten(ctx context.Context, from *dns.ViewFil
 	if m == nil {
 		*m = ViewFilterAaaaListModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 }

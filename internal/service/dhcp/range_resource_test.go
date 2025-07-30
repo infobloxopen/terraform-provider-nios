@@ -3557,7 +3557,6 @@ resource "nios_dhcp_range" "test_server_association_type" {
 `, startAddr, endAddr, serverAssociationType, failoverAssociation, member)
 }
 
-
 func testAccRangeStartAddr(startAddr, endAddr string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_start_addr" {

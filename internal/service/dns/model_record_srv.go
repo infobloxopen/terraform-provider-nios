@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -150,6 +151,9 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -254,7 +258,7 @@ func (m *RecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 		DdnsPrincipal:     flex.ExpandStringPointer(m.DdnsPrincipal),
 		DdnsProtected:     flex.ExpandBoolPointer(m.DdnsProtected),
 		Disable:           flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:          ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ForbidReclamation: flex.ExpandBoolPointer(m.ForbidReclamation),
 		Name:              flex.ExpandStringPointer(m.Name),
 		Port:              flex.ExpandInt64Pointer(m.Port),
@@ -276,7 +280,7 @@ func FlattenRecordSrv(ctx context.Context, from *dns.RecordSrv, diags *diag.Diag
 	}
 	m := RecordSrvModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RecordSrvAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -300,7 +304,7 @@ func (m *RecordSrvModel) Flatten(ctx context.Context, from *dns.RecordSrv, diags
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
 	m.DnsTarget = flex.FlattenStringPointer(from.DnsTarget)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.ForbidReclamation = types.BoolPointerValue(from.ForbidReclamation)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)
 	m.Name = flex.FlattenStringPointer(from.Name)

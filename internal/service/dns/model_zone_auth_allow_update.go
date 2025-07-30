@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -19,17 +20,17 @@ import (
 )
 
 type ZoneAuthAllowUpdateModel struct {
-	Address        types.String `tfsdk:"address"`
-	Struct         types.String `tfsdk:"struct"`
-	Permission     types.String `tfsdk:"permission"`
-	TsigKey        types.String `tfsdk:"tsig_key"`
-	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
-	TsigKeyName    types.String `tfsdk:"tsig_key_name"`
-	UseTsigKeyName types.Bool   `tfsdk:"use_tsig_key_name"`
+	Address        iptypes.IPAddress `tfsdk:"address"`
+	Struct         types.String      `tfsdk:"struct"`
+	Permission     types.String      `tfsdk:"permission"`
+	TsigKey        types.String      `tfsdk:"tsig_key"`
+	TsigKeyAlg     types.String      `tfsdk:"tsig_key_alg"`
+	TsigKeyName    types.String      `tfsdk:"tsig_key_name"`
+	UseTsigKeyName types.Bool        `tfsdk:"use_tsig_key_name"`
 }
 
 var ZoneAuthAllowUpdateAttrTypes = map[string]attr.Type{
-	"address":           types.StringType,
+	"address":           iptypes.IPAddressType{},
 	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -47,8 +48,9 @@ var ZoneAuthAllowUpdateResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"address": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: iptypes.IPAddressType{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
@@ -145,7 +147,7 @@ func (m *ZoneAuthAllowUpdateModel) Expand(ctx context.Context, diags *diag.Diagn
 		return nil
 	}
 	to := &dns.ZoneAuthAllowUpdate{
-		Address:        flex.ExpandStringPointer(m.Address),
+		Address:        flex.ExpandIPAddress(m.Address),
 		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -174,7 +176,7 @@ func (m *ZoneAuthAllowUpdateModel) Flatten(ctx context.Context, from *dns.ZoneAu
 	if m == nil {
 		*m = ZoneAuthAllowUpdateModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

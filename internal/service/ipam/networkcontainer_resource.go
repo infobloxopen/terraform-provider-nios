@@ -9,10 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -74,8 +74,8 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Add internal ID exists in the Extensible Attributes if not already present
-	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
+	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	if diags.HasError() {
 		return
 	}
 
@@ -98,9 +98,9 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	res := apiRes.CreateNetworkcontainerResponseAsObject.GetResult()
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Networkcontainer due to inherited Extensible attributes: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Networkcontainer due inherited Extensible attributes, got error: %s", err))
 		return
 	}
 
@@ -143,30 +143,13 @@ func (r *NetworkcontainerResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	res := apiRes.GetNetworkcontainerResponseObjectAsResult.GetResult()
-	if res.ExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Extensible Attributes",
-			"Unable to read Networkcontainer because no extensible attributes were returned from the API.",
-		)
-		return
-	}
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Networkcontainer due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
+	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
-		resp.Diagnostics.AddError(
-			"Missing Terraform internal id Attributes",
-			"Unable to read Networkcontainer because terraform internal id does not exist.",
-		)
-		return
+		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
 	if stateExtAttrs == nil {
 		resp.Diagnostics.AddError(
 			"Missing Internal ID",
@@ -175,12 +158,17 @@ func (r *NetworkcontainerResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	stateTerraformId := (*stateExtAttrs)["Terraform Internal ID"]
-
+	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
 	if apiTerraformId.Value != stateTerraformId.Value {
 		if r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
+	}
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
@@ -196,18 +184,18 @@ func (r *NetworkcontainerResource) ReadByExtAttrs(ctx context.Context, data *Net
 		return false
 	}
 
-	internalIdExtAttr := *ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
+	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
 	if diags.HasError() {
 		return false
 	}
 
-	internalId := internalIdExtAttr["Terraform Internal ID"].Value
+	internalId := internalIdExtAttr[terraformInternalIDEA].Value
 	if internalId == "" {
 		return false
 	}
 
 	idMap := map[string]interface{}{
-		"Terraform Internal ID": internalId,
+		terraformInternalIDEA: internalId,
 	}
 
 	apiRes, _, err := r.client.IPAMAPI.
@@ -232,8 +220,8 @@ func (r *NetworkcontainerResource) ReadByExtAttrs(ctx context.Context, data *Net
 
 	res := results[0]
 
-	// Remove inherited external attributes and check for errors
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	// Remove inherited external attributes from extattrs
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		return true
 	}
@@ -255,8 +243,8 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
+	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -268,9 +256,10 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	// Add internal ID exists in the Extensible Attributes if not already present
-	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
+	// Add Inherited Extensible Attributes
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -281,7 +270,6 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Networkcontainer, got error: %s", err))
 		return
@@ -289,7 +277,7 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 
 	res := apiRes.UpdateNetworkcontainerResponseAsObject.GetResult()
 
-	res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Networkcontainer due inherited Extensible attributes, got error: %s", diags))
 		return
@@ -324,39 +312,13 @@ func (r *NetworkcontainerResource) Delete(ctx context.Context, req resource.Dele
 	}
 }
 
-func (r *NetworkcontainerResource) addInternalIDToExtAttrs(ctx context.Context, data *NetworkcontainerModel) error {
-	var internalId string
-
-	if !data.ExtAttrsAll.IsNull() {
-		elements := data.ExtAttrsAll.Elements()
-		if tId, ok := elements["Terraform Internal ID"]; ok {
-			if tIdStr, ok := tId.(types.String); ok {
-				internalId = tIdStr.ValueString()
-			}
-		}
-	}
-
-	if internalId == "" {
-		var err error
-		internalId, err = uuid.GenerateUUID()
-		if err != nil {
-			return err
-		}
-	}
-
-	r.client.IPAMAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
-		"Terraform Internal ID": {Value: internalId},
-	}
-
-	return nil
-}
 func (r *NetworkcontainerResource) UpdateFuncCallAttributeName(ctx context.Context, data NetworkcontainerModel, diags *diag.Diagnostics) types.Object {
 
 	updatedFuncCallAttrs := data.FuncCall.Attributes()
 	attrVal := updatedFuncCallAttrs["attribute_name"].(types.String).ValueString()
 	pathVar, err := utils.FindModelFieldByTFSdkTag(data, attrVal)
 	if !err {
-		diags.AddError("Client Error", fmt.Sprintf("Unable to find attribute '%s' in RecordA model, got error", attrVal))
+		diags.AddError("Client Error", fmt.Sprintf("Unable to find attribute '%s' in Networkcontainer model, got error", attrVal))
 		return types.ObjectNull(FuncCallAttrTypes)
 	}
 	updatedFuncCallAttrs["attribute_name"] = types.StringValue(pathVar)
@@ -365,5 +327,64 @@ func (r *NetworkcontainerResource) UpdateFuncCallAttributeName(ctx context.Conte
 }
 
 func (r *NetworkcontainerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	var diags diag.Diagnostics
+	var data NetworkcontainerModel
+
+	resourceRef := utils.ExtractResourceRef(req.ID)
+
+	apiRes, _, err := r.client.IPAMAPI.
+		NetworkcontainerAPI.
+		Read(ctx, resourceRef).
+		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read Networkcontainer for import, got error: %s", err))
+		return
+	}
+
+	res := apiRes.GetNetworkcontainerResponseObjectAsResult.GetResult()
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Networkcontainer for import due inherited Extensible attributes, got error: %s", diags))
+		return
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	planExtAttrs := data.ExtAttrs
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	if diags.HasError() {
+		return
+	}
+
+	updateRes, _, err := r.client.IPAMAPI.
+		NetworkcontainerAPI.
+		Update(ctx, resourceRef).
+		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
+		ReturnAsObject(1).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Networkcontainer for import, got error: %s", err))
+		return
+	}
+
+	res = updateRes.UpdateNetworkcontainerResponseAsObject.GetResult()
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Networkcontainer due inherited Extensible attributes for import, got error: %s", diags))
+		return
+	}
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

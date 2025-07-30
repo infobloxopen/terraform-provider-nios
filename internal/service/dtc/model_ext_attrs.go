@@ -1,21 +1,25 @@
-// Model functions for ExtAttrs
 package dtc
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
+
+	"github.com/hashicorp/go-uuid"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dtc.ExtAttrs {
+const terraformInternalIDEA = "Terraform Internal ID"
+
+func ExpandExtAttrs(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dtc.ExtAttrs {
 	if extattrs.IsNull() || extattrs.IsUnknown() {
 		return nil
 	}
@@ -28,14 +32,18 @@ func ExpandExtAttr(ctx context.Context, extattrs types.Map, diags *diag.Diagnost
 	result := make(map[string]dtc.ExtAttrs)
 
 	for key, valStr := range extAttrsMap {
-		parsedValue := parseExtAttrValue(valStr)
+		parsedValue := utils.ParseInterfaceValue(valStr)
 		result[key] = dtc.ExtAttrs{Value: parsedValue}
 	}
 	return &result
 }
 
-func FlattenExtAttr(ctx context.Context, extattrs *map[string]dtc.ExtAttrs, diags *diag.Diagnostics) types.Map {
+func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[string]dtc.ExtAttrs, diags *diag.Diagnostics) types.Map {
 	result := make(map[string]attr.Value)
+	planExtAttrsMap := planExtAttrs.Elements()
+	if extattrs == nil || len(*extattrs) == 0 {
+		return types.MapNull(types.StringType)
+	}
 
 	for key, extAttr := range *extattrs {
 		if extAttr.Value == nil {
@@ -54,7 +62,13 @@ func FlattenExtAttr(ctx context.Context, extattrs *map[string]dtc.ExtAttrs, diag
 				)
 				result[key] = types.StringValue(fmt.Sprintf("%v", v))
 			} else {
-				result[key] = types.StringValue(string(jsonBytes))
+				value := string(jsonBytes)
+				if _, ok := planExtAttrsMap[key]; ok {
+					if strings.Contains(planExtAttrsMap[key].String(), "'") {
+						value = strings.ReplaceAll(value, "\"", "'")
+					}
+				}
+				result[key] = types.StringValue(value)
 			}
 		default:
 			// Convert primitive values to string
@@ -67,62 +81,83 @@ func FlattenExtAttr(ctx context.Context, extattrs *map[string]dtc.ExtAttrs, diag
 	return mapVal
 }
 
-func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dtc.ExtAttrs) (*map[string]dtc.ExtAttrs, diag.Diagnostics) {
+func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dtc.ExtAttrs) (*map[string]dtc.ExtAttrs, types.Map, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	newRespMap := make(map[string]dtc.ExtAttrs, len(respExtAttrs))
+	extAttrsRespMap := make(map[string]dtc.ExtAttrs, len(planExtAttrs.Elements()))
+	extAttrsAllRespMap := make(map[string]dtc.ExtAttrs)
+	var extAttrAll types.Map
 
 	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
-		if v, ok := respExtAttrs["Terraform Internal ID"]; ok {
-			newRespMap["Terraform Internal ID"] = v
-		}
-		return &newRespMap, nil
+		extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &respExtAttrs, &diags)
+		return nil, extAttrAll, nil
 	}
 
-	planMap := *ExpandExtAttr(ctx, planExtAttrs, &diags)
+	planMap := *ExpandExtAttrs(ctx, planExtAttrs, &diags)
 	if diags.HasError() {
-		return nil, diags
+		return nil, extAttrAll, diags
 	}
 
 	for k, v := range respExtAttrs {
-		if k == "Terraform Internal ID" {
-			newRespMap[k] = v
+		if k == terraformInternalIDEA {
+			extAttrsAllRespMap[k] = v
 			continue
 		}
 
+		// If the EA is inherited , if the state is override , add it to the ExtAttrs.
+		// If the EA is inherited and state is inherited , add it ExtAttrsAll
 		if respExtAttrs[k].AdditionalProperties["inheritance_source"] != nil {
 			if planVal, ok := planMap[k]; ok {
-				newRespMap[k] = planVal
+				extAttrsRespMap[k] = planVal
+			} else {
+				extAttrsAllRespMap[k] = respExtAttrs[k]
 			}
 			continue
 		}
-		newRespMap[k] = respExtAttrs[k]
+		extAttrsRespMap[k] = v
 	}
-	return &newRespMap, diags
+	extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &extAttrsAllRespMap, &diags)
+	return &extAttrsRespMap, extAttrAll, diags
 }
 
-func parseExtAttrValue(valStr string) interface{} {
-	// Check if the value appears to be a JSON array (enclosed in square brackets)
-	if strings.HasPrefix(valStr, "[") && strings.HasSuffix(valStr, "]") {
-		var listVal []interface{}
+func AddInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, stateExtAttrs types.Map) (types.Map, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	stateExtAttrsMap := stateExtAttrs.Elements()
+	if len(stateExtAttrsMap) == 0 {
+		return planExtAttrs, diags
+	}
+	planExtAttrsMap := planExtAttrs.Elements()
 
-		// Parse as standard JSON with double quotes
-		err := json.Unmarshal([]byte(valStr), &listVal)
-
-		// If that fails and we have single quotes, replace them with double quotes
-		if err != nil && strings.Contains(valStr, "'") {
-			processedStr := strings.ReplaceAll(valStr, "'", "\"")
-			err = json.Unmarshal([]byte(processedStr), &listVal)
-		}
-
-		// If either parsing attempt succeeded, return the list value
-		if err == nil {
-			return listVal
+	for k, v := range stateExtAttrsMap {
+		// if the key is not in planExtAttrsMap , we add it
+		if _, ok := planExtAttrsMap[k]; !ok {
+			planExtAttrsMap[k] = v
 		}
 	}
 
-	// Try to parse the value as an integer
-	if intVal, err := strconv.ParseInt(valStr, 10, 64); err == nil {
-		return intVal
+	// Convert the updated map back to types.Map
+	newRespMap, diags := types.MapValue(types.StringType, planExtAttrsMap)
+	if diags.HasError() {
+		return planExtAttrs, diags
 	}
-	return valStr
+
+	return newRespMap, diags
+}
+
+func AddInternalIDToExtAttrs(ctx context.Context, extAttrs types.Map, diags diag.Diagnostics) (types.Map, diag.Diagnostics) {
+
+	internalId, err := uuid.GenerateUUID()
+	if err != nil {
+		diags.AddError("Error generating UUID", fmt.Sprintf("Unable to generate internal ID for Extensible Attributes: %s", err))
+		return extAttrs, diags
+	}
+
+	extAttrsMap := extAttrs.Elements()
+	extAttrsMap[terraformInternalIDEA] = types.StringValue(internalId)
+
+	extAttrs, diags = types.MapValue(types.StringType, extAttrsMap)
+	if diags.HasError() {
+		return extAttrs, diags
+	}
+
+	return extAttrs, nil
 }

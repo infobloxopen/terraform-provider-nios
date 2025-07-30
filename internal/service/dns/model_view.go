@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -446,6 +447,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -884,7 +888,7 @@ func (m *ViewModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.Vi
 		EnableBlacklist:                     flex.ExpandBoolPointer(m.EnableBlacklist),
 		EnableFixedRrsetOrderFqdns:          flex.ExpandBoolPointer(m.EnableFixedRrsetOrderFqdns),
 		EnableMatchRecursiveOnly:            flex.ExpandBoolPointer(m.EnableMatchRecursiveOnly),
-		ExtAttrs:                            ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FilterAaaa:                          flex.ExpandStringPointer(m.FilterAaaa),
 		FilterAaaaList:                      flex.ExpandFrameworkListNestedBlock(ctx, m.FilterAaaaList, diags, ExpandViewFilterAaaaList),
 		FixedRrsetOrderFqdns:                flex.ExpandFrameworkListNestedBlock(ctx, m.FixedRrsetOrderFqdns, diags, ExpandViewFixedRrsetOrderFqdns),
@@ -947,7 +951,7 @@ func FlattenView(ctx context.Context, from *dns.View, diags *diag.Diagnostics) t
 	}
 	m := ViewModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ViewAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -989,7 +993,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.EnableBlacklist = types.BoolPointerValue(from.EnableBlacklist)
 	m.EnableFixedRrsetOrderFqdns = types.BoolPointerValue(from.EnableFixedRrsetOrderFqdns)
 	m.EnableMatchRecursiveOnly = types.BoolPointerValue(from.EnableMatchRecursiveOnly)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FilterAaaa = flex.FlattenStringPointer(from.FilterAaaa)
 	m.FilterAaaaList = flex.FlattenFrameworkListNestedBlock(ctx, from.FilterAaaaList, ViewFilterAaaaListAttrTypes, diags, FlattenViewFilterAaaaList)
 	m.FixedRrsetOrderFqdns = flex.FlattenFrameworkListNestedBlock(ctx, from.FixedRrsetOrderFqdns, ViewFixedRrsetOrderFqdnsAttrTypes, diags, FlattenViewFixedRrsetOrderFqdns)

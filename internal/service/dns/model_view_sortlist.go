@@ -3,6 +3,7 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -15,17 +16,18 @@ import (
 )
 
 type ViewSortlistModel struct {
-	Address   types.String `tfsdk:"address"`
-	MatchList types.List   `tfsdk:"match_list"`
+	Address   iptypes.IPAddress `tfsdk:"address"`
+	MatchList types.List        `tfsdk:"match_list"`
 }
 
 var ViewSortlistAttrTypes = map[string]attr.Type{
-	"address":    types.StringType,
+	"address":    iptypes.IPAddressType{},
 	"match_list": types.ListType{ElemType: types.StringType},
 }
 
 var ViewSortlistResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Required:            true,
 		MarkdownDescription: "The source address of a sortlist object.",
 	},
@@ -53,7 +55,7 @@ func (m *ViewSortlistModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		return nil
 	}
 	to := &dns.ViewSortlist{
-		Address:   flex.ExpandStringPointer(m.Address),
+		Address:   flex.ExpandIPAddress(m.Address),
 		MatchList: flex.ExpandFrameworkListString(ctx, m.MatchList, diags),
 	}
 	return to
@@ -77,6 +79,6 @@ func (m *ViewSortlistModel) Flatten(ctx context.Context, from *dns.ViewSortlist,
 	if m == nil {
 		*m = ViewSortlistModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.MatchList = flex.FlattenFrameworkListString(ctx, from.MatchList, diags)
 }

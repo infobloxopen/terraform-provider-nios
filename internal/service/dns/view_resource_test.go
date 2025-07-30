@@ -2035,7 +2035,6 @@ func TestAccViewResource_RpzQnameWaitRecurse(t *testing.T) {
 	})
 }
 
-
 func TestAccViewResource_ScavengingSettings(t *testing.T) {
 	var resourceName = "nios_dns_view.test_scavenging_settings"
 	var v dns.View
@@ -2256,7 +2255,6 @@ func TestAccViewResource_UseDdnsPatternRestricted(t *testing.T) {
 		},
 	})
 }
-
 
 func TestAccViewResource_UseDdnsPrincipalSecurity(t *testing.T) {
 	var resourceName = "nios_dns_view.test_use_ddns_principal_security"
@@ -3761,5 +3759,3 @@ resource "nios_dns_view" "test_use_sortlist" {
 }
 `, name, useSortlist)
 }
-
-

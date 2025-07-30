@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -18,23 +19,25 @@ import (
 )
 
 type RangeExcludeModel struct {
-	StartAddress types.String `tfsdk:"start_address"`
-	EndAddress   types.String `tfsdk:"end_address"`
-	Comment      types.String `tfsdk:"comment"`
+	StartAddress iptypes.IPv4Address `tfsdk:"start_address"`
+	EndAddress   iptypes.IPv4Address `tfsdk:"end_address"`
+	Comment      types.String        `tfsdk:"comment"`
 }
 
 var RangeExcludeAttrTypes = map[string]attr.Type{
-	"start_address": types.StringType,
-	"end_address":   types.StringType,
+	"start_address": iptypes.IPv4AddressType{},
+	"end_address":   iptypes.IPv4AddressType{},
 	"comment":       types.StringType,
 }
 
 var RangeExcludeResourceSchemaAttributes = map[string]schema.Attribute{
 	"start_address": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Required:            true,
 		MarkdownDescription: "The IPv4 Address starting address of the exclusion range.",
 	},
 	"end_address": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Required:            true,
 		MarkdownDescription: "The IPv4 Address ending address of the exclusion range.",
 	},
@@ -68,8 +71,8 @@ func (m *RangeExcludeModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		return nil
 	}
 	to := &dhcp.RangeExclude{
-		StartAddress: flex.ExpandStringPointer(m.StartAddress),
-		EndAddress:   flex.ExpandStringPointer(m.EndAddress),
+		StartAddress: flex.ExpandIPv4Address(m.StartAddress),
+		EndAddress:   flex.ExpandIPv4Address(m.EndAddress),
 		Comment:      flex.ExpandStringPointer(m.Comment),
 	}
 	return to
@@ -93,7 +96,7 @@ func (m *RangeExcludeModel) Flatten(ctx context.Context, from *dhcp.RangeExclude
 	if m == nil {
 		*m = RangeExcludeModel{}
 	}
-	m.StartAddress = flex.FlattenStringPointer(from.StartAddress)
-	m.EndAddress = flex.FlattenStringPointer(from.EndAddress)
+	m.StartAddress = flex.FlattenIPv4Address(from.StartAddress)
+	m.EndAddress = flex.FlattenIPv4Address(from.EndAddress)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 }

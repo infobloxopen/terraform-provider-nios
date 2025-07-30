@@ -71,6 +71,17 @@ func RandomCIDRNetwork() string {
 	return fmt.Sprintf("%d.%d.0.0/%d", base, second, cidr)
 }
 
+// RandomIPv6Network generates a random IPv6 network with specific CIDR
+func RandomIPv6Network() string {
+	// Generate a random IPv6 network using the documentation prefix 2001:db8::/32
+	// This is reserved for documentation and testing purposes (RFC 3849)
+	third := rand.Intn(65536)  // 0-FFFF for third hextet
+	fourth := rand.Intn(65536) // 0-FFFF for fourth hextet
+	cidr := 64 + rand.Intn(60)
+
+	return fmt.Sprintf("2001:db8:%x:%x::/%d", third, fourth, cidr)
+}
+
 func PreCheck(t *testing.T) {
 	hostURL := os.Getenv("NIOS_HOST_URL")
 	if hostURL == "" {

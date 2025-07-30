@@ -53,7 +53,7 @@ resource "nios_dns_zone_forward" "zone_forward_additional_fields" {
 
 ### Required
 
-- `fqdn` (String) The name of this DNS zone. For a reverse zone, this is in "address/cidr" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.
+- `fqdn` (String) The name of this DNS zone. For a reverse zone, this is in "address/cidr" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set. apra notation is not allowed for IP address.
 
 ### Optional
 

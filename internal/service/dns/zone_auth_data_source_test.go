@@ -144,7 +144,7 @@ func testAccCheckZoneAuthResourceAttrPair(resourceName, dataSourceName string) [
 		resource.TestCheckResourceAttrPair(resourceName, "soa_email", dataSourceName, "result.0.soa_email"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_expire", dataSourceName, "result.0.soa_expire"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_negative_ttl", dataSourceName, "result.0.soa_negative_ttl"),
-		resource.TestCheckResourceAttrPair(resourceName, "soarefresh", dataSourceName, "result.0.soarefresh"),
+		resource.TestCheckResourceAttrPair(resourceName, "soa_refresh", dataSourceName, "result.0.soa_refresh"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_retry", dataSourceName, "result.0.soa_retry"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_serial_number", dataSourceName, "result.0.soa_serial_number"),
 		resource.TestCheckResourceAttrPair(resourceName, "srgs", dataSourceName, "result.0.srgs"),

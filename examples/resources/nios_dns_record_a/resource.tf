@@ -1,15 +1,28 @@
 // Create Record A with Basic Fields
-resource "nios_dns_record_a" "create_record" {
+resource "nios_dns_record_a" "create_record_a" {
   name     = "example_record.example.com"
   ipv4addr = "10.20.1.2"
   view     = "default"
   extattrs = {
-    Site = "Siteblr"
+    Site = "location-1"
+  }
+}
+
+// Create Record A with additional fields
+resource "nios_dns_record_a" "create_record_a_with_additional_fields" {
+  name     = "example_record_with_ttl.example.com"
+  ipv4addr = "10.20.1.3"
+  view     = "default"
+  use_ttl  = true
+  ttl      = 10
+  comment  = "Example A record"
+  extattrs = {
+    Site = "location-1"
   }
 }
 
 // Create Record A using function call to retrieve ipv4addr
-resource "nios_dns_record_a" "create_with_func_call" {
+resource "nios_dns_record_a" "create_record_a_with_func_call" {
   name = "example_func_call.example.com"
   func_call = {
     attribute_name  = "ipv4addr"

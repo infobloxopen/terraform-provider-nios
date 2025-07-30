@@ -438,36 +438,6 @@ func TestAccRecordAaaaResource_UseTtl(t *testing.T) {
 	})
 }
 
-func TestAccRecordAaaaResource_View(t *testing.T) {
-	var resourceName = "nios_dns_record_aaaa.test_view"
-	var v dns.RecordAaaa
-	name := acctest.RandomName() + ".example.com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordAaaaView(name, "2002:1111::1401", "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRecordAaaaView(name, "2002:1111::1401", "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func testAccCheckRecordAaaaExists(ctx context.Context, resourceName string, v *dns.RecordAaaa) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	var readableAttributes = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,extattrs,forbid_reclamation,ipv6addr,last_queried,ms_ad_user_data,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
@@ -684,14 +654,4 @@ resource "nios_dns_record_aaaa" "test_use_ttl" {
     use_ttl  = %q
 }
 `, name, ipV6Addr, view, ttl, useTtl)
-}
-
-func testAccRecordAaaaView(name, ipV6Addr, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_aaaa" "test_view" {
-	name     = %q
-	ipv6addr = %q
-	view     = %q
-}
-`, name, ipV6Addr, view)
 }

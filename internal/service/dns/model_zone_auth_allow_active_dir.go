@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -18,17 +19,18 @@ import (
 )
 
 type ZoneAuthAllowActiveDirModel struct {
-	Address    types.String `tfsdk:"address"`
-	Permission types.String `tfsdk:"permission"`
+	Address    iptypes.IPAddress `tfsdk:"address"`
+	Permission types.String      `tfsdk:"permission"`
 }
 
 var ZoneAuthAllowActiveDirAttrTypes = map[string]attr.Type{
-	"address":    types.StringType,
+	"address":    iptypes.IPAddressType{},
 	"permission": types.StringType,
 }
 
 var ZoneAuthAllowActiveDirResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Required:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 		Validators: []validator.String{
@@ -66,7 +68,7 @@ func (m *ZoneAuthAllowActiveDirModel) Expand(ctx context.Context, diags *diag.Di
 		return nil
 	}
 	to := &dns.ZoneAuthAllowActiveDir{
-		Address:    flex.ExpandStringPointer(m.Address),
+		Address:    flex.ExpandIPAddress(m.Address),
 		Permission: flex.ExpandStringPointer(m.Permission),
 	}
 	return to
@@ -90,6 +92,6 @@ func (m *ZoneAuthAllowActiveDirModel) Flatten(ctx context.Context, from *dns.Zon
 	if m == nil {
 		*m = ZoneAuthAllowActiveDirModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 }

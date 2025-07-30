@@ -68,7 +68,6 @@ func FlattenNetworkcontainerSubscribeSettings(ctx context.Context, from *ipam.Ne
 	}
 	m := NetworkcontainerSubscribeSettingsModel{}
 	m.Flatten(ctx, from, diags)
-	// m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerSubscribeSettingsAttrTypes, m)
 	diags.Append(d...)
 	return t

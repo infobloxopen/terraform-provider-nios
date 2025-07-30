@@ -4,7 +4,9 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -18,44 +20,45 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneForwardModel struct {
-	Ref                  types.String `tfsdk:"ref"`
-	Address              types.String `tfsdk:"address"`
-	Comment              types.String `tfsdk:"comment"`
-	Disable              types.Bool   `tfsdk:"disable"`
-	DisableNsGeneration  types.Bool   `tfsdk:"disable_ns_generation"`
-	DisplayDomain        types.String `tfsdk:"display_domain"`
-	DnsFqdn              types.String `tfsdk:"dns_fqdn"`
-	ExtAttrs             types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll          types.Map    `tfsdk:"extattrs_all"`
-	ExternalNsGroup      types.String `tfsdk:"external_ns_group"`
-	ForwardTo            types.List   `tfsdk:"forward_to"`
-	ForwardersOnly       types.Bool   `tfsdk:"forwarders_only"`
-	ForwardingServers    types.List   `tfsdk:"forwarding_servers"`
-	Fqdn                 types.String `tfsdk:"fqdn"`
-	Locked               types.Bool   `tfsdk:"locked"`
-	LockedBy             types.String `tfsdk:"locked_by"`
-	MaskPrefix           types.String `tfsdk:"mask_prefix"`
-	MsAdIntegrated       types.Bool   `tfsdk:"ms_ad_integrated"`
-	MsDdnsMode           types.String `tfsdk:"ms_ddns_mode"`
-	MsManaged            types.String `tfsdk:"ms_managed"`
-	MsReadOnly           types.Bool   `tfsdk:"ms_read_only"`
-	MsSyncMasterName     types.String `tfsdk:"ms_sync_master_name"`
-	NsGroup              types.String `tfsdk:"ns_group"`
-	Parent               types.String `tfsdk:"parent"`
-	Prefix               types.String `tfsdk:"prefix"`
-	UsingSrgAssociations types.Bool   `tfsdk:"using_srg_associations"`
-	View                 types.String `tfsdk:"view"`
-	ZoneFormat           types.String `tfsdk:"zone_format"`
+	Ref                  types.String      `tfsdk:"ref"`
+	Address              iptypes.IPAddress `tfsdk:"address"`
+	Comment              types.String      `tfsdk:"comment"`
+	Disable              types.Bool        `tfsdk:"disable"`
+	DisableNsGeneration  types.Bool        `tfsdk:"disable_ns_generation"`
+	DisplayDomain        types.String      `tfsdk:"display_domain"`
+	DnsFqdn              types.String      `tfsdk:"dns_fqdn"`
+	ExtAttrs             types.Map         `tfsdk:"extattrs"`
+	ExtAttrsAll          types.Map         `tfsdk:"extattrs_all"`
+	ExternalNsGroup      types.String      `tfsdk:"external_ns_group"`
+	ForwardTo            types.List        `tfsdk:"forward_to"`
+	ForwardersOnly       types.Bool        `tfsdk:"forwarders_only"`
+	ForwardingServers    types.List        `tfsdk:"forwarding_servers"`
+	Fqdn                 types.String      `tfsdk:"fqdn"`
+	Locked               types.Bool        `tfsdk:"locked"`
+	LockedBy             types.String      `tfsdk:"locked_by"`
+	MaskPrefix           types.String      `tfsdk:"mask_prefix"`
+	MsAdIntegrated       types.Bool        `tfsdk:"ms_ad_integrated"`
+	MsDdnsMode           types.String      `tfsdk:"ms_ddns_mode"`
+	MsManaged            types.String      `tfsdk:"ms_managed"`
+	MsReadOnly           types.Bool        `tfsdk:"ms_read_only"`
+	MsSyncMasterName     types.String      `tfsdk:"ms_sync_master_name"`
+	NsGroup              types.String      `tfsdk:"ns_group"`
+	Parent               types.String      `tfsdk:"parent"`
+	Prefix               types.String      `tfsdk:"prefix"`
+	UsingSrgAssociations types.Bool        `tfsdk:"using_srg_associations"`
+	View                 types.String      `tfsdk:"view"`
+	ZoneFormat           types.String      `tfsdk:"zone_format"`
 }
 
 var ZoneForwardAttrTypes = map[string]attr.Type{
 	"ref":                    types.StringType,
-	"address":                types.StringType,
+	"address":                iptypes.IPAddressType{},
 	"comment":                types.StringType,
 	"disable":                types.BoolType,
 	"disable_ns_generation":  types.BoolType,
@@ -90,12 +93,19 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		MarkdownDescription: "The IP address of the server that is serving this zone.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the zone; maximum 256 characters.",
 	},
 	"disable": schema.BoolAttribute{
@@ -124,6 +134,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -166,8 +179,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidIPCIDR(),
 		},
-		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
+		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set. apra notation is not allowed for IP address.",
 	},
 	"locked": schema.BoolAttribute{
 		Optional:            true,
@@ -272,7 +286,7 @@ func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		Comment:             flex.ExpandStringPointer(m.Comment),
 		Disable:             flex.ExpandBoolPointer(m.Disable),
 		DisableNsGeneration: flex.ExpandBoolPointer(m.DisableNsGeneration),
-		ExtAttrs:            ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ExternalNsGroup:     flex.ExpandStringPointer(m.ExternalNsGroup),
 		ForwardTo:           flex.ExpandFrameworkListNestedBlock(ctx, m.ForwardTo, diags, ExpandZoneForwardForwardTo),
 		ForwardersOnly:      flex.ExpandBoolPointer(m.ForwardersOnly),
@@ -297,7 +311,7 @@ func FlattenZoneForward(ctx context.Context, from *dns.ZoneForward, diags *diag.
 	}
 	m := ZoneForwardModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ZoneForwardAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -311,13 +325,13 @@ func (m *ZoneForwardModel) Flatten(ctx context.Context, from *dns.ZoneForward, d
 		*m = ZoneForwardModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DisableNsGeneration = types.BoolPointerValue(from.DisableNsGeneration)
 	m.DisplayDomain = flex.FlattenStringPointer(from.DisplayDomain)
 	m.DnsFqdn = flex.FlattenStringPointer(from.DnsFqdn)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.ExternalNsGroup = flex.FlattenStringPointer(from.ExternalNsGroup)
 	m.ForwardTo = flex.FlattenFrameworkListNestedBlock(ctx, from.ForwardTo, ZoneForwardForwardToAttrTypes, diags, FlattenZoneForwardForwardTo)
 	m.ForwardersOnly = types.BoolPointerValue(from.ForwardersOnly)
