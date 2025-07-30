@@ -32,14 +32,12 @@ var Ipv6networkcontainerOptionsAttrTypes = map[string]attr.Type{
 
 var Ipv6networkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "Name of the DHCP option.",
-		Computed:            true,
 	},
 	"num": schema.Int64Attribute{
-		Optional:            true,
+		Required: 		  true,
 		MarkdownDescription: "The code of the DHCP option.",
-		Computed:            true,
 	},
 	"vendor_class": schema.StringAttribute{
 		Optional:            true,
@@ -47,9 +45,8 @@ var Ipv6networkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attr
 		Computed:            true,
 	},
 	"value": schema.StringAttribute{
-		Optional:            true,
+		Required: 		  true,
 		MarkdownDescription: "Value of the DHCP option",
-		Computed:            true,
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,
