@@ -789,7 +789,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 	},
 	"options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
