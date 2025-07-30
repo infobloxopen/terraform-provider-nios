@@ -587,7 +587,7 @@ func TestAccSharednetworkResource_IgnoreClientIdentifier(t *testing.T) {
 				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
