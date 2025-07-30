@@ -27,6 +27,8 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 type NetworkModel struct {
@@ -230,7 +232,7 @@ var NetworkAttrTypes = map[string]attr.Type{
 	"network_container":                    types.StringType,
 	"network_view":                         types.StringType,
 	"nextserver":                           types.StringType,
-	"options":                              types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkOptionsAttrTypes}},
+	"options":                              internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: NetworkOptionsAttrTypes}}},
 	"port_control_blackout_setting":        types.ObjectType{AttrTypes: NetworkPortControlBlackoutSettingAttrTypes},
 	"pxe_lease_time":                       types.Int64Type,
 	"recycle_leases":                       types.BoolType,
@@ -802,6 +804,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 	},
 	"options": schema.ListNestedAttribute{
+		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: NetworkOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NetworkOptionsResourceSchemaAttributes,
 		},
@@ -1273,8 +1276,6 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 		*m = NetworkModel{}
 	}
 
-	from.Options = RemoveDefaultDHCPOptionsNetwork(ctx, diags, from.Options, m.Options)
-
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
@@ -1345,7 +1346,19 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.NetworkContainer = flex.FlattenStringPointer(from.NetworkContainer)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, NetworkOptionsAttrTypes, diags, FlattenNetworkOptions)
+	m.Options = flex.FilterDHCPOptions(
+		ctx,
+		diags,
+		from.Options,
+		m.Options,
+		NetworkOptionsAttrTypes,
+		func(ctx context.Context, opt *ipam.NetworkOptions, d *diag.Diagnostics) types.Object {
+			return FlattenNetworkOptions(ctx, opt, d)
+		},
+		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *ipam.NetworkOptions {
+			return ExpandNetworkOptions(ctx, obj, d)
+		},
+	)
 	m.PortControlBlackoutSetting = FlattenNetworkPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
@@ -1412,31 +1425,4 @@ func FlattenNetworkNetwork(from *ipam.NetworkNetwork) cidrtypes.IPv4Prefix {
 	}
 	m := flex.FlattenIPv4CIDR(from.String)
 	return m
-}
-
-func RemoveDefaultDHCPOptionsNetwork(ctx context.Context, diags *diag.Diagnostics, options []ipam.NetworkOptions, planOptions types.List) []ipam.NetworkOptions {
-	defaultOptionName := "dhcp-lease-time"
-	defaultOptionVal := ""
-
-	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandNetworkOptions)
-
-	for i := range planOptionsArr {
-		if *planOptionsArr[i].Name == defaultOptionName {
-			defaultOptionVal = *planOptionsArr[i].Value
-		}
-	}
-	var result []ipam.NetworkOptions
-
-	for i := range options {
-		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
-			continue
-		}
-		result = append(result, options[i])
-	}
-
-	if len(result) == 0 {
-		return options
-	}
-
-	return result
 }
