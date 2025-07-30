@@ -116,6 +116,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworkcontainerResource,
+		ipam.NewIpv6networkResource,
 		ipam.NewNetworkviewResource,
 	}
 }
@@ -149,6 +150,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworkcontainerDataSource,
+		ipam.NewIpv6networkDataSource,
 		ipam.NewNetworkviewDataSource,
 	}
 }
