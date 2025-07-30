@@ -26,9 +26,9 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 type NetworkModel struct {

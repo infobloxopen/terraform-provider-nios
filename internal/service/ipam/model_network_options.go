@@ -32,7 +32,7 @@ var NetworkOptionsAttrTypes = map[string]attr.Type{
 
 var NetworkOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Required: 		  true,
+		Required:            true,
 		MarkdownDescription: "Name of the DHCP option.",
 	},
 	"num": schema.Int64Attribute{
