@@ -934,7 +934,7 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 		diags,
 		from.Options,
 		m.Options,
-		NetworkOptionsAttrTypes,
+		Ipv6networkOptionsAttrTypes,
 		func(ctx context.Context, opt *ipam.Ipv6networkOptions, d *diag.Diagnostics) types.Object {
 			return FlattenIpv6networkOptions(ctx, opt, d)
 		},

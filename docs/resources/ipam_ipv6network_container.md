@@ -34,7 +34,15 @@ resource "nios_ipam_ipv6network_container" "complete_example" {
   network_view = "default"
   comment      = "IPv6 network container with additional fields"
 
-
+  options = [
+    {
+      name         = "dhcp6.fqdn",
+      num          = 39,
+      value        = "test_options.com",
+      vendor_class = "DHCPv6"
+    }
+  ]
+  use_options = true
   // DDNS settings
   enable_ddns                = true
   use_enable_ddns            = true
