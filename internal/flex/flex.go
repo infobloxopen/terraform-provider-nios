@@ -623,14 +623,8 @@ func FilterDHCPOptions[T any](
     flattenFunc func(context.Context, *T, *diag.Diagnostics) types.Object,
     expandFunc func(context.Context, types.Object, *diag.Diagnostics) *T,
 ) internaltypes.UnorderedListValue {
-    // If there are no options from API, return null list
-    if len(fromOptions) == 0 {
+    if len(fromOptions) == 0 ||tfOptions.IsNull() || tfOptions.IsUnknown(){
         return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: attrTypes})
-    }
-    
-    // If tfOptions is null or unknown, return fromOptions flattened
-    if tfOptions.IsNull() || tfOptions.IsUnknown() {
-        return FlattenFrameworkUnorderedListNestedBlock(ctx, fromOptions, attrTypes, diags, flattenFunc)
     }
     
     // Convert UnorderedListValue to List for processing
