@@ -100,6 +100,7 @@ resource "nios_ipam_network_container" "example_func_call" {
 - `auto_create_reversezone` (Boolean) This flag controls whether reverse zones are automatically created when the network is added.
 - `bootfile` (String) The boot server IPv4 Address or name in FQDN format for the network container. You can specify the name and/or IP address of the boot server that the host needs to boot.
 - `bootserver` (String) The bootserver address for the network container. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.
+- `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--cloud_info))
 - `comment` (String) Comment for the network container; maximum 256 characters.
 - `ddns_domainname` (String) The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network container.
 - `ddns_generate_hostname` (Boolean) If this field is set to True, the DHCP server generates a hostname and updates DNS with it when the DHCP client request does not contain a hostname.
@@ -188,7 +189,6 @@ resource "nios_ipam_network_container" "example_func_call" {
 
 ### Read-Only
 
-- `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--cloud_info))
 - `discover_now_status` (String) Discover now status for this network container.
 - `discovery_engine_type` (String) The network discovery engine type.
 - `endpoint_sources` (List of String) The endpoints that provides data for the DHCP Network Container object.
@@ -200,6 +200,34 @@ resource "nios_ipam_network_container" "example_func_call" {
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the network container address space.
 - `utilization` (Number) The network container utilization in percentage.
+
+<a id="nestedatt--cloud_info"></a>
+### Nested Schema for `cloud_info`
+
+Optional:
+
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
+
+Read-Only:
+
+- `authority_type` (String) Type of authority over the object.
+- `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
+- `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
+- `mgmt_platform` (String) Indicates the specified cloud management platform.
+- `owned_by_adaptor` (Boolean) Determines whether the object was created by the cloud adapter or not.
+- `tenant` (String) Reference to the tenant object associated with the object, if any.
+- `usage` (String) Indicates the cloud origin of the object.
+
+<a id="nestedatt--cloud_info--delegated_member"></a>
+### Nested Schema for `cloud_info.delegated_member`
+
+Optional:
+
+- `ipv4addr` (String) The IPv4 Address of the Grid Member.
+- `ipv6addr` (String) The IPv6 Address of the Grid Member.
+- `name` (String) The Grid member name
+
+
 
 <a id="nestedatt--discovery_basic_poll_settings"></a>
 ### Nested Schema for `discovery_basic_poll_settings`
@@ -397,30 +425,3 @@ Optional:
 - `fqdn` (String) The FQDN of the authoritative forward zone.
 - `is_default` (Boolean) True if this is the default zone.
 - `view` (String) The view to which the zone belongs. If a view is not specified, the default view is used.
-
-
-<a id="nestedatt--cloud_info"></a>
-### Nested Schema for `cloud_info`
-
-Optional:
-
-- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
-
-Read-Only:
-
-- `authority_type` (String) Type of authority over the object.
-- `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
-- `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
-- `mgmt_platform` (String) Indicates the specified cloud management platform.
-- `owned_by_adaptor` (Boolean) Determines whether the object was created by the cloud adapter or not.
-- `tenant` (String) Reference to the tenant object associated with the object, if any.
-- `usage` (String) Indicates the cloud origin of the object.
-
-<a id="nestedatt--cloud_info--delegated_member"></a>
-### Nested Schema for `cloud_info.delegated_member`
-
-Read-Only:
-
-- `ipv4addr` (String) The IPv4 Address of the Grid Member.
-- `ipv6addr` (String) The IPv6 Address of the Grid Member.
-- `name` (String) The Grid member name
