@@ -371,7 +371,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
 		},
-		Default:  stringdefault.StaticString(""),
 		Computed: true,
 	},
 	"domain_name": schema.StringAttribute{
@@ -575,7 +574,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization associated with the IPv6 network.",
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,

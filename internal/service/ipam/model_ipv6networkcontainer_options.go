@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -61,7 +60,6 @@ var Ipv6networkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attr
 				"Should not have leading or trailing whitespace",
 			),
 		},
-		Default: stringdefault.StaticString("DHCP"),
 	},
 	"value": schema.StringAttribute{
 		Optional:            true,

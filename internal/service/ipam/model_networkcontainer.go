@@ -392,7 +392,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
 		},
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 	},
 	"email_list": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -698,7 +697,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization assoicated with the network container.",
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,

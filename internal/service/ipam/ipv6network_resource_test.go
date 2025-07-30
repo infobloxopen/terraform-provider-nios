@@ -783,7 +783,7 @@ func TestAccIpv6networkResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkOptions(network, "dhcp6.fqdn", "39", "test_options.com", "DHCPv6", "true"),
+				Config: testAccIpv6networkOptions(network, "dhcp-lease-time", "51", "3600", "DHCP", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),

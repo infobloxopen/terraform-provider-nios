@@ -510,7 +510,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_enable_discovery")),
 		},
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 	},
 	"dynamic_hosts": schema.Int64Attribute{
 		Computed:            true,
@@ -846,7 +845,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization assoicated with the network.",
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
