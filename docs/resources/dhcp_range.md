@@ -28,22 +28,26 @@ resource "nios_dhcp_range" "create_range_with_additional_fields" {
   name              = "range object"
   always_update_dns = true
 
+  options = [
+    {
+      name  = "time-offset"
+      num   = 2
+      value = "50"
+    },
+    {
+      name  = "dhcp-lease-time"
+      num   = 51
+      value = "7200"
+    }
+  ]
+  use_options = true
+
   extattrs = {
     "Site" = "location-1"
   }
 
-  //filter rules 
-  fingerprint_filter_rules = [{
-    filter     = "finger_print_filter"
-    permission = "Allow"
-  }]
-
   nextserver     = "next_server.com"
   use_nextserver = true
-
-  //failover association 
-  server_association_type = "FAILOVER"
-  failover_association    = "failover_association"
 
   ignore_id     = "MACADDR"
   use_ignore_id = true

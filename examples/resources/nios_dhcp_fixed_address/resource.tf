@@ -35,14 +35,16 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
   options = [
     {
       name  = "time-offset"
+      num   = 2
       value = "50"
     },
     {
       name  = "dhcp-lease-time"
+      num   = 51
       value = "7200"
     }
   ]
-
+  use_options = true
   // Extensible Attributes
   extattrs = {
     Site = "location-2"

@@ -31,24 +31,27 @@ resource "nios_dhcp_shared_network" "shared_network_additional_fields" {
   options = [
     {
       name  = "domain-name-servers"
+      num   = "6"
       value = "11.22.1.2"
     },
     {
       name  = "time-offset"
+      num   = "2"
       value = "1000"
     },
     {
       name  = "domain-name"
+      num   = "15"
       value = "aa.bb.com"
     },
   ]
   use_logic_filter_rules = true
-  logic_filter_rules = [
-    {
-      filter = "option_filter"
-      type   = "Option"
-    }
-  ]
+  # logic_filter_rules = [
+  #   {
+  #     filter = "option_filter"
+  #     type   = "Option"
+  #   }
+  # ]
   comment                    = "Shared network with additional fields"
   ddns_server_always_updates = true
   ddns_use_option81          = true
