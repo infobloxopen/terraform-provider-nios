@@ -629,7 +629,19 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Networks = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = RemoveDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+	m.Options = flex.FilterDHCPOptions(
+		ctx,
+		diags,
+		from.Options,
+		m.Options,
+		RangetemplateOptionsAttrTypes,
+		func(ctx context.Context, opt *dhcp.SharednetworkOptions, d *diag.Diagnostics) types.Object {
+			return FlattenSharednetworkOptions(ctx, opt, d)
+		},
+		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *dhcp.SharednetworkOptions {
+			return ExpandSharednetworkOptions(ctx, obj, d)
+		},
+	)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.TotalHosts = flex.FlattenInt64Pointer(from.TotalHosts)
