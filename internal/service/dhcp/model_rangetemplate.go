@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -818,65 +817,3 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.UseUnknownClients = types.BoolPointerValue(from.UseUnknownClients)
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
 }
-
-func filterDHCPOptions(ctx context.Context, diags *diag.Diagnostics, fromOptions []dhcp.RangetemplateOptions, tfOptions internaltypes.UnorderedListValue) internaltypes.UnorderedListValue {
-	// If there are no options from API, return null list
-	if len(fromOptions) == 0 {
-		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: RangetemplateOptionsAttrTypes})
-	}
-	// If tfOptions is null or unknown, return fromOptions flattened
-	if tfOptions.IsNull() || tfOptions.IsUnknown() {
-		return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, fromOptions, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
-	}
-	// Convert UnorderedListValue to List for processing
-	baseList, err := tfOptions.ToListValue(ctx)
-	if err != nil {
-		diags.AddError(
-			"Error converting unordered list",
-			fmt.Sprintf("Failed to convert options to list: %s", err),
-		)
-		return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, fromOptions, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
-	}
-	// Expand tfOptions (plan) to slice and map
-	tfOptionsList := flex.ExpandFrameworkListNestedBlock(ctx, baseList, diags, ExpandRangetemplateOptions)
-	tfOptionsMap := make(map[string]dhcp.RangetemplateOptions)
-	var tfOrder []string
-	for _, opt := range tfOptionsList {
-		if opt.Name != nil {
-			tfOptionsMap[*opt.Name] = opt
-			tfOrder = append(tfOrder, *opt.Name)
-		}
-	}
-	// Convert current options (fromOptions) to map
-	currentOptionsMap := make(map[string]dhcp.RangetemplateOptions)
-	for _, opt := range fromOptions {
-		if opt.Name != nil {
-			currentOptionsMap[*opt.Name] = opt
-		}
-	}
-	// Build result maintaining tfOrder
-	var result []dhcp.RangetemplateOptions
-	for _, name := range tfOrder {
-		currentOpt, exists := currentOptionsMap[name]
-		if !exists {
-			continue
-		}
-		if (currentOpt.UseOption != nil && *currentOpt.UseOption) || tfOptionsMap[name].Name != nil {
-			result = append(result, currentOpt)
-		}
-	}
-	
-	// Add any remaining fromOptions not in tfOptions but still valid
-	for _, opt := range fromOptions {
-		if opt.Name == nil {
-			continue
-		}
-		_, inPlan := tfOptionsMap[*opt.Name]
-		if !inPlan && opt.UseOption != nil && *opt.UseOption {
-			result = append(result, opt)
-		}
-	}
-	// Return unordered list maintaining order from plan
-	return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, result, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
-}
- 
