@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -427,6 +428,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -803,7 +807,7 @@ func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		EnableDiscovery:                  flex.ExpandBoolPointer(m.EnableDiscovery),
 		EnableIfmapPublishing:            flex.ExpandBoolPointer(m.EnableIfmapPublishing),
 		EnableImmediateDiscovery:         flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
-		ExtAttrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                         ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FederatedRealms:                  flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandIpv6networkFederatedRealms),
 		LogicFilterRules:                 flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6networkLogicFilterRules),
 		Members:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Members, diags, ExpandIpv6networkMembers),
@@ -865,7 +869,6 @@ func FlattenIpv6network(ctx context.Context, from *ipam.Ipv6network, diags *diag
 	}
 	m := Ipv6networkModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, Ipv6networkAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -909,7 +912,7 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableIfmapPublishing = types.BoolPointerValue(from.EnableIfmapPublishing)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, Ipv6networkFederatedRealmsAttrTypes, diags, FlattenIpv6networkFederatedRealms)
 	m.LastRirRegistrationUpdateSent = flex.FlattenInt64Pointer(from.LastRirRegistrationUpdateSent)
 	m.LastRirRegistrationUpdateStatus = flex.FlattenStringPointer(from.LastRirRegistrationUpdateStatus)

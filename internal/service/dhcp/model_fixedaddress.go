@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -379,6 +380,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		ElementType:         types.StringType,
@@ -652,7 +656,7 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		EnableDdns:                     flex.ExpandBoolPointer(m.EnableDdns),
 		EnableImmediateDiscovery:       flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		EnablePxeLeaseTime:             flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
-		ExtAttrs:                       ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                       ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		IgnoreDhcpOptionListRequest:    flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
 		Ipv4addr:                       ExpandFixedAddressIpv4addr(m.Ipv4addr),
 		FuncCall:                       ExpandFuncCall(ctx, m.FuncCall, diags),
@@ -700,7 +704,6 @@ func FlattenFixedaddress(ctx context.Context, from *dhcp.Fixedaddress, diags *di
 	}
 	m := FixedaddressModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, FixedaddressAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -739,7 +742,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.DiscoverNowStatus = flex.FlattenStringPointer(from.DiscoverNowStatus)
 	m.DiscoveredData = FlattenFixedaddressDiscoveredData(ctx, from.DiscoveredData, diags)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.Ipv4addr = FlattenFixedAddressIpv4addr(from.Ipv4addr)
 	m.IsInvalidMac = types.BoolPointerValue(from.IsInvalidMac)

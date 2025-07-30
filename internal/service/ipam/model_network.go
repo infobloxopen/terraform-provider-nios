@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -573,6 +574,9 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
@@ -1140,7 +1144,7 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		EnableImmediateDiscovery:         flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		EnablePxeLeaseTime:               flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
 		EnableSnmpWarnings:               flex.ExpandBoolPointer(m.EnableSnmpWarnings),
-		ExtAttrs:                         ExpandExtAttr(ctx, m.ExtAttrs, diags),
+		ExtAttrs:                         ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FederatedRealms:                  flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandNetworkFederatedRealms),
 		HighWaterMark:                    flex.ExpandInt64Pointer(m.HighWaterMark),
 		HighWaterMarkReset:               flex.ExpandInt64Pointer(m.HighWaterMarkReset),
@@ -1224,7 +1228,6 @@ func FlattenNetwork(ctx context.Context, from *ipam.Network, diags *diag.Diagnos
 	}
 	m := NetworkModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = m.ExtAttrsAll
 	t, d := types.ObjectValueFrom(ctx, NetworkAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -1282,7 +1285,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
-	m.ExtAttrsAll = FlattenExtAttr(ctx, *from.ExtAttrs, diags)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, NetworkFederatedRealmsAttrTypes, diags, FlattenNetworkFederatedRealms)
 	m.HighWaterMark = flex.FlattenInt64Pointer(from.HighWaterMark)
 	m.HighWaterMarkReset = flex.FlattenInt64Pointer(from.HighWaterMarkReset)
