@@ -193,6 +193,7 @@ func FlattenRecordAlias(ctx context.Context, from *dns.RecordAlias, diags *diag.
 	}
 	m := RecordAliasModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RecordAliasAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -309,6 +309,7 @@ func FlattenRecordPtr(ctx context.Context, from *dns.RecordPtr, diags *diag.Diag
 	}
 	m := RecordPtrModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RecordPtrAttrTypes, m)
 	diags.Append(d...)
 	return t

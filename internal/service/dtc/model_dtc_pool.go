@@ -245,6 +245,7 @@ func FlattenDtcPool(ctx context.Context, from *dtc.DtcPool, diags *diag.Diagnost
 	}
 	m := DtcPoolModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, DtcPoolAttrTypes, m)
 	diags.Append(d...)
 	return t

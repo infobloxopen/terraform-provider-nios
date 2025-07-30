@@ -239,6 +239,7 @@ func FlattenRecordCname(ctx context.Context, from *dns.RecordCname, diags *diag.
 	}
 	m := RecordCnameModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RecordCnameAttrTypes, m)
 	diags.Append(d...)
 	return t

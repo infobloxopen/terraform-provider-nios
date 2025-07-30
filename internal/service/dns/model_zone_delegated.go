@@ -285,6 +285,7 @@ func FlattenZoneDelegated(ctx context.Context, from *dns.ZoneDelegated, diags *d
 	}
 	m := ZoneDelegatedModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ZoneDelegatedAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -301,6 +301,7 @@ func FlattenZoneForward(ctx context.Context, from *dns.ZoneForward, diags *diag.
 	}
 	m := ZoneForwardModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ZoneForwardAttrTypes, m)
 	diags.Append(d...)
 	return t

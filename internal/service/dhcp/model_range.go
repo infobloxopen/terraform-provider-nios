@@ -1020,6 +1020,7 @@ func FlattenRange(ctx context.Context, from *dhcp.Range, diags *diag.Diagnostics
 	}
 	m := RangeModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RangeAttrTypes, m)
 	diags.Append(d...)
 	return t

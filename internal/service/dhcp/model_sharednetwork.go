@@ -591,6 +591,7 @@ func FlattenSharednetwork(ctx context.Context, from *dhcp.Sharednetwork, diags *
 	}
 	m := SharednetworkModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, SharednetworkAttrTypes, m)
 	diags.Append(d...)
 	return t

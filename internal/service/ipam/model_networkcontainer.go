@@ -1041,6 +1041,7 @@ func FlattenNetworkcontainer(ctx context.Context, from *ipam.Networkcontainer, d
 	}
 	m := NetworkcontainerModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, NetworkcontainerAttrTypes, m)
 	diags.Append(d...)
 	return t
