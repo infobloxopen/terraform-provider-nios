@@ -1,10 +1,9 @@
 # Terraform Provider for Infoblox NIOS
 
-The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS resources such as DNS records, networks, fixed addresses, and more using Terraform.
+The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS resources such as DNS records, networks, fixed addresses, and more using Terraform. This provider uses the [infoblox-nios-go-client](https://github.com/infobloxopen/infoblox-nios-go-client) for all API calls to interact with the Infoblox NIOS WAPI.
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 0.13.x
 - [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin)
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) >= 9.0.6
 
@@ -52,6 +51,12 @@ git clone https://github.com/infobloxopen/terraform-provider-nios.git
 2. Change to the repository directory:
 ```bash
 cd <path-to-provider>/terraform-provider-nios
+```
+
+3. Ensure you have the necessary dependencies installed. You can use `go mod tidy` to ensure all dependencies are fetched:
+```bash
+go mod tidy
+go mod vendor
 ```
 
 3. Build and install the provider:
@@ -194,6 +199,35 @@ Each documentation file contains comprehensive information about:
 
 We recommend referring to these documentation files for the most up-to-date and detailed information about working with specific NIOS objects.
 Alternatively, you can also refer to the [Infoblox NIOS WAPI documentation](https://docs.infoblox.com/space/NIOS/35400616/NIOS) for more information on the API endpoints and their usage.
+
+## Debugging
+
+### Terraform Logging
+
+Terraform has detailed logs that can help debug provider issues. To enable them, set the `TF_LOG` environment variable to one of the log levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, or `ERROR`:
+
+```bash
+# For Linux/macOS
+export TF_LOG=DEBUG
+terraform plan
+
+# For Windows PowerShell
+$env:TF_LOG="DEBUG"
+terraform plan
+```
+
+The `TRACE` level is the most verbose and will include all API calls made by the provider to the Infoblox NIOS WAPI.
+
+### Provider-Specific Debugging
+
+For debugging specific issues with the NIOS provider:
+
+1. Use `DEBUG` or `TRACE` log levels to see the API requests and responses
+2. Check the request body and response status codes for API errors
+3. Verify the WAPI version compatibility with your NIOS Grid Manager
+4. Ensure correct credentials and permissions in the NIOS system
+
+For more information on debugging Terraform providers, refer to the [Terraform debugging documentation](https://developer.hashicorp.com/terraform/internals/debugging).
 
 ## Contributing
 
