@@ -1051,7 +1051,7 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	if m == nil {
 		*m = NetworkcontainerModel{}
 	}
-	from.Options = RemoveDefaultDHCPOptionsNetwork(ctx, diags, from.Options, m.Options)
+	from.Options = RemoveDefaultDHCPOptionsNetworkContainerNetwork(ctx, diags, from.Options, m.Options)
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Authority = types.BoolPointerValue(from.Authority)
@@ -1170,7 +1170,7 @@ func FlattenNetworkcontainerNetwork(from *ipam.NetworkcontainerNetwork) types.St
 	return m
 }
 
-func RemoveDefaultDHCPOptionsNetwork(ctx context.Context, diags *diag.Diagnostics, options []ipam.NetworkcontainerOptions, planOptions types.List) []ipam.NetworkcontainerOptions {
+func RemoveDefaultDHCPOptionsNetworkContainerNetwork(ctx context.Context, diags *diag.Diagnostics, options []ipam.NetworkcontainerOptions, planOptions types.List) []ipam.NetworkcontainerOptions {
 	defaultOptionName := "dhcp-lease-time"
 	defaultOptionVal := ""
 
