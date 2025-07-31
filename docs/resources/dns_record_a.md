@@ -82,7 +82,7 @@ resource "nios_dns_record_a" "create_record_a_with_func_call" {
 - `aws_rte53_record_info` (Attributes) The AWS Route53 record information associated with the record. (see [below for nested schema](#nestedatt--aws_rte53_record_info))
 - `cloud_info` (Attributes) The cloud information associated with the record. (see [below for nested schema](#nestedatt--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
-- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--discovered_data))
+- `discovered_data` (Attributes) The discovered data for the record. (see [below for nested schema](#nestedatt--discovered_data))
 - `dns_name` (String) The name for an A record in punycode format.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.

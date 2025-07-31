@@ -744,6 +744,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.DiscoveredData = FlattenFixedaddressDiscoveredData(ctx, from.DiscoveredData, diags)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.Ipv4addr = FlattenFixedAddressIpv4addr(from.Ipv4addr)
 	m.IsInvalidMac = types.BoolPointerValue(from.IsInvalidMac)

@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -96,8 +97,15 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
@@ -232,20 +240,15 @@ func (m *RecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics, i
 		return nil
 	}
 	to := &dns.RecordAaaa{
-		Ref:                 flex.ExpandStringPointer(m.Ref),
-		AwsRte53RecordInfo:  ExpandRecordAaaaAwsRte53RecordInfo(ctx, m.AwsRte53RecordInfo, diags),
-		CloudInfo:           ExpandRecordAaaaCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:             flex.ExpandStringPointer(m.Comment),
 		Creator:             flex.ExpandStringPointer(m.Creator),
 		DdnsPrincipal:       flex.ExpandStringPointer(m.DdnsPrincipal),
 		DdnsProtected:       flex.ExpandBoolPointer(m.DdnsProtected),
 		Disable:             flex.ExpandBoolPointer(m.Disable),
-		DiscoveredData:      ExpandRecordAaaaDiscoveredData(ctx, m.DiscoveredData, diags),
 		ExtAttrs:            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ForbidReclamation:   flex.ExpandBoolPointer(m.ForbidReclamation),
 		Ipv6addr:            ExpandRecordAaaaIpv6addr(m.Ipv6addr),
 		FuncCall:            ExpandFuncCall(ctx, m.FuncCall, diags),
-		MsAdUserData:        ExpandRecordAaaaMsAdUserData(ctx, m.MsAdUserData, diags),
 		Name:                flex.ExpandStringPointer(m.Name),
 		RemoveAssociatedPtr: flex.ExpandBoolPointer(m.RemoveAssociatedPtr),
 		Ttl:                 flex.ExpandInt64Pointer(m.Ttl),
