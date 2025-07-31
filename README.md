@@ -2,6 +2,8 @@
 
 The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS resources such as DNS records, networks, fixed addresses, and more using Terraform. This provider uses the [infoblox-nios-go-client](https://github.com/infobloxopen/infoblox-nios-go-client) for all API calls to interact with the Infoblox NIOS WAPI.
 
+>This release is intended for Early Access Program(EAP) to test in your lab and provide feedback prior to General Availability (GA)
+
 ## Table of Contents
 
 - [Requirements](#requirements)
@@ -23,7 +25,6 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
   - [Terraform Logging](#terraform-logging)
   - [Provider-Specific Debugging](#provider-specific-debugging)
 - [Contributing](#contributing)
-- [License](#license)
 - [Support](#support)
 
 ## Requirements
@@ -264,10 +265,6 @@ Contributions are welcome!
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## License
-
-This project is owned by Infoblox and available only to limited partners and customers.
 
 ## Support
 
