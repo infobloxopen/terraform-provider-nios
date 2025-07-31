@@ -186,7 +186,7 @@ var NetworkcontainerAttrTypes = map[string]attr.Type{
 	"network_container":                    types.StringType,
 	"network_view":                         types.StringType,
 	"nextserver":                           types.StringType,
-	"options":                              internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: NetworkOptionsAttrTypes}}},
+	"options":                              internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: NetworkcontainerOptionsAttrTypes}}},
 	"port_control_blackout_setting":        types.ObjectType{AttrTypes: NetworkcontainerPortControlBlackoutSettingAttrTypes},
 	"pxe_lease_time":                       types.Int64Type,
 	"recycle_leases":                       types.BoolType,
