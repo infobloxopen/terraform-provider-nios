@@ -1116,7 +1116,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"utilization": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The network utilization in percentage.",
-		Default:             int64default.StaticInt64(0),
 	},
 	"utilization_update": schema.Int64Attribute{
 		Computed:            true,

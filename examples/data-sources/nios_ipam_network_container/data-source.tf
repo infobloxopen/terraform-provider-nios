@@ -1,5 +1,5 @@
 // Retrieve a specific IPAM network container using filters
-data "nios_ipam_network_container" "get_record_using_filters" {
+data "nios_ipam_network_container" "get_network_containers_using_filters" {
   filters = {
     "network" = "10.0.0.0/24"
   }
