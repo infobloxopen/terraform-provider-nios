@@ -174,6 +174,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The bootfile name for the range. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.",
 	},
 	"bootserver": schema.StringAttribute{
@@ -182,6 +183,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The bootserver address for the range. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
 	"cloud_api_compatible": schema.BoolAttribute{
@@ -193,6 +195,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "A descriptive comment of a range template object.",
 	},
 	"ddns_domainname": schema.StringAttribute{
@@ -205,6 +208,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 				"Name should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.",
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
@@ -312,6 +316,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("server_association_type")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name of the failover association: the server in this failover association will serve the IPv4 range in case the main server is out of service. {rangetemplate:rangetemplate} must be set to 'FAILOVER' or 'FAILOVER_MS' if you want the failover association specified here to serve the range.",
 	},
 	"fingerprint_filter_rules": schema.ListNestedAttribute{
@@ -356,6 +361,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.OneOf("Allow", "Deny"),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_known_clients")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Permission for known clients. If set to 'Deny' known clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"lease_scavenge_time": schema.Int64Attribute{
@@ -451,6 +457,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.",
 	},
 	"number_of_addresses": schema.Int64Attribute{
@@ -522,6 +529,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.OneOf("Allow", "Deny"),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_unknown_clients")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Permission for unknown clients. If set to 'Deny' unknown clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"update_dns_on_lease_renewal": schema.BoolAttribute{

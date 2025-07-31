@@ -74,6 +74,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
 				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
 			),
+			stringvalidator.OneOf("ALLOW", "DENY"),
 		},
 	},
 	"tsig_key": schema.StringAttribute{

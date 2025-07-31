@@ -260,6 +260,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the DNS view; maximum 64 characters.",
 	},
 	"custom_root_name_servers": schema.ListNestedAttribute{
@@ -288,6 +289,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The DDNS Principal cluster group name.",
 	},
 	"ddns_principal_tracking": schema.BoolAttribute{

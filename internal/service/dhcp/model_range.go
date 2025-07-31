@@ -249,6 +249,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"bootserver": schema.StringAttribute{
 		Optional:            true,
@@ -257,6 +258,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          RangeCloudInfoResourceSchemaAttributes,
@@ -273,6 +275,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the range; maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
@@ -285,6 +288,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.",
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
@@ -463,6 +467,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"failover_association": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name of the failover association: the server in this failover association will serve the IPv4 range in case the main server is out of service. {range:range} must be set to 'FAILOVER' or 'FAILOVER_MS' if you want the failover association specified here to serve the range.",
 	},
 	"fingerprint_filter_rules": schema.ListNestedAttribute{
@@ -524,6 +529,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_known_clients")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Permission for known clients. This can be 'Allow' or 'Deny'. If set to 'Deny' known clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"lease_scavenge_time": schema.Int64Attribute{
@@ -621,6 +627,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "This field contains the name of the Microsoft scope.",
 	},
 	"network": schema.StringAttribute{
@@ -642,6 +649,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.IsValidFQDN(),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 	},
 	"option_filter_rules": schema.ListNestedAttribute{
@@ -745,6 +753,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"template": schema.StringAttribute{
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "If set on creation, the range will be created according to the values specified in the named template.",
 	},
 	"total_hosts": schema.Int64Attribute{
@@ -757,6 +766,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_unknown_clients")),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Permission for unknown clients. This can be 'Allow' or 'Deny'. If set to 'Deny', unknown clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.",
 	},
 	"update_dns_on_lease_renewal": schema.BoolAttribute{

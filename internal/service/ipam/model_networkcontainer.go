@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -269,6 +270,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkcontainerCloudInfoResourceSchemaAttributes,
@@ -280,6 +282,13 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Comment for the network container; maximum 256 characters.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+		Default: stringdefault.StaticString(""),
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
@@ -627,6 +636,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

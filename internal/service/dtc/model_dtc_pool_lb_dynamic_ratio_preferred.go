@@ -47,6 +47,7 @@ var DtcPoolLbDynamicRatioPreferredResourceSchemaAttributes = map[string]schema.A
 	"monitor": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The DTC monitor output of which will be used for dynamic ratio load balancing.",
 	},
 	"monitor_metric": schema.StringAttribute{

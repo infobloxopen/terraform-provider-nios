@@ -62,6 +62,7 @@ var ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[s
 	},
 	"time_zone": schema.StringAttribute{
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
@@ -74,6 +75,7 @@ var ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[s
 		Validators: []validator.String{
 			stringvalidator.OneOf("DAILY", "HOURLY", "MONTHLY", "WEEKLY"),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The frequency for the scheduled task.",
 	},
 	"every": schema.Int64Attribute{

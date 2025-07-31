@@ -378,6 +378,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"copy_xfer_to_notify": schema.BoolAttribute{
 		Optional:            true,
@@ -867,6 +868,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.",
 	},
 	"primary_type": schema.StringAttribute{
@@ -939,6 +941,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The SOA email value for this zone. This value can be in unicode format.",
 	},
 	"soa_expire": schema.Int64Attribute{

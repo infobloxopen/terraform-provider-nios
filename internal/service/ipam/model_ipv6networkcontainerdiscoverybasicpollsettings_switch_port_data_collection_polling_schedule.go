@@ -73,6 +73,7 @@ var Ipv6networkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollin
 		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
 		Computed:            true,
+		Default:             stringdefault.StaticString("UTC Coordinated Universal Time"),
 	},
 	"recurring_time": schema.Int64Attribute{
 		Optional:            true,
@@ -90,6 +91,7 @@ var Ipv6networkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollin
 				"MONTHLY",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"every": schema.Int64Attribute{
 		Optional:            true,

@@ -63,6 +63,7 @@ var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[strin
 	},
 	"time_zone": schema.StringAttribute{
 		Computed:            true,
+		Default:             stringdefault.StaticString("(UTC) Coordinated Universal Time"),
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
@@ -75,6 +76,7 @@ var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[strin
 		Validators: []validator.String{
 			stringvalidator.OneOf("DAILY", "HOURLY", "MONTHLY", "WEEKLY"),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The frequency for the scheduled task.",
 	},
 	"every": schema.Int64Attribute{

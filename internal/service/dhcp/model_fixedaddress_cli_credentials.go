@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -78,6 +79,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 				"should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The comment for the credential.",
 	},
 	"id": schema.Int64Attribute{
@@ -87,6 +89,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the CLI credential.",
 	},
 }

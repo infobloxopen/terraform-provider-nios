@@ -195,6 +195,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"ddns_domainname": schema.StringAttribute{
 		Optional:            true,
@@ -206,6 +207,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace"),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"ddns_enable_option_fqdn": schema.BoolAttribute{
 		Optional:            true,

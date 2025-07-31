@@ -91,6 +91,7 @@ var Ipv6networkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttribute
 				"MONTHLY",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"every": schema.Int64Attribute{
 		Optional:            true,
@@ -136,6 +137,7 @@ var Ipv6networkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttribute
 				"RECUR",
 			),
 		},
+		Default: stringdefault.StaticString("ONCE"),
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,

@@ -310,6 +310,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"bootserver": schema.StringAttribute{
 		Optional:            true,
@@ -318,6 +319,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkCloudInfoResourceSchemaAttributes,
@@ -341,6 +343,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"conflict_count": schema.Int64Attribute{
 		Computed:            true,
@@ -357,6 +360,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 		},
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	},
 	"ddns_generate_hostname": schema.BoolAttribute{
 		Optional:            true,
@@ -448,6 +452,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered bridge domain.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -465,6 +470,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default: stringdefault.StaticString(""),
 	},
 	"discovered_vlan_id": schema.StringAttribute{
 		Computed:            true,
@@ -764,7 +770,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          NetworkMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
-  },
+	},
 	"netmask": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The netmask of the network in CIDR format.",
