@@ -287,6 +287,7 @@ For more information on debugging Terraform providers, refer to the [Terraform d
   - Using the wrong field based on WAPI version will cause configuration errors.
 - When setting `use_ttl=false` or removing the field, the provider fails to unset TTL properly. Users must remove both `ttl` and `use_ttl` fields to successfully unset TTL.
 - NS Record type lacks Extensible Attribute support, preventing effective state drift detection via Terraform Internal ID.
+- Function call next_available_network for IPv4/IPv6 networks fails during subsequent terraform apply operations with "overlap an existing network" error.
 
 ## Contributing
 
