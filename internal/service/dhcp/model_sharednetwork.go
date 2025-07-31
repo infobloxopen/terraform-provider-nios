@@ -634,7 +634,7 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 		diags,
 		from.Options,
 		m.Options,
-		RangetemplateOptionsAttrTypes,
+		SharednetworkOptionsAttrTypes,
 		func(ctx context.Context, opt *dhcp.SharednetworkOptions, d *diag.Diagnostics) types.Object {
 			return FlattenSharednetworkOptions(ctx, opt, d)
 		},

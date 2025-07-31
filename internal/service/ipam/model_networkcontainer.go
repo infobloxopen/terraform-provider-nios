@@ -1114,7 +1114,7 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 		diags,
 		from.Options,
 		m.Options,
-		NetworkOptionsAttrTypes,
+		NetworkcontainerOptionsAttrTypes,
 		func(ctx context.Context, opt *ipam.NetworkcontainerOptions, d *diag.Diagnostics) types.Object {
 			return FlattenNetworkcontainerOptions(ctx, opt, d)
 		},

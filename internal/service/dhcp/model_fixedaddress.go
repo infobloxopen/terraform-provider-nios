@@ -762,7 +762,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 		diags,
 		from.Options,
 		m.Options,
-		RangeOptionsAttrTypes,
+		FixedaddressOptionsAttrTypes,
 		func(ctx context.Context, opt *dhcp.FixedaddressOptions, d *diag.Diagnostics) types.Object {
 			return FlattenFixedaddressOptions(ctx, opt, d)
 		},
