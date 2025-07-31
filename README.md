@@ -31,7 +31,7 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 ## Requirements
 
 - [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin) (recommended version is 1.24.4 or later)
-- [Infoblox NIOS](https://www.infoblox.com/products/nios/) >= 9.0.6
+- [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.0.6 or higher)
 
 ## Installation
 
@@ -302,5 +302,3 @@ Contributions are welcome!
 ## Support
 
 For issues, feature requests, or questions, please [open an issue](https://github.com/infobloxopen/terraform-provider-nios/issues) on GitHub.
-
-For commercial support, please contact [Infoblox Support](https://www.infoblox.com/support/).
