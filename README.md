@@ -2,6 +2,30 @@
 
 The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS resources such as DNS records, networks, fixed addresses, and more using Terraform. This provider uses the [infoblox-nios-go-client](https://github.com/infobloxopen/infoblox-nios-go-client) for all API calls to interact with the Infoblox NIOS WAPI.
 
+## Table of Contents
+
+- [Requirements](#requirements)
+- [Installation](#installation)
+  - [Terraform RC Configuration for local usage](#terraform-rc-configuration-for-local-usage)
+  - [Using Pre-built Binaries from Github Releases](#using-pre-built-binaries-from-github-releases)
+  - [Build the Provider from Source](#build-the-provider-from-source)
+- [Example Provider Configuration](#example-provider-configuration)
+  - [Provider Arguments](#provider-arguments)
+- [Usage Examples](#usage-examples)
+- [Available Resources and DataSources](#available-resources-and-datasources)
+  - [DHCP](#dhcp)
+  - [DNS](#dns)
+  - [DTC](#dtc)
+  - [IPAM](#ipam)
+- [Importing Existing Resources](#importing-existing-resources)
+- [Documentation](#documentation)
+- [Debugging](#debugging)
+  - [Terraform Logging](#terraform-logging)
+  - [Provider-Specific Debugging](#provider-specific-debugging)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
+
 ## Requirements
 
 - [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin)
