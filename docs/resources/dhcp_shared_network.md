@@ -61,12 +61,12 @@ resource "nios_dhcp_shared_network" "shared_network_additional_fields" {
     },
   ]
   use_logic_filter_rules = true
-  # logic_filter_rules = [
-  #   {
-  #     filter = "option_filter"
-  #     type   = "Option"
-  #   }
-  # ]
+  logic_filter_rules = [
+    {
+      filter = "option_filter"
+      type   = "Option"
+    }
+  ]
   comment                    = "Shared network with additional fields"
   ddns_server_always_updates = true
   ddns_use_option81          = true
