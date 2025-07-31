@@ -534,6 +534,7 @@ resource "nios_ipam_network_view" "test_cloud_info" {
 	name = %q
     cloud_info = {
 		delegated_member = null
+	}
 }
 `, name)
 }
