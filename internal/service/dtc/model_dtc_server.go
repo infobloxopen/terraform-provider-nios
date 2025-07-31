@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator" 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -102,6 +103,9 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		MarkdownDescription: "List of IP/FQDN and monitor pairs to be used for additional monitoring.",
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
@@ -141,7 +145,7 @@ func (m *DtcServerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		ExtAttrs:             ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Health:               ExpandDtcServerHealth(ctx, m.Health, diags),
 		Host:                 flex.ExpandStringPointer(m.Host),
-		Monitors:             flex.ExpandFrameworkListNestedBlock(ctx, m.Monitors, diags, ExpandDtcServerMonitors),
+		Monitors:             flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.Monitors, diags, ExpandDtcServerMonitors),
 		Name:                 flex.ExpandStringPointer(m.Name),
 		SniHostname:          flex.ExpandStringPointer(m.SniHostname),
 		UseSniHostname:       flex.ExpandBoolPointer(m.UseSniHostname),
