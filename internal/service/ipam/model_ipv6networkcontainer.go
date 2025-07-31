@@ -405,6 +405,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"port_control_blackout_setting": schema.SingleNestedAttribute{
