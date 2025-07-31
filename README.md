@@ -14,7 +14,7 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 
 As the Provider isn't available on registry , to use a locally built version of the provider for development purposes:
 
-1. Modify the `.terraformrc` file in your home directory:
+Modify the `.terraformrc` file in your home directory:
 
 ```bash
 provider_installation {
@@ -31,9 +31,8 @@ provider_installation {
 }
 ```
 
-### Manual Installation
 
-#### Using Pre-built Binaries from Github Releases
+### Using Pre-built Binaries from Github Releases
 
 1. Download the latest release from the [releases page](https://github.com/infobloxopen/terraform-provider-nios/releases).
 2. Extract the binary and move it to the Terraform plugins directory (`~/.terraform.d/plugins/`) . Use the following command to create the necessary directory structure:
@@ -41,7 +40,9 @@ provider_installation {
 mkdir -p ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/1.0.0/<OS_ARCH>(linux_amd64, darwin_amd64, windows_amd64)
 ```
 
-#### Build the Provider from Source
+### Build the Provider from Source
+
+Instead of using pre-built binaries, you can build the provider from source. This is useful for development and testing purposes and to build the latest changes pushed to the repository.
 
 1. Clone the repository:
 ```bash
@@ -50,7 +51,7 @@ git clone https://github.com/infobloxopen/terraform-provider-nios.git
 
 2. Change to the repository directory:
 ```bash
-cd terraform-provider-nios
+cd <path-to-provider>/terraform-provider-nios
 ```
 
 3. Build and install the provider:
@@ -153,6 +154,8 @@ The tables below list all available resources and data sources
 | `nios_ipam_ipv6network` | Manages IPAM IPv6 networks | Retrieves information about existing IPAM IPv6 networks |
 | `nios_ipam_ipv6network_container` | Manages IPAM IPv6 network containers | Retrieves information about existing IPAM IPv6 network containers |
 
+
+
 ## Importing Existing Resources
 
 Resources can be imported using their reference ID:
@@ -177,24 +180,24 @@ resource "nios_dns_record_a" "example" {
 
 After running `terraform plan` and `terraform apply`, the resource will be imported and you can then update the configuration as needed.
 
-## Building the Provider
+## Documentation
 
-1. Clone the repository:
+Detailed documentation for each resource and data source, including all supported attributes and their descriptions, is available in the `docs` directory of this repository:
 
-```bash
-git clone https://github.com/infobloxopen/terraform-provider-nios.git
-```
+- Resource documentation: `docs/resources/`
+- Data source documentation: `docs/data-sources/`
 
-2. Build the provider:
+Each documentation file contains comprehensive information about:
+- Required and optional attributes
+- Computed attributes returned by the API
+- Examples of usage
 
-```bash
-cd terraform-provider-nios
-go build
-```
+We recommend referring to these documentation files for the most up-to-date and detailed information about working with specific NIOS objects.
+Alternatively, you can also refer to the [Infoblox NIOS WAPI documentation](https://docs.infoblox.com/space/NIOS/35400616/NIOS) for more information on the API endpoints and their usage.
 
 ## Contributing
 
-Contributions are welcome! Please read the [contribution guidelines](CONTRIBUTING.md) before submitting a pull request.
+Contributions are welcome!
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -204,7 +207,7 @@ Contributions are welcome! Please read the [contribution guidelines](CONTRIBUTIN
 
 ## License
 
-This project is licensed under the MPL 2.0 License - see the [LICENSE](LICENSE) file for details.
+This project is owned by Infoblox and available only to limited partners and customers.
 
 ## Support
 
