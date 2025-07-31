@@ -104,33 +104,54 @@ For example:
 
 Please refer to these examples for detailed usage patterns and configurations.
 
-## Available Resources
+## Available Resources and DataSources
 
-- `nios_dns_record_a` - Manages A records
-- `nios_dns_record_aaaa` - Manages AAAA records
-- `nios_dns_record_cname` - Manages CNAME records
-- `nios_dns_record_mx` - Manages MX records
-- `nios_dns_record_txt` - Manages TXT records
-- `nios_dns_record_srv` - Manages SRV records
-- `nios_dns_record_ptr` - Manages PTR records
-- `nios_dns_view` - Manages DNS views
-- `nios_dns_zone` - Manages DNS zones
-- `nios_dhcp_fixedaddress` - Manages fixed addresses
-- `nios_dhcp_range` - Manages DHCP ranges
-- `nios_dhcp_network` - Manages DHCP networks
-- `nios_dhcp_network_container` - Manages DHCP network containers
+The tables below list all available resources and data sources
 
-## Available Data Sources
+### DHCP
 
-- `nios_dns_record_a` - Fetches A records
-- `nios_dns_record_aaaa` - Fetches AAAA records
-- `nios_dns_record_cname` - Fetches CNAME records
-- `nios_dns_view` - Fetches DNS views
-- `nios_dns_zone` - Fetches DNS zones
-- `nios_dhcp_fixedaddress` - Fetches fixed addresses
-- `nios_dhcp_range` - Fetches DHCP ranges
-- `nios_dhcp_network` - Fetches DHCP networks
+| Name | Resource Description | Data Source Description |
+|----------|-------------|------------|
+| `nios_dhcp_fixed_address` | Manages DHCP fixed address resources | Retrieves information about existing DHCP fixed addresses |
+| `nios_dhcp_range` | Manages DHCP range resources | Retrieves information about existing DHCP ranges |
+| `nios_dhcp_range_template` | Manages DHCP range template resources | Retrieves information about existing DHCP range templates |
+| `nios_dhcp_shared_network` | Manages DHCP shared network resources | Retrieves information about existing DHCP shared networks |
 
+### DNS
+
+| Name | Resource Description | Data Source Description |
+|----------|-------------|------------|
+| `nios_dns_view` | Manages DNS views | Retrieves information about existing DNS views |
+| `nios_dns_zone_auth` | Manages authoritative DNS zones | Retrieves information about existing authoritative DNS zones |
+| `nios_dns_zone_delegated` | Manages delegated DNS zones | Retrieves information about existing delegated DNS zones |
+| `nios_dns_zone_forward` | Manages forwarding DNS zones | Retrieves information about existing forwarding DNS zones |
+| `nios_dns_record_a` | Manages DNS A records | Retrieves information about existing DNS A records |
+| `nios_dns_record_aaaa` | Manages DNS AAAA records | Retrieves information about existing DNS AAAA records |
+| `nios_dns_record_alias` | Manages DNS ALIAS records | Retrieves information about existing DNS ALIAS records |
+| `nios_dns_record_cname` | Manages DNS CNAME records | Retrieves information about existing DNS CNAME records |
+| `nios_dns_record_mx` | Manages DNS MX records | Retrieves information about existing DNS MX records |
+| `nios_dns_record_ns` | Manages DNS NS records | Retrieves information about existing DNS NS records |
+| `nios_dns_record_ptr` | Manages DNS PTR records | Retrieves information about existing DNS PTR records |
+| `nios_dns_record_srv` | Manages DNS SRV records | Retrieves information about existing DNS SRV records |
+| `nios_dns_record_txt` | Manages DNS TXT records | Retrieves information about existing DNS TXT records |
+
+### DTC
+
+| Name | Resource Description | Data Source Description |
+|----------|-------------|------------|
+| `nios_dtc_lbdn` | Manages DTC LBDN resources | Retrieves information about existing DTC LBDNs |
+| `nios_dtc_pool` | Manages DTC pool resources | Retrieves information about existing DTC pools |
+| `nios_dtc_server` | Manages DTC server resources | Retrieves information about existing DTC servers |
+
+### IPAM
+
+| Name | Resource Description | Data Source Description |
+|----------|-------------|------------|
+| `nios_ipam_network_view` | Manages IPAM network views | Retrieves information about existing IPAM network views |
+| `nios_ipam_network` | Manages IPAM networks | Retrieves information about existing IPAM networks |
+| `nios_ipam_network_container` | Manages IPAM network containers | Retrieves information about existing IPAM network containers |
+| `nios_ipam_ipv6network` | Manages IPAM IPv6 networks | Retrieves information about existing IPAM IPv6 networks |
+| `nios_ipam_ipv6network_container` | Manages IPAM IPv6 network containers | Retrieves information about existing IPAM IPv6 network containers |
 ## Importing Existing Resources
 
 Resources can be imported using their reference ID:
