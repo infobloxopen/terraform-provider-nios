@@ -152,6 +152,7 @@ The tables below list all available resources and data sources
 | `nios_ipam_network_container` | Manages IPAM network containers | Retrieves information about existing IPAM network containers |
 | `nios_ipam_ipv6network` | Manages IPAM IPv6 networks | Retrieves information about existing IPAM IPv6 networks |
 | `nios_ipam_ipv6network_container` | Manages IPAM IPv6 network containers | Retrieves information about existing IPAM IPv6 network containers |
+
 ## Importing Existing Resources
 
 Resources can be imported using their reference ID:
