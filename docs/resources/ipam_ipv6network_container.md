@@ -34,7 +34,15 @@ resource "nios_ipam_ipv6network_container" "complete_example" {
   network_view = "default"
   comment      = "IPv6 network container with additional fields"
 
-
+  options = [
+    {
+      name         = "dhcp6.fqdn",
+      num          = 39,
+      value        = "test_options.com",
+      vendor_class = "DHCPv6"
+    }
+  ]
+  use_options = true
   // DDNS settings
   enable_ddns                = true
   use_enable_ddns            = true
@@ -284,12 +292,15 @@ Required:
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
+Required:
 
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
-- `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `value` (String) Value of the DHCP option
+
+Optional:
+
+- `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `vendor_class` (String) The name of the space this DHCP option is associated to.
 
 

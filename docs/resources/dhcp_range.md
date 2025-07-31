@@ -28,22 +28,26 @@ resource "nios_dhcp_range" "create_range_with_additional_fields" {
   name              = "range object"
   always_update_dns = true
 
+  options = [
+    {
+      name  = "time-offset"
+      num   = 2
+      value = "50"
+    },
+    {
+      name  = "dhcp-lease-time"
+      num   = 51
+      value = "7200"
+    }
+  ]
+  use_options = true
+
   extattrs = {
     "Site" = "location-1"
   }
 
-  //filter rules 
-  fingerprint_filter_rules = [{
-    filter     = "finger_print_filter"
-    permission = "Allow"
-  }]
-
   nextserver     = "next_server.com"
   use_nextserver = true
-
-  //failover association 
-  server_association_type = "FAILOVER"
-  failover_association    = "failover_association"
 
   ignore_id     = "MACADDR"
   use_ignore_id = true
@@ -353,10 +357,13 @@ Required:
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
+Required:
 
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
+
+Optional:
+
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `value` (String) Value of the DHCP option
 - `vendor_class` (String) The name of the space this DHCP option is associated to.

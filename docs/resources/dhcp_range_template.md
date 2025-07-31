@@ -46,14 +46,17 @@ resource "nios_dhcp_range_template" "range_template_additional_fields" {
   options = [
     {
       name  = "domain-name-servers"
+      num   = "6"
       value = "11.22.1.2"
     },
     {
       name  = "time-offset"
+      num   = "2"
       value = "1000"
     },
     {
       name  = "domain-name"
+      num   = "15"
       value = "aa.bb.com"
     },
   ]
@@ -296,10 +299,13 @@ Required:
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
+Required:
 
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
+
+Optional:
+
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `value` (String) Value of the DHCP option
 - `vendor_class` (String) The name of the space this DHCP option is associated to.

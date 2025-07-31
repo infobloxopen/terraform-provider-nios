@@ -2,7 +2,15 @@ resource "nios_ipam_network_container" "example_container" {
   network      = "10.0.0.0/24"
   network_view = "default"
   comment      = "Created by Terraform"
-
+  options = [
+    {
+      name         = "dhcp-lease-time",
+      num          = 51,
+      value        = "3600",
+      vendor_class = "DHCP"
+    },
+  ]
+  use_options = true
   // Optional: Configure extensible attributes
   extattrs = {
     "Site" = "location-1"

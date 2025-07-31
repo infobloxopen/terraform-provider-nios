@@ -717,7 +717,6 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	if m == nil {
 		*m = FixedaddressModel{}
 	}
-	from.Options = RemoveDefaultFixedAddressDHCPOptions(ctx, diags, from.Options, m.Options)
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.AgentCircuitId = flex.FlattenStringPointer(from.AgentCircuitId)
@@ -758,7 +757,19 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.Network = flex.FlattenStringPointer(from.Network)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.Options, FixedaddressOptionsAttrTypes, diags, FlattenFixedaddressOptions)
+	m.Options = flex.FilterDHCPOptions(
+		ctx,
+		diags,
+		from.Options,
+		m.Options,
+		FixedaddressOptionsAttrTypes,
+		func(ctx context.Context, opt *dhcp.FixedaddressOptions, d *diag.Diagnostics) types.Object {
+			return FlattenFixedaddressOptions(ctx, opt, d)
+		},
+		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *dhcp.FixedaddressOptions {
+			return ExpandFixedaddressOptions(ctx, obj, d)
+		},
+	)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
 	m.Snmp3Credential = FlattenFixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
@@ -801,30 +812,3 @@ func FlattenFixedAddressIpv4addr(from *dhcp.FixedaddressIpv4addr) iptypes.IPv4Ad
 	return m
 }
 
-// RemoveDefaultFixedAddressDHCPOptions removes the default DHCP options from the provided options list.
-func RemoveDefaultFixedAddressDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []dhcp.FixedaddressOptions, planOptions internaltypes.UnorderedListValue) []dhcp.FixedaddressOptions {
-	defaultOptionName := "dhcp-lease-time"
-	defaultOptionVal := ""
-
-	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, planOptions, diags, ExpandFixedaddressOptions)
-
-	for i := range planOptionsArr {
-		if *planOptionsArr[i].Name == defaultOptionName {
-			defaultOptionVal = *planOptionsArr[i].Value
-		}
-	}
-	var result []dhcp.FixedaddressOptions
-
-	for i := range options {
-		if *options[i].Name == defaultOptionName && *options[i].Value != defaultOptionVal {
-			continue
-		}
-		result = append(result, options[i])
-	}
-
-	if len(result) == 0 {
-		return options
-	}
-
-	return result
-}

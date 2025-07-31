@@ -18,6 +18,15 @@ resource "nios_ipam_network" "example_network" {
   network      = "10.0.0.0/24"
   network_view = "default"
   comment      = "Created by Terraform"
+  options = [
+    {
+      name         = "dhcp-lease-time",
+      num          = 51,
+      value        = "3600",
+      vendor_class = "DHCP"
+    }
+  ]
+  use_options = true
   extattrs = {
     Site = "location-1"
   }
@@ -387,10 +396,13 @@ Optional:
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
+Required:
 
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
+
+Optional:
+
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `value` (String) Value of the DHCP option
 - `vendor_class` (String) The name of the space this DHCP option is associated to.

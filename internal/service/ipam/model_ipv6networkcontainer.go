@@ -745,7 +745,19 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	}
 	m.NetworkContainer = flex.FlattenStringPointer(from.NetworkContainer)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	m.Options = RemoveIpv6networkcontainerDefaultDHCPOptions(ctx, diags, from.Options, m.Options)
+	m.Options = flex.FilterDHCPOptions(
+		ctx,
+		diags,
+		from.Options,
+		m.Options,
+		Ipv6networkcontainerOptionsAttrTypes,
+		func(ctx context.Context, opt *ipam.Ipv6networkcontainerOptions, d *diag.Diagnostics) types.Object {
+			return FlattenIpv6networkcontainerOptions(ctx, opt, d)
+		},
+		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *ipam.Ipv6networkcontainerOptions {
+			return ExpandIpv6networkcontainerOptions(ctx, obj, d)
+		},
+	)
 	m.PortControlBlackoutSetting = FlattenIpv6networkcontainerPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
@@ -797,74 +809,3 @@ func FlattenIpv6NetworkcontainerNetwork(from *ipam.Ipv6networkcontainerNetwork) 
 	return m
 }
 
-func RemoveIpv6networkcontainerDefaultDHCPOptions(ctx context.Context, diags *diag.Diagnostics, options []ipam.Ipv6networkcontainerOptions, planOptions internaltypes.UnorderedListValue) internaltypes.UnorderedListValue {
-	defaultOptionName := "dhcp-lease-time"
-
-	// If no options, return empty list
-	if len(options) == 0 {
-		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: Ipv6networkcontainerOptionsAttrTypes})
-	}
-
-	// If plan options is null or unknown, return original options
-	if planOptions.IsNull() || planOptions.IsUnknown() {
-		return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, options, Ipv6networkcontainerOptionsAttrTypes, diags, FlattenIpv6networkcontainerOptions)
-	}
-
-	// Convert plan options to a map for easy lookup
-	baseList, err := planOptions.ToListValue(ctx)
-	if err != nil {
-		return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, options, Ipv6networkcontainerOptionsAttrTypes, diags, FlattenIpv6networkcontainerOptions)
-	}
-
-	planOptionsArr := flex.ExpandFrameworkListNestedBlock(ctx, baseList, diags, ExpandIpv6networkcontainerOptions)
-	planOptionsMap := make(map[string]ipam.Ipv6networkcontainerOptions)
-	var planOrder []string
-	for _, opt := range planOptionsArr {
-		if opt.Name != nil {
-			planOptionsMap[*opt.Name] = opt
-			planOrder = append(planOrder, *opt.Name)
-		}
-	}
-
-	// Convert current options to a map
-	currentOptionsMap := make(map[string]ipam.Ipv6networkcontainerOptions)
-	for _, opt := range options {
-		if opt.Name != nil {
-			currentOptionsMap[*opt.Name] = opt
-		}
-	}
-
-	// Build result maintaining plan order
-	var result []ipam.Ipv6networkcontainerOptions
-	for _, name := range planOrder {
-		if name == defaultOptionName {
-			// For lease-time option, check if values match
-			planOpt, planExists := planOptionsMap[name]
-			currentOpt, currentExists := currentOptionsMap[name]
-
-			if planExists && currentExists &&
-				planOpt.Value != nil && currentOpt.Value != nil &&
-				*planOpt.Value == *currentOpt.Value {
-				result = append(result, currentOpt)
-			}
-		} else {
-			// For non-lease-time options, use current value if exists
-			if opt, exists := currentOptionsMap[name]; exists {
-				result = append(result, opt)
-			}
-		}
-	}
-
-	// Add any remaining options that weren't in the plan but should be kept
-	for _, opt := range options {
-		if opt.Name == nil {
-			continue
-		}
-		_, inPlan := planOptionsMap[*opt.Name]
-		if !inPlan && *opt.Name != defaultOptionName {
-			result = append(result, opt)
-		}
-	}
-
-	return flex.FlattenFrameworkUnorderedListNestedBlock(ctx, result, Ipv6networkcontainerOptionsAttrTypes, diags, FlattenIpv6networkcontainerOptions)
-}

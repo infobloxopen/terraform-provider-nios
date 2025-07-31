@@ -60,7 +60,6 @@ resource "nios_ipam_ipv6network" "complete_example" {
   preferred_lifetime          = 27000
   recycle_leases              = true
   update_dns_on_lease_renewal = true
-  valid_lifetime              = 43200
 
   use_ddns_enable_option_fqdn     = true
   use_ddns_generate_hostname      = true
@@ -72,7 +71,6 @@ resource "nios_ipam_ipv6network" "complete_example" {
   use_preferred_lifetime          = true
   use_recycle_leases              = true
   use_update_dns_on_lease_renewal = true
-  use_valid_lifetime              = true
 }
 
 // Create an IPAM IPv6 Network with Function Call
@@ -334,12 +332,15 @@ Optional:
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
+Required:
 
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
-- `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `value` (String) Value of the DHCP option
+
+Optional:
+
+- `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `vendor_class` (String) The name of the space this DHCP option is associated to.
 
 

@@ -50,14 +50,16 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
   options = [
     {
       name  = "time-offset"
+      num   = 2
       value = "50"
     },
     {
       name  = "dhcp-lease-time"
+      num   = 51
       value = "7200"
     }
   ]
-
+  use_options = true
   // Extensible Attributes
   extattrs = {
     Site = "location-2"
@@ -228,10 +230,13 @@ Required:
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
+Required:
 
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
+
+Optional:
+
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
 - `value` (String) Value of the DHCP option
 - `vendor_class` (String) The name of the space this DHCP option is associated to.

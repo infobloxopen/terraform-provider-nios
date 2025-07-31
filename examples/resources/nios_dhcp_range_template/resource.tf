@@ -31,14 +31,17 @@ resource "nios_dhcp_range_template" "range_template_additional_fields" {
   options = [
     {
       name  = "domain-name-servers"
+      num   = "6"
       value = "11.22.1.2"
     },
     {
       name  = "time-offset"
+      num   = "2"
       value = "1000"
     },
     {
       name  = "domain-name"
+      num   = "15"
       value = "aa.bb.com"
     },
   ]
