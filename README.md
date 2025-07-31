@@ -24,6 +24,7 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 - [Debugging](#debugging)
   - [Terraform Logging](#terraform-logging)
   - [Provider-Specific Debugging](#provider-specific-debugging)
+- [Terraform Limitations / Anomalies and Known Issues](#terraform-limitations--anomalies-and-known-issues)
 - [Contributing](#contributing)
 - [Support](#support)
 
