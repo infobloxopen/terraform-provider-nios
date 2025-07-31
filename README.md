@@ -256,6 +256,37 @@ For debugging specific issues with the NIOS provider:
 
 For more information on debugging Terraform providers, refer to the [Terraform debugging documentation](https://developer.hashicorp.com/terraform/internals/debugging).
 
+##  Terraform Limitations / Anomalies and Known Issues
+
+- DHCP Options:
+  - DHCP Options:
+    - Both `name` and `num` fields are required when configuring DHCP options
+    - For IPv6 (Network / Network Container): When setting `dhcp-lease-time` during initial creation or updation operations does not take effect
+    - When `use_options = true` is set and all options are subsequently removed, no change is detected
+    - If `use_options` is set to `false`, changes are detected but may not reflect properly in the UI
+- Cloud platform configuration must be nullified before modification or removal
+- Cannot specify reverse mapping notation for Zone FQDNs (Auth, Forward, Delegated)
+- Forward Zones lack TSIG support
+- IPv6 PTR records lack function call support.
+- Range templates have `cloud_api_compatible` set to `true` by default, as Terraform's internal ID structure requires cloud compatibility. Setting this to `false` causes errors when adding the Terraform Internal ID extensible attribute.
+- DHCP Range Configuration:
+  - `cloud_info` cannot be configured via Terraform because `delegated_member` is a computed field
+  - `use_ignore_id` parameter requires explicit setting to `false` to unset it after initial configuration
+- DTC Pool Configuration:
+  - When setting `availability` to `quorum`, you must explicitly define the `quorum` field or the operation will fail.
+  - Once the `quorum` field is added to the Terraform configuration, it cannot be removed.
+- Data Source provides no value for `extattrs_all` since this is for internal use only. Users should only work with the `extattrs` field.
+- Extensible Attributes (EA):
+  - CLI Import doesn't segregate EA into `extattrs` and `extattrs_all`
+  - Requires another apply operation
+  - Import block works as expected, contrary to CLI import
+- String Field unsetting issues explisitly require to pass empty string to unset.
+- `ignore_id` & `ignore_client_identifier` field usage:
+  - For shared networks in WAPI 1.8 or higher, use `ignore_id` instead of `ignore_client_identifier`
+  - Using the wrong field based on WAPI version will cause configuration errors.
+- When setting `use_ttl=false` or removing the field, the provider fails to unset TTL properly. Users must remove both `ttl` and `use_ttl` fields to successfully unset TTL.
+- NS Record type lacks Extensible Attribute support, preventing effective state drift detection via Terraform Internal ID.
+
 ## Contributing
 
 Contributions are welcome!
