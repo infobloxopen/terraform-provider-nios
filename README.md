@@ -222,7 +222,8 @@ Each documentation file contains comprehensive information about:
 - Examples of usage
 
 We recommend referring to these documentation files for the most up-to-date and detailed information about working with specific NIOS objects.
-Alternatively, you can also refer to the [Infoblox NIOS WAPI documentation](https://docs.infoblox.com/space/NIOS/35400616/NIOS) for more information on the API endpoints and their usage.
+You can also refer to the [Infoblox NIOS WAPI documentation](https://docs.infoblox.com/space/NIOS/35400616/NIOS) for more information on the API endpoints and their usage.
+Alternatively, you can also refer to the [Infoblox NIOS Swagger](https://infobloxopen.github.io/nios-swagger/) to view the API endpoints and their parameters.
 
 ## Debugging
 
