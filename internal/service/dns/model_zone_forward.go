@@ -301,7 +301,6 @@ func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		return nil
 	}
 	to := &dns.ZoneForward{
-		Ref:                 flex.ExpandStringPointer(m.Ref),
 		Comment:             flex.ExpandStringPointer(m.Comment),
 		Disable:             flex.ExpandBoolPointer(m.Disable),
 		DisableNsGeneration: flex.ExpandBoolPointer(m.DisableNsGeneration),

@@ -193,13 +193,11 @@ func (m *DtcLbdnModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc
 		return nil
 	}
 	to := &dtc.DtcLbdn{
-		Ref:                      flex.ExpandStringPointer(m.Ref),
 		AuthZones:                flex.ExpandFrameworkListString(ctx, m.AuthZones, diags),
 		AutoConsolidatedMonitors: flex.ExpandBoolPointer(m.AutoConsolidatedMonitors),
 		Comment:                  flex.ExpandStringPointer(m.Comment),
 		Disable:                  flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:                 ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Health:                   ExpandDtcLbdnHealth(ctx, m.Health, diags),
 		LbMethod:                 flex.ExpandStringPointer(m.LbMethod),
 		Name:                     flex.ExpandStringPointer(m.Name),
 		Patterns:                 flex.ExpandFrameworkListString(ctx, m.Patterns, diags),
