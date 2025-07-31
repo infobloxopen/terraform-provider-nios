@@ -281,7 +281,7 @@ For more information on debugging Terraform providers, refer to the [Terraform d
   - CLI Import doesn't segregate EA into `extattrs` and `extattrs_all`
   - Requires another apply operation
   - Import block works as expected, contrary to CLI import
-- String Field unsetting issues explisitly require to pass empty string to unset.
+- String Field unsetting issues explicitly require to pass empty string to unset.
 - `ignore_id` & `ignore_client_identifier` field usage:
   - For shared networks in WAPI 1.8 or higher, use `ignore_id` instead of `ignore_client_identifier`
   - Using the wrong field based on WAPI version will cause configuration errors.
