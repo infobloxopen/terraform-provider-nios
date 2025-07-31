@@ -245,6 +245,6 @@ This project is owned by Infoblox and available only to limited partners and cus
 
 ## Support
 
-For issues, feature requests, or questions, please [open an issue](https://github.com/infobloxopen/terraform-provider-nios/issues/new) on GitHub.
+For issues, feature requests, or questions, please [open an issue](https://github.com/infobloxopen/terraform-provider-nios/issues) on GitHub.
 
 For commercial support, please contact [Infoblox Support](https://www.infoblox.com/support/).
