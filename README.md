@@ -28,7 +28,7 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 
 ## Requirements
 
-- [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin)
+- [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin) (recommended version is 1.24.4 or later)
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) >= 9.0.6
 
 ## Installation
@@ -140,12 +140,12 @@ The tables below list all available resources and data sources
 
 ### DHCP
 
-| Name | Resource Description | Data Source Description |
-|----------|-------------|------------|
-| `nios_dhcp_fixed_address` | Manages DHCP fixed address resources | Retrieves information about existing DHCP fixed addresses |
-| `nios_dhcp_range` | Manages DHCP range resources | Retrieves information about existing DHCP ranges |
-| `nios_dhcp_range_template` | Manages DHCP range template resources | Retrieves information about existing DHCP range templates |
-| `nios_dhcp_shared_network` | Manages DHCP shared network resources | Retrieves information about existing DHCP shared networks |
+| Name | Resource Description                         | Data Source Description |
+|----------|----------------------------------------------|------------|
+| `nios_dhcp_fixed_address` | Manages DHCP fixed address (IPv4) resources  | Retrieves information about existing DHCP fixed addresses |
+| `nios_dhcp_range` | Manages DHCP range (IPv4) resources          | Retrieves information about existing DHCP ranges |
+| `nios_dhcp_range_template` | Manages DHCP range template (IPv4) resources | Retrieves information about existing DHCP range templates |
+| `nios_dhcp_shared_network` | Manages DHCP shared network (IPv4) resources | Retrieves information about existing DHCP shared networks |
 
 ### DNS
 
@@ -223,6 +223,7 @@ Each documentation file contains comprehensive information about:
 
 We recommend referring to these documentation files for the most up-to-date and detailed information about working with specific NIOS objects.
 You can also refer to the [Infoblox NIOS WAPI documentation](https://docs.infoblox.com/space/NIOS/35400616/NIOS) for more information on the API endpoints and their usage.
+
 Alternatively, you can also refer to the [Infoblox NIOS Swagger](https://infobloxopen.github.io/nios-swagger/) to view the API endpoints and their parameters.
 
 ## Debugging
