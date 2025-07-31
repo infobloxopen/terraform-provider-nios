@@ -20,6 +20,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordAModel struct {
@@ -96,8 +97,15 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The cloud information associated with the record.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
+
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
@@ -131,8 +139,9 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the record is disabled or not. False means that the record is enabled.",
 	},
 	"discovered_data": schema.SingleNestedAttribute{
-		Computed:   true,
-		Attributes: RecordADiscoveredDataResourceSchemaAttributes,
+		Computed:            true,
+		Attributes:          RecordADiscoveredDataResourceSchemaAttributes,
+		MarkdownDescription: "The discovered data for the record.",
 	},
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
@@ -184,10 +193,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "The Name of the record.",
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.IsValidFQDN(),
 		},
 	},
 	"reclaimable": schema.BoolAttribute{
