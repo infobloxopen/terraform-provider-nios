@@ -35,34 +35,13 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 
 ## Installation
 
-### Terraform RC Configuration for local usage 
-
-As the Provider isn't available on registry , to use a locally built version of the provider for development purposes:
-
-Modify the `.terraformrc` file in your home directory:
-
-```bash
-provider_installation {
-  dev_overrides {
-    "infobloxopen/nios" = "/Users/<user-name>/<path-to-provider>/terraform-provider-nios"
-  }
-  filesystem_mirror {
-    path    = "/Users/<user-name>/.terraform.d/plugins/"
-    include = ["infobloxopen/nios"]
-  }
-  direct {
-    exclude = ["infobloxopen/nios"]
-  }
-}
-```
-
-
 ### Using Pre-built Binaries from Github Releases
 
 1. Download the latest release from the [releases page](https://github.com/infobloxopen/terraform-provider-nios/releases).
 2. Extract the binary and move it to the Terraform plugins directory (`~/.terraform.d/plugins/`) . Use the following command to create the necessary directory structure:
 ```bash
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/1.0.0/<OS_ARCH>(linux_amd64, darwin_amd64, windows_amd64)
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>(linux_amd64, darwin_amd64, windows_amd64)
+mv terraform-provider-nios ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>
 ```
 
 ### Build the Provider from Source
@@ -94,8 +73,8 @@ make install
 OR instead of `make install`, you can manually move the built binary to the Terraform plugins directory:
 
 ```bash
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/1.0.0/linux_amd64
-mv terraform-provider-nios_v1.0.0 ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/1.0.0/linux_amd64/terraform-provider-nios_v1.0.0
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>(linux_amd64, darwin_amd64, windows_amd64)
+mv terraform-provider-nios ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>
 ```
 
 
@@ -108,7 +87,7 @@ terraform {
   required_providers {
     nios = {
       source  = "infobloxopen/nios"
-      version = "1.0.0"
+      version = "0.0.1"
     }
   }
 }
@@ -292,6 +271,28 @@ For more information on debugging Terraform providers, refer to the [Terraform d
 ## Contributing
 
 Contributions are welcome!
+
+### Terraform RC Configuration for local usage
+
+As the Provider isn't available on registry , to develop the provider locally , you need to set up the `.terraformrc` file in your home directory to point to the `terraform-provider-nios` repository.
+
+```bash
+provider_installation {
+  dev_overrides {
+    "infobloxopen/nios" = "/Users/<user-name>/<path-to-provider>/terraform-provider-nios"
+  }
+  filesystem_mirror {
+    path    = "/Users/<user-name>/.terraform.d/plugins/"
+    include = ["infobloxopen/nios"]
+  }
+  direct {
+    exclude = ["infobloxopen/nios"]
+  }
+}
+```
+Using this configuration allows Terraform to use the local provider instead of the one from the Terraform registry, which is particularly useful during development and testing.
+
+### How to Contribute a New Feature
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
