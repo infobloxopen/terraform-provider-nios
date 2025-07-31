@@ -57,11 +57,7 @@ func (m *DtcServerHealthModel) Expand(ctx context.Context, diags *diag.Diagnosti
 	if m == nil {
 		return nil
 	}
-	to := &dtc.DtcServerHealth{
-		Availability: flex.ExpandStringPointer(m.Availability),
-		EnabledState: flex.ExpandStringPointer(m.EnabledState),
-		Description:  flex.ExpandStringPointer(m.Description),
-	}
+	to := &dtc.DtcServerHealth{}
 	return to
 }
 

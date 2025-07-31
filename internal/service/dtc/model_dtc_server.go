@@ -138,12 +138,10 @@ func (m *DtcServerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		return nil
 	}
 	to := &dtc.DtcServer{
-		Ref:                  flex.ExpandStringPointer(m.Ref),
 		AutoCreateHostRecord: flex.ExpandBoolPointer(m.AutoCreateHostRecord),
 		Comment:              flex.ExpandStringPointer(m.Comment),
 		Disable:              flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:             ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Health:               ExpandDtcServerHealth(ctx, m.Health, diags),
 		Host:                 flex.ExpandStringPointer(m.Host),
 		Monitors:             flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.Monitors, diags, ExpandDtcServerMonitors),
 		Name:                 flex.ExpandStringPointer(m.Name),
