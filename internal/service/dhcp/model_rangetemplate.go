@@ -187,7 +187,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"cloud_api_compatible": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "This flag controls whether this template can be used to create network objects in a cloud-computing deployment.",
 	},
 	"comment": schema.StringAttribute{
@@ -351,7 +351,6 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"known_clients": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("Allow", "Deny"),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_known_clients")),
@@ -517,7 +516,6 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"unknown_clients": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("Allow", "Deny"),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_unknown_clients")),
@@ -763,7 +761,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.HighWaterMark = flex.FlattenInt64Pointer(from.HighWaterMark)
 	m.HighWaterMarkReset = flex.FlattenInt64Pointer(from.HighWaterMarkReset)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
-	m.KnownClients = flex.FlattenStringPointer(from.KnownClients)
+	m.KnownClients = flex.FlattenStringPointerNilAsNotEmpty(from.KnownClients)
 	m.LeaseScavengeTime = flex.FlattenInt64Pointer(from.LeaseScavengeTime)
 	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, RangetemplateLogicFilterRulesAttrTypes, diags, FlattenRangetemplateLogicFilterRules)
 	m.LowWaterMark = flex.FlattenInt64Pointer(from.LowWaterMark)
@@ -795,7 +793,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangetemplateRelayAgentFilterRulesAttrTypes, diags, FlattenRangetemplateRelayAgentFilterRules)
 	m.ServerAssociationType = flex.FlattenStringPointer(from.ServerAssociationType)
-	m.UnknownClients = flex.FlattenStringPointer(from.UnknownClients)
+	m.UnknownClients = flex.FlattenStringPointerNilAsNotEmpty(from.UnknownClients)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)
 	m.UseBootfile = types.BoolPointerValue(from.UseBootfile)
 	m.UseBootserver = types.BoolPointerValue(from.UseBootserver)

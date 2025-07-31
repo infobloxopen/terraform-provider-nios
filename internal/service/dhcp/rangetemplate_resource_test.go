@@ -327,12 +327,12 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 	numberOfAdresses := 100
 	offset := 50
 	delegatedMember := map[string]string{
-		"name":     "infoblox.172_28_83_209",
-		"ipv4addr": "172.28.83.209",
+		"name":     "infoblox.172_28_82_12",
+		"ipv4addr": "172.28.82.12",
 	}
 	delegatedMemberUpdated := map[string]string{
-		"name":     "infoblox.172_28_83_235",
-		"ipv4addr": "172.28.83.235",
+		"name":     "infoblox.172_28_82_218",
+		"ipv4addr": "172.28.82.218",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -344,8 +344,8 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccRangetemplateDelegatedMember(delegatedMember, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_83_209"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.83.209"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_12"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.12"),
 				),
 			},
 			// Update and Read
@@ -353,8 +353,8 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccRangetemplateDelegatedMember(delegatedMemberUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_83_235"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.83.235"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_218"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.218"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1152,12 +1152,12 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 	offset := 50
 
 	member := map[string]string{
-		"name":     "infoblox.172_28_83_209",
-		"ipv4addr": "172.28.83.209",
+		"name":     "infoblox.172_28_82_12",
+		"ipv4addr": "172.28.82.12",
 	}
 	memberUpdated := map[string]string{
-		"name":     "infoblox.172_28_83_235",
-		"ipv4addr": "172.28.83.235",
+		"name":     "infoblox.172_28_82_218",
+		"ipv4addr": "172.28.82.218",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1169,8 +1169,8 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 				Config: testAccRangetemplateMember(member, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_83_209"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.209"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_12"),
+					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.12"),
 				),
 			},
 			// Update and Read
@@ -1178,8 +1178,8 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 				Config: testAccRangetemplateMember(memberUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_83_235"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.235"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_218"),
+					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.218"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1509,7 +1509,7 @@ func TestAccRangetemplateResource_Options(t *testing.T) {
 	options := []map[string]any{
 		{
 			"name":  "domain-name",
-			"num":  "15",
+			"num":   "15",
 			"value": "aa.bb.com",
 		},
 		{
@@ -1614,7 +1614,7 @@ func TestAccRangetemplateResource_RecycleLeases(t *testing.T) {
 				Config: testAccRangetemplateRecycleLeases(true, true, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "false"),
+					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
 				),
 			},
 			// Update and Read
@@ -1622,7 +1622,7 @@ func TestAccRangetemplateResource_RecycleLeases(t *testing.T) {
 				Config: testAccRangetemplateRecycleLeases(true, false, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
+					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

@@ -45,7 +45,7 @@ var ZoneForwardForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
@@ -55,7 +55,7 @@ var ZoneForwardForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
@@ -76,7 +76,7 @@ var ZoneForwardForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "A generated TSIG key.",
@@ -92,7 +92,7 @@ var ZoneForwardForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
+				"should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The TSIG key name.",
