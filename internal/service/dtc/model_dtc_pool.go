@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	internalvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
@@ -88,6 +89,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString("ALL"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ALL", "ANY", "QUORUM"),
+			internalvalidator.NewAvailabilityQuorumValidator(),
 		},
 		MarkdownDescription: "A resource in the pool is available if ANY, at least QUORUM, or ALL monitors for the pool say that it is up.",
 	},
@@ -187,6 +189,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	"quorum": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "For availability mode QUORUM, at least this many monitors must report the resource as up for it to be available",
+		Validators: []validator.Int64{
+			internalvalidator.NewQuorumValidator(),
+		},
 	},
 	"servers": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -272,8 +277,15 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 	m.LbPreferredTopology = flex.FlattenStringPointer(from.LbPreferredTopology)
 	m.Monitors = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Monitors, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Quorum = flex.FlattenInt64Pointer(from.Quorum)
+	m.Quorum = FlattenQuorumBasedOnAvailability(from.Availability, from.Quorum)
 	m.Servers = flex.FlattenFrameworkListNestedBlock(ctx, from.Servers, DtcPoolServersAttrTypes, diags, FlattenDtcPoolServers)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
+}
+
+func FlattenQuorumBasedOnAvailability(availability *string, quorum *int64) types.Int64 {
+    if availability == nil || *availability != "QUORUM" {
+        return types.Int64Null()
+    }
+    return flex.FlattenInt64Pointer(quorum)
 }
