@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
@@ -45,13 +46,20 @@ func (validator fqdnValidator) ValidateString(ctx context.Context, req validator
 			req.ConfigValue.ValueString(),
 		))
 	}
+
+	fqdnRegex := `^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`
+
+	if matched, _ := regexp.MatchString(fqdnRegex, value); !matched {
+		resp.Diagnostics.Append(validatordiag.InvalidAttributeTypeDiagnostic(
+			req.Path,
+			"Not a valid FQDN: contains invalid characters or format",
+			req.ConfigValue.ValueString(),
+		))
+	}
 }
 
 // IsValidFQDN returns an AttributeValidator which ensures that any configured
 // attribute value:
-//
-//   - Contains no whitespace.
-//   - Does not end with a dot
 func IsValidFQDN() validator.String {
 	return fqdnValidator{}
 }

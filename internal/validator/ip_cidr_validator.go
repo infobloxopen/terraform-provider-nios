@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -56,19 +55,11 @@ func (v IPCIDRValidator) ValidateString(ctx context.Context, request validator.S
 		// Valid CIDR notation (either IPv4 or IPv6)
 		return
 	}
-
-	// Validate as FQDN (allowing trailing dot)
-	fqdnRegex := `^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\.?$`
-	if matched, _ := regexp.MatchString(fqdnRegex, value); matched {
-		// Valid FQDN
-		return
-	}
-
 	// If we get here, it's not a valid format
 	response.Diagnostics.AddAttributeError(
 		request.Path,
 		"Invalid Value Format",
-		fmt.Sprintf("The value '%s' is not a valid FQDN, IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR.", value),
+		fmt.Sprintf("The value '%s' is not a valid IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR.", value),
 	)
 }
 
