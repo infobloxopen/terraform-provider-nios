@@ -287,8 +287,11 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangetemplateExcludeResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "These are ranges of IP addresses that the appliance does not use to assign to clients. You can use these exclusion addresses as static IP addresses. They contain the start and end addresses of the exclusion range, and optionally, information about this exclusion range.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -318,8 +321,11 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangetemplateFingerprintFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the fingerprint filters for this DHCP range. The appliance uses matching rules in these filters to select the address range from which it assigns a lease.",
 	},
 	"high_water_mark": schema.Int64Attribute{
@@ -374,6 +380,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the logic filters to be applied on this range. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
@@ -399,8 +406,11 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangetemplateMacFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the MAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"member": schema.SingleNestedAttribute{
@@ -417,6 +427,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ms_options")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The Microsoft DHCP options for this range.",
 	},
@@ -430,8 +441,11 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangetemplateNacFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the NAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"name": schema.StringAttribute{
@@ -464,8 +478,11 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangetemplateOptionFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the Option filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"options": schema.ListNestedAttribute{
@@ -502,8 +519,11 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangetemplateRelayAgentFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the Relay Agent filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"server_association_type": schema.StringAttribute{
@@ -668,32 +688,32 @@ func (m *RangetemplateModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		EnableEmailWarnings:            flex.ExpandBoolPointer(m.EnableEmailWarnings),
 		EnablePxeLeaseTime:             flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
 		EnableSnmpWarnings:             flex.ExpandBoolPointer(m.EnableSnmpWarnings),
-		Exclude:                        flex.ExpandFrameworkListNestedBlock(ctx, m.Exclude, diags, ExpandRangetemplateExclude),
+		Exclude:                        flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.Exclude, diags, ExpandRangetemplateExclude),
 		ExtAttrs:                       ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FailoverAssociation:            flex.ExpandStringPointer(m.FailoverAssociation),
-		FingerprintFilterRules:         flex.ExpandFrameworkListNestedBlock(ctx, m.FingerprintFilterRules, diags, ExpandRangetemplateFingerprintFilterRules),
+		FingerprintFilterRules:         flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.FingerprintFilterRules, diags, ExpandRangetemplateFingerprintFilterRules),
 		HighWaterMark:                  flex.ExpandInt64Pointer(m.HighWaterMark),
 		HighWaterMarkReset:             flex.ExpandInt64Pointer(m.HighWaterMarkReset),
 		IgnoreDhcpOptionListRequest:    flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
 		KnownClients:                   flex.ExpandStringPointer(m.KnownClients),
 		LeaseScavengeTime:              flex.ExpandInt64Pointer(m.LeaseScavengeTime),
-		LogicFilterRules:               flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandRangetemplateLogicFilterRules),
+		LogicFilterRules:               flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.LogicFilterRules, diags, ExpandRangetemplateLogicFilterRules),
 		LowWaterMark:                   flex.ExpandInt64Pointer(m.LowWaterMark),
 		LowWaterMarkReset:              flex.ExpandInt64Pointer(m.LowWaterMarkReset),
-		MacFilterRules:                 flex.ExpandFrameworkListNestedBlock(ctx, m.MacFilterRules, diags, ExpandRangetemplateMacFilterRules),
+		MacFilterRules:                 flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.MacFilterRules, diags, ExpandRangetemplateMacFilterRules),
 		Member:                         ExpandRangetemplateMember(ctx, m.Member, diags),
-		MsOptions:                      flex.ExpandFrameworkListNestedBlock(ctx, m.MsOptions, diags, ExpandRangetemplateMsOptions),
+		MsOptions:                      flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.MsOptions, diags, ExpandRangetemplateMsOptions),
 		MsServer:                       ExpandRangetemplateMsServer(ctx, m.MsServer, diags),
-		NacFilterRules:                 flex.ExpandFrameworkListNestedBlock(ctx, m.NacFilterRules, diags, ExpandRangetemplateNacFilterRules),
+		NacFilterRules:                 flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.NacFilterRules, diags, ExpandRangetemplateNacFilterRules),
 		Name:                           flex.ExpandStringPointer(m.Name),
 		Nextserver:                     flex.ExpandStringPointer(m.Nextserver),
 		NumberOfAddresses:              flex.ExpandInt64Pointer(m.NumberOfAddresses),
 		Offset:                         flex.ExpandInt64Pointer(m.Offset),
-		OptionFilterRules:              flex.ExpandFrameworkListNestedBlock(ctx, m.OptionFilterRules, diags, ExpandRangetemplateOptionFilterRules),
+		OptionFilterRules:              flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.OptionFilterRules, diags, ExpandRangetemplateOptionFilterRules),
 		Options:                        flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandRangetemplateOptions),
 		PxeLeaseTime:                   flex.ExpandInt64Pointer(m.PxeLeaseTime),
 		RecycleLeases:                  flex.ExpandBoolPointer(m.RecycleLeases),
-		RelayAgentFilterRules:          flex.ExpandFrameworkListNestedBlock(ctx, m.RelayAgentFilterRules, diags, ExpandRangetemplateRelayAgentFilterRules),
+		RelayAgentFilterRules:          flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.RelayAgentFilterRules, diags, ExpandRangetemplateRelayAgentFilterRules),
 		ServerAssociationType:          flex.ExpandStringPointer(m.ServerAssociationType),
 		UnknownClients:                 flex.ExpandStringPointer(m.UnknownClients),
 		UpdateDnsOnLeaseRenewal:        flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),

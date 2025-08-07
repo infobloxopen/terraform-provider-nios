@@ -333,6 +333,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the logic filters to be applied on the this shared network. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
@@ -549,7 +550,7 @@ func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		IgnoreId:                       flex.ExpandStringPointer(m.IgnoreId),
 		IgnoreMacAddresses:             flex.ExpandFrameworkListString(ctx, m.IgnoreMacAddresses, diags),
 		LeaseScavengeTime:              flex.ExpandInt64Pointer(m.LeaseScavengeTime),
-		LogicFilterRules:               flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandSharednetworkLogicFilterRules),
+		LogicFilterRules:               flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.LogicFilterRules, diags, ExpandSharednetworkLogicFilterRules),
 		MsAdUserData:                   ExpandSharednetworkMsAdUserData(ctx, m.MsAdUserData, diags),
 		Name:                           flex.ExpandStringPointer(m.Name),
 		Networks:                       flex.ExpandFrameworkListNestedBlock(ctx, m.Networks, diags, ExpandSharednetworkNetworks),

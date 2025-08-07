@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -147,8 +148,11 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcLbdnPoolsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The maximum time, in seconds, for which client specific LBDN responses will be cached. Zero specifies no caching.",
 	},
 	"priority": schema.Int64Attribute{
@@ -202,7 +206,7 @@ func (m *DtcLbdnModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc
 		Name:                     flex.ExpandStringPointer(m.Name),
 		Patterns:                 flex.ExpandFrameworkListString(ctx, m.Patterns, diags),
 		Persistence:              flex.ExpandInt64Pointer(m.Persistence),
-		Pools:                    flex.ExpandFrameworkListNestedBlock(ctx, m.Pools, diags, ExpandDtcLbdnPools),
+		Pools:                    flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.Pools, diags, ExpandDtcLbdnPools),
 		Priority:                 flex.ExpandInt64Pointer(m.Priority),
 		Topology:                 flex.ExpandStringPointer(m.Topology),
 		Ttl:                      flex.ExpandInt64Pointer(m.Ttl),
