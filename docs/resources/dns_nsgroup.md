@@ -3,12 +3,12 @@
 page_title: "nios_dns_nsgroup Resource - nios"
 subcategory: "DNS"
 description: |-
-  
+  Manages a NS group.
 ---
 
 # nios_dns_nsgroup (Resource)
 
-
+Manages a NS group.
 
 ## Example Usage
 
