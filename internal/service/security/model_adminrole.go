@@ -121,6 +121,7 @@ func FlattenAdminrole(ctx context.Context, from *security.Adminrole, diags *diag
 	}
 	m := AdminroleModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, AdminroleAttrTypes, m)
 	diags.Append(d...)
 	return t

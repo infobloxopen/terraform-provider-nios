@@ -15,16 +15,16 @@ Manages an Admin Role.
 ```terraform
 // Create an Admin Role with Basic Fields
 resource "nios_security_admin_role" "admin_role_basic_fields" {
-  name = "example-admin-role1"
+  name = "example_admin_role"
 }
 
 // Create an Admin Role with additional fields
 resource "nios_security_admin_role" "admin_role_additional_fields" {
-  name    = "example-admin-role2"
+  name    = "example_admin_role2"
   comment = "Example Admin Role with additional fields"
   disable = true
   extattrs = {
-    Site = "location-2"
+    Site = "location-1"
   }
 }
 ```

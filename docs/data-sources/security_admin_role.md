@@ -13,7 +13,7 @@ Retrieves information about existing Admin Roles.
 ## Example Usage
 
 ```terraform
-// Retrieve a specific Admin Roles by filters
+// Retrieve a specific Admin Role by filters
 data "nios_security_admin_role" "get_admin_role_using_filters" {
   filters = {
     name = "example_admin_role"
@@ -21,13 +21,13 @@ data "nios_security_admin_role" "get_admin_role_using_filters" {
 }
 
 // Retrieve specific Admin Roles using Extensible Attributes
-data "nios_security_admin_role" "get_admin_role_using_extensible_attributes" {
+data "nios_security_admin_role" "get_admin_roles_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }
 }
 
-// Retrieve all Admin Roles
+// Retrieve all Admin Role
 data "nios_security_admin_role" "get_all_admin_roles" {}
 ```
 
