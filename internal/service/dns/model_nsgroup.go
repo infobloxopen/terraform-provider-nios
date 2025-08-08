@@ -2,12 +2,18 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -20,8 +26,8 @@ import (
 type NsgroupModel struct {
 	Ref                 types.String `tfsdk:"ref"`
 	Comment             types.String `tfsdk:"comment"`
-	ExtAttrs            types.Map           `tfsdk:"extattrs"`
-	ExtAttrsAll         types.Map           `tfsdk:"extattrs_all"`
+	ExtAttrs            types.Map    `tfsdk:"extattrs"`
+	ExtAttrsAll         types.Map    `tfsdk:"extattrs_all"`
 	ExternalPrimaries   types.List   `tfsdk:"external_primaries"`
 	ExternalSecondaries types.List   `tfsdk:"external_secondaries"`
 	GridPrimary         types.List   `tfsdk:"grid_primary"`
@@ -35,8 +41,8 @@ type NsgroupModel struct {
 var NsgroupAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
 	"comment":              types.StringType,
-	"extattrs":              types.MapType{ElemType: types.StringType},
-	"extattrs_all":          types.MapType{ElemType: types.StringType},
+	"extattrs":             types.MapType{ElemType: types.StringType},
+	"extattrs_all":         types.MapType{ElemType: types.StringType},
 	"external_primaries":   types.ListType{ElemType: types.ObjectType{AttrTypes: NsgroupExternalPrimariesAttrTypes}},
 	"external_secondaries": types.ListType{ElemType: types.ObjectType{AttrTypes: NsgroupExternalSecondariesAttrTypes}},
 	"grid_primary":         types.ListType{ElemType: types.ObjectType{AttrTypes: NsgroupGridPrimaryAttrTypes}},
@@ -49,11 +55,19 @@ var NsgroupAttrTypes = map[string]attr.Type{
 
 var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the name server group; maximum 256 characters.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -76,6 +90,9 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: NsgroupExternalPrimariesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_external_primary")),
+		},
 		MarkdownDescription: "The list of external primary servers.",
 	},
 	"external_secondaries": schema.ListNestedAttribute{
@@ -101,18 +118,29 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"is_grid_default": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if this name server group is the Grid default.",
 	},
 	"is_multimaster": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if the \"multiple DNS primaries\" feature is enabled for the group.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The name of this name server group.",
 	},
 	"use_external_primary": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag controls whether the group is using an external primary. Note that modification of this field requires passing values for \"grid_secondaries\" and \"external_primaries\".",
 	},
 }
@@ -155,6 +183,7 @@ func FlattenNsgroup(ctx context.Context, from *dns.Nsgroup, diags *diag.Diagnost
 	}
 	m := NsgroupModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, NsgroupAttrTypes, m)
 	diags.Append(d...)
 	return t

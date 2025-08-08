@@ -10,12 +10,19 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccNsgroupDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_nsgroup.test"
 	resourceName := "nios_dns_nsgroup.test"
 	var v dns.Nsgroup
+	name := acctest.RandomName()
+	gridPrimary := []map[string]any{
+		{
+			"name":"infoblox.172_28_83_208",
+		},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +30,7 @@ func TestAccNsgroupDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupDataSourceConfigFilters(),
+				Config: testAccNsgroupDataSourceConfigFilters(name, gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupExists(context.Background(), resourceName, &v),
@@ -38,13 +45,20 @@ func TestAccNsgroupDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_nsgroup.test"
 	resourceName := "nios_dns_nsgroup.test"
 	var v dns.Nsgroup
+	name := acctest.RandomName()
+	gridPrimary := []map[string]any{
+		{
+			"name":"infoblox.172_28_83_208",
+		},
+	}
+	extAttrValue := acctest.RandomName()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckNsgroupDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupDataSourceConfigExtAttrFilters(acctest.RandomName()),
+				Config: testAccNsgroupDataSourceConfigExtAttrFilters(name, gridPrimary, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupExists(context.Background(), resourceName, &v),
@@ -73,22 +87,28 @@ func testAccCheckNsgroupResourceAttrPair(resourceName, dataSourceName string) []
     }
 }
 
-func testAccNsgroupDataSourceConfigFilters() string {
+func testAccNsgroupDataSourceConfigFilters(name string, gridPrimary []map[string]any) string {
+	gridPrimaryStr:= utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test" {
+  name = %q
+  grid_primary = %s
 }
 
 data "nios_dns_nsgroup" "test" {
   filters = {
-	 = nios_dns_nsgroup.test.
+    name = nios_dns_nsgroup.test.name
   }
 }
-`)
+`, name, gridPrimaryStr)
 }
 
-func testAccNsgroupDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccNsgroupDataSourceConfigExtAttrFilters(name string, gridPrimary []map[string]any, extAttrsValue string) string {
+	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test" {
+  name = %q
+  grid_primary = %s
   extattrs = {
     Site = %q
   } 
@@ -99,6 +119,6 @@ data "nios_dns_nsgroup" "test" {
 	Site = nios_dns_nsgroup.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, name, gridPrimaryStr, extAttrsValue)
 }
 
