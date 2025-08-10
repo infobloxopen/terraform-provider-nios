@@ -35,27 +35,6 @@ func TestAccRulesetDataSource_Filters(t *testing.T) {
 	})
 }
 
-// func TestAccRulesetDataSource_ExtAttrFilters(t *testing.T) {
-// 	dataSourceName := "data.nios_misc_ruleset.test"
-// 	resourceName := "nios_misc_ruleset.test"
-// 	var v misc.Ruleset
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckRulesetDestroy(context.Background(), &v),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccRulesetDataSourceConfigExtAttrFilters("value1"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					append([]resource.TestCheckFunc{
-// 						testAccCheckRulesetExists(context.Background(), resourceName, &v),
-// 					}, testAccCheckRulesetResourceAttrPair(resourceName, dataSourceName)...)...,
-// 				),
-// 			},
-// 		},
-// 	})
-// }
-
 // below all TestAcc functions
 
 func testAccCheckRulesetResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
@@ -83,19 +62,3 @@ data "nios_misc_ruleset" "test" {
 }
 `, name, ruleset_type)
 }
-
-// func testAccRulesetDataSourceConfigExtAttrFilters(extAttrsValue string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_misc_ruleset" "test" {
-//   extattrs = {
-//     Site = %q
-//   }
-// }
-
-// data "nios_misc_ruleset" "test" {
-//   extattrfilters = {
-// 	Site = nios_misc_ruleset.test.extattrs.Site
-//   }
-// }
-// `, extAttrsValue)
-// }

@@ -52,7 +52,6 @@ func TestAccRulesetResource_basic(t *testing.T) {
 }
 
 func TestAccRulesetResource_disappears(t *testing.T) {
-	//t.Skip("Skipping test as it throws Expected a non-empty plan, but got an empty refresh plan")
 
 	resourceName := "nios_misc_ruleset.test"
 	var v misc.Ruleset
@@ -220,38 +219,6 @@ func TestAccRulesetResource_NxdomainRules(t *testing.T) {
 	})
 }
 
-//"Changing the type of Ruleset ruleset_2 is not allowed"
-// func TestAccRulesetResource_Type(t *testing.T) {
-// 	var resourceName = "nios_misc_ruleset.test_type"
-// 	var v misc.Ruleset
-
-// 	name := acctest.RandomNameWithPrefix("example_ruleset")
-
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccRulesetType(name, "BLACKLIST"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "type", "BLACKLIST"),
-// 				),
-// 			},
-// 			// Update and Read
-// 			{
-// 				Config: testAccRulesetType(name, "NXDOMAIN"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "type", "NXDOMAIN"),
-// 				),
-// 			},
-// 			// Delete testing automatically occurs in TestCase
-// 		},
-// 	})
-// }
-
 func testAccCheckRulesetExists(ctx context.Context, resourceName string, v *misc.Ruleset) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -357,15 +324,6 @@ resource "nios_misc_ruleset" "test_nxdomain_rules" {
 }
 `, name, ruleset_type, nxdomainRules)
 }
-
-// func testAccRulesetType(name, ruleset_type string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_misc_ruleset" "test_type" {
-// 	name = %q
-//     type = %q
-// }
-// `, name, ruleset_type)
-// }
 
 func FormatNxdomainRulesToHCL(rules []map[string]any) string {
 	var ruleBlocks []string
