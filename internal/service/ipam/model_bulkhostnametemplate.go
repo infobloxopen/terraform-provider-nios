@@ -50,10 +50,6 @@ var BulkhostnametemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-			stringvalidator.RegexMatches(
 				regexp.MustCompile(`.*(\$4|#4).*`),
 				"Template format must contain at least one of $4 or #4 placeholders",
 			),
@@ -64,7 +60,7 @@ var BulkhostnametemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				regexp.MustCompile(`^[^\s]([^\s]|.*[^\s])?$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},

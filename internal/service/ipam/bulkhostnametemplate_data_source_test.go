@@ -15,6 +15,8 @@ func TestAccBulkhostnametemplateDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_bulkhostnametemplate.test"
 	resourceName := "nios_ipam_bulkhostnametemplate.test"
 	var v ipam.Bulkhostnametemplate
+	templateName := acctest.RandomNameWithPrefix("test-template")
+	templateFormat := "host-$4"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,28 +24,7 @@ func TestAccBulkhostnametemplateDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckBulkhostnametemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBulkhostnametemplateDataSourceConfigFilters(),
-				Check: resource.ComposeTestCheckFunc(
-					append([]resource.TestCheckFunc{
-						testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
-					}, testAccCheckBulkhostnametemplateResourceAttrPair(resourceName, dataSourceName)...)...,
-				),
-			},
-		},
-	})
-}
-
-func TestAccBulkhostnametemplateDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_ipam_bulkhostnametemplate.test"
-	resourceName := "nios_ipam_bulkhostnametemplate.test"
-	var v ipam.Bulkhostnametemplate
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckBulkhostnametemplateDestroy(context.Background(), &v),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBulkhostnametemplateDataSourceConfigExtAttrFilters(acctest.RandomName()),
+				Config: testAccBulkhostnametemplateDataSourceConfigFilters(templateName, templateFormat),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
@@ -66,31 +47,18 @@ func testAccCheckBulkhostnametemplateResourceAttrPair(resourceName, dataSourceNa
 	}
 }
 
-func testAccBulkhostnametemplateDataSourceConfigFilters() string {
+func testAccBulkhostnametemplateDataSourceConfigFilters(templateName, templateFormat string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_bulkhostnametemplate" "test" {
+    template_name   = %q
+    template_format = %q
 }
 
 data "nios_ipam_bulkhostnametemplate" "test" {
   filters = {
-	 = nios_ipam_bulkhostnametemplate.test.
+    template_name = nios_ipam_bulkhostnametemplate.test.template_name
+    template_format = nios_ipam_bulkhostnametemplate.test.template_format
   }
 }
-`)
-}
-
-func testAccBulkhostnametemplateDataSourceConfigExtAttrFilters(extAttrsValue string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_bulkhostnametemplate" "test" {
-  extattrs = {
-    Site = %q
-  } 
-}
-
-data "nios_ipam_bulkhostnametemplate" "test" {
-  extattrfilters = {
-	Site = nios_ipam_bulkhostnametemplate.test.extattrs.Site
-  }
-}
-`, extAttrsValue)
+`, templateName, templateFormat)
 }

@@ -75,7 +75,7 @@ func TestAccBulkhostnametemplateResource_TemplateFormat(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccBulkhostnametemplateTemplateFormat(templateName, "server-$4"),
+				Config: testAccBulkhostnametemplateBasicConfig(templateName, "server-$4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "template_format", "server-$4"),
@@ -84,7 +84,7 @@ func TestAccBulkhostnametemplateResource_TemplateFormat(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccBulkhostnametemplateTemplateFormat(templateName, "server-$3-$4"),
+				Config: testAccBulkhostnametemplateBasicConfig(templateName, "server-$3-$4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "template_format", "server-$3-$4"),
@@ -109,7 +109,7 @@ func TestAccBulkhostnametemplateResource_TemplateName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccBulkhostnametemplateTemplateName(templateName, templateFormat),
+				Config: testAccBulkhostnametemplateBasicConfig(templateName, templateFormat),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "template_format", templateFormat),
@@ -118,7 +118,7 @@ func TestAccBulkhostnametemplateResource_TemplateName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccBulkhostnametemplateTemplateName(templateNameUpdated, templateFormat),
+				Config: testAccBulkhostnametemplateBasicConfig(templateNameUpdated, templateFormat),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "template_format", templateFormat),
@@ -189,24 +189,6 @@ func testAccCheckBulkhostnametemplateDisappears(ctx context.Context, v *ipam.Bul
 }
 
 func testAccBulkhostnametemplateBasicConfig(templateName, templateFormat string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_bulkhostnametemplate" "test" {
-    template_name   = %q
-    template_format = %q
-}
-`, templateName, templateFormat)
-}
-
-func testAccBulkhostnametemplateTemplateFormat(templateName, templateFormat string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_bulkhostnametemplate" "test" {
-    template_name   = %q
-    template_format = %q
-}
-`, templateName, templateFormat)
-}
-
-func testAccBulkhostnametemplateTemplateName(templateName, templateFormat string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_bulkhostnametemplate" "test" {
     template_name   = %q

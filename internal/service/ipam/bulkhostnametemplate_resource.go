@@ -62,7 +62,7 @@ func (r *BulkhostnametemplateResource) Configure(ctx context.Context, req resour
 }
 
 func (r *BulkhostnametemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
+
 	var data BulkhostnametemplateModel
 
 	// Read Terraform plan data into the model
@@ -85,10 +85,6 @@ func (r *BulkhostnametemplateResource) Create(ctx context.Context, req resource.
 	}
 
 	res := apiRes.CreateBulkhostnametemplateResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Bulkhostnametemplate due inherited Extensible attributes, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -163,11 +159,6 @@ func (r *BulkhostnametemplateResource) Update(ctx context.Context, req resource.
 
 	res := apiRes.UpdateBulkhostnametemplateResponseAsObject.GetResult()
 
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Bulkhostnametemplate due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
@@ -216,11 +207,6 @@ func (r *BulkhostnametemplateResource) ImportState(ctx context.Context, req reso
 
 	res := apiRes.GetBulkhostnametemplateResponseObjectAsResult.GetResult()
 
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Bulkhostnametemplate for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	if diags.HasError() {
@@ -242,10 +228,6 @@ func (r *BulkhostnametemplateResource) ImportState(ctx context.Context, req reso
 
 	res = updateRes.UpdateBulkhostnametemplateResponseAsObject.GetResult()
 
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Bulkhostnametemplate due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
