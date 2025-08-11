@@ -10,12 +10,20 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccNsgroupDelegationDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_nsgroup_delegation.test"
 	resourceName := "nios_dns_nsgroup_delegation.test"
 	var v dns.NsgroupDelegation
+	name := acctest.RandomName()
+	delegateTo := []map[string]interface{}{
+		{
+			"name":"delegate_to_ns_group",
+			"address":"2.3.4.5",
+		},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +31,7 @@ func TestAccNsgroupDelegationDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupDelegationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupDelegationDataSourceConfigFilters(),
+				Config: testAccNsgroupDelegationDataSourceConfigFilters(name, delegateTo),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
@@ -38,13 +46,21 @@ func TestAccNsgroupDelegationDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_nsgroup_delegation.test"
 	resourceName := "nios_dns_nsgroup_delegation.test"
 	var v dns.NsgroupDelegation
+	name := acctest.RandomName()
+	delegateTo := []map[string]interface{}{
+		{
+			"name":"delegate_to_ns_group",
+			"address":"2.3.4.5",
+		},
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckNsgroupDelegationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupDelegationDataSourceConfigExtAttrFilters( acctest.RandomName()),
+				Config: testAccNsgroupDelegationDataSourceConfigExtAttrFilters( name , delegateTo , acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
@@ -67,22 +83,28 @@ func testAccCheckNsgroupDelegationResourceAttrPair(resourceName, dataSourceName 
     }
 }
 
-func testAccNsgroupDelegationDataSourceConfigFilters() string {
+func testAccNsgroupDelegationDataSourceConfigFilters(name string, delegateTo []map[string]any) string {
+	delegateToStr := utils.ConvertSliceOfMapsToHCL(delegateTo)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_delegation" "test" {
+    name = %q
+    delegate_to = %s
 }
 
 data "nios_dns_nsgroup_delegation" "test" {
   filters = {
-	 = nios_dns_nsgroup_delegation.test.
+	name = nios_dns_nsgroup_delegation.test.name
   }
 }
-`)
+`, name, delegateToStr)
 }
 
-func testAccNsgroupDelegationDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccNsgroupDelegationDataSourceConfigExtAttrFilters(name string , delegateTo []map[string]interface{}, extAttrsValue string) string {
+	delegateToStr := utils.ConvertSliceOfMapsToHCL(delegateTo)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_delegation" "test" {
+  name = %q
+  delegate_to = %s
   extattrs = {
     Site = %q
   } 
@@ -93,6 +115,6 @@ data "nios_dns_nsgroup_delegation" "test" {
 	Site = nios_dns_nsgroup_delegation.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, name, delegateToStr, extAttrsValue)
 }
 
