@@ -27,7 +27,7 @@ func TestAccZoneStubResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubBasicConfig(),
+				Config: testAccZoneStubBasicConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
@@ -49,7 +49,7 @@ func TestAccZoneStubResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneStubDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneStubBasicConfig(),
+				Config: testAccZoneStubBasicConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					testAccCheckZoneStubDisappears(context.Background(), &v),

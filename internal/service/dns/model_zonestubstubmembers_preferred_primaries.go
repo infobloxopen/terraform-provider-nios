@@ -4,7 +4,6 @@ import (
 	"context"
 	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -20,19 +19,19 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type ZoneStubStubFromModel struct {
-	Address                      iptypes.IPAddress `tfsdk:"address"`
-	Name                         types.String      `tfsdk:"name"`
-	SharedWithMsParentDelegation types.Bool        `tfsdk:"shared_with_ms_parent_delegation"`
-	Stealth                      types.Bool        `tfsdk:"stealth"`
-	TsigKey                      types.String      `tfsdk:"tsig_key"`
-	TsigKeyAlg                   types.String      `tfsdk:"tsig_key_alg"`
-	TsigKeyName                  types.String      `tfsdk:"tsig_key_name"`
-	UseTsigKeyName               types.Bool        `tfsdk:"use_tsig_key_name"`
+type ZonestubstubmembersPreferredPrimariesModel struct {
+	Address                      types.String `tfsdk:"address"`
+	Name                         types.String `tfsdk:"name"`
+	SharedWithMsParentDelegation types.Bool   `tfsdk:"shared_with_ms_parent_delegation"`
+	Stealth                      types.Bool   `tfsdk:"stealth"`
+	TsigKey                      types.String `tfsdk:"tsig_key"`
+	TsigKeyAlg                   types.String `tfsdk:"tsig_key_alg"`
+	TsigKeyName                  types.String `tfsdk:"tsig_key_name"`
+	UseTsigKeyName               types.Bool   `tfsdk:"use_tsig_key_name"`
 }
 
-var ZoneStubStubFromAttrTypes = map[string]attr.Type{
-	"address":                          iptypes.IPAddressType{},
+var ZonestubstubmembersPreferredPrimariesAttrTypes = map[string]attr.Type{
+	"address":                          types.StringType,
 	"name":                             types.StringType,
 	"shared_with_ms_parent_delegation": types.BoolType,
 	"stealth":                          types.BoolType,
@@ -42,10 +41,9 @@ var ZoneStubStubFromAttrTypes = map[string]attr.Type{
 	"use_tsig_key_name":                types.BoolType,
 }
 
-var ZoneStubStubFromResourceSchemaAttributes = map[string]schema.Attribute{
+var ZonestubstubmembersPreferredPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Required:   true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -112,11 +110,11 @@ var ZoneStubStubFromResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandZoneStubStubFrom(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZoneStubStubFrom {
+func ExpandZonestubstubmembersPreferredPrimaries(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZonestubstubmembersPreferredPrimaries {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m ZoneStubStubFromModel
+	var m ZonestubstubmembersPreferredPrimariesModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -124,12 +122,12 @@ func ExpandZoneStubStubFrom(ctx context.Context, o types.Object, diags *diag.Dia
 	return m.Expand(ctx, diags)
 }
 
-func (m *ZoneStubStubFromModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneStubStubFrom {
+func (m *ZonestubstubmembersPreferredPrimariesModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZonestubstubmembersPreferredPrimaries {
 	if m == nil {
 		return nil
 	}
-	to := &dns.ZoneStubStubFrom{
-		Address:        flex.ExpandIPAddress(m.Address),
+	to := &dns.ZonestubstubmembersPreferredPrimaries{
+		Address:        flex.ExpandStringPointer(m.Address),
 		Name:           flex.ExpandStringPointer(m.Name),
 		Stealth:        flex.ExpandBoolPointer(m.Stealth),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -140,25 +138,25 @@ func (m *ZoneStubStubFromModel) Expand(ctx context.Context, diags *diag.Diagnost
 	return to
 }
 
-func FlattenZoneStubStubFrom(ctx context.Context, from *dns.ZoneStubStubFrom, diags *diag.Diagnostics) types.Object {
+func FlattenZonestubstubmembersPreferredPrimaries(ctx context.Context, from *dns.ZonestubstubmembersPreferredPrimaries, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(ZoneStubStubFromAttrTypes)
+		return types.ObjectNull(ZonestubstubmembersPreferredPrimariesAttrTypes)
 	}
-	m := ZoneStubStubFromModel{}
+	m := ZonestubstubmembersPreferredPrimariesModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, ZoneStubStubFromAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, ZonestubstubmembersPreferredPrimariesAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *ZoneStubStubFromModel) Flatten(ctx context.Context, from *dns.ZoneStubStubFrom, diags *diag.Diagnostics) {
+func (m *ZonestubstubmembersPreferredPrimariesModel) Flatten(ctx context.Context, from *dns.ZonestubstubmembersPreferredPrimaries, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = ZoneStubStubFromModel{}
+		*m = ZonestubstubmembersPreferredPrimariesModel{}
 	}
-	m.Address = flex.FlattenIPAddress(from.Address)
+	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)
