@@ -3,12 +3,12 @@
 page_title: "nios_misc_ruleset Resource - nios"
 subcategory: "MISC"
 description: |-
-  
+  Manages rulesets
 ---
 
 # nios_misc_ruleset (Resource)
 
-
+Manages rulesets
 
 ## Example Usage
 

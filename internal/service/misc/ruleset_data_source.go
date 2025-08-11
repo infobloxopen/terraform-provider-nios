@@ -51,15 +51,10 @@ func (m *RulesetModelWithFilter) FlattenResults(ctx context.Context, from []misc
 
 func (d *RulesetDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Retrieves information about existing rulesets.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
-				ElementType: types.StringType,
-				Optional:    true,
-			},
-			"extattrfilters": schema.MapAttribute{
-				Description: "External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType: types.StringType,
 				Optional:    true,
 			},
@@ -133,7 +128,6 @@ func (d *RulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest
 				RulesetAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForRuleset).
 				Paging(paging).
@@ -147,7 +141,7 @@ func (d *RulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ruleset by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ruleset, got error: %s", err))
 				return nil, "", err
 			}
 

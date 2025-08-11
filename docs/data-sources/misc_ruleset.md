@@ -3,12 +3,12 @@
 page_title: "nios_misc_ruleset Data Source - nios"
 subcategory: "MISC"
 description: |-
-  
+  Retrieves information about existing rulesets.
 ---
 
 # nios_misc_ruleset (Data Source)
 
-
+Retrieves information about existing rulesets.
 
 ## Example Usage
 
@@ -29,7 +29,6 @@ data "nios_misc_ruleset" "get_all_rulesets" {}
 
 ### Optional
 
-- `extattrfilters` (Map of String) External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
 - `filters` (Map of String) Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
 - `max_results` (Number) Maximum number of objects to be returned. Defaults to 1000.
 - `paging` (Number) Enable (1) or disable (0) paging for the data source query. When enabled, the system retrieves results in pages, allowing efficient handling of large result sets. Paging is enabled by default.
