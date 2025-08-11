@@ -36,7 +36,7 @@ func (r *BulkhostnametemplateResource) Metadata(ctx context.Context, req resourc
 
 func (r *BulkhostnametemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a bulk hostname template in Infoblox NIOS. This resource allows you to define and manage templates for bulk hostname creation, including settings such as template format, template name, and grid default status.",
 		Attributes:          BulkhostnametemplateResourceSchemaAttributes,
 	}
 }
@@ -209,8 +209,7 @@ func (r *BulkhostnametemplateResource) ImportState(ctx context.Context, req reso
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
