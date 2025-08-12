@@ -519,7 +519,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ViewMatchClientsResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of forwarders for the match clients. This list specifies a named ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"match_destinations": schema.ListNestedAttribute{
@@ -527,7 +529,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ViewMatchDestinationsResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of forwarders for the match destinations. This list specifies a name ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"max_cache_ttl": schema.Int64Attribute{
@@ -889,8 +893,8 @@ func (m *ViewModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.Vi
 		ForwardOnly:                         flex.ExpandBoolPointer(m.ForwardOnly),
 		Forwarders:                          flex.ExpandFrameworkListString(ctx, m.Forwarders, diags),
 		LastQueriedAcl:                      flex.ExpandFrameworkListNestedBlock(ctx, m.LastQueriedAcl, diags, ExpandViewLastQueriedAcl),
-		MatchClients:                        flex.ExpandFrameworkListNestedBlock(ctx, m.MatchClients, diags, ExpandViewMatchClients),
-		MatchDestinations:                   flex.ExpandFrameworkListNestedBlock(ctx, m.MatchDestinations, diags, ExpandViewMatchDestinations),
+		MatchClients:                        flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.MatchClients, diags, ExpandViewMatchClients),
+		MatchDestinations:                   flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.MatchDestinations, diags, ExpandViewMatchDestinations),
 		MaxCacheTtl:                         flex.ExpandInt64Pointer(m.MaxCacheTtl),
 		MaxNcacheTtl:                        flex.ExpandInt64Pointer(m.MaxNcacheTtl),
 		MaxUdpSize:                          flex.ExpandInt64Pointer(m.MaxUdpSize),
