@@ -189,45 +189,5 @@ func (r *BulkhostnametemplateResource) Delete(ctx context.Context, req resource.
 }
 
 func (r *BulkhostnametemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data BulkhostnametemplateModel
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.IPAMAPI.
-		BulkhostnametemplateAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForBulkhostnametemplate).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read Bulkhostnametemplate for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetBulkhostnametemplateResponseObjectAsResult.GetResult()
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	updateRes, _, err := r.client.IPAMAPI.
-		BulkhostnametemplateAPI.
-		Update(ctx, resourceRef).
-		Bulkhostnametemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForBulkhostnametemplate).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Bulkhostnametemplate for import, got error: %s", err))
-		return
-	}
-
-	res = updateRes.UpdateBulkhostnametemplateResponseAsObject.GetResult()
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
 }
