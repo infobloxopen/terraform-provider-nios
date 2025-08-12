@@ -83,7 +83,7 @@ func testAccCheckZoneStubResourceAttrPair(resourceName, dataSourceName string) [
 		resource.TestCheckResourceAttrPair(resourceName, "soa_expire", dataSourceName, "result.0.soa_expire"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_mname", dataSourceName, "result.0.soa_mname"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_negative_ttl", dataSourceName, "result.0.soa_negative_ttl"),
-		resource.TestCheckResourceAttrPair(resourceName, "soarefresh", dataSourceName, "result.0.soarefresh"),
+		resource.TestCheckResourceAttrPair(resourceName, "soa_refresh", dataSourceName, "result.0.soa_refresh"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_retry", dataSourceName, "result.0.soa_retry"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_serial_number", dataSourceName, "result.0.soa_serial_number"),
 		resource.TestCheckResourceAttrPair(resourceName, "stub_from", dataSourceName, "result.0.stub_from"),

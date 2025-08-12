@@ -15,11 +15,13 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForZoneStub = "address,comment,disable,disable_forwarding,display_domain,dns_fqdn,extattrs,external_ns_group,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed,ms_read_only,ms_sync_master_name,ns_group,parent,prefix,soa_email,soa_expire,soa_mname,soa_negative_ttl,soarefresh,soa_retry,soa_serial_number,stub_from,stub_members,stub_msservers,using_srg_associations,view,zone_format"
+var readableAttributesForZoneStub = "address,comment,disable,disable_forwarding,display_domain,dns_fqdn,extattrs,external_ns_group,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed,ms_read_only,ms_sync_master_name,ns_group,parent,prefix,soa_email,soa_expire,soa_mname,soa_negative_ttl,soa_refresh,soa_retry,soa_serial_number,stub_from,stub_members,stub_msservers,using_srg_associations,view,zone_format"
 
 func TestAccZoneStubResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,7 +29,7 @@ func TestAccZoneStubResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubBasicConfig(""),
+				Config: testAccZoneStubBasicConfig(fqdn, "1.1.1.1", stubServerName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
@@ -42,6 +44,8 @@ func TestAccZoneStubResource_basic(t *testing.T) {
 func TestAccZoneStubResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_zone_stub.test"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +53,7 @@ func TestAccZoneStubResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneStubDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneStubBasicConfig(""),
+				Config: testAccZoneStubBasicConfig(fqdn, "1.1.1.1", stubServerName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					testAccCheckZoneStubDisappears(context.Background(), &v),
@@ -60,38 +64,11 @@ func TestAccZoneStubResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccZoneStubResource_Ref(t *testing.T) {
-	var resourceName = "nios_dns_zone_stub.test_ref"
-	var v dns.ZoneStub
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneStubRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneStubRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneStubResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_comment"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +76,18 @@ func TestAccZoneStubResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubComment("COMMENT_REPLACE_ME"),
+				Config: testAccZoneStubComment(fqdn, "1.1.1.1", stubServerName, "Example Comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Example Comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubComment(fqdn, "1.1.1.1", stubServerName, "Updated Comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Updated Comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +98,8 @@ func TestAccZoneStubResource_Comment(t *testing.T) {
 func TestAccZoneStubResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_disable"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,18 +107,18 @@ func TestAccZoneStubResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubDisable("DISABLE_REPLACE_ME"),
+				Config: testAccZoneStubDisable(fqdn, "1.1.1.1", stubServerName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubDisable(fqdn, "1.1.1.1", stubServerName, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -150,6 +129,8 @@ func TestAccZoneStubResource_Disable(t *testing.T) {
 func TestAccZoneStubResource_DisableForwarding(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_disable_forwarding"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,18 +138,18 @@ func TestAccZoneStubResource_DisableForwarding(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubDisableForwarding("DISABLE_FORWARDING_REPLACE_ME"),
+				Config: testAccZoneStubDisableForwarding(fqdn, "1.1.1.1", stubServerName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable_forwarding", "DISABLE_FORWARDING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable_forwarding", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubDisableForwarding("DISABLE_FORWARDING_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubDisableForwarding(fqdn, "1.1.1.1", stubServerName, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable_forwarding", "DISABLE_FORWARDING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable_forwarding", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -179,6 +160,10 @@ func TestAccZoneStubResource_DisableForwarding(t *testing.T) {
 func TestAccZoneStubResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_extattrs"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,18 +171,22 @@ func TestAccZoneStubResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccZoneStubExtAttrs(fqdn, "1.1.1.1", stubServerName, map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubExtAttrs(fqdn, "1.1.1.1", stubServerName, map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -208,6 +197,8 @@ func TestAccZoneStubResource_ExtAttrs(t *testing.T) {
 func TestAccZoneStubResource_ExternalNsGroup(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_external_ns_group"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,7 +206,7 @@ func TestAccZoneStubResource_ExternalNsGroup(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubExternalNsGroup("EXTERNAL_NS_GROUP_REPLACE_ME"),
+				Config: testAccZoneStubExternalNsGroup(fqdn, "1.1.1.1", stubServerName, "EXTERNAL_NS_GROUP_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_ns_group", "EXTERNAL_NS_GROUP_REPLACE_ME"),
@@ -223,7 +214,7 @@ func TestAccZoneStubResource_ExternalNsGroup(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubExternalNsGroup("EXTERNAL_NS_GROUP_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubExternalNsGroup(fqdn, "1.1.1.1", stubServerName, "EXTERNAL_NS_GROUP_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_ns_group", "EXTERNAL_NS_GROUP_UPDATE_REPLACE_ME"),
@@ -234,38 +225,11 @@ func TestAccZoneStubResource_ExternalNsGroup(t *testing.T) {
 	})
 }
 
-func TestAccZoneStubResource_Fqdn(t *testing.T) {
-	var resourceName = "nios_dns_zone_stub.test_fqdn"
-	var v dns.ZoneStub
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneStubFqdn("FQDN_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", "FQDN_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneStubFqdn("FQDN_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", "FQDN_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneStubResource_Locked(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_locked"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -273,18 +237,18 @@ func TestAccZoneStubResource_Locked(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubLocked("LOCKED_REPLACE_ME"),
+				Config: testAccZoneStubLocked(fqdn, "1.1.1.1", stubServerName, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "locked", "LOCKED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "locked", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubLocked("LOCKED_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubLocked(fqdn, "1.1.1.1", stubServerName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "locked", "LOCKED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "locked", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -295,6 +259,8 @@ func TestAccZoneStubResource_Locked(t *testing.T) {
 func TestAccZoneStubResource_MsAdIntegrated(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_ms_ad_integrated"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -302,18 +268,18 @@ func TestAccZoneStubResource_MsAdIntegrated(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubMsAdIntegrated("MS_AD_INTEGRATED_REPLACE_ME"),
+				Config: testAccZoneStubMsAdIntegrated(fqdn, "1.1.1.1", stubServerName, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "MS_AD_INTEGRATED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubMsAdIntegrated("MS_AD_INTEGRATED_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubMsAdIntegrated(fqdn, "1.1.1.1", stubServerName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "MS_AD_INTEGRATED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_ad_integrated", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -324,6 +290,8 @@ func TestAccZoneStubResource_MsAdIntegrated(t *testing.T) {
 func TestAccZoneStubResource_MsDdnsMode(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_ms_ddns_mode"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -331,18 +299,18 @@ func TestAccZoneStubResource_MsDdnsMode(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubMsDdnsMode("MS_DDNS_MODE_REPLACE_ME"),
+				Config: testAccZoneStubMsDdnsMode(fqdn, "1.1.1.1", stubServerName, "ANY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ddns_mode", "MS_DDNS_MODE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_ddns_mode", "ANY"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubMsDdnsMode("MS_DDNS_MODE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubMsDdnsMode(fqdn, "1.1.1.1", stubServerName, "SECURE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_ddns_mode", "MS_DDNS_MODE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_ddns_mode", "SECURE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -353,6 +321,8 @@ func TestAccZoneStubResource_MsDdnsMode(t *testing.T) {
 func TestAccZoneStubResource_NsGroup(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_ns_group"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -360,7 +330,7 @@ func TestAccZoneStubResource_NsGroup(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubNsGroup("NS_GROUP_REPLACE_ME"),
+				Config: testAccZoneStubNsGroup(fqdn, "1.1.1.1", stubServerName, "NS_GROUP_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ns_group", "NS_GROUP_REPLACE_ME"),
@@ -368,7 +338,7 @@ func TestAccZoneStubResource_NsGroup(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubNsGroup("NS_GROUP_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubNsGroup(fqdn, "1.1.1.1", stubServerName, "NS_GROUP_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ns_group", "NS_GROUP_UPDATE_REPLACE_ME"),
@@ -382,6 +352,10 @@ func TestAccZoneStubResource_NsGroup(t *testing.T) {
 func TestAccZoneStubResource_Prefix(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_prefix"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+	prefix := acctest.RandomName()
+	prefixUpdated := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -389,18 +363,18 @@ func TestAccZoneStubResource_Prefix(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubPrefix("PREFIX_REPLACE_ME"),
+				Config: testAccZoneStubPrefix(fqdn, "1.1.1.1", stubServerName, prefix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "prefix", "PREFIX_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "prefix", prefix),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubPrefix("PREFIX_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubPrefix(fqdn, "1.1.1.1", stubServerName, prefixUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "prefix", "PREFIX_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "prefix", prefixUpdated),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -411,6 +385,9 @@ func TestAccZoneStubResource_Prefix(t *testing.T) {
 func TestAccZoneStubResource_StubFrom(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_stub_from"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+	stubServerName2 := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -418,18 +395,20 @@ func TestAccZoneStubResource_StubFrom(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubStubFrom("STUB_FROM_REPLACE_ME"),
+				Config: testAccZoneStubStubFrom(fqdn, "1.1.1.1", stubServerName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_from", "STUB_FROM_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "stub_from.0.name", stubServerName),
+					resource.TestCheckResourceAttr(resourceName, "stub_from.0.address", "1.1.1.1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubStubFrom("STUB_FROM_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubStubFrom(fqdn, "2.2.2.2", stubServerName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_from", "STUB_FROM_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "stub_from.0.name", stubServerName2),
+					resource.TestCheckResourceAttr(resourceName, "stub_from.0.address", "2.2.2.2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -440,6 +419,8 @@ func TestAccZoneStubResource_StubFrom(t *testing.T) {
 func TestAccZoneStubResource_StubMembers(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_stub_members"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -447,7 +428,7 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubStubMembers("STUB_MEMBERS_REPLACE_ME"),
+				Config: testAccZoneStubStubMembers(fqdn, "1.1.1.1", stubServerName, "STUB_MEMBERS_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "stub_members", "STUB_MEMBERS_REPLACE_ME"),
@@ -455,7 +436,7 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubStubMembers("STUB_MEMBERS_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubStubMembers(fqdn, "1.1.1.1", stubServerName, "STUB_MEMBERS_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "stub_members", "STUB_MEMBERS_UPDATE_REPLACE_ME"),
@@ -469,6 +450,8 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 func TestAccZoneStubResource_StubMsservers(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_stub_msservers"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -476,7 +459,7 @@ func TestAccZoneStubResource_StubMsservers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubStubMsservers("STUB_MSSERVERS_REPLACE_ME"),
+				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "STUB_MSSERVERS_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "stub_msservers", "STUB_MSSERVERS_REPLACE_ME"),
@@ -484,7 +467,7 @@ func TestAccZoneStubResource_StubMsservers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubStubMsservers("STUB_MSSERVERS_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "STUB_MSSERVERS_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "stub_msservers", "STUB_MSSERVERS_UPDATE_REPLACE_ME"),
@@ -498,6 +481,8 @@ func TestAccZoneStubResource_StubMsservers(t *testing.T) {
 func TestAccZoneStubResource_View(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_view"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -505,18 +490,18 @@ func TestAccZoneStubResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubView("VIEW_REPLACE_ME"),
+				Config: testAccZoneStubView(fqdn, "1.1.1.1", stubServerName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubView("VIEW_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubView(fqdn, "1.1.1.1", stubServerName, "example_view"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "example_view"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -524,9 +509,13 @@ func TestAccZoneStubResource_View(t *testing.T) {
 	})
 }
 
-func TestAccZoneStubResource_ZoneFormat(t *testing.T) {
+// TestAccZoneStubResource_ZoneFormatIPv4 tests the IPv4 zone format for a stub zone.
+// It is mandatory to provide a prefix for classless reverse zones.
+func TestAccZoneStubResource_ZoneFormatIPv4(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_zone_format"
 	var v dns.ZoneStub
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+	prefix := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -534,18 +523,33 @@ func TestAccZoneStubResource_ZoneFormat(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubZoneFormat("ZONE_FORMAT_REPLACE_ME"),
+				Config: testAccZoneStubZoneFormatIPv4("10.1.0.0/25", "1.1.1.1", stubServerName, "IPV4", prefix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "ZONE_FORMAT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV4"),
 				),
 			},
-			// Update and Read
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccZoneStubResource_ZoneFormatIPv6(t *testing.T) {
+	var resourceName = "nios_dns_zone_stub.test_zone_format"
+	var v dns.ZoneStub
+	//fqdn := acctest.RandomNameWithPrefix("zone_stub")
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
 			{
-				Config: testAccZoneStubZoneFormat("ZONE_FORMAT_UPDATE_REPLACE_ME"),
+				Config: testAccZoneStubZoneFormatIpv6("2001:db8:85a3:8::/64", "1.1.1.1", stubServerName, "IPV6"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "ZONE_FORMAT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV6"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -611,146 +615,229 @@ func testAccCheckZoneStubDisappears(ctx context.Context, v *dns.ZoneStub) resour
 	}
 }
 
-func testAccZoneStubBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccZoneStubBasicConfig(fqdn, stubAddress, stubName string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test" {
+	fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
 }
-`)
-}
-
-func testAccZoneStubRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_stub" "test_ref" {
-    ref = %q
-}
-`, ref)
+`, fqdn, stubAddress, stubName)
 }
 
-func testAccZoneStubComment(comment string) string {
+func testAccZoneStubComment(fqdn, stubAddress, stubName, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_comment" {
+	fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
     comment = %q
 }
-`, comment)
+`, fqdn, stubAddress, stubName, comment)
 }
 
-func testAccZoneStubDisable(disable string) string {
+func testAccZoneStubDisable(fqdn, stubAddress, stubName, disable string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_disable" {
-    disable = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	disable = %q
 }
-`, disable)
+`, fqdn, stubAddress, stubName, disable)
 }
 
-func testAccZoneStubDisableForwarding(disableForwarding string) string {
+func testAccZoneStubDisableForwarding(fqdn, stubAddress, stubName, disableForwarding string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_disable_forwarding" {
-    disable_forwarding = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	disable_forwarding = %q
 }
-`, disableForwarding)
+`, fqdn, stubAddress, stubName, disableForwarding)
 }
 
-func testAccZoneStubExtAttrs(extAttrs string) string {
+func testAccZoneStubExtAttrs(fqdn, stubAddress, stubName string, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
+	}
+	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_extattrs" {
-    extattrs = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	extattrs = %s
 }
-`, extAttrs)
+`, fqdn, stubAddress, stubName, extattrsStr)
 }
 
-func testAccZoneStubExternalNsGroup(externalNsGroup string) string {
+func testAccZoneStubExternalNsGroup(fqdn, stubAddress, stubName, externalNsGroup string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_external_ns_group" {
-    external_ns_group = %q
-}
-`, externalNsGroup)
-}
-
-func testAccZoneStubFqdn(fqdn string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_stub" "test_fqdn" {
     fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	external_ns_group = %q
 }
-`, fqdn)
+`, fqdn, stubAddress, stubName, externalNsGroup)
 }
 
-func testAccZoneStubLocked(locked string) string {
+func testAccZoneStubLocked(fqdn, stubAddress, stubName, locked string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_locked" {
-    locked = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	locked = %q
 }
-`, locked)
+`, fqdn, stubAddress, stubName, locked)
 }
 
-func testAccZoneStubMsAdIntegrated(msAdIntegrated string) string {
+func testAccZoneStubMsAdIntegrated(fqdn, stubAddress, stubName, msAdIntegrated string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_ms_ad_integrated" {
-    ms_ad_integrated = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	ms_ad_integrated = %q
 }
-`, msAdIntegrated)
+`, fqdn, stubAddress, stubName, msAdIntegrated)
 }
 
-func testAccZoneStubMsDdnsMode(msDdnsMode string) string {
+func testAccZoneStubMsDdnsMode(fqdn, stubAddress, stubName, msDdnsMode string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_ms_ddns_mode" {
-    ms_ddns_mode = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	ms_ddns_mode = %q
 }
-`, msDdnsMode)
+`, fqdn, stubAddress, stubName, msDdnsMode)
 }
 
-func testAccZoneStubNsGroup(nsGroup string) string {
+func testAccZoneStubNsGroup(fqdn, stubAddress, stubName, nsGroup string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_ns_group" {
-    ns_group = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	ns_group = %q
 }
-`, nsGroup)
+`, fqdn, stubAddress, stubName, nsGroup)
 }
 
-func testAccZoneStubPrefix(prefix string) string {
+func testAccZoneStubPrefix(fqdn, stubAddress, stubName, prefix string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_prefix" {
-    prefix = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	prefix = %q
 }
-`, prefix)
+`, fqdn, stubAddress, stubName, prefix)
 }
 
-func testAccZoneStubStubFrom(stubFrom string) string {
+func testAccZoneStubStubFrom(fqdn, stubAddress, stubName string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_stub_from" {
-    stub_from = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
 }
-`, stubFrom)
+`, fqdn, stubAddress, stubName)
 }
 
-func testAccZoneStubStubMembers(stubMembers string) string {
+func testAccZoneStubStubMembers(fqdn, stubAddress, stubName, stubMembers string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_stub_members" {
-    stub_members = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	stub_members = %q
 }
-`, stubMembers)
+`, fqdn, stubAddress, stubName, stubMembers)
 }
 
-func testAccZoneStubStubMsservers(stubMsservers string) string {
+func testAccZoneStubStubMsservers(fqdn, stubAddress, stubName, stubMsservers string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_stub_msservers" {
-    stub_msservers = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	stub_msservers = %q
 }
-`, stubMsservers)
+`, fqdn, stubAddress, stubName, stubMsservers)
 }
 
-func testAccZoneStubView(view string) string {
+func testAccZoneStubView(fqdn, stubAddress, stubName, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_view" {
-    view = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	view = %q
 }
-`, view)
+`, fqdn, stubAddress, stubName, view)
 }
 
-func testAccZoneStubZoneFormat(zoneFormat string) string {
+func testAccZoneStubZoneFormatIPv4(fqdn, stubAddress, stubName, zoneFormat, prefix string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_zone_format" {
-    zone_format = %q
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	zone_format = %q
+	prefix = %q
 }
-`, zoneFormat)
+`, fqdn, stubAddress, stubName, zoneFormat, prefix)
+}
+
+func testAccZoneStubZoneFormatIpv6(fqdn, stubAddress, stubName, zoneFormat string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_stub" "test_zone_format" {
+    fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	zone_format = %q
+}
+`, fqdn, stubAddress, stubName, zoneFormat)
 }

@@ -48,7 +48,7 @@ type ZoneStubModel struct {
 	SoaExpire            types.Int64  `tfsdk:"soa_expire"`
 	SoaMname             types.String `tfsdk:"soa_mname"`
 	SoaNegativeTtl       types.Int64  `tfsdk:"soa_negative_ttl"`
-	SoaRefresh           types.Int64  `tfsdk:"soarefresh"`
+	SoaRefresh           types.Int64  `tfsdk:"soa_refresh"`
 	SoaRetry             types.Int64  `tfsdk:"soa_retry"`
 	SoaSerialNumber      types.Int64  `tfsdk:"soa_serial_number"`
 	StubFrom             types.List   `tfsdk:"stub_from"`
@@ -86,7 +86,7 @@ var ZoneStubAttrTypes = map[string]attr.Type{
 	"soa_expire":             types.Int64Type,
 	"soa_mname":              types.StringType,
 	"soa_negative_ttl":       types.Int64Type,
-	"soarefresh":             types.Int64Type,
+	"soa_refresh":            types.Int64Type,
 	"soa_retry":              types.Int64Type,
 	"soa_serial_number":      types.Int64Type,
 	"stub_from":              types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneStubStubFromAttrTypes}},
@@ -167,6 +167,7 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidIPCIDR(),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
 	},
@@ -253,7 +254,7 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The negative Time to Live (TTL) value of the SOA of the zone indicates how long a secondary server can cache data for \"Does Not Respond\" responses.",
 	},
-	"soarefresh": schema.Int64Attribute{
+	"soa_refresh": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "This indicates the interval at which a secondary server sends a message to the primary server for a zone to check that its data is current, and retrieve fresh data if it is not.",
 	},
