@@ -317,7 +317,7 @@ func TestAccRecordDnameResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordDnameName(target, view, zoneFqdn1),
+				Config: testAccRecordDnameName(target, view, zoneFqdn1, zoneFqdn2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordDnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", zoneFqdn1),
@@ -325,7 +325,7 @@ func TestAccRecordDnameResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordDnameNameUpdate(target, view, zoneFqdn2),
+				Config: testAccRecordDnameNameUpdate(target, view, zoneFqdn1, zoneFqdn2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordDnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", zoneFqdn2),
@@ -618,7 +618,7 @@ resource "nios_dns_record_dname" "test_forbid_reclamation" {
 	return strings.Join([]string{testAccBaseWithZoneAndView(view, zoneFqdn), config}, "")
 }
 
-func testAccRecordDnameName(target, view, zoneFqdn string) string {
+func testAccRecordDnameName(target, view, zoneFqdn1, zoneFqdn2 string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_dname" "test_name" {
     name   = nios_dns_zone_auth.test.fqdn
@@ -626,18 +626,18 @@ resource "nios_dns_record_dname" "test_name" {
 	view = nios_dns_zone_auth.test.view
 }
 `, target)
-	return strings.Join([]string{testAccBaseWithZoneAndView(view, zoneFqdn), config}, "")
+	return strings.Join([]string{testAccBaseWithTwoZonesAndView(view, zoneFqdn1, zoneFqdn2), config}, "")
 }
 
-func testAccRecordDnameNameUpdate(target, view, zoneFqdn string) string {
+func testAccRecordDnameNameUpdate(target, view, zoneFqdn1, zoneFqdn2 string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_dname" "test_name" {
-    name   = nios_dns_zone_auth.test_update.fqdn
+    name   = nios_dns_zone_auth.updated_zone.fqdn
     target = %q
-	view = nios_dns_zone_auth.test_update.view
+	view = nios_dns_zone_auth.test.view
 }
 `, target)
-	return strings.Join([]string{testAccBaseWithUpdatedZone(view, zoneFqdn), config}, "")
+	return strings.Join([]string{testAccBaseWithTwoZonesAndView(view, zoneFqdn1, zoneFqdn2), config}, "")
 }
 
 func testAccRecordDnameTarget(target, view, zoneFqdn string) string {
@@ -702,14 +702,20 @@ resource "nios_dns_zone_auth" "test" {
 `, view, zoneFqdn)
 }
 
-func testAccBaseWithUpdatedZone(view, zoneFqdn string) string {
+func testAccBaseWithTwoZonesAndView(view, zoneFqdn1, zoneFqdn2 string) string {
 	return fmt.Sprintf(`
-	resource "nios_dns_view" "test" {
+resource "nios_dns_view" "test" {
 	name = %q
 }
-resource "nios_dns_zone_auth" "test_update" {
+
+resource "nios_dns_zone_auth" "test" {
     fqdn = %q
 	view = nios_dns_view.test.name
 }
-`, view, zoneFqdn)
+
+resource "nios_dns_zone_auth" "updated_zone" {
+    fqdn = %q
+	view = nios_dns_view.test.name
+}
+`, view, zoneFqdn1, zoneFqdn2)
 }
