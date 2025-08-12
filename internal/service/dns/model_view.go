@@ -229,6 +229,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_blacklist")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The array of IP addresses the appliance includes in the response it sends in place of a blacklisted IP address.",
 	},
