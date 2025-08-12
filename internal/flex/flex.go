@@ -149,13 +149,24 @@ func ExpandFrameworkListString(ctx context.Context, tfList interface {
 	ElementsAs(ctx context.Context, target interface{}, allowUnhandled bool) diag.Diagnostics
 }, diags *diag.Diagnostics) []string {
 	if tfList.IsNull() || tfList.IsUnknown() {
-		return nil
+		return make([]string, 0)
 	}
 	var data []string
 	diags.Append(tfList.ElementsAs(ctx, &data, false)...)
 	return data
 }
 
+func ExpandFrameworkListStringEmptyAsNil(ctx context.Context, tfList interface {
+	basetypes.ListValuable
+	ElementsAs(ctx context.Context, target interface{}, allowUnhandled bool) diag.Diagnostics
+}, diags *diag.Diagnostics) []string {
+	if tfList.IsNull() || tfList.IsUnknown() {
+		return nil
+	}
+	var data []string
+	diags.Append(tfList.ElementsAs(ctx, &data, false)...)
+	return data
+}
 func FlattenFrameworkUnorderedListNestedBlock[T any, U any](ctx context.Context, data []T, attrTypes map[string]attr.Type, diags *diag.Diagnostics, f FrameworkElementFlExFunc[*T, U]) internaltypes.UnorderedListValue {
 	if len(data) == 0 {
 		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: attrTypes})
