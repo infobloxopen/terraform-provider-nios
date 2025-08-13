@@ -12,5 +12,5 @@ data "nios_security_admin_role" "get_admin_roles_using_extensible_attributes" {
   }
 }
 
-// Retrieve all Admin Role
+// Retrieve all Admin Roles
 data "nios_security_admin_role" "get_all_admin_roles" {}

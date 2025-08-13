@@ -138,7 +138,7 @@ func TestAccAdminroleResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminroleExtAttrs(name, extAttrValue1),
+				Config: testAccAdminroleExtAttrs(name, map[string]string{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminroleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
@@ -146,7 +146,7 @@ func TestAccAdminroleResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminroleExtAttrs(name, extAttrValue2),
+				Config: testAccAdminroleExtAttrs(name, map[string]string{"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminroleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
@@ -272,15 +272,18 @@ resource "nios_security_admin_role" "test_disable" {
 `, name, disable)
 }
 
-func testAccAdminroleExtAttrs(name string, extAttrs string) string {
+func testAccAdminroleExtAttrs(name string, extAttrs map[string]string) string {
+	extattrsStr := "{"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`%s = %q`, k, v)
+	}
+	extattrsStr += "}"
 	return fmt.Sprintf(`
 resource "nios_security_admin_role" "test_extattrs" {
     name = %q
-    extattrs = {
-        Site = %q
-    }
+    extattrs = %s
 }
-`, name, extAttrs)
+`, name, extattrsStr)
 }
 
 func testAccAdminroleName(name string) string {

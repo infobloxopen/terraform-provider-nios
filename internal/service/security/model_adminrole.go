@@ -2,20 +2,18 @@ package security
 
 import (
 	"context"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"regexp"
-
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -89,24 +87,11 @@ var AdminroleResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandAdminrole(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.Adminrole {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m AdminroleModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *AdminroleModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.Adminrole {
 	if m == nil {
 		return nil
 	}
 	to := &security.Adminrole{
-		Ref:      flex.ExpandStringPointer(m.Ref),
 		Comment:  flex.ExpandStringPointer(m.Comment),
 		Disable:  flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs: ExpandExtAttrs(ctx, m.ExtAttrs, diags),

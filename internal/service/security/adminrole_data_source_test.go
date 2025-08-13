@@ -3,10 +3,11 @@ package security_test
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
-	"testing"
 )
 
 func TestAccAdminroleDataSource_Filters(t *testing.T) {

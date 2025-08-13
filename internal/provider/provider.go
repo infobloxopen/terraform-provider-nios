@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -18,6 +17,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
