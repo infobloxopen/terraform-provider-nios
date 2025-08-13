@@ -16,11 +16,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordNaptrModel struct {
@@ -96,7 +96,7 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
@@ -204,7 +204,7 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^$|^\S+(\s+\S+)*$`),
+				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
@@ -214,7 +214,7 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S+(\s+\S+)*$`),
+				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
