@@ -31,7 +31,7 @@ type BulkhostnametemplateDataSource struct {
 }
 
 func (d *BulkhostnametemplateDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "ipam_bulkhostnametemplate"
+	resp.TypeName = req.ProviderTypeName + "_" + "ipam_bulk_hostname_template"
 }
 
 type BulkhostnametemplateModelWithFilter struct {
@@ -50,7 +50,7 @@ func (m *BulkhostnametemplateModelWithFilter) FlattenResults(ctx context.Context
 
 func (d *BulkhostnametemplateDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "The bulk hostname template data source allows you to retrieve and filter bulk hostname template objects from Infoblox NIOS. Use filters to narrow down results by specific attributes.",
+		MarkdownDescription: "Retrieves information about existing IPAM Bulk Hostname Templates.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

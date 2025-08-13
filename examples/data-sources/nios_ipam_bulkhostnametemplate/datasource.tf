@@ -1,10 +1,10 @@
-// Retrieve IPAM bulk hostname templates using filters
-data "nios_ipam_bulkhostnametemplate" "test" {
+// Retrieve a specific IPAM Bulk Hostname Templates by filters
+data "nios_ipam_bulk_hostname_template" "bulk_hostname_template" {
   filters = {
-    template_name   = nios_ipam_bulkhostnametemplate.test2.template_name
-    template_format = nios_ipam_bulkhostnametemplate.test2.template_format
+    template_name   = "one-octet"
+    template_format = "host-$4"
   }
 }
 
-// Retrieve all IPAM bulk hostname templates
-data "nios_ipam_bulkhostnametemplate" "all_templates" {}
+// Retrieve all IPAM Bulk Hostname Templates
+data "nios_ipam_bulk_hostname_template" "all_templates" {}

@@ -85,7 +85,6 @@ func (m *BulkhostnametemplateModel) Expand(ctx context.Context, diags *diag.Diag
 		return nil
 	}
 	to := &ipam.Bulkhostnametemplate{
-		Ref:            flex.ExpandStringPointer(m.Ref),
 		TemplateFormat: flex.ExpandStringPointer(m.TemplateFormat),
 		TemplateName:   flex.ExpandStringPointer(m.TemplateName),
 	}

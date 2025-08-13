@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccBulkhostnametemplateDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_ipam_bulkhostnametemplate.test"
-	resourceName := "nios_ipam_bulkhostnametemplate.test"
+	dataSourceName := "data.nios_ipam_bulk_hostname_template.test"
+	resourceName := "nios_ipam_bulk_hostname_template.test"
 	var v ipam.Bulkhostnametemplate
 	templateName := acctest.RandomNameWithPrefix("test-template")
 	templateFormat := "host-$4"
@@ -49,15 +49,15 @@ func testAccCheckBulkhostnametemplateResourceAttrPair(resourceName, dataSourceNa
 
 func testAccBulkhostnametemplateDataSourceConfigFilters(templateName, templateFormat string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_bulkhostnametemplate" "test" {
+resource "nios_ipam_bulk_hostname_template" "test" {
     template_name   = %q
     template_format = %q
 }
 
-data "nios_ipam_bulkhostnametemplate" "test" {
+data "nios_ipam_bulk_hostname_template" "test" {
   filters = {
-    template_name = nios_ipam_bulkhostnametemplate.test.template_name
-    template_format = nios_ipam_bulkhostnametemplate.test.template_format
+    template_name = nios_ipam_bulk_hostname_template.test.template_name
+    template_format = nios_ipam_bulk_hostname_template.test.template_format
   }
 }
 `, templateName, templateFormat)
