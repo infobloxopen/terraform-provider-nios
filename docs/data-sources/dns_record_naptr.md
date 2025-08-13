@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_naptr Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS NAPTR Records.
 ---
 
 # nios_dns_record_naptr (Data Source)
 
-
+Retrieves information about existing DNS NAPTR Records.
 
 ## Example Usage
 
@@ -86,13 +86,10 @@ Read-Only:
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`
 
-Optional:
-
-- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
-
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
+- `delegated_member` (Attributes) The Cloud Platform Appliance to which authority of the object is delegated. (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.

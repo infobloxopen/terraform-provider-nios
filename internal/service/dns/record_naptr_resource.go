@@ -36,7 +36,7 @@ func (r *RecordNaptrResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *RecordNaptrResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DNS NAPTR record.",
 		Attributes:          RecordNaptrResourceSchemaAttributes,
 	}
 }
