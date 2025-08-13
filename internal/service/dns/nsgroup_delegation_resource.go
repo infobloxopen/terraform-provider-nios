@@ -36,7 +36,7 @@ func (r *NsgroupDelegationResource) Metadata(ctx context.Context, req resource.M
 
 func (r *NsgroupDelegationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a NS group delegation.",
 		Attributes:          NsgroupDelegationResourceSchemaAttributes,
 	}
 }

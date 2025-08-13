@@ -37,8 +37,12 @@ func TestAccNsgroupDelegationResource_basic(t *testing.T) {
 				Config: testAccNsgroupDelegationBasicConfig(name , delegateTo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "delegate_to.0.address", "2.3.4.5"), 
+					resource.TestCheckResourceAttr(resourceName, "delegate_to.0.name", "delegate_to_ns_group"),
+					// Test fields with default value	
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+
 				),
 			},
 			// Delete testing automatically occurs in TestCase
