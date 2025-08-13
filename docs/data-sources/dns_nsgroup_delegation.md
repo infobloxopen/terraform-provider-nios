@@ -3,12 +3,12 @@
 page_title: "nios_dns_nsgroup_delegation Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing NS Group delegations.
 ---
 
 # nios_dns_nsgroup_delegation (Data Source)
 
-
+Retrieves information about existing NS Group delegations.
 
 ## Example Usage
 
@@ -52,12 +52,12 @@ data "nios_dns_nsgroup_delegation" "get_all_ns_group_delegations" {
 
 Required:
 
+- `delegate_to` (Attributes List) The list of delegated servers for the delegated NS group. (see [below for nested schema](#nestedatt--result--delegate_to))
 - `name` (String) The name of the delegated NS group.
 
 Optional:
 
 - `comment` (String) The comment for the delegated NS group.
-- `delegate_to` (Attributes List) The list of delegated servers for the delegated NS group. (see [below for nested schema](#nestedatt--result--delegate_to))
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 
 Read-Only:

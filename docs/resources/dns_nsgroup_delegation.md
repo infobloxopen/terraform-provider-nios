@@ -3,12 +3,12 @@
 page_title: "nios_dns_nsgroup_delegation Resource - nios"
 subcategory: "DNS"
 description: |-
-  
+  Manages a NS group delegation.
 ---
 
 # nios_dns_nsgroup_delegation (Resource)
 
-
+Manages a NS group delegation.
 
 ## Example Usage
 
@@ -32,12 +32,12 @@ resource "nios_dns_nsgroup_delegation" "create_nsgroup_delegate" {
 
 ### Required
 
+- `delegate_to` (Attributes List) The list of delegated servers for the delegated NS group. (see [below for nested schema](#nestedatt--delegate_to))
 - `name` (String) The name of the delegated NS group.
 
 ### Optional
 
 - `comment` (String) The comment for the delegated NS group.
-- `delegate_to` (Attributes List) The list of delegated servers for the delegated NS group. (see [below for nested schema](#nestedatt--delegate_to))
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 
 ### Read-Only
