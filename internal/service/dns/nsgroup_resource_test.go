@@ -15,6 +15,8 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+//TODO 
+//Setup a NIOS grid with 2 members 
 var readableAttributesForNsgroup = "comment,extattrs,external_primaries,external_secondaries,grid_primary,grid_secondaries,is_grid_default,is_multimaster,name,use_external_primary"
 
 func TestAccNsgroupResource_basic(t *testing.T) {

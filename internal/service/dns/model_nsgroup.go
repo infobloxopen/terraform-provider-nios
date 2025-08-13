@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
@@ -145,24 +144,12 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandNsgroup(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.Nsgroup {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m NsgroupModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
 
 func (m *NsgroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.Nsgroup {
 	if m == nil {
 		return nil
 	}
 	to := &dns.Nsgroup{
-		Ref:                 flex.ExpandStringPointer(m.Ref),
 		Comment:             flex.ExpandStringPointer(m.Comment),
 		ExtAttrs:            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ExternalPrimaries:   flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalPrimaries, diags, ExpandNsgroupExternalPrimaries),
