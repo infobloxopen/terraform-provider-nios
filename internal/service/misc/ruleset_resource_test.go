@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -36,14 +35,11 @@ func TestAccRulesetResource_basic(t *testing.T) {
 				Config: testAccRulesetBasicConfig(name, "NXDOMAIN"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "type", "NXDOMAIN"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 					resource.TestCheckResourceAttr(resourceName, "disabled", "false"),
-					// resource.TestCheckResourceAttr(resourceName, "nxdomain_rules.0.action", "PASS"),
-					// resource.TestCheckResourceAttr(resourceName, "nxdomain_rules.0.pattern", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -189,8 +185,8 @@ func TestAccRulesetResource_NxdomainRules(t *testing.T) {
 		},
 	}
 
-	nxdomainRulesHCL1 := FormatNxdomainRulesToHCL(nxDomainRules1)
-	nxdomainRulesHCL2 := FormatNxdomainRulesToHCL(nxDomainRules2)
+	nxdomainRulesHCL1 := utils.ConvertSliceOfMapsToHCL(nxDomainRules1)
+	nxdomainRulesHCL2 := utils.ConvertSliceOfMapsToHCL(nxDomainRules2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -323,20 +319,4 @@ resource "nios_misc_ruleset" "test_nxdomain_rules" {
     nxdomain_rules = %s
 }
 `, name, ruleset_type, nxdomainRules)
-}
-
-func FormatNxdomainRulesToHCL(rules []map[string]any) string {
-	var ruleBlocks []string
-
-	for _, rule := range rules {
-		block := fmt.Sprintf(`    {
-      action = %q
-      pattern = %q
-    }`, rule["action"], rule["pattern"])
-		ruleBlocks = append(ruleBlocks, block)
-	}
-
-	return fmt.Sprintf(`[
-%s
-  ]`, strings.Join(ruleBlocks, ",\n"))
 }

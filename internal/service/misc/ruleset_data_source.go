@@ -35,11 +35,10 @@ func (d *RulesetDataSource) Metadata(ctx context.Context, req datasource.Metadat
 }
 
 type RulesetModelWithFilter struct {
-	Filters        types.Map   `tfsdk:"filters"`
-	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
-	Result         types.List  `tfsdk:"result"`
-	MaxResults     types.Int32 `tfsdk:"max_results"`
-	Paging         types.Int32 `tfsdk:"paging"`
+	Filters    types.Map   `tfsdk:"filters"`
+	Result     types.List  `tfsdk:"result"`
+	MaxResults types.Int32 `tfsdk:"max_results"`
+	Paging     types.Int32 `tfsdk:"paging"`
 }
 
 func (m *RulesetModelWithFilter) FlattenResults(ctx context.Context, from []misc.Ruleset, diags *diag.Diagnostics) {

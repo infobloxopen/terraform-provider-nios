@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -78,18 +78,6 @@ var RulesetResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The type of this Ruleset object.",
 	},
-}
-
-func ExpandRuleset(ctx context.Context, o types.Object, diags *diag.Diagnostics) *misc.Ruleset {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RulesetModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *RulesetModel) Expand(ctx context.Context, diags *diag.Diagnostics) *misc.Ruleset {
