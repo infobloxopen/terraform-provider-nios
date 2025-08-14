@@ -164,8 +164,7 @@ func (m *SmartfolderPersonalQueryItemsModel) Flatten(ctx context.Context, from *
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.FieldType = flex.FlattenStringPointer(from.FieldType)
 	m.Operator = flex.FlattenStringPointer(from.Operator)
-	//m.OpMatch = types.BoolPointerValue(from.OpMatch)
-	m.OpMatch = flex.FlattenBoolPointerFalseAsNull(from.OpMatch)
+	m.OpMatch = types.BoolPointerValue(from.OpMatch)
 	m.ValueType = flex.FlattenStringPointer(from.ValueType)
 	m.Value = FlattenSmartfolderpersonalqueryitemsValue(ctx, from.Value, diags)
 }

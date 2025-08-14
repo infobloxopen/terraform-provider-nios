@@ -123,7 +123,6 @@ func TestAccSmartfolderPersonalResource_GroupBys(t *testing.T) {
 		},
 	}
 
-	//make groupBys1 and groupBys2 into HCL format
 	groupBysHCL1 := utils.ConvertSliceOfMapsToHCL(groupBys1)
 	groupBysHCL2 := utils.ConvertSliceOfMapsToHCL(groupBys2)
 	groupBysHCL3 := utils.ConvertSliceOfMapsToHCL(groupBys3)

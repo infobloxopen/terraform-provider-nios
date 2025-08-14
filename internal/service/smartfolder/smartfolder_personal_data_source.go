@@ -57,11 +57,6 @@ func (d *SmartfolderPersonalDataSource) Schema(ctx context.Context, req datasour
 				ElementType: types.StringType,
 				Optional:    true,
 			},
-			// "extattrfilters": schema.MapAttribute{
-			// 	Description: "External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
-			// 	ElementType: types.StringType,
-			// 	Optional:    true,
-			// },
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: utils.DataSourceAttributeMap(SmartfolderPersonalResourceSchemaAttributes, &resp.Diagnostics),
@@ -132,7 +127,6 @@ func (d *SmartfolderPersonalDataSource) Read(ctx context.Context, req datasource
 				SmartfolderPersonalAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-				//Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForSmartfolderPersonal).
 				Paging(paging).

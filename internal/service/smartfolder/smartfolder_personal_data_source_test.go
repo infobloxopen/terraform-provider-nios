@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/smartfolder"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
@@ -35,27 +36,6 @@ func TestAccSmartfolderPersonalDataSource_Filters(t *testing.T) {
 	})
 }
 
-// func TestAccSmartfolderPersonalDataSource_ExtAttrFilters(t *testing.T) {
-// 	dataSourceName := "data.nios_smartfolder_personal.test"
-// 	resourceName := "nios_smartfolder_personal.test"
-// 	var v smartfolder.SmartfolderPersonal
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckSmartfolderPersonalDestroy(context.Background(), &v),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccSmartfolderPersonalDataSourceConfigExtAttrFilters("value1"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					append([]resource.TestCheckFunc{
-// 						testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
-// 					}, testAccCheckSmartfolderPersonalResourceAttrPair(resourceName, dataSourceName)...)...,
-// 				),
-// 			},
-// 		},
-// 	})
-// }
-
 // below all TestAcc functions
 
 func testAccCheckSmartfolderPersonalResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
@@ -82,19 +62,3 @@ data "nios_smartfolder_personal" "test" {
 }
 `, name)
 }
-
-// func testAccSmartfolderPersonalDataSourceConfigExtAttrFilters(extAttrsValue string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_smartfolder_personal" "test" {
-//   extattrs = {
-//     Site = %q
-//   }
-// }
-
-// data "nios_smartfolder_personal" "test" {
-//   extattrfilters = {
-// 	"Site" = nios_smartfolder_personal.test.extattrs.Site
-//   }
-// }
-// `, extAttrsValue)
-// }
