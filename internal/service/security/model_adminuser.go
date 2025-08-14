@@ -2,19 +2,19 @@ package security
 
 import (
 	"context"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"regexp"
-
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -235,7 +235,7 @@ func (m *AdminuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *s
 		ExtAttrs:                        ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                            flex.ExpandStringPointer(m.Name),
 		Password:                        flex.ExpandStringPointer(m.Password),
-		SshKeys:                         flex.ExpandFrameworkListNestedBlock(ctx, m.SshKeys, diags, ExpandAdminuserSshKeys),
+		SshKeys:                         flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.SshKeys, diags, ExpandAdminuserSshKeys),
 		TimeZone:                        flex.ExpandStringPointer(m.TimeZone),
 		UseSshKeys:                      flex.ExpandBoolPointer(m.UseSshKeys),
 		UseTimeZone:                     flex.ExpandBoolPointer(m.UseTimeZone),
@@ -249,6 +249,7 @@ func FlattenAdminuser(ctx context.Context, from *security.Adminuser, diags *diag
 	}
 	m := AdminuserModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, AdminuserAttrTypes, m)
 	diags.Append(d...)
 	return t
