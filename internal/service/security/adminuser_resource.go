@@ -36,7 +36,7 @@ func (r *AdminuserResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *AdminuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages an Admin User.",
 		Attributes:          AdminuserResourceSchemaAttributes,
 	}
 }

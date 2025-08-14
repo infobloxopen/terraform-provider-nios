@@ -3,12 +3,12 @@
 page_title: "nios_security_admin_user Resource - nios"
 subcategory: ""
 description: |-
-  
+  Manages an Admin User.
 ---
 
 # nios_security_admin_user (Resource)
 
-
+Manages an Admin User.
 
 ## Example Usage
 

@@ -3,12 +3,12 @@
 page_title: "nios_security_admin_user Data Source - nios"
 subcategory: ""
 description: |-
-  
+  Retrieves information about existing Admin Users.
 ---
 
 # nios_security_admin_user (Data Source)
 
-
+Retrieves information about existing Admin Users.
 
 ## Example Usage
 
