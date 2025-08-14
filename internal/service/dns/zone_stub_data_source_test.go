@@ -15,6 +15,8 @@ func TestAccZoneStubDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_zone_stub.test"
 	resourceName := "nios_dns_zone_stub.test"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +24,7 @@ func TestAccZoneStubDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneStubDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneStubDataSourceConfigFilters(),
+				Config: testAccZoneStubDataSourceConfigFilters(fqdn, "1.1.1.1", stubServerName),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckZoneStubExists(context.Background(), resourceName, &v),
@@ -37,13 +39,16 @@ func TestAccZoneStubDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_zone_stub.test"
 	resourceName := "nios_dns_zone_stub.test"
 	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckZoneStubDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneStubDataSourceConfigExtAttrFilters(acctest.RandomName()),
+				Config: testAccZoneStubDataSourceConfigExtAttrFilters(fqdn, "1.1.1.1", stubServerName, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckZoneStubExists(context.Background(), resourceName, &v),
@@ -95,25 +100,35 @@ func testAccCheckZoneStubResourceAttrPair(resourceName, dataSourceName string) [
 	}
 }
 
-func testAccZoneStubDataSourceConfigFilters() string {
+func testAccZoneStubDataSourceConfigFilters(fqdn, stubAddress, stubName string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test" {
+	fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
 }
 
 data "nios_dns_zone_stub" "test" {
   filters = {
-	 = nios_dns_zone_stub.test.
+  fqdn = nios_dns_zone_stub.test.fqdn
   }
 }
-`)
+`, fqdn, stubAddress, stubName)
 }
 
-func testAccZoneStubDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccZoneStubDataSourceConfigExtAttrFilters(fqdn, stubAddress, stubName, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test" {
-  extattrs = {
-    Site = %q
-  } 
+  	fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	extattrs = {
+    	Site = %q
+  	} 
 }
 
 data "nios_dns_zone_stub" "test" {
@@ -121,5 +136,5 @@ data "nios_dns_zone_stub" "test" {
 	Site = nios_dns_zone_stub.test.extattrs.Site
   }
 }
-`, extAttrsValue)
+`, fqdn, stubAddress, stubName, extAttrsValue)
 }
