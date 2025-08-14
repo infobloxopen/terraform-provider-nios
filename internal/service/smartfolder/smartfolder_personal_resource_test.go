@@ -33,7 +33,7 @@ func TestAccSmartfolderPersonalResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					// Test fields with default value
+					// Test the fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
 			},
