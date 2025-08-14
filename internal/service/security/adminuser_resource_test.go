@@ -4,13 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
-	"net/http"
-	"testing"
 )
 
 var readableAttributesForAdminuser = "admin_groups,auth_method,auth_type,ca_certificate_issuer,client_certificate_serial_number,comment,disable,email,enable_certificate_authentication,extattrs,name,ssh_keys,status,time_zone,use_ssh_keys,use_time_zone"
@@ -20,14 +24,13 @@ func TestAccAdminuserResource_basic(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserBasicConfig(name, password, adminGroups),
+				Config: testAccAdminuserBasicConfig(name, password, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					// Test fields with default value
@@ -53,14 +56,13 @@ func TestAccAdminuserResource_disappears(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAdminuserDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAdminuserBasicConfig(name, password, adminGroups),
+				Config: testAccAdminuserBasicConfig(name, password, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					testAccCheckAdminuserDisappears(context.Background(), &v),
@@ -76,8 +78,8 @@ func TestAccAdminuserResource_AdminGroups(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
-	adminGroups1 := `["opa-group"]`
+	adminGroups := "admin-group"
+	adminGroups1 := "opa-group"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -108,16 +110,19 @@ func TestAccAdminuserResource_AuthMethod(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	authMethod := "KEYPAIR"
 	authMethod1 := "KEYPAIR_PASSWORD"
+	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "..", "examples", "resources", "nios_security_admin_user", "sample_key.pub"))
+	if err != nil {
+		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserAuthMethod(name, password, adminGroups, authMethod),
+				Config: testAccAdminuserAuthMethod(name, password, "admin-group", authMethod, false, nil, nil, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auth_method", authMethod),
@@ -125,7 +130,7 @@ func TestAccAdminuserResource_AuthMethod(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserAuthMethod(name, password, adminGroups, authMethod1),
+				Config: testAccAdminuserAuthMethod(name, password, "admin-group", authMethod1, true, utils.Ptr("sample-key"), utils.Ptr("RSA"), utils.Ptr(sshkeys)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auth_method", authMethod1),
@@ -141,7 +146,6 @@ func TestAccAdminuserResource_AuthType(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	authType := "LOCAL"
 	authype1 := "REMOTE"
 	resource.ParallelTest(t, resource.TestCase{
@@ -150,7 +154,7 @@ func TestAccAdminuserResource_AuthType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserAuthType(name, password, adminGroups, authType),
+				Config: testAccAdminuserAuthType(name, password, "admin-group", authType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auth_type", authType),
@@ -158,7 +162,7 @@ func TestAccAdminuserResource_AuthType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserAuthType(name, password, adminGroups, authype1),
+				Config: testAccAdminuserAuthType(name, password, "admin-group", authype1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auth_type", authype1),
@@ -172,25 +176,30 @@ func TestAccAdminuserResource_AuthType(t *testing.T) {
 func TestAccAdminuserResource_CaCertificateIssuer(t *testing.T) {
 	var resourceName = "nios_security_admin_user.test_ca_certificate_issuer"
 	var v security.Adminuser
-
-	resource.ParallelTest(t, resource.TestCase{
+	name := acctest.RandomNameWithPrefix("admin-user")
+	password := "Example-Admin123!"
+	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22"
+	caCertificateIssuer1 := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuZGM2MTlhMWYyYmI0NGYwYjUzMWFiNzcwZjk1ZDQ0MDRhNWY2ODQxZGQxOTQ3Y2Q0YjcxMjU1YWU1MjY5MzM1MTRhMDljNWI5OTMwNmNhYzRiMjczY2JhN2NhODYwOWQ5ODY2YWYxYzU3NDdkNTVmNTFjZjM0ZGY4NzRmYTFjZWU:CN%3D%22ib-root-ca%22"
+	clientCertificateSerialNumber := "4e7c675cd972ecd2e5b895ad6cb4e38e6d77b4b4"
+	clientCertificateSerialNumber1 := "682f792e09c242093c192cee888d44658e88abfb"
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserCaCertificateIssuer("CA_CERTIFICATE_ISSUER_REPLACE_ME"),
+				Config: testAccAdminuserCaCertificateIssuer(name, password, "admin-group", caCertificateIssuer, clientCertificateSerialNumber, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ca_certificate_issuer", "CA_CERTIFICATE_ISSUER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ca_certificate_issuer", caCertificateIssuer),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserCaCertificateIssuer("CA_CERTIFICATE_ISSUER_UPDATE_REPLACE_ME"),
+				Config: testAccAdminuserCaCertificateIssuer(name, password, "admin-group", caCertificateIssuer1, clientCertificateSerialNumber1, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ca_certificate_issuer", "CA_CERTIFICATE_ISSUER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ca_certificate_issuer", caCertificateIssuer1),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -201,25 +210,30 @@ func TestAccAdminuserResource_CaCertificateIssuer(t *testing.T) {
 func TestAccAdminuserResource_ClientCertificateSerialNumber(t *testing.T) {
 	var resourceName = "nios_security_admin_user.test_client_certificate_serial_number"
 	var v security.Adminuser
-
+	name := acctest.RandomNameWithPrefix("admin-user")
+	password := "Example-Admin123!"
+	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22"
+	caCertificateIssuer1 := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuZGM2MTlhMWYyYmI0NGYwYjUzMWFiNzcwZjk1ZDQ0MDRhNWY2ODQxZGQxOTQ3Y2Q0YjcxMjU1YWU1MjY5MzM1MTRhMDljNWI5OTMwNmNhYzRiMjczY2JhN2NhODYwOWQ5ODY2YWYxYzU3NDdkNTVmNTFjZjM0ZGY4NzRmYTFjZWU:CN%3D%22ib-root-ca%22"
+	clientCertificateSerialNumber := "4e7c675cd972ecd2e5b895ad6cb4e38e6d77b4b4"
+	clientCertificateSerialNumber1 := "682f792e09c242093c192cee888d44658e88abfb"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserClientCertificateSerialNumber("CLIENT_CERTIFICATE_SERIAL_NUMBER_REPLACE_ME"),
+				Config: testAccAdminuserClientCertificateSerialNumber(name, password, "admin-group", caCertificateIssuer, clientCertificateSerialNumber, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "client_certificate_serial_number", "CLIENT_CERTIFICATE_SERIAL_NUMBER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "client_certificate_serial_number", clientCertificateSerialNumber),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserClientCertificateSerialNumber("CLIENT_CERTIFICATE_SERIAL_NUMBER_UPDATE_REPLACE_ME"),
+				Config: testAccAdminuserClientCertificateSerialNumber(name, password, "admin-group", caCertificateIssuer1, clientCertificateSerialNumber1, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "client_certificate_serial_number", "CLIENT_CERTIFICATE_SERIAL_NUMBER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "client_certificate_serial_number", clientCertificateSerialNumber1),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -232,14 +246,13 @@ func TestAccAdminuserResource_Comment(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserComment(name, password, adminGroups, "example admin user"),
+				Config: testAccAdminuserComment(name, password, "admin-group", "example admin user"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "example admin user"),
@@ -247,7 +260,7 @@ func TestAccAdminuserResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserComment(name, password, adminGroups, "example admin user updated"),
+				Config: testAccAdminuserComment(name, password, "admin-group", "example admin user updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "example admin user updated"),
@@ -263,14 +276,13 @@ func TestAccAdminuserResource_Disable(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserDisable(name, password, adminGroups, true),
+				Config: testAccAdminuserDisable(name, password, "admin-group", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -278,7 +290,7 @@ func TestAccAdminuserResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserDisable(name, password, adminGroups, false),
+				Config: testAccAdminuserDisable(name, password, "admin-group", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -294,7 +306,6 @@ func TestAccAdminuserResource_Email(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	email := "abc@example.com"
 	email1 := "xyz@sample.com"
 	resource.ParallelTest(t, resource.TestCase{
@@ -303,7 +314,7 @@ func TestAccAdminuserResource_Email(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserEmail(name, password, adminGroups, email),
+				Config: testAccAdminuserEmail(name, password, "admin-group", email),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "email", email),
@@ -311,7 +322,7 @@ func TestAccAdminuserResource_Email(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserEmail(name, password, adminGroups, email1),
+				Config: testAccAdminuserEmail(name, password, "admin-group", email1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "email", email1),
@@ -327,15 +338,15 @@ func TestAccAdminuserResource_EnableCertificateAuthentication(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
-
-	resource.ParallelTest(t, resource.TestCase{
+	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22"
+	clientCertificateSerialNumber := "4e7c675cd972ecd2e5b895ad6cb4e38e6d77b4b4"
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserEnableCertificateAuthentication(name, password, adminGroups, true),
+				Config: testAccAdminuserEnableCertificateAuthentication(name, password, "admin-group", &caCertificateIssuer, &clientCertificateSerialNumber, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_certificate_authentication", "true"),
@@ -343,7 +354,7 @@ func TestAccAdminuserResource_EnableCertificateAuthentication(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserEnableCertificateAuthentication(name, password, adminGroups, false),
+				Config: testAccAdminuserEnableCertificateAuthentication(name, password, "admin-group", nil, nil, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_certificate_authentication", "false"),
@@ -359,7 +370,6 @@ func TestAccAdminuserResource_ExtAttrs(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	extAttrValue := acctest.RandomName()
 	extAttrValue1 := acctest.RandomName()
 
@@ -369,7 +379,7 @@ func TestAccAdminuserResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserExtAttrs(name, password, adminGroups, map[string]string{"Site": extAttrValue}),
+				Config: testAccAdminuserExtAttrs(name, password, "admin-group", map[string]string{"Site": extAttrValue}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue),
@@ -377,7 +387,7 @@ func TestAccAdminuserResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserExtAttrs(name, password, adminGroups, map[string]string{"Site": extAttrValue1}),
+				Config: testAccAdminuserExtAttrs(name, password, "admin-group", map[string]string{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
@@ -393,7 +403,6 @@ func TestAccAdminuserResource_Name(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	name1 := acctest.RandomNameWithPrefix("admin-user-update")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -401,7 +410,7 @@ func TestAccAdminuserResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserName(name, password, adminGroups),
+				Config: testAccAdminuserName(name, password, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -409,7 +418,7 @@ func TestAccAdminuserResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserName(name1, password, adminGroups),
+				Config: testAccAdminuserName(name1, password, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name1),
@@ -425,7 +434,6 @@ func TestAccAdminuserResource_Password(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	password1 := "Example-password123!"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -434,7 +442,7 @@ func TestAccAdminuserResource_Password(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserPassword(name, password, adminGroups),
+				Config: testAccAdminuserPassword(name, password, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "password", password),
@@ -442,7 +450,7 @@ func TestAccAdminuserResource_Password(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserPassword(name, password1, adminGroups),
+				Config: testAccAdminuserPassword(name, password1, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "password", password1),
@@ -458,9 +466,30 @@ func TestAccAdminuserResource_SshKeys(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
-	sshkeys := `[{"key_name":"example_key", "key_value":"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCy", "key_type":"RSA"}]`
-	sshKeys1 := `[{"key_name":"example_key_update", "key_value":"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCy-update", "key_type":"RSA"}]`
+
+	keyFilePath, err := filepath.Abs(filepath.Join("..", "..", "..", "examples", "resources", "nios_security_admin_user", "sample_key.pub"))
+	if err != nil {
+		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
+	}
+	keyContent, err := os.ReadFile(keyFilePath)
+	if err != nil {
+		t.Errorf("Failed to read SSH key file: %v", err)
+	}
+
+	// Replace newline characters in the file content
+	keyValue := strings.ReplaceAll(string(keyContent), "\n", "")
+
+	keyFilePath1, err := filepath.Abs(filepath.Join("..", "..", "..", "examples", "resources", "nios_security_admin_user", "sample_key.pub"))
+	if err != nil {
+		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
+	}
+	keyContent1, err := os.ReadFile(keyFilePath1)
+	if err != nil {
+		t.Errorf("Failed to read SSH key file: %v", err)
+	}
+
+	// Replace newline characters in the file content
+	keyValue1 := strings.ReplaceAll(string(keyContent1), "\n", "")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -468,18 +497,22 @@ func TestAccAdminuserResource_SshKeys(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserSshKeys(name, password, adminGroups, sshkeys),
+				Config: testAccAdminuserSshKeys(name, password, "admin-group", "sample-key", "RSA", keyFilePath),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ssh_keys", ""),
+					resource.TestCheckResourceAttr(resourceName, "ssh_keys.0.key_name", "sample-key"),
+					resource.TestCheckResourceAttr(resourceName, "ssh_keys.0.key_type", "RSA"),
+					resource.TestCheckResourceAttr(resourceName, "ssh_keys.0.key_value", keyValue),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserSshKeys(name, password, adminGroups, sshKeys1),
+				Config: testAccAdminuserSshKeys(name, password, "admin-group", "sample-key", "RSA", keyFilePath1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ssh_keys", ""),
+					resource.TestCheckResourceAttr(resourceName, "ssh_keys.0.key_name", "sample-key"),
+					resource.TestCheckResourceAttr(resourceName, "ssh_keys.0.key_type", "RSA"),
+					resource.TestCheckResourceAttr(resourceName, "ssh_keys.0.key_value", keyValue1),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -492,7 +525,6 @@ func TestAccAdminuserResource_TimeZone(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
 	timeZone := "UTC"
 	timeZone1 := "Singapore"
 
@@ -502,7 +534,7 @@ func TestAccAdminuserResource_TimeZone(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserTimeZone(name, password, adminGroups, timeZone),
+				Config: testAccAdminuserTimeZone(name, password, "admin-group", timeZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "time_zone", timeZone),
@@ -510,7 +542,7 @@ func TestAccAdminuserResource_TimeZone(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserTimeZone(name, password, adminGroups, timeZone1),
+				Config: testAccAdminuserTimeZone(name, password, "admin-group", timeZone1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "time_zone", timeZone1),
@@ -526,15 +558,17 @@ func TestAccAdminuserResource_UseSshKeys(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
-
+	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "..", "examples", "resources", "nios_security_admin_user", "sample_key.pub"))
+	if err != nil {
+		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserUseSshKeys(name, password, adminGroups, true),
+				Config: testAccAdminuserUseSshKeys(name, password, "admin-group", true, utils.Ptr("sample-key"), utils.Ptr("RSA"), &sshkeys),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ssh_keys", "true"),
@@ -542,7 +576,7 @@ func TestAccAdminuserResource_UseSshKeys(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserUseSshKeys(name, password, adminGroups, false),
+				Config: testAccAdminuserUseSshKeys(name, password, "admin-group", false, nil, nil, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ssh_keys", "false"),
@@ -558,15 +592,13 @@ func TestAccAdminuserResource_UseTimeZone(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	adminGroups := `["admin-group"]`
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserUseTimeZone(name, password, adminGroups, true),
+				Config: testAccAdminuserUseTimeZone(name, password, "admin-group", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_time_zone", "true"),
@@ -574,7 +606,7 @@ func TestAccAdminuserResource_UseTimeZone(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserUseTimeZone(name, password, adminGroups, false),
+				Config: testAccAdminuserUseTimeZone(name, password, "admin-group", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_time_zone", "false"),
@@ -649,17 +681,9 @@ func testAccAdminuserBasicConfig(name, password, adminGroups string) string {
 resource "nios_security_admin_user" "test" {
   name = %q
   password = %q
-  admin_groups = %s
+  admin_groups = [%q]
 }
 `, name, password, adminGroups)
-}
-
-func testAccAdminuserRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_security_admin_user" "test_ref" {
-   ref = %q
-}
-`, ref)
 }
 
 func testAccAdminuserAdminGroups(name, password, adminGroups string) string {
@@ -667,20 +691,32 @@ func testAccAdminuserAdminGroups(name, password, adminGroups string) string {
 resource "nios_security_admin_user" "test_admin_groups" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
 }
 `, name, password, adminGroups)
 }
 
-func testAccAdminuserAuthMethod(name, password, authGroups, authMethod string) string {
+func testAccAdminuserAuthMethod(name, password, authGroups, authMethod string, useSshKeys bool, keyName, keyType, keyValue *string) string {
+	var extraConfig string
+	if keyName != nil && keyType != nil && keyValue != nil {
+		extraConfig = fmt.Sprintf(`
+		ssh_keys = [{
+          key_name  = %q
+          key_type = %q
+          key_value = replace(file(%q), "\n", "")
+		}]
+		`, *keyName, *keyType, *keyValue)
+	}
 	return fmt.Sprintf(`
 resource "nios_security_admin_user" "test_auth_method" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    auth_method = %q
+   use_ssh_keys = %t
+   %s
 }
-`, name, password, authGroups, authMethod)
+`, name, password, authGroups, authMethod, useSshKeys, extraConfig)
 }
 
 func testAccAdminuserAuthType(name, password, authGroups, authType string) string {
@@ -688,26 +724,36 @@ func testAccAdminuserAuthType(name, password, authGroups, authType string) strin
 resource "nios_security_admin_user" "test_auth_type" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    auth_type = %q
 }
 `, name, password, authGroups, authType)
 }
 
-func testAccAdminuserCaCertificateIssuer(caCertificateIssuer string) string {
+func testAccAdminuserCaCertificateIssuer(name, password, authGroups, caCertificateIssuer, clientCertificateSerialNumber string, enableCertAuth bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_user" "test_ca_certificate_issuer" {
+   name = %q
+   password = %q
+   admin_groups = [%q]
    ca_certificate_issuer = %q
+   client_certificate_serial_number = %q 
+   enable_certificate_authentication = %t
 }
-`, caCertificateIssuer)
+`, name, password, authGroups, caCertificateIssuer, clientCertificateSerialNumber, enableCertAuth)
 }
 
-func testAccAdminuserClientCertificateSerialNumber(clientCertificateSerialNumber string) string {
+func testAccAdminuserClientCertificateSerialNumber(name, password, authGroups, caCertificateIssuer, clientCertificateSerialNumber string, enableCertAuth bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_user" "test_client_certificate_serial_number" {
-   client_certificate_serial_number = %q
+   name = %q
+   password = %q
+   admin_groups = [%q]
+   ca_certificate_issuer = %q
+   client_certificate_serial_number = %q 
+   enable_certificate_authentication = %t
 }
-`, clientCertificateSerialNumber)
+`, name, password, authGroups, caCertificateIssuer, clientCertificateSerialNumber, enableCertAuth)
 }
 
 func testAccAdminuserComment(name, password, adminGroups, comment string) string {
@@ -715,7 +761,7 @@ func testAccAdminuserComment(name, password, adminGroups, comment string) string
 resource "nios_security_admin_user" "test_comment" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    comment = %q
 }
 `, name, password, adminGroups, comment)
@@ -726,7 +772,7 @@ func testAccAdminuserDisable(name, password, adminGroups string, disable bool) s
 resource "nios_security_admin_user" "test_disable" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    disable = %t
 }
 `, name, password, adminGroups, disable)
@@ -737,21 +783,29 @@ func testAccAdminuserEmail(name, password, adminGroups, email string) string {
 resource "nios_security_admin_user" "test_email" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    email = %q
 }
 `, name, password, adminGroups, email)
 }
 
-func testAccAdminuserEnableCertificateAuthentication(name, password, adminGroups string, enableCertificateAuthentication bool) string {
+func testAccAdminuserEnableCertificateAuthentication(name, password, adminGroups string, caCertificateIssuer, clientCertificateSerialNumber *string, enableCertificateAuthentication bool) string {
+	var extraConfig string
+	if caCertificateIssuer != nil && clientCertificateSerialNumber != nil {
+		extraConfig = fmt.Sprintf(`
+		ca_certificate_issuer = %q
+		client_certificate_serial_number = %q
+		`, *caCertificateIssuer, *clientCertificateSerialNumber)
+	}
 	return fmt.Sprintf(`
 resource "nios_security_admin_user" "test_enable_certificate_authentication" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    enable_certificate_authentication = %t
+   %s
 }
-`, name, password, adminGroups, enableCertificateAuthentication)
+`, name, password, adminGroups, enableCertificateAuthentication, extraConfig)
 }
 
 func testAccAdminuserExtAttrs(name, password, adminGroups string, extAttrs map[string]string) string {
@@ -764,7 +818,7 @@ func testAccAdminuserExtAttrs(name, password, adminGroups string, extAttrs map[s
 resource "nios_security_admin_user" "test_extattrs" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    extattrs = %s
 }
 `, name, password, adminGroups, extattrsStr)
@@ -775,7 +829,7 @@ func testAccAdminuserName(name, password, adminGroups string) string {
 resource "nios_security_admin_user" "test_name" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
 }
 `, name, password, adminGroups)
 }
@@ -785,21 +839,27 @@ func testAccAdminuserPassword(name, password, adminGroups string) string {
 resource "nios_security_admin_user" "test_password" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
 }
 `, name, password, adminGroups)
 }
 
-func testAccAdminuserSshKeys(name, password, adminGroups, sshKeys string) string {
+func testAccAdminuserSshKeys(name, password, adminGroups, keyName, keyType, keyValue string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_user" "test_ssh_keys" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    use_ssh_keys = true
-   ssh_keys = %s
+   ssh_keys = [
+     {
+       key_name  = %q
+       key_type  = %q
+       key_value = replace(file(%q), "\n", "")
+     }
+   ]
 }
-`, name, password, adminGroups, sshKeys)
+`, name, password, adminGroups, keyName, keyType, keyValue)
 }
 
 func testAccAdminuserTimeZone(name, password, adminGroups, timeZone string) string {
@@ -807,22 +867,33 @@ func testAccAdminuserTimeZone(name, password, adminGroups, timeZone string) stri
 resource "nios_security_admin_user" "test_time_zone" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    use_time_zone = true
    time_zone = %q
 }
 `, name, password, adminGroups, timeZone)
 }
 
-func testAccAdminuserUseSshKeys(name, password, adminGroups string, useSshKeys bool) string {
+func testAccAdminuserUseSshKeys(name, password, adminGroups string, useSshKeys bool, keyName, keyType, keyValue *string) string {
+	var extraConfig string
+	if keyName != nil && keyType != nil && keyValue != nil {
+		extraConfig = fmt.Sprintf(`
+		ssh_keys = [{
+          key_name  = %q
+          key_type = %q
+          key_value = replace(file(%q), "\n", "")
+		}]
+		`, *keyName, *keyType, *keyValue)
+	}
 	return fmt.Sprintf(`
 resource "nios_security_admin_user" "test_use_ssh_keys" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    use_ssh_keys = %t
+   %s
 }
-`, name, password, adminGroups, useSshKeys)
+`, name, password, adminGroups, useSshKeys, extraConfig)
 }
 
 func testAccAdminuserUseTimeZone(name, password, adminGroups string, useTimeZone bool) string {
@@ -830,7 +901,7 @@ func testAccAdminuserUseTimeZone(name, password, adminGroups string, useTimeZone
 resource "nios_security_admin_user" "test_use_time_zone" {
    name = %q
    password = %q
-   admin_groups = %s
+   admin_groups = [%q]
    use_time_zone = %t
 }
 `, name, password, adminGroups, useTimeZone)

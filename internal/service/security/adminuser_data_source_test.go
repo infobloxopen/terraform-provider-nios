@@ -23,7 +23,7 @@ func TestAccAdminuserDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckAdminuserDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAdminuserDataSourceConfigFilters(name, "ExamplePassword12!", `{"admin-group"}`),
+				Config: testAccAdminuserDataSourceConfigFilters(name, "ExamplePassword12!", "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckAdminuserExists(context.Background(), resourceName, &v),
@@ -46,7 +46,7 @@ func TestAccAdminuserDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckAdminuserDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAdminuserDataSourceConfigExtAttrFilters(name, "ExamplePassword12!", `{"admin-group"}`, extAttrValue),
+				Config: testAccAdminuserDataSourceConfigExtAttrFilters(name, "ExamplePassword12!", "admin-group", extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckAdminuserExists(context.Background(), resourceName, &v),
@@ -73,7 +73,6 @@ func testAccCheckAdminuserResourceAttrPair(resourceName, dataSourceName string) 
 		resource.TestCheckResourceAttrPair(resourceName, "enable_certificate_authentication", dataSourceName, "result.0.enable_certificate_authentication"),
 		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-		resource.TestCheckResourceAttrPair(resourceName, "password", dataSourceName, "result.0.password"),
 		resource.TestCheckResourceAttrPair(resourceName, "ssh_keys", dataSourceName, "result.0.ssh_keys"),
 		resource.TestCheckResourceAttrPair(resourceName, "status", dataSourceName, "result.0.status"),
 		resource.TestCheckResourceAttrPair(resourceName, "time_zone", dataSourceName, "result.0.time_zone"),
@@ -87,7 +86,7 @@ func testAccAdminuserDataSourceConfigFilters(name, password string, adminGroups 
 resource "nios_security_admin_user" "test" {
 	  name            = %q
 	  password        = %q
-	  admin_groups    = %q
+	  admin_groups    = [%q]
 }
 
 data "nios_security_admin_user" "test" {
@@ -103,7 +102,7 @@ func testAccAdminuserDataSourceConfigExtAttrFilters(name, password, adminGroups,
 resource "nios_security_admin_user" "test" {
   name = %q
   password = %q
-  admin_groups = %q
+  admin_groups = [%q]
   extattrs = {
     Site = %q
   } 
