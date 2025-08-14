@@ -335,12 +335,12 @@ func (m *ZoneStubModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		StubFrom:          flex.ExpandFrameworkListNestedBlock(ctx, m.StubFrom, diags, ExpandZoneStubStubFrom),
 		StubMembers:       flex.ExpandFrameworkListNestedBlock(ctx, m.StubMembers, diags, ExpandZoneStubStubMembers),
 		StubMsservers:     flex.ExpandFrameworkListNestedBlock(ctx, m.StubMsservers, diags, ExpandZoneStubStubMsservers),
-		View:              flex.ExpandStringPointer(m.View),
 	}
 
 	if isCreate {
 		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
 		to.ZoneFormat = flex.ExpandStringPointer(m.ZoneFormat)
+		to.View = flex.ExpandStringPointer(m.View)
 	}
 
 	return to
