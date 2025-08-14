@@ -7,8 +7,3 @@ data "nios_smartfolder_personal" "get_smartfolder_using_filters" {
 
 // Retrieve all smartfolder personal records
 data "nios_smartfolder_personal" "get_all_smartfolders" {}
-
-output "name" {
-
-  value = data.nios_smartfolder_personal.get_all_smartfolders
-}
