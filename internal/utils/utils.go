@@ -429,6 +429,12 @@ func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 			case []map[string]any:
 				nestedHCL := ConvertSliceOfMapsToHCL(v)
 				formattedValue = nestedHCL
+			case map[string]any:
+				var nestedAttr []string
+				for nestedKey, nestedVal := range v {
+					nestedAttr = append(nestedAttr, fmt.Sprintf("          %s = %q", nestedKey, nestedVal))
+				}
+				formattedValue = fmt.Sprintf("{\n%s\n        }", strings.Join(nestedAttr, "\n"))
 			case string:
 				formattedValue = fmt.Sprintf("%q", v)
 			case int, int64, float64:
