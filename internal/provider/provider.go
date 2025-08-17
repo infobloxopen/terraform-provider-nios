@@ -120,7 +120,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewIpv6networkResource,
 		ipam.NewNetworkviewResource,
 
-		cloud.NewAwsrte53taskgroupResource,
+		cloud.NewAwsuserResource,
 	}
 }
 
@@ -156,7 +156,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewIpv6networkDataSource,
 		ipam.NewNetworkviewDataSource,
 
-		cloud.NewAwsrte53taskgroupDataSource,
+		cloud.NewAwsuserDataSource,
 	}
 }
 
