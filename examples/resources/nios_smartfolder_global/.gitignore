@@ -1,5 +1,0 @@
-provider.tf
-# .terraform/
-# terraform.tfplan
-# terraform.tfstate
-# .terraform.lock.hcl
