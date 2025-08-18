@@ -20,7 +20,7 @@ resource "nios_dns_nsgroup" "create_ns_group_with_additional_fields" {
   ]
   external_primaries = [
     {
-      name = "external.primary.1",
+      name    = "external.primary.1",
       address = "2.3.4.5",
     },
   ]

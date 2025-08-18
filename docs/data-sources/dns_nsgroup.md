@@ -3,12 +3,12 @@
 page_title: "nios_dns_nsgroup Data Source - nios"
 subcategory: "DNS"
 description: |-
-  Retrieves information about existing NS Group.
+  Retrieves information about existing NS Groups.
 ---
 
 # nios_dns_nsgroup (Data Source)
 
-Retrieves information about existing NS Group.
+Retrieves information about existing NS Groups.
 
 ## Example Usage
 
@@ -23,7 +23,7 @@ data "nios_dns_nsgroup" "get_ns_group_using_filters" {
 // Retrieve a NS Group using Extensible Attributes
 data "nios_dns_nsgroup" "get_ns_group_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 

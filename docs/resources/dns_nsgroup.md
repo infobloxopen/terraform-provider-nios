@@ -25,23 +25,23 @@ resource "nios_dns_nsgroup" "create_ns_group" {
 
 // Create NS Group with Additional Fields
 resource "nios_dns_nsgroup" "create_ns_group_with_additional_fields" {
-  name    = "example_ns_group"
+  name    = "example_ns_group_1"
   comment = "Example NS Group"
 
   grid_secondaries = [
     {
-      "name" : "infoblox.172_28_83_208",
+      name = "12.9.0.6",
     },
   ]
   external_primaries = [
     {
-      "name" : "external.primary.1",
-      "address" : "2.3.4.5",
+      name    = "external.primary.1",
+      address = "2.3.4.5",
     },
   ]
   use_external_primary = true
   extattrs = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 ```
