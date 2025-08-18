@@ -89,6 +89,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: NsgroupExternalPrimariesResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_external_primary")),
 		},
@@ -99,6 +100,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: NsgroupExternalSecondariesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of external secondary servers.",
 	},
 	"grid_primary": schema.ListNestedAttribute{
@@ -106,6 +108,13 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: NsgroupGridPrimaryResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.ExactlyOneOf(
+				path.MatchRoot("grid_primary"),
+				path.MatchRoot("external_primaries"),
+			),
+		},
 		MarkdownDescription: "The grid primary servers for this group.",
 	},
 	"grid_secondaries": schema.ListNestedAttribute{
@@ -113,6 +122,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: NsgroupGridSecondariesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list with Grid members that are secondary servers for this group.",
 	},
 	"is_grid_default": schema.BoolAttribute{
@@ -156,7 +166,6 @@ func (m *NsgroupModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		GridPrimary:         flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandNsgroupGridPrimary),
 		GridSecondaries:     flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandNsgroupGridSecondaries),
 		IsGridDefault:       flex.ExpandBoolPointer(m.IsGridDefault),
-		IsMultimaster:       flex.ExpandBoolPointer(m.IsMultimaster),
 		Name:                flex.ExpandStringPointer(m.Name),
 		UseExternalPrimary:  flex.ExpandBoolPointer(m.UseExternalPrimary),
 	}
