@@ -332,14 +332,6 @@ resource "nios_smartfolder_global" "test" {
 `, name)
 }
 
-func testAccSmartfolderGlobalRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_smartfolder_global" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
 func testAccSmartfolderGlobalComment(name, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_smartfolder_global" "test_comment" {

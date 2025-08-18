@@ -61,7 +61,6 @@ func (r *SmartfolderGlobalResource) Configure(ctx context.Context, req resource.
 }
 
 func (r *SmartfolderGlobalResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
 	var data SmartfolderGlobalModel
 
 	// Read Terraform plan data into the model
@@ -84,11 +83,6 @@ func (r *SmartfolderGlobalResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	res := apiRes.CreateSmartfolderGlobalResponseAsObject.GetResult()
-	//res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create SmartfolderGlobal due inherited Extensible attributes, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
