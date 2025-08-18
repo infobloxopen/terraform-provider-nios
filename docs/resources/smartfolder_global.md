@@ -13,7 +13,7 @@ Manages Smartfolder Global resources.
 ## Example Usage
 
 ```terraform
-// Create Smartfolder Global with Basic Fields (Required only)
+// Create Smartfolder Global with Basic Fields
 resource "nios_smartfolder_global" "basic" {
   name = "example-global-smartfolder"
 }
