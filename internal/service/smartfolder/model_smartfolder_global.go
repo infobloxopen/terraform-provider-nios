@@ -2,11 +2,14 @@ package smartfolder
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/smartfolder"
@@ -50,7 +53,13 @@ var SmartfolderGlobalResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Global Smart Folder grouping rules.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing white space",
+			),
+		},
 		MarkdownDescription: "The global Smart Folder name.",
 	},
 	"query_items": schema.ListNestedAttribute{
@@ -62,18 +71,6 @@ var SmartfolderGlobalResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The global Smart Folder filter queries.",
 	},
 }
-
-// func ExpandSmartfolderGlobal(ctx context.Context, o types.Object, diags *diag.Diagnostics) *smartfolder.SmartfolderGlobal {
-// 	if o.IsNull() || o.IsUnknown() {
-// 		return nil
-// 	}
-// 	var m SmartfolderGlobalModel
-// 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-// 	if diags.HasError() {
-// 		return nil
-// 	}
-// 	return m.Expand(ctx, diags)
-// }
 
 func (m *SmartfolderGlobalModel) Expand(ctx context.Context, diags *diag.Diagnostics) *smartfolder.SmartfolderGlobal {
 	if m == nil {

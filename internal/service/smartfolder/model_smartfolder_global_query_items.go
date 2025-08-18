@@ -2,12 +2,15 @@ package smartfolder
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -36,21 +39,50 @@ var SmartfolderGlobalQueryItemsAttrTypes = map[string]attr.Type{
 
 var SmartfolderGlobalQueryItemsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("type"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("type"),
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Name should not have leading or trailing white space",
+			),
+		},
 		MarkdownDescription: "The Smart Folder query name.",
 	},
 	"field_type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("NORMAL"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("NORMAL"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("EXTATTR", "NORMAL"),
+		},
 		MarkdownDescription: "The Smart Folder query field type.",
 	},
 	"operator": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("EQ"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("EQ"),
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"BEGINS_WITH",
+				"CONTAINS",
+				"DROPS_BY",
+				"ENDS_WITH",
+				"EQ",
+				"GEQ",
+				"GT",
+				"HAS_VALUE",
+				"INHERITANCE_STATE_EQUALS",
+				"IP_ADDR_WITHIN",
+				"LEQ",
+				"LT",
+				"MATCH_EXPR",
+				"RELATIVE_DATE",
+				"RISES_BY",
+				"SUFFIX_MATCH",
+			),
+		},
 		MarkdownDescription: "The Smart Folder operator used in query.",
 	},
 	"op_match": schema.BoolAttribute{
@@ -60,9 +92,21 @@ var SmartfolderGlobalQueryItemsResourceSchemaAttributes = map[string]schema.Attr
 		MarkdownDescription: "Determines whether the query operator should match.",
 	},
 	"value_type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("ENUM"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("ENUM"),
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"BOOLEAN",
+				"DATE",
+				"EMAIL",
+				"ENUM",
+				"INTEGER",
+				"OBJTYPE",
+				"STRING",
+				"URL",
+			),
+		},
 		MarkdownDescription: "The Smart Folder query value type.",
 	},
 	"value": schema.SingleNestedAttribute{

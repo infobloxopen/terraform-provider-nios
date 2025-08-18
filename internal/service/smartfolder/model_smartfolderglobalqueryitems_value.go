@@ -31,23 +31,19 @@ var SmartfolderglobalqueryitemsValueAttrTypes = map[string]attr.Type{
 var SmartfolderglobalqueryitemsValueResourceSchemaAttributes = map[string]schema.Attribute{
 	"value_integer": schema.Int64Attribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The integer value of the Smart Folder query.",
 	},
 	"value_string": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             stringdefault.StaticString("Network/Zone/Range/Member"),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The string value of the Smart Folder query.",
 	},
 	"value_date": schema.Int64Attribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The timestamp value of the Smart Folder query.",
 	},
 	"value_boolean": schema.BoolAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The boolean value of the Smart Folder query.",
 	},
 }

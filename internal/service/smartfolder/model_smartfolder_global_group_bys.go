@@ -2,10 +2,14 @@ package smartfolder
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -28,18 +32,28 @@ var SmartfolderGlobalGroupBysAttrTypes = map[string]attr.Type{
 
 var SmartfolderGlobalGroupBysResourceSchemaAttributes = map[string]schema.Attribute{
 	"value": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing white space",
+			),
+		},
 		MarkdownDescription: "The name of the Smart Folder grouping attribute.",
 	},
 	"value_type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("NORMAL", "EXTATTR"),
+		},
 		MarkdownDescription: "The type of the Smart Folder grouping attribute value.",
 	},
 	"enable_grouping": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether the grouping is enabled.",
 	},
 }

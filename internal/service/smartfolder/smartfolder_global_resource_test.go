@@ -33,7 +33,8 @@ func TestAccSmartfolderGlobalResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderGlobalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					//resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					//Test default values
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -58,7 +59,7 @@ func TestAccSmartfolderGlobalResource_disappears(t *testing.T) {
 					testAccCheckSmartfolderGlobalExists(context.Background(), resourceName, &v),
 					testAccCheckSmartfolderGlobalDisappears(context.Background(), &v),
 				),
-				ExpectNonEmptyPlan: true, // uncomment once disappearance plan behavior is validated
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

@@ -71,12 +71,6 @@ func (r *SmartfolderGlobalResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	// // Add internal ID exists in the Extensible Attributes if not already present
-	// if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
-	// 	return
-	// }
-
 	apiRes, _, err := r.client.SmartFolderAPI.
 		SmartfolderGlobalAPI.
 		Create(ctx).
@@ -120,9 +114,9 @@ func (r *SmartfolderGlobalResource) Read(ctx context.Context, req resource.ReadR
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle if the resource is not found
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound { //&& r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
 			resp.State.RemoveResource(ctx)
 			return
@@ -132,106 +126,11 @@ func (r *SmartfolderGlobalResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	res := apiRes.GetSmartfolderGlobalResponseObjectAsResult.GetResult()
-	// if res.ExtAttrs == nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Missing Extensible Attributes",
-	// 		"Unable to read SmartfolderGlobal because no extensible attributes were returned from the API.",
-	// 	)
-	// 	return
-	// }
-
-	// res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	// if diags.HasError() {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading SmartfolderGlobal due inherited Extensible attributes, got error: %s", diags))
-	// 	return
-	// }
-
-	// apiTerraformId, ok := (*res.ExtAttrs)["Terraform Internal ID"]
-	// if !ok {
-	// 	resp.Diagnostics.AddError(
-	// 		"Missing Terraform internal id Attributes",
-	// 		"Unable to read SmartfolderGlobal because terraform internal id does not exist.",
-	// 	)
-	// 	return
-	// }
-
-	// stateExtAttrs := ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
-	// if stateExtAttrs == nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Missing Internal ID",
-	// 		"Unable to read SmartfolderGlobal because the internal ID (from extattrs_all) is missing or invalid.",
-	// 	)
-	// 	return
-	// }
-
-	//stateTerraformId := (*stateExtAttrs)["Terraform Internal ID"]
-
-	// if apiTerraformId.Value != stateTerraformId.Value {
-	// 	if r.ReadByExtAttrs(ctx, &data, resp) {
-	// 		return
-	// 	}
-	// }
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
-// func (r *SmartfolderGlobalResource) ReadByExtAttrs(ctx context.Context, data *SmartfolderGlobalModel, resp *resource.ReadResponse) bool {
-// 	var diags diag.Diagnostics
-
-// 	if data.ExtAttrsAll.IsNull() {
-// 		return false
-// 	}
-
-// 	internalIdExtAttr := *ExpandExtAttr(ctx, data.ExtAttrsAll, &diags)
-// 	if diags.HasError() {
-// 		return false
-// 	}
-
-// 	internalId := internalIdExtAttr["Terraform Internal ID"].Value
-// 	if internalId == "" {
-// 		return false
-// 	}
-
-// 	idMap := map[string]interface{}{
-// 		"Terraform Internal ID": internalId,
-// 	}
-
-// 	apiRes, _, err := r.client.SmartFolderAPI.
-// 		SmartfolderGlobalAPI.
-// 		List(ctx).
-// 		Extattrfilter(idMap).
-// 		ReturnAsObject(1).
-// 		ReturnFieldsPlus(readableAttributesForSmartfolderGlobal).
-// 		Execute()
-// 	if err != nil {
-// 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SmartfolderGlobal by extattrs, got error: %s", err))
-// 		return true
-// 	}
-
-// 	results := apiRes.ListSmartfolderGlobalResponseObject.GetResult()
-
-// 	// If the list is empty, the resource no longer exists so remove it from state
-// 	if len(results) == 0 {
-// 		resp.State.RemoveResource(ctx)
-// 		return true
-// 	}
-
-// 	res := results[0]
-
-// 	// Remove inherited external attributes and check for errors
-// 	// res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-// 	// if diags.HasError() {
-// 	// 	return true
-// 	// }
-
-// 	data.Flatten(ctx, &res, &resp.Diagnostics)
-// 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
-// 	return true
-// }
 
 func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
@@ -251,18 +150,6 @@ func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	// diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
-	// if diags.HasError() {
-	// 	resp.Diagnostics.Append(diags...)
-	// 	return
-	// }
-
-	// Add internal ID exists in the Extensible Attributes if not already present
-	// if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
-	// 	return
-	// }
-
 	apiRes, _, err := r.client.SmartFolderAPI.
 		SmartfolderGlobalAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -277,12 +164,6 @@ func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	res := apiRes.UpdateSmartfolderGlobalResponseAsObject.GetResult()
-
-	// res.ExtAttrs, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	// if diags.HasError() {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update SmartfolderGlobal due inherited Extensible attributes, got error: %s", diags))
-	// 	return
-	// }
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -313,31 +194,6 @@ func (r *SmartfolderGlobalResource) Delete(ctx context.Context, req resource.Del
 	}
 }
 
-// func (r *SmartfolderGlobalResource) addInternalIDToExtAttrs(ctx context.Context, data *SmartfolderGlobalModel) error {
-// 	var internalId string
-
-// 	if !data.ExtAttrsAll.IsNull() {
-// 		elements := data.ExtAttrsAll.Elements()
-// 		if tId, ok := elements["Terraform Internal ID"]; ok {
-// 			if tIdStr, ok := tId.(types.String); ok {
-// 				internalId = tIdStr.ValueString()
-// 			}
-// 		}
-// 	}
-
-// 	if internalId == "" {
-// 		var err error
-// 		internalId, err = uuid.GenerateUUID()
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	r.client.SmartFolderAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
-// 		"Terraform Internal ID": {Value: internalId},
-// 	}
-
-// 	return nil
 // }
 
 func (r *SmartfolderGlobalResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

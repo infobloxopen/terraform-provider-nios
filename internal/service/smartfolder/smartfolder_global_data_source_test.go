@@ -35,27 +35,6 @@ func TestAccSmartfolderGlobalDataSource_Filters(t *testing.T) {
 	})
 }
 
-// func TestAccSmartfolderGlobalDataSource_ExtAttrFilters(t *testing.T) {
-// 	dataSourceName := "data.nios_smartfolder_global.test"
-// 	resourceName := "nios_smartfolder_global.test"
-// 	var v smartfolder.SmartfolderGlobal
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckSmartfolderGlobalDestroy(context.Background(), &v),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccSmartfolderGlobalDataSourceConfigExtAttrFilters("value1"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					append([]resource.TestCheckFunc{
-// 						testAccCheckSmartfolderGlobalExists(context.Background(), resourceName, &v),
-// 					}, testAccCheckSmartfolderGlobalResourceAttrPair(resourceName, dataSourceName)...)...,
-// 				),
-// 			},
-// 		},
-// 	})
-// }
-
 // below all TestAcc functions
 
 func testAccCheckSmartfolderGlobalResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
@@ -81,19 +60,3 @@ data "nios_smartfolder_global" "test" {
 }
 `, name)
 }
-
-// func testAccSmartfolderGlobalDataSourceConfigExtAttrFilters(extAttrsValue string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_smartfolder_global" "test" {
-//   extattrs = {
-//     Site = %q
-//   }
-// }
-
-// data "nios_smartfolder_global" "test" {
-//   extattrfilters = {
-// 	"Site" = nios_smartfolder_global.test.extattrs.Site
-//   }
-// }
-// `, extAttrsValue)
-// }
