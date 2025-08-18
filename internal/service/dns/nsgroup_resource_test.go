@@ -15,17 +15,17 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-//TODO 
-//Setup a NIOS grid with 2 members 
+// TODO
+// Setup a NIOS grid with 2 members
 var readableAttributesForNsgroup = "comment,extattrs,external_primaries,external_secondaries,grid_primary,grid_secondaries,is_grid_default,is_multimaster,name,use_external_primary"
 
 func TestAccNsgroupResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
 
@@ -41,7 +41,7 @@ func TestAccNsgroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.172_28_83_208"),
-					// Test fields with default value	
+					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 					resource.TestCheckResourceAttr(resourceName, "is_grid_default", "false"),
 					resource.TestCheckResourceAttr(resourceName, "is_multimaster", "false"),
@@ -57,10 +57,10 @@ func TestAccNsgroupResource_basic(t *testing.T) {
 func TestAccNsgroupResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_nsgroup.test"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
 
@@ -81,17 +81,16 @@ func TestAccNsgroupResource_disappears(t *testing.T) {
 	})
 }
 
-
 func TestAccNsgroupResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_comment"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
-	comment := "This is a test comment"	
+	comment := "This is a test comment"
 	commentUpdate := "This is an updated test comment"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -100,7 +99,7 @@ func TestAccNsgroupResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupComment(name ,gridPrimary, comment),
+				Config: testAccNsgroupComment(name, gridPrimary, comment),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", comment),
@@ -108,7 +107,7 @@ func TestAccNsgroupResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupComment(name ,gridPrimary, commentUpdate),
+				Config: testAccNsgroupComment(name, gridPrimary, commentUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", commentUpdate),
@@ -122,7 +121,7 @@ func TestAccNsgroupResource_Comment(t *testing.T) {
 func TestAccNsgroupResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_extattrs"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
 			"name":"infoblox.172_28_83_208",
@@ -137,7 +136,7 @@ func TestAccNsgroupResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupExtAttrs(name , gridPrimary ,  map[string]any{
+				Config: testAccNsgroupExtAttrs(name, gridPrimary, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -147,7 +146,7 @@ func TestAccNsgroupResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupExtAttrs(name , gridPrimary , map[string]any{
+				Config: testAccNsgroupExtAttrs(name, gridPrimary, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -163,22 +162,22 @@ func TestAccNsgroupResource_ExtAttrs(t *testing.T) {
 func TestAccNsgroupResource_ExternalPrimaries(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_external_primaries"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	externalPrimaries := []map[string]any{
 		{
-			"name": "external.primary.1",
-			"address":"2.3.4.5",
+			"name":    "external.primary.1",
+			"address": "2.3.4.5",
 		},
 	}
 	gridSecondaries := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
 	externalPrimariesUpdate := []map[string]any{
 		{
-			"name": "external.primary.2",
-			"address":"20.1.12.23",
+			"name":    "external.primary.2",
+			"address": "20.1.12.23",
 		},
 	}
 
@@ -188,7 +187,7 @@ func TestAccNsgroupResource_ExternalPrimaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupExternalPrimaries(name , externalPrimaries, gridSecondaries),
+				Config: testAccNsgroupExternalPrimaries(name, externalPrimaries, gridSecondaries),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "external.primary.1"),
@@ -197,7 +196,7 @@ func TestAccNsgroupResource_ExternalPrimaries(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupExternalPrimaries(name , externalPrimariesUpdate, gridSecondaries),
+				Config: testAccNsgroupExternalPrimaries(name, externalPrimariesUpdate, gridSecondaries),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "external.primary.2"),
@@ -212,22 +211,22 @@ func TestAccNsgroupResource_ExternalPrimaries(t *testing.T) {
 func TestAccNsgroupResource_ExternalSecondaries(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_external_secondaries"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
 	externalSecondaries := []map[string]any{
 		{
-			"name": "external.secondary.1",
-			"address":"2.3.3.3",
+			"name":    "external.secondary.1",
+			"address": "2.3.3.3",
 		},
 	}
 	externalSecondariesUpdate := []map[string]any{
 		{
-			"name": "external.secondary.2",
-			"address":"20.3.32.3",
+			"name":    "external.secondary.2",
+			"address": "20.3.32.3",
 		},
 	}
 
@@ -237,7 +236,7 @@ func TestAccNsgroupResource_ExternalSecondaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupExternalSecondaries(name , externalSecondaries , gridPrimary),
+				Config: testAccNsgroupExternalSecondaries(name, externalSecondaries, gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.name", "external.secondary.1"),
@@ -246,7 +245,7 @@ func TestAccNsgroupResource_ExternalSecondaries(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupExternalSecondaries(name,externalSecondariesUpdate , gridPrimary),
+				Config: testAccNsgroupExternalSecondaries(name, externalSecondariesUpdate, gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.name", "external.secondary.2"),
@@ -261,15 +260,15 @@ func TestAccNsgroupResource_ExternalSecondaries(t *testing.T) {
 func TestAccNsgroupResource_GridPrimary(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_grid_primary"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
 	gridPrimaryUpdate := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_25",
+			"name": "infoblox.172_28_83_25",
 		},
 	}
 
@@ -287,7 +286,7 @@ func TestAccNsgroupResource_GridPrimary(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupGridPrimary(name , gridPrimaryUpdate),
+				Config: testAccNsgroupGridPrimary(name, gridPrimaryUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.172_28_83_25"),
@@ -301,15 +300,15 @@ func TestAccNsgroupResource_GridPrimary(t *testing.T) {
 func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_grid_secondaries"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridSecondaries := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
 	gridSecondariesUpdate := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_25",
+			"name": "infoblox.172_28_83_25",
 		},
 	}
 
@@ -341,10 +340,10 @@ func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 func TestAccNsgroupResource_IsGridDefault(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_is_grid_default"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
 
@@ -354,7 +353,7 @@ func TestAccNsgroupResource_IsGridDefault(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupIsGridDefault(name,gridPrimary, true),
+				Config: testAccNsgroupIsGridDefault(name, gridPrimary, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "is_grid_default", "true"),
@@ -376,13 +375,13 @@ func TestAccNsgroupResource_IsGridDefault(t *testing.T) {
 func TestAccNsgroupResource_IsMultimaster(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_is_multimaster"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 		{
-			"name":"infoblox.172_28_83_25",
+			"name": "infoblox.172_28_83_25",
 		},
 	}
 
@@ -392,7 +391,7 @@ func TestAccNsgroupResource_IsMultimaster(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupIsMultimaster(name , gridPrimary, true),
+				Config: testAccNsgroupIsMultimaster(name, gridPrimary, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "is_multimaster", "true"),
@@ -406,13 +405,13 @@ func TestAccNsgroupResource_IsMultimaster(t *testing.T) {
 func TestAccNsgroupResource_Name(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_name"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
-	nameUpdate := acctest.RandomName()
+	nameUpdate := acctest.RandomNameWithPrefix("ns-group")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -442,7 +441,7 @@ func TestAccNsgroupResource_Name(t *testing.T) {
 func TestAccNsgroupResource_UseExternalPrimary(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup.test_use_external_primary"
 	var v dns.Nsgroup
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("ns-group")
 	gridSecondaries := []map[string]any{
 		{
 			"name": "infoblox.172_28_83_208",
@@ -455,8 +454,8 @@ func TestAccNsgroupResource_UseExternalPrimary(t *testing.T) {
 	}
 	externalPrimaries := []map[string]any{
 		{
-			"name": "external.primary.1",
-			"address":"2.3.4.5",
+			"name":    "external.primary.1",
+			"address": "2.3.4.5",
 		},
 	}
 
@@ -466,7 +465,7 @@ func TestAccNsgroupResource_UseExternalPrimary(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupUseExternalPrimary(name , gridSecondaries, externalPrimaries, true),
+				Config: testAccNsgroupUseExternalPrimary(name, gridSecondaries, externalPrimaries, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "true"),
@@ -544,7 +543,7 @@ func testAccCheckNsgroupDisappears(ctx context.Context, v *dns.Nsgroup) resource
 }
 
 func testAccNsgroupBasicConfig(name string, gridPrimary []map[string]any) string {
-	gridPrimaryStr:= utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test" {
 	name = %q
@@ -553,30 +552,36 @@ resource "nios_dns_nsgroup" "test" {
 `, name, gridPrimaryStr)
 }
 
-func testAccNsgroupComment(name string , gridPrimary []map[string]any, comment string) string {
-	gridPrimaryStr:= utils.ConvertSliceOfMapsToHCL(gridPrimary)
+func testAccNsgroupComment(name string, gridPrimary []map[string]any, comment string) string {
+	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_comment" {
     name = %q
     grid_primary = %s
     comment = %q
 }
-`, name , gridPrimaryStr, comment)
+`, name, gridPrimaryStr, comment)
 }
 
-func testAccNsgroupExtAttrs(name string , gridPrimary []map[string]any, extAttrs map[string]any) string {
-	extAttrsHCL := utils.ConvertMapToHCL(extAttrs)
-	gridPrimaryStr:= utils.ConvertSliceOfMapsToHCL(gridPrimary)
+func testAccNsgroupExtAttrs(name string, gridPrimary []map[string]any, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
+	}
+	extattrsStr += "\t}"
+	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_extattrs" {
     name = %q
     grid_primary = %s
     extattrs = %s
 }
-`, name, gridPrimaryStr, extAttrsHCL)
+`, name, gridPrimaryStr, extattrsStr)
 }
 
-func testAccNsgroupExternalPrimaries(name string , externalPrimaries , gridSecondaries []map[string]any) string {
+func testAccNsgroupExternalPrimaries(name string, externalPrimaries, gridSecondaries []map[string]any) string {
 	externalPrimariesStr := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
 	gridSecondariesStr := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 
@@ -590,7 +595,7 @@ resource "nios_dns_nsgroup" "test_external_primaries" {
 `, name, externalPrimariesStr, gridSecondariesStr)
 }
 
-func testAccNsgroupExternalSecondaries(name string , externalSecondaries , gridPrimary []map[string]any) string {
+func testAccNsgroupExternalSecondaries(name string, externalSecondaries, gridPrimary []map[string]any) string {
 	externalSecondariesStr := utils.ConvertSliceOfMapsToHCL(externalSecondaries)
 	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
@@ -599,10 +604,10 @@ resource "nios_dns_nsgroup" "test_external_secondaries" {
 	grid_primary = %s
     external_secondaries = %s
 }
-`, name , gridPrimaryStr, externalSecondariesStr)
+`, name, gridPrimaryStr, externalSecondariesStr)
 }
 
-func testAccNsgroupGridPrimary(name string , gridPrimary []map[string]any) string {
+func testAccNsgroupGridPrimary(name string, gridPrimary []map[string]any) string {
 	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_grid_primary" {
@@ -612,7 +617,7 @@ resource "nios_dns_nsgroup" "test_grid_primary" {
 `, name, gridPrimaryStr)
 }
 
-func testAccNsgroupGridSecondaries(name string , gridSecondaries []map[string]any) string {
+func testAccNsgroupGridSecondaries(name string, gridSecondaries []map[string]any) string {
 	gridSecondariesStr := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_grid_secondaries" {
@@ -625,7 +630,7 @@ resource "nios_dns_nsgroup" "test_grid_secondaries" {
 `, name, gridSecondariesStr)
 }
 
-func testAccNsgroupIsGridDefault(name string , gridPrimary []map[string]any, isGridDefault bool) string {
+func testAccNsgroupIsGridDefault(name string, gridPrimary []map[string]any, isGridDefault bool) string {
 	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_is_grid_default" {
@@ -636,7 +641,7 @@ resource "nios_dns_nsgroup" "test_is_grid_default" {
 `, name, gridPrimaryStr, isGridDefault)
 }
 
-func testAccNsgroupIsMultimaster(name string ,  gridPrimary []map[string]any,isMultimaster bool) string {
+func testAccNsgroupIsMultimaster(name string, gridPrimary []map[string]any, isMultimaster bool) string {
 	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_is_multimaster" {
@@ -647,7 +652,7 @@ resource "nios_dns_nsgroup" "test_is_multimaster" {
 `, name, gridPrimaryStr, isMultimaster)
 }
 
-func testAccNsgroupName(name string,gridPrimary []map[string]any) string {
+func testAccNsgroupName(name string, gridPrimary []map[string]any) string {
 	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_name" {
@@ -657,7 +662,7 @@ resource "nios_dns_nsgroup" "test_name" {
 `, name, gridPrimaryStr)
 }
 
-func testAccNsgroupUseExternalPrimary(name string , gridSecondaries , externalPrimaries []map[string]any , useExternalPrimary bool) string {
+func testAccNsgroupUseExternalPrimary(name string, gridSecondaries, externalPrimaries []map[string]any, useExternalPrimary bool) string {
 	gridSecondariesStr := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 	externalPrimariesStr := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
 
@@ -671,7 +676,7 @@ resource "nios_dns_nsgroup" "test_use_external_primary" {
 `, name, gridSecondariesStr, externalPrimariesStr, useExternalPrimary)
 }
 
-func testAccNsgroupUseExternalPrimaryUpdate(name string , gridSecondaries , externalPrimaries , gridPrimary []map[string]any , useExternalPrimary bool) string {
+func testAccNsgroupUseExternalPrimaryUpdate(name string, gridSecondaries, externalPrimaries, gridPrimary []map[string]any, useExternalPrimary bool) string {
 	gridSecondariesStr := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 	externalPrimariesStr := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
 	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)

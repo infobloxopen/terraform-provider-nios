@@ -88,7 +88,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NsgroupExternalPrimariesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_external_primary")),
 		},
@@ -144,8 +144,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-
-func (m *NsgroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.Nsgroup {
+func (m *NsgroupModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.Nsgroup {
 	if m == nil {
 		return nil
 	}
@@ -160,6 +159,9 @@ func (m *NsgroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns
 		IsMultimaster:       flex.ExpandBoolPointer(m.IsMultimaster),
 		Name:                flex.ExpandStringPointer(m.Name),
 		UseExternalPrimary:  flex.ExpandBoolPointer(m.UseExternalPrimary),
+	}
+	if isCreate {
+		to.IsMultimaster = flex.ExpandBoolPointer(m.IsMultimaster)
 	}
 	return to
 }

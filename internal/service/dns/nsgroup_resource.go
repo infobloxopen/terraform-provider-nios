@@ -81,7 +81,7 @@ func (r *NsgroupResource) Create(ctx context.Context, req resource.CreateRequest
 	apiRes, _, err := r.client.DNSAPI.
 		NsgroupAPI.
 		Create(ctx).
-		Nsgroup(*data.Expand(ctx, &resp.Diagnostics)).
+		Nsgroup(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForNsgroup).
 		ReturnAsObject(1).
 		Execute()
@@ -254,7 +254,7 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 	apiRes, _, err := r.client.DNSAPI.
 		NsgroupAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Nsgroup(*data.Expand(ctx, &resp.Diagnostics)).
+		Nsgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForNsgroup).
 		ReturnAsObject(1).
 		Execute()
@@ -342,7 +342,7 @@ func (r *NsgroupResource) ImportState(ctx context.Context, req resource.ImportSt
 	updateRes, _, err := r.client.DNSAPI.
 		NsgroupAPI.
 		Update(ctx, resourceRef).
-		Nsgroup(*data.Expand(ctx, &resp.Diagnostics)).
+		Nsgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForNsgroup).
 		ReturnAsObject(1).
 		Execute()

@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -21,18 +22,18 @@ import (
 )
 
 type NsgroupgridprimaryPreferredPrimariesModel struct {
-	Address                      types.String `tfsdk:"address"`
-	Name                         types.String `tfsdk:"name"`
-	SharedWithMsParentDelegation types.Bool   `tfsdk:"shared_with_ms_parent_delegation"`
-	Stealth                      types.Bool   `tfsdk:"stealth"`
-	TsigKey                      types.String `tfsdk:"tsig_key"`
-	TsigKeyAlg                   types.String `tfsdk:"tsig_key_alg"`
-	TsigKeyName                  types.String `tfsdk:"tsig_key_name"`
-	UseTsigKeyName               types.Bool   `tfsdk:"use_tsig_key_name"`
+	Address                      iptypes.IPAddress `tfsdk:"address"`
+	Name                         types.String      `tfsdk:"name"`
+	SharedWithMsParentDelegation types.Bool        `tfsdk:"shared_with_ms_parent_delegation"`
+	Stealth                      types.Bool        `tfsdk:"stealth"`
+	TsigKey                      types.String      `tfsdk:"tsig_key"`
+	TsigKeyAlg                   types.String      `tfsdk:"tsig_key_alg"`
+	TsigKeyName                  types.String      `tfsdk:"tsig_key_name"`
+	UseTsigKeyName               types.Bool        `tfsdk:"use_tsig_key_name"`
 }
 
 var NsgroupgridprimaryPreferredPrimariesAttrTypes = map[string]attr.Type{
-	"address":                          types.StringType,
+	"address":                          iptypes.IPAddressType{},
 	"name":                             types.StringType,
 	"shared_with_ms_parent_delegation": types.BoolType,
 	"stealth":                          types.BoolType,
@@ -44,7 +45,8 @@ var NsgroupgridprimaryPreferredPrimariesAttrTypes = map[string]attr.Type{
 
 var NsgroupgridprimaryPreferredPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Required: true,
+		CustomType: iptypes.IPAddressType{},
+		Required:   true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -129,7 +131,7 @@ func (m *NsgroupgridprimaryPreferredPrimariesModel) Expand(ctx context.Context, 
 		return nil
 	}
 	to := &dns.NsgroupgridprimaryPreferredPrimaries{
-		Address:        flex.ExpandStringPointer(m.Address),
+		Address:        flex.ExpandIPAddress(m.Address),
 		Name:           flex.ExpandStringPointer(m.Name),
 		Stealth:        flex.ExpandBoolPointer(m.Stealth),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -158,7 +160,7 @@ func (m *NsgroupgridprimaryPreferredPrimariesModel) Flatten(ctx context.Context,
 	if m == nil {
 		*m = NsgroupgridprimaryPreferredPrimariesModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)

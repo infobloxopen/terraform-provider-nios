@@ -8,7 +8,7 @@ data "nios_dns_nsgroup" "get_ns_group_using_filters" {
 // Retrieve a NS Group using Extensible Attributes
 data "nios_dns_nsgroup" "get_ns_group_using_extensible_attributes" {
   extattrfilters = {
-    "Site" = "location-1"
+    Site = "location-1"
   }
 }
 
