@@ -1,30 +1,23 @@
-resource "nios_dns_view" "create_view" {
-  name = "example_view"
-}
-
+// Create a Zone Auth
 resource "nios_dns_zone_auth" "create_zone1" {
   fqdn = "example.com"
-  view = nios_dns_view.create_view.name
 }
 
 // Create a DNAME record with Basic Fields
 resource "nios_dns_record_dname" "create_record_dname_with_basic_fields" {
   target = "example-dname-1.com"
   name   = nios_dns_zone_auth.create_zone1.fqdn
-  view   = nios_dns_zone_auth.create_zone1.view
 }
 
+// Create a Zone Auth
 resource "nios_dns_zone_auth" "create_zone2" {
   fqdn = "example-1.com"
-  view = nios_dns_view.create_view.name
 }
 
 // Create a DNAME record with Additional Fields
 resource "nios_dns_record_dname" "create_record_dname_with_additional_fields" {
   target = "example-dname-2.com"
   name   = nios_dns_zone_auth.create_zone2.fqdn
-  view   = nios_dns_zone_auth.create_zone2.view
-
   extattrs = {
     Site = "location-1"
   }
@@ -32,27 +25,27 @@ resource "nios_dns_record_dname" "create_record_dname_with_additional_fields" {
 }
 
 // Create IPV4 reverse mapping zone with Basic Fields
-resource "nios_dns_zone_auth" "create_zone2" {
+resource "nios_dns_zone_auth" "create_zone3" {
   fqdn        = "10.0.0.0/24"
-  view        = nios_dns_view.create_view.name
   zone_format = "IPV4"
 }
 
+// Create a DNAME record in IPV4 reverse mapping zone
 resource "nios_dns_record_dname" "create_record_dname1" {
   target = "example-dname-1.com"
-  name   = nios_dns_zone_auth.create_zone2.display_domain
-  view   = nios_dns_zone_auth.create_zone2.view
+  // We use display_domain for reverse mapping zones as arpa format is required for name
+  name = nios_dns_zone_auth.create_zone3.display_domain
 }
 
 // Create IPV6 reverse mapping zone with Basic Fields
 resource "nios_dns_zone_auth" "create_zone4" {
   fqdn        = "2002:1100::/64"
-  view        = nios_dns_view.create_view.name
   zone_format = "IPV6"
 }
 
+// Create a DNAME record in IPV6 reverse mapping zone
 resource "nios_dns_record_dname" "create_record_dname2" {
   target = "example-dname-1.com"
-  name   = nios_dns_zone_auth.create_zone4.display_domain
-  view   = nios_dns_zone_auth.create_zone4.view
+  // We use display_domain for reverse mapping zones as arpa format is required for name
+  name = nios_dns_zone_auth.create_zone4.display_domain
 }

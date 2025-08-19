@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -138,6 +139,9 @@ var RecordDnameResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object.",
 		ElementType:         types.StringType,
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,

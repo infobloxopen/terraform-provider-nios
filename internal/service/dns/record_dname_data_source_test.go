@@ -106,7 +106,7 @@ data "nios_dns_record_dname" "test" {
   }
 }
 `, target)
-	return strings.Join([]string{testAccBaseWithZoneAndView(view, zoneFqdn), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
 func testAccRecordDnameDataSourceConfigExtAttrFilters(target, view, zoneFqdn, extAttrsValue string) string {
@@ -126,5 +126,5 @@ data "nios_dns_record_dname" "test" {
   }
 }
 `, target, extAttrsValue)
-	return strings.Join([]string{testAccBaseWithZoneAndView(view, zoneFqdn), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
