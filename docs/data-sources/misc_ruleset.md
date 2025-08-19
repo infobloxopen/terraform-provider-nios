@@ -3,12 +3,12 @@
 page_title: "nios_misc_ruleset Data Source - nios"
 subcategory: "MISC"
 description: |-
-  Retrieves information about existing rulesets.
+  Retrieves information about existing rulesets
 ---
 
 # nios_misc_ruleset (Data Source)
 
-Retrieves information about existing rulesets.
+Retrieves information about existing rulesets
 
 ## Example Usage
 
