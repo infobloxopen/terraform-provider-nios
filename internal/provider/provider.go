@@ -18,6 +18,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
@@ -120,6 +121,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewIpv6networkResource,
 		ipam.NewNetworkviewResource,
 
+		security.NewAdminroleResource,
+
 		misc.NewRulesetResource,
 	}
 }
@@ -155,6 +158,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewIpv6networkcontainerDataSource,
 		ipam.NewIpv6networkDataSource,
 		ipam.NewNetworkviewDataSource,
+
+		security.NewAdminroleDataSource,
 
 		misc.NewRulesetDataSource,
 	}
