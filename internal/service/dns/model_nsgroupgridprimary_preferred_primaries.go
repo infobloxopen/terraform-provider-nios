@@ -47,12 +47,6 @@ var NsgroupgridprimaryPreferredPrimariesResourceSchemaAttributes = map[string]sc
 	"address": schema.StringAttribute{
 		CustomType: iptypes.IPAddressType{},
 		Required:   true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
@@ -77,6 +71,7 @@ var NsgroupgridprimaryPreferredPrimariesResourceSchemaAttributes = map[string]sc
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
