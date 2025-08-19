@@ -35,6 +35,7 @@ var RulesetNxdomainRulesResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.OneOf("MODIFY", "PASS", "REDIRECT"),
 		},
+		Default:             stringdefault.StaticString("PASS"),
 		MarkdownDescription: "The action to perform when a domain name matches the pattern defined in this Ruleset.",
 	},
 	"pattern": schema.StringAttribute{

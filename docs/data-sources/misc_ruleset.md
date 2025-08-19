@@ -16,7 +16,7 @@ Retrieves information about existing rulesets.
 // Retrieve a specific ruleset by filters
 data "nios_misc_ruleset" "get_ruleset_by_name" {
   filters = {
-    name = "example_ruleset_basic"
+    name = "example_ruleset_1"
   }
 }
 

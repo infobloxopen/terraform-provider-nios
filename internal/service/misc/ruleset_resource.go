@@ -35,7 +35,7 @@ func (r *RulesetResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *RulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages rulesets",
+		MarkdownDescription: "Manages a ruleset.",
 		Attributes:          RulesetResourceSchemaAttributes,
 	}
 }
@@ -138,11 +138,6 @@ func (r *RulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
 
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

@@ -15,7 +15,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-//TODO:
+//TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // To be able to view the NXDOMAIN ruleset, install the Add Query Redirection license on the NIOS Grid
 
 var readableAttributesForRuleset = "comment,disabled,name,nxdomain_rules,type"
@@ -83,7 +83,7 @@ func TestAccRulesetResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRulesetComment(name, "NXDOMAIN", "This is a comment"),
+				Config: testAccRulesetComment(name, "BLACKLIST", "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -91,7 +91,7 @@ func TestAccRulesetResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRulesetComment(name, "NXDOMAIN", "Updated comment"),
+				Config: testAccRulesetComment(name, "BLACKLIST", "Updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment"),
@@ -185,6 +185,13 @@ func TestAccRulesetResource_NxdomainRules(t *testing.T) {
 		},
 	}
 
+	nxDomainRules3 := []map[string]any{
+		{
+			"action":  "REDIRECT",
+			"pattern": "redirect-test.com",
+		},
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -205,6 +212,15 @@ func TestAccRulesetResource_NxdomainRules(t *testing.T) {
 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nxdomain_rules.0.action", "MODIFY"),
 					resource.TestCheckResourceAttr(resourceName, "nxdomain_rules.0.pattern", "test.com"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRulesetNxdomainRules(name, "NXDOMAIN", nxDomainRules3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRulesetExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "nxdomain_rules.0.action", "REDIRECT"),
+					resource.TestCheckResourceAttr(resourceName, "nxdomain_rules.0.pattern", "redirect-test.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
