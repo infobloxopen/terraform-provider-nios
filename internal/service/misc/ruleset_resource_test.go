@@ -325,7 +325,7 @@ resource "nios_misc_ruleset" "test_name" {
 }
 
 func testAccRulesetNxdomainRules(name, ruleset_type string, nxdomainRules []map[string]any) string {
-	hcl := utils.ConvertSliceOfMapsToHCL(nxdomainRules)
+	rulesethcl := utils.ConvertSliceOfMapsToHCL(nxdomainRules)
 
 	return fmt.Sprintf(`
 resource "nios_misc_ruleset" "test_nxdomain_rules" {
@@ -333,5 +333,5 @@ resource "nios_misc_ruleset" "test_nxdomain_rules" {
 	type = %q
     nxdomain_rules = %s
 }
-`, name, ruleset_type, hcl)
+`, name, ruleset_type, rulesethcl)
 }
