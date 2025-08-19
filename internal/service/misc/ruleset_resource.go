@@ -108,9 +108,10 @@ func (r *RulesetResource) Read(ctx context.Context, req resource.ReadRequest, re
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// If the resource is not found
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			resp.State.RemoveResource(ctx)
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ruleset, got error: %s", err))

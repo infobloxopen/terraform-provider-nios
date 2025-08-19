@@ -65,7 +65,7 @@ func TestAccRulesetResource_disappears(t *testing.T) {
 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
 					testAccCheckRulesetDisappears(context.Background(), &v),
 				),
-				//ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -185,16 +185,13 @@ func TestAccRulesetResource_NxdomainRules(t *testing.T) {
 		},
 	}
 
-	nxdomainRulesHCL1 := utils.ConvertSliceOfMapsToHCL(nxDomainRules1)
-	nxdomainRulesHCL2 := utils.ConvertSliceOfMapsToHCL(nxDomainRules2)
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRulesetNxdomainRules(name, "NXDOMAIN", nxdomainRulesHCL1),
+				Config: testAccRulesetNxdomainRules(name, "NXDOMAIN", nxDomainRules1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nxdomain_rules.0.action", "PASS"),
@@ -203,7 +200,7 @@ func TestAccRulesetResource_NxdomainRules(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRulesetNxdomainRules(name, "NXDOMAIN", nxdomainRulesHCL2),
+				Config: testAccRulesetNxdomainRules(name, "NXDOMAIN", nxDomainRules2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRulesetExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nxdomain_rules.0.action", "MODIFY"),
@@ -311,12 +308,14 @@ resource "nios_misc_ruleset" "test_name" {
 `, name, ruleset_type)
 }
 
-func testAccRulesetNxdomainRules(name, ruleset_type, nxdomainRules string) string {
+func testAccRulesetNxdomainRules(name, ruleset_type string, nxdomainRules []map[string]any) string {
+	hcl := utils.ConvertSliceOfMapsToHCL(nxdomainRules)
+
 	return fmt.Sprintf(`
 resource "nios_misc_ruleset" "test_nxdomain_rules" {
 	name = %q
 	type = %q
     nxdomain_rules = %s
 }
-`, name, ruleset_type, nxdomainRules)
+`, name, ruleset_type, hcl)
 }
