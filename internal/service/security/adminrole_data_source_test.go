@@ -69,12 +69,12 @@ func testAccCheckAdminroleResourceAttrPair(resourceName, dataSourceName string) 
 func testAccAdminroleDataSourceConfigFilters(name string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_role" "test" {
- name    = %q
+ name = %q
 }
 
 data "nios_security_admin_role" "test" {
  filters = {
-	 name = nios_security_admin_role.test.name
+	name = nios_security_admin_role.test.name
  }
 }
 `, name)
