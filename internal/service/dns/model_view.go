@@ -624,6 +624,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	"nxdomain_redirect_addresses_v6": schema.ListAttribute{
 		ElementType: types.StringType,
 		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
