@@ -40,7 +40,7 @@ resource "nios_dns_record_dname" "create_record_dname_with_additional_fields" {
 }
 
 // Create IPV4 reverse mapping zone with Basic Fields
-resource "nios_dns_zone_auth" "create_zone2" {
+resource "nios_dns_zone_auth" "create_zone3" {
   fqdn        = "10.0.0.0/24"
   zone_format = "IPV4"
 }
@@ -49,7 +49,7 @@ resource "nios_dns_zone_auth" "create_zone2" {
 resource "nios_dns_record_dname" "create_record_dname1" {
   target = "example-dname-1.com"
   // We use display_domain for reverse mapping zones as arpa format is required for name
-  name = nios_dns_zone_auth.create_zone2.display_domain
+  name = nios_dns_zone_auth.create_zone3.display_domain
 }
 
 // Create IPV6 reverse mapping zone with Basic Fields
