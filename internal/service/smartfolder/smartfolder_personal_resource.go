@@ -115,7 +115,9 @@ func (r *SmartfolderPersonalResource) Read(ctx context.Context, req resource.Rea
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound { //&& r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			//Handle not found case
+			resp.State.RemoveResource(ctx)
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SmartfolderPersonal, got error: %s", err))
@@ -190,8 +192,6 @@ func (r *SmartfolderPersonalResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 }
-
-// }
 
 func (r *SmartfolderPersonalResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)

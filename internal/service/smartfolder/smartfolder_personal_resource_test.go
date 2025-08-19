@@ -59,7 +59,7 @@ func TestAccSmartfolderPersonalResource_disappears(t *testing.T) {
 					testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
 					testAccCheckSmartfolderPersonalDisappears(context.Background(), &v),
 				),
-				//ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -123,17 +123,13 @@ func TestAccSmartfolderPersonalResource_GroupBys(t *testing.T) {
 		},
 	}
 
-	groupBysHCL1 := utils.ConvertSliceOfMapsToHCL(groupBys1)
-	groupBysHCL2 := utils.ConvertSliceOfMapsToHCL(groupBys2)
-	groupBysHCL3 := utils.ConvertSliceOfMapsToHCL(groupBys3)
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSmartfolderPersonalGroupBys(name, groupBysHCL1),
+				Config: testAccSmartfolderPersonalGroupBys(name, groupBys1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group_bys.#", "1"),
@@ -144,7 +140,7 @@ func TestAccSmartfolderPersonalResource_GroupBys(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSmartfolderPersonalGroupBys(name, groupBysHCL2),
+				Config: testAccSmartfolderPersonalGroupBys(name, groupBys2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group_bys.#", "1"),
@@ -155,7 +151,7 @@ func TestAccSmartfolderPersonalResource_GroupBys(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSmartfolderPersonalGroupBys(name, groupBysHCL3),
+				Config: testAccSmartfolderPersonalGroupBys(name, groupBys3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group_bys.#", "1"),
@@ -233,16 +229,13 @@ func TestAccSmartfolderPersonalResource_QueryItems(t *testing.T) {
 		},
 	}
 
-	queryItemsHCL1 := utils.ConvertSliceOfMapsToHCL(queryItems1)
-	queryItemsHCL2 := utils.ConvertSliceOfMapsToHCL(queryItems2)
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSmartfolderPersonalQueryItems(name, queryItemsHCL1),
+				Config: testAccSmartfolderPersonalQueryItems(name, queryItems1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "query_items.#", "1"),
@@ -256,7 +249,7 @@ func TestAccSmartfolderPersonalResource_QueryItems(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSmartfolderPersonalQueryItems(name, queryItemsHCL2),
+				Config: testAccSmartfolderPersonalQueryItems(name, queryItems2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "query_items.#", "1"),
@@ -348,13 +341,14 @@ resource "nios_smartfolder_personal" "test_comment" {
 `, name, comment)
 }
 
-func testAccSmartfolderPersonalGroupBys(name, groupBys string) string {
+func testAccSmartfolderPersonalGroupBys(name string, groupBys []map[string]any) string {
+	groupBysHCL := utils.ConvertSliceOfMapsToHCL(groupBys)
 	return fmt.Sprintf(`
 resource "nios_smartfolder_personal" "test_group_bys" {
     name      = %q
     group_bys = %s
 }
-`, name, groupBys)
+`, name, groupBysHCL)
 }
 
 func testAccSmartfolderPersonalName(name string) string {
@@ -365,11 +359,12 @@ resource "nios_smartfolder_personal" "test_name" {
 `, name)
 }
 
-func testAccSmartfolderPersonalQueryItems(name, queryItems string) string {
+func testAccSmartfolderPersonalQueryItems(name string, queryItems []map[string]any) string {
+	queryItemsHCL := utils.ConvertSliceOfMapsToHCL(queryItems)
 	return fmt.Sprintf(`
 resource "nios_smartfolder_personal" "test_query_items" {
     name        = %q
     query_items = %s
 }
-`, name, queryItems)
+`, name, queryItemsHCL)
 }
