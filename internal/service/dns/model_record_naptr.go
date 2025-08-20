@@ -100,6 +100,7 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"creation_time": schema.Int64Attribute{
@@ -158,8 +159,12 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"flags": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("U"),
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
+				"Should not have leading or trailing whitespace",
+			),
 			stringvalidator.OneOf("U", "S", "P", "A"),
 		},
 		MarkdownDescription: "The flags used to control the interpretation of the fields for an NAPTR record object. Supported values for the flags field are \"U\", \"S\", \"P\" and \"A\".",
@@ -202,6 +207,7 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"regexp": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
@@ -223,11 +229,13 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"services": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Should not have leading or trailing whitespace",
 			),
+			stringvalidator.LengthBetween(0, 128),
 		},
 		MarkdownDescription: "The services field of the NAPTR record object; maximum 128 characters. The services field contains protocol and service identifiers, such as \"http+E2U\" or \"SIPS+D2T\".",
 	},
@@ -242,6 +250,7 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_ttl": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ttl",
 	},
 	"view": schema.StringAttribute{

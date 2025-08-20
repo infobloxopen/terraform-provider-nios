@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -42,6 +43,11 @@ func TestAccRecordNaptrResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "regexp", ""),
+					resource.TestCheckResourceAttr(resourceName, "services", ""),
+					resource.TestCheckResourceAttr(resourceName, "flags", ""),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
