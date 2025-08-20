@@ -1,4 +1,4 @@
-// Create a DNS zone stub with basic fields
+// Create a DNS Zone Stub with Basic Fields
 resource "nios_dns_zone_stub" "zone_stub_basic_fields" {
   fqdn = "example_stub_zone.example.com"
   stub_from = [
@@ -9,7 +9,7 @@ resource "nios_dns_zone_stub" "zone_stub_basic_fields" {
   ]
 }
 
-// Create a DNS zone stub with additional fields
+// Create a DNS Zone Stub with Additional Fields
 resource "nios_dns_zone_stub" "zone_stub_additional_fields" {
   fqdn = "example_stub_zone2.example.com"
   stub_from = [
@@ -29,7 +29,7 @@ resource "nios_dns_zone_stub" "zone_stub_additional_fields" {
   }
 }
 
-// Create an IPV4 DNS zone stub
+// Create an IPV4 DNS Zone Stub
 resource "nios_dns_zone_stub" "zone_stub_ipv4" {
   fqdn = "10.1.0.0/25"
   forward_to = [
@@ -41,7 +41,7 @@ resource "nios_dns_zone_stub" "zone_stub_ipv4" {
   zone_format = "IPV4"
 }
 
-// Create an IPV6 DNS zone stub
+// Create an IPV6 DNS Zone Stub
 resource "nios_dns_zone_stub" "zone_stub_ipv6_mapping" {
   fqdn = "3001:db8::/64"
   forward_to = [

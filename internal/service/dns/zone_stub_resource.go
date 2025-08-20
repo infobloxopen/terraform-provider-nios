@@ -36,7 +36,7 @@ func (r *ZoneStubResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *ZoneStubResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DNS Stub Zone.",
 		Attributes:          ZoneStubResourceSchemaAttributes,
 	}
 }

@@ -112,7 +112,7 @@ resource "nios_dns_zone_stub" "test" {
 
 data "nios_dns_zone_stub" "test" {
   filters = {
-  fqdn = nios_dns_zone_stub.test.fqdn
+  	fqdn = nios_dns_zone_stub.test.fqdn
   }
 }
 `, fqdn, stubAddress, stubName)

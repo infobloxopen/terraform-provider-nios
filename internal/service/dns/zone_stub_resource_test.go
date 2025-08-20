@@ -446,7 +446,7 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 				Config: testAccZoneStubStubMembers(fqdn, "1.1.1.1", stubServerName, "infoblox.member"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_members", "infoblox.172_28_82_250"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "infoblox.member"),
 				),
 			},
 			// Update and Read
@@ -454,7 +454,7 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 				Config: testAccZoneStubStubMembers(fqdn, "1.1.1.1", stubServerName, "infoblox.172_28_82_250"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_members", "infoblox.172_28_82_250"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "infoblox.172_28_82_250"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -475,18 +475,24 @@ func TestAccZoneStubResource_StubMsservers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "infoblox.172_28_82_250"),
+				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "3.3.3.3", false, "1.1.1.1", "ns_server"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_msservers", "infoblox.172_28_82_250"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.address", "3.3.3.3"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.is_master", "false"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.ns_ip", "1.1.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.ns_name", "ns_server"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "infoblox.172_28_82_250"),
+				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "4.4.4.4", false, "2.1.1.1", "ns_server2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_msservers", "infoblox.172_28_82_250"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.address", "4.4.4.4"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.is_master", "false"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.ns_ip", "2.1.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.ns_name", "ns_server2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -522,7 +528,6 @@ func TestAccZoneStubResource_ZoneFormatIPv4(t *testing.T) {
 func TestAccZoneStubResource_ZoneFormatIPv6(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_zone_format"
 	var v dns.ZoneStub
-	//fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
 	stubServerName := acctest.RandomNameWithPrefix("stub_server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -776,7 +781,7 @@ resource "nios_dns_zone_stub" "test_stub_members" {
 `, fqdn, stubAddress, stubName, stubMembers)
 }
 
-func testAccZoneStubStubMsservers(fqdn, stubAddress, stubName, stubMsservers string) string {
+func testAccZoneStubStubMsservers(fqdn, stubAddress, stubName, stubMsServerAddress string, stubMsServerIsMaster bool, nsIP string, nsName string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_stub" "test_stub_msservers" {
     fqdn = %q
@@ -784,9 +789,14 @@ resource "nios_dns_zone_stub" "test_stub_msservers" {
 		address = %q
 		name  = %q
 	}]
-	stub_msservers = %q
+	stub_msservers = [{
+		address = %q
+		is_master = %t
+		ns_ip = %q
+		ns_name = %q
+	}]
 }
-`, fqdn, stubAddress, stubName, stubMsservers)
+`, fqdn, stubAddress, stubName, stubMsServerAddress, stubMsServerIsMaster, nsIP, nsName)
 }
 
 func testAccZoneStubZoneFormatIPv4(fqdn, stubAddress, stubName, zoneFormat, prefix string) string {
