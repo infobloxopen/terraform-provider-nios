@@ -283,10 +283,10 @@ func TestAccRecordTlsaResource_MatchedType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaMatchedType(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaMatchedType(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 1, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "matched_type", "MATCHED_TYPE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "matched_type", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -298,7 +298,8 @@ func TestAccRecordTlsaResource_Name(t *testing.T) {
 	var resourceName = "nios_dns_record_tlsa.test_name"
 	var v dns.RecordTlsa
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-tlsa")
+	name1 := acctest.RandomNameWithPrefix("record-tlsa")
+	name2 := acctest.RandomNameWithPrefix("record-tlsa")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -306,18 +307,18 @@ func TestAccRecordTlsaResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaName(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaName(zoneFqdn, name1, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s.%s", name1, zoneFqdn)),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaName(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaName(zoneFqdn, name2, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s.%s", name2, zoneFqdn)),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -345,10 +346,10 @@ func TestAccRecordTlsaResource_Selector(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaSelector(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaSelector(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "selector", "SELECTOR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "selector", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -368,18 +369,18 @@ func TestAccRecordTlsaResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "TTL_REPLACE_ME"),
+				Config: testAccRecordTlsaTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, 10, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "TTL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordTlsaTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, 20, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "20"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -399,18 +400,18 @@ func TestAccRecordTlsaResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaUseTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "USE_TTL_REPLACE_ME"),
+				Config: testAccRecordTlsaUseTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "false", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaUseTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "USE_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordTlsaUseTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "true", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -430,18 +431,18 @@ func TestAccRecordTlsaResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaView(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "VIEW_REPLACE_ME"),
+				Config: testAccRecordTlsaView(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "custom_view_1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "custom_view_1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaView(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "VIEW_UPDATE_REPLACE_ME"),
+				Config: testAccRecordTlsaView(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "custom_view_2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "view", "custom_view_2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -602,7 +603,7 @@ resource "nios_dns_record_tlsa" "test_extattrs" {
     certificate_usage = %d
     matched_type = %d
     selector = %d
-    extattrs = %q
+    extattrs = %s
 	name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
 }
 `, certificateData, certificateUsage, matchedType, selector, extattrsStr, name)
@@ -648,21 +649,22 @@ resource "nios_dns_record_tlsa" "test_selector" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordTlsaTtl(zoneFqdn, name, certificateData string, certificateUsage, matchedType, selector int, ttl string) string {
+func testAccRecordTlsaTtl(zoneFqdn, name, certificateData string, certificateUsage, matchedType, selector int, ttl int, useTtl string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_tlsa" "test_ttl" {
     certificate_data = %q
     certificate_usage = %d
     matched_type = %d
     selector = %d
-    ttl = %q
+    ttl = %d
+	use_ttl = %q
 	name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
 }
-`, certificateData, certificateUsage, matchedType, selector, ttl, name)
+`, certificateData, certificateUsage, matchedType, selector, ttl, useTtl, name)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordTlsaUseTtl(zoneFqdn, name, certificateData string, certificateUsage, matchedType, selector int, useTtl string) string {
+func testAccRecordTlsaUseTtl(zoneFqdn, name, certificateData string, certificateUsage, matchedType, selector int, useTtl string, ttl int) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_tlsa" "test_use_ttl" {
     certificate_data = %q
@@ -670,9 +672,10 @@ resource "nios_dns_record_tlsa" "test_use_ttl" {
     matched_type = %d
     selector = %d
     use_ttl = %q
+	ttl = %d
 	name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
 }
-`, certificateData, certificateUsage, matchedType, selector, useTtl, name)
+`, certificateData, certificateUsage, matchedType, selector, useTtl, ttl, name)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
@@ -687,7 +690,7 @@ resource "nios_dns_record_tlsa" "test_view" {
 	name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
 }
 `, certificateData, certificateUsage, matchedType, selector, view, name)
-	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneandView(zoneFqdn, view), config}, "")
 }
 
 func testAccBaseWithZone(zoneFqdn string) string {
@@ -696,4 +699,16 @@ resource "nios_dns_zone_auth" "test" {
     fqdn = %q
 }
 `, zoneFqdn)
+}
+
+func testAccBaseWithZoneandView(zoneFqdn, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test" {
+	name = %q
+}
+resource "nios_dns_zone_auth" "test" {
+    fqdn = %q
+    view = nios_dns_view.test.name
+}
+`, view, zoneFqdn)
 }

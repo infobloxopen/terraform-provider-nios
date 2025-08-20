@@ -86,6 +86,7 @@ var RecordTlsaResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
 			stringvalidator.RegexMatches(
@@ -185,7 +186,6 @@ func (m *RecordTlsaModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		return nil
 	}
 	to := &dns.RecordTlsa{
-		Ref:              flex.ExpandStringPointer(m.Ref),
 		CertificateData:  flex.ExpandStringPointer(m.CertificateData),
 		CertificateUsage: flex.ExpandInt64Pointer(m.CertificateUsage),
 		CloudInfo:        ExpandRecordTlsaCloudInfo(ctx, m.CloudInfo, diags),
@@ -209,6 +209,7 @@ func FlattenRecordTlsa(ctx context.Context, from *dns.RecordTlsa, diags *diag.Di
 	}
 	m := RecordTlsaModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, RecordTlsaAttrTypes, m)
 	diags.Append(d...)
 	return t

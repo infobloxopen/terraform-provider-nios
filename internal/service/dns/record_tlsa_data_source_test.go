@@ -3,11 +3,13 @@ package dns_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
@@ -15,6 +17,8 @@ func TestAccRecordTlsaDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_tlsa.test"
 	resourceName := "nios_dns_record_tlsa.test"
 	var v dns.RecordTlsa
+	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomNameWithPrefix("record-tlsa")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +26,7 @@ func TestAccRecordTlsaDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordTlsaDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordTlsaDataSourceConfigFilters("CERTIFICATE_DATA_REPLACE_ME", "CERTIFICATE_USAGE_REPLACE_ME", "MATCHED_TYPE_REPLACE_ME", "SELECTOR_REPLACE_ME"),
+				Config: testAccRecordTlsaDataSourceConfigFilters(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
@@ -37,13 +41,16 @@ func TestAccRecordTlsaDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_tlsa.test"
 	resourceName := "nios_dns_record_tlsa.test"
 	var v dns.RecordTlsa
+	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomNameWithPrefix("record-tlsa")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckRecordTlsaDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordTlsaDataSourceConfigExtAttrFilters("CERTIFICATE_DATA_REPLACE_ME", "CERTIFICATE_USAGE_REPLACE_ME", "MATCHED_TYPE_REPLACE_ME", "SELECTOR_REPLACE_ME", acctest.RandomName()),
+				Config: testAccRecordTlsaDataSourceConfigExtAttrFilters(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
@@ -78,39 +85,43 @@ func testAccCheckRecordTlsaResourceAttrPair(resourceName, dataSourceName string)
 	}
 }
 
-func testAccRecordTlsaDataSourceConfigFilters(certificateData, certificateUsage, matchedType, selector string) string {
-	return fmt.Sprintf(`
+func testAccRecordTlsaDataSourceConfigFilters(zoneFqdn, name, certificateData string, certificateUsage, matchedType, selector int) string {
+	config := fmt.Sprintf(`
 resource "nios_dns_record_tlsa" "test" {
-  certificate_data = %q
-  certificate_usage = %q
-  matched_type = %q
-  selector = %q
+	certificate_data = %q
+    certificate_usage = %d
+    matched_type = %d
+    selector = %d
+	name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
 }
 
 data "nios_dns_record_tlsa" "test" {
-  filters = {
-	certificate_data = nios_dns_record_tlsa.test.certificate_data
-  }
+	filters = {
+		name = nios_dns_record_tlsa.test.name
+	}
 }
-`, certificateData, certificateUsage, matchedType, selector)
+`, certificateData, certificateUsage, matchedType, selector, name)
+	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordTlsaDataSourceConfigExtAttrFilters(certificateData, certificateUsage, matchedType, selector string, extAttrsValue string) string {
-	return fmt.Sprintf(`
+func testAccRecordTlsaDataSourceConfigExtAttrFilters(zoneFqdn, name, certificateData string, certificateUsage, matchedType, selector int, extAttrsValue string) string {
+	config := fmt.Sprintf(`
 resource "nios_dns_record_tlsa" "test" {
-  certificate_data = %q
-  certificate_usage = %q
-  matched_type = %q
-  selector = %q
-  extattrs = {
-    Site = %q
-  } 
+	certificate_data = %q
+	certificate_usage = %d
+	matched_type = %d
+	selector = %d
+	name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
+	extattrs = {
+		Site = %q
+	} 
 }
 
 data "nios_dns_record_tlsa" "test" {
-  extattrfilters = {
-	Site = nios_dns_record_tlsa.test.extattrs.Site
-  }
+	extattrfilters = {
+		Site = nios_dns_record_tlsa.test.extattrs.Site
+	}
 }
-`, certificateData, certificateUsage, matchedType, selector, extAttrsValue)
+`, certificateData, certificateUsage, matchedType, selector, name, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
