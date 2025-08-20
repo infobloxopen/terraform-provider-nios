@@ -43,14 +43,8 @@ var ZoneAuthExternalPrimariesAttrTypes = map[string]attr.Type{
 
 var ZoneAuthExternalPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Required:   true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		CustomType:          iptypes.IPAddressType{},
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{

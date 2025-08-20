@@ -44,12 +44,6 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 	"address": schema.StringAttribute{
 		CustomType: iptypes.IPAddressType{},
 		Required:   true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
