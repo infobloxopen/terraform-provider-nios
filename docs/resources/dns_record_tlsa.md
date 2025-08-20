@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_tlsa Resource - nios"
 subcategory: "DNS"
 description: |-
-  
+  Manages a TLSA Record.
 ---
 
 # nios_dns_record_tlsa (Resource)
 
-
+Manages a TLSA Record.
 
 ## Example Usage
 

@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_tlsa Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing TLSA Records.
 ---
 
 # nios_dns_record_tlsa (Data Source)
 
-
+Retrieves information about existing TLSA Records.
 
 ## Example Usage
 
@@ -27,7 +27,7 @@ data "nios_dns_record_tlsa" "get_tlsa_record_using_extensible_attributes" {
   }
 }
 
-// Retrieve all TLSA records in default view
+// Retrieve all TLSA records in Default View
 data "nios_dns_record_tlsa" "get_all_tlsa_records_in_default_view" {}
 ```
 
