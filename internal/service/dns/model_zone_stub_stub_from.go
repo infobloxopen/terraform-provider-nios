@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -18,6 +17,9 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
+
+// ZoneStubStubFromModel defines the model for a stub zone's primary servers.
+// All attributes of this model except 'name' and 'address' are Computed, as input values for stub from are ignored.
 
 type ZoneStubStubFromModel struct {
 	Address                      iptypes.IPAddress `tfsdk:"address"`
@@ -43,14 +45,8 @@ var ZoneStubStubFromAttrTypes = map[string]attr.Type{
 
 var ZoneStubStubFromResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Required:   true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		CustomType:          iptypes.IPAddressType{},
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
@@ -68,42 +64,22 @@ var ZoneStubStubFromResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.",
 	},
 	"stealth": schema.BoolAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
-		},
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
-		},
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},

@@ -2,16 +2,10 @@ package dns
 
 import (
 	"context"
-	"regexp"
-
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -19,6 +13,9 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
+
+// ZonestubstubmembersPreferredPrimariesModel defines the model for preferred primaries in a stub zone member.
+// Attributes of this model are Computed as inputs for preferred primaries are ignored for stub_members
 
 type ZonestubstubmembersPreferredPrimariesModel struct {
 	Address                      iptypes.IPAddress `tfsdk:"address"`
@@ -44,24 +41,12 @@ var ZonestubstubmembersPreferredPrimariesAttrTypes = map[string]attr.Type{
 
 var ZonestubstubmembersPreferredPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Required:   true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		CustomType:          iptypes.IPAddressType{},
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Required: true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		Computed:            true,
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
@@ -69,44 +54,22 @@ var ZonestubstubmembersPreferredPrimariesResourceSchemaAttributes = map[string]s
 		MarkdownDescription: "This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.",
 	},
 	"stealth": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
-		},
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
-		},
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},

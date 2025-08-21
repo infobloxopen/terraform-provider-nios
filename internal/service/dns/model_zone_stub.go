@@ -14,11 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneStubModel struct {
@@ -167,8 +167,10 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
-			customvalidator.IsValidIPCIDR(),
+			stringvalidator.Any(
+				customvalidator.IsValidFQDN(),
+				customvalidator.IsValidIPCIDR(),
+			),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
 	},
@@ -273,7 +275,7 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The primary servers (masters) of this stub zone.",
+		MarkdownDescription: "The primary servers (masters) of this stub zone.Note that the stealth/tsig_key/tsig_key_alg/tsig_key_name/use_tsig_key_name fields of the struct will be ignored when set in this field.",
 	},
 	"stub_members": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -281,7 +283,7 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The Grid member servers of this stub zone. Note that the lead/stealth/grid_replicate/ preferred_primaries/override_preferred_primaries fields of the struct will be ignored when set in this field.",
+		MarkdownDescription: "The Grid member servers of this stub zone. Note that the lead/stealth/grid_replicate/ preferred_primaries/enable_preferred_primaries fields of the struct will be ignored when set in this field.",
 	},
 	"stub_msservers": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

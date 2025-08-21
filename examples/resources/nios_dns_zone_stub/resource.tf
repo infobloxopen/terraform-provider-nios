@@ -32,7 +32,7 @@ resource "nios_dns_zone_stub" "zone_stub_additional_fields" {
 // Create an IPV4 DNS Zone Stub
 resource "nios_dns_zone_stub" "zone_stub_ipv4" {
   fqdn = "10.1.0.0/25"
-  forward_to = [
+  stub_from = [
     {
       name    = "stub.example.com"
       address = "1.1.1.1"
@@ -44,7 +44,7 @@ resource "nios_dns_zone_stub" "zone_stub_ipv4" {
 // Create an IPV6 DNS Zone Stub
 resource "nios_dns_zone_stub" "zone_stub_ipv6_mapping" {
   fqdn = "3001:db8::/64"
-  forward_to = [
+  stub_from = [
     {
       name    = "stub.example.com"
       address = "1.1.1.1"
