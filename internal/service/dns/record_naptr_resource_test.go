@@ -281,7 +281,7 @@ func TestAccRecordNaptrResource_Flags(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
+			// Create and Read with "U" flag
 			{
 				Config: testAccRecordNaptrFlags(zoneFqdn, name, 10, 10, ".", "U"),
 				Check: resource.ComposeTestCheckFunc(
@@ -289,12 +289,36 @@ func TestAccRecordNaptrResource_Flags(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "flags", "U"),
 				),
 			},
-			// Update and Read
+			// Update to "S" flag
 			{
 				Config: testAccRecordNaptrFlags(zoneFqdn, name, 10, 10, ".", "S"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordNaptrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "flags", "S"),
+				),
+			},
+			// Update to "A" flag
+			{
+				Config: testAccRecordNaptrFlags(zoneFqdn, name, 10, 10, ".", "A"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordNaptrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "flags", "A"),
+				),
+			},
+			// Update to "P" flag
+			{
+				Config: testAccRecordNaptrFlags(zoneFqdn, name, 10, 10, ".", "P"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordNaptrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "flags", "P"),
+				),
+			},
+			// Update to empty flag
+			{
+				Config: testAccRecordNaptrFlags(zoneFqdn, name, 10, 10, ".", ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordNaptrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "flags", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
