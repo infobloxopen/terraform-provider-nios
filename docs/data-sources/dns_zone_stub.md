@@ -64,8 +64,8 @@ Optional:
 - `ms_ddns_mode` (String) Determines whether an Active Directory-integrated zone with a Microsoft DNS server as primary allows dynamic updates. Valid values are: "SECURE" if the zone allows secure updates only. "NONE" if the zone forbids dynamic updates. "ANY" if the zone accepts both secure and nonsecure updates. This field is valid only if ms_managed is either "AUTH_PRIMARY" or "AUTH_BOTH". If the flag ms_ad_integrated is false, the value "SECURE" is not allowed.
 - `ns_group` (String) A stub member name server group.
 - `prefix` (String) The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.
-- `stub_from` (Attributes List) The primary servers (masters) of this stub zone. (see [below for nested schema](#nestedatt--result--stub_from))
-- `stub_members` (Attributes List) The Grid member servers of this stub zone. Note that the lead/stealth/grid_replicate/ preferred_primaries/override_preferred_primaries fields of the struct will be ignored when set in this field. (see [below for nested schema](#nestedatt--result--stub_members))
+- `stub_from` (Attributes List) The primary servers (masters) of this stub zone.Note that the stealth/tsig_key/tsig_key_alg/tsig_key_name/use_tsig_key_name fields of the struct will be ignored when set in this field. (see [below for nested schema](#nestedatt--result--stub_from))
+- `stub_members` (Attributes List) The Grid member servers of this stub zone. Note that the lead/stealth/grid_replicate/ preferred_primaries/enable_preferred_primaries fields of the struct will be ignored when set in this field. (see [below for nested schema](#nestedatt--result--stub_members))
 - `stub_msservers` (Attributes List) The Microsoft DNS servers of this stub zone. Note that the stealth field of the struct will be ignored when set in this field. (see [below for nested schema](#nestedatt--result--stub_msservers))
 - `view` (String) The name of the DNS view in which the zone resides. Example "external".
 - `zone_format` (String) Determines the format of this zone.
@@ -100,17 +100,14 @@ Required:
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
 
-Optional:
+Read-Only:
 
+- `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The TSIG key name.
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
-
-Read-Only:
-
-- `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
 
 
 <a id="nestedatt--result--stub_members"></a>
@@ -122,8 +119,11 @@ Required:
 
 Optional:
 
-- `enable_preferred_primaries` (Boolean) This flag represents whether the preferred_primaries field values of this member are used.
 - `grid_replicate` (Boolean) The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.
+
+Read-Only:
+
+- `enable_preferred_primaries` (Boolean) This flag represents whether the preferred_primaries field values of this member are used.
 - `lead` (Boolean) This flag controls whether the Grid lead secondary server performs zone transfers to non lead secondaries. This flag is ignored if the struct is specified as grid_member in an authoritative zone.
 - `preferred_primaries` (Attributes List) The primary preference list with Grid member names and\or External Server extserver structs for this member. (see [below for nested schema](#nestedatt--result--stub_members--preferred_primaries))
 - `stealth` (Boolean) This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.
@@ -131,22 +131,16 @@ Optional:
 <a id="nestedatt--result--stub_members--preferred_primaries"></a>
 ### Nested Schema for `result.stub_members.preferred_primaries`
 
-Required:
+Read-Only:
 
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
-
-Optional:
-
+- `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The TSIG key name.
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
-
-Read-Only:
-
-- `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
 
 
 
