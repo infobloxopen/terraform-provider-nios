@@ -81,12 +81,7 @@ func (m *ZoneStubStubMembersModel) Expand(ctx context.Context, diags *diag.Diagn
 		return nil
 	}
 	to := &dns.ZoneStubStubMembers{
-		Name:                     flex.ExpandStringPointer(m.Name),
-		Stealth:                  flex.ExpandBoolPointer(m.Stealth),
-		GridReplicate:            flex.ExpandBoolPointer(m.GridReplicate),
-		Lead:                     flex.ExpandBoolPointer(m.Lead),
-		PreferredPrimaries:       flex.ExpandFrameworkListNestedBlock(ctx, m.PreferredPrimaries, diags, ExpandZonestubstubmembersPreferredPrimaries),
-		EnablePreferredPrimaries: flex.ExpandBoolPointer(m.EnablePreferredPrimaries),
+		Name: flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }
