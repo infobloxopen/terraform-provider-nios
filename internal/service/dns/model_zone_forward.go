@@ -164,6 +164,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.ConflictsWith(path.MatchRoot("external_ns_group")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The information for the remote name servers to which you want the Infoblox appliance to forward queries for a specified domain name.",
 	},
@@ -179,6 +180,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The information for the Grid members to which you want the Infoblox appliance to forward queries for a specified domain name.",
 	},
 	"fqdn": schema.StringAttribute{

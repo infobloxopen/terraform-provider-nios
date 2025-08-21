@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -75,6 +76,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "List of linked auth zones.",
 	},
 	"auto_consolidated_monitors": schema.BoolAttribute{
@@ -135,6 +139,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "LBDN wildcards for pattern match.",
 	},
 	"persistence": schema.Int64Attribute{
@@ -149,6 +156,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The maximum time, in seconds, for which client specific LBDN responses will be cached. Zero specifies no caching.",
 	},
 	"priority": schema.Int64Attribute{
@@ -177,6 +187,7 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:    true,
 		Validators: []validator.List{
 			customvalidator.StringsInSlice([]string{"A", "AAAA", "CNAME", "NAPTR", "SRV"}),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The list of resource record types supported by LBDN.",
 	},
