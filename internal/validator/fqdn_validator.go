@@ -31,12 +31,14 @@ func (validator fqdnValidator) ValidateString(ctx context.Context, req validator
 
 	value := req.ConfigValue.ValueString()
 
+	// Check for leading or trailing whitespace
 	if strings.TrimSpace(value) != value {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeTypeDiagnostic(
 			req.Path,
 			"must not contain leading or trailing whitespaces",
 			req.ConfigValue.ValueString(),
 		))
+		return
 	}
 	// Check for trailing dot
 	if strings.HasSuffix(value, ".") {
@@ -45,9 +47,19 @@ func (validator fqdnValidator) ValidateString(ctx context.Context, req validator
 			"must not end with a dot",
 			req.ConfigValue.ValueString(),
 		))
+		return
+	}
+	// Check for uppercase characters
+	if value != strings.ToLower(value) {
+		resp.Diagnostics.Append(validatordiag.InvalidAttributeTypeDiagnostic(
+			req.Path,
+			"must not contain uppercase characters",
+			req.ConfigValue.ValueString(),
+		))
+		return
 	}
 
-	fqdnRegex := `^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`
+	fqdnRegex := `^([a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$`
 
 	if matched, _ := regexp.MatchString(fqdnRegex, value); !matched {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeTypeDiagnostic(
@@ -58,8 +70,7 @@ func (validator fqdnValidator) ValidateString(ctx context.Context, req validator
 	}
 }
 
-// IsValidFQDN returns an AttributeValidator which ensures that any configured
-// attribute value:
+// IsValidFQDN returns an AttributeValidator which ensures that any configured attribute value is a valid FQDN.
 func IsValidFQDN() validator.String {
 	return fqdnValidator{}
 }
