@@ -39,6 +39,7 @@ resource "nios_dns_zone_stub" "zone_stub_ipv4" {
     }
   ]
   zone_format = "IPV4"
+  prefix      = "zone-stub"
 }
 
 // Create an IPV6 DNS Zone Stub
