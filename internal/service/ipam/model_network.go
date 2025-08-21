@@ -606,6 +606,9 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "This field contains the federated realms associated to this network",
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	},
 	"high_water_mark": schema.Int64Attribute{
 		Optional:            true,
@@ -641,6 +644,9 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ignore_mac_addresses": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+	},
 		MarkdownDescription: "A list of MAC addresses the appliance will ignore.",
 	},
 	"ipam_email_addresses": schema.ListAttribute{
@@ -649,6 +655,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The e-mail lists to which the appliance sends IPAM threshold alarm e-mail messages.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ipam_email_addresses")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"ipam_threshold_settings": schema.SingleNestedAttribute{
@@ -704,6 +711,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on the this network. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"low_water_mark": schema.Int64Attribute{
@@ -736,6 +744,9 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A list of members or Microsoft (r) servers that serve DHCP for this network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the \"_struct\" member to the struct type.",
 		Computed:            true,
 		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: NetworkMembersAttrTypes})),
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	},
 	"mgm_private": schema.BoolAttribute{
 		Optional:            true,
@@ -1128,6 +1139,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of zones associated with this network.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_zone_associations")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 }

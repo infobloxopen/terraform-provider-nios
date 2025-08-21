@@ -3,6 +3,7 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -67,6 +68,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 	"associated_dns_views": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+			},
 		MarkdownDescription: "The list of DNS views associated with this network view.",
 	},
 	"associated_members": schema.ListNestedAttribute{
@@ -101,6 +105,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+			},
 		MarkdownDescription: "An array of Ddns Zone Primary dhcpddns structs that lists the information of primary zone to wich DDNS updates should be sent.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -124,6 +131,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the federated realms associated to this network view",
 	},
 	"internal_forward_zones": schema.ListAttribute{
@@ -160,6 +170,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of forward-mapping zones to which the DHCP server sends the updates.",
 	},
 	"remote_reverse_zones": schema.ListNestedAttribute{
@@ -168,6 +181,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of reverse-mapping zones to which the DHCP server sends the updates.",
 	},
 }
