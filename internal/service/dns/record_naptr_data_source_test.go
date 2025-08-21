@@ -103,9 +103,9 @@ resource "nios_dns_record_naptr" "test" {
 }
 
 data "nios_dns_record_naptr" "test" {
-  filters = {
-	name = nios_dns_record_naptr.test.name
-  }
+	filters = {
+		name = nios_dns_record_naptr.test.name
+	}
 }
 `, name, order, preference, replacement)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -114,19 +114,19 @@ data "nios_dns_record_naptr" "test" {
 func testAccRecordNaptrDataSourceConfigExtAttrFilters(zoneFqdn, name string, order, preference int, replacement string, extAttrsValue string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_naptr" "test" {
-  name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
-  order = %d
-  preference = %d
-  replacement = %q
-  	extattrs = {
+	name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
+	order = %d
+	preference = %d
+	replacement = %q
+	extattrs = {
 		Site = %q
 	}
 }
 
 data "nios_dns_record_naptr" "test" {
-  extattrfilters = {
-	Site = nios_dns_record_naptr.test.extattrs.Site
-  }
+	extattrfilters = {
+		Site = nios_dns_record_naptr.test.extattrs.Site
+	}
 }
 `, name, order, preference, replacement, extAttrsValue)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
