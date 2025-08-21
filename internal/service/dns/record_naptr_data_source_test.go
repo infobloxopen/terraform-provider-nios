@@ -17,8 +17,8 @@ func TestAccRecordNaptrDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_record_naptr.test"
 	resourceName := "nios_dns_record_naptr.test"
 	var v dns.RecordNaptr
-	view := acctest.RandomNameWithPrefix("test-view")
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomNameWithPrefix("test-naptr")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -26,7 +26,7 @@ func TestAccRecordNaptrDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordNaptrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordNaptrDataSourceConfigFilters(view, zoneFqdn, 10, 10, "."),
+				Config: testAccRecordNaptrDataSourceConfigFilters(zoneFqdn, name, 10, 10, "."),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordNaptrExists(context.Background(), resourceName, &v),
@@ -42,6 +42,7 @@ func TestAccRecordNaptrDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dns_record_naptr.test"
 	var v dns.RecordNaptr
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomNameWithPrefix("test-naptr")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +50,7 @@ func TestAccRecordNaptrDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordNaptrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordNaptrDataSourceConfigExtAttrFilters(zoneFqdn, 10, 10, ".", acctest.RandomName()),
+				Config: testAccRecordNaptrDataSourceConfigExtAttrFilters(zoneFqdn, name, 10, 10, ".", acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordNaptrExists(context.Background(), resourceName, &v),
@@ -92,10 +93,10 @@ func testAccCheckRecordNaptrResourceAttrPair(resourceName, dataSourceName string
 	}
 }
 
-func testAccRecordNaptrDataSourceConfigFilters(view, zoneFqdn string, order, preference int, replacement string) string {
+func testAccRecordNaptrDataSourceConfigFilters(zoneFqdn, name string, order, preference int, replacement string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_naptr" "test" {
-    name = nios_dns_zone_auth.test.fqdn
+    name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
  	order = %d
     preference = %d
     replacement = %q
@@ -106,14 +107,14 @@ data "nios_dns_record_naptr" "test" {
 	name = nios_dns_record_naptr.test.name
   }
 }
-`, order, preference, replacement)
+`, name, order, preference, replacement)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordNaptrDataSourceConfigExtAttrFilters(zoneFqdn string, order, preference int, replacement string, extAttrsValue string) string {
+func testAccRecordNaptrDataSourceConfigExtAttrFilters(zoneFqdn, name string, order, preference int, replacement string, extAttrsValue string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_naptr" "test" {
-  name = nios_dns_zone_auth.test.fqdn
+  name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
   order = %d
   preference = %d
   replacement = %q
@@ -127,7 +128,7 @@ data "nios_dns_record_naptr" "test" {
 	Site = nios_dns_record_naptr.test.extattrs.Site
   }
 }
-`, order, preference, replacement, extAttrsValue)
+`, name, order, preference, replacement, extAttrsValue)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 
 }

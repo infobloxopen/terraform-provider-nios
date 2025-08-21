@@ -165,7 +165,7 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
 				"Should not have leading or trailing whitespace",
 			),
-			stringvalidator.OneOf("U", "S", "P", "A"),
+			stringvalidator.OneOf("U", "S", "P", "A", ""),
 		},
 		MarkdownDescription: "The flags used to control the interpretation of the fields for an NAPTR record object. Supported values for the flags field are \"U\", \"S\", \"P\" and \"A\".",
 	},
