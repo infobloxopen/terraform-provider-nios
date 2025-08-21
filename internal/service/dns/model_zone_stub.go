@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -171,6 +172,7 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 				customvalidator.IsValidFQDN(),
 				customvalidator.IsValidIPCIDR(),
 			),
+			stringvalidator.AlsoRequires(path.MatchRoot("stub_from")),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
 	},
