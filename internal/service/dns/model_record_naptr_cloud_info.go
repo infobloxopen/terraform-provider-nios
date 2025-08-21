@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
@@ -70,18 +69,6 @@ var RecordNaptrCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Type of authority over the object.",
 	},
-}
-
-func ExpandRecordNaptrCloudInfo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordNaptrCloudInfo {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RecordNaptrCloudInfoModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *RecordNaptrCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordNaptrCloudInfo {
