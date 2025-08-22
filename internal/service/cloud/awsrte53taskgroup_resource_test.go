@@ -239,7 +239,7 @@ func TestAccAwsrte53taskgroupResource_MultipleAccountsSyncPolicy(t *testing.T) {
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
-	roleArn := "arn:aws:iam::123456789012:role/Role-name"
+	roleArn := "arn:aws:iam:::role/Role-name"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -353,18 +353,18 @@ func TestAccAwsrte53taskgroupResource_RoleArn(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, "arn:aws:iam::123456789012:role/Role-name"),
+				Config: testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, "arn:aws:iam:::role/Role-name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::123456789012:role/Role-name"),
+					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam:::role/Role-name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, "arn:aws:iam::123456789013:role/Role-name"),
+				Config: testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, "arn:aws:iam::1:role/Role-name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::123456789013:role/Role-name"),
+					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::1:role/Role-name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
