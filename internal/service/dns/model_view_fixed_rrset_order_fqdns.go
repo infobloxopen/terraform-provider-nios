@@ -30,19 +30,19 @@ var ViewFixedRrsetOrderFqdnsAttrTypes = map[string]attr.Type{
 
 var ViewFixedRrsetOrderFqdnsResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.IsValidFQDN(),
 		},
 		MarkdownDescription: "The FQDN of the fixed RRset configuration item.",
 	},
 	"record_type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("A", "AAAA","BOTH"),
+			stringvalidator.OneOf("A", "AAAA", "BOTH"),
 		},
-		Default : stringdefault.StaticString("A"),
+		Default:             stringdefault.StaticString("A"),
 		MarkdownDescription: "The record type for the specified FQDN in the fixed RRset configuration.",
 	},
 }
