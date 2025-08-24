@@ -40,6 +40,7 @@ var RangeCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes:          RangecloudinfoDelegatedMemberResourceSchemaAttributes,
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "This field contains the delegated member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network.",
 	},
 	"delegated_scope": schema.StringAttribute{
