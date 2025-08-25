@@ -16,11 +16,13 @@ import (
 )
 
 // TODO : Objects to be present in the grid for testing
-// - DDNS Principal Group - example-ddns-principal-group, updated-ddns-principal-group
-// - Grid Members - infoblox.172_28_83_235, infoblox.172_28_83_209
+// - DDNS Principal Cluster Group - example-ddns-principal-group, updated-ddns-principal-group
+// - Grid Members - infoblox.localdomain1, infoblox.localdomain2
 // - NS Group - example-ns-group, updated-example-ns-group
 // - Record Name Policy - example-policy, example-policy-update
 // - MS Server - 10.120.23.22, 10.120.23.23
+// - Shared Record Group - example-shared-record-group, updated-example-shared-record-groups
+// - GSS TSIG Key has to be configured in the grid
 
 var readableAttributesForZoneAuth = "address,allow_active_dir,allow_fixed_rrset_order,allow_gss_tsig_for_underscore_zone,allow_gss_tsig_zone_updates,allow_query,allow_transfer,allow_update,allow_update_forwarding,aws_rte53_zone_info,cloud_info,comment,copy_xfer_to_notify,create_underscore_zones,ddns_force_creation_timestamp_update,ddns_principal_group,ddns_principal_tracking,ddns_restrict_patterns,ddns_restrict_patterns_list,ddns_restrict_protected,ddns_restrict_secure,ddns_restrict_static,disable,disable_forwarding,display_domain,dns_fqdn,dns_integrity_enable,dns_integrity_frequency,dns_integrity_member,dns_integrity_verbose_logging,dns_soa_email,dnssec_key_params,dnssec_keys,dnssec_ksk_rollover_date,dnssec_zsk_rollover_date,effective_check_names_policy,effective_record_name_policy,extattrs,external_primaries,external_secondaries,fqdn,grid_primary,grid_primary_shared_with_ms_parent_delegation,grid_secondaries,is_dnssec_enabled,is_dnssec_signed,is_multimaster,last_queried,last_queried_acl,locked,locked_by,mask_prefix,member_soa_mnames,member_soa_serials,ms_ad_integrated,ms_allow_transfer,ms_allow_transfer_mode,ms_dc_ns_record_creation,ms_ddns_mode,ms_managed,ms_primaries,ms_read_only,ms_secondaries,ms_sync_disabled,ms_sync_master_name,network_associations,network_view,notify_delay,ns_group,parent,prefix,primary_type,record_name_policy,records_monitored,rr_not_queried_enabled_time,scavenging_settings,soa_default_ttl,soa_email,soa_expire,soa_negative_ttl,soa_refresh,soa_retry,soa_serial_number,srgs,update_forwarding,use_allow_active_dir,use_allow_query,use_allow_transfer,use_allow_update,use_allow_update_forwarding,use_check_names_policy,use_copy_xfer_to_notify,use_ddns_force_creation_timestamp_update,use_ddns_patterns_restriction,use_ddns_principal_security,use_ddns_restrict_protected,use_ddns_restrict_static,use_dnssec_key_params,use_external_primary,use_grid_zone_timer,use_import_from,use_notify_delay,use_record_name_policy,use_scavenging_settings,use_soa_email,using_srg_associations,view,zone_format,zone_not_queried_enabled_time"
 
@@ -820,10 +822,10 @@ func TestAccZoneAuthResource_DnsIntegrityEnable(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_209",
+			"name": "infoblox.localdomain2",
 		},
 	}
-	dnsIntegrityMember := "infoblox.172_28_83_209"
+	dnsIntegrityMember := "infoblox.localdomain2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -884,8 +886,8 @@ func TestAccZoneAuthResource_DnsIntegrityMember(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_dns_integrity_member"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-	dnsIntegrityMember1 := "infoblox.172_28_83_209"
-	dnsIntegrityMember2 := "infoblox.172_28_83_235"
+	dnsIntegrityMember1 := "infoblox.localdomain2"
+	dnsIntegrityMember2 := "infoblox.localdomain1"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1092,7 +1094,7 @@ func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 	}
 	msSecondaries := []map[string]any{
 		{
-			"address": "10.34.98.68",
+			"address": "10.120.23.22",
 			"ns_name": "example-server",
 			"ns_ip":   "10.120.23.22",
 		},
@@ -1138,7 +1140,7 @@ func TestAccZoneAuthResource_ExternalSecondaries(t *testing.T) {
 	}
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_209",
+			"name": "infoblox.localdomain2",
 		},
 	}
 	updatedExternalSecondaries := []map[string]any{
@@ -1213,12 +1215,12 @@ func TestAccZoneAuthResource_GridPrimary(t *testing.T) {
 	zoneAuth := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_209",
+			"name": "infoblox.localdomain2",
 		},
 	}
 	gridPrimaryUpdated := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_235",
+			"name": "infoblox.localdomain1",
 		},
 	}
 
@@ -1232,7 +1234,7 @@ func TestAccZoneAuthResource_GridPrimary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.172_28_83_209"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain2"),
 				),
 			},
 			// Update and Read
@@ -1241,7 +1243,7 @@ func TestAccZoneAuthResource_GridPrimary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.172_28_83_235"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1255,17 +1257,17 @@ func TestAccZoneAuthResource_GridSecondaries(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_209",
+			"name": "infoblox.localdomain2",
 		},
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 	updatedGridSecondary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_235",
+			"name": "infoblox.localdomain1",
 		},
 	}
 
@@ -1279,7 +1281,7 @@ func TestAccZoneAuthResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.172_28_82_248"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -1288,7 +1290,7 @@ func TestAccZoneAuthResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.172_28_83_235"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1374,13 +1376,13 @@ func TestAccZoneAuthResource_MemberSoaMnames(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 	memberSoaMnames := []map[string]any{
 		{
-			"grid_primary": "infoblox.172_28_82_248",
-			"mname":        "infoblox.172_28_82_248",
+			"grid_primary": "infoblox.localdomain",
+			"mname":        "infoblox.localdomain",
 		},
 	}
 	updatedMemberSoaMnames := []map[string]any{
@@ -1399,8 +1401,8 @@ func TestAccZoneAuthResource_MemberSoaMnames(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.grid_primary", "infoblox.172_28_82_248"),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.mname", "infoblox.172_28_82_248"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.grid_primary", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.mname", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -1409,7 +1411,7 @@ func TestAccZoneAuthResource_MemberSoaMnames(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.grid_primary", "infoblox.172_28_82_248"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.grid_primary", "infoblox.localdomain"),
 					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.mname", "example.com"),
 				),
 			},
@@ -1667,7 +1669,7 @@ func TestAccZoneAuthResource_MsSecondaries(t *testing.T) {
 	}
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -1951,7 +1953,7 @@ func TestAccZoneAuthResource_SoaDefaultTtl(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -1986,7 +1988,7 @@ func TestAccZoneAuthResource_SoaEmail(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -2021,7 +2023,7 @@ func TestAccZoneAuthResource_SoaExpire(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -2056,7 +2058,7 @@ func TestAccZoneAuthResource_SoaNegativeTtl(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -2091,7 +2093,7 @@ func TestAccZoneAuthResource_SoaRefresh(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -2126,7 +2128,7 @@ func TestAccZoneAuthResource_SoaRetry(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -2161,7 +2163,7 @@ func TestAccZoneAuthResource_SoaSerialNumber(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -2758,7 +2760,7 @@ func TestAccZoneAuthResource_UseGridZoneTimer(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -2933,7 +2935,7 @@ func TestAccZoneAuthResource_UseSoaEmail(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_82_248",
+			"name": "infoblox.localdomain",
 		},
 	}
 
