@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -16,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneDelegatedDelegateToModel struct {
@@ -42,17 +42,14 @@ var ZoneDelegatedDelegateToAttrTypes = map[string]attr.Type{
 
 var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Required:   true,
+		CustomType:          iptypes.IPAddressType{},
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
@@ -69,10 +66,7 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "A generated TSIG key.",
 	},
@@ -88,10 +82,7 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},

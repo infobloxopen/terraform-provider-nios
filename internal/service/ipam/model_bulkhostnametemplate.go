@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type BulkhostnametemplateModel struct {
@@ -59,10 +60,7 @@ var BulkhostnametemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"template_name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s]([^\s]|.*[^\s])?$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The name of bulk host name template.",
 	},

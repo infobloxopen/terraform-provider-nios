@@ -2,9 +2,7 @@ package ipam
 
 import (
 	"context"
-	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -46,10 +44,7 @@ var Ipv6networkcontainerZoneAssociationsResourceSchemaAttributes = map[string]sc
 		Optional:            true,
 		MarkdownDescription: "The view to which the zone belongs. If a view is not specified, the default view is used.",
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 	},
 }

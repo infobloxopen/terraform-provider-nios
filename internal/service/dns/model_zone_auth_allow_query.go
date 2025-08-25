@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneAuthAllowQueryModel struct {
@@ -58,10 +58,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
 				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 	},
 	"permission": schema.StringAttribute{
@@ -85,10 +82,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 	},
 	"tsig_key_alg": schema.StringAttribute{
@@ -111,10 +105,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{

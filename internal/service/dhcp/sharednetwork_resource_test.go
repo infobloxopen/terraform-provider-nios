@@ -886,24 +886,24 @@ func TestAccSharednetworkResource_Options(t *testing.T) {
 	options := []map[string]any{
 		{
 			"name":  "domain-name",
-			"num" : "15",
+			"num":   "15",
 			"value": "aa.bb.com",
 		},
 		{
 			"name":  "dhcp-lease-time",
-			"num":  "51",
+			"num":   "51",
 			"value": "72000",
 		},
 	}
 	optionsUpdated := []map[string]any{
 		{
 			"name":  "domain-name",
-			"num": "15",
+			"num":   "15",
 			"value": "cc.dd.com",
 		},
 		{
 			"name":  "dhcp-lease-time",
-			"num":  "51",
+			"num":   "51",
 			"value": "82000",
 		},
 	}

@@ -120,7 +120,7 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 	"disable": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default: 		   booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to True, the scheduled task is disabled.",
 	},
 }
