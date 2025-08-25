@@ -16,6 +16,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 )
 
 type Awsrte53taskgroupModel struct {
@@ -55,7 +56,7 @@ var Awsrte53taskgroupAttrTypes = map[string]attr.Type{
 	"role_arn":                      types.StringType,
 	"sync_child_accounts":           types.BoolType,
 	"sync_status":                   types.StringType,
-	"task_list":                     types.ListType{ElemType: types.ObjectType{AttrTypes: Awsrte53taskgroupTaskListAttrTypes}},
+	"task_list":                     internaltypes.UnorderedListOfStringType,
 }
 
 var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
@@ -155,6 +156,7 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: Awsrte53taskgroupTaskListResourceSchemaAttributes,
 		},
+		CustomType:          internaltypes.UnorderedListOfStringType,
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "List of AWS Route53 tasks in this group.",

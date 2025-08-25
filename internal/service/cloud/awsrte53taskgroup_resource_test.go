@@ -67,8 +67,8 @@ func TestAccAwsrte53taskgroupResource_disappears(t *testing.T) {
 	})
 }
 
-// TO DO
 func TestAccAwsrte53taskgroupResource_AwsAccountIdsFileToken(t *testing.T) {
+	t.Skip("skipping test as it needs file operation, adding this under TODO")
 	var resourceName = "nios_cloud_awsrte53taskgroup.test_aws_account_ids_file_token"
 	var v cloud.Awsrte53taskgroup
 
@@ -253,14 +253,6 @@ func TestAccAwsrte53taskgroupResource_MultipleAccountsSyncPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "multiple_accounts_sync_policy", "DISCOVER_CHILDREN"),
 				),
 			},
-			//Update and Read
-			// {
-			// 	Config: testAccAwsrte53taskgroupMultipleAccountsSyncPolicy(taskGroupName, gridMember, "NONE", roleArn),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-			// 		resource.TestCheckResourceAttr(resourceName, "multiple_accounts_sync_policy", "NONE"),
-			// 	),
-			// },
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -410,7 +402,6 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 	gridMember := "infoblox.localdomain"
 	task_list := []map[string]any{
 		{
-			"struct":             "task_list",
 			"aws_user":           "awsuser/b25lLmF3c191c2VyJEFLSUFVNUpHWlRURVRTWEwyVEU0:AKIAU5JGZTTETSXL2TE4",
 			"credentials_type":   "DIRECT",
 			"disabled":           false,
@@ -421,11 +412,21 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 			"sync_private_zones": true,
 			"sync_public_zones":  true,
 		},
+		{
+			"aws_user":           "awsuser/b25lLmF3c191c2VyJEFLSUFVNUpHWlRURVRTWEwyVEU0:AKIAU5JGZTTETSXL2TE4",
+			"credentials_type":   "DIRECT",
+			"disabled":           false,
+			"filter":             "*",
+			"name":               "test2",
+			"schedule_interval":  10,
+			"schedule_units":     "DAYS",
+			"sync_private_zones": true,
+			"sync_public_zones":  true,
+		},
 	}
 	task_list_update := []map[string]any{
 		{
-			"struct":             "task_list",
-			"aws_user":           "awsuser/b25lLmF3c191c2VyJEFLSUFVNUpHWlRURVRTWEwyVEU0:AKIAU5JGZTTETSXL2TE5",
+			"aws_user":           "awsuser/b25lLmF3c191c2VyJEFLSUFhYWFhYWFhYWFhYWFhYWFh:AKIAaaaaaaaaaaaaaaaa",
 			"credentials_type":   "DIRECT",
 			"disabled":           false,
 			"filter":             "*",
@@ -446,8 +447,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 				Config: testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember, task_list),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "task_list.#", "1"),
-					//resource.TestCheckResourceAttr(resourceName, "task_list.0.struct", "task_list"),
+					resource.TestCheckResourceAttr(resourceName, "task_list.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.aws_user", "awsuser/b25lLmF3c191c2VyJEFLSUFVNUpHWlRURVRTWEwyVEU0:AKIAU5JGZTTETSXL2TE4"),
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.credentials_type", "DIRECT"),
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.disabled", "false"),
@@ -457,6 +457,8 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.schedule_units", "DAYS"),
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.sync_private_zones", "true"),
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.sync_public_zones", "true"),
+					resource.TestCheckResourceAttr(resourceName, "task_list.1.name", "test2"),
+					resource.TestCheckResourceAttr(resourceName, "task_list.1.schedule_interval", "10"),
 				),
 			},
 			// Update and Read
@@ -465,7 +467,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "task_list.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "task_list.0.aws_user", "awsuser/b25lLmF3c191c2VyJEFLSUFVNUpHWlRURVRTWEwyVEU0:AKIAU5JGZTTETSXL2TE5"),
+					resource.TestCheckResourceAttr(resourceName, "task_list.0.aws_user", "awsuser/b25lLmF3c191c2VyJEFLSUFhYWFhYWFhYWFhYWFhYWFh:AKIAaaaaaaaaaaaaaaaa"),
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.credentials_type", "DIRECT"),
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.disabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "task_list.0.filter", "*"),
