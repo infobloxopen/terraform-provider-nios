@@ -214,8 +214,11 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: FixedaddressCliCredentialsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The CLI credentials for the fixed address.",
 	},
 	"client_identifier_prepend_zero": schema.BoolAttribute{
@@ -392,6 +395,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
@@ -430,6 +434,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ms_options")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the Microsoft DHCP options for this fixed address.",
 	},
