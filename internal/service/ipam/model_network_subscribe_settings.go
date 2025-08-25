@@ -3,6 +3,7 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -41,6 +42,7 @@ var NetworkSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribu
 				"USERNAME",
 				"VLAN",
 			}),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"mapped_ea_attributes": schema.ListNestedAttribute{
@@ -50,6 +52,9 @@ var NetworkSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribu
 		Optional:            true,
 		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	},
 }
 
