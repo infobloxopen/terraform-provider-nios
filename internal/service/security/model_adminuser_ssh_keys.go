@@ -3,9 +3,12 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -32,7 +35,12 @@ var AdminuserSshKeysResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Unique identifier for the key",
 	},
 	"key_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ECDSA", "ED25519", "RSA"),
+		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "ssh_key_types",
 	},
 	"key_value": schema.StringAttribute{

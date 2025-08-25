@@ -56,7 +56,7 @@ resource "nios_security_admin_user" "admin_user_additional_fields" {
 
 - `admin_groups` (List of String) The names of the Admin Groups to which this Admin User belongs. Currently, this is limited to only one Admin Group.
 - `name` (String) The name of the admin user.
-- `password` (String) The password for the administrator to use when logging in.
+- `password` (String, Sensitive) The password for the administrator to use when logging in.
 
 ### Optional
 

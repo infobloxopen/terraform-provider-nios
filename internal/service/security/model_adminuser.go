@@ -16,8 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -97,9 +95,8 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The authentication type for the admin user.",
 	},
 	"ca_certificate_issuer": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             stringdefault.StaticString(""),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The CA certificate that is used for user lookup during authentication.",
 	},
 	"client_certificate_serial_number": schema.StringAttribute{
@@ -115,7 +112,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "Comment for the admin user; maximum 256 characters.",
@@ -158,17 +155,18 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The name of the admin user.",
 	},
 	"password": schema.StringAttribute{
-		Required: true,
+		Required:  true,
+		Sensitive: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
+				"Should not have leading or trailing whitespace",
 			),
 		},
 		MarkdownDescription: "The password for the administrator to use when logging in.",
@@ -204,18 +202,6 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: time_zone",
 	},
-}
-
-func ExpandAdminuser(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.Adminuser {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m AdminuserModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *AdminuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.Adminuser {
@@ -274,7 +260,6 @@ func (m *AdminuserModel) Flatten(ctx context.Context, from *security.Adminuser, 
 	m.EnableCertificateAuthentication = types.BoolPointerValue(from.EnableCertificateAuthentication)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	//m.Password = flex.FlattenStringPointer(from.Password)
 	m.SshKeys = flex.FlattenFrameworkListNestedBlock(ctx, from.SshKeys, AdminuserSshKeysAttrTypes, diags, FlattenAdminuserSshKeys)
 	m.Status = flex.FlattenStringPointer(from.Status)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
