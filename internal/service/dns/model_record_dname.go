@@ -89,10 +89,11 @@ var RecordDnameResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The comment for the record.",
 	},
 	"creation_time": schema.Int64Attribute{

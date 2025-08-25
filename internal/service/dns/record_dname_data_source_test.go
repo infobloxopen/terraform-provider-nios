@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
@@ -121,9 +122,9 @@ resource "nios_dns_record_dname" "test" {
 }
 
 data "nios_dns_record_dname" "test" {
-  extattrfilters = {
-	Site = nios_dns_record_dname.test.extattrs.Site
-  }
+	extattrfilters = {
+		Site = nios_dns_record_dname.test.extattrs.Site
+	}
 }
 `, target, extAttrsValue)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")

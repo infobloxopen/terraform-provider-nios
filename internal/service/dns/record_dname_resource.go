@@ -36,7 +36,7 @@ func (r *RecordDnameResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *RecordDnameResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DNS DNAME record.",
+		MarkdownDescription: "Manages a DNAME record.",
 		Attributes:          RecordDnameResourceSchemaAttributes,
 	}
 }
