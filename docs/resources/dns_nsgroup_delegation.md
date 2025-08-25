@@ -3,17 +3,17 @@
 page_title: "nios_dns_nsgroup_delegation Resource - nios"
 subcategory: "DNS"
 description: |-
-  Manages a NS group delegation.
+  Manages an NS Group Delegation.
 ---
 
 # nios_dns_nsgroup_delegation (Resource)
 
-Manages a NS group delegation.
+Manages an NS Group Delegation.
 
 ## Example Usage
 
 ```terraform
-//Create an NS group delegation 
+//Create an NS Group Delegation with Basic Fields 
 resource "nios_dns_nsgroup_delegation" "create_nsgroup_delegate" {
   name = "example_ns_group_del"
   delegate_to = [
@@ -24,7 +24,7 @@ resource "nios_dns_nsgroup_delegation" "create_nsgroup_delegate" {
   ]
 }
 
-//Create an NS group with additional attributes
+//Create an NS Group Delegation with Additional Fields
 resource "nios_dns_nsgroup_delegation" "create_nsgroup_delegate_with_additional_params" {
   name = "example_ns_group_delegation"
   delegate_to = [
