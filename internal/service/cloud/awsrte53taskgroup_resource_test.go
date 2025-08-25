@@ -403,7 +403,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 	gridMember := "infoblox.localdomain"
 	task_list := []map[string]any{
 		{
-			"aws_user":           "awsuser/b25lLRVRTWEwyVEU0:AKIAU5TSXL2TE4",
+			"aws_user":           "awsuser/****:****",
 			"credentials_type":   "DIRECT",
 			"disabled":           false,
 			"filter":             "*",
@@ -414,7 +414,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 			"sync_public_zones":  true,
 		},
 		{
-			"aws_user":           "awsuser/b25lLmF3c1HWlRURVRTWEwyVEU0:AKIAU5JXL2TE4",
+			"aws_user":           "awsuser/****:****",
 			"credentials_type":   "DIRECT",
 			"disabled":           false,
 			"filter":             "*",
