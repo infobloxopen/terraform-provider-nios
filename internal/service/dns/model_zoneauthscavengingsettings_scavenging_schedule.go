@@ -57,6 +57,7 @@ var ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[s
 			listvalidator.ValueStringsAre(
 				stringvalidator.OneOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"),
 			),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 	},

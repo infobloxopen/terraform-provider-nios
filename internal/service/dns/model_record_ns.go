@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -58,6 +59,9 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RecordNsAddressesResourceSchemaAttributes,
 		},
 		Required:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of zone name servers.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
