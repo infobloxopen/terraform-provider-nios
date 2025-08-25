@@ -90,7 +90,7 @@ var RecordTlsaResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
 				"Should not have leading or trailing whitespace",
 			),
 		},
@@ -188,7 +188,6 @@ func (m *RecordTlsaModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 	to := &dns.RecordTlsa{
 		CertificateData:  flex.ExpandStringPointer(m.CertificateData),
 		CertificateUsage: flex.ExpandInt64Pointer(m.CertificateUsage),
-		CloudInfo:        ExpandRecordTlsaCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:          flex.ExpandStringPointer(m.Comment),
 		Creator:          flex.ExpandStringPointer(m.Creator),
 		Disable:          flex.ExpandBoolPointer(m.Disable),
