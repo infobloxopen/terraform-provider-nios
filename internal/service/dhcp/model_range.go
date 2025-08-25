@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
@@ -269,10 +268,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "Comment for the range; maximum 256 characters.",
 	},
@@ -281,10 +277,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.",
 	},
@@ -617,10 +610,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "This field contains the name of the Microsoft scope.",
 	},

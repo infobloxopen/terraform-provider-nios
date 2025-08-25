@@ -2,7 +2,6 @@ package dtc
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -124,10 +123,7 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The display name of the DTC LBDN, not DNS related.",
 	},

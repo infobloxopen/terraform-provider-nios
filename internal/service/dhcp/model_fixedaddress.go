@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/hwtypes"
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
@@ -170,10 +169,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The agent circuit ID for the fixed address.",
 	},
@@ -181,10 +177,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The agent remote ID for the fixed address.",
 	},
@@ -240,10 +233,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "Comment for the fixed address; maximum 256 characters.",
 	},
@@ -252,10 +242,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this fixed address.",
 	},
@@ -263,10 +250,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The DDNS host name for this fixed address.",
 	},
@@ -283,10 +267,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The description of the device.",
 	},
@@ -294,10 +275,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The location of the device.",
 	},
@@ -305,10 +283,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The type of the device.",
 	},
@@ -316,10 +291,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The vendor of the device.",
 	},
@@ -327,10 +299,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The DHCP client ID for the fixed address.",
 	},
@@ -473,10 +442,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "This field contains the name of this fixed address.",
 	},
@@ -812,4 +778,3 @@ func FlattenFixedAddressIpv4addr(from *dhcp.FixedaddressIpv4addr) iptypes.IPv4Ad
 	m := flex.FlattenIPv4Address(from.String)
 	return m
 }
-

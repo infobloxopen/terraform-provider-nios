@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -17,6 +16,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneAuthLastQueriedAclModel struct {
@@ -35,10 +35,7 @@ var ZoneAuthLastQueriedAclResourceSchemaAttributes = map[string]schema.Attribute
 		Required:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 	},
 	"permission": schema.StringAttribute{
