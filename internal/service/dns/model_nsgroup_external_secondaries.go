@@ -45,8 +45,8 @@ var NsgroupExternalSecondariesAttrTypes = map[string]attr.Type{
 
 var NsgroupExternalSecondariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Required:   true,
+		CustomType:          iptypes.IPAddressType{},
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{

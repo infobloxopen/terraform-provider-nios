@@ -2,10 +2,17 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -15,18 +22,18 @@ import (
 )
 
 type NsgroupgridsecondariesPreferredPrimariesModel struct {
-	Address                      types.String `tfsdk:"address"`
-	Name                         types.String `tfsdk:"name"`
-	SharedWithMsParentDelegation types.Bool   `tfsdk:"shared_with_ms_parent_delegation"`
-	Stealth                      types.Bool   `tfsdk:"stealth"`
-	TsigKey                      types.String `tfsdk:"tsig_key"`
-	TsigKeyAlg                   types.String `tfsdk:"tsig_key_alg"`
-	TsigKeyName                  types.String `tfsdk:"tsig_key_name"`
-	UseTsigKeyName               types.Bool   `tfsdk:"use_tsig_key_name"`
+	Address                      iptypes.IPAddress `tfsdk:"address"`
+	Name                         types.String      `tfsdk:"name"`
+	SharedWithMsParentDelegation types.Bool        `tfsdk:"shared_with_ms_parent_delegation"`
+	Stealth                      types.Bool        `tfsdk:"stealth"`
+	TsigKey                      types.String      `tfsdk:"tsig_key"`
+	TsigKeyAlg                   types.String      `tfsdk:"tsig_key_alg"`
+	TsigKeyName                  types.String      `tfsdk:"tsig_key_name"`
+	UseTsigKeyName               types.Bool        `tfsdk:"use_tsig_key_name"`
 }
 
 var NsgroupgridsecondariesPreferredPrimariesAttrTypes = map[string]attr.Type{
-	"address":                          types.StringType,
+	"address":                          iptypes.IPAddressType{},
 	"name":                             types.StringType,
 	"shared_with_ms_parent_delegation": types.BoolType,
 	"stealth":                          types.BoolType,
@@ -38,13 +45,24 @@ var NsgroupgridsecondariesPreferredPrimariesAttrTypes = map[string]attr.Type{
 
 var NsgroupgridsecondariesPreferredPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		CustomType: iptypes.IPAddressType{},
+		Required:   true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
@@ -54,26 +72,45 @@ var NsgroupgridsecondariesPreferredPrimariesResourceSchemaAttributes = map[strin
 	"stealth": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("HMAC-MD5"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
+		},
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
+		},
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
@@ -95,7 +132,7 @@ func (m *NsgroupgridsecondariesPreferredPrimariesModel) Expand(ctx context.Conte
 		return nil
 	}
 	to := &dns.NsgroupgridsecondariesPreferredPrimaries{
-		Address:        flex.ExpandStringPointer(m.Address),
+		Address:        flex.ExpandIPAddress(m.Address),
 		Name:           flex.ExpandStringPointer(m.Name),
 		Stealth:        flex.ExpandBoolPointer(m.Stealth),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -124,7 +161,7 @@ func (m *NsgroupgridsecondariesPreferredPrimariesModel) Flatten(ctx context.Cont
 	if m == nil {
 		*m = NsgroupgridsecondariesPreferredPrimariesModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)

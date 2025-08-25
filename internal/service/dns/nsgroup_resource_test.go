@@ -16,7 +16,7 @@ import (
 )
 
 // TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// A NIOS grid with 2 members
+// A NIOS grid with 2 members - infoblox.172_28_82_110 , infoblox.172_28_83_25
 var readableAttributesForNsgroup = "comment,extattrs,external_primaries,external_secondaries,grid_primary,grid_secondaries,is_grid_default,is_multimaster,name,use_external_primary"
 
 func TestAccNsgroupResource_basic(t *testing.T) {
@@ -124,7 +124,7 @@ func TestAccNsgroupResource_ExtAttrs(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name":"infoblox.172_28_83_208",
+			"name": "infoblox.172_28_83_208",
 		},
 	}
 	extAttrValue1 := acctest.RandomName()
@@ -625,7 +625,8 @@ resource "nios_dns_nsgroup" "test_grid_secondaries" {
     grid_secondaries = %s
 	grid_primary = [
 	{
-			"name": "infoblox.172_28_82_110"}]
+		name: "infoblox.172_28_82_110"
+	}]
 }
 `, name, gridSecondariesStr)
 }
