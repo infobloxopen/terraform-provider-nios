@@ -140,6 +140,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of linked authoritative DNS zones.",
 	},
 	"is_default": schema.BoolAttribute{

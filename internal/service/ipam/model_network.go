@@ -1129,6 +1129,9 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		MarkdownDescription: "List of VLANs assigned to Network.",
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	},
 	"zone_associations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
