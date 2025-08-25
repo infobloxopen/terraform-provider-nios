@@ -13,7 +13,7 @@ Retrieves information about existing Admin Users.
 ## Example Usage
 
 ```terraform
-// Retrieve a specific Admin User View by filters
+// Retrieve a specific Admin User by filters
 data "nios_security_admin_user" "get_admin_user_using_filters" {
   filters = {
     name = "example_admin_user"
@@ -52,7 +52,7 @@ Required:
 
 - `admin_groups` (List of String) The names of the Admin Groups to which this Admin User belongs. Currently, this is limited to only one Admin Group.
 - `name` (String) The name of the admin user.
-- `password` (String) The password for the administrator to use when logging in.
+- `password` (String, Sensitive) The password for the administrator to use when logging in.
 
 Optional:
 
