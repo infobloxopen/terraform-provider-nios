@@ -427,7 +427,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 	}
 	task_list_update := []map[string]any{
 		{
-			"aws_user":           "awsuser/****:****",,
+			"aws_user":           "awsuser/****:****",
 			"credentials_type":   "DIRECT",
 			"disabled":           false,
 			"filter":             "*",

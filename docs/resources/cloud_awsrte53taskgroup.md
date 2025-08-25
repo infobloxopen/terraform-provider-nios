@@ -31,15 +31,15 @@ resource "nios_cloud_awsrte53taskgroup" "test_advanced" {
   network_view_mapping_policy = "AUTO_CREATE"
 
   task_list {
-    name              = "test-task"
-    description       = "Test Task"
-    schedule_interval = "5"
+    name              = "test-task4"
+    schedule_interval = 5
+    aws_user          = "awsuser/***:***"
   }
 
   task_list {
-    name              = "test-task-2"
-    description       = "Test Task 2"
-    schedule_interval = "10"
+    name              = "test-task5"
+    schedule_interval = 5
+    aws_user          = "awsuser/***:***"
   }
 }
 ```
