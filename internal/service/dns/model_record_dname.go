@@ -112,6 +112,7 @@ var RecordDnameResourceSchemaAttributes = map[string]schema.Attribute{
 	"ddns_principal": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The GSS-TSIG principal that owns this record.",
 	},
 	"ddns_protected": schema.BoolAttribute{
@@ -198,6 +199,7 @@ var RecordDnameResourceSchemaAttributes = map[string]schema.Attribute{
 	"view": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the DNS View in which the record resides, for example \"external\".",
 	},
 	"zone": schema.StringAttribute{
