@@ -685,14 +685,6 @@ resource "nios_dns_record_dname" "test_view" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccBaseWithZone(zoneFqdn string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test" {
-    fqdn = %q
-}
-`, zoneFqdn)
-}
-
 func testAccBaseWithTwoZones(zoneFqdn1, zoneFqdn2 string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test" {
