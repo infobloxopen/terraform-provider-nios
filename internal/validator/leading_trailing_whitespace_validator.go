@@ -22,7 +22,6 @@ func (v noLeadingOrTrailingWhitespaceValidator) MarkdownDescription(ctx context.
 }
 
 func (v noLeadingOrTrailingWhitespaceValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
-	// Only validate the attribute configuration value if it is known.
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
 		return
 	}
