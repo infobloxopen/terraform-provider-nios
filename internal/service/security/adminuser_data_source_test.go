@@ -15,7 +15,7 @@ func TestAccAdminuserDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_security_admin_user.test"
 	resourceName := "nios_security_admin_user.test"
 	var v security.Adminuser
-	name := acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("admin-user")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -37,7 +37,7 @@ func TestAccAdminuserDataSource_Filters(t *testing.T) {
 func TestAccAdminuserDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_security_admin_user.test"
 	resourceName := "nios_security_admin_user.test"
-	extAttrValue := acctest.RandomName()
+	extAttrValue := acctest.RandomNameWithPrefix("admin-user")
 	name := acctest.RandomName()
 	var v security.Adminuser
 	resource.Test(t, resource.TestCase{

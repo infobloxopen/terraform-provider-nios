@@ -33,8 +33,9 @@ func TestAccAdminuserResource_basic(t *testing.T) {
 				Config: testAccAdminuserBasicConfig(name, password, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
+					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "auth_method", "KEYPAIR"),
 					resource.TestCheckResourceAttr(resourceName, "auth_type", "LOCAL"),
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
