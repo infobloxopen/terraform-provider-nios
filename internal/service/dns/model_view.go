@@ -272,6 +272,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of customized root name servers. You can either select and use Internet root name servers or specify custom root name servers by providing a host name and IP address to which the Infoblox appliance can send queries. Include the specified parameter to set the attribute value. Omit the parameter to retrieve the attribute value.",
 	},
 	"ddns_force_creation_timestamp_update": schema.BoolAttribute{
