@@ -87,8 +87,6 @@ func TestAccNsgroupDelegationResource_Comment(t *testing.T) {
 			"address":"2.3.4.5",
 		},
 	}
-	comment := "comment ns group"
-	commentUpdate := "updated comment ns group"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -96,18 +94,18 @@ func TestAccNsgroupDelegationResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupDelegationComment(name, comment , delegateTo),
+				Config: testAccNsgroupDelegationComment(name, delegateTo , "comment ns group" ),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", comment),
+					resource.TestCheckResourceAttr(resourceName, "comment", "comment ns group"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupDelegationComment(name, commentUpdate, delegateTo),
+				Config: testAccNsgroupDelegationComment(name, delegateTo, "comment ns group updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", commentUpdate),
+					resource.TestCheckResourceAttr(resourceName, "comment", "comment ns group updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -298,7 +296,6 @@ func testAccCheckNsgroupDelegationDisappears(ctx context.Context, v *dns.Nsgroup
 
 func testAccNsgroupDelegationBasicConfig(name string, delegateTo []map[string]any) string {
 	delegateToStr := utils.ConvertSliceOfMapsToHCL(delegateTo)
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_delegation" "test" {
     name = %q
@@ -307,7 +304,7 @@ resource "nios_dns_nsgroup_delegation" "test" {
 `, name, delegateToStr)
 }
 
-func testAccNsgroupDelegationComment(name , comment string, delegateTo []map[string]any) string {
+func testAccNsgroupDelegationComment(name string, delegateTo []map[string]any, comment string) string {
 	delegateToStr := utils.ConvertSliceOfMapsToHCL(delegateTo)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_delegation" "test_comment" {
