@@ -17,6 +17,8 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
 
@@ -102,9 +104,11 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewZoneForwardResource,
 		dns.NewRecordCnameResource,
 		dns.NewRecordMxResource,
+		dns.NewRecordNaptrResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
 		dns.NewViewResource,
+		dns.NewZoneStubResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -119,6 +123,11 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewIpv6networkcontainerResource,
 		ipam.NewIpv6networkResource,
 		ipam.NewNetworkviewResource,
+		ipam.NewBulkhostnametemplateResource,
+
+		security.NewAdminroleResource,
+
+		misc.NewRulesetResource,
 
 		smartfolder.NewSmartfolderGlobalResource,
 	}
@@ -138,9 +147,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewZoneForwardDataSource,
 		dns.NewRecordCnameDataSource,
 		dns.NewRecordMxDataSource,
+		dns.NewRecordNaptrDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
 		dns.NewViewDataSource,
+		dns.NewZoneStubDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -155,6 +166,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewIpv6networkcontainerDataSource,
 		ipam.NewIpv6networkDataSource,
 		ipam.NewNetworkviewDataSource,
+		ipam.NewBulkhostnametemplateDataSource,
+
+		security.NewAdminroleDataSource,
+
+		misc.NewRulesetDataSource,
 
 		smartfolder.NewSmartfolderGlobalDataSource,
 	}
