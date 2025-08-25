@@ -9,17 +9,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type ZoneauthgridsecondariesPreferredPrimariesModel struct {
+// ZoneStubStubFromModel defines the model for a stub zone's primary servers.
+// All attributes of this model except 'name' and 'address' are Computed, as input values for stub from are ignored.
+
+type ZoneStubStubFromModel struct {
 	Address                      iptypes.IPAddress `tfsdk:"address"`
 	Name                         types.String      `tfsdk:"name"`
 	SharedWithMsParentDelegation types.Bool        `tfsdk:"shared_with_ms_parent_delegation"`
@@ -30,7 +32,7 @@ type ZoneauthgridsecondariesPreferredPrimariesModel struct {
 	UseTsigKeyName               types.Bool        `tfsdk:"use_tsig_key_name"`
 }
 
-var ZoneauthgridsecondariesPreferredPrimariesAttrTypes = map[string]attr.Type{
+var ZoneStubStubFromAttrTypes = map[string]attr.Type{
 	"address":                          iptypes.IPAddressType{},
 	"name":                             types.StringType,
 	"shared_with_ms_parent_delegation": types.BoolType,
@@ -41,7 +43,7 @@ var ZoneauthgridsecondariesPreferredPrimariesAttrTypes = map[string]attr.Type{
 	"use_tsig_key_name":                types.BoolType,
 }
 
-var ZoneauthgridsecondariesPreferredPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
+var ZoneStubStubFromResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
 		Required:            true,
@@ -62,54 +64,32 @@ var ZoneauthgridsecondariesPreferredPrimariesResourceSchemaAttributes = map[stri
 		MarkdownDescription: "This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.",
 	},
 	"stealth": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
-		},
-		Default:             stringdefault.StaticString("HMAC-MD5.SIG-ALG.REG.INT"),
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
 
-func ExpandZoneauthgridsecondariesPreferredPrimaries(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZoneauthgridsecondariesPreferredPrimaries {
+func ExpandZoneStubStubFrom(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZoneStubStubFrom {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m ZoneauthgridsecondariesPreferredPrimariesModel
+	var m ZoneStubStubFromModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -117,39 +97,34 @@ func ExpandZoneauthgridsecondariesPreferredPrimaries(ctx context.Context, o type
 	return m.Expand(ctx, diags)
 }
 
-func (m *ZoneauthgridsecondariesPreferredPrimariesModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneauthgridsecondariesPreferredPrimaries {
+func (m *ZoneStubStubFromModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneStubStubFrom {
 	if m == nil {
 		return nil
 	}
-	to := &dns.ZoneauthgridsecondariesPreferredPrimaries{
-		Address:        flex.ExpandIPAddress(m.Address),
-		Name:           flex.ExpandStringPointer(m.Name),
-		Stealth:        flex.ExpandBoolPointer(m.Stealth),
-		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
-		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
-		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
-		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
+	to := &dns.ZoneStubStubFrom{
+		Address: flex.ExpandIPAddress(m.Address),
+		Name:    flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }
 
-func FlattenZoneauthgridsecondariesPreferredPrimaries(ctx context.Context, from *dns.ZoneauthgridsecondariesPreferredPrimaries, diags *diag.Diagnostics) types.Object {
+func FlattenZoneStubStubFrom(ctx context.Context, from *dns.ZoneStubStubFrom, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(ZoneauthgridsecondariesPreferredPrimariesAttrTypes)
+		return types.ObjectNull(ZoneStubStubFromAttrTypes)
 	}
-	m := ZoneauthgridsecondariesPreferredPrimariesModel{}
+	m := ZoneStubStubFromModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, ZoneauthgridsecondariesPreferredPrimariesAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, ZoneStubStubFromAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *ZoneauthgridsecondariesPreferredPrimariesModel) Flatten(ctx context.Context, from *dns.ZoneauthgridsecondariesPreferredPrimaries, diags *diag.Diagnostics) {
+func (m *ZoneStubStubFromModel) Flatten(ctx context.Context, from *dns.ZoneStubStubFrom, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = ZoneauthgridsecondariesPreferredPrimariesModel{}
+		*m = ZoneStubStubFromModel{}
 	}
 	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Name = flex.FlattenStringPointer(from.Name)

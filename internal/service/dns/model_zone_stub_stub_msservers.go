@@ -15,10 +15,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-type ZoneAuthMsSecondariesModel struct {
+type ZoneStubStubMsserversModel struct {
 	Address                      iptypes.IPAddress `tfsdk:"address"`
 	IsMaster                     types.Bool        `tfsdk:"is_master"`
 	NsIp                         types.String      `tfsdk:"ns_ip"`
@@ -27,7 +28,7 @@ type ZoneAuthMsSecondariesModel struct {
 	SharedWithMsParentDelegation types.Bool        `tfsdk:"shared_with_ms_parent_delegation"`
 }
 
-var ZoneAuthMsSecondariesAttrTypes = map[string]attr.Type{
+var ZoneStubStubMsserversAttrTypes = map[string]attr.Type{
 	"address":                          iptypes.IPAddressType{},
 	"is_master":                        types.BoolType,
 	"ns_ip":                            types.StringType,
@@ -36,7 +37,7 @@ var ZoneAuthMsSecondariesAttrTypes = map[string]attr.Type{
 	"shared_with_ms_parent_delegation": types.BoolType,
 }
 
-var ZoneAuthMsSecondariesResourceSchemaAttributes = map[string]schema.Attribute{
+var ZoneStubStubMsserversResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
 		Required:            true,
@@ -45,6 +46,7 @@ var ZoneAuthMsSecondariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"is_master": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag indicates if this server is a synchronization master.",
 	},
 	"ns_ip": schema.StringAttribute{
@@ -73,11 +75,11 @@ var ZoneAuthMsSecondariesResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandZoneAuthMsSecondaries(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZoneAuthMsSecondaries {
+func ExpandZoneStubStubMsservers(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZoneStubStubMsservers {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m ZoneAuthMsSecondariesModel
+	var m ZoneStubStubMsserversModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -85,11 +87,11 @@ func ExpandZoneAuthMsSecondaries(ctx context.Context, o types.Object, diags *dia
 	return m.Expand(ctx, diags)
 }
 
-func (m *ZoneAuthMsSecondariesModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneAuthMsSecondaries {
+func (m *ZoneStubStubMsserversModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneStubStubMsservers {
 	if m == nil {
 		return nil
 	}
-	to := &dns.ZoneAuthMsSecondaries{
+	to := &dns.ZoneStubStubMsservers{
 		Address:  flex.ExpandIPAddress(m.Address),
 		IsMaster: flex.ExpandBoolPointer(m.IsMaster),
 		NsIp:     flex.ExpandStringPointer(m.NsIp),
@@ -99,23 +101,23 @@ func (m *ZoneAuthMsSecondariesModel) Expand(ctx context.Context, diags *diag.Dia
 	return to
 }
 
-func FlattenZoneAuthMsSecondaries(ctx context.Context, from *dns.ZoneAuthMsSecondaries, diags *diag.Diagnostics) types.Object {
+func FlattenZoneStubStubMsservers(ctx context.Context, from *dns.ZoneStubStubMsservers, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(ZoneAuthMsSecondariesAttrTypes)
+		return types.ObjectNull(ZoneStubStubMsserversAttrTypes)
 	}
-	m := ZoneAuthMsSecondariesModel{}
+	m := ZoneStubStubMsserversModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, ZoneAuthMsSecondariesAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, ZoneStubStubMsserversAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *ZoneAuthMsSecondariesModel) Flatten(ctx context.Context, from *dns.ZoneAuthMsSecondaries, diags *diag.Diagnostics) {
+func (m *ZoneStubStubMsserversModel) Flatten(ctx context.Context, from *dns.ZoneStubStubMsservers, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = ZoneAuthMsSecondariesModel{}
+		*m = ZoneStubStubMsserversModel{}
 	}
 	m.Address = flex.FlattenIPAddress(from.Address)
 	m.IsMaster = types.BoolPointerValue(from.IsMaster)
