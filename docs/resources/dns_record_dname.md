@@ -41,7 +41,7 @@ resource "nios_dns_record_dname" "create_record_dname_with_additional_fields" {
   use_ttl = true
 }
 
-// Create IPV4 reverse mapping zone (Required as Parent)
+// Create an IPV4 reverse mapping zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_zone_3" {
   fqdn        = "10.0.0.0/24"
   zone_format = "IPV4"
@@ -54,7 +54,7 @@ resource "nios_dns_record_dname" "create_record_dname1" {
   name = nios_dns_zone_auth.parent_zone_3.display_domain
 }
 
-// Create IPV6 reverse mapping zone (Required as Parent)
+// Create an IPV6 reverse mapping zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_zone_4" {
   fqdn        = "2002:1100::/64"
   zone_format = "IPV6"
