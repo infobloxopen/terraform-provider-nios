@@ -10,8 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -66,7 +64,6 @@ var NsgroupExternalSecondariesResourceSchemaAttributes = map[string]schema.Attri
 	"stealth": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
@@ -83,7 +80,6 @@ var NsgroupExternalSecondariesResourceSchemaAttributes = map[string]schema.Attri
 	"tsig_key_alg": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("HMAC-MD5"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
 		},
@@ -104,7 +100,6 @@ var NsgroupExternalSecondariesResourceSchemaAttributes = map[string]schema.Attri
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
