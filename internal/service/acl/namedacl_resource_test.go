@@ -77,9 +77,10 @@ func TestAccNamedaclResource_AccessList(t *testing.T) {
 
 	acl2 := []map[string]any{
 		{
-			"struct":     "addressac",
-			"address":    "10.0.0.5",
-			"permission": "ALLOW",
+			"struct":        "tsigac",
+			"tsig_key":      "X4oRe92t54I+T98NdQpV2w==",
+			"tsig_key_name": "example-tsig-key",
+			"tsig_key_alg":  "HMAC-SHA256",
 		},
 	}
 
@@ -92,6 +93,7 @@ func TestAccNamedaclResource_AccessList(t *testing.T) {
 				Config: testAccNamedaclAccessList(name, acl1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNamedaclExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "access_list.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "access_list.0.address", "10.0.0.5"),
 					resource.TestCheckResourceAttr(resourceName, "access_list.0.permission", "DENY"),
 				),
@@ -101,8 +103,8 @@ func TestAccNamedaclResource_AccessList(t *testing.T) {
 				Config: testAccNamedaclAccessList(name, acl2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNamedaclExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "access_list.0.address", "10.0.0.5"),
-					resource.TestCheckResourceAttr(resourceName, "access_list.0.permission", "ALLOW"),
+					resource.TestCheckResourceAttr(resourceName, "access_list.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "access_list.0.tsig_key", "X4oRe92t54I+T98NdQpV2w=="),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
