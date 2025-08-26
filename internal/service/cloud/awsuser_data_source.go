@@ -35,11 +35,10 @@ func (d *AwsuserDataSource) Metadata(ctx context.Context, req datasource.Metadat
 }
 
 type AwsuserModelWithFilter struct {
-	Filters        types.Map   `tfsdk:"filters"`
-	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
-	Result         types.List  `tfsdk:"result"`
-	MaxResults     types.Int32 `tfsdk:"max_results"`
-	Paging         types.Int32 `tfsdk:"paging"`
+	Filters    types.Map   `tfsdk:"filters"`
+	Result     types.List  `tfsdk:"result"`
+	MaxResults types.Int32 `tfsdk:"max_results"`
+	Paging     types.Int32 `tfsdk:"paging"`
 }
 
 func (m *AwsuserModelWithFilter) FlattenResults(ctx context.Context, from []cloud.Awsuser, diags *diag.Diagnostics) {
