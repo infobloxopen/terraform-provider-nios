@@ -127,7 +127,6 @@ func (d *AwsuserDataSource) Read(ctx context.Context, req datasource.ReadRequest
 				AwsuserAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForAwsuser).
 				Paging(paging).
