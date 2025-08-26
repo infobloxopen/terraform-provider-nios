@@ -18,7 +18,6 @@ resource "nios_acl_namedacl" "base_namedacl" {
   name    = "base-acl-template"
   comment = "Base ACL structure created for future assignment of access control entries"
 
-  // Extensible Attributes
   extattrs = {
     Site = "location-1"
   }
@@ -43,7 +42,6 @@ resource "nios_acl_namedacl" "namedacl_with_additional_config" {
     }
   ]
 
-  // Extensible Attributes
   extattrs = {
     Site = "location-2"
   }
