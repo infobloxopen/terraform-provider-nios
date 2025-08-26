@@ -3,12 +3,12 @@
 page_title: "nios_cloud_awsuser Resource - nios"
 subcategory: "CLOUD"
 description: |-
-  AWS User Resource
+  Manages an AWS User.
 ---
 
 # nios_cloud_awsuser (Resource)
 
-AWS User Resource
+Manages an AWS User.
 
 ## Example Usage
 

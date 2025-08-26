@@ -17,6 +17,7 @@ import (
 
 var readableAttributesForAwsuser = "access_key_id,account_id,govcloud_enabled,last_used,name,nios_user_name,status"
 
+// TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
 func TestAccAwsuserResource_basic(t *testing.T) {
 	var resourceName = "nios_cloud_awsuser.test"
 	var v cloud.Awsuser
@@ -79,6 +80,7 @@ func TestAccAwsuserResource_AccessKeyId(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("aws-user")
 	accessKeyId1 := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accessKeyId2 := "AKIA" + acctest.RandomAlphaNumeric(16)
+	secret_access_key := "S1JGWfwcZWEY+hSkfpyhxigL9A/ua96mY"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -86,7 +88,7 @@ func TestAccAwsuserResource_AccessKeyId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsuserAccessKeyId(accessKeyId1, accountId, name),
+				Config: testAccAwsuserAccessKeyId(accessKeyId1, accountId, name, secret_access_key),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "access_key_id"),
@@ -96,7 +98,7 @@ func TestAccAwsuserResource_AccessKeyId(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAwsuserAccessKeyId(accessKeyId2, accountId, name),
+				Config: testAccAwsuserAccessKeyId(accessKeyId2, accountId, name, secret_access_key),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "access_key_id"),
@@ -114,6 +116,7 @@ func TestAccAwsuserResource_AccountId(t *testing.T) {
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	name := acctest.RandomNameWithPrefix("aws-user")
+	secret_access_key := "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -121,7 +124,7 @@ func TestAccAwsuserResource_AccountId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsuserAccountId("33773173961", accessKeyId, name),
+				Config: testAccAwsuserAccountId("33773173961", accessKeyId, name, secret_access_key),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "account_id", "33773173961"),
@@ -129,7 +132,7 @@ func TestAccAwsuserResource_AccountId(t *testing.T) {
 			},
 			//Update and Read
 			{
-				Config: testAccAwsuserAccountId("12345689012", accessKeyId, name),
+				Config: testAccAwsuserAccountId("12345689012", accessKeyId, name, secret_access_key),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "account_id", "12345689012"),
@@ -146,6 +149,7 @@ func TestAccAwsuserResource_GovcloudEnabled(t *testing.T) {
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
 	name := acctest.RandomNameWithPrefix("aws-user")
+	secret_access_key := "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -153,7 +157,7 @@ func TestAccAwsuserResource_GovcloudEnabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsuserGovcloudEnabled(accountId, accessKeyId, name, "true"),
+				Config: testAccAwsuserGovcloudEnabled(accountId, accessKeyId, name, "true", secret_access_key),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "govcloud_enabled", "true"),
@@ -161,7 +165,7 @@ func TestAccAwsuserResource_GovcloudEnabled(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAwsuserGovcloudEnabled(accountId, accessKeyId, name, "false"),
+				Config: testAccAwsuserGovcloudEnabled(accountId, accessKeyId, name, "false", secret_access_key),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "govcloud_enabled", "false"),
@@ -178,6 +182,7 @@ func TestAccAwsuserResource_Name(t *testing.T) {
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
 	name := acctest.RandomNameWithPrefix("aws-user")
+	secretAccessKey := "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -185,7 +190,7 @@ func TestAccAwsuserResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsuserName(accountId, accessKeyId, name, "false"),
+				Config: testAccAwsuserName(accountId, accessKeyId, name, "false", secretAccessKey),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -193,7 +198,7 @@ func TestAccAwsuserResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAwsuserName(accountId, accessKeyId, name+"-updated", "false"),
+				Config: testAccAwsuserName(accountId, accessKeyId, name+"-updated", "false", secretAccessKey),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
@@ -211,6 +216,7 @@ func TestAccAwsuserResource_NiosUserName(t *testing.T) {
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
 	name := acctest.RandomNameWithPrefix("aws-user")
+	secretAccessKey := "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -218,7 +224,7 @@ func TestAccAwsuserResource_NiosUserName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsuserNiosUserName(accountId, accessKeyId, name, "aws1"),
+				Config: testAccAwsuserNiosUserName(accountId, accessKeyId, name, "aws1", secretAccessKey),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nios_user_name", "aws1"),
@@ -226,7 +232,7 @@ func TestAccAwsuserResource_NiosUserName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAwsuserNiosUserName(accountId, accessKeyId, name, "aws2"),
+				Config: testAccAwsuserNiosUserName(accountId, accessKeyId, name, "aws2", secretAccessKey),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nios_user_name", "aws2"),
@@ -341,65 +347,65 @@ resource "nios_cloud_awsuser" "test" {
 `, accessKeyId, accountId, name, secretAccessKey)
 }
 
-func testAccAwsuserAccessKeyId(accessKeyId, accountId, name string) string {
+func testAccAwsuserAccessKeyId(accessKeyId, accountId, name, secretAccessKey string) string {
 	return fmt.Sprintf(`
 resource "nios_cloud_awsuser" "test_access_key_id" {
     access_key_id = %q
     account_id    = %q
     name          = %q
-    govcloud_enabled = false
-	secret_access_key = "S1JGWfwcZWEY+hSkfpyhxigL9A/ua96mY"
+    secret_access_key = %q
 }
-`, accessKeyId, accountId, name)
+`, accessKeyId, accountId, name, secretAccessKey)
+
 }
 
-func testAccAwsuserAccountId(accountId, accessKeyId, name string) string {
+func testAccAwsuserAccountId(accountId, accessKeyId, name, secretAccessKey string) string {
 	return fmt.Sprintf(`
 resource "nios_cloud_awsuser" "test_account_id" {
     account_id = %q
     access_key_id = %q
     name = %q
-    secret_access_key = "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
-    govcloud_enabled = false
+    secret_access_key = %q
 }
-`, accountId, accessKeyId, name)
+`, accountId, accessKeyId, name, secretAccessKey)
 }
 
-func testAccAwsuserGovcloudEnabled(accountId, accessKeyId, name, govcloudEnabled string) string {
+func testAccAwsuserGovcloudEnabled(accountId, accessKeyId, name, govcloudEnabled, secretAccessKey string) string {
 	return fmt.Sprintf(`
 resource "nios_cloud_awsuser" "test_govcloud_enabled" {
     account_id = %q
     access_key_id = %q
     name = %q
-    secret_access_key = "S1JGWfwcZWEY+hSkfpyhxigL9A/ua96mY"
     govcloud_enabled = %q
+	secret_access_key = %q
 }
-`, accountId, accessKeyId, name, govcloudEnabled)
+`, accountId, accessKeyId, name, govcloudEnabled, secretAccessKey)
 }
 
-func testAccAwsuserName(accountId, accessKeyId, name, govcloudEnabled string) string {
+func testAccAwsuserName(accountId, accessKeyId, name, govcloudEnabled, secretAccessKey string) string {
 	return fmt.Sprintf(`
 resource "nios_cloud_awsuser" "test_name" {
     account_id = %q
     access_key_id = %q
     name = %q
-    secret_access_key = "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
-    govcloud_enabled = %q
+	govcloud_enabled = %q
+    secret_access_key = %q
+
 }
-`, accountId, accessKeyId, name, govcloudEnabled)
+`, accountId, accessKeyId, name, govcloudEnabled, secretAccessKey)
 }
 
-func testAccAwsuserNiosUserName(accountId, accessKeyId, name, niosUserName string) string {
+func testAccAwsuserNiosUserName(accountId, accessKeyId, name, niosUserName, secretAccessKey string) string {
 	return fmt.Sprintf(`
 resource "nios_cloud_awsuser" "test_nios_user_name" {
     account_id = %q
     access_key_id = %q
     name = %q
-    secret_access_key = "S1JGWfwcZWEY+jhSkfpyhxigL9A/uaJ6mY"
     govcloud_enabled = false
     nios_user_name = %q
+	secret_access_key = %q
 }
-`, accountId, accessKeyId, name, niosUserName)
+`, accountId, accessKeyId, name, niosUserName, secretAccessKey)
 }
 
 func testAccAwsuserSecretAccessKey(accountId, accessKeyId, name, secretAccessKey string) string {

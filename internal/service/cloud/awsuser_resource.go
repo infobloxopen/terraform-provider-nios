@@ -36,7 +36,7 @@ func (r *AwsuserResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *AwsuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "AWS User Resource",
+		MarkdownDescription: "Manages an AWS User.",
 		Attributes:          AwsuserResourceSchemaAttributes,
 	}
 }
@@ -86,7 +86,7 @@ func (r *AwsuserResource) Create(ctx context.Context, req resource.CreateRequest
 
 	res := apiRes.CreateAwsuserResponseAsObject.GetResult()
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Awsuser due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Awsuser, got error: %s", err))
 		return
 	}
 
@@ -164,7 +164,7 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 	res := apiRes.UpdateAwsuserResponseAsObject.GetResult()
 
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Awsuse, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Awsuser, got error: %s", diags))
 		return
 	}
 
