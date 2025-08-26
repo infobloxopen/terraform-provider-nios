@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -49,9 +51,11 @@ var NamedaclResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: NamedaclAccessListResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
+		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: NamedaclAccessListAttrTypes})),
 		MarkdownDescription: "The access control list of IPv4/IPv6 addresses, networks, TSIG-based anonymous access controls, and other named ACLs.",
 	},
 	"comment": schema.StringAttribute{
@@ -63,6 +67,7 @@ var NamedaclResourceSchemaAttributes = map[string]schema.Attribute{
 				"Should not have leading or trailing whitespace",
 			),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the named ACL; maximum 256 characters.",
 	},
 	"exploded_access_list": schema.ListNestedAttribute{
@@ -104,7 +109,6 @@ func (m *NamedaclModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		return nil
 	}
 	to := &acl.Namedacl{
-		Ref:        flex.ExpandStringPointer(m.Ref),
 		AccessList: flex.ExpandFrameworkListNestedBlock(ctx, m.AccessList, diags, ExpandNamedaclAccessList),
 		Comment:    flex.ExpandStringPointer(m.Comment),
 		ExtAttrs:   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
