@@ -31,7 +31,7 @@ func (v NotArpaValidator) ValidateString(ctx context.Context, request validator.
 		response.Diagnostics.AddAttributeError(
 			request.Path,
 			"ARPA Format Not Allowed",
-			fmt.Sprintf("ARPA format addresses are not allowed: '%s'", request.ConfigValue.ValueString()),
+			fmt.Sprintf("ARPA format addresses are not allowed: '%s'. Please use IP CIDR Notation.", request.ConfigValue.ValueString()),
 		)
 	}
 }
