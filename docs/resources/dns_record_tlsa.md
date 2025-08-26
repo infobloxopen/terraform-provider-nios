@@ -35,9 +35,14 @@ resource "nios_dns_record_tlsa" "create_record_tlsa_with_additional_fields" {
   matched_type      = 0
   selector          = 0
 
+  // Additional Fields
   extattrs = {
     Site = "location-1"
   }
+  ttl     = 3600
+  use_ttl = true
+  disable = false
+  creator = "STATIC"
   comment = "TLSA record created by Terraform"
 }
 ```
