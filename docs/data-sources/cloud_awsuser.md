@@ -3,12 +3,12 @@
 page_title: "nios_cloud_awsuser Data Source - nios"
 subcategory: "CLOUD"
 description: |-
-  
+  AWS User Data Source
 ---
 
 # nios_cloud_awsuser (Data Source)
 
-
+AWS User Data Source
 
 ## Example Usage
 
@@ -16,7 +16,7 @@ description: |-
 // Retrieve a specific AWS User by filters
 data "nios_cloud_awsuser" "awsuser_name" {
   filters = {
-    nios_user_name = "AWS_USER_NAME"
+    name = "aws-user"
   }
 }
 

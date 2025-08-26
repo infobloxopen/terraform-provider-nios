@@ -1,5 +1,5 @@
 // Create AWS User with Basic Fields
-resource "nios_cloud_awsuser" "awsusertest" {
+resource "nios_cloud_awsuser" "aws_user_basic_fields" {
   access_key_id     = "AKIAaaaaaaaaaaaaaaaa"
   account_id        = "337773173961"
   name              = "aws-user"
@@ -7,7 +7,7 @@ resource "nios_cloud_awsuser" "awsusertest" {
 }
 
 // Create AWS User with Additional Fields
-resource "nios_cloud_awsuser" "test2" {
+resource "nios_cloud_awsuser" "aws_user_additional_fields" {
   access_key_id     = "AKIAbbbbbbbbbbbbbbbb"
   account_id        = "337773173962"
   name              = "aws-user-2"

@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
 
@@ -54,11 +53,15 @@ var AwsuserResourceSchemaAttributes = map[string]schema.Attribute{
 				regexp.MustCompile(`^[^\s]([^\s]|.*[^\s])?$`),
 				"Should not have leading or trailing whitespace",
 			),
+			stringvalidator.LengthAtMost(255),
 		},
 		MarkdownDescription: "The unique Access Key ID of this AWS user. Maximum 255 characters.",
 	},
 	"account_id": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtMost(64),
+		},
 		MarkdownDescription: "The AWS Account ID of this AWS user. Maximum 64 characters.",
 	},
 	"govcloud_enabled": schema.BoolAttribute{
@@ -72,12 +75,18 @@ var AwsuserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The timestamp when this AWS user credentials was last used.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtMost(64),
+		},
 		MarkdownDescription: "The AWS user name. Maximum 64 characters.",
 	},
 	"nios_user_name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtMost(64),
+		},
 		MarkdownDescription: "The NIOS user name mapped to this AWS user. Maximum 64 characters.",
 	},
 	"secret_access_key": schema.StringAttribute{
@@ -96,24 +105,11 @@ var AwsuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandAwsuser(ctx context.Context, o types.Object, diags *diag.Diagnostics) *cloud.Awsuser {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m AwsuserModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *AwsuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *cloud.Awsuser {
 	if m == nil {
 		return nil
 	}
 	to := &cloud.Awsuser{
-		Ref:             flex.ExpandStringPointer(m.Ref),
 		AccessKeyId:     flex.ExpandStringPointer(m.AccessKeyId),
 		AccountId:       flex.ExpandStringPointer(m.AccountId),
 		GovcloudEnabled: flex.ExpandBoolPointer(m.GovcloudEnabled),
@@ -149,6 +145,5 @@ func (m *AwsuserModel) Flatten(ctx context.Context, from *cloud.Awsuser, diags *
 	m.LastUsed = flex.FlattenInt64Pointer(from.LastUsed)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NiosUserName = flex.FlattenStringPointer(from.NiosUserName)
-	//m.SecretAccessKey = flex.FlattenStringPointer(from.SecretAccessKey)
 	m.Status = flex.FlattenStringPointer(from.Status)
 }

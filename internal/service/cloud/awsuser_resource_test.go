@@ -23,7 +23,7 @@ func TestAccAwsuserResource_basic(t *testing.T) {
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
 	name := acctest.RandomNameWithPrefix("aws-user")
-	secret_access_key := "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"
+	secret_access_key := "S1JGWfwcZWEY+hSkfpyhxigL9A/uaJ96mY"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -38,6 +38,7 @@ func TestAccAwsuserResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "access_key_id", accessKeyId),
 					resource.TestCheckResourceAttr(resourceName, "account_id", accountId),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
+					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "govcloud_enabled", "false"),
 				),
 			},
@@ -52,7 +53,7 @@ func TestAccAwsuserResource_disappears(t *testing.T) {
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
 	name := acctest.RandomNameWithPrefix("aws-user")
-	secret_access_key := "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"
+	secret_access_key := "S1JGWfwcZWEY+jhSkfpyhxigL9A/ua6mY"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -120,18 +121,18 @@ func TestAccAwsuserResource_AccountId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsuserAccountId("337773173961", accessKeyId, name),
+				Config: testAccAwsuserAccountId("33773173961", accessKeyId, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "account_id", "337773173961"),
+					resource.TestCheckResourceAttr(resourceName, "account_id", "33773173961"),
 				),
 			},
 			//Update and Read
 			{
-				Config: testAccAwsuserAccountId("123456789012", accessKeyId, name),
+				Config: testAccAwsuserAccountId("12345689012", accessKeyId, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "account_id", "123456789012"),
+					resource.TestCheckResourceAttr(resourceName, "account_id", "12345689012"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -203,6 +204,7 @@ func TestAccAwsuserResource_Name(t *testing.T) {
 	})
 }
 
+// TODO : create a aww user called aws1  and aws2
 func TestAccAwsuserResource_NiosUserName(t *testing.T) {
 	var resourceName = "nios_cloud_awsuser.test_nios_user_name"
 	var v cloud.Awsuser
@@ -216,18 +218,18 @@ func TestAccAwsuserResource_NiosUserName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsuserNiosUserName(accountId, accessKeyId, name, "anil"),
+				Config: testAccAwsuserNiosUserName(accountId, accessKeyId, name, "aws1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nios_user_name", "anil"),
+					resource.TestCheckResourceAttr(resourceName, "nios_user_name", "aws1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAwsuserNiosUserName(accountId, accessKeyId, name, "anil2"),
+				Config: testAccAwsuserNiosUserName(accountId, accessKeyId, name, "aws2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nios_user_name", "anil2"),
+					resource.TestCheckResourceAttr(resourceName, "nios_user_name", "aws2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -248,18 +250,18 @@ func TestAccAwsuserResource_SecretAccessKey(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsuserSecretAccessKey(accountId, accessKeyId, name, "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"),
+				Config: testAccAwsuserSecretAccessKey(accountId, accessKeyId, name, "S1JGWfwcZWEYhSkfpyhxigL9A/J96mY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "secret_access_key", "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"),
+					resource.TestCheckResourceAttr(resourceName, "secret_access_key", "S1JGWfwcZWEYhSkfpyhxigL9A/J96mY"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAwsuserSecretAccessKey(accountId, accessKeyId, name, "K1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"),
+				Config: testAccAwsuserSecretAccessKey(accountId, accessKeyId, name, "K1JGWfwcZWEYYhSkfpyhxigL9A/J96mY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "secret_access_key", "K1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"),
+					resource.TestCheckResourceAttr(resourceName, "secret_access_key", "K1JGWfwcZWEYYhSkfpyhxigL9A/J96mY"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -346,7 +348,7 @@ resource "nios_cloud_awsuser" "test_access_key_id" {
     account_id    = %q
     name          = %q
     govcloud_enabled = false
-	secret_access_key = "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"
+	secret_access_key = "S1JGWfwcZWEY+hSkfpyhxigL9A/ua96mY"
 }
 `, accessKeyId, accountId, name)
 }
@@ -357,7 +359,7 @@ resource "nios_cloud_awsuser" "test_account_id" {
     account_id = %q
     access_key_id = %q
     name = %q
-    secret_access_key = "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"
+    secret_access_key = "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
     govcloud_enabled = false
 }
 `, accountId, accessKeyId, name)
@@ -369,7 +371,7 @@ resource "nios_cloud_awsuser" "test_govcloud_enabled" {
     account_id = %q
     access_key_id = %q
     name = %q
-    secret_access_key = "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"
+    secret_access_key = "S1JGWfwcZWEY+hSkfpyhxigL9A/ua96mY"
     govcloud_enabled = %q
 }
 `, accountId, accessKeyId, name, govcloudEnabled)
@@ -381,7 +383,7 @@ resource "nios_cloud_awsuser" "test_name" {
     account_id = %q
     access_key_id = %q
     name = %q
-    secret_access_key = "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"
+    secret_access_key = "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
     govcloud_enabled = %q
 }
 `, accountId, accessKeyId, name, govcloudEnabled)
@@ -393,7 +395,7 @@ resource "nios_cloud_awsuser" "test_nios_user_name" {
     account_id = %q
     access_key_id = %q
     name = %q
-    secret_access_key = "S1JGWfwcZWEY+uduuujhSkfpyhxigL9A/uaJ96mY"
+    secret_access_key = "S1JGWfwcZWEY+jhSkfpyhxigL9A/uaJ6mY"
     govcloud_enabled = false
     nios_user_name = %q
 }

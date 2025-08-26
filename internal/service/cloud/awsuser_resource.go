@@ -36,7 +36,7 @@ func (r *AwsuserResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *AwsuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "AWS User Resource",
 		Attributes:          AwsuserResourceSchemaAttributes,
 	}
 }
@@ -113,7 +113,7 @@ func (r *AwsuserResource) Read(ctx context.Context, req resource.ReadRequest, re
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -164,7 +164,7 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 	res := apiRes.UpdateAwsuserResponseAsObject.GetResult()
 
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Awsuser due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Awsuse, got error: %s", diags))
 		return
 	}
 
