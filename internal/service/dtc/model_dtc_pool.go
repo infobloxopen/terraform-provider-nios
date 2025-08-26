@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
-	internalvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
@@ -89,7 +88,6 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString("ALL"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ALL", "ANY", "QUORUM"),
-			internalvalidator.NewAvailabilityQuorumValidator(),
 		},
 		MarkdownDescription: "A resource in the pool is available if ANY, at least QUORUM, or ALL monitors for the pool say that it is up.",
 	},
@@ -189,9 +187,6 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	"quorum": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "For availability mode QUORUM, at least this many monitors must report the resource as up for it to be available",
-		Validators: []validator.Int64{
-			internalvalidator.NewQuorumValidator(),
-		},
 	},
 	"servers": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
