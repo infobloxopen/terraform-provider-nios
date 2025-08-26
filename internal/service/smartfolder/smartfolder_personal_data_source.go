@@ -140,7 +140,7 @@ func (d *SmartfolderPersonalDataSource) Read(ctx context.Context, req datasource
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SmartfolderPersonal by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SmartfolderPersonal, got error: %s", err))
 				return nil, "", err
 			}
 

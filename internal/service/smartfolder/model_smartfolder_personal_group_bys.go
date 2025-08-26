@@ -33,8 +33,7 @@ var SmartfolderPersonalGroupBysAttrTypes = map[string]attr.Type{
 
 var SmartfolderPersonalGroupBysResourceSchemaAttributes = map[string]schema.Attribute{
 	"value": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),

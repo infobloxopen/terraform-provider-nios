@@ -14,12 +14,12 @@ Manages personal Smart Folders.
 
 ```terraform
 // Create Smartfolder Personal with Basic Fields (Required only)
-resource "nios_smartfolder_personal" "basic" {
+resource "nios_smartfolder_personal" "create_smartfolder_personal_basic" {
   name = "example-personal-smartfolder"
 }
 
 // Create Smartfolder Personal with Additional Fields
-resource "nios_smartfolder_personal" "complete" {
+resource "nios_smartfolder_personal" "create_smartfolder_personal_additional" {
   name    = "example-personal-smartfolder-2"
   comment = "sample comment"
 
@@ -63,10 +63,13 @@ resource "nios_smartfolder_personal" "complete" {
 <a id="nestedatt--group_bys"></a>
 ### Nested Schema for `group_bys`
 
+Required:
+
+- `value` (String) The name of the Smart Folder grouping attribute.
+
 Optional:
 
 - `enable_grouping` (Boolean) Determines whether the grouping is enabled.
-- `value` (String) The name of the Smart Folder grouping attribute.
 - `value_type` (String) The type of the Smart Folder grouping attribute value.
 
 
