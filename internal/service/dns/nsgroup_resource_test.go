@@ -306,6 +306,11 @@ func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 			"name": "infoblox.172_28_83_208",
 		},
 	}
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.172_28_82_110",
+		},
+	}
 	gridSecondariesUpdate := []map[string]any{
 		{
 			"name": "infoblox.172_28_83_25",
@@ -318,7 +323,7 @@ func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupGridSecondaries(name, gridSecondaries),
+				Config: testAccNsgroupGridSecondaries(name, gridPrimary, gridSecondaries),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.172_28_83_208"),
@@ -326,7 +331,7 @@ func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupGridSecondaries(name, gridSecondariesUpdate),
+				Config: testAccNsgroupGridSecondaries(name, gridPrimary, gridSecondariesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.172_28_83_25"),
@@ -584,7 +589,6 @@ resource "nios_dns_nsgroup" "test_extattrs" {
 func testAccNsgroupExternalPrimaries(name string, externalPrimaries, gridSecondaries []map[string]any) string {
 	externalPrimariesStr := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
 	gridSecondariesStr := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
-
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_external_primaries" {
 	name = %q
@@ -617,18 +621,16 @@ resource "nios_dns_nsgroup" "test_grid_primary" {
 `, name, gridPrimaryStr)
 }
 
-func testAccNsgroupGridSecondaries(name string, gridSecondaries []map[string]any) string {
+func testAccNsgroupGridSecondaries(name string, gridPrimary, gridSecondaries []map[string]any) string {
+	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	gridSecondariesStr := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_grid_secondaries" {
 	name = %q
     grid_secondaries = %s
-	grid_primary = [
-	{
-		name: "infoblox.172_28_82_110"
-	}]
+	grid_primary = %s
 }
-`, name, gridSecondariesStr)
+`, name, gridSecondariesStr, gridPrimaryStr)
 }
 
 func testAccNsgroupIsGridDefault(name string, gridPrimary []map[string]any, isGridDefault bool) string {
@@ -666,7 +668,6 @@ resource "nios_dns_nsgroup" "test_name" {
 func testAccNsgroupUseExternalPrimary(name string, gridSecondaries, externalPrimaries []map[string]any, useExternalPrimary bool) string {
 	gridSecondariesStr := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 	externalPrimariesStr := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
-
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_use_external_primary" {
     name = %q
@@ -681,7 +682,6 @@ func testAccNsgroupUseExternalPrimaryUpdate(name string, gridSecondaries, extern
 	gridSecondariesStr := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 	externalPrimariesStr := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
 	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
-
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_use_external_primary" {
     name = %q
