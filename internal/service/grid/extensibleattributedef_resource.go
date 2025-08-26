@@ -63,7 +63,6 @@ func (r *ExtensibleattributedefResource) Configure(ctx context.Context, req reso
 
 func (r *ExtensibleattributedefResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data ExtensibleattributedefModel
-	var diags diag.Diagnostics
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -85,10 +84,6 @@ func (r *ExtensibleattributedefResource) Create(ctx context.Context, req resourc
 	}
 
 	res := apiRes.CreateExtensibleattributedefResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordNs due inherited Extensible attributes, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -97,7 +92,6 @@ func (r *ExtensibleattributedefResource) Create(ctx context.Context, req resourc
 }
 
 func (r *ExtensibleattributedefResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var diags diag.Diagnostics
 	var data ExtensibleattributedefModel
 
 	// Read Terraform prior state data into the model
@@ -126,11 +120,6 @@ func (r *ExtensibleattributedefResource) Read(ctx context.Context, req resource.
 	}
 
 	res := apiRes.GetExtensibleattributedefResponseObjectAsResult.GetResult()
-
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Extensibleattributedef due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -168,10 +157,6 @@ func (r *ExtensibleattributedefResource) Update(ctx context.Context, req resourc
 	}
 
 	res := apiRes.UpdateExtensibleattributedefResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Extensibleattributedef due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
