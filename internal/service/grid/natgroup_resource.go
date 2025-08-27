@@ -62,7 +62,6 @@ func (r *NatgroupResource) Configure(ctx context.Context, req resource.Configure
 }
 
 func (r *NatgroupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
 	var data NatgroupModel
 
 	// Read Terraform plan data into the model
@@ -85,10 +84,6 @@ func (r *NatgroupResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	res := apiRes.CreateNatgroupResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Natgroup due inherited Extensible attributes, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 

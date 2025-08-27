@@ -15,7 +15,7 @@ func TestAccNatgroupDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_grid_natgroup.test"
 	resourceName := "nios_grid_natgroup.test"
 	var v grid.Natgroup
-	name := acctest.RandomNameWithPrefix("natrgroup")
+	name := acctest.RandomNameWithPrefix("natgroup")
 	comment := "This is a test natgroup"
 
 	resource.Test(t, resource.TestCase{
