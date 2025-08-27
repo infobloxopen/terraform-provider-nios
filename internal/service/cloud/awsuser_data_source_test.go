@@ -18,6 +18,7 @@ func TestAccAwsuserDataSource_Filters(t *testing.T) {
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
 	name := acctest.RandomNameWithPrefix("aws-user")
+	secretAccessKey := "S1JGWfwcZWEYhSkfpyhxigL9A/uaJ6mY"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -25,7 +26,7 @@ func TestAccAwsuserDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckAwsuserDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAwsuserDataSourceConfigFilters(name, accessKeyId, accountId),
+				Config: testAccAwsuserDataSourceConfigFilters(name, accessKeyId, accountId, secretAccessKey),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckAwsuserExists(context.Background(), resourceName, &v),
@@ -50,14 +51,14 @@ func testAccCheckAwsuserResourceAttrPair(resourceName, dataSourceName string) []
 	}
 }
 
-func testAccAwsuserDataSourceConfigFilters(name, accessKeyId, accountId string) string {
+func testAccAwsuserDataSourceConfigFilters(name, accessKeyId, accountId, secretAccessKey string) string {
 	return fmt.Sprintf(`
 resource "nios_cloud_awsuser" "test" {
   name               = "%s"
   access_key_id      = "%s"
   account_id         = "%s"
   govcloud_enabled   = false
-  secret_access_key  = "S1JGWfwcZWE+hSkfpyhxigL9A/uaJ96mY"
+  secret_access_key  = %q
 }
 
 data "nios_cloud_awsuser" "test" {
@@ -65,5 +66,5 @@ data "nios_cloud_awsuser" "test" {
     name = nios_cloud_awsuser.test.name
   }
 }
-`, accessKeyId, accountId, name)
+`, accessKeyId, accountId, name, secretAccessKey)
 }

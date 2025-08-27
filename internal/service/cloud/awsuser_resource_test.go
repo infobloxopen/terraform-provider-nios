@@ -18,6 +18,7 @@ import (
 var readableAttributesForAwsuser = "access_key_id,account_id,govcloud_enabled,last_used,name,nios_user_name,status"
 
 // TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// Admin User - aws1, aws2
 func TestAccAwsuserResource_basic(t *testing.T) {
 	var resourceName = "nios_cloud_awsuser.test"
 	var v cloud.Awsuser
@@ -209,7 +210,6 @@ func TestAccAwsuserResource_Name(t *testing.T) {
 	})
 }
 
-// TODO : create a aww user called aws1  and aws2
 func TestAccAwsuserResource_NiosUserName(t *testing.T) {
 	var resourceName = "nios_cloud_awsuser.test_nios_user_name"
 	var v cloud.Awsuser
