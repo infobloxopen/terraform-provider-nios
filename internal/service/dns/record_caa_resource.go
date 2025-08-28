@@ -36,7 +36,7 @@ func (r *RecordCaaResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *RecordCaaResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DNS CAA record.",
 		Attributes:          RecordCaaResourceSchemaAttributes,
 	}
 }
