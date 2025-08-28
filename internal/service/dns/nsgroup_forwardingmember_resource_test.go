@@ -27,7 +27,7 @@ func TestAccNsgroupForwardingmemberResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardingmemberBasicConfig(),
+				Config: testAccNsgroupForwardingmemberBasicConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
@@ -49,7 +49,7 @@ func TestAccNsgroupForwardingmemberResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardingmemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardingmemberBasicConfig(),
+				Config: testAccNsgroupForwardingmemberBasicConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					testAccCheckNsgroupForwardingmemberDisappears(context.Background(), &v),

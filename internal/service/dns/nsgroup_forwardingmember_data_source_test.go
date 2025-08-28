@@ -44,7 +44,7 @@ func TestAccNsgroupForwardingmemberDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardingmemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(, acctest.RandomName()),
+				Config: testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters( acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),

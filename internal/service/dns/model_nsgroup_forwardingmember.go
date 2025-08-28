@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -10,11 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -43,6 +45,14 @@ var NsgroupForwardingmemberResourceSchemaAttributes = map[string]schema.Attribut
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "Comment for the Forwarding Member Name Server Group; maximum 256 characters.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -67,11 +77,17 @@ var NsgroupForwardingmemberResourceSchemaAttributes = map[string]schema.Attribut
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The list of forwarding member servers.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^[^\s].*[^\s]$`),
+				"Should not have leading or trailing whitespace",
+			),
+		},
 		MarkdownDescription: "The name of the Forwarding Member Name Server Group.",
 	},
 }
@@ -93,7 +109,6 @@ func (m *NsgroupForwardingmemberModel) Expand(ctx context.Context, diags *diag.D
 		return nil
 	}
 	to := &dns.NsgroupForwardingmember{
-		Ref:               flex.ExpandStringPointer(m.Ref),
 		Comment:           flex.ExpandStringPointer(m.Comment),
 		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ForwardingServers: flex.ExpandFrameworkListNestedBlock(ctx, m.ForwardingServers, diags, ExpandNsgroupForwardingmemberForwardingServers),
