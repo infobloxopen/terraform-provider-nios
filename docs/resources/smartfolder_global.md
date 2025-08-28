@@ -14,12 +14,12 @@ Manages Smartfolder Global resources.
 
 ```terraform
 // Create Smartfolder Global with Basic Fields
-resource "nios_smartfolder_global" "basic" {
+resource "nios_smartfolder_global" "create_smartfolder_global_basic" {
   name = "example-global-smartfolder"
 }
 
 // Create Smartfolder Global with Additional Fields
-resource "nios_smartfolder_global" "complete" {
+resource "nios_smartfolder_global" "create_smartfolder_global_additional" {
   name    = "example-global-smartfolder-2"
   comment = "sample comment"
 
@@ -62,10 +62,13 @@ resource "nios_smartfolder_global" "complete" {
 <a id="nestedatt--group_bys"></a>
 ### Nested Schema for `group_bys`
 
+Required:
+
+- `value` (String) The name of the Smart Folder grouping attribute.
+
 Optional:
 
 - `enable_grouping` (Boolean) Determines whether the grouping is enabled.
-- `value` (String) The name of the Smart Folder grouping attribute.
 - `value_type` (String) The type of the Smart Folder grouping attribute value.
 
 

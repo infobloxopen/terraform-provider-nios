@@ -124,16 +124,12 @@ func TestAccSmartfolderGlobalResource_GroupBys(t *testing.T) {
 		},
 	}
 
-	groupBysHCL1 := utils.ConvertSliceOfMapsToHCL(groupBys1)
-	groupBysHCL2 := utils.ConvertSliceOfMapsToHCL(groupBys2)
-	groupBysHCL3 := utils.ConvertSliceOfMapsToHCL(groupBys3)
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSmartfolderGlobalGroupBys(name, groupBysHCL1),
+				Config: testAccSmartfolderGlobalGroupBys(name, groupBys1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderGlobalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group_bys.#", "1"),
@@ -143,7 +139,7 @@ func TestAccSmartfolderGlobalResource_GroupBys(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSmartfolderGlobalGroupBys(name, groupBysHCL2),
+				Config: testAccSmartfolderGlobalGroupBys(name, groupBys2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderGlobalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group_bys.#", "1"),
@@ -153,7 +149,7 @@ func TestAccSmartfolderGlobalResource_GroupBys(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSmartfolderGlobalGroupBys(name, groupBysHCL3),
+				Config: testAccSmartfolderGlobalGroupBys(name, groupBys3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderGlobalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group_bys.#", "1"),
@@ -229,15 +225,12 @@ func TestAccSmartfolderGlobalResource_QueryItems(t *testing.T) {
 		},
 	}
 
-	queryItemsHCL1 := utils.ConvertSliceOfMapsToHCL(queryItems1)
-	queryItemsHCL2 := utils.ConvertSliceOfMapsToHCL(queryItems2)
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSmartfolderGlobalQueryItems(name, queryItemsHCL1),
+				Config: testAccSmartfolderGlobalQueryItems(name, queryItems1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderGlobalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "query_items.#", "1"),
@@ -250,7 +243,7 @@ func TestAccSmartfolderGlobalResource_QueryItems(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSmartfolderGlobalQueryItems(name, queryItemsHCL2),
+				Config: testAccSmartfolderGlobalQueryItems(name, queryItems2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSmartfolderGlobalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "query_items.#", "1"),
@@ -341,13 +334,14 @@ resource "nios_smartfolder_global" "test_comment" {
 `, name, comment)
 }
 
-func testAccSmartfolderGlobalGroupBys(name, groupBys string) string {
+func testAccSmartfolderGlobalGroupBys(name string, groupBys []map[string]any) string {
+	groupBysHCL := utils.ConvertSliceOfMapsToHCL(groupBys)
 	return fmt.Sprintf(`
 resource "nios_smartfolder_global" "test_group_bys" {
     name      = %q
     group_bys = %s
 }
-`, name, groupBys)
+`, name, groupBysHCL)
 }
 
 func testAccSmartfolderGlobalName(name string) string {
@@ -358,11 +352,12 @@ resource "nios_smartfolder_global" "test_name" {
 `, name)
 }
 
-func testAccSmartfolderGlobalQueryItems(name, queryItems string) string {
+func testAccSmartfolderGlobalQueryItems(name string, queryItems []map[string]any) string {
+	queryItemsHCL := utils.ConvertSliceOfMapsToHCL(queryItems)
 	return fmt.Sprintf(`
 resource "nios_smartfolder_global" "test_query_items" {
     name        = %q
     query_items = %s
 }
-`, name, queryItems)
+`, name, queryItemsHCL)
 }
