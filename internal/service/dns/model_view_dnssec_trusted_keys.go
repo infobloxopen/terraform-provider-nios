@@ -35,6 +35,7 @@ var ViewDnssecTrustedKeysAttrTypes = map[string]attr.Type{
 var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Required: true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
@@ -42,12 +43,14 @@ var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"algorithm": schema.StringAttribute{
 		Required: true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
 		MarkdownDescription: "The DNSSEC algorithm used to generate the key.",
 	},
 	"key": schema.StringAttribute{
+		Required: true,
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),

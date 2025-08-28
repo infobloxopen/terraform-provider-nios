@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -21,17 +20,17 @@ import (
 )
 
 type ViewMatchDestinationsModel struct {
-	Address        iptypes.IPAddress `tfsdk:"address"`
-	Struct         types.String      `tfsdk:"struct"`
-	Permission     types.String      `tfsdk:"permission"`
-	TsigKey        types.String      `tfsdk:"tsig_key"`
-	TsigKeyAlg     types.String      `tfsdk:"tsig_key_alg"`
-	TsigKeyName    types.String      `tfsdk:"tsig_key_name"`
-	UseTsigKeyName types.Bool        `tfsdk:"use_tsig_key_name"`
+	Address        types.String `tfsdk:"address"`
+	Struct         types.String `tfsdk:"struct"`
+	Permission     types.String `tfsdk:"permission"`
+	TsigKey        types.String `tfsdk:"tsig_key"`
+	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
+	TsigKeyName    types.String `tfsdk:"tsig_key_name"`
+	UseTsigKeyName types.Bool   `tfsdk:"use_tsig_key_name"`
 }
 
 var ViewMatchDestinationsAttrTypes = map[string]attr.Type{
-	"address":           iptypes.IPAddressType{},
+	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -50,9 +49,8 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
 	},
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Optional:   true,
-		Computed:   true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
@@ -140,7 +138,7 @@ func (m *ViewMatchDestinationsModel) Expand(ctx context.Context, diags *diag.Dia
 		return nil
 	}
 	to := &dns.ViewMatchDestinations{
-		Address:        flex.ExpandIPAddress(m.Address),
+		Address:        flex.ExpandStringPointer(m.Address),
 		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -169,7 +167,7 @@ func (m *ViewMatchDestinationsModel) Flatten(ctx context.Context, from *dns.View
 	if m == nil {
 		*m = ViewMatchDestinationsModel{}
 	}
-	m.Address = flex.FlattenIPAddress(from.Address)
+	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

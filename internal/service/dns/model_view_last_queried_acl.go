@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -20,19 +19,18 @@ import (
 )
 
 type ViewLastQueriedAclModel struct {
-	Address    iptypes.IPAddress `tfsdk:"address"`
-	Permission types.String      `tfsdk:"permission"`
+	Address    types.String `tfsdk:"address"`
+	Permission types.String `tfsdk:"permission"`
 }
 
 var ViewLastQueriedAclAttrTypes = map[string]attr.Type{
-	"address":    iptypes.IPAddressType{},
+	"address":    types.StringType,
 	"permission": types.StringType,
 }
 
 var ViewLastQueriedAclResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Required:   true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
 		},
@@ -66,7 +64,7 @@ func (m *ViewLastQueriedAclModel) Expand(ctx context.Context, diags *diag.Diagno
 		return nil
 	}
 	to := &dns.ViewLastQueriedAcl{
-		Address:    flex.ExpandIPAddress(m.Address),
+		Address:    flex.ExpandStringPointer(m.Address),
 		Permission: flex.ExpandStringPointer(m.Permission),
 	}
 	return to
@@ -90,6 +88,6 @@ func (m *ViewLastQueriedAclModel) Flatten(ctx context.Context, from *dns.ViewLas
 	if m == nil {
 		*m = ViewLastQueriedAclModel{}
 	}
-	m.Address = flex.FlattenIPAddress(from.Address)
+	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 }
