@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -34,9 +36,10 @@ type NIOSProvider struct {
 
 // NIOSProviderModel describes the provider data model.
 type NIOSProviderModel struct {
-	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
-	NIOSUsername types.String `tfsdk:"nios_username"`
-	NIOSPassword types.String `tfsdk:"nios_password"`
+	NIOSHostURL     types.String `tfsdk:"nios_host_url"`
+	NIOSUsername    types.String `tfsdk:"nios_username"`
+	NIOSPassword    types.String `tfsdk:"nios_password"`
+	NIOSWAPIVersion types.String `tfsdk:"nios_wapi_version"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -57,6 +60,12 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			"nios_password": schema.StringAttribute{
 				Optional: true,
 			},
+			"nios_wapi_version": schema.StringAttribute{
+				Optional: true,
+				Validators: []validator.String{
+					stringvalidator.OneOf("v2.13.1", "v2.13.4", "v2.13.5", "v2.13.6"),
+				},
+			},
 		},
 	}
 }
@@ -75,6 +84,7 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithNIOSUsername(data.NIOSUsername.ValueString()),
 		option.WithNIOSPassword(data.NIOSPassword.ValueString()),
 		option.WithNIOSHostUrl(data.NIOSHostURL.ValueString()),
+		option.WithNIOSWapiVersion(data.NIOSWAPIVersion.ValueString()),
 		option.WithDebug(true),
 	)
 
