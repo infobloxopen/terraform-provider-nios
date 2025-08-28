@@ -42,7 +42,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI user name.",
 	},
@@ -51,7 +51,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI password.",
 	},
@@ -67,7 +67,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The comment for the credential.",
 	},

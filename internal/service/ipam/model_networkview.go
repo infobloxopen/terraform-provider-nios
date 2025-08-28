@@ -86,7 +86,7 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the network view; maximum 256 characters.",
 	},
@@ -150,7 +150,7 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Name of the network view.",
 	},

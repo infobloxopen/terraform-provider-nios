@@ -111,7 +111,7 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "The DTC Server display name.",
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"sni_hostname": schema.StringAttribute{

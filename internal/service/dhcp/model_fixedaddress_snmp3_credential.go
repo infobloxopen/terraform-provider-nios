@@ -41,7 +41,7 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 	"user": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The SNMPv3 user name.",
 	},
@@ -56,7 +56,7 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Authentication password for the SNMPv3 user.",
 	},
@@ -71,7 +71,7 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},

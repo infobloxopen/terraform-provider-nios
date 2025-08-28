@@ -36,7 +36,7 @@ var ZoneAuthMsDcNsRecordCreationResourceSchemaAttributes = map[string]schema.Att
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Optional user comment.",
 	},

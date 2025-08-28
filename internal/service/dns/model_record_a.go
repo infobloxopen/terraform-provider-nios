@@ -99,7 +99,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",

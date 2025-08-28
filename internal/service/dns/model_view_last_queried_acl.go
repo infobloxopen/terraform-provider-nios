@@ -32,7 +32,7 @@ var ViewLastQueriedAclResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},

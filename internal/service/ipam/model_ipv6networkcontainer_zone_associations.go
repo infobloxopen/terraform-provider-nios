@@ -44,7 +44,7 @@ var Ipv6networkcontainerZoneAssociationsResourceSchemaAttributes = map[string]sc
 		Optional:            true,
 		MarkdownDescription: "The view to which the zone belongs. If a view is not specified, the default view is used.",
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 }

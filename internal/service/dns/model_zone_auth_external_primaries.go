@@ -50,7 +50,7 @@ var ZoneAuthExternalPrimariesResourceSchemaAttributes = map[string]schema.Attrib
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
@@ -68,7 +68,7 @@ var ZoneAuthExternalPrimariesResourceSchemaAttributes = map[string]schema.Attrib
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A generated TSIG key.",
 	},

@@ -33,7 +33,7 @@ var ZoneAuthMsAllowTransferResourceSchemaAttributes = map[string]schema.Attribut
 		Required:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"permission": schema.StringAttribute{

@@ -90,7 +90,7 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	"nameserver": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The domain name of an authoritative server for the redirected zone.",
 	},

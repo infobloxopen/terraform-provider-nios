@@ -54,7 +54,7 @@ var ZoneAuthMsPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"ns_name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "This name is used when generating the NS record in the zone, which can be different in case of multihomed hosts.",
 	},

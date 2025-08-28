@@ -49,7 +49,7 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
@@ -66,7 +66,7 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A generated TSIG key.",
 	},
@@ -82,7 +82,7 @@ var ZoneDelegatedDelegateToResourceSchemaAttributes = map[string]schema.Attribut
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},

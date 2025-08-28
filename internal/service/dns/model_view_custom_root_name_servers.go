@@ -63,7 +63,7 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A generated TSIG key.",
 	},
@@ -79,7 +79,7 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},

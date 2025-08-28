@@ -33,7 +33,7 @@ var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attri
 	"community_string": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The public community string.",
 	},
@@ -41,7 +41,7 @@ var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attri
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comments for the SNMPv1 and SNMPv2 users.",
 	},

@@ -45,7 +45,7 @@ var RulesetResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Descriptive comment about the Ruleset object.",

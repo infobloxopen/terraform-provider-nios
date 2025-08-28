@@ -42,7 +42,7 @@ var RulesetNxdomainRulesResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateNoLeadingOrTrailingWhitespace(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The pattern that is used to match the domain name.",
