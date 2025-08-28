@@ -36,7 +36,7 @@ func (r *Awsrte53taskgroupResource) Metadata(ctx context.Context, req resource.M
 
 func (r *Awsrte53taskgroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages AWS Route 53 Task Group.",
 		Attributes:          Awsrte53taskgroupResourceSchemaAttributes,
 	}
 }
@@ -86,7 +86,7 @@ func (r *Awsrte53taskgroupResource) Create(ctx context.Context, req resource.Cre
 
 	res := apiRes.CreateAwsrte53taskgroupResponseAsObject.GetResult()
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Awsrte53taskgroup due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Awsrte53taskgroup, got error: %s", err))
 		return
 	}
 
@@ -164,7 +164,7 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 	res := apiRes.UpdateAwsrte53taskgroupResponseAsObject.GetResult()
 
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Awsrte53taskgroup due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Awsrte53taskgroup, got error: %s", diags))
 		return
 	}
 

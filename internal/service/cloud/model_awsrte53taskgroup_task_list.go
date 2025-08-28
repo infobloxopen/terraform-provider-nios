@@ -85,7 +85,7 @@ var Awsrte53taskgroupTaskListResourceSchemaAttributes = map[string]schema.Attrib
 	"filter": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             stringdefault.StaticString("*."),
+		Default:             stringdefault.StaticString("*"),
 		MarkdownDescription: "Filter for this task.",
 	},
 	"schedule_interval": schema.Int64Attribute{
@@ -119,6 +119,7 @@ var Awsrte53taskgroupTaskListResourceSchemaAttributes = map[string]schema.Attrib
 	"sync_public_zones": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Indicates whether public zones are synchronized.",
 	},
 	"sync_private_zones": schema.BoolAttribute{

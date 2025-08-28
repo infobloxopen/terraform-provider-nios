@@ -3,18 +3,18 @@
 page_title: "nios_cloud_awsrte53taskgroup Resource - nios"
 subcategory: "CLOUD"
 description: |-
-  
+  Manages AWS Route 53 Task Group.
 ---
 
 # nios_cloud_awsrte53taskgroup (Resource)
 
-
+Manages AWS Route 53 Task Group.
 
 ## Example Usage
 
 ```terraform
 // Create awsrte53taskgroup with Basic Fields
-resource "nios_cloud_awsrte53taskgroup" "test" {
+resource "nios_cloud_awsrte53taskgroup" "test_basic" {
   name                        = "test-taskgroup"
   grid_member                 = "infoblox.localdomain"
   disabled                    = false

@@ -17,6 +17,10 @@ import (
 
 var readableAttributesForAwsrte53taskgroup = "account_id,comment,consolidate_zones,consolidated_view,disabled,grid_member,name,network_view,network_view_mapping_policy,role_arn,sync_child_accounts,sync_status,task_list"
 
+// TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// Two Grid members are needed for testing
+// Tasklist unordered issue exist, similar to dhcp options
+// AWS secret and key has to added, or can be skipped if privacy concern
 func TestAccAwsrte53taskgroupResource_basic(t *testing.T) {
 	var resourceName = "nios_cloud_awsrte53taskgroup.test"
 	var v cloud.Awsrte53taskgroup
@@ -35,6 +39,7 @@ func TestAccAwsrte53taskgroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", taskGroupName),
 					resource.TestCheckResourceAttr(resourceName, "grid_member", gridMember),
 					resource.TestCheckResourceAttr(resourceName, "disabled", "false"),
+					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "sync_child_accounts", "false"),
 					resource.TestCheckResourceAttr(resourceName, "network_view_mapping_policy", "AUTO_CREATE"),
 				),

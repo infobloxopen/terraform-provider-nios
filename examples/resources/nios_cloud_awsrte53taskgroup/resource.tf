@@ -1,5 +1,5 @@
 // Create awsrte53taskgroup with Basic Fields
-resource "nios_cloud_awsrte53taskgroup" "test" {
+resource "nios_cloud_awsrte53taskgroup" "test_basic" {
   name                        = "test-taskgroup"
   grid_member                 = "infoblox.localdomain"
   disabled                    = false
