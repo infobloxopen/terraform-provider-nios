@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -100,6 +101,7 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("consolidate_zones")),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
 				"should not have leading or trailing whitespace",
@@ -243,7 +245,6 @@ func (m *Awsrte53taskgroupModel) Flatten(ctx context.Context, from *cloud.Awsrte
 	m.MultipleAccountsSyncPolicy = flex.FlattenStringPointer(from.MultipleAccountsSyncPolicy)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	m.NetworkViewMappingPolicy = flex.FlattenStringPointer(from.NetworkViewMappingPolicy)
 	m.RoleArn = flex.FlattenStringPointer(from.RoleArn)
 	m.SyncChildAccounts = types.BoolPointerValue(from.SyncChildAccounts)
 	m.SyncStatus = flex.FlattenStringPointer(from.SyncStatus)
