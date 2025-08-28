@@ -4,7 +4,6 @@ import (
 	"context"
 	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -20,17 +19,17 @@ import (
 )
 
 type ZoneAuthAllowQueryModel struct {
-	Address        iptypes.IPAddress `tfsdk:"address"`
-	Struct         types.String      `tfsdk:"struct"`
-	Permission     types.String      `tfsdk:"permission"`
-	TsigKey        types.String      `tfsdk:"tsig_key"`
-	TsigKeyAlg     types.String      `tfsdk:"tsig_key_alg"`
-	TsigKeyName    types.String      `tfsdk:"tsig_key_name"`
-	UseTsigKeyName types.Bool        `tfsdk:"use_tsig_key_name"`
+	Address        types.String `tfsdk:"address"`
+	Struct         types.String `tfsdk:"struct"`
+	Permission     types.String `tfsdk:"permission"`
+	TsigKey        types.String `tfsdk:"tsig_key"`
+	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
+	TsigKeyName    types.String `tfsdk:"tsig_key_name"`
+	UseTsigKeyName types.Bool   `tfsdk:"use_tsig_key_name"`
 }
 
 var ZoneAuthAllowQueryAttrTypes = map[string]attr.Type{
-	"address":           iptypes.IPAddressType{},
+	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -48,7 +47,6 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
 	},
 	"address": schema.StringAttribute{
-		CustomType:          iptypes.IPAddressType{},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
@@ -147,7 +145,7 @@ func (m *ZoneAuthAllowQueryModel) Expand(ctx context.Context, diags *diag.Diagno
 		return nil
 	}
 	to := &dns.ZoneAuthAllowQuery{
-		Address:        flex.ExpandIPAddress(m.Address),
+		Address:        flex.ExpandStringPointer(m.Address),
 		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -176,7 +174,7 @@ func (m *ZoneAuthAllowQueryModel) Flatten(ctx context.Context, from *dns.ZoneAut
 	if m == nil {
 		*m = ZoneAuthAllowQueryModel{}
 	}
-	m.Address = flex.FlattenIPAddress(from.Address)
+	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
