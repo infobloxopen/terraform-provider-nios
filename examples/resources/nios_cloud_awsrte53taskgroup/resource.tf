@@ -8,7 +8,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_basic" {
 }
 
 // Create awsrte53taskgroup with Advanced Fields
-resource "nios_cloud_awsrte53taskgroup" "test_advanced" {
+resource "nios_cloud_awsrte53taskgroup" "create_awsrte53taskgroup_advanced" {
   name                        = "test-taskgroup-advanced"
   grid_member                 = "infoblox.localdomain"
   disabled                    = false
