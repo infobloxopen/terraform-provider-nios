@@ -84,6 +84,7 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^\S.*\S$`),
 				"should not have leading or trailing whitespace",
@@ -245,6 +246,7 @@ func (m *Awsrte53taskgroupModel) Flatten(ctx context.Context, from *cloud.Awsrte
 	m.MultipleAccountsSyncPolicy = flex.FlattenStringPointer(from.MultipleAccountsSyncPolicy)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
+	m.NetworkViewMappingPolicy = flex.FlattenStringPointer(from.NetworkViewMappingPolicy)
 	m.RoleArn = flex.FlattenStringPointer(from.RoleArn)
 	m.SyncChildAccounts = types.BoolPointerValue(from.SyncChildAccounts)
 	m.SyncStatus = flex.FlattenStringPointer(from.SyncStatus)

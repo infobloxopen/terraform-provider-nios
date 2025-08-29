@@ -36,7 +36,7 @@ func (r *Awsrte53taskgroupResource) Metadata(ctx context.Context, req resource.M
 
 func (r *Awsrte53taskgroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages AWS Route 53 Task Group.",
+		MarkdownDescription: "Manages an AWS Route 53 Task Group.",
 		Attributes:          Awsrte53taskgroupResourceSchemaAttributes,
 	}
 }
@@ -113,7 +113,7 @@ func (r *Awsrte53taskgroupResource) Read(ctx context.Context, req resource.ReadR
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state

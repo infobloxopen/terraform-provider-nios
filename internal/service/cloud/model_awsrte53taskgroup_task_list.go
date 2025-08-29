@@ -72,10 +72,7 @@ var Awsrte53taskgroupTaskListResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "Indicates if the task is enabled or disabled.",
 	},
 	"state": schema.StringAttribute{
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("CANCELED", "COMPLETED", "FAILED", "IDLE", "PARTIALLY_COMPLETED", "READY", "RUNNING"),
-		},
+		Computed:            true,
 		MarkdownDescription: "Indicate the sync status of this task.",
 	},
 	"state_msg": schema.StringAttribute{

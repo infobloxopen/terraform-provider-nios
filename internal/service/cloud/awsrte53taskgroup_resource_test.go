@@ -18,7 +18,8 @@ import (
 var readableAttributesForAwsrte53taskgroup = "account_id,comment,consolidate_zones,consolidated_view,disabled,grid_member,name,network_view,network_view_mapping_policy,role_arn,sync_child_accounts,sync_status,task_list"
 
 // TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// Two Grid members are needed for testing
+// Two Grid members are needed for testing ( "infoblox.localdomain" "member.com"),
+// add  "member.com" within "infoblox.localdomain"
 // Tasklist unordered issue exist, similar to dhcp options
 // AWS secret and key has to added, or can be skipped if privacy concern
 func TestAccAwsrte53taskgroupResource_basic(t *testing.T) {

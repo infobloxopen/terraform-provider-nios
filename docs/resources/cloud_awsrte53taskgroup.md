@@ -3,12 +3,12 @@
 page_title: "nios_cloud_awsrte53taskgroup Resource - nios"
 subcategory: "CLOUD"
 description: |-
-  Manages AWS Route 53 Task Group.
+  Manages an AWS Route 53 Task Group.
 ---
 
 # nios_cloud_awsrte53taskgroup (Resource)
 
-Manages AWS Route 53 Task Group.
+Manages an AWS Route 53 Task Group.
 
 ## Example Usage
 

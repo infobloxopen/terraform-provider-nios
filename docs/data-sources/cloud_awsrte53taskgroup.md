@@ -3,12 +3,12 @@
 page_title: "nios_cloud_awsrte53taskgroup Data Source - nios"
 subcategory: "CLOUD"
 description: |-
-  Retrieves AWS Route 53 Task Group.
+  Retrieves information about existing AWS Route 53 Task Groups.
 ---
 
 # nios_cloud_awsrte53taskgroup (Data Source)
 
-Retrieves AWS Route 53 Task Group.
+Retrieves information about existing AWS Route 53 Task Groups.
 
 ## Example Usage
 

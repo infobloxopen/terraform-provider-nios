@@ -50,7 +50,7 @@ func (m *Awsrte53taskgroupModelWithFilter) FlattenResults(ctx context.Context, f
 
 func (d *Awsrte53taskgroupDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves AWS Route 53 Task Group.",
+		MarkdownDescription: "Retrieves information about existing AWS Route 53 Task Groups.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
@@ -140,7 +140,7 @@ func (d *Awsrte53taskgroupDataSource) Read(ctx context.Context, req datasource.R
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Awsrte53taskgroup by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Awsrte53taskgroup, got error: %s", err))
 				return nil, "", err
 			}
 
