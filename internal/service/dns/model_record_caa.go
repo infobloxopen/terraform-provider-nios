@@ -85,6 +85,9 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"ca_tag": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "Tag of CAA record.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtMost(255),
+		},
 	},
 	"ca_value": schema.StringAttribute{
 		Required:            true,
