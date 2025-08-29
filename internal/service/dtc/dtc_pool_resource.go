@@ -373,25 +373,22 @@ func (r *DtcPoolResource) ValidateConfig(ctx context.Context, req resource.Valid
         return
     }
 
-    // Validate quorum is set when availability is "QUORUM"
-    if !data.Availability.IsNull() && !data.Availability.IsUnknown() && data.Availability.ValueString() == "QUORUM" {
-        if data.Quorum.IsNull() || data.Quorum.IsUnknown() {
-            resp.Diagnostics.AddAttributeError(
-                path.Root("quorum"),
-                "Missing Required Attribute",
-                "When availability is set to 'QUORUM', the 'quorum' attribute must be specified",
-            )
-        }
-    }
-
-    // Validate quorum is not set when availability is not "QUORUM"
-    if !data.Quorum.IsNull() && !data.Quorum.IsUnknown() {
-        if data.Availability.IsNull() || data.Availability.IsUnknown() || data.Availability.ValueString() != "QUORUM" {
-            resp.Diagnostics.AddAttributeError(
-                path.Root("quorum"),
-                "Invalid Attribute Combination",
-                fmt.Sprintf("The quorum attribute can only be used when availability is set to 'QUORUM', but got '%s'", data.Availability.ValueString()),
-            )
-        }
-    }
+	if !data.Availability.IsNull() && !data.Availability.IsUnknown() {
+		if data.Availability.ValueString() == "QUORUM" {
+			if data.Quorum.IsNull() || data.Quorum.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("quorum"),"Missing Required Attribute",
+					"When availability is set to 'QUORUM', the 'quorum' attribute must be specified",
+				)
+			}
+		} else {
+			if !data.Quorum.IsNull() && !data.Quorum.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("quorum"),
+					"Invalid Attribute Combination",
+					fmt.Sprintf("The quorum attribute can only be used when availability is set to 'QUORUM', but got '%s'", data.Availability.ValueString()),
+				)
+			}
+		}
+	}
 }
