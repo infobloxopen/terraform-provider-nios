@@ -269,8 +269,15 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 	m.LbPreferredTopology = flex.FlattenStringPointer(from.LbPreferredTopology)
 	m.Monitors = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Monitors, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Quorum = flex.FlattenInt64Pointer(from.Quorum)
+	m.Quorum = FlattenQuorumBasedOnAvailability(from.Availability, from.Quorum)
 	m.Servers = flex.FlattenFrameworkListNestedBlock(ctx, from.Servers, DtcPoolServersAttrTypes, diags, FlattenDtcPoolServers)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
+}
+
+func FlattenQuorumBasedOnAvailability(availability *string, quorum *int64) types.Int64 {
+    if availability == nil || *availability != "QUORUM" {
+        return types.Int64Null()
+    }
+    return flex.FlattenInt64Pointer(quorum)
 }
