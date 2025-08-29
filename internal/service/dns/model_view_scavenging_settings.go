@@ -77,8 +77,8 @@ var ViewScavengingSettingsResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "This flag indicates if the associated resource record scavenging is enabled or not.",
 	},
 	"scavenging_schedule": schema.SingleNestedAttribute{
-		Attributes: ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes,
+		Optional:            true,
 		MarkdownDescription: "The scavenging schedule. The scavenging schedule is used to determine when the scavenging should be performed. If not specified, the default scavenging schedule is used.",
 	},
 	"expression_list": schema.ListNestedAttribute{

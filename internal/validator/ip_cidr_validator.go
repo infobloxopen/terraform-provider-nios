@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"regexp"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
@@ -14,17 +12,16 @@ import (
 // - A valid FQDN
 // - A valid IPv4 address or IPV4 CIDR
 // - A valid IPv6 address or IPV6 CIDR
-// But NOT an IPv6 reverse mapping address
 type IPCIDRValidator struct{}
 
 // Description returns a plain text description of the validator's behavior.
 func (v IPCIDRValidator) Description(ctx context.Context) string {
-	return "String must be a valid FQDN, IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR (IPv6 reverse mapping not allowed)"
+	return "String must be a valid FQDN, IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR"
 }
 
 // MarkdownDescription returns a markdown formatted description of the validator's behavior.
 func (v IPCIDRValidator) MarkdownDescription(ctx context.Context) string {
-	return "String must be a valid FQDN, IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR (IPv6 reverse mapping not allowed)"
+	return "String must be a valid IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR"
 }
 
 // Validate performs the validation.
@@ -34,16 +31,6 @@ func (v IPCIDRValidator) ValidateString(ctx context.Context, request validator.S
 	}
 
 	value := request.ConfigValue.ValueString()
-
-	// Check if the value is an IPv6 reverse mapping format
-	if isIPv6ReverseMapping(value) {
-		response.Diagnostics.AddAttributeError(
-			request.Path,
-			"Invalid FQDN Format",
-			"The provided value appears to be in IPv6 reverse mapping format, which is not allowed.",
-		)
-		return
-	}
 
 	// Check if the value is a valid IPv4 or IPv6 address
 	if ip := net.ParseIP(value); ip != nil {
@@ -56,29 +43,15 @@ func (v IPCIDRValidator) ValidateString(ctx context.Context, request validator.S
 		// Valid CIDR notation (either IPv4 or IPv6)
 		return
 	}
-
-	// Validate as FQDN (allowing trailing dot)
-	fqdnRegex := `^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\.?$`
-	if matched, _ := regexp.MatchString(fqdnRegex, value); matched {
-		// Valid FQDN
-		return
-	}
-
 	// If we get here, it's not a valid format
 	response.Diagnostics.AddAttributeError(
 		request.Path,
 		"Invalid Value Format",
-		fmt.Sprintf("The value '%s' is not a valid FQDN, IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR.", value),
+		fmt.Sprintf("The value '%s' is not a valid IPv4, IPv4 CIDR, IPv6, or IPv6 CIDR.", value),
 	)
 }
 
-// isIPv6ReverseMapping checks if the string appears to be an IPv6 reverse mapping format
-// IPv6 reverse mappings typically look like: x.y.z.w.ip6.arpa
-func isIPv6ReverseMapping(s string) bool {
-	return strings.HasSuffix(s, ".ip6.arpa") || strings.HasSuffix(s, ".ip6.arpa.")
-}
-
-// IsValidIPCIDR returns a validator that ensures the input is a valid FQDN, IPv4, IPv6 address, or CIDR notation.
+// IsValidIPCIDR returns a validator that ensures the input is a valid IPv4, IPv6 address, or CIDR notation.
 func IsValidIPCIDR() validator.String {
 	return IPCIDRValidator{}
 }
