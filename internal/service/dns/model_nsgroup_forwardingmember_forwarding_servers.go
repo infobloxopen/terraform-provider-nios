@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -47,6 +48,7 @@ var NsgroupForwardingmemberForwardingServersResourceSchemaAttributes = map[strin
 			Attributes: NsgroupforwardingmemberforwardingserversForwardToResourceSchemaAttributes,
 		},
 		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_override_forwarders")),
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
