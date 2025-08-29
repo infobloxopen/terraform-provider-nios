@@ -2,9 +2,7 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -17,21 +15,22 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneAuthUpdateForwardingModel struct {
-	Struct         types.String      `tfsdk:"struct"`
-	Address        iptypes.IPAddress `tfsdk:"address"`
-	Permission     types.String      `tfsdk:"permission"`
-	TsigKey        types.String      `tfsdk:"tsig_key"`
-	TsigKeyAlg     types.String      `tfsdk:"tsig_key_alg"`
-	TsigKeyName    types.String      `tfsdk:"tsig_key_name"`
-	UseTsigKeyName types.Bool        `tfsdk:"use_tsig_key_name"`
+	Struct         types.String `tfsdk:"struct"`
+	Address        types.String `tfsdk:"address"`
+	Permission     types.String `tfsdk:"permission"`
+	TsigKey        types.String `tfsdk:"tsig_key"`
+	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
+	TsigKeyName    types.String `tfsdk:"tsig_key_name"`
+	UseTsigKeyName types.Bool   `tfsdk:"use_tsig_key_name"`
 }
 
 var ZoneAuthUpdateForwardingAttrTypes = map[string]attr.Type{
 	"struct":            types.StringType,
-	"address":           iptypes.IPAddressType{},
+	"address":           types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
 	"tsig_key_alg":      types.StringType,
@@ -48,19 +47,15 @@ var ZoneAuthUpdateForwardingResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
 	},
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Optional:   true,
-		Computed:   true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
 				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Shouldnot have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
@@ -84,10 +79,7 @@ var ZoneAuthUpdateForwardingResourceSchemaAttributes = map[string]schema.Attribu
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
@@ -110,10 +102,7 @@ var ZoneAuthUpdateForwardingResourceSchemaAttributes = map[string]schema.Attribu
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
@@ -148,7 +137,7 @@ func (m *ZoneAuthUpdateForwardingModel) Expand(ctx context.Context, diags *diag.
 	}
 	to := &dns.ZoneAuthUpdateForwarding{
 		Struct:         flex.ExpandStringPointer(m.Struct),
-		Address:        flex.ExpandIPAddress(m.Address),
+		Address:        flex.ExpandStringPointer(m.Address),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
 		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
@@ -177,7 +166,7 @@ func (m *ZoneAuthUpdateForwardingModel) Flatten(ctx context.Context, from *dns.Z
 		*m = ZoneAuthUpdateForwardingModel{}
 	}
 	m.Struct = flex.FlattenStringPointer(from.Struct)
-	m.Address = flex.FlattenIPAddress(from.Address)
+	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
 	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)

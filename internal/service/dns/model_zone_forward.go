@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -102,10 +101,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the zone; maximum 256 characters.",
 	},
@@ -149,10 +145,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("forward_to")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A forward stub server name server group.",
 	},
@@ -184,8 +177,11 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
-			customvalidator.IsValidIPCIDR(),
+			stringvalidator.Any(
+				customvalidator.IsValidFQDN(),
+				customvalidator.IsValidIPCIDR(),
+			),
+			customvalidator.IsNotArpa(),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set. apra notation is not allowed for IP address.",
 	},
@@ -234,10 +230,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A forwarding member name server group.",
 	},
@@ -250,10 +243,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.",
 	},
@@ -266,10 +256,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString("default"),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the DNS view in which the zone resides. Example \"external\".",
 	},
