@@ -105,6 +105,8 @@ func TestAccNamedaclResource_AccessList(t *testing.T) {
 					testAccCheckNamedaclExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "access_list.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "access_list.0.tsig_key", "X4oRe92t54I+T98NdQpV2w=="),
+					resource.TestCheckResourceAttr(resourceName, "access_list.0.tsig_key_name", "example-tsig-key"),
+					resource.TestCheckResourceAttr(resourceName, "access_list.0.tsig_key_alg", "HMAC-SHA256"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

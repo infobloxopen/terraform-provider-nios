@@ -66,6 +66,7 @@ var NamedaclResourceSchemaAttributes = map[string]schema.Attribute{
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Should not have leading or trailing whitespace",
 			),
+			stringvalidator.LengthBetween(0, 256),
 		},
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the named ACL; maximum 256 characters.",
