@@ -14,12 +14,12 @@ Manages a Personal Smart Folder.
 
 ```terraform
 // Create a Personal Smarfolder with Basic Fields
-resource "nios_smartfolder_personal" "create_smartfolder_personal_basic" {
+resource "nios_smartfolder_personal" "smartfolder_personal_basic_fields" {
   name = "example-personal-smartfolder"
 }
 
 // Create a Personal Smartfolder with Additional Fields
-resource "nios_smartfolder_personal" "create_smartfolder_personal_additional" {
+resource "nios_smartfolder_personal" "smartfolder_personal_additional_fields" {
   name    = "example-personal-smartfolder-2"
   comment = "sample comment"
 
