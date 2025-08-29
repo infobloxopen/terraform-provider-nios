@@ -4,7 +4,6 @@ import (
 	"context"
 	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -119,12 +118,6 @@ var NamedaclAccessListResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_tsig_key_name": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
-		Validators: []validator.Bool{
-			boolvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
-		},
 	},
 }
 
@@ -145,13 +138,12 @@ func (m *NamedaclAccessListModel) Expand(ctx context.Context, diags *diag.Diagno
 		return nil
 	}
 	to := &acl.NamedaclAccessList{
-		Struct:         flex.ExpandStringPointer(m.Struct),
-		Address:        flex.ExpandStringPointer(m.Address),
-		Permission:     flex.ExpandStringPointer(m.Permission),
-		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
-		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
-		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
-		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
+		Struct:      flex.ExpandStringPointer(m.Struct),
+		Address:     flex.ExpandStringPointer(m.Address),
+		Permission:  flex.ExpandStringPointer(m.Permission),
+		TsigKey:     flex.ExpandStringPointer(m.TsigKey),
+		TsigKeyAlg:  flex.ExpandStringPointer(m.TsigKeyAlg),
+		TsigKeyName: flex.ExpandStringPointer(m.TsigKeyName),
 	}
 	return to
 }
