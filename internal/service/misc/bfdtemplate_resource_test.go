@@ -32,7 +32,7 @@ func TestAccBfdtemplateResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					//Test with basic feilds
+					//Test with basic fields
 					resource.TestCheckResourceAttr(resourceName, "authentication_type", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "detection_multiplier", "3"),
 					resource.TestCheckResourceAttr(resourceName, "min_rx_interval", "100"),

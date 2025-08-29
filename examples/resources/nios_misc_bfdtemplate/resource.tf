@@ -1,4 +1,4 @@
-// Create nios_misc_bfdtemplate with Basic Fields
+// Create nios_misc_bfdtemplate with Basic fields
 resource "nios_misc_bfdtemplate" "test_bfdtemplate_basic" {
   name = "tf_test_bfd_name"
 }
