@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -50,6 +51,7 @@ var SmartfolderGlobalResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators:          []validator.List{listvalidator.SizeAtLeast(1)},
 		MarkdownDescription: "Global Smart Folder grouping rules.",
 	},
 	"name": schema.StringAttribute{
@@ -68,6 +70,7 @@ var SmartfolderGlobalResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators:          []validator.List{listvalidator.SizeAtLeast(1)},
 		MarkdownDescription: "The global Smart Folder filter queries.",
 	},
 }
