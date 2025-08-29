@@ -70,15 +70,12 @@ Optional:
 <a id="nestedatt--result--query_items"></a>
 ### Nested Schema for `result.query_items`
 
-Required:
+Optional:
 
 - `field_type` (String) The Smart Folder query field type.
 - `name` (String) The Smart Folder query name.
-- `operator` (String) The Smart Folder operator used in query.
-
-Optional:
-
 - `op_match` (Boolean) Determines whether the query operator should match.
+- `operator` (String) The Smart Folder operator used in query.
 - `value` (Attributes) (see [below for nested schema](#nestedatt--result--query_items--value))
 - `value_type` (String) The Smart Folder query value type.
 
