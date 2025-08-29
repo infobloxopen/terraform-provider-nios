@@ -22,5 +22,4 @@ resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
   upgrade_policy               = "SIMULTANEOUSLY"
   distribution_time            = 172834354
   upgrade_time                 = 172834355
-
 }
