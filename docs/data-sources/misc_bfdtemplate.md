@@ -3,12 +3,12 @@
 page_title: "nios_misc_bfdtemplate Data Source - nios"
 subcategory: "MISC"
 description: |-
-  
+  Manages an BFD.
 ---
 
 # nios_misc_bfdtemplate (Data Source)
 
-
+Manages an BFD.
 
 ## Example Usage
 

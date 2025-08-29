@@ -3,12 +3,12 @@
 page_title: "nios_misc_bfdtemplate Resource - nios"
 subcategory: "MISC"
 description: |-
-  
+  Retrieves information about existing BFD.
 ---
 
 # nios_misc_bfdtemplate (Resource)
 
-
+Retrieves information about existing BFD.
 
 ## Example Usage
 

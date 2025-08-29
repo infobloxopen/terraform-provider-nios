@@ -36,7 +36,7 @@ func (r *BfdtemplateResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *BfdtemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Retrieves information about existing BFD.",
 		Attributes:          BfdtemplateResourceSchemaAttributes,
 	}
 }
