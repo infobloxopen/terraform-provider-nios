@@ -20,6 +20,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 )
 
 type ZoneStubModel struct {
@@ -278,6 +279,9 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The primary servers (masters) of this stub zone.Note that the stealth/tsig_key/tsig_key_alg/tsig_key_name/use_tsig_key_name fields of the struct will be ignored when set in this field.",
 	},
 	"stub_members": schema.ListNestedAttribute{
@@ -286,6 +290,9 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The Grid member servers of this stub zone. Note that the lead/stealth/grid_replicate/ preferred_primaries/enable_preferred_primaries fields of the struct will be ignored when set in this field.",
 	},
 	"stub_msservers": schema.ListNestedAttribute{
@@ -294,6 +301,9 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The Microsoft DNS servers of this stub zone. Note that the stealth field of the struct will be ignored when set in this field.",
 	},
 	"using_srg_associations": schema.BoolAttribute{
