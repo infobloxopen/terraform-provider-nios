@@ -1,5 +1,5 @@
 // Create awsrte53taskgroup with Basic Fields
-resource "nios_cloud_awsrte53taskgroup" "test_basic" {
+resource "nios_cloud_awsrte53taskgroup" "awsrte53taskgroup_basic_fields" {
   name                        = "test-taskgroup"
   grid_member                 = "infoblox.localdomain"
   disabled                    = false
@@ -7,8 +7,8 @@ resource "nios_cloud_awsrte53taskgroup" "test_basic" {
   network_view_mapping_policy = "AUTO_CREATE"
 }
 
-// Create awsrte53taskgroup with Advanced Fields
-resource "nios_cloud_awsrte53taskgroup" "create_awsrte53taskgroup_advanced" {
+// Create awsrte53taskgroup with Additional Fields
+resource "nios_cloud_awsrte53taskgroup" "awsrte53taskgroup_additional_fields" {
   name                        = "test-taskgroup-advanced"
   grid_member                 = "infoblox.localdomain"
   disabled                    = false
