@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 )
 
 type RulesetModel struct {
@@ -65,6 +66,9 @@ var RulesetResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of Rules assigned to this Ruleset object. Rules can be set only when the Ruleset type is set to \"NXDOMAIN\".",
 	},
 	"type": schema.StringAttribute{
