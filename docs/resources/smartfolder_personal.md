@@ -3,22 +3,22 @@
 page_title: "nios_smartfolder_personal Resource - nios"
 subcategory: "SMART FOLDER"
 description: |-
-  Manages personal Smart Folders.
+  Manages a Personal Smart Folder.
 ---
 
 # nios_smartfolder_personal (Resource)
 
-Manages personal Smart Folders.
+Manages a Personal Smart Folder.
 
 ## Example Usage
 
 ```terraform
-// Create Smartfolder Personal with Basic Fields (Required only)
+// Create a Personal Smarfolder with Basic Fields
 resource "nios_smartfolder_personal" "create_smartfolder_personal_basic" {
   name = "example-personal-smartfolder"
 }
 
-// Create Smartfolder Personal with Additional Fields
+// Create a Personal Smartfolder with Additional Fields
 resource "nios_smartfolder_personal" "create_smartfolder_personal_additional" {
   name    = "example-personal-smartfolder-2"
   comment = "sample comment"

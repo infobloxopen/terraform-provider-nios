@@ -35,7 +35,7 @@ func (r *SmartfolderPersonalResource) Metadata(ctx context.Context, req resource
 
 func (r *SmartfolderPersonalResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages personal Smart Folders.",
+		MarkdownDescription: "Manages a Personal Smart Folder.",
 		Attributes:          SmartfolderPersonalResourceSchemaAttributes,
 	}
 }
