@@ -13,7 +13,7 @@ Manages Named Access Control Lists (ACLs)
 ## Example Usage
 
 ```terraform
-// Create Named Access Control Lists (ACLs) with basic fields
+// Create Named Access Control Lists (ACLs) with Basic Fields
 resource "nios_acl_namedacl" "base_namedacl" {
   name    = "base-acl-template"
   comment = "Base ACL structure created for future assignment of access control entries"
@@ -23,13 +23,13 @@ resource "nios_acl_namedacl" "base_namedacl" {
   }
 }
 
-// Create Named Access Control Lists (ACLs) with additional fields
+// Create Named Access Control Lists (ACLs) with Additional Fields
 resource "nios_acl_namedacl" "namedacl_with_additional_config" {
   name    = "dev-network-acl"
   comment = "ACL to allow/deny access to specific dev network resources"
 
   // ACL Entries
-  acl = [
+  access_list = [
     {
       struct     = "addressac"
       address    = "10.0.0.1"
