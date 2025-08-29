@@ -1,4 +1,3 @@
-
 package dns_test
 
 import (
@@ -10,12 +9,19 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccNsgroupForwardingmemberDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_nsgroup_forwardingmember.test"
 	resourceName := "nios_dns_nsgroup_forwardingmember.test"
 	var v dns.NsgroupForwardingmember
+	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
+	forwardingServers := []map[string]any{
+		{
+			"name": "infoblox.localdomain",
+		},	
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +29,7 @@ func TestAccNsgroupForwardingmemberDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardingmemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardingmemberDataSourceConfigFilters(),
+				Config: testAccNsgroupForwardingmemberDataSourceConfigFilters(name, forwardingServers),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
@@ -38,13 +44,21 @@ func TestAccNsgroupForwardingmemberDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_nsgroup_forwardingmember.test"
 	resourceName := "nios_dns_nsgroup_forwardingmember.test"
 	var v dns.NsgroupForwardingmember
+	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
+	forwardingServers := []map[string]any{
+		{
+			"name": "infoblox.localdomain",
+		},	
+	}
+	extAttrValue := acctest.RandomName()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckNsgroupForwardingmemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters( acctest.RandomName()),
+				Config: testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(name , forwardingServers, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
@@ -67,22 +81,28 @@ func testAccCheckNsgroupForwardingmemberResourceAttrPair(resourceName, dataSourc
     }
 }
 
-func testAccNsgroupForwardingmemberDataSourceConfigFilters() string {
+func testAccNsgroupForwardingmemberDataSourceConfigFilters(name string, forwardingServers []map[string]any) string {
+	forwardingServersStr := utils.ConvertSliceOfMapsToHCL(forwardingServers)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardingmember" "test" {
+  name = %q
+  forwarding_servers = %s
 }
 
 data "nios_dns_nsgroup_forwardingmember" "test" {
   filters = {
-	 = nios_dns_nsgroup_forwardingmember.test.
+    name = nios_dns_nsgroup_forwardingmember.test.name
   }
 }
-`)
+`, name, forwardingServersStr)
 }
 
-func testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(name string , forwardingServers []map[string]any, extAttrsValue string) string {
+	forwardingServersStr := utils.ConvertSliceOfMapsToHCL(forwardingServers)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardingmember" "test" {
+  name = %q
+  forwarding_servers = %s
   extattrs = {
     Site = %q
   } 
@@ -93,6 +113,6 @@ data "nios_dns_nsgroup_forwardingmember" "test" {
 	Site = nios_dns_nsgroup_forwardingmember.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, name, forwardingServersStr, extAttrsValue)
 }
 
