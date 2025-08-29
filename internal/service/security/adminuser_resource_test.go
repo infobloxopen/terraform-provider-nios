@@ -19,6 +19,9 @@ import (
 
 var readableAttributesForAdminuser = "admin_groups,auth_method,auth_type,ca_certificate_issuer,client_certificate_serial_number,comment,disable,email,enable_certificate_authentication,extattrs,name,ssh_keys,status,time_zone,use_ssh_keys,use_time_zone"
 
+// Create a ca certificate to be used for the admin user
+// TODO: Retrieve references based on the provided distinguished name of the object: cacertificate
+
 func TestAccAdminuserResource_basic(t *testing.T) {
 	var resourceName = "nios_security_admin_user.test"
 	var v security.Adminuser

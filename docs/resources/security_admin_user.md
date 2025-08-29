@@ -20,6 +20,8 @@ resource "nios_security_admin_user" "admin_user_basic_fields" {
   admin_groups = ["admin-group"]
 }
 
+// Create a ca-certificate to be used for the admin user
+// TODO: Retrieve references based on the provided distinguished name of the object: cacertificate
 // Create an Admin User with Additional Fields
 resource "nios_security_admin_user" "admin_user_additional_fields" {
   name         = "example_admin_user2"

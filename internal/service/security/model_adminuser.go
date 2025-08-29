@@ -71,9 +71,12 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"admin_groups": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Required:            true,
-		Validators:          []validator.List{listvalidator.SizeAtMost(1)},
+		ElementType: types.StringType,
+		Required:    true,
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The names of the Admin Groups to which this Admin User belongs. Currently, this is limited to only one Admin Group.",
 	},
 	"auth_method": schema.StringAttribute{
@@ -110,6 +113,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Should not have leading or trailing whitespace",
@@ -151,13 +155,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 	},
 	"name": schema.StringAttribute{
-		Required: true,
-		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},
+		Required:            true,
 		MarkdownDescription: "The name of the admin user.",
 	},
 	"password": schema.StringAttribute{
