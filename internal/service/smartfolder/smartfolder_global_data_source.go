@@ -50,7 +50,7 @@ func (m *SmartfolderGlobalModelWithFilter) FlattenResults(ctx context.Context, f
 
 func (d *SmartfolderGlobalDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves existing Smartfolder Global resources.",
+		MarkdownDescription: "Retrieves existing Global Smartfolders.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

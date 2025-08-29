@@ -1,9 +1,9 @@
-// Retrieve a specific smartfolder global by filters
-data "nios_smartfolder_global" "get_smartfolder_global_using_filters" {
+// Retrieve a specific Global smartfolder by filters
+data "nios_smartfolder_global" "get_global_smartfolder_using_filters" {
   filters = {
     name = "example-global-smartfolder"
   }
 }
 
-// Retrieve all smartfolder global records
+// Retrieve all Global smartfolders
 data "nios_smartfolder_global" "get_all_global_smartfolders" {}

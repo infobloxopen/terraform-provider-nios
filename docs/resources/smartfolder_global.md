@@ -3,22 +3,22 @@
 page_title: "nios_smartfolder_global Resource - nios"
 subcategory: "SMART FOLDER"
 description: |-
-  Manages Smartfolder Global resources.
+  Manages a Global Smartfolder.
 ---
 
 # nios_smartfolder_global (Resource)
 
-Manages Smartfolder Global resources.
+Manages a Global Smartfolder.
 
 ## Example Usage
 
 ```terraform
-// Create Smartfolder Global with Basic Fields
+// Create Global Smartfolder with Basic Fields
 resource "nios_smartfolder_global" "create_smartfolder_global_basic" {
   name = "example-global-smartfolder"
 }
 
-// Create Smartfolder Global with Additional Fields
+// Create Global Smartfolder with Additional Fields
 resource "nios_smartfolder_global" "create_smartfolder_global_additional" {
   name    = "example-global-smartfolder-2"
   comment = "sample comment"
@@ -75,12 +75,15 @@ Optional:
 <a id="nestedatt--query_items"></a>
 ### Nested Schema for `query_items`
 
-Optional:
+Required:
 
 - `field_type` (String) The Smart Folder query field type.
 - `name` (String) The Smart Folder query name.
-- `op_match` (Boolean) Determines whether the query operator should match.
 - `operator` (String) The Smart Folder operator used in query.
+
+Optional:
+
+- `op_match` (Boolean) Determines whether the query operator should match.
 - `value` (Attributes) (see [below for nested schema](#nestedatt--query_items--value))
 - `value_type` (String) The Smart Folder query value type.
 

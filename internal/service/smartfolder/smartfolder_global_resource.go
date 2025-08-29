@@ -35,7 +35,7 @@ func (r *SmartfolderGlobalResource) Metadata(ctx context.Context, req resource.M
 
 func (r *SmartfolderGlobalResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages Smartfolder Global resources.",
+		MarkdownDescription: "Manages a Global Smartfolder.",
 		Attributes:          SmartfolderGlobalResourceSchemaAttributes,
 	}
 }

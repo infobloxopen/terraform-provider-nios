@@ -39,9 +39,8 @@ var SmartfolderGlobalQueryItemsAttrTypes = map[string]attr.Type{
 
 var SmartfolderGlobalQueryItemsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString("type"),
+		Required: true,
+		//Default:  stringdefault.StaticString("type"),
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -51,18 +50,16 @@ var SmartfolderGlobalQueryItemsResourceSchemaAttributes = map[string]schema.Attr
 		MarkdownDescription: "The Smart Folder query name.",
 	},
 	"field_type": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString("NORMAL"),
+		Required: true,
+		//Default:  stringdefault.StaticString("NORMAL"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("EXTATTR", "NORMAL"),
 		},
 		MarkdownDescription: "The Smart Folder query field type.",
 	},
 	"operator": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString("EQ"),
+		Required: true,
+		//Default:  stringdefault.StaticString("EQ"),
 		Validators: []validator.String{
 			stringvalidator.OneOf(
 				"BEGINS_WITH",

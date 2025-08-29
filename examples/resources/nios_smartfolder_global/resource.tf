@@ -1,10 +1,10 @@
 
-// Create Smartfolder Global with Basic Fields
+// Create Global Smartfolder with Basic Fields
 resource "nios_smartfolder_global" "create_smartfolder_global_basic" {
   name = "example-global-smartfolder"
 }
 
-// Create Smartfolder Global with Additional Fields
+// Create Global Smartfolder with Additional Fields
 resource "nios_smartfolder_global" "create_smartfolder_global_additional" {
   name    = "example-global-smartfolder-2"
   comment = "sample comment"
