@@ -3,12 +3,12 @@
 page_title: "nios_acl_namedacl Data Source - nios"
 subcategory: "ACL"
 description: |-
-  Retrieves information about existing DNS Named Access Control Lists (ACLs).
+  Retrieves information about existing Named Access Control Lists (ACLs).
 ---
 
 # nios_acl_namedacl (Data Source)
 
-Retrieves information about existing DNS Named Access Control Lists (ACLs).
+Retrieves information about existing Named Access Control Lists (ACLs).
 
 ## Example Usage
 
