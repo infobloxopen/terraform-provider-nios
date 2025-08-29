@@ -117,7 +117,6 @@ var NamedaclAccessListResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 		Validators: []validator.Bool{
