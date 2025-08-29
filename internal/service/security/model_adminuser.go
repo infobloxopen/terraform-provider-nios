@@ -173,7 +173,10 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: AdminuserSshKeysResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "List of ssh keys for a particular user.",
 	},
 	"status": schema.StringAttribute{
