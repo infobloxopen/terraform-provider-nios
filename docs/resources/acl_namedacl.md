@@ -81,6 +81,9 @@ Optional:
 - `tsig_key` (String) A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.
+
+Read-Only:
+
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
 
 
@@ -98,4 +101,7 @@ Optional:
 - `tsig_key` (String) A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.
+
+Read-Only:
+
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
