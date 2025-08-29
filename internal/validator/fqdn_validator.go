@@ -30,12 +30,14 @@ func (validator fqdnValidator) ValidateString(ctx context.Context, req validator
 
 	value := req.ConfigValue.ValueString()
 
+	// Check for leading or trailing whitespace
 	if strings.TrimSpace(value) != value {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeTypeDiagnostic(
 			req.Path,
 			"must not contain leading or trailing whitespaces",
 			req.ConfigValue.ValueString(),
 		))
+		return
 	}
 	// Check for trailing dot
 	if strings.HasSuffix(value, ".") {
@@ -44,14 +46,20 @@ func (validator fqdnValidator) ValidateString(ctx context.Context, req validator
 			"must not end with a dot",
 			req.ConfigValue.ValueString(),
 		))
+		return
+	}
+	// Check for uppercase characters
+	if value != strings.ToLower(value) {
+		resp.Diagnostics.Append(validatordiag.InvalidAttributeTypeDiagnostic(
+			req.Path,
+			"must not contain uppercase characters",
+			req.ConfigValue.ValueString(),
+		))
+		return
 	}
 }
 
-// IsValidFQDN returns an AttributeValidator which ensures that any configured
-// attribute value:
-//
-//   - Contains no whitespace.
-//   - Does not end with a dot
+// IsValidFQDN returns an AttributeValidator which ensures that any configured attribute value is a valid FQDN.
 func IsValidFQDN() validator.String {
 	return fqdnValidator{}
 }

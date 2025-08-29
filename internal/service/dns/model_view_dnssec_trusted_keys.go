@@ -35,7 +35,7 @@ var ViewDnssecTrustedKeysAttrTypes = map[string]attr.Type{
 
 var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
-		Required: 		true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
@@ -45,23 +45,23 @@ var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The FQDN of the domain for which the member validates responses to recursive queries.",
 	},
 	"algorithm": schema.StringAttribute{
-		Required: 		  true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Should not have leading or trailing whitespace",
 			),
-		},	
+		},
 		MarkdownDescription: "The DNSSEC algorithm used to generate the key.",
 	},
 	"key": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(`^[^\s].*[^\s]$`),
 				"Should not have leading or trailing whitespace",
 			),
-		},	
+		},
 		MarkdownDescription: "The DNSSEC key.",
 	},
 	"secure_entry_point": schema.BoolAttribute{
