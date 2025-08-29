@@ -21,7 +21,7 @@ func TestAccSmartfolderPersonalResource_basic(t *testing.T) {
 	var resourceName = "nios_smartfolder_personal.test"
 	var v smartfolder.SmartfolderPersonal
 
-	name := acctest.RandomNameWithPrefix("hi-example-smartfolder-personal-")
+	name := acctest.RandomNameWithPrefix("example-smartfolder-personal-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
