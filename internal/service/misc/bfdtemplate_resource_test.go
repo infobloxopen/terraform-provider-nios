@@ -317,23 +317,6 @@ resource "nios_misc_bfdtemplate" "test" {
 `, name)
 }
 
-func testAccBfdtemplateRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_misc_bfdtemplate" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
-func testAccBfdtemplateAuthenticationKey(name string, authenticationKey string) string {
-	return fmt.Sprintf(`
-resource "nios_misc_bfdtemplate" "test_authentication_key" {
-    name = %q
-    authentication_key = %q
-}
-`, name, authenticationKey)
-}
-
 func testAccBfdtemplateAuthenticationKeyId(name string, authenticationKeyId string, authenticationType string, authenticationKey string, minRxInterval int, minTxInterval int) string {
 	return fmt.Sprintf(`
 resource "nios_misc_bfdtemplate" "test_authentication_key_id" {
