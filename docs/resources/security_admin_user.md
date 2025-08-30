@@ -16,7 +16,7 @@ Manages an Admin User.
 // Create an Admin User with Basic Fields
 resource "nios_security_admin_user" "admin_user_basic_fields" {
   name         = "example_admin_user"
-  password     = "Example-password1!1223a"
+  password     = "Example-password1!"
   admin_groups = ["admin-group"]
 }
 
@@ -42,8 +42,9 @@ resource "nios_security_admin_user" "admin_user_additional_fields" {
   enable_certificate_authentication = true
   ssh_keys = [
     {
-      key_name  = "sample-key"
-      key_type  = "RSA"
+      key_name = "sample-key"
+      key_type = "RSA"
+      // A Public key file is required for the example to function
       key_value = replace(file("${path.module}/sample1_key.pub"), "\n", "")
     }
   ]

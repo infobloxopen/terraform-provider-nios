@@ -19,7 +19,8 @@ import (
 
 var readableAttributesForAdminuser = "admin_groups,auth_method,auth_type,ca_certificate_issuer,client_certificate_serial_number,comment,disable,email,enable_certificate_authentication,extattrs,name,ssh_keys,status,time_zone,use_ssh_keys,use_time_zone"
 
-// Create a ca certificate to be used for the admin user
+// TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// cacertificate to be uploaded to NIOS Grid
 // TODO: Retrieve references based on the provided distinguished name of the object: cacertificate
 
 func TestAccAdminuserResource_basic(t *testing.T) {
@@ -116,7 +117,7 @@ func TestAccAdminuserResource_AuthMethod(t *testing.T) {
 	password := "Example-Admin123!"
 	authMethod := "KEYPAIR"
 	authMethod1 := "KEYPAIR_PASSWORD"
-	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "..", "examples", "resources", "nios_security_admin_user", "sample_key.pub"))
+	sshkeys, err := filepath.Abs(filepath.Join("sample_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
@@ -471,7 +472,7 @@ func TestAccAdminuserResource_SshKeys(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
 
-	keyFilePath, err := filepath.Abs(filepath.Join("..", "..", "..", "examples", "resources", "nios_security_admin_user", "sample_key.pub"))
+	keyFilePath, err := filepath.Abs(filepath.Join("sample_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
@@ -483,7 +484,7 @@ func TestAccAdminuserResource_SshKeys(t *testing.T) {
 	// Replace newline characters in the file content
 	keyValue := strings.ReplaceAll(string(keyContent), "\n", "")
 
-	keyFilePath1, err := filepath.Abs(filepath.Join("..", "..", "..", "examples", "resources", "nios_security_admin_user", "sample_key.pub"))
+	keyFilePath1, err := filepath.Abs(filepath.Join("sample_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}

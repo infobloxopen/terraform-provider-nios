@@ -19,6 +19,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type AdminuserModel struct {
@@ -162,10 +163,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:  true,
 		Sensitive: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.IsStrongPassword(),
 		},
 		MarkdownDescription: "The password for the administrator to use when logging in.",
 	},
