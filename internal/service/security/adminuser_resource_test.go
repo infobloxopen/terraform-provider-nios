@@ -117,7 +117,7 @@ func TestAccAdminuserResource_AuthMethod(t *testing.T) {
 	password := "Example-Admin123!"
 	authMethod := "KEYPAIR"
 	authMethod1 := "KEYPAIR_PASSWORD"
-	sshkeys, err := filepath.Abs(filepath.Join("sample_key.pub"))
+	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "acctest_data", "nios_security_admin_user", "sample_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
@@ -472,7 +472,7 @@ func TestAccAdminuserResource_SshKeys(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
 
-	keyFilePath, err := filepath.Abs(filepath.Join("sample_key.pub"))
+	keyFilePath, err := filepath.Abs(filepath.Join("..", "..", "acctest_data", "nios_security_admin_user", "sample_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
@@ -484,7 +484,7 @@ func TestAccAdminuserResource_SshKeys(t *testing.T) {
 	// Replace newline characters in the file content
 	keyValue := strings.ReplaceAll(string(keyContent), "\n", "")
 
-	keyFilePath1, err := filepath.Abs(filepath.Join("sample_key.pub"))
+	keyFilePath1, err := filepath.Abs(filepath.Join("..", "..", "acctest_data", "nios_security_admin_user", "sample1_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
@@ -563,7 +563,7 @@ func TestAccAdminuserResource_UseSshKeys(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "..", "examples", "resources", "nios_security_admin_user", "sample_key.pub"))
+	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "acctest_data", "nios_security_admin_user", "sample1_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
