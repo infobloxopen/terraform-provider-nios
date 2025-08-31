@@ -1,5 +1,5 @@
 //Create an NS group delegation 
-resource "nios_dns_nsgroup_delegation" "create_nsgroup_delegate" {
+resource "nios_dns_nsgroup_delegation" "nsgroup_delegation_basic_fields" {
   name = "example_ns_group_del"
   delegate_to = [
     {
@@ -10,7 +10,7 @@ resource "nios_dns_nsgroup_delegation" "create_nsgroup_delegate" {
 }
 
 //Create an NS group with additional attributes
-resource "nios_dns_nsgroup_delegation" "create_nsgroup_delegate_with_additional_params" {
+resource "nios_dns_nsgroup_delegation" "nsgroup_delegation_with_additional_fields" {
   name = "example_ns_group_delegation"
   delegate_to = [
     {
