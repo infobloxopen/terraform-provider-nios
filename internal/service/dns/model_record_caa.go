@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -86,7 +85,8 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "Tag of CAA record.",
 		Validators: []validator.String{
-			stringvalidator.LengthAtMost(255),
+			stringvalidator.LengthBetween(1, 255),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"ca_value": schema.StringAttribute{
@@ -102,10 +102,7 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthBetween(0, 256),
 		},
 		Default:             stringdefault.StaticString(""),
@@ -201,10 +198,7 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString("default"),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the DNS view in which the record resides. Example: \"external\".",
 	},
