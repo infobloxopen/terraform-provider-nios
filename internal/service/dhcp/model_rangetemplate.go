@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -25,6 +24,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RangetemplateModel struct {
@@ -200,10 +200,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.",
 	},
@@ -437,10 +434,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of a range template object.",
 	},

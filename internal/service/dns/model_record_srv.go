@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -100,10 +99,7 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
@@ -202,10 +198,7 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	"target": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The target of the SRV record in FQDN format. This value can be in unicode format.",
 	},
@@ -227,10 +220,7 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the DNS view in which the record resides. Example: \"external\".",

@@ -45,7 +45,7 @@ var Ipv6networkOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 	},
 	"value": schema.StringAttribute{
-		Required: 		  true,
+		Required:            true,
 		MarkdownDescription: "Value of the DHCP option",
 	},
 	"use_option": schema.BoolAttribute{

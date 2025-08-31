@@ -2359,7 +2359,7 @@ resource "nios_dhcp_fixed_address" "test_nextserver" {
 `, ip, matchClient, agentCircuitID, nextserver, useNextServer)
 }
 
-func testAccFixedaddressOptions(ip, matchClient string, agentCircuitID int, optionsName, optionValue string, useOptions bool,  num string) string {
+func testAccFixedaddressOptions(ip, matchClient string, agentCircuitID int, optionsName, optionValue string, useOptions bool, num string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_options" {
 	ipv4addr = %q
