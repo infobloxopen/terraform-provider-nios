@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -16,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type FixedaddressCliCredentialsModel struct {
@@ -42,10 +42,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI user name.",
 	},
@@ -54,10 +51,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI password.",
 	},
@@ -73,10 +67,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The comment for the credential.",
 	},
