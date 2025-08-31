@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -16,6 +15,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneAuthAllowTransferModel struct {
@@ -55,10 +55,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
 				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
@@ -82,10 +79,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
@@ -108,10 +102,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
