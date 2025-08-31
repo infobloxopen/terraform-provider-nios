@@ -5,7 +5,6 @@ resource "nios_security_admin_user" "admin_user_basic_fields" {
   admin_groups = ["admin-group"]
 }
 
-// Create a ca-certificate to be used for the admin user
 // TODO: Retrieve references based on the provided distinguished name of the object: cacertificate
 // Create an Admin User with Additional Fields
 resource "nios_security_admin_user" "admin_user_additional_fields" {
@@ -30,7 +29,7 @@ resource "nios_security_admin_user" "admin_user_additional_fields" {
       key_name = "sample-key"
       key_type = "RSA"
       // A Public key file is required for the example to function
-      key_value = replace(file("${path.module}/sample1_key.pub"), "\n", "")
+      key_value = replace(file("${path.module}/sample_key.pub"), "\n", "")
     }
   ]
   use_ssh_keys = true

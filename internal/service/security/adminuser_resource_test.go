@@ -117,7 +117,7 @@ func TestAccAdminuserResource_AuthMethod(t *testing.T) {
 	password := "Example-Admin123!"
 	authMethod := "KEYPAIR"
 	authMethod1 := "KEYPAIR_PASSWORD"
-	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "acctest_data", "nios_security_admin_user", "sample_key.pub"))
+	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "testdata", "nios_security_admin_user", "sample_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
@@ -151,26 +151,40 @@ func TestAccAdminuserResource_AuthType(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	authType := "LOCAL"
-	authype1 := "REMOTE"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserAuthType(name, password, "admin-group", authType),
+				Config: testAccAdminuserAuthType(name, password, "admin-group", "LOCAL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_type", authType),
+					resource.TestCheckResourceAttr(resourceName, "auth_type", "LOCAL"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdminuserAuthType(name, password, "admin-group", authype1),
+				Config: testAccAdminuserAuthType(name, password, "admin-group", "REMOTE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_type", authype1),
+					resource.TestCheckResourceAttr(resourceName, "auth_type", "REMOTE"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccAdminuserAuthType(name, password, "admin-group", "SAML"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "auth_type", "SAML"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccAdminuserAuthType(name, password, "admin-group", "SAML_LOCAL"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "auth_type", "SAML_LOCAL"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -472,7 +486,7 @@ func TestAccAdminuserResource_SshKeys(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
 
-	keyFilePath, err := filepath.Abs(filepath.Join("..", "..", "acctest_data", "nios_security_admin_user", "sample_key.pub"))
+	keyFilePath, err := filepath.Abs(filepath.Join("..", "..", "testdata", "nios_security_admin_user", "sample_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
@@ -484,7 +498,7 @@ func TestAccAdminuserResource_SshKeys(t *testing.T) {
 	// Replace newline characters in the file content
 	keyValue := strings.ReplaceAll(string(keyContent), "\n", "")
 
-	keyFilePath1, err := filepath.Abs(filepath.Join("..", "..", "acctest_data", "nios_security_admin_user", "sample1_key.pub"))
+	keyFilePath1, err := filepath.Abs(filepath.Join("..", "..", "testdata", "nios_security_admin_user", "sample1_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}
@@ -563,7 +577,7 @@ func TestAccAdminuserResource_UseSshKeys(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "acctest_data", "nios_security_admin_user", "sample1_key.pub"))
+	sshkeys, err := filepath.Abs(filepath.Join("..", "..", "testdata", "nios_security_admin_user", "sample1_key.pub"))
 	if err != nil {
 		t.Errorf("Failed to construct absolute path for SSH key: %v", err)
 	}

@@ -2,8 +2,6 @@ package security
 
 import (
 	"context"
-	"regexp"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -75,8 +73,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType: types.StringType,
 		Required:    true,
 		Validators: []validator.List{
-			listvalidator.SizeAtMost(1),
-			listvalidator.SizeAtLeast(1),
+			listvalidator.SizeBetween(1, 1),
 		},
 		MarkdownDescription: "The names of the Admin Groups to which this Admin User belongs. Currently, this is limited to only one Admin Group.",
 	},
@@ -115,10 +112,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the admin user; maximum 256 characters.",
 	},
@@ -174,6 +168,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("use_ssh_keys")),
 		},
 		MarkdownDescription: "List of ssh keys for a particular user.",
 	},
