@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -89,10 +88,7 @@ var RecordTlsaResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^$|^\S(?:.*\S)?$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
@@ -167,10 +163,7 @@ var RecordTlsaResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the DNS view in which the record resides. Example: \"external\".",
