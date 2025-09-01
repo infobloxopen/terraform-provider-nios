@@ -36,7 +36,7 @@ func (r *NamedaclResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *NamedaclResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages Named Access Control Lists (ACLs)",
+		MarkdownDescription: "Manage a Named Access Control List (ACL)",
 		Attributes:          NamedaclResourceSchemaAttributes,
 	}
 }

@@ -1,5 +1,5 @@
 // Create Named Access Control Lists (ACLs) with Basic Fields
-resource "nios_acl_namedacl" "base_namedacl" {
+resource "nios_acl_namedacl" "namedacl_with_basic_fields" {
   name    = "base-acl-template"
   comment = "Base ACL structure created for future assignment of access control entries"
 

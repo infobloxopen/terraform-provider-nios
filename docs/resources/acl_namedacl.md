@@ -3,18 +3,18 @@
 page_title: "nios_acl_namedacl Resource - nios"
 subcategory: "ACL"
 description: |-
-  Manages Named Access Control Lists (ACLs)
+  Manage a Named Access Control List (ACL)
 ---
 
 # nios_acl_namedacl (Resource)
 
-Manages Named Access Control Lists (ACLs)
+Manage a Named Access Control List (ACL)
 
 ## Example Usage
 
 ```terraform
 // Create Named Access Control Lists (ACLs) with Basic Fields
-resource "nios_acl_namedacl" "base_namedacl" {
+resource "nios_acl_namedacl" "namedacl_with_basic_fields" {
   name    = "base-acl-template"
   comment = "Base ACL structure created for future assignment of access control entries"
 
