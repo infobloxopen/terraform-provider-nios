@@ -211,18 +211,18 @@ func TestAccExtensibleattributedefResource_ListValues(t *testing.T) {
 	var v grid.Extensibleattributedef
 	name := acctest.RandomNameWithPrefix("tf_test_ea_")
 
-	initialListValues := []string{
-		"value1",
-		"value2",
-		"value3",
+	initialListValues := []map[string]any{
+		{"value": "value1"},
+		{"value": "value2"},
+		{"value": "value3"},
 	}
 
-	updatedListValues := []string{
-		"value1",
-		"value2",
-		"value3",
-		"value4",
-		"value5",
+	updatedListValues := []map[string]any{
+		{"value": "value1"},
+		{"value": "value2"},
+		{"value": "value3"},
+		{"value": "value4"},
+		{"value": "value5"},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -470,13 +470,8 @@ resource "nios_grid_extensibleattributedef" "test_flags" {
 `, name, flags)
 }
 
-func testAccExtensibleattributedefListValues(name string, listValues []string) string {
-	valuesStr := "[\n"
-	for _, val := range listValues {
-		valuesStr += fmt.Sprintf("\t{\n\t\tvalue = %q\n\t},\n", val)
-	}
-	valuesStr += "]"
-
+func testAccExtensibleattributedefListValues(name string, listValues []map[string]any) string {
+	listValuesHCL := utils.ConvertSliceOfMapsToHCL(listValues)
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_list_values" {
     name = %q
@@ -484,7 +479,7 @@ resource "nios_grid_extensibleattributedef" "test_list_values" {
     flags = "L"
     list_values = %s
 }
-`, name, valuesStr)
+`, name, listValuesHCL)
 }
 
 func testAccExtensibleattributedefMax(name string, maxValue int) string {
