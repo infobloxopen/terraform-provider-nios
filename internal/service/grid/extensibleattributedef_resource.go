@@ -36,7 +36,7 @@ func (r *ExtensibleattributedefResource) Metadata(ctx context.Context, req resou
 
 func (r *ExtensibleattributedefResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manage an Extensible Attribute definitions",
 		Attributes:          ExtensibleattributedefResourceSchemaAttributes,
 	}
 }
@@ -108,7 +108,7 @@ func (r *ExtensibleattributedefResource) Read(ctx context.Context, req resource.
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state

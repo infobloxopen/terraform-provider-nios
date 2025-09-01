@@ -15,6 +15,8 @@ func TestAccExtensibleattributedefDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_grid_extensibleattributedef.test"
 	resourceName := "nios_grid_extensibleattributedef.test"
 	var v grid.Extensibleattributedef
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
+	type_ := "STRING"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +24,7 @@ func TestAccExtensibleattributedefDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckExtensibleattributedefDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccExtensibleattributedefDataSourceConfigFilters(),
+				Config: testAccExtensibleattributedefDataSourceConfigFilters(name, type_),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
@@ -52,13 +54,11 @@ func testAccCheckExtensibleattributedefResourceAttrPair(resourceName, dataSource
 	}
 }
 
-func testAccExtensibleattributedefDataSourceConfigFilters() string {
-	name := "tf_test_ea_" + acctest.RandomName()
-
+func testAccExtensibleattributedefDataSourceConfigFilters(name, type_ string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test" {
     name = %q
-    type = "STRING"
+    type = %q
     comment = "Test extensible attribute definition"
 }
 
@@ -66,9 +66,6 @@ data "nios_grid_extensibleattributedef" "test" {
     filters = {
         name = nios_grid_extensibleattributedef.test.name
     }
-    
-    # Add dependency to ensure the resource is created before the data source is queried
-    depends_on = [nios_grid_extensibleattributedef.test]
 }
-`, name)
+`, name, type_)
 }

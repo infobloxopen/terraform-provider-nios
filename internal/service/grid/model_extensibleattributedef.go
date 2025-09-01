@@ -3,12 +3,14 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
@@ -51,15 +53,21 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The reference to the object.",
 	},
 	"allowed_object_types": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
-		Computed:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Computed:    true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The object types this extensible attribute is allowed to associate with.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "Comment for the Extensible Attribute Definition; maximum 256 characters.",
 	},
 	"default_value": schema.StringAttribute{
@@ -68,9 +76,10 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "Default value used to pre-populate the attribute value in the GUI. For email, URL, and string types, the value is a string with a maximum of 256 characters. For an integer, the value is an integer from -2147483648 through 2147483647. For a date, the value is the number of seconds that have elapsed since January 1st, 1970 UTC.",
 	},
 	"descendants_action": schema.SingleNestedAttribute{
-		Attributes: ExtensibleattributedefDescendantsActionResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          ExtensibleattributedefDescendantsActionResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Action to take on descendants of the object when the object is deleted.",
 	},
 	"flags": schema.StringAttribute{
 		Optional:            true,
@@ -107,24 +116,11 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 	},
 }
 
-func ExpandExtensibleattributedef(ctx context.Context, o types.Object, diags *diag.Diagnostics) *grid.Extensibleattributedef {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m ExtensibleattributedefModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.Extensibleattributedef {
 	if m == nil {
 		return nil
 	}
 	to := &grid.Extensibleattributedef{
-		Ref:                flex.ExpandStringPointer(m.Ref),
 		AllowedObjectTypes: flex.ExpandFrameworkListString(ctx, m.AllowedObjectTypes, diags),
 		Comment:            flex.ExpandStringPointer(m.Comment),
 		DefaultValue:       flex.ExpandStringPointer(m.DefaultValue),
