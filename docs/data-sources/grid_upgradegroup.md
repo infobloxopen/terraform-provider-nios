@@ -3,24 +3,24 @@
 page_title: "nios_grid_upgradegroup Data Source - nios"
 subcategory: "GRID"
 description: |-
-  Retrieves information about existing upgrade groups.
+  Retrieves information about existing Upgrade groups.
 ---
 
 # nios_grid_upgradegroup (Data Source)
 
-Retrieves information about existing upgrade groups.
+Retrieves information about existing Upgrade groups.
 
 ## Example Usage
 
 ```terraform
-//Retrieve a specific Upgradegroup by filters
+//Retrieve a specific Upgrade Group by filters
 data "nios_grid_upgradegroup" "get_upgradegroup_using_filters" {
   filters = {
     name = "upgradegroup-additional"
   }
 }
 
-//Retrieve all Upgradegroups
+//Retrieve all Upgrade Groups
 data "nios_grid_upgradegroup" "get_all_upgradegroups" {}
 ```
 

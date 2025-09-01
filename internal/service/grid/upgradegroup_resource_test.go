@@ -15,6 +15,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// Grid Members: infoblox.172_28_83_29, infoblox.172_28_82_115
+// Distribution Dependent Groups: example_distribution_dependent_group1, example_distribution_dependent_group2
+// Upgrade Dependent Groups: example_upgrade_dependent_group1, example_upgrade_dependent_group2
+
 var readableAttributesForUpgradegroup = "comment,distribution_dependent_group,distribution_policy,distribution_time,members,name,time_zone,upgrade_dependent_group,upgrade_policy,upgrade_time"
 
 func TestAccUpgradegroupResource_basic(t *testing.T) {
@@ -22,7 +27,6 @@ func TestAccUpgradegroupResource_basic(t *testing.T) {
 	var v grid.Upgradegroup
 
 	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
-	//name := "test-update-group3"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -200,11 +204,11 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 
 	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
 	member1 := []map[string]any{
-		{"member": "infoblox.172_28_82_185"},
+		{"member": "infoblox.172_28_83_29"},
 	}
-	// member2 := []map[string]any{
-	// 	{"member": ""},
-	// }
+	member2 := []map[string]any{
+		{"member": "infoblox.172_28_82_115"},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,18 +219,17 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 				Config: testAccUpgradegroupMembers(name, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.172_28_82_185"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.172_28_83_29"),
 				),
 			},
 			// // Update and Read
-			// {
-			// 	Config: testAccUpgradegroupMembers(name, member2),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-			// 		//resource.TestCheckResourceAttr(resourceName, "members", "infoblox.172_28_82_213"),
-			// 		resource.TestCheckResourceAttr(resourceName, "members.0.member", ""),
-			// 	),
-			// },
+			{
+				Config: testAccUpgradegroupMembers(name, member2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.172_28_82_115"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})

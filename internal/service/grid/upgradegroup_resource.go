@@ -36,7 +36,7 @@ func (r *UpgradegroupResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *UpgradegroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages an Upgrade Group.",
 		Attributes:          UpgradegroupResourceSchemaAttributes,
 	}
 }
@@ -189,66 +189,3 @@ func (r *UpgradegroupResource) Delete(ctx context.Context, req resource.DeleteRe
 func (r *UpgradegroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
 }
-
-// func (r *UpgradegroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-// 	//var diags diag.Diagnostics
-// 	var data UpgradegroupModel
-
-// 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-// 	apiRes, _, err := r.client.GridAPI.
-// 		UpgradegroupAPI.
-// 		Read(ctx, resourceRef).
-// 		ReturnFieldsPlus(readableAttributesForUpgradegroup).
-// 		ReturnAsObject(1).
-// 		Execute()
-// 	if err != nil {
-// 		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read Upgradegroup for import, got error: %s", err))
-// 		return
-// 	}
-
-// 	res := apiRes.GetUpgradegroupResponseObjectAsResult.GetResult()
-
-// 	// res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-// 	// if diags.HasError() {
-// 	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Upgradegroup for import due inherited Extensible attributes, got error: %s", diags))
-// 	// 	return
-// 	// }
-
-// 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-// 	//planExtAttrs := data.ExtAttrs
-// 	// data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-// 	// if diags.HasError() {
-// 	// 	resp.Diagnostics.Append(diags...)
-// 	// 	return
-// 	// }
-
-// 	// data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-// 	// if diags.HasError() {
-// 	// 	return
-// 	// }
-
-// 	updateRes, _, err := r.client.GridAPI.
-// 		UpgradegroupAPI.
-// 		Update(ctx, resourceRef).
-// 		Upgradegroup(*data.Expand(ctx, &resp.Diagnostics)).
-// 		ReturnFieldsPlus(readableAttributesForUpgradegroup).
-// 		ReturnAsObject(1).
-// 		Execute()
-// 	if err != nil {
-// 		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Upgradegroup for import, got error: %s", err))
-// 		return
-// 	}
-
-// 	res = updateRes.UpdateUpgradegroupResponseAsObject.GetResult()
-
-// 	// res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
-// 	// if diags.HasError() {
-// 	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Upgradegroup due inherited Extensible attributes for import, got error: %s", diags))
-// 	// 	return
-// 	// }
-// 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-// 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-// }

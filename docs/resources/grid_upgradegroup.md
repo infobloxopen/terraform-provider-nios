@@ -3,33 +3,30 @@
 page_title: "nios_grid_upgradegroup Resource - nios"
 subcategory: "GRID"
 description: |-
-  
+  Manages an Upgrade Group.
 ---
 
 # nios_grid_upgradegroup (Resource)
 
-
+Manages an Upgrade Group.
 
 ## Example Usage
 
 ```terraform
-//Create an Upgradegroup with Basic fields
+//Create an Upgrade Group with Basic fields
 
 resource "nios_grid_upgradegroup" "upgradegroup_with_basic_fields" {
   name = "upgradegroup-basic"
 }
 
-//Create an Upgradegroup with Additional fields
+//Create an Upgrade Group with Additional fields
 resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
   name    = "upgradegroup-additional"
   comment = "This is a sample comment"
   members = [
     {
-      member = "infoblox.172_28_82_185"
+      member = "infoblox.172_28_82_115"
     },
-    # {
-    #   member = "infoblox.172.28.82.186"
-    # }
   ]
   distribution_dependent_group = "distribution-dependent-group-1"
   distribution_policy          = "SEQUENTIALLY"

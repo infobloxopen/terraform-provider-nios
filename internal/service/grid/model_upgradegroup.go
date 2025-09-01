@@ -2,7 +2,6 @@ package grid
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -16,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type UpgradegroupModel struct {
@@ -58,9 +58,8 @@ var UpgradegroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The upgrade group descriptive comment.",
 	},
 	"distribution_dependent_group": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             stringdefault.StaticString(""),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The distribution dependent group name.",
 	},
 	"distribution_policy": schema.StringAttribute{
@@ -91,10 +90,7 @@ var UpgradegroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The upgrade group name.",
 	},
@@ -103,9 +99,8 @@ var UpgradegroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The time zone for scheduling operations.",
 	},
 	"upgrade_dependent_group": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             stringdefault.StaticString(""),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The upgrade dependent group name.",
 	},
 	"upgrade_policy": schema.StringAttribute{
