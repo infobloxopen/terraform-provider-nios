@@ -15,6 +15,8 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// A NIOS grid with 1 members - member.com
 var readableAttributesForNsgroupForwardingmember = "comment,extattrs,forwarding_servers,name"
 
 func TestAccNsgroupForwardingmemberResource_basic(t *testing.T) {
