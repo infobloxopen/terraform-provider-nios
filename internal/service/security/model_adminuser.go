@@ -215,7 +215,7 @@ func (m *AdminuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *s
 		ExtAttrs:                        ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                            flex.ExpandStringPointer(m.Name),
 		Password:                        flex.ExpandStringPointer(m.Password),
-		SshKeys:                         flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.SshKeys, diags, ExpandAdminuserSshKeys),
+		SshKeys:                         flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.SshKeys, diags, ExpandAdminuserSshKeys),
 		TimeZone:                        flex.ExpandStringPointer(m.TimeZone),
 		UseSshKeys:                      flex.ExpandBoolPointer(m.UseSshKeys),
 		UseTimeZone:                     flex.ExpandBoolPointer(m.UseTimeZone),
