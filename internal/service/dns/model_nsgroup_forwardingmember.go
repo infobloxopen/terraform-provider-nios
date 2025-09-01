@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -85,17 +84,6 @@ var NsgroupForwardingmemberResourceSchemaAttributes = map[string]schema.Attribut
 	},
 }
 
-func ExpandNsgroupForwardingmember(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.NsgroupForwardingmember {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m NsgroupForwardingmemberModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
 
 func (m *NsgroupForwardingmemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.NsgroupForwardingmember {
 	if m == nil {
