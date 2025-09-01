@@ -3,25 +3,25 @@
 page_title: "nios_dns_nsgroup_forwardingmember Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing NS Group Forwarding Members.
 ---
 
 # nios_dns_nsgroup_forwardingmember (Data Source)
 
-
+Retrieves information about existing NS Group Forwarding Members.
 
 ## Example Usage
 
 ```terraform
 // Retrieve a NS Group forwardingmember by filters
-data "nios_dns_nsgroup_forwardingmember" "get_ns_group_forwardingmember_using_filters" {
+data "nios_dns_nsgroup_forwardingmember" "get_nsgroup_forwardingmember_using_filters" {
   filters = {
-    name = "example_ns_group_forwardingmember"
+    name = "example_nsgroup_forwardingmember"
   }
 }
 
 // Retrieve a NS Group forwardingmember using Extensible Attributes
-data "nios_dns_nsgroup_forwardingmember" "get_ns_group_forwardingmember_using_extensible_attributes" {
+data "nios_dns_nsgroup_forwardingmember" "get_nsgroup_forwardingmember_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }

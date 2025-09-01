@@ -36,7 +36,7 @@ func (r *NsgroupForwardingmemberResource) Metadata(ctx context.Context, req reso
 
 func (r *NsgroupForwardingmemberResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages an NS Group Forwarding Member.",
 		Attributes:          NsgroupForwardingmemberResourceSchemaAttributes,
 	}
 }

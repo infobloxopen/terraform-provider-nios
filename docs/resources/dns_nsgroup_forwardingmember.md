@@ -3,12 +3,12 @@
 page_title: "nios_dns_nsgroup_forwardingmember Resource - nios"
 subcategory: "DNS"
 description: |-
-  
+  Manages an NS Group Forwarding Member.
 ---
 
 # nios_dns_nsgroup_forwardingmember (Resource)
 
-
+Manages an NS Group Forwarding Member.
 
 ## Example Usage
 
@@ -29,7 +29,7 @@ resource "nios_dns_nsgroup_forwardingmember" "nsgroup_forwardingmember_basic_fie
 // Create NS Group forwardingmember with Additional Fields
 resource "nios_dns_nsgroup_forwardingmember" "nsgroup_forwardingmember_additional_fields" {
   name    = "example_nsgroup_forwardingmember1"
-  comment = "nsgroup forwarding creating with additional fields"
+  comment = "nsgroup forwarding member with additional fields"
   forwarding_servers = [
     {
       name            = "infoblox.localdomain"

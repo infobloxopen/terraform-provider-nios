@@ -2,11 +2,9 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -18,6 +16,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NsgroupForwardingmemberModel struct {
@@ -48,10 +47,7 @@ var NsgroupForwardingmemberResourceSchemaAttributes = map[string]schema.Attribut
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the Forwarding Member Name Server Group; maximum 256 characters.",
 	},
@@ -71,22 +67,19 @@ var NsgroupForwardingmemberResourceSchemaAttributes = map[string]schema.Attribut
 		ElementType:         types.StringType,
 	},
 	"forwarding_servers": schema.ListNestedAttribute{
+		Required:            true,
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NsgroupForwardingmemberForwardingServersResourceSchemaAttributes,
 		},
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Required:            true,
 		MarkdownDescription: "The list of forwarding member servers.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the Forwarding Member Name Server Group.",
 	},
