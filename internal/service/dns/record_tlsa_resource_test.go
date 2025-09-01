@@ -18,6 +18,7 @@ import (
 )
 
 var readableAttributesForRecordTlsa = "certificate_data,certificate_usage,cloud_info,comment,creator,disable,dns_name,extattrs,last_queried,matched_type,name,selector,ttl,use_ttl,view,zone"
+var certificateData = "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971"
 
 func TestAccRecordTlsaResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_tlsa.test"
@@ -31,10 +32,10 @@ func TestAccRecordTlsaResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaBasicConfig(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaBasicConfig(zoneFqdn, name, certificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "certificate_data", "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971"),
+					resource.TestCheckResourceAttr(resourceName, "certificate_data", certificateData),
 					resource.TestCheckResourceAttr(resourceName, "certificate_usage", "2"),
 					resource.TestCheckResourceAttr(resourceName, "matched_type", "0"),
 					resource.TestCheckResourceAttr(resourceName, "selector", "0"),
@@ -62,7 +63,7 @@ func TestAccRecordTlsaResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordTlsaDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordTlsaBasicConfig(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaBasicConfig(zoneFqdn, name, certificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					testAccCheckRecordTlsaDisappears(context.Background(), &v),
@@ -78,6 +79,7 @@ func TestAccRecordTlsaResource_CertificateData(t *testing.T) {
 	var v dns.RecordTlsa
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	name := acctest.RandomNameWithPrefix("record-tlsa")
+	updatedCertificateData := "E2ABDE240D7CD3EE6B4B28C54DF134B97983A1D16E8A410E4561CB106618E972"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -85,18 +87,18 @@ func TestAccRecordTlsaResource_CertificateData(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaCertificateData(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaCertificateData(zoneFqdn, name, certificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "certificate_data", "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971"),
+					resource.TestCheckResourceAttr(resourceName, "certificate_data", certificateData),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaCertificateData(zoneFqdn, name, "E2ABDE240D7CD3EE6B4B28C54DF134B97983A1D16E8A410E4561CB106618E972", 2, 0, 0),
+				Config: testAccRecordTlsaCertificateData(zoneFqdn, name, updatedCertificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "certificate_data", "E2ABDE240D7CD3EE6B4B28C54DF134B97983A1D16E8A410E4561CB106618E972"),
+					resource.TestCheckResourceAttr(resourceName, "certificate_data", updatedCertificateData),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -116,7 +118,7 @@ func TestAccRecordTlsaResource_CertificateUsage(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaCertificateUsage(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaCertificateUsage(zoneFqdn, name, certificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "certificate_usage", "2"),
@@ -124,7 +126,7 @@ func TestAccRecordTlsaResource_CertificateUsage(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaCertificateUsage(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 3, 0, 0),
+				Config: testAccRecordTlsaCertificateUsage(zoneFqdn, name, certificateData, 3, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "certificate_usage", "3"),
@@ -147,7 +149,7 @@ func TestAccRecordTlsaResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaComment(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "This is a comment"),
+				Config: testAccRecordTlsaComment(zoneFqdn, name, certificateData, 2, 0, 0, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -155,7 +157,7 @@ func TestAccRecordTlsaResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaComment(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "This is an updated comment"),
+				Config: testAccRecordTlsaComment(zoneFqdn, name, certificateData, 2, 0, 0, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
@@ -178,7 +180,7 @@ func TestAccRecordTlsaResource_Creator(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaCreator(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "STATIC"),
+				Config: testAccRecordTlsaCreator(zoneFqdn, name, certificateData, 2, 0, 0, "STATIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
@@ -186,7 +188,7 @@ func TestAccRecordTlsaResource_Creator(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaCreator(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "DYNAMIC"),
+				Config: testAccRecordTlsaCreator(zoneFqdn, name, certificateData, 2, 0, 0, "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "creator", "DYNAMIC"),
@@ -209,7 +211,7 @@ func TestAccRecordTlsaResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaDisable(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "false"),
+				Config: testAccRecordTlsaDisable(zoneFqdn, name, certificateData, 2, 0, 0, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -217,7 +219,7 @@ func TestAccRecordTlsaResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaDisable(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "true"),
+				Config: testAccRecordTlsaDisable(zoneFqdn, name, certificateData, 2, 0, 0, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -242,7 +244,7 @@ func TestAccRecordTlsaResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaExtAttrs(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, map[string]string{
+				Config: testAccRecordTlsaExtAttrs(zoneFqdn, name, certificateData, 2, 0, 0, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -252,7 +254,7 @@ func TestAccRecordTlsaResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaExtAttrs(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, map[string]string{
+				Config: testAccRecordTlsaExtAttrs(zoneFqdn, name, certificateData, 2, 0, 0, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -277,7 +279,7 @@ func TestAccRecordTlsaResource_MatchedType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaMatchedType(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaMatchedType(zoneFqdn, name, certificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "matched_type", "0"),
@@ -285,7 +287,7 @@ func TestAccRecordTlsaResource_MatchedType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaMatchedType(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 1, 0),
+				Config: testAccRecordTlsaMatchedType(zoneFqdn, name, certificateData, 2, 1, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "matched_type", "1"),
@@ -309,7 +311,7 @@ func TestAccRecordTlsaResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaName(zoneFqdn, name1, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaName(zoneFqdn, name1, certificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s.%s", name1, zoneFqdn)),
@@ -317,7 +319,7 @@ func TestAccRecordTlsaResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaName(zoneFqdn, name2, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaName(zoneFqdn, name2, certificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s.%s", name2, zoneFqdn)),
@@ -340,7 +342,7 @@ func TestAccRecordTlsaResource_Selector(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaSelector(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0),
+				Config: testAccRecordTlsaSelector(zoneFqdn, name, certificateData, 2, 0, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "selector", "0"),
@@ -348,7 +350,7 @@ func TestAccRecordTlsaResource_Selector(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaSelector(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 1),
+				Config: testAccRecordTlsaSelector(zoneFqdn, name, certificateData, 2, 0, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "selector", "1"),
@@ -371,7 +373,7 @@ func TestAccRecordTlsaResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, 10, "true"),
+				Config: testAccRecordTlsaTtl(zoneFqdn, name, certificateData, 2, 0, 0, 10, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
@@ -379,7 +381,7 @@ func TestAccRecordTlsaResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, 20, "true"),
+				Config: testAccRecordTlsaTtl(zoneFqdn, name, certificateData, 2, 0, 0, 20, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "20"),
@@ -402,7 +404,7 @@ func TestAccRecordTlsaResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaUseTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "false", 10),
+				Config: testAccRecordTlsaUseTtl(zoneFqdn, name, certificateData, 2, 0, 0, "false", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -410,7 +412,7 @@ func TestAccRecordTlsaResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaUseTtl(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "true", 10),
+				Config: testAccRecordTlsaUseTtl(zoneFqdn, name, certificateData, 2, 0, 0, "true", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
@@ -433,7 +435,7 @@ func TestAccRecordTlsaResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTlsaView(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "custom_view_1"),
+				Config: testAccRecordTlsaView(zoneFqdn, name, certificateData, 2, 0, 0, "custom_view_1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", "custom_view_1"),
@@ -441,7 +443,7 @@ func TestAccRecordTlsaResource_View(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTlsaView(zoneFqdn, name, "D2ABDE240D7CD3EE6B4B28C54DF034B97983A1D16E8A410E4561CB106618E971", 2, 0, 0, "custom_view_2"),
+				Config: testAccRecordTlsaView(zoneFqdn, name, certificateData, 2, 0, 0, "custom_view_2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTlsaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", "custom_view_2"),
