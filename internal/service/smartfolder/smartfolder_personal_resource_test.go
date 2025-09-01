@@ -219,13 +219,13 @@ func TestAccSmartfolderPersonalResource_QueryItems(t *testing.T) {
 	queryItems2 := []map[string]any{
 		{
 			"field_type": "NORMAL",
-			"name":       "type",
+			"name":       "last_discovered_timestamp",
 			"op_match":   true,
 			"operator":   "EQ",
 			"value": map[string]any{
-				"value_string": "Zone",
+				"value_date": 4123567,
 			},
-			"value_type": "ENUM",
+			"value_type": "DATE",
 		},
 	}
 
@@ -254,11 +254,11 @@ func TestAccSmartfolderPersonalResource_QueryItems(t *testing.T) {
 					testAccCheckSmartfolderPersonalExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "query_items.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "query_items.0.field_type", "NORMAL"),
-					resource.TestCheckResourceAttr(resourceName, "query_items.0.name", "type"),
+					resource.TestCheckResourceAttr(resourceName, "query_items.0.name", "last_discovered_timestamp"),
 					resource.TestCheckResourceAttr(resourceName, "query_items.0.op_match", "true"),
 					resource.TestCheckResourceAttr(resourceName, "query_items.0.operator", "EQ"),
-					resource.TestCheckResourceAttr(resourceName, "query_items.0.value.value_string", "Zone"),
-					resource.TestCheckResourceAttr(resourceName, "query_items.0.value_type", "ENUM"),
+					resource.TestCheckResourceAttr(resourceName, "query_items.0.value.value_date", "4123567"),
+					resource.TestCheckResourceAttr(resourceName, "query_items.0.value_type", "DATE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

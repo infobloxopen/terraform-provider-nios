@@ -110,9 +110,10 @@ var SmartfolderPersonalQueryItemsResourceSchemaAttributes = map[string]schema.At
 		MarkdownDescription: "The Smart Folder query value type.",
 	},
 	"value": schema.SingleNestedAttribute{
-		Attributes: SmartfolderpersonalqueryitemsValueResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          SmartfolderpersonalqueryitemsValueResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The Smart Folder query value.",
 	},
 }
 

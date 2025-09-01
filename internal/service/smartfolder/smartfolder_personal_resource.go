@@ -85,7 +85,7 @@ func (r *SmartfolderPersonalResource) Create(ctx context.Context, req resource.C
 
 	res := apiRes.CreateSmartfolderPersonalResponseAsObject.GetResult()
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create SmartfolderPersonal due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create SmartfolderPersonal, got error: %s", err))
 		return
 	}
 
