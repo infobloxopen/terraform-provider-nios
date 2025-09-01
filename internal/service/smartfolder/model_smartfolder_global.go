@@ -2,10 +2,8 @@ package smartfolder
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -16,6 +14,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/smartfolder"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SmartfolderGlobalModel struct {
@@ -57,10 +56,7 @@ var SmartfolderGlobalResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing white space",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The global Smart Folder name.",
 	},
