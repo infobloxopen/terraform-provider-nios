@@ -20,7 +20,7 @@ func TestAccNsgroupForwardingmemberDataSource_Filters(t *testing.T) {
 	forwardingServers := []map[string]any{
 		{
 			"name": "infoblox.localdomain",
-		},	
+		},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -32,8 +32,8 @@ func TestAccNsgroupForwardingmemberDataSource_Filters(t *testing.T) {
 				Config: testAccNsgroupForwardingmemberDataSourceConfigFilters(name, forwardingServers),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
-						}, testAccCheckNsgroupForwardingmemberResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
+					}, testAccCheckNsgroupForwardingmemberResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -48,7 +48,7 @@ func TestAccNsgroupForwardingmemberDataSource_ExtAttrFilters(t *testing.T) {
 	forwardingServers := []map[string]any{
 		{
 			"name": "infoblox.localdomain",
-		},	
+		},
 	}
 	extAttrValue := acctest.RandomName()
 
@@ -58,11 +58,11 @@ func TestAccNsgroupForwardingmemberDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardingmemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(name , forwardingServers, extAttrValue),
+				Config: testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(name, forwardingServers, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
-						}, testAccCheckNsgroupForwardingmemberResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
+					}, testAccCheckNsgroupForwardingmemberResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -71,14 +71,14 @@ func TestAccNsgroupForwardingmemberDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckNsgroupForwardingmemberResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "forwarding_servers", dataSourceName, "result.0.forwarding_servers"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-    }
+func testAccCheckNsgroupForwardingmemberResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "forwarding_servers", dataSourceName, "result.0.forwarding_servers"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+	}
 }
 
 func testAccNsgroupForwardingmemberDataSourceConfigFilters(name string, forwardingServers []map[string]any) string {
@@ -97,7 +97,7 @@ data "nios_dns_nsgroup_forwardingmember" "test" {
 `, name, forwardingServersStr)
 }
 
-func testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(name string , forwardingServers []map[string]any, extAttrsValue string) string {
+func testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(name string, forwardingServers []map[string]any, extAttrsValue string) string {
 	forwardingServersStr := utils.ConvertSliceOfMapsToHCL(forwardingServers)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardingmember" "test" {
@@ -115,4 +115,3 @@ data "nios_dns_nsgroup_forwardingmember" "test" {
 }
 `, name, forwardingServersStr, extAttrsValue)
 }
-

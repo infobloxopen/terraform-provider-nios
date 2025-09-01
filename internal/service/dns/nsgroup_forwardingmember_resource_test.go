@@ -26,7 +26,7 @@ func TestAccNsgroupForwardingmemberResource_basic(t *testing.T) {
 	forwardingServers := []map[string]any{
 		{
 			"name": "infoblox.localdomain",
-		},	
+		},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -35,13 +35,13 @@ func TestAccNsgroupForwardingmemberResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardingmemberBasicConfig(name,forwardingServers),
+				Config: testAccNsgroupForwardingmemberBasicConfig(name, forwardingServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName,"name",name),
-					resource.TestCheckResourceAttr(resourceName,"forwarding_servers.0.name", "infoblox.localdomain"), 
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.localdomain"),
 					// Test fields with default value
-					resource.TestCheckResourceAttr(resourceName,"comment",""),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -56,7 +56,7 @@ func TestAccNsgroupForwardingmemberResource_disappears(t *testing.T) {
 	forwardingServers := []map[string]any{
 		{
 			"name": "infoblox.localdomain",
-		},	
+		},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -65,7 +65,7 @@ func TestAccNsgroupForwardingmemberResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardingmemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardingmemberBasicConfig(name,forwardingServers),
+				Config: testAccNsgroupForwardingmemberBasicConfig(name, forwardingServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					testAccCheckNsgroupForwardingmemberDisappears(context.Background(), &v),
@@ -83,7 +83,7 @@ func TestAccNsgroupForwardingmemberResource_Comment(t *testing.T) {
 	forwardingServers := []map[string]any{
 		{
 			"name": "infoblox.localdomain",
-		},	
+		},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -92,7 +92,7 @@ func TestAccNsgroupForwardingmemberResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardingmemberComment(name , forwardingServers , "this is an comment"),
+				Config: testAccNsgroupForwardingmemberComment(name, forwardingServers, "this is an comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "this is an comment"),
@@ -100,7 +100,7 @@ func TestAccNsgroupForwardingmemberResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupForwardingmemberComment(name , forwardingServers , "this is an updated comment"),
+				Config: testAccNsgroupForwardingmemberComment(name, forwardingServers, "this is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "this is an updated comment"),
@@ -118,7 +118,7 @@ func TestAccNsgroupForwardingmemberResource_ExtAttrs(t *testing.T) {
 	forwardingServers := []map[string]any{
 		{
 			"name": "infoblox.localdomain",
-		},	
+		},
 	}
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -129,7 +129,7 @@ func TestAccNsgroupForwardingmemberResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardingmemberExtAttrs(name , forwardingServers ,  map[string]string{
+				Config: testAccNsgroupForwardingmemberExtAttrs(name, forwardingServers, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -139,7 +139,7 @@ func TestAccNsgroupForwardingmemberResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupForwardingmemberExtAttrs(name , forwardingServers ,  map[string]string{
+				Config: testAccNsgroupForwardingmemberExtAttrs(name, forwardingServers, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -159,16 +159,16 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 	forwardingServers := []map[string]any{
 		{
 			"name": "infoblox.localdomain",
-		},	
+		},
 	}
 	forwardingServersUpdate := []map[string]any{
 		{
-			"name": "member.com",
-			"use_override_forwarders": true , 
-			"forward_to":[]map[string]any{
+			"name":                    "member.com",
+			"use_override_forwarders": true,
+			"forward_to": []map[string]any{
 				{
-					"name":"forwarder.com",
-					"address":"2.3.4.5",
+					"name":    "forwarder.com",
+					"address": "2.3.4.5",
 				},
 			},
 		},
@@ -180,7 +180,7 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardingmemberForwardingServers(name , forwardingServers),
+				Config: testAccNsgroupForwardingmemberForwardingServers(name, forwardingServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.localdomain"),
@@ -188,7 +188,7 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupForwardingmemberForwardingServers(name , forwardingServersUpdate),
+				Config: testAccNsgroupForwardingmemberForwardingServers(name, forwardingServersUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "member.com"),
@@ -207,7 +207,7 @@ func TestAccNsgroupForwardingmemberResource_Name(t *testing.T) {
 	forwardingServers := []map[string]any{
 		{
 			"name": "infoblox.localdomain",
-		},	
+		},
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,7 +215,7 @@ func TestAccNsgroupForwardingmemberResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardingmemberName(name , forwardingServers),
+				Config: testAccNsgroupForwardingmemberName(name, forwardingServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -223,7 +223,7 @@ func TestAccNsgroupForwardingmemberResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupForwardingmemberName(nameUpdate,forwardingServers),
+				Config: testAccNsgroupForwardingmemberName(nameUpdate, forwardingServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
@@ -302,8 +302,7 @@ resource "nios_dns_nsgroup_forwardingmember" "test" {
 `, name, forwardingServerStr)
 }
 
-
-func testAccNsgroupForwardingmemberComment(name string , forwardingServer []map[string]any, comment string) string {
+func testAccNsgroupForwardingmemberComment(name string, forwardingServer []map[string]any, comment string) string {
 	forwardingServerStr := utils.ConvertSliceOfMapsToHCL(forwardingServer)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardingmember" "test_comment" {
@@ -314,7 +313,7 @@ resource "nios_dns_nsgroup_forwardingmember" "test_comment" {
 `, name, forwardingServerStr, comment)
 }
 
-func testAccNsgroupForwardingmemberExtAttrs(name string , forwardingServer []map[string]any , extAttrs map[string]string) string {
+func testAccNsgroupForwardingmemberExtAttrs(name string, forwardingServer []map[string]any, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf(`
@@ -329,10 +328,10 @@ resource "nios_dns_nsgroup_forwardingmember" "test_extattrs" {
 	forwarding_servers = %s
     extattrs = %s
 }
-`, name , forwardingServerStr , extattrsStr)
+`, name, forwardingServerStr, extattrsStr)
 }
 
-func testAccNsgroupForwardingmemberForwardingServers(name string , forwardingServers []map[string]any) string {
+func testAccNsgroupForwardingmemberForwardingServers(name string, forwardingServers []map[string]any) string {
 	forwardingServersStr := utils.ConvertSliceOfMapsToHCL(forwardingServers)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardingmember" "test_forwarding_servers" {

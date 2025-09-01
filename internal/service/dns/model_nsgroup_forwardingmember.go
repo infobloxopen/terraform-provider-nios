@@ -66,7 +66,7 @@ var NsgroupForwardingmemberResourceSchemaAttributes = map[string]schema.Attribut
 		ElementType:         types.StringType,
 	},
 	"forwarding_servers": schema.ListNestedAttribute{
-		Required:            true,
+		Required: true,
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NsgroupForwardingmemberForwardingServersResourceSchemaAttributes,
 		},
@@ -83,7 +83,6 @@ var NsgroupForwardingmemberResourceSchemaAttributes = map[string]schema.Attribut
 		MarkdownDescription: "The name of the Forwarding Member Name Server Group.",
 	},
 }
-
 
 func (m *NsgroupForwardingmemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.NsgroupForwardingmember {
 	if m == nil {

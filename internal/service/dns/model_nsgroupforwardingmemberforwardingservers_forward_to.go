@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -18,13 +18,13 @@ import (
 
 type NsgroupforwardingmemberforwardingserversForwardToModel struct {
 	Address                      iptypes.IPv4Address `tfsdk:"address"`
-	Name                         types.String `tfsdk:"name"`
-	SharedWithMsParentDelegation types.Bool   `tfsdk:"shared_with_ms_parent_delegation"`
-	Stealth                      types.Bool   `tfsdk:"stealth"`
-	TsigKey                      types.String `tfsdk:"tsig_key"`
-	TsigKeyAlg                   types.String `tfsdk:"tsig_key_alg"`
-	TsigKeyName                  types.String `tfsdk:"tsig_key_name"`
-	UseTsigKeyName               types.Bool   `tfsdk:"use_tsig_key_name"`
+	Name                         types.String        `tfsdk:"name"`
+	SharedWithMsParentDelegation types.Bool          `tfsdk:"shared_with_ms_parent_delegation"`
+	Stealth                      types.Bool          `tfsdk:"stealth"`
+	TsigKey                      types.String        `tfsdk:"tsig_key"`
+	TsigKeyAlg                   types.String        `tfsdk:"tsig_key_alg"`
+	TsigKeyName                  types.String        `tfsdk:"tsig_key_name"`
+	UseTsigKeyName               types.Bool          `tfsdk:"use_tsig_key_name"`
 }
 
 var NsgroupforwardingmemberforwardingserversForwardToAttrTypes = map[string]attr.Type{
@@ -40,15 +40,15 @@ var NsgroupforwardingmemberforwardingserversForwardToAttrTypes = map[string]attr
 
 var NsgroupforwardingmemberforwardingserversForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
-		Required:            true,
+		CustomType: iptypes.IPv4AddressType{},
+		Required:   true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -97,8 +97,8 @@ func (m *NsgroupforwardingmemberforwardingserversForwardToModel) Expand(ctx cont
 		return nil
 	}
 	to := &dns.NsgroupforwardingmemberforwardingserversForwardTo{
-		Address:        flex.ExpandIPv4Address(m.Address),
-		Name:           flex.ExpandStringPointer(m.Name),
+		Address: flex.ExpandIPv4Address(m.Address),
+		Name:    flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }
