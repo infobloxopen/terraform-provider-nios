@@ -2,9 +2,7 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -15,6 +13,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ViewDnssecTrustedKeysModel struct {
@@ -35,33 +34,24 @@ var ViewDnssecTrustedKeysAttrTypes = map[string]attr.Type{
 
 var ViewDnssecTrustedKeysResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
-		Required: 		true,
+		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The FQDN of the domain for which the member validates responses to recursive queries.",
 	},
 	"algorithm": schema.StringAttribute{
-		Required: 		  true,
+		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},	
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The DNSSEC algorithm used to generate the key.",
 	},
 	"key": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
-		},	
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The DNSSEC key.",
 	},
 	"secure_entry_point": schema.BoolAttribute{

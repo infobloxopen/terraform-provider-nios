@@ -2,7 +2,6 @@ package dtc
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -16,11 +15,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcPoolModel struct {
@@ -177,10 +177,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The DTC Pool display name.",
 	},
@@ -272,8 +269,15 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 	m.LbPreferredTopology = flex.FlattenStringPointer(from.LbPreferredTopology)
 	m.Monitors = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Monitors, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Quorum = flex.FlattenInt64Pointer(from.Quorum)
+	m.Quorum = FlattenQuorumBasedOnAvailability(from.Availability, from.Quorum)
 	m.Servers = flex.FlattenFrameworkListNestedBlock(ctx, from.Servers, DtcPoolServersAttrTypes, diags, FlattenDtcPoolServers)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
+}
+
+func FlattenQuorumBasedOnAvailability(availability *string, quorum *int64) types.Int64 {
+    if availability == nil || *availability != "QUORUM" {
+        return types.Int64Null()
+    }
+    return flex.FlattenInt64Pointer(quorum)
 }
