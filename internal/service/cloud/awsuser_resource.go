@@ -31,7 +31,7 @@ type AwsuserResource struct {
 }
 
 func (r *AwsuserResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "cloud_awsuser"
+	resp.TypeName = req.ProviderTypeName + "_" + "cloud_aws_user"
 }
 
 func (r *AwsuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

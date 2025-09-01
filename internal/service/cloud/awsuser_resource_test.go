@@ -20,7 +20,7 @@ var readableAttributesForAwsuser = "access_key_id,account_id,govcloud_enabled,la
 // TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // Admin User - aws1, aws2
 func TestAccAwsuserResource_basic(t *testing.T) {
-	var resourceName = "nios_cloud_awsuser.test"
+	var resourceName = "nios_cloud_aws_user.test"
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
@@ -50,7 +50,7 @@ func TestAccAwsuserResource_basic(t *testing.T) {
 }
 
 func TestAccAwsuserResource_disappears(t *testing.T) {
-	resourceName := "nios_cloud_awsuser.test"
+	resourceName := "nios_cloud_aws_user.test"
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
@@ -75,7 +75,7 @@ func TestAccAwsuserResource_disappears(t *testing.T) {
 }
 
 func TestAccAwsuserResource_AccessKeyId(t *testing.T) {
-	var resourceName = "nios_cloud_awsuser.test_access_key_id"
+	var resourceName = "nios_cloud_aws_user.test_access_key_id"
 	var v cloud.Awsuser
 	accountId := "337773173961"
 	name := acctest.RandomNameWithPrefix("aws-user")
@@ -113,7 +113,7 @@ func TestAccAwsuserResource_AccessKeyId(t *testing.T) {
 }
 
 func TestAccAwsuserResource_AccountId(t *testing.T) {
-	var resourceName = "nios_cloud_awsuser.test_account_id"
+	var resourceName = "nios_cloud_aws_user.test_account_id"
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	name := acctest.RandomNameWithPrefix("aws-user")
@@ -145,7 +145,7 @@ func TestAccAwsuserResource_AccountId(t *testing.T) {
 }
 
 func TestAccAwsuserResource_GovcloudEnabled(t *testing.T) {
-	var resourceName = "nios_cloud_awsuser.test_govcloud_enabled"
+	var resourceName = "nios_cloud_aws_user.test_govcloud_enabled"
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
@@ -178,7 +178,7 @@ func TestAccAwsuserResource_GovcloudEnabled(t *testing.T) {
 }
 
 func TestAccAwsuserResource_Name(t *testing.T) {
-	var resourceName = "nios_cloud_awsuser.test_name"
+	var resourceName = "nios_cloud_aws_user.test_name"
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
@@ -211,7 +211,7 @@ func TestAccAwsuserResource_Name(t *testing.T) {
 }
 
 func TestAccAwsuserResource_NiosUserName(t *testing.T) {
-	var resourceName = "nios_cloud_awsuser.test_nios_user_name"
+	var resourceName = "nios_cloud_aws_user.test_nios_user_name"
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
@@ -244,7 +244,7 @@ func TestAccAwsuserResource_NiosUserName(t *testing.T) {
 }
 
 func TestAccAwsuserResource_SecretAccessKey(t *testing.T) {
-	var resourceName = "nios_cloud_awsuser.test_secret_access_key"
+	var resourceName = "nios_cloud_aws_user.test_secret_access_key"
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
@@ -306,7 +306,6 @@ func testAccCheckAwsuserDestroy(ctx context.Context, v *cloud.Awsuser) resource.
 		_, httpRes, err := acctest.NIOSClient.CloudAPI.
 			AwsuserAPI.
 			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
-			//Read(ctx, *v.Ref).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForAwsuser).
 			Execute()
@@ -337,7 +336,7 @@ func testAccCheckAwsuserDisappears(ctx context.Context, v *cloud.Awsuser) resour
 
 func testAccAwsuserBasicConfig(accessKeyId, accountId, name, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsuser" "test" {
+resource "nios_cloud_aws_user" "test" {
     access_key_id = %q
     account_id    = %q
     name          = %q
@@ -349,7 +348,7 @@ resource "nios_cloud_awsuser" "test" {
 
 func testAccAwsuserAccessKeyId(accessKeyId, accountId, name, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsuser" "test_access_key_id" {
+resource "nios_cloud_aws_user" "test_access_key_id" {
     access_key_id = %q
     account_id    = %q
     name          = %q
@@ -361,7 +360,7 @@ resource "nios_cloud_awsuser" "test_access_key_id" {
 
 func testAccAwsuserAccountId(accountId, accessKeyId, name, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsuser" "test_account_id" {
+resource "nios_cloud_aws_user" "test_account_id" {
     account_id = %q
     access_key_id = %q
     name = %q
@@ -372,7 +371,7 @@ resource "nios_cloud_awsuser" "test_account_id" {
 
 func testAccAwsuserGovcloudEnabled(accountId, accessKeyId, name, govcloudEnabled, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsuser" "test_govcloud_enabled" {
+resource "nios_cloud_aws_user" "test_govcloud_enabled" {
     account_id = %q
     access_key_id = %q
     name = %q
@@ -384,7 +383,7 @@ resource "nios_cloud_awsuser" "test_govcloud_enabled" {
 
 func testAccAwsuserName(accountId, accessKeyId, name, govcloudEnabled, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsuser" "test_name" {
+resource "nios_cloud_aws_user" "test_name" {
     account_id = %q
     access_key_id = %q
     name = %q
@@ -397,7 +396,7 @@ resource "nios_cloud_awsuser" "test_name" {
 
 func testAccAwsuserNiosUserName(accountId, accessKeyId, name, niosUserName, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsuser" "test_nios_user_name" {
+resource "nios_cloud_aws_user" "test_nios_user_name" {
     account_id = %q
     access_key_id = %q
     name = %q
@@ -410,7 +409,7 @@ resource "nios_cloud_awsuser" "test_nios_user_name" {
 
 func testAccAwsuserSecretAccessKey(accountId, accessKeyId, name, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsuser" "test_secret_access_key" {
+resource "nios_cloud_aws_user" "test_secret_access_key" {
     account_id = %q
     access_key_id = %q
     name = %q

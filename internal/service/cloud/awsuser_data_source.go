@@ -31,7 +31,7 @@ type AwsuserDataSource struct {
 }
 
 func (d *AwsuserDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "cloud_awsuser"
+	resp.TypeName = req.ProviderTypeName + "_" + "cloud_aws_user"
 }
 
 type AwsuserModelWithFilter struct {

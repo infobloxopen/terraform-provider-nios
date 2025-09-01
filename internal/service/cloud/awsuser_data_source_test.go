@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccAwsuserDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_cloud_awsuser.test"
-	resourceName := "nios_cloud_awsuser.test"
+	dataSourceName := "data.nios_cloud_aws_user.test"
+	resourceName := "nios_cloud_aws_user.test"
 	var v cloud.Awsuser
 	accessKeyId := "AKIA" + acctest.RandomAlphaNumeric(16)
 	accountId := "337773173961"
@@ -53,18 +53,18 @@ func testAccCheckAwsuserResourceAttrPair(resourceName, dataSourceName string) []
 
 func testAccAwsuserDataSourceConfigFilters(name, accessKeyId, accountId, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsuser" "test" {
-  name               = "%s"
+resource "nios_cloud_aws_user" "test" {
   access_key_id      = "%s"
   account_id         = "%s"
   govcloud_enabled   = false
   secret_access_key  = %q
 }
 
-data "nios_cloud_awsuser" "test" {
+data "nios_cloud_aws_user" "test" {
   filters = {
-    name = nios_cloud_awsuser.test.name
+    name = nios_cloud_aws_user.test.name
   }
+  depends_on = [nios_cloud_aws_user.test]
 }
 `, accessKeyId, accountId, name, secretAccessKey)
 }

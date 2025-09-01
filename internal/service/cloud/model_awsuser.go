@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type AwsuserModel struct {
@@ -92,10 +93,7 @@ var AwsuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"secret_access_key": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s]([^\s]|.*[^\s])?$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The Secret Access Key for the Access Key ID of this user. Maximum 255 characters.",
 	},
