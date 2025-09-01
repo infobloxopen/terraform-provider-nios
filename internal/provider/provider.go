@@ -130,6 +130,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdminroleResource,
 
 		misc.NewRulesetResource,
+		misc.NewBfdtemplateResource,
 	}
 }
 
@@ -174,6 +175,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewAdminroleDataSource,
 
 		misc.NewRulesetDataSource,
+		misc.NewBfdtemplateDataSource,
 	}
 }
 
