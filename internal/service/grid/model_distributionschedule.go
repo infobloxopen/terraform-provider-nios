@@ -74,86 +74,6 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func UseStateForUnknownInt64() planmodifier.Int64 {
-	return useStateForUnknownInt64{}
-}
-
-type useStateForUnknownInt64 struct{}
-
-func (m useStateForUnknownInt64) Description(ctx context.Context) string {
-	return "Use state value when unknown"
-}
-
-func (m useStateForUnknownInt64) MarkdownDescription(ctx context.Context) string {
-	return "Use state value when unknown"
-}
-
-func (m useStateForUnknownInt64) PlanModifyInt64(ctx context.Context, req planmodifier.Int64Request, resp *planmodifier.Int64Response) {
-	if req.PlanValue.IsUnknown() && req.ConfigValue.IsNull() && !req.StateValue.IsNull() {
-		resp.PlanValue = req.StateValue
-	}
-}
-
-func UseStateForUnknownBool() planmodifier.Bool {
-	return useStateForUnknownBool{}
-}
-
-type useStateForUnknownBool struct{}
-
-func (m useStateForUnknownBool) Description(ctx context.Context) string {
-	return "Use state value when unknown"
-}
-
-func (m useStateForUnknownBool) MarkdownDescription(ctx context.Context) string {
-	return "Use state value when unknown"
-}
-
-func (m useStateForUnknownBool) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
-	if req.PlanValue.IsUnknown() && req.ConfigValue.IsNull() && !req.StateValue.IsNull() {
-		resp.PlanValue = req.StateValue
-	}
-}
-
-func UseStateForUnknownString() planmodifier.String {
-	return useStateForUnknownString{}
-}
-
-type useStateForUnknownString struct{}
-
-func (m useStateForUnknownString) Description(ctx context.Context) string {
-	return "Use state value when unknown"
-}
-
-func (m useStateForUnknownString) MarkdownDescription(ctx context.Context) string {
-	return "Use state value when unknown"
-}
-
-func (m useStateForUnknownString) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
-	if req.PlanValue.IsUnknown() && req.ConfigValue.IsNull() && !req.StateValue.IsNull() {
-		resp.PlanValue = req.StateValue
-	}
-}
-
-func UseStateForUnknownList() planmodifier.List {
-	return useStateForUnknownList{}
-}
-
-type useStateForUnknownList struct{}
-
-func (m useStateForUnknownList) Description(ctx context.Context) string {
-	return "Use state value when unknown"
-}
-
-func (m useStateForUnknownList) MarkdownDescription(ctx context.Context) string {
-	return "Use state value when unknown"
-}
-
-func (m useStateForUnknownList) PlanModifyList(ctx context.Context, req planmodifier.ListRequest, resp *planmodifier.ListResponse) {
-	if req.PlanValue.IsUnknown() && req.ConfigValue.IsNull() && !req.StateValue.IsNull() {
-		resp.PlanValue = req.StateValue
-	}
-}
-
 func (m *DistributionscheduleModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.Distributionschedule {
 	if m == nil {
 		return nil
@@ -161,32 +81,22 @@ func (m *DistributionscheduleModel) Expand(ctx context.Context, diags *diag.Diag
 	allGroups := flex.ExpandFrameworkListNestedBlock(ctx, m.UpgradeGroups, diags, ExpandDistributionscheduleUpgradeGroups)
 	var groups []grid.DistributionscheduleUpgradeGroups
 
-	for _, g := range allGroups {
-		// Skip invalid groups entirely
-		if g.Name == nil || *g.Name == "" {
-			diags.AddError("Invalid Upgrade Group", "Upgrade group 'name' is required and cannot be empty")
-			continue
-		}
-		if g.DistributionTime == nil || *g.DistributionTime == 0 {
-			diags.AddError("Invalid Upgrade Group", "Upgrade group 'distribution_time' is required and cannot be 0")
-			continue
-		}
-
+	for _, group := range allGroups {
 		// Convert empty optional fields to nil
-		if g.UpgradeDependentGroup != nil && *g.UpgradeDependentGroup == "" {
-			g.UpgradeDependentGroup = nil
+		if group.UpgradeDependentGroup != nil && *group.UpgradeDependentGroup == "" {
+			group.UpgradeDependentGroup = nil
 		}
-		if g.DistributionDependentGroup != nil && *g.DistributionDependentGroup == "" {
-			g.DistributionDependentGroup = nil
+		if group.DistributionDependentGroup != nil && *group.DistributionDependentGroup == "" {
+			group.DistributionDependentGroup = nil
 		}
 
-		// UpgradeTime: leave 0 as is, can be omitted
-		if g.UpgradeTime == nil {
+		// UpgradeTime cannot be nil, set to 0 if not provided
+		if group.UpgradeTime == nil {
 			val := int64(0)
-			g.UpgradeTime = &val
+			group.UpgradeTime = &val
 		}
 
-		groups = append(groups, g)
+		groups = append(groups, group)
 	}
 
 	to := &grid.Distributionschedule{

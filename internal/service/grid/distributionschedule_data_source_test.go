@@ -3,6 +3,7 @@ package grid_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,21 +18,31 @@ func TestAccDistributionscheduleDataSource_Filters(t *testing.T) {
 	resourceName := "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
 	active := true
-	start_time := time.Now().Add(24 * time.Hour).Unix()
+
+	now := time.Now()
+	start_time := now.Add(12 * time.Hour).Unix()
+	distribution_time := now.Add(24 * time.Hour).Unix()
+
+	upgrade_groups := []map[string]any{
+		{
+			"distribution_time": distribution_time,
+			"name":              "Default",
+		},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckDistributionscheduleDestroy(context.Background(), &v),
+		// CheckDestroy:             testAccCheckDistributionscheduleDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDistributionscheduleResourceConfigFilters(active, start_time),
+				Config: testAccDistributionscheduleResourceConfigFilters(active, start_time, upgrade_groups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
 				),
 			},
 			{
-				Config: testAccDistributionscheduleDataSourceConfigFilters(active, start_time),
+				Config: testAccDistributionscheduleDataSourceConfigFilters(active, start_time, upgrade_groups),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
@@ -50,26 +61,52 @@ func testAccCheckDistributionscheduleResourceAttrPair(resourceName, dataSourceNa
 		resource.TestCheckResourceAttrPair(resourceName, "active", dataSourceName, "result.0.active"),
 		resource.TestCheckResourceAttrPair(resourceName, "start_time", dataSourceName, "result.0.start_time"),
 		resource.TestCheckResourceAttrPair(resourceName, "time_zone", dataSourceName, "result.0.time_zone"),
-		// resource.TestCheckResourceAttrPair(resourceName, "upgrade_groups", dataSourceName, "result.0.upgrade_groups"),
+		resource.TestCheckResourceAttrPair(resourceName, "upgrade_groups", dataSourceName, "result.0.upgrade_groups"),
 	}
 }
 
-func testAccDistributionscheduleResourceConfigFilters(active bool, start_time int64) string {
+func testAccDistributionscheduleResourceConfigFilters(active bool, start_time int64, upgradeGroups []map[string]any) string {
+	hclGroups := []string{}
+	for _, g := range upgradeGroups {
+		groupHCL := fmt.Sprintf(`
+    {
+      name = %q
+      distribution_time = %d
+    }`, g["name"], g["distribution_time"])
+		hclGroups = append(hclGroups, groupHCL)
+	}
+
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test" {
-	  active     = %t
-	  start_time = %d
+	active     = %t
+	start_time = %d
+	upgrade_groups = [
+		%s
+	]
 }
-`, active, start_time)
+`, active, start_time, strings.Join(hclGroups, ","))
 }
 
-func testAccDistributionscheduleDataSourceConfigFilters(active bool, start_time int64) string {
+func testAccDistributionscheduleDataSourceConfigFilters(active bool, start_time int64, upgradeGroups []map[string]any) string {
+	hclGroups := []string{}
+	for _, g := range upgradeGroups {
+		groupHCL := fmt.Sprintf(`
+    {
+      name = %q
+      distribution_time = %d
+    }`, g["name"], g["distribution_time"])
+		hclGroups = append(hclGroups, groupHCL)
+	}
+
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test" {
-	  active     = %t
-	  start_time = %d
+	active     = %t
+	start_time = %d
+	upgrade_groups = [
+		%s
+	]
 }
 
 data "nios_grid_distributionschedule" "test" {}
-`, active, start_time)
+`, active, start_time, strings.Join(hclGroups, ","))
 }

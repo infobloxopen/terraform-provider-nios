@@ -102,7 +102,6 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 		DistributionscheduleAPI.
 		List(ctx).
 		ReturnAsObject(1).
-		// ReturnFieldsPlus(readableAttributesForDistributionschedule).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list DistributionSchedule: %s", err))

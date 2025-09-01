@@ -21,7 +21,7 @@ var readableAttributesForDistributionschedule = "active,start_time,time_zone,upg
 func TestAccDistributionscheduleResource_basic(t *testing.T) {
 	var resourceName = "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
-	start_time := time.Now().Add(24 * time.Hour).Unix()
+	start_time := time.Now().Add(12 * time.Hour).Unix()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -205,26 +205,26 @@ func testAccCheckDistributionscheduleExists(ctx context.Context, resourceName st
 	}
 }
 
-func testAccCheckDistributionscheduleDestroy(ctx context.Context, v *grid.Distributionschedule) resource.TestCheckFunc {
-	// // Verify the resource was destroyed
-	// return func(state *terraform.State) error {
-	// 	_, httpRes, err := acctest.NIOSClient.GridAPI.
-	// 		DistributionscheduleAPI.
-	// 		Read(ctx, utils.ExtractResourceRef(*v.Ref)).
-	// 		ReturnAsObject(1).
-	// 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
-	// 		Execute()
-	// 	if err != nil {
-	// 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-	// 			// resource was deleted
-	// 			return nil
-	// 		}
-	// 		return err
-	// 	}
-	// 	return errors.New("expected to be deleted")
-	// }
-	return nil
-}
+// func testAccCheckDistributionscheduleDestroy(ctx context.Context, v *grid.Distributionschedule) resource.TestCheckFunc {
+// // Verify the resource was destroyed
+// return func(state *terraform.State) error {
+// 	_, httpRes, err := acctest.NIOSClient.GridAPI.
+// 		DistributionscheduleAPI.
+// 		Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+// 		ReturnAsObject(1).
+// 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
+// 		Execute()
+// 	if err != nil {
+// 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+// 			// resource was deleted
+// 			return nil
+// 		}
+// 		return err
+// 	}
+// 	return errors.New("expected to be deleted")
+// }
+// return nil
+// }
 
 // func testAccCheckDistributionscheduleDisappears(ctx context.Context, v *grid.Distributionschedule) resource.TestCheckFunc {
 // 	// Delete the resource externally to verify disappears test
@@ -264,14 +264,6 @@ resource "nios_grid_distributionschedule" "test_start_time" {
 }
 `, startTime)
 }
-
-// func testAccDistributionscheduleUpgradeGroups(upgradeGroups []map[string]any) string {
-// 	return fmt.Sprintf(`
-// resource "nios_grid_distributionschedule" "test_upgrade_groups" {
-//     upgrade_groups = %q
-// }
-// `, utils.ConvertSliceOfMapsToHCL(upgradeGroups))
-// }
 
 func testAccDistributionscheduleUpgradeGroups(startTime int64, upgradeGroups []map[string]any) string {
 	hclGroups := []string{}

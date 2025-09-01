@@ -100,7 +100,6 @@ func (d *DistributionscheduleDataSource) Configure(ctx context.Context, req data
 
 func (d *DistributionscheduleDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data DistributionscheduleModelWithFilter
-	pageCount := 0
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -109,67 +108,26 @@ func (d *DistributionscheduleDataSource) Read(ctx context.Context, req datasourc
 		return
 	}
 
-	allResults, err := utils.ReadWithPages(
-		func(pageID string, maxResults int32) ([]grid.Distributionschedule, string, error) {
+	request := d.client.GridAPI.
+		DistributionscheduleAPI.
+		List(ctx).
+		Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
+		ReturnAsObject(1).
+		ReturnFieldsPlus(readableAttributesForDistributionschedule)
 
-			if !data.MaxResults.IsNull() {
-				maxResults = data.MaxResults.ValueInt32()
-			}
-			var paging int32 = 1
-			if !data.Paging.IsNull() {
-				paging = data.Paging.ValueInt32()
-			}
-
-			//Increment the page count
-			pageCount++
-
-			request := d.client.GridAPI.
-				DistributionscheduleAPI.
-				List(ctx).
-				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForDistributionschedule).
-				Paging(paging).
-				MaxResults(maxResults)
-
-			// Add page ID if provided
-			if pageID != "" {
-				request = request.PageId(pageID)
-			}
-
-			// Execute the request
-			apiRes, _, err := request.Execute()
-			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Distributionschedule, got error: %s", err))
-				return nil, "", err
-			}
-
-			res := apiRes.ListDistributionscheduleResponseObject.GetResult()
-			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
-
-			// Check for next page ID in additional properties
-			additionalProperties := apiRes.ListDistributionscheduleResponseObject.AdditionalProperties
-			var nextPageID string
-			npId, ok := additionalProperties["next_page_id"]
-			if ok {
-				if npIdStr, ok := npId.(string); ok {
-					nextPageID = npIdStr
-				}
-			} else {
-				tflog.Info(ctx, "No next page ID found. This is the last page.")
-			}
-			return res, nextPageID, nil
-		},
-	)
-
+	// Execute the request
+	apiRes, _, err := request.Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Distributionschedule, got error: %s", err))
 		return
 	}
-	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
+
+	results := apiRes.ListDistributionscheduleResponseObject.GetResult()
+
+	tflog.Info(ctx, fmt.Sprintf("Retrieved %d results", len(results)))
 
 	// Process the results
-	data.FlattenResults(ctx, allResults, &resp.Diagnostics)
+	data.FlattenResults(ctx, results, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
