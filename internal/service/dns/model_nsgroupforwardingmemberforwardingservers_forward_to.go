@@ -3,19 +3,21 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NsgroupforwardingmemberforwardingserversForwardToModel struct {
-	Address                      types.String `tfsdk:"address"`
+	Address                      iptypes.IPv4Address `tfsdk:"address"`
 	Name                         types.String `tfsdk:"name"`
 	SharedWithMsParentDelegation types.Bool   `tfsdk:"shared_with_ms_parent_delegation"`
 	Stealth                      types.Bool   `tfsdk:"stealth"`
@@ -26,7 +28,7 @@ type NsgroupforwardingmemberforwardingserversForwardToModel struct {
 }
 
 var NsgroupforwardingmemberforwardingserversForwardToAttrTypes = map[string]attr.Type{
-	"address":                          types.StringType,
+	"address":                          iptypes.IPv4AddressType{},
 	"name":                             types.StringType,
 	"shared_with_ms_parent_delegation": types.BoolType,
 	"stealth":                          types.BoolType,
@@ -38,11 +40,18 @@ var NsgroupforwardingmemberforwardingserversForwardToAttrTypes = map[string]attr
 
 var NsgroupforwardingmemberforwardingserversForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Required:            true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
@@ -88,7 +97,7 @@ func (m *NsgroupforwardingmemberforwardingserversForwardToModel) Expand(ctx cont
 		return nil
 	}
 	to := &dns.NsgroupforwardingmemberforwardingserversForwardTo{
-		Address:        flex.ExpandStringPointer(m.Address),
+		Address:        flex.ExpandIPv4Address(m.Address),
 		Name:           flex.ExpandStringPointer(m.Name),
 	}
 	return to
@@ -112,7 +121,7 @@ func (m *NsgroupforwardingmemberforwardingserversForwardToModel) Flatten(ctx con
 	if m == nil {
 		*m = NsgroupforwardingmemberforwardingserversForwardToModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPv4Address(from.Address)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)
