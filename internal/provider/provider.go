@@ -128,9 +128,10 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
 
-		security.NewAdminroleResource,
-
 		misc.NewRulesetResource,
+
+		security.NewAdminroleResource,
+		security.NewAdminuserResource,
 	}
 }
 
@@ -173,9 +174,10 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
 
-		security.NewAdminroleDataSource,
-
 		misc.NewRulesetDataSource,
+
+		security.NewAdminroleDataSource,
+		security.NewAdminuserDataSource,
 	}
 }
 
