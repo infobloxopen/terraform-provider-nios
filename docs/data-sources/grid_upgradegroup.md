@@ -3,12 +3,12 @@
 page_title: "nios_grid_upgradegroup Data Source - nios"
 subcategory: "GRID"
 description: |-
-  Retrieves information about existing Upgrade groups.
+  Retrieves information about existing Upgrade Groups.
 ---
 
 # nios_grid_upgradegroup (Data Source)
 
-Retrieves information about existing Upgrade groups.
+Retrieves information about existing Upgrade Groups.
 
 ## Example Usage
 
