@@ -64,28 +64,23 @@ var NsgroupDelegationDelegateToResourceSchemaAttributes = map[string]schema.Attr
 		MarkdownDescription: "This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.",
 	},
 	"stealth": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
 		Computed:            true,
-		Optional:            true,
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
 		Computed:            true,
-		Optional:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Computed:            true,
-		Optional:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Computed:            true,
-		Optional:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
