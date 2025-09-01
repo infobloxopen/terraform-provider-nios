@@ -54,6 +54,7 @@ func testAccCheckAwsuserResourceAttrPair(resourceName, dataSourceName string) []
 func testAccAwsuserDataSourceConfigFilters(name, accessKeyId, accountId, secretAccessKey string) string {
 	return fmt.Sprintf(`
 resource "nios_cloud_aws_user" "test" {
+  name               = "%s"
   access_key_id      = "%s"
   account_id         = "%s"
   govcloud_enabled   = false
