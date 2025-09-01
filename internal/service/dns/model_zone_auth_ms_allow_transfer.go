@@ -2,9 +2,7 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,28 +15,25 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneAuthMsAllowTransferModel struct {
-	Address    iptypes.IPAddress `tfsdk:"address"`
-	Permission types.String      `tfsdk:"permission"`
+	Address    types.String `tfsdk:"address"`
+	Permission types.String `tfsdk:"permission"`
 }
 
 var ZoneAuthMsAllowTransferAttrTypes = map[string]attr.Type{
-	"address":    iptypes.IPAddressType{},
+	"address":    types.StringType,
 	"permission": types.StringType,
 }
 
 var ZoneAuthMsAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType:          iptypes.IPAddressType{},
 		Required:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"permission": schema.StringAttribute{
@@ -69,7 +64,7 @@ func (m *ZoneAuthMsAllowTransferModel) Expand(ctx context.Context, diags *diag.D
 		return nil
 	}
 	to := &dns.ZoneAuthMsAllowTransfer{
-		Address:    flex.ExpandIPAddress(m.Address),
+		Address:    flex.ExpandStringPointer(m.Address),
 		Permission: flex.ExpandStringPointer(m.Permission),
 	}
 	return to
@@ -93,6 +88,6 @@ func (m *ZoneAuthMsAllowTransferModel) Flatten(ctx context.Context, from *dns.Zo
 	if m == nil {
 		*m = ZoneAuthMsAllowTransferModel{}
 	}
-	m.Address = flex.FlattenIPAddress(from.Address)
+	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 }
