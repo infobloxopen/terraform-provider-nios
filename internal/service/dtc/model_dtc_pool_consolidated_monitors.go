@@ -3,6 +3,7 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -35,6 +36,9 @@ var DtcPoolConsolidatedMonitorsResourceSchemaAttributes = map[string]schema.Attr
 		ElementType:         types.StringType,
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "Members whose monitor statuses are shared across other members in a pool.",
 	},
 	"monitor": schema.StringAttribute{

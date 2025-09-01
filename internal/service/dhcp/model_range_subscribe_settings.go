@@ -44,6 +44,7 @@ var RangeSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute
 					"VLAN",
 				),
 			),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
 	},
@@ -53,6 +54,9 @@ var RangeSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
 	},
 }

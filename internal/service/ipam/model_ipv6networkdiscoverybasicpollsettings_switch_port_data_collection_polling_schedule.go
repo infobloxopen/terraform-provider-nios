@@ -66,6 +66,7 @@ var Ipv6networkdiscoverybasicpollsettingsSwitchPortDataCollectionPollingSchedule
 					"SATURDAY",
 				),
 			),
+			listvalidator.SizeAtLeast(1),
 		},
 		Computed: true,
 	},

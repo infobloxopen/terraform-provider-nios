@@ -149,13 +149,24 @@ func ExpandFrameworkListString(ctx context.Context, tfList interface {
 	ElementsAs(ctx context.Context, target interface{}, allowUnhandled bool) diag.Diagnostics
 }, diags *diag.Diagnostics) []string {
 	if tfList.IsNull() || tfList.IsUnknown() {
-		return nil
+		return make([]string, 0)
 	}
 	var data []string
 	diags.Append(tfList.ElementsAs(ctx, &data, false)...)
 	return data
 }
 
+func ExpandFrameworkListStringEmptyAsNil(ctx context.Context, tfList interface {
+	basetypes.ListValuable
+	ElementsAs(ctx context.Context, target interface{}, allowUnhandled bool) diag.Diagnostics
+}, diags *diag.Diagnostics) []string {
+	if tfList.IsNull() || tfList.IsUnknown() {
+		return nil
+	}
+	var data []string
+	diags.Append(tfList.ElementsAs(ctx, &data, false)...)
+	return data
+}
 func FlattenFrameworkUnorderedListNestedBlock[T any, U any](ctx context.Context, data []T, attrTypes map[string]attr.Type, diags *diag.Diagnostics, f FrameworkElementFlExFunc[*T, U]) internaltypes.UnorderedListValue {
 	if len(data) == 0 {
 		return internaltypes.NewUnorderedListValueNull(types.ObjectType{AttrTypes: attrTypes})
@@ -362,7 +373,7 @@ func ExpandFrameworkListNestedBlock[T any, U any](ctx context.Context, tfList in
 	ElementsAs(ctx context.Context, target interface{}, allowUnhandled bool) diag.Diagnostics
 }, diags *diag.Diagnostics, f FrameworkElementFlExFunc[T, *U]) []U {
 	if tfList.IsNull() || tfList.IsUnknown() {
-		return nil
+		return  make([]U, 0)
 	}
 
 	var data []T
@@ -375,12 +386,12 @@ func ExpandFrameworkListNestedBlock[T any, U any](ctx context.Context, tfList in
 
 }
 
-func ExpandFrameworkListNestedBlockNilAsEmpty[T any, U any](ctx context.Context, tfList interface {
+func ExpandFrameworkListNestedBlockEmptyAsNil[T any, U any](ctx context.Context, tfList interface {
 	basetypes.ListValuable
 	ElementsAs(ctx context.Context, target interface{}, allowUnhandled bool) diag.Diagnostics
 }, diags *diag.Diagnostics, f FrameworkElementFlExFunc[T, *U]) []U {
 	if tfList.IsNull() || tfList.IsUnknown() {
-		return make([]U, 0)
+		return nil
 	}
 
 	var data []T
