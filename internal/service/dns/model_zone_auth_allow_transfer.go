@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -14,11 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneAuthAllowTransferModel struct {
+	Ref            types.String `tfsdk:"ref"`
 	Address        types.String `tfsdk:"address"`
 	Struct         types.String `tfsdk:"struct"`
 	Permission     types.String `tfsdk:"permission"`
@@ -29,6 +30,7 @@ type ZoneAuthAllowTransferModel struct {
 }
 
 var ZoneAuthAllowTransferAttrTypes = map[string]attr.Type{
+	"ref":               types.StringType,
 	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
@@ -40,11 +42,27 @@ var ZoneAuthAllowTransferAttrTypes = map[string]attr.Type{
 
 var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 	"struct": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
 		Validators: []validator.String{
 			stringvalidator.OneOf("addressac", "tsigac"),
 		},
+	},
+	"ref": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("struct"),
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
+			),
+		},
+		MarkdownDescription: "The reference to the object.",
 	},
 	"address": schema.StringAttribute{
 		Optional: true,
@@ -53,7 +71,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
-				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
 			),
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -67,7 +85,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
-				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
 			),
 		},
 	},
@@ -106,15 +124,8 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
-		Validators: []validator.Bool{
-			boolvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
-		},
 	},
 }
 
@@ -134,17 +145,14 @@ func (m *ZoneAuthAllowTransferModel) Expand(ctx context.Context, diags *diag.Dia
 	if m == nil {
 		return nil
 	}
-	structValue := m.Struct.ValueString()
 	to := &dns.ZoneAuthAllowTransfer{
-		Struct: flex.ExpandStringPointer(m.Struct),
-	}
-	if structValue == "addressac" {
-		to.Address = flex.ExpandStringPointer(m.Address)
-		to.Permission = flex.ExpandStringPointer(m.Permission)
-	} else if structValue == "tsigac" {
-		to.TsigKey = flex.ExpandStringPointer(m.TsigKey)
-		to.TsigKeyAlg = flex.ExpandStringPointer(m.TsigKeyAlg)
-		to.TsigKeyName = flex.ExpandStringPointer(m.TsigKeyName)
+		Ref:         flex.ExpandStringPointer(m.Ref),
+		Address:     flex.ExpandStringPointer(m.Address),
+		Struct:      flex.ExpandStringPointer(m.Struct),
+		Permission:  flex.ExpandStringPointer(m.Permission),
+		TsigKey:     flex.ExpandStringPointer(m.TsigKey),
+		TsigKeyAlg:  flex.ExpandStringPointer(m.TsigKeyAlg),
+		TsigKeyName: flex.ExpandStringPointer(m.TsigKeyName),
 	}
 	return to
 }
@@ -167,16 +175,12 @@ func (m *ZoneAuthAllowTransferModel) Flatten(ctx context.Context, from *dns.Zone
 	if m == nil {
 		*m = ZoneAuthAllowTransferModel{}
 	}
-
 	m.Struct = flex.FlattenStringPointer(from.Struct)
-
-	if m.Struct.ValueString() == "addressac" {
-		m.Address = flex.FlattenStringPointer(from.Address)
-		m.Permission = flex.FlattenStringPointer(from.Permission)
-	} else if m.Struct.ValueString() == "tsigac" {
-		m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
-		m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)
-		m.TsigKeyName = flex.FlattenStringPointer(from.TsigKeyName)
-		m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
-	}
+	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Permission = flex.FlattenStringPointer(from.Permission)
+	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
+	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)
+	m.TsigKeyName = flex.FlattenStringPointer(from.TsigKeyName)
+	m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
 }
