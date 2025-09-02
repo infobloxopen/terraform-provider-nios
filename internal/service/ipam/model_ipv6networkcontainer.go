@@ -605,7 +605,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},
-		Default: int64default.StaticInt64(43200),
+		//Default: int64default.StaticInt64(43200),
 	},
 	"zone_associations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
