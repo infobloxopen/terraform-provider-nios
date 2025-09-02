@@ -41,6 +41,7 @@ var Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes = map[string]s
 				"USERNAME",
 				"VLAN",
 			)),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"mapped_ea_attributes": schema.ListNestedAttribute{
@@ -49,6 +50,9 @@ var Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes = map[string]s
 		},
 		Optional:            true,
 		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	},
 }
 
