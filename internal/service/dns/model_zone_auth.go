@@ -765,6 +765,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of domain controllers that are allowed to create NS records for authoritative zones.",
 	},
 	"ms_ddns_mode": schema.StringAttribute{
