@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -24,6 +23,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ViewModel struct {
@@ -226,10 +226,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"blacklist_redirect_addresses": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_blacklist")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The array of IP addresses the appliance includes in the response it sends in place of a blacklisted IP address.",
 	},
 	"blacklist_redirect_ttl": schema.Int64Attribute{
@@ -242,7 +243,10 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Time To Live (TTL) value of the synthetic DNS responses resulted from blacklist redirection. The TTL value is a 32-bit unsigned integer that represents the TTL in seconds.",
 	},
 	"blacklist_rulesets": schema.ListAttribute{
-		ElementType:         types.StringType,
+		ElementType: types.StringType,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
 		MarkdownDescription: "The name of the Ruleset object assigned at the Grid level for blacklist redirection.",
 	},
@@ -255,10 +259,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the DNS view; maximum 64 characters.",
 	},
@@ -266,11 +267,12 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewCustomRootNameServersResourceSchemaAttributes,
 		},
-		Optional: true,
-		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_root_name_server")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of customized root name servers. You can either select and use Internet root name servers or specify custom root name servers by providing a host name and IP address to which the Infoblox appliance can send queries. Include the specified parameter to set the attribute value. Omit the parameter to retrieve the attribute value.",
 	},
 	"ddns_force_creation_timestamp_update": schema.BoolAttribute{
@@ -310,10 +312,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_restrict_patterns_list": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ddns_patterns_restriction")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The unordered list of restriction patterns for an option of to restrict DDNS updates based on FQDN patterns.",
 	},
 	"ddns_restrict_protected": schema.BoolAttribute{
@@ -360,10 +363,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"dns64_groups": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_dns64")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The list of DNS64 synthesis groups associated with this DNS view.",
 	},
 	"dnssec_enabled": schema.BoolAttribute{
@@ -385,7 +389,10 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the DNS security extension accepts expired signatures or not.",
 	},
 	"dnssec_negative_trust_anchors": schema.ListAttribute{
-		ElementType:         types.StringType,
+		ElementType: types.StringType,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
 		MarkdownDescription: "A list of zones for which the server does not perform DNSSEC validation.",
 	},
@@ -393,10 +400,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewDnssecTrustedKeysResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_dnssec")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The list of trusted keys for the DNS security extension.",
 	},
 	"dnssec_validation_enabled": schema.BoolAttribute{
@@ -470,20 +478,22 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewFilterAaaaListResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_filter_aaaa")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "Applies AAAA filtering to a named ACL, or to a list of IPv4/IPv6 addresses and networks from which queries are received. This field does not allow TSIG keys.",
 	},
 	"fixed_rrset_order_fqdns": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewFixedRrsetOrderFqdnsResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_fixed_rrset_order_fqdns")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The fixed RRset order FQDN. If this field does not contain an empty value, the appliance will automatically set the enable_fixed_rrset_order_fqdns field to 'true', unless the same request sets the enable field to 'false'.",
 	},
 	"forward_only": schema.BoolAttribute{
@@ -497,10 +507,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"forwarders": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_forwarders")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The list of forwarders for the DNS view. A forwarder is a name server to which other name servers first send their off-site queries. The forwarder builds up a cache of information, avoiding the need for other name servers to send queries off-site.",
 	},
 	"is_default": schema.BoolAttribute{
@@ -511,26 +522,31 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewLastQueriedAclResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_scavenging_settings")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "Determines last queried ACL for the specified IPv4 or IPv6 addresses and networks in scavenging settings.",
 	},
 	"match_clients": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewMatchClientsResourceSchemaAttributes,
 		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "A list of forwarders for the match clients. This list specifies a named ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"match_destinations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewMatchDestinationsResourceSchemaAttributes,
 		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "A list of forwarders for the match destinations. This list specifies a name ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"max_cache_ttl": schema.Int64Attribute{
@@ -563,10 +579,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Name of the DNS view.",
 	},
@@ -602,18 +615,20 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"nxdomain_redirect_addresses": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The array with IPv4 addresses the appliance includes in the response it sends in place of an NXDOMAIN response.",
 	},
 	"nxdomain_redirect_addresses_v6": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The array with IPv6 addresses the appliance includes in the response it sends in place of an NXDOMAIN response.",
 	},
 	"nxdomain_redirect_ttl": schema.Int64Attribute{
@@ -627,10 +642,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"nxdomain_rulesets": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The names of the Ruleset objects assigned at the grid level for NXDOMAIN redirection.",
 	},
 	"recursion": schema.BoolAttribute{
@@ -710,10 +726,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewSortlistResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_sortlist")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "A sort list that determines the order of IP addresses in responses sent to DNS queries.",
 	},
 	"use_blacklist": schema.BoolAttribute{

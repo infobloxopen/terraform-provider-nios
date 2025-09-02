@@ -2,11 +2,9 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -20,6 +18,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NsgroupModel struct {
@@ -62,10 +61,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the name server group; maximum 256 characters.",
 	},
@@ -92,6 +88,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_external_primary")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The list of external primary servers.",
 	},
@@ -101,6 +98,9 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of external secondary servers.",
 	},
 	"grid_primary": schema.ListNestedAttribute{
@@ -114,6 +114,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("grid_primary"),
 				path.MatchRoot("external_primaries"),
 			),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The grid primary servers for this group.",
 	},
@@ -125,6 +126,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_external_primary")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The list with Grid members that are secondary servers for this group.",
 	},
@@ -142,10 +144,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of this name server group.",
 	},
