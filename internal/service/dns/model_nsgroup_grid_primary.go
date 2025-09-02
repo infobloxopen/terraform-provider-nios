@@ -11,8 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 )
 
 type NsgroupGridPrimaryModel struct {
@@ -60,6 +61,9 @@ var NsgroupGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The primary preference list with Grid member names and\\or External Server extserver structs for this member.",
 	},
 	"enable_preferred_primaries": schema.BoolAttribute{
