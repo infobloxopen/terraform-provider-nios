@@ -117,7 +117,7 @@ Optional:
 - `pxe_lease_time` (Number) The PXE lease time value for a DHCP Fixed Address object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.
 - `reserved_interface` (String) The ref to the reserved interface to which the device belongs.
 - `restart_if_needed` (Boolean) Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.
-- `snmp3_credential` (Attributes) The SNMPv3 credential for this fixed address. (see [below for nested schema](#nestedatt--result--snmp3_credential))
+- `snmp3_credential` (Attributes) The SNMPv3 credential for this fixed address.For SNMP Credentials to be applied to this fixed address,. (see [below for nested schema](#nestedatt--result--snmp3_credential))
 - `snmp_credential` (Attributes) The SNMP credential for this fixed address. If set to true, the SNMP credential will override member-level settings. (see [below for nested schema](#nestedatt--result--snmp_credential))
 - `template` (String) If set on creation, the fixed address will be created according to the values specified in the named template.
 - `use_bootfile` (Boolean) Use flag for: bootfile
