@@ -281,6 +281,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use this method to set or retrieve the dynamic DNS updates flag of a DHCP IPv6 Network Container object. The DHCP server can send DDNS updates to DNS servers in the same Grid and to external DNS servers. This setting overrides the member level settings.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"enable_ddns": schema.BoolAttribute{
@@ -330,6 +331,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: Ipv6networkcontainerFederatedRealmsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+			},
 		MarkdownDescription: "This field contains the federated realms associated to this network container.",
 	},
 	"last_rir_registration_update_sent": schema.Int64Attribute{
@@ -348,6 +352,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"mgm_private": schema.BoolAttribute{
@@ -615,6 +620,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of zones associated with this network container.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_zone_associations")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 }
