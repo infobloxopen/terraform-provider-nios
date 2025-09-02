@@ -102,10 +102,11 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordPtrResource,
 		dns.NewRecordNsResource,
 		dns.NewRecordDnameResource,
-		dns.NewZoneForwardResource,
 		dns.NewRecordCnameResource,
 		dns.NewRecordMxResource,
 		dns.NewRecordNaptrResource,
+		dns.NewRecordCaaResource,
+		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
 		dns.NewViewResource,
@@ -132,6 +133,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdminroleResource,
 
 		misc.NewRulesetResource,
+
+		security.NewAdminroleResource,
+		security.NewAdminuserResource,
 	}
 }
 
@@ -147,10 +151,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordPtrDataSource,
 		dns.NewRecordNsDataSource,
 		dns.NewRecordDnameDataSource,
-		dns.NewZoneForwardDataSource,
 		dns.NewRecordCnameDataSource,
 		dns.NewRecordMxDataSource,
 		dns.NewRecordNaptrDataSource,
+		dns.NewRecordCaaDataSource,
+		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
 		dns.NewViewDataSource,
@@ -177,6 +182,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewAdminroleDataSource,
 
 		misc.NewRulesetDataSource,
+
+		security.NewAdminroleDataSource,
+		security.NewAdminuserDataSource,
 	}
 }
 

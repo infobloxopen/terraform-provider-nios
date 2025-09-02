@@ -32,6 +32,8 @@ subcategory: "{{- $group := index (split .Name "_") 1 -}}
   RIR
 {{- else if eq $group "rpz" -}}
   RPZ
+{{- else if eq $group "security" -}}
+  SECURITY
 {{- else if eq $group "smartfolder" -}}
   SMART FOLDER
 {{- else if eq $group "threatinsight" -}}
