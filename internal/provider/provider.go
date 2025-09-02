@@ -105,6 +105,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordCnameResource,
 		dns.NewRecordMxResource,
 		dns.NewRecordNaptrResource,
+		dns.NewRecordTlsaResource,
 		dns.NewRecordCaaResource,
 		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
@@ -128,9 +129,10 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
 
-		security.NewAdminroleResource,
-
 		misc.NewRulesetResource,
+
+		security.NewAdminroleResource,
+		security.NewAdminuserResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 	}
@@ -151,6 +153,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordCnameDataSource,
 		dns.NewRecordMxDataSource,
 		dns.NewRecordNaptrDataSource,
+		dns.NewRecordTlsaDataSource,
 		dns.NewRecordCaaDataSource,
 		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
@@ -174,9 +177,10 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
 
-		security.NewAdminroleDataSource,
-
 		misc.NewRulesetDataSource,
+
+		security.NewAdminroleDataSource,
+		security.NewAdminuserDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 	}

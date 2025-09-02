@@ -8,16 +8,15 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 )
 
 type ViewscavengingsettingsScavengingScheduleModel struct {
@@ -58,6 +57,7 @@ var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[strin
 			listvalidator.ValueStringsAre(
 				stringvalidator.OneOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"),
 			),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 	},
