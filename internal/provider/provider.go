@@ -130,8 +130,6 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		cloud.NewAwsuserResource,
 
-		security.NewAdminroleResource,
-
 		misc.NewRulesetResource,
 
 		security.NewAdminroleResource,
@@ -178,8 +176,6 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewBulkhostnametemplateDataSource,
 
 		cloud.NewAwsuserDataSource,
-
-		security.NewAdminroleDataSource,
 
 		misc.NewRulesetDataSource,
 
