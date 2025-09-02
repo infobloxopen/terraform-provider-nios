@@ -2,7 +2,6 @@ package smartfolder
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -16,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/smartfolder"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SmartfolderGlobalGroupBysModel struct {
@@ -34,10 +34,7 @@ var SmartfolderGlobalGroupBysResourceSchemaAttributes = map[string]schema.Attrib
 	"value": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing white space",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the Smart Folder grouping attribute.",
 	},
