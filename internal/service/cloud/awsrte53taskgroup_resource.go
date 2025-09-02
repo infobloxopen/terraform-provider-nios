@@ -31,7 +31,7 @@ type Awsrte53taskgroupResource struct {
 }
 
 func (r *Awsrte53taskgroupResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "cloud_awsrte53taskgroup"
+	resp.TypeName = req.ProviderTypeName + "_" + "cloud_aws_route53_task_group"
 }
 
 func (r *Awsrte53taskgroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -162,11 +162,6 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	res := apiRes.UpdateAwsrte53taskgroupResponseAsObject.GetResult()
-
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Awsrte53taskgroup, got error: %s", diags))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 

@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccAwsrte53taskgroupDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_cloud_awsrte53taskgroup.test"
-	resourceName := "nios_cloud_awsrte53taskgroup.test"
+	dataSourceName := "data.nios_cloud_aws_route53_task_group.test"
+	resourceName := "nios_cloud_aws_route53_task_group.test"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -61,7 +61,7 @@ func testAccCheckAwsrte53taskgroupResourceAttrPair(resourceName, dataSourceName 
 
 func testAccAwsrte53taskgroupDataSourceConfigFilters(taskGroupName, gridMember string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test" {
+resource "nios_cloud_aws_route53_task_group" "test" {
     name                         = %q
     grid_member                  = %q
     disabled                     = false
@@ -69,10 +69,10 @@ resource "nios_cloud_awsrte53taskgroup" "test" {
     network_view_mapping_policy  = "AUTO_CREATE"
 }
 
-data "nios_cloud_awsrte53taskgroup" "test" {
+data "nios_cloud_aws_route53_task_group" "test" {
   filters = {
-    name = nios_cloud_awsrte53taskgroup.test.name
-    grid_member = nios_cloud_awsrte53taskgroup.test.grid_member
+    name = nios_cloud_aws_route53_task_group.test.name
+    grid_member = nios_cloud_aws_route53_task_group.test.grid_member
   }
 }
 `, taskGroupName, gridMember)

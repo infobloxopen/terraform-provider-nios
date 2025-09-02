@@ -31,7 +31,7 @@ type Awsrte53taskgroupDataSource struct {
 }
 
 func (d *Awsrte53taskgroupDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "cloud_awsrte53taskgroup"
+	resp.TypeName = req.ProviderTypeName + "_" + "cloud_aws_route53_task_group"
 }
 
 type Awsrte53taskgroupModelWithFilter struct {

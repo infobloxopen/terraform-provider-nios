@@ -23,7 +23,7 @@ var readableAttributesForAwsrte53taskgroup = "account_id,comment,consolidate_zon
 // Tasklist unordered issue exist, similar to dhcp options
 // AWS secret and key has to added, or can be skipped if privacy concern
 func TestAccAwsrte53taskgroupResource_basic(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test"
+	var resourceName = "nios_cloud_aws_route53_task_group.test"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -51,7 +51,7 @@ func TestAccAwsrte53taskgroupResource_basic(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_disappears(t *testing.T) {
-	resourceName := "nios_cloud_awsrte53taskgroup.test"
+	resourceName := "nios_cloud_aws_route53_task_group.test"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -75,7 +75,7 @@ func TestAccAwsrte53taskgroupResource_disappears(t *testing.T) {
 
 func TestAccAwsrte53taskgroupResource_AwsAccountIdsFileToken(t *testing.T) {
 	t.Skip("skipping test as it needs file operation, adding this under TODO")
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_aws_account_ids_file_token"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_aws_account_ids_file_token"
 	var v cloud.Awsrte53taskgroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -104,7 +104,7 @@ func TestAccAwsrte53taskgroupResource_AwsAccountIdsFileToken(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_Comment(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_comment"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_comment"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -135,7 +135,7 @@ func TestAccAwsrte53taskgroupResource_Comment(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_ConsolidateZones(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_consolidate_zones"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_consolidate_zones"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -158,7 +158,7 @@ func TestAccAwsrte53taskgroupResource_ConsolidateZones(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_ConsolidatedView(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_consolidated_view"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_consolidated_view"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -180,7 +180,7 @@ func TestAccAwsrte53taskgroupResource_ConsolidatedView(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_Disabled(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_disabled"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_disabled"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -211,7 +211,7 @@ func TestAccAwsrte53taskgroupResource_Disabled(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_GridMember(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_grid_member"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_grid_member"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 
@@ -241,7 +241,7 @@ func TestAccAwsrte53taskgroupResource_GridMember(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_MultipleAccountsSyncPolicy(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_multiple_accounts_sync_policy"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_multiple_accounts_sync_policy"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -265,7 +265,7 @@ func TestAccAwsrte53taskgroupResource_MultipleAccountsSyncPolicy(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_Name(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_name"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_name"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -296,7 +296,7 @@ func TestAccAwsrte53taskgroupResource_Name(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_NetworkView(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_network_view"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_network_view"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -318,7 +318,7 @@ func TestAccAwsrte53taskgroupResource_NetworkView(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_NetworkViewMappingPolicy(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_network_view_mapping_policy"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_network_view_mapping_policy"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -340,7 +340,7 @@ func TestAccAwsrte53taskgroupResource_NetworkViewMappingPolicy(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_RoleArn(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_role_arn"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_role_arn"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -371,7 +371,7 @@ func TestAccAwsrte53taskgroupResource_RoleArn(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_SyncChildAccounts(t *testing.T) {
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_sync_child_accounts"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_sync_child_accounts"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -403,7 +403,7 @@ func TestAccAwsrte53taskgroupResource_SyncChildAccounts(t *testing.T) {
 
 func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 	t.Skip("skipping test as we cannot provide aws secret in environment variables")
-	var resourceName = "nios_cloud_awsrte53taskgroup.test_task_list"
+	var resourceName = "nios_cloud_aws_route53_task_group.test_task_list"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
@@ -548,7 +548,7 @@ func testAccCheckAwsrte53taskgroupDisappears(ctx context.Context, v *cloud.Awsrt
 
 func testAccAwsrte53taskgroupBasicConfig(name, gridMember string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test" {
+resource "nios_cloud_aws_route53_task_group" "test" {
     name                         = %q
     grid_member                  = %q
     disabled                     = false
@@ -563,7 +563,7 @@ func testAccAwsrte53taskgroupAwsAccountIdsFileToken(awsAccountIdsFileToken strin
 	gridMember := "infoblox.localdomain"
 
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_aws_account_ids_file_token" {
+resource "nios_cloud_aws_route53_task_group" "test_aws_account_ids_file_token" {
     name                        = %q
     grid_member                 = %q
     aws_account_ids_file_token  = %q
@@ -576,7 +576,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_aws_account_ids_file_token" {
 
 func testAccAwsrte53taskgroupComment(taskGroupName, gridMember, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_comment" {
+resource "nios_cloud_aws_route53_task_group" "test_comment" {
     name    = %q
     grid_member = %q
     comment = %q
@@ -589,7 +589,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_comment" {
 
 func testAccAwsrte53taskgroupConsolidateZones(taskGroupName, gridMember, consolidateZones string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_consolidate_zones" {
+resource "nios_cloud_aws_route53_task_group" "test_consolidate_zones" {
     name    = %q
     grid_member = %q    
     consolidate_zones = %q
@@ -600,7 +600,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_consolidate_zones" {
 
 func testAccAwsrte53taskgroupConsolidatedView(taskGroupName, gridMember, consolidatedView string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_consolidated_view" {
+resource "nios_cloud_aws_route53_task_group" "test_consolidated_view" {
     name    = %q
     grid_member = %q      
     consolidated_view = %q
@@ -613,7 +613,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_consolidated_view" {
 
 func testAccAwsrte53taskgroupDisabled(taskGroupName, gridMember, disabled string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_disabled" {
+resource "nios_cloud_aws_route53_task_group" "test_disabled" {
     name    = %q
     grid_member = %q
     disabled = %q
@@ -624,7 +624,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_disabled" {
 
 func testAccAwsrte53taskgroupGridMember(gridMember, taskGroupName string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_grid_member" {
+resource "nios_cloud_aws_route53_task_group" "test_grid_member" {
 	grid_member = %q
 	name    = %q 
 }
@@ -633,7 +633,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_grid_member" {
 
 func testAccAwsrte53taskgroupMultipleAccountsSyncPolicy(taskGroupName, gridMember, multipleAccountsSyncPolicy, roleArn string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_multiple_accounts_sync_policy" {
+resource "nios_cloud_aws_route53_task_group" "test_multiple_accounts_sync_policy" {
     name                        = %q
     grid_member                 = %q
     multiple_accounts_sync_policy = %q
@@ -645,7 +645,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_multiple_accounts_sync_policy" {
 
 func testAccAwsrte53taskgroupName(taskGroupName, gridMember string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_name" {
+resource "nios_cloud_aws_route53_task_group" "test_name" {
     name    = %q
     grid_member = %q
     disabled = false
@@ -656,7 +656,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_name" {
 
 func testAccAwsrte53taskgroupNetworkView(taskGroupName, gridMember, networkView string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_network_view" {
+resource "nios_cloud_aws_route53_task_group" "test_network_view" {
     name    = %q
     grid_member = %q      
     consolidated_view = "default"
@@ -669,7 +669,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_network_view" {
 
 func testAccAwsrte53taskgroupNetworkViewMappingPolicy(taskGroupName, gridMember, networkViewMappingPolicy string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_network_view_mapping_policy" {
+resource "nios_cloud_aws_route53_task_group" "test_network_view_mapping_policy" {
     name                        = %q
     grid_member                 = %q
     network_view_mapping_policy = %q
@@ -679,7 +679,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_network_view_mapping_policy" {
 
 func testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, roleArn string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_role_arn" {
+resource "nios_cloud_aws_route53_task_group" "test_role_arn" {
     name                        = %q
     grid_member                 = %q	   
 	role_arn = %q
@@ -690,7 +690,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_role_arn" {
 
 func testAccAwsrte53taskgroupSyncChildAccounts(taskGroupName, gridMember, syncChildAccounts string) string {
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_sync_child_accounts" {
+resource "nios_cloud_aws_route53_task_group" "test_sync_child_accounts" {
     name                        = %q
     grid_member                 = %q	    
 	sync_child_accounts = %q
@@ -703,7 +703,7 @@ resource "nios_cloud_awsrte53taskgroup" "test_sync_child_accounts" {
 func testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember string, taskList []map[string]any) string {
 	taskListHCL := utils.ConvertSliceOfMapsToHCL(taskList)
 	return fmt.Sprintf(`
-resource "nios_cloud_awsrte53taskgroup" "test_task_list" {
+resource "nios_cloud_aws_route53_task_group" "test_task_list" {
     name                        = %q
     grid_member                 = %q    
 	task_list = %s
