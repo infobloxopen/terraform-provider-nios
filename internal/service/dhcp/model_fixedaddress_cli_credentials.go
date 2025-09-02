@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -41,7 +40,6 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI user name.",
@@ -50,7 +48,6 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI password.",
@@ -66,7 +63,6 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The comment for the credential.",
@@ -127,7 +123,7 @@ func (m *FixedaddressCliCredentialsModel) Flatten(ctx context.Context, from *dhc
 		*m = FixedaddressCliCredentialsModel{}
 	}
 	m.User = flex.FlattenStringPointer(from.User)
-	m.Password = flex.FlattenStringPointer(from.Password)
+	m.Password = flex.FlattenStringPointerNilAsNotEmpty(from.Password)
 	m.CredentialType = flex.FlattenStringPointer(from.CredentialType)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Id = flex.FlattenInt64Pointer(from.Id)

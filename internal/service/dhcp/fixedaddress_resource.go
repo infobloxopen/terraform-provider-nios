@@ -437,4 +437,40 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			}
 		}
 	}
+	if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
+		var useCLICredential bool
+		req.Config.GetAttribute(ctx, path.Root("use_cli_credentials"), &useCLICredential)
+		if !useCLICredential {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("cli_credentials"),
+				"Invalid configuration",
+				"The 'cli_credentials' attribute is set, but 'use_cli_credentials' is false. "+
+					"Please set 'use_cli_credentials' to true to use CLI credentials.",
+			)
+		}
+	}
+	if !data.SnmpCredential.IsNull() && !data.SnmpCredential.IsUnknown() {
+		var useSNMPCredential bool
+		req.Config.GetAttribute(ctx, path.Root("use_snmp_credential"), &useSNMPCredential)
+		if !useSNMPCredential {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp_credential"),
+				"Invalid configuration",
+				"The 'snmp_credential' attribute is set, but 'use_snmp_credential' is false. "+
+					"Please set 'use_snmp_credential' to true to use SNMP Credentials.",
+			)
+		}
+	}
+	if !data.Snmp3Credential.IsNull() && !data.Snmp3Credential.IsUnknown() {
+		var useSNMP3Credential bool
+		req.Config.GetAttribute(ctx, path.Root("use_snmp3_credential"), &useSNMP3Credential)
+		if !useSNMP3Credential {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp3_credential"),
+				"Invalid configuration",
+				"The 'snmp3_credential' attribute is set, but 'use_snmp3_credential' is false. "+
+					"Please set 'use_snmp3_credential' to true to use SNMP3 Credentials.",
+			)
+		}
+	}
 }
