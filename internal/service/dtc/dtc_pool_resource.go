@@ -21,6 +21,8 @@ var readableAttributesForDtcPool = "auto_consolidated_monitors,availability,comm
 var _ resource.Resource = &DtcPoolResource{}
 var _ resource.ResourceWithImportState = &DtcPoolResource{}
 
+var _ resource.ResourceWithValidateConfig = &DtcPoolResource{}
+
 func NewDtcPoolResource() resource.Resource {
 	return &DtcPoolResource{}
 }
@@ -361,4 +363,32 @@ func (r *DtcPoolResource) ImportState(ctx context.Context, req resource.ImportSt
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+// ValidateConfig validates the configuration of the DTC Pool resource.
+func (r *DtcPoolResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+    var data DtcPoolModel
+    resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+	if !data.Availability.IsNull() && !data.Availability.IsUnknown() {
+		if data.Availability.ValueString() == "QUORUM" {
+			if data.Quorum.IsNull() || data.Quorum.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("quorum"),"Missing Required Attribute",
+					"When availability is set to 'QUORUM', the 'quorum' attribute must be specified",
+				)
+			}
+		} else {
+			if !data.Quorum.IsNull() && !data.Quorum.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("quorum"),
+					"Invalid Attribute Combination",
+					fmt.Sprintf("The quorum attribute can only be used when availability is set to 'QUORUM', but got '%s'", data.Availability.ValueString()),
+				)
+			}
+		}
+	}
 }

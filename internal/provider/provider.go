@@ -101,14 +101,17 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordTxtResource,
 		dns.NewRecordPtrResource,
 		dns.NewRecordNsResource,
-		dns.NewZoneForwardResource,
+		dns.NewRecordDnameResource,
 		dns.NewRecordCnameResource,
 		dns.NewRecordMxResource,
 		dns.NewRecordNaptrResource,
+		dns.NewRecordCaaResource,
+		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
 		dns.NewViewResource,
 		dns.NewZoneStubResource,
+		dns.NewNsgroupResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -125,11 +128,11 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
 
-		security.NewAdminroleResource,
-
 		misc.NewRulesetResource,
 
 		grid.NewExtensibleattributedefResource,
+		security.NewAdminroleResource,
+		security.NewAdminuserResource,
 	}
 }
 
@@ -144,14 +147,17 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordTxtDataSource,
 		dns.NewRecordPtrDataSource,
 		dns.NewRecordNsDataSource,
-		dns.NewZoneForwardDataSource,
+		dns.NewRecordDnameDataSource,
 		dns.NewRecordCnameDataSource,
 		dns.NewRecordMxDataSource,
 		dns.NewRecordNaptrDataSource,
+		dns.NewRecordCaaDataSource,
+		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
 		dns.NewViewDataSource,
 		dns.NewZoneStubDataSource,
+		dns.NewNsgroupDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -168,11 +174,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
 
-		security.NewAdminroleDataSource,
-
 		misc.NewRulesetDataSource,
 
 		grid.NewExtensibleattributedefDataSource,
+		security.NewAdminroleDataSource,
+		security.NewAdminuserDataSource,
 	}
 }
 

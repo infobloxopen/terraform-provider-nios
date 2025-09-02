@@ -38,8 +38,8 @@ var ViewCloudInfoAttrTypes = map[string]attr.Type{
 
 var ViewCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes: ViewcloudinfoDelegatedMemberResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          ViewcloudinfoDelegatedMemberResourceSchemaAttributes,
+		Computed:            true,
 		MarkdownDescription: "Information about the delegated member.",
 	},
 	"delegated_scope": schema.StringAttribute{
@@ -88,8 +88,7 @@ func (m *ViewCloudInfoModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	if m == nil {
 		return nil
 	}
-	to := &dns.ViewCloudInfo{
-	}
+	to := &dns.ViewCloudInfo{}
 	return to
 }
 

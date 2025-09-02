@@ -63,7 +63,7 @@ var NetworkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attribut
 		Computed:            true,
 	},
 	"value": schema.StringAttribute{
-		Required: 		  true,
+		Required:            true,
 		MarkdownDescription: "Value of the DHCP option",
 	},
 	"use_option": schema.BoolAttribute{

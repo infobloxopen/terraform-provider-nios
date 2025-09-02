@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -25,6 +24,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 // TODO: networks fields to accept list of IPs (current implementation accepts list of networks' references)
@@ -176,10 +176,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Comment should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the shared network, maximum 256 characters.",
 	},
@@ -315,6 +312,9 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of MAC addresses the appliance will ignore.",
 	},
 	"lease_scavenge_time": schema.Int64Attribute{
@@ -333,6 +333,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the logic filters to be applied on the this shared network. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
@@ -344,10 +345,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"prefix should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the IPv6 Shared Network.",
 	},
@@ -356,10 +354,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString("default"),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Comment should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the network view in which this shared network resides.",
 	},
@@ -369,6 +364,9 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: SharednetworkNetworksResourceSchemaAttributes,
 		},
 		Required:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of networks belonging to the shared network. Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ \"ref\": \"network/ZG5zLm5ldHdvcmskMTAuMwLvMTYvMA\" }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ \"ref\": { 'network': '10.0.0.0/8' } }] note that in this case the search must match exactly one network for the assignment to be successful.",
 	},
 	"nextserver": schema.StringAttribute{
