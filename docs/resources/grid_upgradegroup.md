@@ -13,13 +13,12 @@ Manages an Upgrade Group.
 ## Example Usage
 
 ```terraform
-//Create an Upgrade Group with Basic fields
-
+// Create an Upgrade Group with Basic fields
 resource "nios_grid_upgradegroup" "upgradegroup_with_basic_fields" {
   name = "upgradegroup-basic"
 }
 
-//Create an Upgrade Group with Additional fields
+// Create an Upgrade Group with Additional fields
 resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
   name    = "upgradegroup-additional"
   comment = "This is a sample comment"
