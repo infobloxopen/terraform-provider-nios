@@ -20,7 +20,7 @@ var readableAttributesForExtensibleattributedef = "allowed_object_types,comment,
 func TestAccExtensibleattributedefResource_basic(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test"
 	var v grid.Extensibleattributedef
-	name := "tf_test_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -43,7 +43,7 @@ func TestAccExtensibleattributedefResource_basic(t *testing.T) {
 func TestAccExtensibleattributedefResource_disappears(t *testing.T) {
 	resourceName := "nios_grid_extensibleattributedef.test"
 	var v grid.Extensibleattributedef
-	name := "tf_test_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -65,7 +65,7 @@ func TestAccExtensibleattributedefResource_disappears(t *testing.T) {
 func TestAccExtensibleattributedefResource_AllowedObjectTypes(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_allowed_object_types"
 	var v grid.Extensibleattributedef
-	name := "tf_test_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
 
 	initialObjectTypes := []string{
 		"NetworkContainer",

@@ -16,7 +16,7 @@ func TestAccExtensibleattributedefDataSource_Filters(t *testing.T) {
 	resourceName := "nios_grid_extensibleattributedef.test"
 	var v grid.Extensibleattributedef
 	name := acctest.RandomNameWithPrefix("tf_test_ea_")
-	type_ := "STRING"
+	eaType := "STRING"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -24,7 +24,7 @@ func TestAccExtensibleattributedefDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckExtensibleattributedefDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccExtensibleattributedefDataSourceConfigFilters(name, type_),
+				Config: testAccExtensibleattributedefDataSourceConfigFilters(name, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),

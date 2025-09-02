@@ -50,7 +50,7 @@ func (m *ExtensibleattributedefModelWithFilter) FlattenResults(ctx context.Conte
 
 func (d *ExtensibleattributedefDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieve an Extensible Attribute definitions",
+		MarkdownDescription: "Retrieves information about existing Extensible Attribute definitions.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

@@ -3,12 +3,12 @@
 page_title: "nios_grid_extensibleattributedef Data Source - nios"
 subcategory: "GRID"
 description: |-
-  Retrieve an Extensible Attribute definitions
+  Retrieves information about existing Extensible Attribute definitions.
 ---
 
 # nios_grid_extensibleattributedef (Data Source)
 
-Retrieve an Extensible Attribute definitions
+Retrieves information about existing Extensible Attribute definitions.
 
 ## Example Usage
 
@@ -16,7 +16,7 @@ Retrieve an Extensible Attribute definitions
 // Retrieve a specific Extensible Attribute definition by filters
 data "nios_grid_extensibleattributedef" "get_extensibleattributedef_with_filter" {
   filters = {
-    name = "example_ea"
+    name = "example_ea_1"
   }
 }
 // Retrieve all Extensible Attribute definitions

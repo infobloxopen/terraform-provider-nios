@@ -90,6 +90,9 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ExtensibleattributedefListValuesResourceSchemaAttributes,
 		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "List of Values. Applicable if the extensible attribute type is ENUM.",

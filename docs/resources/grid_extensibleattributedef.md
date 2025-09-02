@@ -3,12 +3,12 @@
 page_title: "nios_grid_extensibleattributedef Resource - nios"
 subcategory: "GRID"
 description: |-
-  Manage an Extensible Attribute definitions
+  Manages an Extensible Attribute definition
 ---
 
 # nios_grid_extensibleattributedef (Resource)
 
-Manage an Extensible Attribute definitions
+Manages an Extensible Attribute definition
 
 ## Example Usage
 
@@ -23,10 +23,14 @@ resource "nios_grid_extensibleattributedef" "extensibleattributedef_basic_fields
 resource "nios_grid_extensibleattributedef" "extensibleattributedef_additional_fields" {
   name = "example_ea_2"
   type = "STRING"
-  allowed_object_types = ["NetworkContainer",
+  allowed_object_types = [
+    "NetworkContainer",
     "IPv6NetworkContainer",
-    "Network", "IPv6Network",
-  "FixedAddress", "IPv6FixedAddress"]
+    "Network",
+    "IPv6Network",
+    "FixedAddress",
+    "IPv6FixedAddress"
+  ]
   comment = "Extensible attribute definition"
 }
 ```
