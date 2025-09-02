@@ -447,6 +447,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"endpoint_sources": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The endpoints that provides data for the DHCP Network Container object.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -469,6 +472,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: NetworkcontainerFederatedRealmsResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the federated realms associated to this network container.",
 	},
 	"high_water_mark": schema.Int64Attribute{
@@ -503,6 +509,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ignore_mac_addresses": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of MAC addresses the appliance will ignore.",
 	},
 	"ipam_email_addresses": schema.ListAttribute{
@@ -511,6 +520,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The e-mail lists to which the appliance sends IPAM threshold alarm e-mail messages.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ipam_email_addresses")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"ipam_threshold_settings": schema.SingleNestedAttribute{
@@ -559,6 +569,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"low_water_mark": schema.Int64Attribute{
@@ -931,6 +942,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of zones associated with this network.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_zone_associations")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 }
@@ -1080,7 +1092,6 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.EnableDhcpThresholds = types.BoolPointerValue(from.EnableDhcpThresholds)
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
 	m.EnableEmailWarnings = types.BoolPointerValue(from.EnableEmailWarnings)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EnablePxeLeaseTime = types.BoolPointerValue(from.EnablePxeLeaseTime)
 	m.EnableSnmpWarnings = types.BoolPointerValue(from.EnableSnmpWarnings)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
@@ -1132,7 +1143,6 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
-	m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)
 	m.SubscribeSettings = FlattenNetworkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)
 	m.Unmanaged = types.BoolPointerValue(from.Unmanaged)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)

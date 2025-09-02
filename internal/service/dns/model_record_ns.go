@@ -2,9 +2,8 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -58,6 +57,9 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RecordNsAddressesResourceSchemaAttributes,
 		},
 		Required:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of zone name servers.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
@@ -92,10 +94,7 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	"nameserver": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The domain name of an authoritative server for the redirected zone.",
 	},
