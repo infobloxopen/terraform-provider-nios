@@ -696,15 +696,3 @@ resource "nios_dns_record_tlsa" "test_view" {
 `, certificateData, certificateUsage, matchedType, selector, view, name)
 	return strings.Join([]string{testAccBaseWithZoneandView(zoneFqdn, view), config}, "")
 }
-
-func testAccBaseWithZoneandView(zoneFqdn, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_view" "test" {
-	name = %q
-}
-resource "nios_dns_zone_auth" "test" {
-    fqdn = %q
-    view = nios_dns_view.test.name
-}
-`, view, zoneFqdn)
-}
