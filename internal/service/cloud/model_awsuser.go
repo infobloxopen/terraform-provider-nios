@@ -2,7 +2,6 @@ package cloud
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -50,10 +49,7 @@ var AwsuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"access_key_id": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s]([^\s]|.*[^\s])?$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthAtMost(255),
 		},
 		MarkdownDescription: "The unique Access Key ID of this AWS user. Maximum 255 characters.",

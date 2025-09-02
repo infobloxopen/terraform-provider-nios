@@ -285,7 +285,6 @@ func testAccCheckAwsuserExists(ctx context.Context, resourceName string, v *clou
 		apiRes, _, err := acctest.NIOSClient.CloudAPI.
 			AwsuserAPI.
 			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
-			//Read(ctx, rs.Primary.Attributes["ref"]).
 			ReturnFieldsPlus(readableAttributesForAwsuser).
 			ReturnAsObject(1).
 			Execute()
