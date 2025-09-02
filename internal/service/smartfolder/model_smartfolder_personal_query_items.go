@@ -2,7 +2,6 @@ package smartfolder
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -17,6 +16,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/smartfolder"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SmartfolderPersonalQueryItemsModel struct {
@@ -43,10 +43,7 @@ var SmartfolderPersonalQueryItemsResourceSchemaAttributes = map[string]schema.At
 		Computed: true,
 		Default:  stringdefault.StaticString("type"),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing white space",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The Smart Folder query name.",
 	},

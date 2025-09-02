@@ -113,7 +113,6 @@ func (r *SmartfolderPersonalResource) Read(ctx context.Context, req resource.Rea
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			//Handle not found case
