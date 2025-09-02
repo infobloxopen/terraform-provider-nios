@@ -2,9 +2,7 @@ package dns
 
 import (
 	"context"
-	"regexp"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -14,6 +12,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NsgroupDelegationDelegateToModel struct {
@@ -42,20 +41,14 @@ var NsgroupDelegationDelegateToResourceSchemaAttributes = map[string]schema.Attr
 	"address": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
@@ -104,11 +97,6 @@ func (m *NsgroupDelegationDelegateToModel) Expand(ctx context.Context, diags *di
 	to := &dns.NsgroupDelegationDelegateTo{
 		Address:        flex.ExpandStringPointer(m.Address),
 		Name:           flex.ExpandStringPointer(m.Name),
-		Stealth:        flex.ExpandBoolPointer(m.Stealth),
-		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
-		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
-		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
-		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
 	}
 	return to
 }
