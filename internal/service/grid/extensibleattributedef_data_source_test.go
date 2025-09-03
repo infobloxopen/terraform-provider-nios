@@ -54,12 +54,11 @@ func testAccCheckExtensibleattributedefResourceAttrPair(resourceName, dataSource
 	}
 }
 
-func testAccExtensibleattributedefDataSourceConfigFilters(name, type_ string) string {
+func testAccExtensibleattributedefDataSourceConfigFilters(name, eaType string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test" {
     name = %q
     type = %q
-    comment = "Test extensible attribute definition"
 }
 
 data "nios_grid_extensibleattributedef" "test" {
@@ -67,5 +66,5 @@ data "nios_grid_extensibleattributedef" "test" {
         name = nios_grid_extensibleattributedef.test.name
     }
 }
-`, name, type_)
+`, name, eaType)
 }
