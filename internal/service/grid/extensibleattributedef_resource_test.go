@@ -66,6 +66,7 @@ func TestAccExtensibleattributedefResource_AllowedObjectTypes(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_allowed_object_types"
 	var v grid.Extensibleattributedef
 	name := acctest.RandomNameWithPrefix("tf_test_ea_")
+	eaType := "STRING"
 
 	initialObjectTypes := []string{
 		"NetworkContainer",
@@ -88,7 +89,7 @@ func TestAccExtensibleattributedefResource_AllowedObjectTypes(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefAllowedObjectTypes(name, initialObjectTypes),
+				Config: testAccExtensibleattributedefAllowedObjectTypes(name, initialObjectTypes, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allowed_object_types.#", "3"),
@@ -99,7 +100,7 @@ func TestAccExtensibleattributedefResource_AllowedObjectTypes(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccExtensibleattributedefAllowedObjectTypes(name, updatedObjectTypes),
+				Config: testAccExtensibleattributedefAllowedObjectTypes(name, updatedObjectTypes, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allowed_object_types.#", "6"),
@@ -120,6 +121,7 @@ func TestAccExtensibleattributedefResource_Comment(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_comment"
 	var v grid.Extensibleattributedef
 	name := acctest.RandomNameWithPrefix("tf_test_ea_")
+	eaType := "STRING"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -127,7 +129,7 @@ func TestAccExtensibleattributedefResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefComment(name, "EXTDEF COMMENT"),
+				Config: testAccExtensibleattributedefComment(name, "EXTDEF COMMENT", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "EXTDEF COMMENT"),
@@ -135,7 +137,7 @@ func TestAccExtensibleattributedefResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccExtensibleattributedefComment(name, "EXTDEF COMMENT UPDATE"),
+				Config: testAccExtensibleattributedefComment(name, "EXTDEF COMMENT UPDATE", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "EXTDEF COMMENT UPDATE"),
@@ -150,6 +152,7 @@ func TestAccExtensibleattributedefResource_DefaultValue(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_default_value"
 	var v grid.Extensibleattributedef
 	name := acctest.RandomNameWithPrefix("tf_test_ea_")
+	eaType := "STRING"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,7 +160,7 @@ func TestAccExtensibleattributedefResource_DefaultValue(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefDefaultValue(name, "STRING"),
+				Config: testAccExtensibleattributedefDefaultValue(name, "STRING", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "default_value", "STRING"),
@@ -165,7 +168,7 @@ func TestAccExtensibleattributedefResource_DefaultValue(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccExtensibleattributedefDefaultValue(name, "9945"),
+				Config: testAccExtensibleattributedefDefaultValue(name, "9945", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "default_value", "9945"),
@@ -180,6 +183,7 @@ func TestAccExtensibleattributedefResource_Flags(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_flags"
 	var v grid.Extensibleattributedef
 	name := acctest.RandomNameWithPrefix("tf_test_ea_")
+	eaType := "STRING"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -187,7 +191,7 @@ func TestAccExtensibleattributedefResource_Flags(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefFlags(name, "C"),
+				Config: testAccExtensibleattributedefFlags(name, "C", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "flags", "C"),
@@ -195,7 +199,7 @@ func TestAccExtensibleattributedefResource_Flags(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccExtensibleattributedefFlags(name, "CL"),
+				Config: testAccExtensibleattributedefFlags(name, "CL", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "flags", "CL"),
@@ -210,6 +214,7 @@ func TestAccExtensibleattributedefResource_ListValues(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_list_values"
 	var v grid.Extensibleattributedef
 	name := acctest.RandomNameWithPrefix("tf_test_ea_")
+	eaType := "STRING"
 
 	initialListValues := []map[string]any{
 		{"value": "value1"},
@@ -231,7 +236,7 @@ func TestAccExtensibleattributedefResource_ListValues(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefListValues(name, initialListValues),
+				Config: testAccExtensibleattributedefListValues(name, initialListValues, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "list_values.#", "3"),
@@ -242,7 +247,7 @@ func TestAccExtensibleattributedefResource_ListValues(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccExtensibleattributedefListValues(name, updatedListValues),
+				Config: testAccExtensibleattributedefListValues(name, updatedListValues, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "list_values.#", "5"),
@@ -262,6 +267,7 @@ func TestAccExtensibleattributedefResource_Max(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_max"
 	var v grid.Extensibleattributedef
 	name := "tf_test_max_" + acctest.RandomName()
+	eaType := "INTEGER"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -269,7 +275,7 @@ func TestAccExtensibleattributedefResource_Max(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefMax(name, 100),
+				Config: testAccExtensibleattributedefMax(name, 100, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "max", "100"),
@@ -277,7 +283,7 @@ func TestAccExtensibleattributedefResource_Max(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccExtensibleattributedefMax(name, 200),
+				Config: testAccExtensibleattributedefMax(name, 200, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "max", "200"),
@@ -292,6 +298,7 @@ func TestAccExtensibleattributedefResource_Min(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_min"
 	var v grid.Extensibleattributedef
 	name := "tf_test_min_" + acctest.RandomName()
+	eaType := "INTEGER"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -299,7 +306,7 @@ func TestAccExtensibleattributedefResource_Min(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefMin(name, 10),
+				Config: testAccExtensibleattributedefMin(name, 10, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "min", "10"),
@@ -313,6 +320,7 @@ func TestAccExtensibleattributedefResource_Min(t *testing.T) {
 func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_name"
 	var v grid.Extensibleattributedef
+	eaType := "INTEGER"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -320,7 +328,7 @@ func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefName("tf_test_name_initial"),
+				Config: testAccExtensibleattributedefName("tf_test_name_initial", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", "tf_test_name_initial"),
@@ -328,7 +336,7 @@ func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccExtensibleattributedefName("tf_test_name_updated"),
+				Config: testAccExtensibleattributedefName("tf_test_name_updated", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", "tf_test_name_updated"),
@@ -424,91 +432,89 @@ func testAccExtensibleattributedefBasicConfig(name, eaType string) string {
 resource "nios_grid_extensibleattributedef" "test" {
   name = %q
   type = %q
-
 }
 `, name, eaType)
 }
 
-func testAccExtensibleattributedefAllowedObjectTypes(name string, allowedObjectTypes []string) string {
+func testAccExtensibleattributedefAllowedObjectTypes(name string, allowedObjectTypes []string, eaType string) string {
 	allowedObjectTypesHCL := utils.ConvertStringSliceToHCL(allowedObjectTypes)
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_allowed_object_types" {
     name = %q
-    type = "STRING"
     allowed_object_types = %s
+	type = %q
 }
-`, name, allowedObjectTypesHCL)
+`, name, allowedObjectTypesHCL, eaType)
 }
 
-func testAccExtensibleattributedefComment(name, comment string) string {
+func testAccExtensibleattributedefComment(name, comment string, eaType string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_comment" {
     name = %q
-    type = "STRING"
     comment = %q
+	type = %q
 }
-`, name, comment)
+`, name, comment, eaType)
 }
 
-func testAccExtensibleattributedefDefaultValue(name, defaultValue string) string {
+func testAccExtensibleattributedefDefaultValue(name, defaultValue, eaType string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_default_value" {
     name = %q
-    type = "STRING"
     default_value = %q
+	type = %q
 }
-`, name, defaultValue)
+`, name, defaultValue, eaType)
 }
 
-func testAccExtensibleattributedefFlags(name, flags string) string {
+func testAccExtensibleattributedefFlags(name, flags, eaType string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_flags" {
     name = %q
-    type = "STRING"
     flags = %q
+	type = %q
 }
-`, name, flags)
+`, name, flags, eaType)
 }
 
-func testAccExtensibleattributedefListValues(name string, listValues []map[string]any) string {
+func testAccExtensibleattributedefListValues(name string, listValues []map[string]any, eaType string) string {
 	listValuesHCL := utils.ConvertSliceOfMapsToHCL(listValues)
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_list_values" {
     name = %q
-    type = "ENUM"
-    flags = "L"
     list_values = %s
+	type = %q
 }
-`, name, listValuesHCL)
+`, name, listValuesHCL, eaType)
 }
 
-func testAccExtensibleattributedefMax(name string, maxValue int) string {
+func testAccExtensibleattributedefMax(name string, maxValue int, eaType string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_max" {
     name = %q
-    type = "INTEGER"
     max = %d
+	type = %q
 }
-`, name, maxValue)
+`, name, maxValue, eaType)
 }
 
-func testAccExtensibleattributedefMin(name string, minValue int) string {
+func testAccExtensibleattributedefMin(name string, minValue int, eaType string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_min" {
     name = %q
-    type = "INTEGER"
     min = %d
+	type = %q
 }
-`, name, minValue)
+`, name, minValue, eaType)
 }
 
-func testAccExtensibleattributedefName(name string) string {
+func testAccExtensibleattributedefName(name, eaType string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_extensibleattributedef" "test_name" {
     name = %q
-	type = "STRING"
+	type = %q
 }
-`, name)
+`, name, eaType)
 }
 
 func testAccExtensibleattributedefType(name string, eaType string) string {

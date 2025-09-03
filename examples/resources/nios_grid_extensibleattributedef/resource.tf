@@ -4,7 +4,7 @@ resource "nios_grid_extensibleattributedef" "extensibleattributedef_basic_fields
   type = "STRING"
 }
 
-// Create an Extensible Attribute definition with Additional Fields.
+// Create an Extensible Attribute definition with Additional Fields
 resource "nios_grid_extensibleattributedef" "extensibleattributedef_additional_fields" {
   name = "example_ea_2"
   type = "STRING"

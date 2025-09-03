@@ -3,12 +3,12 @@
 page_title: "nios_grid_extensibleattributedef Resource - nios"
 subcategory: "GRID"
 description: |-
-  Manages an Extensible Attribute definition
+  Manages an Extensible Attribute definition.
 ---
 
 # nios_grid_extensibleattributedef (Resource)
 
-Manages an Extensible Attribute definition
+Manages an Extensible Attribute definition.
 
 ## Example Usage
 
@@ -19,7 +19,7 @@ resource "nios_grid_extensibleattributedef" "extensibleattributedef_basic_fields
   type = "STRING"
 }
 
-// Create an Extensible Attribute definition with Additional Fields.
+// Create an Extensible Attribute definition with Additional Fields
 resource "nios_grid_extensibleattributedef" "extensibleattributedef_additional_fields" {
   name = "example_ea_2"
   type = "STRING"

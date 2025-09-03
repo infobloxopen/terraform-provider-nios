@@ -36,7 +36,7 @@ func (r *ExtensibleattributedefResource) Metadata(ctx context.Context, req resou
 
 func (r *ExtensibleattributedefResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an Extensible Attribute definition",
+		MarkdownDescription: "Manages an Extensible Attribute definition.",
 		Attributes:          ExtensibleattributedefResourceSchemaAttributes,
 	}
 }
