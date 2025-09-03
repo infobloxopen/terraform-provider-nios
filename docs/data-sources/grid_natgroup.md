@@ -16,7 +16,7 @@ Retrieves information about existing NAT Groups.
 // Retrieve a specific NAT Group by filters
 data "nios_grid_natgroup" "get_natgroup_using_filters" {
   filters = {
-    name = "natgroup-test"
+    name = "natgroup-example"
   }
 }
 

@@ -13,7 +13,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
