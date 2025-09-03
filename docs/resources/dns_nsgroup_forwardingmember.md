@@ -13,7 +13,7 @@ Manages an NS Group Forwarding Member.
 ## Example Usage
 
 ```terraform
-// Create NS group forwardingmember with Basic Fields
+// Create an NS group Forwarding Member with Basic Fields
 resource "nios_dns_nsgroup_forwardingmember" "nsgroup_forwardingmember_basic_fields" {
   name = "example_nsgroup_forwardingmember"
   forwarding_servers = [
@@ -26,7 +26,7 @@ resource "nios_dns_nsgroup_forwardingmember" "nsgroup_forwardingmember_basic_fie
   }
 }
 
-// Create NS Group forwardingmember with Additional Fields
+// Create an NS Group Forwarding Member with Additional Fields
 resource "nios_dns_nsgroup_forwardingmember" "nsgroup_forwardingmember_additional_fields" {
   name    = "example_nsgroup_forwardingmember1"
   comment = "nsgroup forwarding member with additional fields"
