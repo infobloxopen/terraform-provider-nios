@@ -13,6 +13,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
@@ -20,6 +21,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
@@ -105,6 +107,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordCnameResource,
 		dns.NewRecordMxResource,
 		dns.NewRecordNaptrResource,
+		dns.NewRecordTlsaResource,
 		dns.NewRecordCaaResource,
 		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
@@ -112,6 +115,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewViewResource,
 		dns.NewZoneStubResource,
 		dns.NewNsgroupResource,
+		dns.NewNsgroupDelegationResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -133,6 +137,13 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewExtensibleattributedefResource,
 		security.NewAdminroleResource,
 		security.NewAdminuserResource,
+
+		smartfolder.NewSmartfolderPersonalResource,
+		smartfolder.NewSmartfolderGlobalResource,
+
+		acl.NewNamedaclResource,
+
+		grid.NewNatgroupResource,
 	}
 }
 
@@ -151,6 +162,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordCnameDataSource,
 		dns.NewRecordMxDataSource,
 		dns.NewRecordNaptrDataSource,
+		dns.NewRecordTlsaDataSource,
 		dns.NewRecordCaaDataSource,
 		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
@@ -158,6 +170,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewViewDataSource,
 		dns.NewZoneStubDataSource,
 		dns.NewNsgroupDataSource,
+		dns.NewNsgroupDelegationDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -179,6 +192,13 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewExtensibleattributedefDataSource,
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+
+		smartfolder.NewSmartfolderPersonalDataSource,
+		smartfolder.NewSmartfolderGlobalDataSource,
+
+		acl.NewNamedaclDataSource,
+
+		gridservice.NewNatgroupDataSource,
 	}
 }
 
