@@ -266,7 +266,7 @@ func TestAccExtensibleattributedefResource_ListValues(t *testing.T) {
 func TestAccExtensibleattributedefResource_Max(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_max"
 	var v grid.Extensibleattributedef
-	name := "tf_test_max_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
 	eaType := "INTEGER"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -297,7 +297,7 @@ func TestAccExtensibleattributedefResource_Max(t *testing.T) {
 func TestAccExtensibleattributedefResource_Min(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_min"
 	var v grid.Extensibleattributedef
-	name := "tf_test_min_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
 	eaType := "INTEGER"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -350,7 +350,7 @@ func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 func TestAccExtensibleattributedefResource_Type(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_type"
 	var v grid.Extensibleattributedef
-	name := "tf_test_type_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
