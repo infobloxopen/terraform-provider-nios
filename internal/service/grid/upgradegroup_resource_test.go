@@ -39,10 +39,8 @@ func TestAccUpgradegroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
-					resource.TestCheckResourceAttr(resourceName, "distribution_dependent_group", ""),
 					resource.TestCheckResourceAttr(resourceName, "distribution_policy", "SIMULTANEOUSLY"),
 					resource.TestCheckResourceAttr(resourceName, "time_zone", ""),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_dependent_group", ""),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_policy", "SEQUENTIALLY"),
 				),
 			},

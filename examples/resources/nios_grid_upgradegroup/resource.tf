@@ -9,7 +9,7 @@ resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
   comment = "This is a sample comment"
   members = [
     {
-      member = "infoblox.172_28_82_115"
+      member = "infoblox.172_28_82_120"
     },
   ]
   distribution_dependent_group = "distribution-dependent-group-1"
