@@ -321,6 +321,7 @@ func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_name"
 	var v grid.Extensibleattributedef
 	eaType := "INTEGER"
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -328,18 +329,18 @@ func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccExtensibleattributedefName("tf_test_name_initial", eaType),
+				Config: testAccExtensibleattributedefName(name, eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_test_name_initial"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccExtensibleattributedefName("tf_test_name_updated", eaType),
+				Config: testAccExtensibleattributedefName(name+"_updated", eaType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_test_name_updated"),
+					resource.TestCheckResourceAttr(resourceName, "name", name+"_updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
