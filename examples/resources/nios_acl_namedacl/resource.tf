@@ -10,7 +10,7 @@ resource "nios_acl_namedacl" "namedacl_with_basic_fields" {
 
 // Create Named Access Control Lists (ACLs) with Additional Fields
 resource "nios_acl_namedacl" "namedacl_with_additional_config" {
-  name    = "dev-network-acl"
+  name    = "example-network-acl"
   comment = "ACL to allow/deny access to specific dev network resources"
 
   // ACL Entries
@@ -24,6 +24,12 @@ resource "nios_acl_namedacl" "namedacl_with_additional_config" {
       struct     = "addressac"
       address    = "10.0.0.2"
       permission = "DENY"
+    },
+    {
+      struct        = "tsigac"
+      tsig_key      = "X4oRe92t54I+T98NdQpV2w=="
+      tsig_key_name = "example-tsig-key"
+      tsig_key_alg  = "HMAC-SHA256"
     }
   ]
 

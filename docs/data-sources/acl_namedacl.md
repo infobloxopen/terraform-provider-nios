@@ -16,7 +16,7 @@ Retrieves information about existing Named Access Control Lists (ACLs).
 // Retrieve a specific Named ACL by filters
 data "nios_acl_namedacl" "get_namedacl_using_filters" {
   filters = {
-    name = "dev-network-acl"
+    name = "example-network-acl"
   }
 }
 

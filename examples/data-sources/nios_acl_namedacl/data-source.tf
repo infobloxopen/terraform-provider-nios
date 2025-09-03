@@ -1,7 +1,7 @@
 // Retrieve a specific Named ACL by filters
 data "nios_acl_namedacl" "get_namedacl_using_filters" {
   filters = {
-    name = "dev-network-acl"
+    name = "example-network-acl"
   }
 }
 
