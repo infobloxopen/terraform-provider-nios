@@ -140,7 +140,7 @@ func (m *DtcServerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		Disable:              flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:             ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Host:                 flex.ExpandStringPointer(m.Host),
-		Monitors:             flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.Monitors, diags, ExpandDtcServerMonitors),
+		Monitors:             flex.ExpandFrameworkListNestedBlock(ctx, m.Monitors, diags, ExpandDtcServerMonitors),
 		Name:                 flex.ExpandStringPointer(m.Name),
 		SniHostname:          flex.ExpandStringPointer(m.SniHostname),
 		UseSniHostname:       flex.ExpandBoolPointer(m.UseSniHostname),
