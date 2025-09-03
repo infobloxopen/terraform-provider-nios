@@ -218,6 +218,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
 		},
 		MarkdownDescription: "The CLI credentials for the fixed address.",
 	},
@@ -501,13 +502,19 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.",
 	},
 	"snmp3_credential": schema.SingleNestedAttribute{
-		Attributes:          FixedaddressSnmp3CredentialResourceSchemaAttributes,
-		Optional:            true,
-		MarkdownDescription: "The SNMPv3 credential for this fixed address.",
+		Attributes: FixedaddressSnmp3CredentialResourceSchemaAttributes,
+		Optional:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
+		},
+		MarkdownDescription: "The SNMPv3 credential for this fixed address.For SNMP Credentials to be applied to this fixed address,.",
 	},
 	"snmp_credential": schema.SingleNestedAttribute{
-		Attributes:          FixedaddressSnmpCredentialResourceSchemaAttributes,
-		Optional:            true,
+		Attributes: FixedaddressSnmpCredentialResourceSchemaAttributes,
+		Optional:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp_credential")),
+		},
 		MarkdownDescription: "The SNMP credential for this fixed address. If set to true, the SNMP credential will override member-level settings.",
 	},
 	"template": schema.StringAttribute{
