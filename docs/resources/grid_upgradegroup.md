@@ -24,7 +24,7 @@ resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
   comment = "This is a sample comment"
   members = [
     {
-      member = "infoblox.10.38.23.8"
+      member = "infoblox.10_38_23_8"
     },
   ]
   distribution_dependent_group = "distribution-dependent-group-1"
