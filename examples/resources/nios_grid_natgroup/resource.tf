@@ -6,5 +6,5 @@ resource "nios_grid_natgroup" "natgroup_basic_fields" {
 // Create NAT Group with additional fields
 resource "nios_grid_natgroup" "natgroup_with_additional_config" {
   name    = "natgroup-example"
-  comment = "Test NAT Group for Grid communication"
+  comment = "Example NAT Group for Grid communication"
 }
