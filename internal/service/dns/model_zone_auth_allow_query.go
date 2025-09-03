@@ -62,10 +62,11 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("tsig_key_name"),
 			),
 		},
-		MarkdownDescription: "The reference to the object.",
+		MarkdownDescription: "The reference to the Named ACL object.",
 	},
 	"address": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
@@ -78,6 +79,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"permission": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The permission to use for this address.",
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
@@ -89,13 +91,18 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"tsig_key": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
+		},
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
