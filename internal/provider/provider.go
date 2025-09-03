@@ -13,6 +13,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
@@ -20,6 +21,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
@@ -136,6 +138,11 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdminroleResource,
 
 		misc.NewRulesetResource,
+
+		smartfolder.NewSmartfolderPersonalResource,
+		smartfolder.NewSmartfolderGlobalResource,
+
+		acl.NewNamedaclResource,
 	}
 }
 
@@ -185,6 +192,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewAdminuserDataSource,
 
 		misc.NewRulesetDataSource,
+
+		smartfolder.NewSmartfolderPersonalDataSource,
+		smartfolder.NewSmartfolderGlobalDataSource,
+
+		acl.NewNamedaclDataSource,
 	}
 }
 
