@@ -1,11 +1,11 @@
 // Create an Extensible Attribute definition with Basic Fields
-resource "nios_grid_extensibleattributedef" "extensibleattributedef_basic_fields" {
+resource "nios_grid_extensibleattributedef" "extensibleattributedef_with_basic_fields" {
   name = "example_ea_1"
   type = "STRING"
 }
 
 // Create an Extensible Attribute definition with Additional Fields
-resource "nios_grid_extensibleattributedef" "extensibleattributedef_additional_fields" {
+resource "nios_grid_extensibleattributedef" "extensibleattributedef_with_additional_fields" {
   name = "example_ea_2"
   type = "STRING"
   allowed_object_types = [
