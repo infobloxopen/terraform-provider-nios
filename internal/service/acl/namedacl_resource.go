@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
+	"github.com/infobloxopen/infoblox-nios-go-client/acl"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -303,46 +304,20 @@ func (r *NamedaclResource) Delete(ctx context.Context, req resource.DeleteReques
 func (r *NamedaclResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data NamedaclModel
+	var goClientData acl.Namedacl
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.ACLAPI.
-		NamedaclAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForNamedacl).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read Namedacl for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetNamedaclResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Namedacl for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.ACLAPI.
 		NamedaclAPI.
 		Update(ctx, resourceRef).
-		Namedacl(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Namedacl(goClientData).
 		ReturnFieldsPlus(readableAttributesForNamedacl).
 		ReturnAsObject(1).
 		Execute()
@@ -351,13 +326,8 @@ func (r *NamedaclResource) ImportState(ctx context.Context, req resource.ImportS
 		return
 	}
 
-	res = updateRes.UpdateNamedaclResponseAsObject.GetResult()
+	res := updateRes.UpdateNamedaclResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Namedacl due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

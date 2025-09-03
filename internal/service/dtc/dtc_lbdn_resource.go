@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -303,46 +304,20 @@ func (r *DtcLbdnResource) Delete(ctx context.Context, req resource.DeleteRequest
 func (r *DtcLbdnResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data DtcLbdnModel
+	var goClientData dtc.DtcLbdn
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.DTCAPI.
-		DtcLbdnAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForDtcLbdn).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read DtcLbdn for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetDtcLbdnResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading DtcLbdn for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.DTCAPI.
 		DtcLbdnAPI.
 		Update(ctx, resourceRef).
-		DtcLbdn(*data.Expand(ctx, &resp.Diagnostics)).
+		DtcLbdn(goClientData).
 		ReturnFieldsPlus(readableAttributesForDtcLbdn).
 		ReturnAsObject(1).
 		Execute()
@@ -351,13 +326,8 @@ func (r *DtcLbdnResource) ImportState(ctx context.Context, req resource.ImportSt
 		return
 	}
 
-	res = updateRes.UpdateDtcLbdnResponseAsObject.GetResult()
+	res := updateRes.UpdateDtcLbdnResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update DtcLbdn due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
