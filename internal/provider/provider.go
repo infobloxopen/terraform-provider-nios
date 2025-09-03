@@ -13,6 +13,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
@@ -139,6 +140,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
 
+		acl.NewNamedaclResource,
+
 		grid.NewUpgradegroupResource,
 	}
 }
@@ -190,6 +193,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
+
+		acl.NewNamedaclDataSource,
 
 		grid.NewUpgradegroupDataSource,
 	}
