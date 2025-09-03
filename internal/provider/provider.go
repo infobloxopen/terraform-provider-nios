@@ -136,7 +136,6 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdminuserResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
-
 		smartfolder.NewSmartfolderGlobalResource,
 	}
 }
@@ -187,7 +186,6 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewAdminuserDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
-
 		smartfolder.NewSmartfolderGlobalDataSource,
 	}
 }
