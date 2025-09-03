@@ -67,6 +67,7 @@ var Ipv6networkportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttribute
 					"SATURDAY",
 				),
 			),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"time_zone": schema.StringAttribute{
