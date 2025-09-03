@@ -20,6 +20,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
@@ -135,6 +136,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdminroleResource,
 		security.NewAdminuserResource,
 
+		smartfolder.NewSmartfolderPersonalResource,
+
 		grid.NewUpgradegroupResource,
 	}
 }
@@ -183,6 +186,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+
+		smartfolder.NewSmartfolderPersonalDataSource,
 
 		grid.NewUpgradegroupDataSource,
 	}
