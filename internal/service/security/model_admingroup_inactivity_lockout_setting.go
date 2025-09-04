@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -33,22 +35,32 @@ var AdmingroupInactivityLockoutSettingAttrTypes = map[string]attr.Type{
 var AdmingroupInactivityLockoutSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"account_inactivity_lockout_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable/disable the account inactivity lockout.",
 	},
 	"inactive_days": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(30),
 		MarkdownDescription: "Number of days after which account gets locked out if user does not login.",
 	},
 	"reminder_days": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "The number of days before the account lockout date when the appliance sends a reminder.",
 	},
 	"reactivate_via_serial_console_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Enable/disable reactivating user account by logging in from serial console.",
 	},
 	"reactivate_via_remote_console_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Enable/disable reactivating user account by logging in from remote console.",
 	},
 }
