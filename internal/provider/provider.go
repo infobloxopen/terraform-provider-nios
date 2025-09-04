@@ -13,12 +13,15 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
+	gridservice "github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
@@ -112,6 +115,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewViewResource,
 		dns.NewZoneStubResource,
 		dns.NewNsgroupResource,
+		dns.NewNsgroupDelegationResource,
 		dns.NewNsgroupStubmemberResource,
 
 		dhcp.NewFixedaddressResource,
@@ -133,6 +137,13 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		security.NewAdminroleResource,
 		security.NewAdminuserResource,
+
+		smartfolder.NewSmartfolderPersonalResource,
+		smartfolder.NewSmartfolderGlobalResource,
+
+		acl.NewNamedaclResource,
+
+		gridservice.NewNatgroupResource,
 	}
 }
 
@@ -159,6 +170,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewViewDataSource,
 		dns.NewZoneStubDataSource,
 		dns.NewNsgroupDataSource,
+		dns.NewNsgroupDelegationDataSource,
 		dns.NewNsgroupStubmemberDataSource,
 
 		dhcp.NewFixedaddressDataSource,
@@ -180,6 +192,13 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+
+		smartfolder.NewSmartfolderPersonalDataSource,
+		smartfolder.NewSmartfolderGlobalDataSource,
+
+		acl.NewNamedaclDataSource,
+
+		gridservice.NewNatgroupDataSource,
 	}
 }
 
