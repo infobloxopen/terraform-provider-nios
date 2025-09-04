@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccNsgroupForwardingmemberDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dns_nsgroup_forwardingmember.test"
-	resourceName := "nios_dns_nsgroup_forwardingmember.test"
+	dataSourceName := "data.nios_dns_nsgroup_forwarding_member.test"
+	resourceName := "nios_dns_nsgroup_forwarding_member.test"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
@@ -41,8 +41,8 @@ func TestAccNsgroupForwardingmemberDataSource_Filters(t *testing.T) {
 }
 
 func TestAccNsgroupForwardingmemberDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_dns_nsgroup_forwardingmember.test"
-	resourceName := "nios_dns_nsgroup_forwardingmember.test"
+	dataSourceName := "data.nios_dns_nsgroup_forwarding_member.test"
+	resourceName := "nios_dns_nsgroup_forwarding_member.test"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
@@ -84,14 +84,14 @@ func testAccCheckNsgroupForwardingmemberResourceAttrPair(resourceName, dataSourc
 func testAccNsgroupForwardingmemberDataSourceConfigFilters(name string, forwardingServers []map[string]any) string {
 	forwardingServersStr := utils.ConvertSliceOfMapsToHCL(forwardingServers)
 	return fmt.Sprintf(`
-resource "nios_dns_nsgroup_forwardingmember" "test" {
+resource "nios_dns_nsgroup_forwarding_member" "test" {
   name = %q
   forwarding_servers = %s
 }
 
-data "nios_dns_nsgroup_forwardingmember" "test" {
+data "nios_dns_nsgroup_forwarding_member" "test" {
   filters = {
-    name = nios_dns_nsgroup_forwardingmember.test.name
+    name = nios_dns_nsgroup_forwarding_member.test.name
   }
 }
 `, name, forwardingServersStr)
@@ -100,7 +100,7 @@ data "nios_dns_nsgroup_forwardingmember" "test" {
 func testAccNsgroupForwardingmemberDataSourceConfigExtAttrFilters(name string, forwardingServers []map[string]any, extAttrsValue string) string {
 	forwardingServersStr := utils.ConvertSliceOfMapsToHCL(forwardingServers)
 	return fmt.Sprintf(`
-resource "nios_dns_nsgroup_forwardingmember" "test" {
+resource "nios_dns_nsgroup_forwarding_member" "test" {
   name = %q
   forwarding_servers = %s
   extattrs = {
@@ -108,9 +108,9 @@ resource "nios_dns_nsgroup_forwardingmember" "test" {
   } 
 }
 
-data "nios_dns_nsgroup_forwardingmember" "test" {
+data "nios_dns_nsgroup_forwarding_member" "test" {
   extattrfilters = {
-	Site = nios_dns_nsgroup_forwardingmember.test.extattrs.Site
+	Site = nios_dns_nsgroup_forwarding_member.test.extattrs.Site
   }
 }
 `, name, forwardingServersStr, extAttrsValue)

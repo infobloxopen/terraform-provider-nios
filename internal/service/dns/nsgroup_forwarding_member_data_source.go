@@ -31,7 +31,7 @@ type NsgroupForwardingmemberDataSource struct {
 }
 
 func (d *NsgroupForwardingmemberDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dns_nsgroup_forwardingmember"
+	resp.TypeName = req.ProviderTypeName + "_" + "dns_nsgroup_forwarding_member"
 }
 
 type NsgroupForwardingmemberModelWithFilter struct {

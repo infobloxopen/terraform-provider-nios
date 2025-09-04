@@ -1,6 +1,6 @@
 // Create an NS group Forwarding Member with Basic Fields
-resource "nios_dns_nsgroup_forwardingmember" "nsgroup_forwardingmember_basic_fields" {
-  name = "example_nsgroup_forwardingmember"
+resource "nios_dns_nsgroup_forwarding_member" "nsgroup_forwarding_member_basic_fields" {
+  name = "example_nsgroup_forwarding_member"
   forwarding_servers = [
     {
       name = "infoblox.localdomain"
@@ -12,8 +12,8 @@ resource "nios_dns_nsgroup_forwardingmember" "nsgroup_forwardingmember_basic_fie
 }
 
 // Create an NS Group Forwarding Member with Additional Fields
-resource "nios_dns_nsgroup_forwardingmember" "nsgroup_forwardingmember_additional_fields" {
-  name    = "example_nsgroup_forwardingmember1"
+resource "nios_dns_nsgroup_forwarding_member" "nsgroup_forwarding_member_additional_fields" {
+  name    = "example_nsgroup_forwarding_member1"
   comment = "nsgroup forwarding member with additional fields"
   forwarding_servers = [
     {
