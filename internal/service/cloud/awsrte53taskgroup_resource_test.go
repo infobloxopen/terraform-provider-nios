@@ -22,6 +22,7 @@ var readableAttributesForAwsrte53taskgroup = "account_id,comment,consolidate_zon
 // add  "member.com" within "infoblox.localdomain"
 // Tasklist unordered issue exist, similar to dhcp options
 // AWS secret and key has to added, or can be skipped if privacy concern
+// upload child is a limitation with multiple accounts sync policy
 func TestAccAwsrte53taskgroupResource_basic(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test"
 	var v cloud.Awsrte53taskgroup
@@ -329,10 +330,10 @@ func TestAccAwsrte53taskgroupResource_NetworkViewMappingPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsrte53taskgroupNetworkViewMappingPolicy(taskGroupName, gridMember, "AUTO_CREATE"),
+				Config: testAccAwsrte53taskgroupNetworkViewMappingPolicy(taskGroupName, gridMember, "DIRECT", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network_view_mapping_policy", "AUTO_CREATE"),
+					resource.TestCheckResourceAttr(resourceName, "network_view_mapping_policy", "DIRECT"),
 				),
 			},
 		},
@@ -667,14 +668,15 @@ resource "nios_cloud_aws_route53_task_group" "test_network_view" {
 `, taskGroupName, gridMember, networkView)
 }
 
-func testAccAwsrte53taskgroupNetworkViewMappingPolicy(taskGroupName, gridMember, networkViewMappingPolicy string) string {
+func testAccAwsrte53taskgroupNetworkViewMappingPolicy(taskGroupName, gridMember, networkViewMappingPolicy, networkView string) string {
 	return fmt.Sprintf(`
 resource "nios_cloud_aws_route53_task_group" "test_network_view_mapping_policy" {
     name                        = %q
     grid_member                 = %q
     network_view_mapping_policy = %q
+	network_view = %q
 }
-`, taskGroupName, gridMember, networkViewMappingPolicy)
+`, taskGroupName, gridMember, networkViewMappingPolicy, networkView)
 }
 
 func testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, roleArn string) string {
