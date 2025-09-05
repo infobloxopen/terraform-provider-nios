@@ -11,13 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/grid"
+	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
+	gridservice "github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
@@ -133,6 +135,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewBulkhostnametemplateResource,
 
 		cloud.NewAwsrte53taskgroupResource,
+		cloud.NewAwsuserResource,
 
 		security.NewAdminuserResource,
 		security.NewAdminroleResource,
@@ -143,6 +146,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		smartfolder.NewSmartfolderGlobalResource,
 
 		acl.NewNamedaclResource,
+
+		gridservice.NewNatgroupResource,
+		grid.NewUpgradegroupResource,
 	}
 }
 
@@ -187,6 +193,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewBulkhostnametemplateDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
+		cloud.NewAwsuserDataSource,
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
@@ -197,6 +204,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		smartfolder.NewSmartfolderGlobalDataSource,
 
 		acl.NewNamedaclDataSource,
+
+		gridservice.NewNatgroupDataSource,
+		grid.NewUpgradegroupDataSource,
 	}
 }
 
@@ -233,11 +243,11 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 	}
 
 	// Create EA if it doesn't exist
-	data := grid.Extensibleattributedef{
-		Name:    grid.PtrString(terraformInternalIDEA),
-		Type:    grid.PtrString("STRING"),
-		Comment: grid.PtrString("Internal ID for Terraform Resource"),
-		Flags:   grid.PtrString("CR"),
+	data := gridclient.Extensibleattributedef{
+		Name:    gridclient.PtrString(terraformInternalIDEA),
+		Type:    gridclient.PtrString("STRING"),
+		Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
+		Flags:   gridclient.PtrString("CR"),
 	}
 
 	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
