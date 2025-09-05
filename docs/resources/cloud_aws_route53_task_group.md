@@ -13,6 +13,14 @@ Manages an AWS Route 53 Task Group.
 ## Example Usage
 
 ```terraform
+// Create aws user with Basic Fields
+resource "nios_cloud_aws_user" "aws_user_basic_fields" {
+  access_key_id     = "AKIAexample1"
+  account_id        = "337773173961"
+  name              = "aws-user"
+  secret_access_key = "S1JGWfwcZWESkfpyhxigL9A/u96mY"
+}
+
 // Create awsrte53taskgroup with Basic Fields
 resource "nios_cloud_aws_route53_task_group" "awsrte53taskgroup_basic_fields" {
   name                        = "example_task_group"
@@ -32,14 +40,14 @@ resource "nios_cloud_aws_route53_task_group" "awsrte53taskgroup_additional_field
 
   task_list = [
     {
-      name              = "example-task4"
+      name              = "example-task2"
       schedule_interval = "5"
-      aws_user          = "awsuser/c25lLmF3c19HWlRURVRTWEwyV1EU0:KIAU5JXL2TE4",
+      aws_user          = nios_cloud_aws_user.aws_user_basic_fields.ref,
     },
     {
-      name              = "example-task17"
+      name              = "example-task1"
       schedule_interval = "10"
-      aws_user          = "awsuser/c25lLmF3c19FVNUpURVRTWEwy1VEU0:IAU5SXL2TE4",
+      aws_user          = nios_cloud_aws_user.aws_user_basic_fields.ref,
     }
   ]
 }
