@@ -18,7 +18,7 @@ Manages a Distribution Schedule resource within the NIOS Grid.
 ### Optional
 
 - `active` (Boolean) Determines whether the distribution schedule is active.
-- `start_time` (Number) The start time of the distribution.
+- `start_time` (String) The start time of the distribution.
 - `upgrade_groups` (Attributes List) The upgrade groups scheduling settings. (see [below for nested schema](#nestedatt--upgrade_groups))
 
 ### Read-Only
@@ -36,7 +36,7 @@ Required:
 Optional:
 
 - `distribution_dependent_group` (String) The distribution dependent group name.
-- `distribution_time` (Number) The time of the next scheduled distribution.
+- `distribution_time` (String) The time of the next scheduled distribution.
 - `upgrade_dependent_group` (String) The upgrade dependent group name.
 - `upgrade_time` (Number) The time of the next scheduled upgrade.
 

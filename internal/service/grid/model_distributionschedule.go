@@ -2,22 +2,26 @@ package grid
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DistributionscheduleModel struct {
 	Ref           types.String `tfsdk:"ref"`
 	Active        types.Bool   `tfsdk:"active"`
-	StartTime     types.Int64  `tfsdk:"start_time"`
+	StartTime     types.String `tfsdk:"start_time"`
 	TimeZone      types.String `tfsdk:"time_zone"`
 	UpgradeGroups types.List   `tfsdk:"upgrade_groups"`
 }
@@ -25,7 +29,7 @@ type DistributionscheduleModel struct {
 var DistributionscheduleAttrTypes = map[string]attr.Type{
 	"ref":            types.StringType,
 	"active":         types.BoolType,
-	"start_time":     types.Int64Type,
+	"start_time":     types.StringType,
 	"time_zone":      types.StringType,
 	"upgrade_groups": types.ListType{ElemType: types.ObjectType{AttrTypes: DistributionscheduleUpgradeGroupsAttrTypes}},
 }
@@ -46,12 +50,15 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 			UseStateForUnknownBool(),
 		},
 	},
-	"start_time": schema.Int64Attribute{
+	"start_time": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The start time of the distribution.",
-		PlanModifiers: []planmodifier.Int64{
-			UseStateForUnknownInt64(),
+		PlanModifiers: []planmodifier.String{
+			UseStateForUnknownString(),
+		},
+		Validators: []validator.String{
+			customvalidator.ValidateTimeFormat(),
 		},
 	},
 	"time_zone": schema.StringAttribute{
@@ -75,11 +82,13 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 }
 
 func (m *DistributionscheduleModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.Distributionschedule {
+	var groups []grid.DistributionscheduleUpgradeGroups
+
 	if m == nil {
 		return nil
 	}
+
 	allGroups := flex.ExpandFrameworkListNestedBlock(ctx, m.UpgradeGroups, diags, ExpandDistributionscheduleUpgradeGroups)
-	var groups []grid.DistributionscheduleUpgradeGroups
 
 	for _, group := range allGroups {
 		// Convert empty optional fields to nil
@@ -101,9 +110,26 @@ func (m *DistributionscheduleModel) Expand(ctx context.Context, diags *diag.Diag
 
 	to := &grid.Distributionschedule{
 		Active:        flex.ExpandBoolPointer(m.Active),
-		StartTime:     flex.ExpandInt64Pointer(m.StartTime),
 		UpgradeGroups: groups,
 	}
+
+	if !m.StartTime.IsNull() && !m.StartTime.IsUnknown() {
+		startTime, err := utils.ToUnixWithTimezone(m.StartTime.ValueString(), m.TimeZone.ValueString())
+		if err != nil {
+			diags.AddError(
+				"Invalid Start Time or Timezone",
+				fmt.Sprintf(
+					"Failed to parse start_time %q with timezone %q: %s",
+					m.StartTime.ValueString(),
+					m.TimeZone.ValueString(),
+					err.Error(),
+				),
+			)
+			return nil
+		}
+		to.StartTime = &startTime
+	}
+
 	return to
 }
 
@@ -119,15 +145,37 @@ func FlattenDistributionschedule(ctx context.Context, from *grid.Distributionsch
 }
 
 func (m *DistributionscheduleModel) Flatten(ctx context.Context, from *grid.Distributionschedule, diags *diag.Diagnostics) {
+	var (
+		startTime string
+		err       error
+	)
+
 	if from == nil {
 		return
 	}
 	if m == nil {
 		*m = DistributionscheduleModel{}
 	}
+
+	if from.StartTime != nil && from.TimeZone != nil {
+		startTime, err = utils.FromUnixWithTimezone(*from.StartTime, *from.TimeZone)
+		if err != nil {
+			diags.AddError(
+				"Invalid Start Time or Timezone",
+				fmt.Sprintf(
+					"Failed to format start_time %d (Unix) with timezone %q: %s",
+					*from.StartTime,
+					*from.TimeZone,
+					err,
+				),
+			)
+			return
+		}
+	}
+
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Active = types.BoolPointerValue(from.Active)
-	m.StartTime = flex.FlattenInt64Pointer(from.StartTime)
+	m.StartTime = types.StringValue(startTime)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.UpgradeGroups = flex.FlattenFrameworkListNestedBlock(ctx, from.UpgradeGroups, DistributionscheduleUpgradeGroupsAttrTypes, diags, FlattenDistributionscheduleUpgradeGroups)
 }

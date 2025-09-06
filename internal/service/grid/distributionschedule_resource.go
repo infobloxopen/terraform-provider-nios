@@ -9,9 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -61,38 +63,12 @@ func (r *DistributionscheduleResource) Configure(ctx context.Context, req resour
 	r.client = client
 }
 
-// func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-// 	var data DistributionscheduleModel
-
-// 	// Read Terraform plan data into the model
-// 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-// 	if resp.Diagnostics.HasError() {
-// 		return
-// 	}
-
-// 	apiRes, _, err := r.client.GridAPI.
-// 		DistributionscheduleAPI.
-// 		Create(ctx).
-// 		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
-// 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
-// 		ReturnAsObject(1).
-// 		Execute()
-// 	if err != nil {
-// 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Distributionschedule, got error: %s", err))
-// 		return
-// 	}
-
-// 	res := apiRes.CreateDistributionscheduleResponseAsObject.GetResult()
-
-// 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-// 	// Save data into Terraform state
-// 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-// }
-
 func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data DistributionscheduleModel
+	var (
+		data       DistributionscheduleModel
+		dataGroups []DistributionscheduleUpgradeGroupsModel
+	)
+
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -102,6 +78,7 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 		DistributionscheduleAPI.
 		List(ctx).
 		ReturnAsObject(1).
+		ReturnFieldsPlus(readableAttributesForDistributionschedule).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list DistributionSchedule: %s", err))
@@ -117,6 +94,35 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 
 	// Extract the singleton ref
 	ref := list[0].GetRef()
+
+	// Set timezone value from existing object
+	timezone := list[0].GetTimeZone()
+	data.TimeZone = flex.FlattenStringPointer(&timezone)
+
+	if len(data.UpgradeGroups.Elements()) > 0 {
+		// Set timezone value in each upgrade group
+		diags := data.UpgradeGroups.ElementsAs(ctx, &dataGroups, false)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+
+		upgradeGroups := list[0].GetUpgradeGroups()
+
+		for i := range dataGroups {
+			if i < len(upgradeGroups) {
+				timezone := upgradeGroups[i].GetTimeZone()
+				dataGroups[i].TimeZone = flex.FlattenStringPointer(&timezone)
+			}
+		}
+
+		newList, diag := types.ListValueFrom(ctx, data.UpgradeGroups.ElementType(ctx), dataGroups)
+		resp.Diagnostics.Append(diag...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		data.UpgradeGroups = newList
+	}
 
 	// Update it with desired plan
 	apiRes, _, err := r.client.GridAPI.
@@ -174,8 +180,12 @@ func (r *DistributionscheduleResource) Read(ctx context.Context, req resource.Re
 }
 
 func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var diags diag.Diagnostics
-	var data DistributionscheduleModel
+	var (
+		diags       diag.Diagnostics
+		data        DistributionscheduleModel
+		stateGroups []DistributionscheduleUpgradeGroupsModel
+		planGroups  []DistributionscheduleUpgradeGroupsModel
+	)
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -188,6 +198,39 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	diags = req.State.GetAttribute(ctx, path.Root("time_zone"), &data.TimeZone)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	if len(data.UpgradeGroups.Elements()) > 0 {
+		diags = req.State.GetAttribute(ctx, path.Root("upgrade_groups"), &stateGroups)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+
+		diags = data.UpgradeGroups.ElementsAs(ctx, &planGroups, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for i := range planGroups {
+			if i < len(stateGroups) {
+				planGroups[i].TimeZone = stateGroups[i].TimeZone
+			}
+		}
+
+		newList, diag := types.ListValueFrom(ctx, data.UpgradeGroups.ElementType(ctx), planGroups)
+		resp.Diagnostics.Append(diag...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		data.UpgradeGroups = newList
 	}
 
 	apiRes, _, err := r.client.GridAPI.
@@ -211,27 +254,6 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 }
 
 func (r *DistributionscheduleResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// var data DistributionscheduleModel
-
-	// // Read Terraform prior state data into the model
-	// resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
-	// httpRes, err := r.client.GridAPI.
-	// 	DistributionscheduleAPI.
-	// 	Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-	// 	Execute()
-	// if err != nil {
-	// 	if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-	// 		return
-	// 	}
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Distributionschedule, got error: %s", err))
-	// 	return
-	// }
-
 	// DistributionSchedule cannot be deleted, so just clear state
 	resp.State.RemoveResource(ctx)
 }

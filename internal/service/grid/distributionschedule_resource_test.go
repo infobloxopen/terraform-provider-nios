@@ -3,7 +3,6 @@ package grid_test
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -21,7 +20,7 @@ var readableAttributesForDistributionschedule = "active,start_time,time_zone,upg
 func TestAccDistributionscheduleResource_basic(t *testing.T) {
 	var resourceName = "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
-	start_time := time.Now().Add(12 * time.Hour).Unix()
+	start_time := time.Now().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -32,7 +31,7 @@ func TestAccDistributionscheduleResource_basic(t *testing.T) {
 				Config: testAccDistributionscheduleBasicConfig(false, start_time),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_time", strconv.FormatInt(start_time, 10)),
+					resource.TestCheckResourceAttr(resourceName, "start_time", start_time),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "active", "false"),
 				),
@@ -99,8 +98,8 @@ func TestAccDistributionscheduleResource_StartTime(t *testing.T) {
 	var resourceName = "nios_grid_distributionschedule.test_start_time"
 	var v grid.Distributionschedule
 	now := time.Now()
-	start_time := strconv.FormatInt(now.Add(1*time.Hour).Unix(), 10)
-	updated_start_time := strconv.FormatInt(now.Add(5*time.Hour).Unix(), 10)
+	start_time := now.Add(1 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	updated_start_time := now.Add(5 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -133,9 +132,9 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 
 	now := time.Now()
 
-	startTime := now.Add(12 * time.Hour).Unix()
+	startTime := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
-	distribution_time := now.Add(24 * time.Hour).Unix()
+	distribution_time := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	upgrade_groups := []map[string]any{
 		{
@@ -144,7 +143,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 		},
 	}
 
-	updated_distribution_time := now.Add(48 * time.Hour).Unix()
+	updated_distribution_time := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	updated_upgrade_groups := []map[string]any{
 		{
@@ -164,7 +163,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.distribution_time", strconv.FormatInt(distribution_time, 10)),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.distribution_time", distribution_time),
 				),
 			},
 			// Update and Read
@@ -174,7 +173,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.distribution_time", strconv.FormatInt(updated_distribution_time, 10))),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.distribution_time", updated_distribution_time)),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -240,11 +239,11 @@ func testAccCheckDistributionscheduleExists(ctx context.Context, resourceName st
 // 	}
 // }
 
-func testAccDistributionscheduleBasicConfig(active bool, start_time int64) string {
+func testAccDistributionscheduleBasicConfig(active bool, start_time string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test" {
 	active = %t
-	start_time = %d
+	start_time = %q
 }
 `, active, start_time)
 }
@@ -265,20 +264,20 @@ resource "nios_grid_distributionschedule" "test_start_time" {
 `, startTime)
 }
 
-func testAccDistributionscheduleUpgradeGroups(startTime int64, upgradeGroups []map[string]any) string {
+func testAccDistributionscheduleUpgradeGroups(startTime string, upgradeGroups []map[string]any) string {
 	hclGroups := []string{}
 	for _, g := range upgradeGroups {
 		groupHCL := fmt.Sprintf(`
     {
       name = %q
-      distribution_time = %d
+      distribution_time = %q
     }`, g["name"], g["distribution_time"])
 		hclGroups = append(hclGroups, groupHCL)
 	}
 
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test_upgrade_groups" {
-  start_time = %d
+  start_time = %q
   upgrade_groups = [
     %s
   ]

@@ -11,6 +11,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccDistributionscheduleDataSource_Filters(t *testing.T) {
@@ -20,8 +21,8 @@ func TestAccDistributionscheduleDataSource_Filters(t *testing.T) {
 	active := true
 
 	now := time.Now()
-	start_time := now.Add(12 * time.Hour).Unix()
-	distribution_time := now.Add(24 * time.Hour).Unix()
+	start_time := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	distribution_time := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	upgrade_groups := []map[string]any{
 		{
@@ -65,13 +66,13 @@ func testAccCheckDistributionscheduleResourceAttrPair(resourceName, dataSourceNa
 	}
 }
 
-func testAccDistributionscheduleResourceConfigFilters(active bool, start_time int64, upgradeGroups []map[string]any) string {
+func testAccDistributionscheduleResourceConfigFilters(active bool, start_time string, upgradeGroups []map[string]any) string {
 	hclGroups := []string{}
 	for _, g := range upgradeGroups {
 		groupHCL := fmt.Sprintf(`
     {
       name = %q
-      distribution_time = %d
+      distribution_time = %q
     }`, g["name"], g["distribution_time"])
 		hclGroups = append(hclGroups, groupHCL)
 	}
@@ -79,7 +80,7 @@ func testAccDistributionscheduleResourceConfigFilters(active bool, start_time in
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test" {
 	active     = %t
-	start_time = %d
+	start_time = %q
 	upgrade_groups = [
 		%s
 	]
@@ -87,13 +88,13 @@ resource "nios_grid_distributionschedule" "test" {
 `, active, start_time, strings.Join(hclGroups, ","))
 }
 
-func testAccDistributionscheduleDataSourceConfigFilters(active bool, start_time int64, upgradeGroups []map[string]any) string {
+func testAccDistributionscheduleDataSourceConfigFilters(active bool, start_time string, upgradeGroups []map[string]any) string {
 	hclGroups := []string{}
 	for _, g := range upgradeGroups {
 		groupHCL := fmt.Sprintf(`
     {
       name = %q
-      distribution_time = %d
+      distribution_time = %q
     }`, g["name"], g["distribution_time"])
 		hclGroups = append(hclGroups, groupHCL)
 	}
@@ -101,7 +102,7 @@ func testAccDistributionscheduleDataSourceConfigFilters(active bool, start_time 
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test" {
 	active     = %t
-	start_time = %d
+	start_time = %q
 	upgrade_groups = [
 		%s
 	]
