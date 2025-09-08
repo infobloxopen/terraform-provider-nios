@@ -23,7 +23,7 @@ func TestAccRecordUnknownResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -64,7 +64,7 @@ func TestAccRecordUnknownResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_record_unknown.test"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -94,7 +94,7 @@ func TestAccRecordUnknownResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_comment"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -132,7 +132,7 @@ func TestAccRecordUnknownResource_Creator(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_creator"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -170,7 +170,7 @@ func TestAccRecordUnknownResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_disable"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -208,7 +208,7 @@ func TestAccRecordUnknownResource_EnableHostNamePolicy(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_enable_host_name_policy"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -246,7 +246,7 @@ func TestAccRecordUnknownResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_extattrs"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -290,8 +290,8 @@ func TestAccRecordUnknownResource_Name(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_name"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
-	updatedName := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
+	updatedName := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -329,7 +329,7 @@ func TestAccRecordUnknownResource_RecordType(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_record_type"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues1 := []map[string]any{
 		{
 			"field_type":     "T",
@@ -359,7 +359,7 @@ func TestAccRecordUnknownResource_SubfieldValues(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_subfield_values"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -410,7 +410,7 @@ func TestAccRecordUnknownResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_ttl"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -448,7 +448,7 @@ func TestAccRecordUnknownResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_use_ttl"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -486,7 +486,7 @@ func TestAccRecordUnknownResource_View(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_view"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-unknown") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
