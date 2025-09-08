@@ -37,9 +37,9 @@ Optional:
 
 - `distribution_dependent_group` (String) The distribution dependent group name.
 - `distribution_time` (String) The time of the next scheduled distribution.
-- `upgrade_dependent_group` (String) The upgrade dependent group name.
-- `upgrade_time` (Number) The time of the next scheduled upgrade.
 
 Read-Only:
 
 - `time_zone` (String) The time zone for scheduling operations.
+- `upgrade_dependent_group` (String) The upgrade dependent group name.
+- `upgrade_time` (Number) The time of the next scheduled upgrade.

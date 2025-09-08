@@ -54,7 +54,6 @@ var DistributionscheduleUpgradeGroupsResourceSchemaAttributes = map[string]schem
 		MarkdownDescription: "The distribution dependent group name.",
 	},
 	"upgrade_dependent_group": schema.StringAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The upgrade dependent group name.",
 	},
@@ -67,7 +66,6 @@ var DistributionscheduleUpgradeGroupsResourceSchemaAttributes = map[string]schem
 		},
 	},
 	"upgrade_time": schema.Int64Attribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The time of the next scheduled upgrade.",
 	},
