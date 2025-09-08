@@ -7,7 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -39,7 +42,7 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 		PlanModifiers: []planmodifier.String{
-			UseStateForUnknownString(),
+			stringplanmodifier.UseStateForUnknown(),
 		},
 	},
 	"active": schema.BoolAttribute{
@@ -47,7 +50,7 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Determines whether the distribution schedule is active.",
 		PlanModifiers: []planmodifier.Bool{
-			UseStateForUnknownBool(),
+			boolplanmodifier.UseStateForUnknown(),
 		},
 	},
 	"start_time": schema.StringAttribute{
@@ -55,7 +58,7 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The start time of the distribution.",
 		PlanModifiers: []planmodifier.String{
-			UseStateForUnknownString(),
+			stringplanmodifier.UseStateForUnknown(),
 		},
 		Validators: []validator.String{
 			customvalidator.ValidateTimeFormat(),
@@ -65,7 +68,7 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Time zone of the distribution start time.",
 		PlanModifiers: []planmodifier.String{
-			UseStateForUnknownString(),
+			stringplanmodifier.UseStateForUnknown(),
 		},
 	},
 	"upgrade_groups": schema.ListNestedAttribute{
@@ -76,7 +79,7 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The upgrade groups scheduling settings.",
 		PlanModifiers: []planmodifier.List{
-			UseStateForUnknownList(),
+			listplanmodifier.UseStateForUnknown(),
 		},
 	},
 }
