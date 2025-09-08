@@ -35,7 +35,6 @@ resource "nios_dns_record_unknown" "record_rp_with_basic_fields" {
 }
 
 // Create an Unknown record with Basic Fields (Type: HINFO)
-
 resource "nios_dns_record_unknown" "record_hinfo_with_basic_fields" {
   name        = "record-hinfo.${nios_dns_zone_auth.parent_zone.fqdn}"
   record_type = "HINFO"
@@ -52,7 +51,6 @@ resource "nios_dns_record_unknown" "record_hinfo_with_basic_fields" {
     }
   ]
 }
-
 
 // Create an Unknown record with Additional Fields (Type: SPF)
 resource "nios_dns_record_unknown" "record_unknown_with_additional_fields" {
