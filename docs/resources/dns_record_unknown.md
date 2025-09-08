@@ -38,12 +38,12 @@ resource "nios_dns_record_unknown" "record_rp_with_basic_fields" {
   subfield_values = [
     {
       field_type     = "N"
-      field_value    = "admin!example.com",
+      field_value    = "example1.com",
       include_length = "NONE"
     },
     {
       field_type     = "N",
-      field_value    = "example.com",
+      field_value    = "example2.com",
       include_length = "NONE"
     }
   ]
