@@ -187,13 +187,11 @@ Optional:
 <a id="nestedatt--filter_aaaa_list"></a>
 ### Nested Schema for `filter_aaaa_list`
 
-Required:
-
-- `address` (String) The address this rule applies to or "Any".
-
 Optional:
 
+- `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
+- `ref` (String) The reference to the Named ACL object.
 
 
 <a id="nestedatt--fixed_rrset_order_fqdns"></a>
