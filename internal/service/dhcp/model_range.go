@@ -435,8 +435,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeExcludeResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -466,7 +466,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeFingerprintFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -580,7 +580,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeMacFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -618,7 +618,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeNacFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -657,7 +657,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeOptionFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -705,7 +705,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeRelayAgentFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
