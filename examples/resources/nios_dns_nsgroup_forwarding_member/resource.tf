@@ -1,4 +1,4 @@
-// Create an NS group Forwarding Member with Basic Fields
+// Create an NS Group Forwarding Member with Basic Fields
 resource "nios_dns_nsgroup_forwarding_member" "nsgroup_forwarding_member_basic_fields" {
   name = "example_nsgroup_forwarding_member"
   forwarding_servers = [
