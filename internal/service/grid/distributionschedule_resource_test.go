@@ -43,26 +43,6 @@ func TestAccDistributionscheduleResource_basic(t *testing.T) {
 
 func TestAccDistributionscheduleResource_disappears(t *testing.T) {
 	t.Skip("Distributionschedule cannot be deleted from NIOS, skipping disappears test")
-
-	// resourceName := "nios_grid_distributionschedule.test"
-	// var v grid.Distributionschedule
-	// start_time := time.Now().Add(24 * time.Hour).Unix()
-
-	// resource.ParallelTest(t, resource.TestCase{
-	// 	PreCheck:                 func() { acctest.PreCheck(t) },
-	// 	ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-	// 	CheckDestroy:             testAccCheckDistributionscheduleDestroy(context.Background(), &v),
-	// 	Steps: []resource.TestStep{
-	// 		{
-	// 			Config: testAccDistributionscheduleBasicConfig(false, start_time),
-	// 			Check: resource.ComposeTestCheckFunc(
-	// 				testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-	// 				testAccCheckDistributionscheduleDisappears(context.Background(), &v),
-	// 			),
-	// 			ExpectNonEmptyPlan: true,
-	// 		},
-	// 	},
-	// })
 }
 
 func TestAccDistributionscheduleResource_Active(t *testing.T) {
@@ -203,41 +183,6 @@ func testAccCheckDistributionscheduleExists(ctx context.Context, resourceName st
 		return nil
 	}
 }
-
-// func testAccCheckDistributionscheduleDestroy(ctx context.Context, v *grid.Distributionschedule) resource.TestCheckFunc {
-// // Verify the resource was destroyed
-// return func(state *terraform.State) error {
-// 	_, httpRes, err := acctest.NIOSClient.GridAPI.
-// 		DistributionscheduleAPI.
-// 		Read(ctx, utils.ExtractResourceRef(*v.Ref)).
-// 		ReturnAsObject(1).
-// 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
-// 		Execute()
-// 	if err != nil {
-// 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-// 			// resource was deleted
-// 			return nil
-// 		}
-// 		return err
-// 	}
-// 	return errors.New("expected to be deleted")
-// }
-// return nil
-// }
-
-// func testAccCheckDistributionscheduleDisappears(ctx context.Context, v *grid.Distributionschedule) resource.TestCheckFunc {
-// 	// Delete the resource externally to verify disappears test
-// 	return func(state *terraform.State) error {
-// 		_, err := acctest.NIOSClient.GridAPI.
-// 			DistributionscheduleAPI.
-// 			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
-// 			Execute()
-// 		if err != nil {
-// 			return err
-// 		}
-// 		return nil
-// 	}
-// }
 
 func testAccDistributionscheduleBasicConfig(active bool, start_time string) string {
 	return fmt.Sprintf(`

@@ -6,26 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 )
 
-type useStateForUnknownInt64 struct{}
-
-func UseStateForUnknownInt64() planmodifier.Int64 {
-	return useStateForUnknownInt64{}
-}
-
-func (m useStateForUnknownInt64) Description(ctx context.Context) string {
-	return "If the configuration is unset and the planned value is unknown, use the prior state value instead."
-}
-
-func (m useStateForUnknownInt64) MarkdownDescription(ctx context.Context) string {
-	return "If the configuration is unset and the planned value is unknown, use the prior state value instead."
-}
-
-func (m useStateForUnknownInt64) PlanModifyInt64(ctx context.Context, req planmodifier.Int64Request, resp *planmodifier.Int64Response) {
-	if req.PlanValue.IsUnknown() && req.ConfigValue.IsNull() && !req.StateValue.IsNull() {
-		resp.PlanValue = req.StateValue
-	}
-}
-
 type useStateForUnknownBool struct{}
 
 func UseStateForUnknownBool() planmodifier.Bool {

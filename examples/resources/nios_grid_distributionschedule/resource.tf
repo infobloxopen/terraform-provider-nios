@@ -1,10 +1,10 @@
-// Create Distribution Schedule with basic fields
+// Update Distribution Schedule with basic fields
 resource "nios_grid_distributionschedule" "basic_schedule" {
   active     = true
   start_time = "2025-09-09T20:30:00"
 }
 
-// Create Distribution Schedule with additional fields
+// Update Distribution Schedule with additional fields
 resource "nios_grid_distributionschedule" "schedule_with_upgrade_groups" {
   active     = true
   start_time = "2025-09-09T20:00:00"

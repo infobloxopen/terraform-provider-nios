@@ -38,7 +38,7 @@ func (r *DistributionscheduleResource) Metadata(ctx context.Context, req resourc
 
 func (r *DistributionscheduleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Distribution Schedule resource within the NIOS Grid.",
+		MarkdownDescription: "Manages a Distribution Schedule",
 		Attributes:          DistributionscheduleResourceSchemaAttributes,
 	}
 }
@@ -93,10 +93,10 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 	}
 
 	// Extract the singleton ref
-	ref := list[0].GetRef()
+	listObj := list[0]
 
 	// Set timezone value from existing object
-	timezone := list[0].GetTimeZone()
+	timezone := listObj.GetTimeZone()
 	data.TimeZone = flex.FlattenStringPointer(&timezone)
 
 	if len(data.UpgradeGroups.Elements()) > 0 {
@@ -107,7 +107,7 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 			return
 		}
 
-		upgradeGroups := list[0].GetUpgradeGroups()
+		upgradeGroups := listObj.GetUpgradeGroups()
 
 		for i := range dataGroups {
 			if i < len(upgradeGroups) {
@@ -127,7 +127,7 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 	// Update it with desired plan
 	apiRes, _, err := r.client.GridAPI.
 		DistributionscheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(ref)).
+		Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
 		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
 		ReturnAsObject(1).

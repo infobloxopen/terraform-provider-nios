@@ -14,7 +14,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-func TestAccDistributionscheduleDataSource_Filters(t *testing.T) {
+func TestAccDistributionscheduleDataSource(t *testing.T) {
 	dataSourceName := "data.nios_grid_distributionschedule.test"
 	resourceName := "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
@@ -34,16 +34,9 @@ func TestAccDistributionscheduleDataSource_Filters(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		// CheckDestroy:             testAccCheckDistributionscheduleDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDistributionscheduleResourceConfigFilters(active, start_time, upgrade_groups),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-				),
-			},
-			{
-				Config: testAccDistributionscheduleDataSourceConfigFilters(active, start_time, upgrade_groups),
+				Config: testAccDistributionscheduleDataSourceConfig(active, start_time, upgrade_groups),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
@@ -66,29 +59,7 @@ func testAccCheckDistributionscheduleResourceAttrPair(resourceName, dataSourceNa
 	}
 }
 
-func testAccDistributionscheduleResourceConfigFilters(active bool, start_time string, upgradeGroups []map[string]any) string {
-	hclGroups := []string{}
-	for _, g := range upgradeGroups {
-		groupHCL := fmt.Sprintf(`
-    {
-      name = %q
-      distribution_time = %q
-    }`, g["name"], g["distribution_time"])
-		hclGroups = append(hclGroups, groupHCL)
-	}
-
-	return fmt.Sprintf(`
-resource "nios_grid_distributionschedule" "test" {
-	active     = %t
-	start_time = %q
-	upgrade_groups = [
-		%s
-	]
-}
-`, active, start_time, strings.Join(hclGroups, ","))
-}
-
-func testAccDistributionscheduleDataSourceConfigFilters(active bool, start_time string, upgradeGroups []map[string]any) string {
+func testAccDistributionscheduleDataSourceConfig(active bool, start_time string, upgradeGroups []map[string]any) string {
 	hclGroups := []string{}
 	for _, g := range upgradeGroups {
 		groupHCL := fmt.Sprintf(`
@@ -108,6 +79,8 @@ resource "nios_grid_distributionschedule" "test" {
 	]
 }
 
-data "nios_grid_distributionschedule" "test" {}
+data "nios_grid_distributionschedule" "test" {
+	depends_on = [nios_grid_distributionschedule.test]
+}
 `, active, start_time, strings.Join(hclGroups, ","))
 }
