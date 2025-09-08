@@ -312,6 +312,9 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of MAC addresses the appliance will ignore.",
 	},
 	"lease_scavenge_time": schema.Int64Attribute{
@@ -330,6 +333,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the logic filters to be applied on the this shared network. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
@@ -360,6 +364,9 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: SharednetworkNetworksResourceSchemaAttributes,
 		},
 		Required:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of networks belonging to the shared network. Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ \"ref\": \"network/ZG5zLm5ldHdvcmskMTAuMwLvMTYvMA\" }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ \"ref\": { 'network': '10.0.0.0/8' } }] note that in this case the search must match exactly one network for the assignment to be successful.",
 	},
 	"nextserver": schema.StringAttribute{
