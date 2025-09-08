@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
@@ -35,10 +33,7 @@ func (d *DistributionscheduleDataSource) Metadata(ctx context.Context, req datas
 }
 
 type DistributionscheduleModelWithFilter struct {
-	Filters    types.Map   `tfsdk:"filters"`
-	Result     types.List  `tfsdk:"result"`
-	MaxResults types.Int32 `tfsdk:"max_results"`
-	Paging     types.Int32 `tfsdk:"paging"`
+	Result types.List `tfsdk:"result"`
 }
 
 func (m *DistributionscheduleModelWithFilter) FlattenResults(ctx context.Context, from []grid.Distributionschedule, diags *diag.Diagnostics) {
@@ -52,27 +47,11 @@ func (d *DistributionscheduleDataSource) Schema(ctx context.Context, req datasou
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Retrieves information about current Distribution Schedule config from the NIOS Grid.",
 		Attributes: map[string]schema.Attribute{
-			"filters": schema.MapAttribute{
-				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
-				ElementType: types.StringType,
-				Optional:    true,
-			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: utils.DataSourceAttributeMap(DistributionscheduleResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
-			},
-			"paging": schema.Int32Attribute{
-				Optional:    true,
-				Description: "Enable (1) or disable (0) paging for the data source query. When enabled, the system retrieves results in pages, allowing efficient handling of large result sets. Paging is enabled by default.",
-				Validators: []validator.Int32{
-					int32validator.OneOf(0, 1),
-				},
-			},
-			"max_results": schema.Int32Attribute{
-				Optional:    true,
-				Description: "Maximum number of objects to be returned. Defaults to 1000.",
 			},
 		},
 	}
@@ -111,7 +90,6 @@ func (d *DistributionscheduleDataSource) Read(ctx context.Context, req datasourc
 	request := d.client.GridAPI.
 		DistributionscheduleAPI.
 		List(ctx).
-		Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForDistributionschedule)
 

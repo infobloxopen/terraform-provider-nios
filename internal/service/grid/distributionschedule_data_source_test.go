@@ -3,7 +3,6 @@ package grid_test
 import (
 	"context"
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
@@ -60,27 +59,17 @@ func testAccCheckDistributionscheduleResourceAttrPair(resourceName, dataSourceNa
 }
 
 func testAccDistributionscheduleDataSourceConfig(active bool, start_time string, upgradeGroups []map[string]any) string {
-	hclGroups := []string{}
-	for _, g := range upgradeGroups {
-		groupHCL := fmt.Sprintf(`
-    {
-      name = %q
-      distribution_time = %q
-    }`, g["name"], g["distribution_time"])
-		hclGroups = append(hclGroups, groupHCL)
-	}
+	upgradeGroupsHCL := utils.ConvertSliceOfMapsToHCL(upgradeGroups)
 
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test" {
 	active     = %t
 	start_time = %q
-	upgrade_groups = [
-		%s
-	]
+	upgrade_groups = %s
 }
 
 data "nios_grid_distributionschedule" "test" {
 	depends_on = [nios_grid_distributionschedule.test]
 }
-`, active, start_time, strings.Join(hclGroups, ","))
+`, active, start_time, upgradeGroupsHCL)
 }
