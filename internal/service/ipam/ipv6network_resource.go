@@ -447,8 +447,9 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 	req.Config.GetAttribute(ctx, path.Root("discovery_basic_poll_settings"), &discoveryBasicPollSettings)
 
 	// use_discovery_basic_polling_settings is false but discovery_basic_poll_settings is provided
-	if !useDiscoveryBasicPollingSettings.ValueBool() {
-		if !discoveryBasicPollSettings.IsNull() && !discoveryBasicPollSettings.IsUnknown() {
+	if !discoveryBasicPollSettings.IsUnknown() && !discoveryBasicPollSettings.IsNull() {
+		// Only then check if use_discovery_basic_polling_settings is false
+		if !useDiscoveryBasicPollingSettings.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Discovery Basic Poll Settings Not Allowed",
 				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings cannot be configured. Either set use_discovery_basic_polling_settings to true or remove the discovery_basic_poll_settings block.",
