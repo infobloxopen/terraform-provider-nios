@@ -18,8 +18,9 @@ import (
 var readableAttributesForAdmingroup = "access_method,admin_set_commands,admin_show_commands,admin_toplevel_commands,cloud_set_commands,cloud_show_commands,comment,database_set_commands,database_show_commands,dhcp_set_commands,dhcp_show_commands,disable,disable_concurrent_login,dns_set_commands,dns_show_commands,dns_toplevel_commands,docker_set_commands,docker_show_commands,email_addresses,enable_restricted_user_access,extattrs,grid_set_commands,grid_show_commands,inactivity_lockout_setting,licensing_set_commands,licensing_show_commands,lockout_setting,machine_control_toplevel_commands,name,networking_set_commands,networking_show_commands,password_setting,roles,saml_setting,security_set_commands,security_show_commands,superuser,trouble_shooting_toplevel_commands,use_account_inactivity_lockout_enable,use_disable_concurrent_login,use_lockout_setting,use_password_setting,user_access"
 
 func TestAccAdmingroupResource_basic(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test"
+	var resourceName = "nios_security_admin_group.test"
 	var v security.Admingroup
+	name := acctest.RandomNameWithPrefix("admin-group")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +28,36 @@ func TestAccAdmingroupResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupBasicConfig(),
+				Config: testAccAdmingroupBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					//resource.TestCheckResourceAttr(resourceName, "access_method.0", "GUI"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "disable_concurrent_login", "false"),
+					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "false"),
+					// Test inactivity_lockout_setting default values
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.account_inactivity_lockout_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.inactive_days", "30"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.reactivate_via_remote_console_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.reactivate_via_serial_console_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.reminder_days", "15"),
+					// Test lockout_setting default values
+					resource.TestCheckResourceAttr(resourceName, "lockout_setting.enable_sequential_failed_login_attempts_lockout", "false"),
+					resource.TestCheckResourceAttr(resourceName, "lockout_setting.failed_lockout_duration", "5"),
+					resource.TestCheckResourceAttr(resourceName, "lockout_setting.never_unlock_user", "false"),
+					resource.TestCheckResourceAttr(resourceName, "lockout_setting.sequential_attempts", "5"),
+					// Test password_setting default values
+					resource.TestCheckResourceAttr(resourceName, "password_setting.expire_days", "30"),
+					resource.TestCheckResourceAttr(resourceName, "password_setting.expire_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "password_setting.reminder_days", "15"),
+
+					resource.TestCheckResourceAttr(resourceName, "password_setting.superuser", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_account_inactivity_lockout_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_disable_concurrent_login", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_lockout_setting", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_password_setting", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -40,8 +66,9 @@ func TestAccAdmingroupResource_basic(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_disappears(t *testing.T) {
-	resourceName := "nios_security_admingroup.test"
+	resourceName := "nios_security_admin_group.test"
 	var v security.Admingroup
+	name := acctest.RandomNameWithPrefix("admin-group")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +76,7 @@ func TestAccAdmingroupResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckAdmingroupDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAdmingroupBasicConfig(),
+				Config: testAccAdmingroupBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
 					testAccCheckAdmingroupDisappears(context.Background(), &v),
@@ -61,7 +88,7 @@ func TestAccAdmingroupResource_disappears(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_Ref(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_ref"
+	var resourceName = "nios_security_admin_group.test_ref"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -90,7 +117,7 @@ func TestAccAdmingroupResource_Ref(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_AccessMethod(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_access_method"
+	var resourceName = "nios_security_admin_group.test_access_method"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -119,7 +146,7 @@ func TestAccAdmingroupResource_AccessMethod(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_AdminSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_admin_set_commands"
+	var resourceName = "nios_security_admin_group.test_admin_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -148,7 +175,7 @@ func TestAccAdmingroupResource_AdminSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_AdminShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_admin_show_commands"
+	var resourceName = "nios_security_admin_group.test_admin_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -177,7 +204,7 @@ func TestAccAdmingroupResource_AdminShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_AdminToplevelCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_admin_toplevel_commands"
+	var resourceName = "nios_security_admin_group.test_admin_toplevel_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -206,7 +233,7 @@ func TestAccAdmingroupResource_AdminToplevelCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_CloudSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_cloud_set_commands"
+	var resourceName = "nios_security_admin_group.test_cloud_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -235,7 +262,7 @@ func TestAccAdmingroupResource_CloudSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_CloudShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_cloud_show_commands"
+	var resourceName = "nios_security_admin_group.test_cloud_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -264,7 +291,7 @@ func TestAccAdmingroupResource_CloudShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_Comment(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_comment"
+	var resourceName = "nios_security_admin_group.test_comment"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -293,7 +320,7 @@ func TestAccAdmingroupResource_Comment(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DatabaseSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_database_set_commands"
+	var resourceName = "nios_security_admin_group.test_database_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -322,7 +349,7 @@ func TestAccAdmingroupResource_DatabaseSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DatabaseShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_database_show_commands"
+	var resourceName = "nios_security_admin_group.test_database_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -351,7 +378,7 @@ func TestAccAdmingroupResource_DatabaseShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DhcpSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_dhcp_set_commands"
+	var resourceName = "nios_security_admin_group.test_dhcp_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -380,7 +407,7 @@ func TestAccAdmingroupResource_DhcpSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DhcpShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_dhcp_show_commands"
+	var resourceName = "nios_security_admin_group.test_dhcp_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -409,7 +436,7 @@ func TestAccAdmingroupResource_DhcpShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_Disable(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_disable"
+	var resourceName = "nios_security_admin_group.test_disable"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -438,7 +465,7 @@ func TestAccAdmingroupResource_Disable(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DisableConcurrentLogin(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_disable_concurrent_login"
+	var resourceName = "nios_security_admin_group.test_disable_concurrent_login"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -467,7 +494,7 @@ func TestAccAdmingroupResource_DisableConcurrentLogin(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DnsSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_dns_set_commands"
+	var resourceName = "nios_security_admin_group.test_dns_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -496,7 +523,7 @@ func TestAccAdmingroupResource_DnsSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DnsShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_dns_show_commands"
+	var resourceName = "nios_security_admin_group.test_dns_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -525,7 +552,7 @@ func TestAccAdmingroupResource_DnsShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DnsToplevelCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_dns_toplevel_commands"
+	var resourceName = "nios_security_admin_group.test_dns_toplevel_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -554,7 +581,7 @@ func TestAccAdmingroupResource_DnsToplevelCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DockerSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_docker_set_commands"
+	var resourceName = "nios_security_admin_group.test_docker_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -583,7 +610,7 @@ func TestAccAdmingroupResource_DockerSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_DockerShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_docker_show_commands"
+	var resourceName = "nios_security_admin_group.test_docker_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -612,7 +639,7 @@ func TestAccAdmingroupResource_DockerShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_EmailAddresses(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_email_addresses"
+	var resourceName = "nios_security_admin_group.test_email_addresses"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -641,7 +668,7 @@ func TestAccAdmingroupResource_EmailAddresses(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_EnableRestrictedUserAccess(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_enable_restricted_user_access"
+	var resourceName = "nios_security_admin_group.test_enable_restricted_user_access"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -670,7 +697,7 @@ func TestAccAdmingroupResource_EnableRestrictedUserAccess(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_extattrs"
+	var resourceName = "nios_security_admin_group.test_extattrs"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -699,7 +726,7 @@ func TestAccAdmingroupResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_GridSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_grid_set_commands"
+	var resourceName = "nios_security_admin_group.test_grid_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -728,7 +755,7 @@ func TestAccAdmingroupResource_GridSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_GridShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_grid_show_commands"
+	var resourceName = "nios_security_admin_group.test_grid_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -757,7 +784,7 @@ func TestAccAdmingroupResource_GridShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_InactivityLockoutSetting(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_inactivity_lockout_setting"
+	var resourceName = "nios_security_admin_group.test_inactivity_lockout_setting"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -786,7 +813,7 @@ func TestAccAdmingroupResource_InactivityLockoutSetting(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_LicensingSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_licensing_set_commands"
+	var resourceName = "nios_security_admin_group.test_licensing_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -815,7 +842,7 @@ func TestAccAdmingroupResource_LicensingSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_LicensingShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_licensing_show_commands"
+	var resourceName = "nios_security_admin_group.test_licensing_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -844,7 +871,7 @@ func TestAccAdmingroupResource_LicensingShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_LockoutSetting(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_lockout_setting"
+	var resourceName = "nios_security_admin_group.test_lockout_setting"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -873,7 +900,7 @@ func TestAccAdmingroupResource_LockoutSetting(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_MachineControlToplevelCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_machine_control_toplevel_commands"
+	var resourceName = "nios_security_admin_group.test_machine_control_toplevel_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -902,7 +929,7 @@ func TestAccAdmingroupResource_MachineControlToplevelCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_Name(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_name"
+	var resourceName = "nios_security_admin_group.test_name"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -931,7 +958,7 @@ func TestAccAdmingroupResource_Name(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_NetworkingSetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_networking_set_commands"
+	var resourceName = "nios_security_admin_group.test_networking_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -960,7 +987,7 @@ func TestAccAdmingroupResource_NetworkingSetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_NetworkingShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_networking_show_commands"
+	var resourceName = "nios_security_admin_group.test_networking_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -989,7 +1016,7 @@ func TestAccAdmingroupResource_NetworkingShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_PasswordSetting(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_password_setting"
+	var resourceName = "nios_security_admin_group.test_password_setting"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1018,7 +1045,7 @@ func TestAccAdmingroupResource_PasswordSetting(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_Roles(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_roles"
+	var resourceName = "nios_security_admin_group.test_roles"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1047,7 +1074,7 @@ func TestAccAdmingroupResource_Roles(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_SamlSetting(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_saml_setting"
+	var resourceName = "nios_security_admin_group.test_saml_setting"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1076,7 +1103,7 @@ func TestAccAdmingroupResource_SamlSetting(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_SecuritySetCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_security_set_commands"
+	var resourceName = "nios_security_admin_group.test_security_set_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1105,7 +1132,7 @@ func TestAccAdmingroupResource_SecuritySetCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_SecurityShowCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_security_show_commands"
+	var resourceName = "nios_security_admin_group.test_security_show_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1134,7 +1161,7 @@ func TestAccAdmingroupResource_SecurityShowCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_Superuser(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_superuser"
+	var resourceName = "nios_security_admin_group.test_superuser"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1163,7 +1190,7 @@ func TestAccAdmingroupResource_Superuser(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_TroubleShootingToplevelCommands(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_trouble_shooting_toplevel_commands"
+	var resourceName = "nios_security_admin_group.test_trouble_shooting_toplevel_commands"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1192,7 +1219,7 @@ func TestAccAdmingroupResource_TroubleShootingToplevelCommands(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_UseAccountInactivityLockoutEnable(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_use_account_inactivity_lockout_enable"
+	var resourceName = "nios_security_admin_group.test_use_account_inactivity_lockout_enable"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1221,7 +1248,7 @@ func TestAccAdmingroupResource_UseAccountInactivityLockoutEnable(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_UseDisableConcurrentLogin(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_use_disable_concurrent_login"
+	var resourceName = "nios_security_admin_group.test_use_disable_concurrent_login"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1250,7 +1277,7 @@ func TestAccAdmingroupResource_UseDisableConcurrentLogin(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_UseLockoutSetting(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_use_lockout_setting"
+	var resourceName = "nios_security_admin_group.test_use_lockout_setting"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1279,7 +1306,7 @@ func TestAccAdmingroupResource_UseLockoutSetting(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_UsePasswordSetting(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_use_password_setting"
+	var resourceName = "nios_security_admin_group.test_use_password_setting"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1308,7 +1335,7 @@ func TestAccAdmingroupResource_UsePasswordSetting(t *testing.T) {
 }
 
 func TestAccAdmingroupResource_UserAccess(t *testing.T) {
-	var resourceName = "nios_security_admingroup.test_user_access"
+	var resourceName = "nios_security_admin_group.test_user_access"
 	var v security.Admingroup
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1394,17 +1421,17 @@ func testAccCheckAdmingroupDisappears(ctx context.Context, v *security.Admingrou
 	}
 }
 
-func testAccAdmingroupBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccAdmingroupBasicConfig(name string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test" {
+resource "nios_security_admin_group" "test" {
+	name = %q
 }
-`)
+`, name)
 }
 
 func testAccAdmingroupRef(ref string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_ref" {
+resource "nios_security_admin_group" "test_ref" {
     ref = %q
 }
 `, ref)
@@ -1412,7 +1439,7 @@ resource "nios_security_admingroup" "test_ref" {
 
 func testAccAdmingroupAccessMethod(accessMethod string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_access_method" {
+resource "nios_security_admin_group" "test_access_method" {
     access_method = %q
 }
 `, accessMethod)
@@ -1420,7 +1447,7 @@ resource "nios_security_admingroup" "test_access_method" {
 
 func testAccAdmingroupAdminSetCommands(adminSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_admin_set_commands" {
+resource "nios_security_admin_group" "test_admin_set_commands" {
     admin_set_commands = %q
 }
 `, adminSetCommands)
@@ -1428,7 +1455,7 @@ resource "nios_security_admingroup" "test_admin_set_commands" {
 
 func testAccAdmingroupAdminShowCommands(adminShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_admin_show_commands" {
+resource "nios_security_admin_group" "test_admin_show_commands" {
     admin_show_commands = %q
 }
 `, adminShowCommands)
@@ -1436,7 +1463,7 @@ resource "nios_security_admingroup" "test_admin_show_commands" {
 
 func testAccAdmingroupAdminToplevelCommands(adminToplevelCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_admin_toplevel_commands" {
+resource "nios_security_admin_group" "test_admin_toplevel_commands" {
     admin_toplevel_commands = %q
 }
 `, adminToplevelCommands)
@@ -1444,7 +1471,7 @@ resource "nios_security_admingroup" "test_admin_toplevel_commands" {
 
 func testAccAdmingroupCloudSetCommands(cloudSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_cloud_set_commands" {
+resource "nios_security_admin_group" "test_cloud_set_commands" {
     cloud_set_commands = %q
 }
 `, cloudSetCommands)
@@ -1452,7 +1479,7 @@ resource "nios_security_admingroup" "test_cloud_set_commands" {
 
 func testAccAdmingroupCloudShowCommands(cloudShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_cloud_show_commands" {
+resource "nios_security_admin_group" "test_cloud_show_commands" {
     cloud_show_commands = %q
 }
 `, cloudShowCommands)
@@ -1460,7 +1487,7 @@ resource "nios_security_admingroup" "test_cloud_show_commands" {
 
 func testAccAdmingroupComment(comment string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_comment" {
+resource "nios_security_admin_group" "test_comment" {
     comment = %q
 }
 `, comment)
@@ -1468,7 +1495,7 @@ resource "nios_security_admingroup" "test_comment" {
 
 func testAccAdmingroupDatabaseSetCommands(databaseSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_database_set_commands" {
+resource "nios_security_admin_group" "test_database_set_commands" {
     database_set_commands = %q
 }
 `, databaseSetCommands)
@@ -1476,7 +1503,7 @@ resource "nios_security_admingroup" "test_database_set_commands" {
 
 func testAccAdmingroupDatabaseShowCommands(databaseShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_database_show_commands" {
+resource "nios_security_admin_group" "test_database_show_commands" {
     database_show_commands = %q
 }
 `, databaseShowCommands)
@@ -1484,7 +1511,7 @@ resource "nios_security_admingroup" "test_database_show_commands" {
 
 func testAccAdmingroupDhcpSetCommands(dhcpSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_dhcp_set_commands" {
+resource "nios_security_admin_group" "test_dhcp_set_commands" {
     dhcp_set_commands = %q
 }
 `, dhcpSetCommands)
@@ -1492,7 +1519,7 @@ resource "nios_security_admingroup" "test_dhcp_set_commands" {
 
 func testAccAdmingroupDhcpShowCommands(dhcpShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_dhcp_show_commands" {
+resource "nios_security_admin_group" "test_dhcp_show_commands" {
     dhcp_show_commands = %q
 }
 `, dhcpShowCommands)
@@ -1500,7 +1527,7 @@ resource "nios_security_admingroup" "test_dhcp_show_commands" {
 
 func testAccAdmingroupDisable(disable string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_disable" {
+resource "nios_security_admin_group" "test_disable" {
     disable = %q
 }
 `, disable)
@@ -1508,7 +1535,7 @@ resource "nios_security_admingroup" "test_disable" {
 
 func testAccAdmingroupDisableConcurrentLogin(disableConcurrentLogin string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_disable_concurrent_login" {
+resource "nios_security_admin_group" "test_disable_concurrent_login" {
     disable_concurrent_login = %q
 }
 `, disableConcurrentLogin)
@@ -1516,7 +1543,7 @@ resource "nios_security_admingroup" "test_disable_concurrent_login" {
 
 func testAccAdmingroupDnsSetCommands(dnsSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_dns_set_commands" {
+resource "nios_security_admin_group" "test_dns_set_commands" {
     dns_set_commands = %q
 }
 `, dnsSetCommands)
@@ -1524,7 +1551,7 @@ resource "nios_security_admingroup" "test_dns_set_commands" {
 
 func testAccAdmingroupDnsShowCommands(dnsShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_dns_show_commands" {
+resource "nios_security_admin_group" "test_dns_show_commands" {
     dns_show_commands = %q
 }
 `, dnsShowCommands)
@@ -1532,7 +1559,7 @@ resource "nios_security_admingroup" "test_dns_show_commands" {
 
 func testAccAdmingroupDnsToplevelCommands(dnsToplevelCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_dns_toplevel_commands" {
+resource "nios_security_admin_group" "test_dns_toplevel_commands" {
     dns_toplevel_commands = %q
 }
 `, dnsToplevelCommands)
@@ -1540,7 +1567,7 @@ resource "nios_security_admingroup" "test_dns_toplevel_commands" {
 
 func testAccAdmingroupDockerSetCommands(dockerSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_docker_set_commands" {
+resource "nios_security_admin_group" "test_docker_set_commands" {
     docker_set_commands = %q
 }
 `, dockerSetCommands)
@@ -1548,7 +1575,7 @@ resource "nios_security_admingroup" "test_docker_set_commands" {
 
 func testAccAdmingroupDockerShowCommands(dockerShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_docker_show_commands" {
+resource "nios_security_admin_group" "test_docker_show_commands" {
     docker_show_commands = %q
 }
 `, dockerShowCommands)
@@ -1556,7 +1583,7 @@ resource "nios_security_admingroup" "test_docker_show_commands" {
 
 func testAccAdmingroupEmailAddresses(emailAddresses string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_email_addresses" {
+resource "nios_security_admin_group" "test_email_addresses" {
     email_addresses = %q
 }
 `, emailAddresses)
@@ -1564,7 +1591,7 @@ resource "nios_security_admingroup" "test_email_addresses" {
 
 func testAccAdmingroupEnableRestrictedUserAccess(enableRestrictedUserAccess string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_enable_restricted_user_access" {
+resource "nios_security_admin_group" "test_enable_restricted_user_access" {
     enable_restricted_user_access = %q
 }
 `, enableRestrictedUserAccess)
@@ -1572,7 +1599,7 @@ resource "nios_security_admingroup" "test_enable_restricted_user_access" {
 
 func testAccAdmingroupExtAttrs(extAttrs string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_extattrs" {
+resource "nios_security_admin_group" "test_extattrs" {
     extattrs = %q
 }
 `, extAttrs)
@@ -1580,7 +1607,7 @@ resource "nios_security_admingroup" "test_extattrs" {
 
 func testAccAdmingroupGridSetCommands(gridSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_grid_set_commands" {
+resource "nios_security_admin_group" "test_grid_set_commands" {
     grid_set_commands = %q
 }
 `, gridSetCommands)
@@ -1588,7 +1615,7 @@ resource "nios_security_admingroup" "test_grid_set_commands" {
 
 func testAccAdmingroupGridShowCommands(gridShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_grid_show_commands" {
+resource "nios_security_admin_group" "test_grid_show_commands" {
     grid_show_commands = %q
 }
 `, gridShowCommands)
@@ -1596,7 +1623,7 @@ resource "nios_security_admingroup" "test_grid_show_commands" {
 
 func testAccAdmingroupInactivityLockoutSetting(inactivityLockoutSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_inactivity_lockout_setting" {
+resource "nios_security_admin_group" "test_inactivity_lockout_setting" {
     inactivity_lockout_setting = %q
 }
 `, inactivityLockoutSetting)
@@ -1604,7 +1631,7 @@ resource "nios_security_admingroup" "test_inactivity_lockout_setting" {
 
 func testAccAdmingroupLicensingSetCommands(licensingSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_licensing_set_commands" {
+resource "nios_security_admin_group" "test_licensing_set_commands" {
     licensing_set_commands = %q
 }
 `, licensingSetCommands)
@@ -1612,7 +1639,7 @@ resource "nios_security_admingroup" "test_licensing_set_commands" {
 
 func testAccAdmingroupLicensingShowCommands(licensingShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_licensing_show_commands" {
+resource "nios_security_admin_group" "test_licensing_show_commands" {
     licensing_show_commands = %q
 }
 `, licensingShowCommands)
@@ -1620,7 +1647,7 @@ resource "nios_security_admingroup" "test_licensing_show_commands" {
 
 func testAccAdmingroupLockoutSetting(lockoutSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_lockout_setting" {
+resource "nios_security_admin_group" "test_lockout_setting" {
     lockout_setting = %q
 }
 `, lockoutSetting)
@@ -1628,7 +1655,7 @@ resource "nios_security_admingroup" "test_lockout_setting" {
 
 func testAccAdmingroupMachineControlToplevelCommands(machineControlToplevelCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_machine_control_toplevel_commands" {
+resource "nios_security_admin_group" "test_machine_control_toplevel_commands" {
     machine_control_toplevel_commands = %q
 }
 `, machineControlToplevelCommands)
@@ -1636,7 +1663,7 @@ resource "nios_security_admingroup" "test_machine_control_toplevel_commands" {
 
 func testAccAdmingroupName(name string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_name" {
+resource "nios_security_admin_group" "test_name" {
     name = %q
 }
 `, name)
@@ -1644,7 +1671,7 @@ resource "nios_security_admingroup" "test_name" {
 
 func testAccAdmingroupNetworkingSetCommands(networkingSetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_networking_set_commands" {
+resource "nios_security_admin_group" "test_networking_set_commands" {
     networking_set_commands = %q
 }
 `, networkingSetCommands)
@@ -1652,7 +1679,7 @@ resource "nios_security_admingroup" "test_networking_set_commands" {
 
 func testAccAdmingroupNetworkingShowCommands(networkingShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_networking_show_commands" {
+resource "nios_security_admin_group" "test_networking_show_commands" {
     networking_show_commands = %q
 }
 `, networkingShowCommands)
@@ -1660,7 +1687,7 @@ resource "nios_security_admingroup" "test_networking_show_commands" {
 
 func testAccAdmingroupPasswordSetting(passwordSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_password_setting" {
+resource "nios_security_admin_group" "test_password_setting" {
     password_setting = %q
 }
 `, passwordSetting)
@@ -1668,7 +1695,7 @@ resource "nios_security_admingroup" "test_password_setting" {
 
 func testAccAdmingroupRoles(roles string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_roles" {
+resource "nios_security_admin_group" "test_roles" {
     roles = %q
 }
 `, roles)
@@ -1676,7 +1703,7 @@ resource "nios_security_admingroup" "test_roles" {
 
 func testAccAdmingroupSamlSetting(samlSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_saml_setting" {
+resource "nios_security_admin_group" "test_saml_setting" {
     saml_setting = %q
 }
 `, samlSetting)
@@ -1684,7 +1711,7 @@ resource "nios_security_admingroup" "test_saml_setting" {
 
 func testAccAdmingroupSecuritySetCommands(securitySetCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_security_set_commands" {
+resource "nios_security_admin_group" "test_security_set_commands" {
     security_set_commands = %q
 }
 `, securitySetCommands)
@@ -1692,7 +1719,7 @@ resource "nios_security_admingroup" "test_security_set_commands" {
 
 func testAccAdmingroupSecurityShowCommands(securityShowCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_security_show_commands" {
+resource "nios_security_admin_group" "test_security_show_commands" {
     security_show_commands = %q
 }
 `, securityShowCommands)
@@ -1700,7 +1727,7 @@ resource "nios_security_admingroup" "test_security_show_commands" {
 
 func testAccAdmingroupSuperuser(superuser string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_superuser" {
+resource "nios_security_admin_group" "test_superuser" {
     superuser = %q
 }
 `, superuser)
@@ -1708,7 +1735,7 @@ resource "nios_security_admingroup" "test_superuser" {
 
 func testAccAdmingroupTroubleShootingToplevelCommands(troubleShootingToplevelCommands string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_trouble_shooting_toplevel_commands" {
+resource "nios_security_admin_group" "test_trouble_shooting_toplevel_commands" {
     trouble_shooting_toplevel_commands = %q
 }
 `, troubleShootingToplevelCommands)
@@ -1716,7 +1743,7 @@ resource "nios_security_admingroup" "test_trouble_shooting_toplevel_commands" {
 
 func testAccAdmingroupUseAccountInactivityLockoutEnable(useAccountInactivityLockoutEnable string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_use_account_inactivity_lockout_enable" {
+resource "nios_security_admin_group" "test_use_account_inactivity_lockout_enable" {
     use_account_inactivity_lockout_enable = %q
 }
 `, useAccountInactivityLockoutEnable)
@@ -1724,7 +1751,7 @@ resource "nios_security_admingroup" "test_use_account_inactivity_lockout_enable"
 
 func testAccAdmingroupUseDisableConcurrentLogin(useDisableConcurrentLogin string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_use_disable_concurrent_login" {
+resource "nios_security_admin_group" "test_use_disable_concurrent_login" {
     use_disable_concurrent_login = %q
 }
 `, useDisableConcurrentLogin)
@@ -1732,7 +1759,7 @@ resource "nios_security_admingroup" "test_use_disable_concurrent_login" {
 
 func testAccAdmingroupUseLockoutSetting(useLockoutSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_use_lockout_setting" {
+resource "nios_security_admin_group" "test_use_lockout_setting" {
     use_lockout_setting = %q
 }
 `, useLockoutSetting)
@@ -1740,7 +1767,7 @@ resource "nios_security_admingroup" "test_use_lockout_setting" {
 
 func testAccAdmingroupUsePasswordSetting(usePasswordSetting string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_use_password_setting" {
+resource "nios_security_admin_group" "test_use_password_setting" {
     use_password_setting = %q
 }
 `, usePasswordSetting)
@@ -1748,7 +1775,7 @@ resource "nios_security_admingroup" "test_use_password_setting" {
 
 func testAccAdmingroupUserAccess(userAccess string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admingroup" "test_user_access" {
+resource "nios_security_admin_group" "test_user_access" {
     user_access = %q
 }
 `, userAccess)
