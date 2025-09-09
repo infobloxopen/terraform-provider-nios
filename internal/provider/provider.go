@@ -14,6 +14,7 @@ import (
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
@@ -132,10 +133,12 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
 
-		misc.NewRulesetResource,
+		cloud.NewAwsuserResource,
 
 		security.NewAdminroleResource,
 		security.NewAdminuserResource,
+
+		misc.NewRulesetResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -187,10 +190,12 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
 
-		misc.NewRulesetDataSource,
+		cloud.NewAwsuserDataSource,
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+
+		misc.NewRulesetDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
@@ -199,6 +204,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		grid.NewNatgroupDataSource,
 		grid.NewExtensibleattributedefDataSource,
+		grid.NewUpgradegroupDataSource,
 	}
 }
 
