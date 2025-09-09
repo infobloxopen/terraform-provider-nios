@@ -156,10 +156,6 @@ Required:
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
 
-Optional:
-
-- `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
-
 Read-Only:
 
 - `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
@@ -167,6 +163,7 @@ Read-Only:
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The TSIG key name.
+- `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
 
 
 <a id="nestedatt--dnssec_trusted_keys"></a>
