@@ -75,6 +75,9 @@ var NsgroupForwardstubserverResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The name of this Forward Stub Server Name Server Group.",
 	},
 }

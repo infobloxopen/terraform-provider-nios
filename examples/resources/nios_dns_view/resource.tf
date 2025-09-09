@@ -1,6 +1,23 @@
+terraform {
+  required_providers {
+    nios = {
+      source  = "infobloxopen/nios"
+      version = "1.0.0"
+    }
+  }
+}
+
+provider "nios" {
+  nios_host_url = "https://172.28.81.186"
+  nios_username = "admin"
+  nios_password = "Infoblox@123"
+}
+
 // Create DNS View with Basic Fields
 resource "nios_dns_view" "create_view" {
-  name = "example_view"
+  name                     = "example_view232323"
+  custom_root_name_servers = null
+  use_root_name_server     = true
 }
 
 // Create DNS View with additional fields

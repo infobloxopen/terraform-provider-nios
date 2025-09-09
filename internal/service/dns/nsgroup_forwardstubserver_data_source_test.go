@@ -10,12 +10,20 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccNsgroupForwardstubserverDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dns_nsgroup_forwardstubserver.test"
 	resourceName := "nios_dns_nsgroup_forwardstubserver.test"
 	var v dns.NsgroupForwardstubserver
+	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
+	externalServers := []map[string]any{
+		{
+			"name": "infoblox.localdomain",
+			"address":"2.3.3.4",
+		},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +31,7 @@ func TestAccNsgroupForwardstubserverDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardstubserverDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardstubserverDataSourceConfigFilters(),
+				Config: testAccNsgroupForwardstubserverDataSourceConfigFilters(name , externalServers),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
@@ -38,13 +46,20 @@ func TestAccNsgroupForwardstubserverDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dns_nsgroup_forwardstubserver.test"
 	resourceName := "nios_dns_nsgroup_forwardstubserver.test"
 	var v dns.NsgroupForwardstubserver
+	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
+	externalServers := []map[string]any{
+		{
+			"name": "infoblox.localdomain",
+			"address":"2.3.3.4",
+		},
+	}
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckNsgroupForwardstubserverDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardstubserverDataSourceConfigExtAttrFilters( acctest.RandomName()),
+				Config: testAccNsgroupForwardstubserverDataSourceConfigExtAttrFilters( name , externalServers , acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
@@ -67,22 +82,28 @@ func testAccCheckNsgroupForwardstubserverResourceAttrPair(resourceName, dataSour
     }
 }
 
-func testAccNsgroupForwardstubserverDataSourceConfigFilters() string {
+func testAccNsgroupForwardstubserverDataSourceConfigFilters(name string, externalServers []map[string]any) string {
+	externalServersStr := utils.ConvertSliceOfMapsToHCL(externalServers)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardstubserver" "test" {
+    name = %q
+    external_servers = %s
 }
 
 data "nios_dns_nsgroup_forwardstubserver" "test" {
   filters = {
-	 = nios_dns_nsgroup_forwardstubserver.test.
+    name = nios_dns_nsgroup_forwardstubserver.test.name
   }
 }
-`)
+`, name, externalServersStr)
 }
 
-func testAccNsgroupForwardstubserverDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccNsgroupForwardstubserverDataSourceConfigExtAttrFilters(name string, externalServers []map[string]any, extAttrsValue string) string {
+	externalServersStr := utils.ConvertSliceOfMapsToHCL(externalServers)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardstubserver" "test" {
+  name = %q
+  external_servers = %s
   extattrs = {
     Site = %q
   } 
@@ -93,6 +114,6 @@ data "nios_dns_nsgroup_forwardstubserver" "test" {
 	Site = nios_dns_nsgroup_forwardstubserver.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, name, externalServersStr, extAttrsValue)
 }
 
