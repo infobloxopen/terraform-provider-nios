@@ -241,6 +241,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_email_list")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The e-mail lists to which the appliance sends DHCP threshold alarm e-mail messages.",
 	},
@@ -286,6 +287,9 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "These are ranges of IP addresses that the appliance does not use to assign to clients. You can use these exclusion addresses as static IP addresses. They contain the start and end addresses of the exclusion range, and optionally, information about this exclusion range.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -316,7 +320,9 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangetemplateFingerprintFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the fingerprint filters for this DHCP range. The appliance uses matching rules in these filters to select the address range from which it assigns a lease.",
 	},
 	"high_water_mark": schema.Int64Attribute{
@@ -368,9 +374,9 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangetemplateLogicFilterRulesResourceSchemaAttributes,
 		},
 		Optional: true,
-		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the logic filters to be applied on this range. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
@@ -397,7 +403,9 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangetemplateMacFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the MAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"member": schema.SingleNestedAttribute{
@@ -414,6 +422,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ms_options")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The Microsoft DHCP options for this range.",
 	},
@@ -428,7 +437,9 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangetemplateNacFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the NAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"name": schema.StringAttribute{
@@ -459,7 +470,9 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangetemplateOptionFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the Option filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"options": schema.ListNestedAttribute{
@@ -497,7 +510,9 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangetemplateRelayAgentFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the Relay Agent filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"server_association_type": schema.StringAttribute{
