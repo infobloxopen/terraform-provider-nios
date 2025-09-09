@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -329,46 +330,20 @@ func (r *RecordAaaaResource) UpdateFuncCallAttributeName(ctx context.Context, da
 func (r *RecordAaaaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data RecordAaaaModel
+	var goClientData dns.RecordAaaa
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.DNSAPI.
-		RecordAaaaAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForRecordAaaa).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read RecordAaaa for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetRecordAaaaResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordAaaa for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.DNSAPI.
 		RecordAaaaAPI.
 		Update(ctx, resourceRef).
-		RecordAaaa(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordAaaa(goClientData).
 		ReturnFieldsPlus(readableAttributesForRecordAaaa).
 		ReturnAsObject(1).
 		Execute()
@@ -377,13 +352,8 @@ func (r *RecordAaaaResource) ImportState(ctx context.Context, req resource.Impor
 		return
 	}
 
-	res = updateRes.UpdateRecordAaaaResponseAsObject.GetResult()
+	res := updateRes.UpdateRecordAaaaResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordAaaa due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
