@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -184,6 +185,31 @@ func (r *ExtensibleattributedefResource) Delete(ctx context.Context, req resourc
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Extensibleattributedef, got error: %s", err))
 		return
+	}
+}
+
+func (r *ExtensibleattributedefResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var eaType types.String
+	var minValue, maxValue types.Int64
+
+	// Get the type attribute
+	req.Config.GetAttribute(ctx, path.Root("type"), &eaType)
+	req.Config.GetAttribute(ctx, path.Root("min"), &minValue)
+	req.Config.GetAttribute(ctx, path.Root("max"), &maxValue)
+
+	// If type is null or unknown, we can't validate
+	if eaType.IsNull() || eaType.IsUnknown() {
+		return
+	}
+
+	typeValue := eaType.ValueString()
+
+	// Check if min or max are set with incompatible types
+	if (!minValue.IsNull() || !maxValue.IsNull()) && typeValue != "INTEGER" && typeValue != "STRING" {
+		resp.Diagnostics.AddError(
+			"Invalid Min/Max Configuration",
+			fmt.Sprintf("The 'min' and 'max' attributes are only valid for INTEGER and STRING extensible attribute types, but type is %q. Remove min and max attributes or change the type to INTEGER or STRING.", typeValue),
+		)
 	}
 }
 

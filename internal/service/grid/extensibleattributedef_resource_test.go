@@ -121,7 +121,7 @@ func TestAccExtensibleattributedefResource_Comment(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_comment"
 	var v grid.Extensibleattributedef
 	name := acctest.RandomNameWithPrefix("tf_test_ea_")
-	eaType := "STRING"
+	eaType := "URL"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -133,6 +133,7 @@ func TestAccExtensibleattributedefResource_Comment(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "EXTDEF COMMENT"),
+					resource.TestCheckResourceAttr(resourceName, "type", eaType),
 				),
 			},
 			// Update and Read
@@ -141,6 +142,7 @@ func TestAccExtensibleattributedefResource_Comment(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "EXTDEF COMMENT UPDATE"),
+					resource.TestCheckResourceAttr(resourceName, "type", eaType),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -279,6 +281,7 @@ func TestAccExtensibleattributedefResource_Max(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "max", "100"),
+					resource.TestCheckResourceAttr(resourceName, "type", eaType),
 				),
 			},
 			// Update and Read
@@ -287,6 +290,7 @@ func TestAccExtensibleattributedefResource_Max(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "max", "200"),
+					resource.TestCheckResourceAttr(resourceName, "type", eaType),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -333,6 +337,7 @@ func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "type", eaType),
 				),
 			},
 			// Update and Read
@@ -341,6 +346,7 @@ func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"_updated"),
+					resource.TestCheckResourceAttr(resourceName, "type", eaType),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
