@@ -13,7 +13,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-func TestAccDistributionscheduleDataSource(t *testing.T) {
+func TestAccDistributionscheduleDataSource_Read(t *testing.T) {
 	dataSourceName := "data.nios_grid_distributionschedule.test"
 	resourceName := "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
