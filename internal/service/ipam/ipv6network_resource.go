@@ -446,7 +446,7 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 	// Get the discovery_basic_poll_settings attribute
 	req.Config.GetAttribute(ctx, path.Root("discovery_basic_poll_settings"), &discoveryBasicPollSettings)
 
-	// use_discovery_basic_polling_settings is false but discovery_basic_poll_settings is provided
+	//  discovery_basic_poll_settings is provided and use_discovery_basic_polling_settings is false
 	if !discoveryBasicPollSettings.IsUnknown() && !discoveryBasicPollSettings.IsNull() {
 		// Only then check if use_discovery_basic_polling_settings is false
 		if !useDiscoveryBasicPollingSettings.ValueBool() {
