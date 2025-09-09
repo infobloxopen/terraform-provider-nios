@@ -330,10 +330,10 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: Ipv6networkcontainerFederatedRealmsResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-			},
+		},
 		MarkdownDescription: "This field contains the federated realms associated to this network container.",
 	},
 	"last_rir_registration_update_sent": schema.Int64Attribute{
@@ -420,7 +420,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network Container object.",
 		Computed:            true,
-		Default:             int64default.StaticInt64(27000),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_preferred_lifetime")),
 		},
