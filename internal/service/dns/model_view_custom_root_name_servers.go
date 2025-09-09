@@ -68,7 +68,7 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
@@ -92,11 +92,6 @@ func (m *ViewCustomRootNameServersModel) Expand(ctx context.Context, diags *diag
 	to := &dns.ViewCustomRootNameServers{
 		Address:        flex.ExpandIPAddress(m.Address),
 		Name:           flex.ExpandStringPointer(m.Name),
-		Stealth:        flex.ExpandBoolPointer(m.Stealth),
-		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
-		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
-		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
-		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
 	}
 	return to
 }
