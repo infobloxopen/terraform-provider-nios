@@ -147,6 +147,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		grid.NewNatgroupResource,
 		grid.NewExtensibleattributedefResource,
+		grid.NewUpgradegroupResource,
 	}
 }
 
