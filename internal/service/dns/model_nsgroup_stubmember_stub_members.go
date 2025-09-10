@@ -79,11 +79,6 @@ func (m *NsgroupStubmemberStubMembersModel) Expand(ctx context.Context, diags *d
 	}
 	to := &dns.NsgroupStubmemberStubMembers{
 		Name:                     flex.ExpandStringPointer(m.Name),
-		Stealth:                  flex.ExpandBoolPointer(m.Stealth),
-		GridReplicate:            flex.ExpandBoolPointer(m.GridReplicate),
-		Lead:                     flex.ExpandBoolPointer(m.Lead),
-		PreferredPrimaries:       flex.ExpandFrameworkListNestedBlock(ctx, m.PreferredPrimaries, diags, ExpandNsgroupstubmemberstubmembersPreferredPrimaries),
-		EnablePreferredPrimaries: flex.ExpandBoolPointer(m.EnablePreferredPrimaries),
 	}
 	return to
 }
