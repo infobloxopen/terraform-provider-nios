@@ -17,6 +17,7 @@ import (
 
 var readableAttributesForPermission = "group,object,permission,resource_type,role"
 
+// TODO: Create CustomRole1 and CustomRole2 in the NIOS before running these tests.
 func TestAccPermissionResource_basic(t *testing.T) {
 	var resourceName = "nios_security_permission.test"
 	var v security.Permission
@@ -165,7 +166,7 @@ func TestAccPermissionResource_ResourceType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{ //view, fqdn, group, object, permission, resourceType
-				Config: testAccPermissionResourceType("test-view-1", "example.com", "cloud-api-only", "nios_dns_view.test_view.ref", "READ", "ZONE"),
+				Config: testAccPermissionResourceType("test-view-21", "example.com", "cloud-api-only", "READ", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "resource_type", "ZONE"),
@@ -173,7 +174,7 @@ func TestAccPermissionResource_ResourceType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccPermissionResourceType("test-view-1", "example.com", "cloud-api-only", "nios_dns_zone_auth.example_zone.ref", "READ", "HOST"),
+				Config: testAccPermissionResourceTypeUpdate("test-view-21", "example.com", "cloud-api-only", "READ", "HOST"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "resource_type", "HOST"),
@@ -194,18 +195,18 @@ func TestAccPermissionResource_Role(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccPermissionRole("ROLE_REPLACE_ME"),
+				Config: testAccPermissionRole("CustomRole1", "WRITE", "NETWORK"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "role", "ROLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "role", "CustomRole1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccPermissionRole("ROLE_UPDATE_REPLACE_ME"),
+				Config: testAccPermissionRole("CustomRole2", "WRITE", "NETWORK"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "role", "ROLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "role", "CustomRole2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -316,7 +317,7 @@ resource "nios_security_permission" "test_permission" {
 `, group, permission, resourceType)
 }
 
-func testAccPermissionResourceType(view, fqdn, group, object, permission, resourceType string) string {
+func testAccPermissionResourceType(view, fqdn, group, permission, resourceType string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_view" {
     name = %q
@@ -329,14 +330,14 @@ resource "nios_dns_zone_auth" "example_zone" {
 
 resource "nios_security_permission" "test_resource_type" {
     group = %q
-    object = %q
+    object = nios_dns_view.test_view.ref
     permission = %q
     resource_type = %q
 }
-`, view, fqdn, group, object, permission, resourceType)
+`, view, fqdn, group, permission, resourceType)
 }
 
-func testAccPermissionResourceTypeUpdate(view, fqdn, group, object, permission, resourceType string) string {
+func testAccPermissionResourceTypeUpdate(view, fqdn, group, permission, resourceType string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_view" {
     name = %q
@@ -349,17 +350,19 @@ resource "nios_dns_zone_auth" "example_zone" {
 
 resource "nios_security_permission" "test_resource_type" {
     group = %q
-    object = %q
+    object = nios_dns_zone_auth.example_zone.ref
     permission = %q
     resource_type = %q
 }
-`, view, fqdn, group, object, permission, resourceType)
+`, view, fqdn, group, permission, resourceType)
 }
 
-func testAccPermissionRole(role string) string {
+func testAccPermissionRole(role, permission, resourceType string) string {
 	return fmt.Sprintf(`
 resource "nios_security_permission" "test_role" {
     role = %q
+    permission = %q
+    resource_type = %q
 }
-`, role)
+`, role, permission, resourceType)
 }

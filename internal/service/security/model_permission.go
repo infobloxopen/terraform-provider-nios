@@ -75,7 +75,8 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The type of permission.",
 	},
 	"resource_type": schema.StringAttribute{
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AtLeastOneOf(
 				path.MatchRoot("object"),
@@ -131,7 +132,6 @@ func (m *PermissionModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		return nil
 	}
 	to := &security.Permission{
-		Ref:          flex.ExpandStringPointer(m.Ref),
 		Group:        flex.ExpandStringPointer(m.Group),
 		Object:       flex.ExpandStringPointer(m.Object),
 		Permission:   flex.ExpandStringPointer(m.Permission),
