@@ -325,7 +325,7 @@ func TestAccRecordUnknownResource_Name(t *testing.T) {
 	})
 }
 
-func TestAccRecordUnknownResource_RecordType(t *testing.T) {
+func TestAccRecordUnknownResource_RecordTypeSPF(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_record_type"
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
@@ -348,6 +348,76 @@ func TestAccRecordUnknownResource_RecordType(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordUnknownExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "record_type", "SPF"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccRecordUnknownResource_RecordTypeRP(t *testing.T) {
+	var resourceName = "nios_dns_record_unknown.test_record_type"
+	var v dns.RecordUnknown
+	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
+	subfieldValues1 := []map[string]any{
+		{
+			"field_type":     "N",
+			"field_value":    "example1.com",
+			"include_length": "NONE",
+		},
+		{
+			"field_type":     "N",
+			"field_value":    "example2.com",
+			"include_length": "NONE",
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordUnknownRecordType(zoneFqdn, name, "RP", subfieldValues1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordUnknownExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "record_type", "RP"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccRecordUnknownResource_RecordTypeHINFO(t *testing.T) {
+	var resourceName = "nios_dns_record_unknown.test_record_type"
+	var v dns.RecordUnknown
+	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
+	subfieldValues1 := []map[string]any{
+		{
+			"field_type":     "T",
+			"field_value":    "INTEL-386",
+			"include_length": "8_BIT",
+		},
+		{
+			"field_type":     "T",
+			"field_value":    "WIN32",
+			"include_length": "8_BIT",
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordUnknownRecordType(zoneFqdn, name, "HINFO", subfieldValues1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordUnknownExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "record_type", "HINFO"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
