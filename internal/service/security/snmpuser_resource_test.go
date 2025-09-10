@@ -72,6 +72,8 @@ func TestAccSnmpuserResource_AuthenticationPassword(t *testing.T) {
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+	auth_password := "AuthPassword@123"
+	updated_auth_password := "UpdatedAuthPassword@123!"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -79,18 +81,18 @@ func TestAccSnmpuserResource_AuthenticationPassword(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserAuthenticationPassword(name, "SHA", "TestPassword123!", "NONE"),
+				Config: testAccSnmpuserAuthenticationPassword(name, "SHA", auth_password, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_password", "TestPassword123!"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_password", auth_password),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserAuthenticationPassword(name, "SHA", "UpdatedPassword123!", "NONE"),
+				Config: testAccSnmpuserAuthenticationPassword(name, "SHA", updated_auth_password, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_password", "UpdatedPassword123!"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_password", updated_auth_password),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -103,6 +105,7 @@ func TestAccSnmpuserResource_AuthenticationProtocol(t *testing.T) {
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+	auth_password := "AuthPassword@123"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -110,7 +113,7 @@ func TestAccSnmpuserResource_AuthenticationProtocol(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserAuthenticationProtocol(name, "SHA", "TestPassword@123", "NONE"),
+				Config: testAccSnmpuserAuthenticationProtocol(name, "SHA", auth_password, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "authentication_protocol", "SHA"),
@@ -118,7 +121,7 @@ func TestAccSnmpuserResource_AuthenticationProtocol(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserAuthenticationProtocol(name, "MD5", "TestPassword@123", "NONE"),
+				Config: testAccSnmpuserAuthenticationProtocol(name, "MD5", auth_password, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "authentication_protocol", "MD5"),
@@ -261,6 +264,9 @@ func TestAccSnmpuserResource_PrivacyPassword(t *testing.T) {
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+	auth_password := "AuthPassword@123"
+	privacy_password := "PrivacyPassword@123"
+	updated_privacy_password := "UpdatedPassword@123"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -268,18 +274,18 @@ func TestAccSnmpuserResource_PrivacyPassword(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserPrivacyPassword(name, "MD5", "TestPassword@123", "DES", "Test-PrivacyPassword123!"),
+				Config: testAccSnmpuserPrivacyPassword(name, "MD5", auth_password, "DES", privacy_password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "privacy_password", "Test-PrivacyPassword123!"),
+					resource.TestCheckResourceAttr(resourceName, "privacy_password", privacy_password),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserPrivacyPassword(name, "MD5", "UpdatedPassword@123", "DES", "Test-PrivacyPasswordUpdated!"),
+				Config: testAccSnmpuserPrivacyPassword(name, "MD5", auth_password, "DES", updated_privacy_password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "privacy_password", "Test-PrivacyPasswordUpdated!"),
+					resource.TestCheckResourceAttr(resourceName, "privacy_password", updated_privacy_password),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -292,6 +298,8 @@ func TestAccSnmpuserResource_PrivacyProtocol(t *testing.T) {
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+	auth_password := "AuthPassword@123"
+	privacy_password := "PrivacyPassword@123"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -299,7 +307,7 @@ func TestAccSnmpuserResource_PrivacyProtocol(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserPrivacyProtocol(name, "MD5", "TestPassword@123", "AES", "Test-PrivacyPassword123!"),
+				Config: testAccSnmpuserPrivacyProtocol(name, "MD5", auth_password, "AES", privacy_password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "privacy_protocol", "AES"),
@@ -307,7 +315,7 @@ func TestAccSnmpuserResource_PrivacyProtocol(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserPrivacyProtocol(name, "MD5", "UpdatedPassword@123", "DES", "Test-PrivacyPasswordUpdated!"),
+				Config: testAccSnmpuserPrivacyProtocol(name, "MD5", auth_password, "DES", privacy_password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "privacy_protocol", "DES"),

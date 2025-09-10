@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
@@ -53,10 +54,13 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"authentication_password": schema.StringAttribute{
-		Optional: true,
-		//Sensitive: true,
-		// Required if authentication_protocol is set to a value other than NONE
-		MarkdownDescription: "Determines an authentication password for the user. This is a write-only attribute.",
+		Optional:  true,
+		Sensitive: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("authentication_protocol")),
+			stringvalidator.LengthBetween(8, 256),
+		},
+		MarkdownDescription: "Determines an authentication password for the user. This is a write-only attribute. Must be between 8 and 256 characters.",
 	},
 	"authentication_protocol": schema.StringAttribute{
 		Required: true,
@@ -103,10 +107,12 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the user.",
 	},
 	"privacy_password": schema.StringAttribute{
-		Optional: true,
-		//Computed: true,
-		//Sensitive: true,
-		//Required if privacy_protocol is set to a value other than NONE
+		Optional:  true,
+		Sensitive: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("privacy_protocol")),
+			stringvalidator.LengthBetween(8, 256),
+		},
 		MarkdownDescription: "Determines a password for the privacy protocol.",
 	},
 	"privacy_protocol": schema.StringAttribute{
@@ -117,18 +123,6 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The privacy protocol to be used for this user.",
 	},
 }
-
-// func ExpandSnmpuser(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.Snmpuser {
-// 	if o.IsNull() || o.IsUnknown() {
-// 		return nil
-// 	}
-// 	var m SnmpuserModel
-// 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-// 	if diags.HasError() {
-// 		return nil
-// 	}
-// 	return m.Expand(ctx, diags)
-// }
 
 func (m *SnmpuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.Snmpuser {
 	if m == nil {
