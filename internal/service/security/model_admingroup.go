@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -20,60 +21,61 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type AdmingroupModel struct {
-	Ref                               types.String `tfsdk:"ref"`
-	AccessMethod                      types.List   `tfsdk:"access_method"`
-	AdminSetCommands                  types.Object `tfsdk:"admin_set_commands"`
-	AdminShowCommands                 types.Object `tfsdk:"admin_show_commands"`
-	AdminToplevelCommands             types.Object `tfsdk:"admin_toplevel_commands"`
-	CloudSetCommands                  types.Object `tfsdk:"cloud_set_commands"`
-	CloudShowCommands                 types.Object `tfsdk:"cloud_show_commands"`
-	Comment                           types.String `tfsdk:"comment"`
-	DatabaseSetCommands               types.Object `tfsdk:"database_set_commands"`
-	DatabaseShowCommands              types.Object `tfsdk:"database_show_commands"`
-	DhcpSetCommands                   types.Object `tfsdk:"dhcp_set_commands"`
-	DhcpShowCommands                  types.Object `tfsdk:"dhcp_show_commands"`
-	Disable                           types.Bool   `tfsdk:"disable"`
-	DisableConcurrentLogin            types.Bool   `tfsdk:"disable_concurrent_login"`
-	DnsSetCommands                    types.Object `tfsdk:"dns_set_commands"`
-	DnsShowCommands                   types.Object `tfsdk:"dns_show_commands"`
-	DnsToplevelCommands               types.Object `tfsdk:"dns_toplevel_commands"`
-	DockerSetCommands                 types.Object `tfsdk:"docker_set_commands"`
-	DockerShowCommands                types.Object `tfsdk:"docker_show_commands"`
-	EmailAddresses                    types.List   `tfsdk:"email_addresses"`
-	EnableRestrictedUserAccess        types.Bool   `tfsdk:"enable_restricted_user_access"`
-	ExtAttrs                          types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                       types.Map    `tfsdk:"extattrs_all"`
-	GridSetCommands                   types.Object `tfsdk:"grid_set_commands"`
-	GridShowCommands                  types.Object `tfsdk:"grid_show_commands"`
-	InactivityLockoutSetting          types.Object `tfsdk:"inactivity_lockout_setting"`
-	LicensingSetCommands              types.Object `tfsdk:"licensing_set_commands"`
-	LicensingShowCommands             types.Object `tfsdk:"licensing_show_commands"`
-	LockoutSetting                    types.Object `tfsdk:"lockout_setting"`
-	MachineControlToplevelCommands    types.Object `tfsdk:"machine_control_toplevel_commands"`
-	Name                              types.String `tfsdk:"name"`
-	NetworkingSetCommands             types.Object `tfsdk:"networking_set_commands"`
-	NetworkingShowCommands            types.Object `tfsdk:"networking_show_commands"`
-	PasswordSetting                   types.Object `tfsdk:"password_setting"`
-	Roles                             types.List   `tfsdk:"roles"`
-	SamlSetting                       types.Object `tfsdk:"saml_setting"`
-	SecuritySetCommands               types.Object `tfsdk:"security_set_commands"`
-	SecurityShowCommands              types.Object `tfsdk:"security_show_commands"`
-	Superuser                         types.Bool   `tfsdk:"superuser"`
-	TroubleShootingToplevelCommands   types.Object `tfsdk:"trouble_shooting_toplevel_commands"`
-	UseAccountInactivityLockoutEnable types.Bool   `tfsdk:"use_account_inactivity_lockout_enable"`
-	UseDisableConcurrentLogin         types.Bool   `tfsdk:"use_disable_concurrent_login"`
-	UseLockoutSetting                 types.Bool   `tfsdk:"use_lockout_setting"`
-	UsePasswordSetting                types.Bool   `tfsdk:"use_password_setting"`
-	UserAccess                        types.List   `tfsdk:"user_access"`
+	Ref                               types.String                     `tfsdk:"ref"`
+	AccessMethod                      internaltypes.UnorderedListValue `tfsdk:"access_method"`
+	AdminSetCommands                  types.Object                     `tfsdk:"admin_set_commands"`
+	AdminShowCommands                 types.Object                     `tfsdk:"admin_show_commands"`
+	AdminToplevelCommands             types.Object                     `tfsdk:"admin_toplevel_commands"`
+	CloudSetCommands                  types.Object                     `tfsdk:"cloud_set_commands"`
+	CloudShowCommands                 types.Object                     `tfsdk:"cloud_show_commands"`
+	Comment                           types.String                     `tfsdk:"comment"`
+	DatabaseSetCommands               types.Object                     `tfsdk:"database_set_commands"`
+	DatabaseShowCommands              types.Object                     `tfsdk:"database_show_commands"`
+	DhcpSetCommands                   types.Object                     `tfsdk:"dhcp_set_commands"`
+	DhcpShowCommands                  types.Object                     `tfsdk:"dhcp_show_commands"`
+	Disable                           types.Bool                       `tfsdk:"disable"`
+	DisableConcurrentLogin            types.Bool                       `tfsdk:"disable_concurrent_login"`
+	DnsSetCommands                    types.Object                     `tfsdk:"dns_set_commands"`
+	DnsShowCommands                   types.Object                     `tfsdk:"dns_show_commands"`
+	DnsToplevelCommands               types.Object                     `tfsdk:"dns_toplevel_commands"`
+	DockerSetCommands                 types.Object                     `tfsdk:"docker_set_commands"`
+	DockerShowCommands                types.Object                     `tfsdk:"docker_show_commands"`
+	EmailAddresses                    types.List                       `tfsdk:"email_addresses"`
+	EnableRestrictedUserAccess        types.Bool                       `tfsdk:"enable_restricted_user_access"`
+	ExtAttrs                          types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll                       types.Map                        `tfsdk:"extattrs_all"`
+	GridSetCommands                   types.Object                     `tfsdk:"grid_set_commands"`
+	GridShowCommands                  types.Object                     `tfsdk:"grid_show_commands"`
+	InactivityLockoutSetting          types.Object                     `tfsdk:"inactivity_lockout_setting"`
+	LicensingSetCommands              types.Object                     `tfsdk:"licensing_set_commands"`
+	LicensingShowCommands             types.Object                     `tfsdk:"licensing_show_commands"`
+	LockoutSetting                    types.Object                     `tfsdk:"lockout_setting"`
+	MachineControlToplevelCommands    types.Object                     `tfsdk:"machine_control_toplevel_commands"`
+	Name                              types.String                     `tfsdk:"name"`
+	NetworkingSetCommands             types.Object                     `tfsdk:"networking_set_commands"`
+	NetworkingShowCommands            types.Object                     `tfsdk:"networking_show_commands"`
+	PasswordSetting                   types.Object                     `tfsdk:"password_setting"`
+	Roles                             types.List                       `tfsdk:"roles"`
+	SamlSetting                       types.Object                     `tfsdk:"saml_setting"`
+	SecuritySetCommands               types.Object                     `tfsdk:"security_set_commands"`
+	SecurityShowCommands              types.Object                     `tfsdk:"security_show_commands"`
+	Superuser                         types.Bool                       `tfsdk:"superuser"`
+	TroubleShootingToplevelCommands   types.Object                     `tfsdk:"trouble_shooting_toplevel_commands"`
+	UseAccountInactivityLockoutEnable types.Bool                       `tfsdk:"use_account_inactivity_lockout_enable"`
+	UseDisableConcurrentLogin         types.Bool                       `tfsdk:"use_disable_concurrent_login"`
+	UseLockoutSetting                 types.Bool                       `tfsdk:"use_lockout_setting"`
+	UsePasswordSetting                types.Bool                       `tfsdk:"use_password_setting"`
+	UserAccess                        types.List                       `tfsdk:"user_access"`
 }
 
 var AdmingroupAttrTypes = map[string]attr.Type{
 	"ref":                                   types.StringType,
-	"access_method":                         types.ListType{ElemType: types.StringType},
+	"access_method":                         internaltypes.UnorderedListOfStringType,
 	"admin_set_commands":                    types.ObjectType{AttrTypes: AdmingroupAdminSetCommandsAttrTypes},
 	"admin_show_commands":                   types.ObjectType{AttrTypes: AdmingroupAdminShowCommandsAttrTypes},
 	"admin_toplevel_commands":               types.ObjectType{AttrTypes: AdmingroupAdminToplevelCommandsAttrTypes},
@@ -125,9 +127,18 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"access_method": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		ElementType: types.StringType,
 		Optional:    true,
 		Computed:    true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(types.StringType, []attr.Value{
+				types.StringValue("GUI"),
+				types.StringValue("API"),
+				types.StringValue("TAXII"),
+				types.StringValue("CLI"),
+			}),
+		),
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			customvalidator.StringsInSlice([]string{"API", "CLI", "CLOUD_API", "GUI", "TAXII"}),
@@ -490,7 +501,7 @@ func (m *AdmingroupModel) Flatten(ctx context.Context, from *security.Admingroup
 		*m = AdmingroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.AccessMethod = flex.FlattenFrameworkListString(ctx, from.AccessMethod, diags)
+	m.AccessMethod = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.AccessMethod, diags)
 	m.AdminSetCommands = FlattenAdmingroupAdminSetCommands(ctx, from.AdminSetCommands, diags)
 	m.AdminShowCommands = FlattenAdmingroupAdminShowCommands(ctx, from.AdminShowCommands, diags)
 	m.AdminToplevelCommands = FlattenAdmingroupAdminToplevelCommands(ctx, from.AdminToplevelCommands, diags)

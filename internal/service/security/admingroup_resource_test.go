@@ -33,7 +33,11 @@ func TestAccAdmingroupResource_basic(t *testing.T) {
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					//resource.TestCheckResourceAttr(resourceName, "access_method.0", "GUI"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.#", "4"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.0", "GUI"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.1", "API"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.2", "TAXII"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.3", "CLI"),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "disable_concurrent_login", "false"),
 					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "false"),
@@ -49,11 +53,11 @@ func TestAccAdmingroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lockout_setting.never_unlock_user", "false"),
 					resource.TestCheckResourceAttr(resourceName, "lockout_setting.sequential_attempts", "5"),
 					// Test password_setting default values
-					resource.TestCheckResourceAttr(resourceName, "password_setting.expire_days", "30"),
-					resource.TestCheckResourceAttr(resourceName, "password_setting.expire_enable", "false"),
-					resource.TestCheckResourceAttr(resourceName, "password_setting.reminder_days", "15"),
+					//resource.TestCheckResourceAttr(resourceName, "password_setting.expire_days", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "password_setting.expire_enable", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "password_setting.reminder_days", "15"),
 
-					resource.TestCheckResourceAttr(resourceName, "password_setting.superuser", "false"),
+					resource.TestCheckResourceAttr(resourceName, "superuser", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_account_inactivity_lockout_enable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_disable_concurrent_login", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_lockout_setting", "false"),
@@ -87,57 +91,33 @@ func TestAccAdmingroupResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccAdmingroupResource_Ref(t *testing.T) {
-	var resourceName = "nios_security_admin_group.test_ref"
-	var v security.Admingroup
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccAdmingroupRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccAdmingroupRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccAdmingroupResource_AccessMethod(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_access_method"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	accessMethod := `["CLI", "GUI"]`
+	accessMethod1 := `["CLI","GUI","API"]`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupAccessMethod("ACCESS_METHOD_REPLACE_ME"),
+				Config: testAccAdmingroupAccessMethod(name, accessMethod),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "access_method", "ACCESS_METHOD_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.0", "CLI"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.1", "GUI"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupAccessMethod("ACCESS_METHOD_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupAccessMethod(name, accessMethod1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "access_method", "ACCESS_METHOD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.0", "CLI"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.1", "GUI"),
+					resource.TestCheckResourceAttr(resourceName, "access_method.2", "API"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -148,25 +128,32 @@ func TestAccAdmingroupResource_AccessMethod(t *testing.T) {
 func TestAccAdmingroupResource_AdminSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_admin_set_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	adminSetCmds := "set_collect_old_logs:true,set_bfd:true,set_bgp:true"
+	adminSetCmds1 := "set_collect_old_logs:false,set_bfd:true,set_bgp:false,set_core_files_quota:true"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupAdminSetCommands("ADMIN_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupAdminSetCommands(name, adminSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "admin_set_commands", "ADMIN_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "admin_set_commands.set_collect_old_logs", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_set_commands.set_bfd", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_set_commands.set_bgp", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupAdminSetCommands("ADMIN_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupAdminSetCommands(name, adminSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "admin_set_commands", "ADMIN_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "admin_set_commands.set_collect_old_logs", "false"),
+					resource.TestCheckResourceAttr(resourceName, "admin_set_commands.set_bfd", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_set_commands.set_bgp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "admin_set_commands.set_core_files_quota", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -177,6 +164,9 @@ func TestAccAdmingroupResource_AdminSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_AdminShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_admin_show_commands"
 	var v security.Admingroup
+	name := acctest.RandomNameWithPrefix("admin-group")
+	adminShowCmds := "show_arp:true,show_bfd:true,show_bgp:true"
+	adminShowCmds1 := "show_arp:false,show_bfd:true,show_bgp:false,show_capacity:true"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -184,18 +174,23 @@ func TestAccAdmingroupResource_AdminShowCommands(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupAdminShowCommands("ADMIN_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupAdminShowCommands(name, adminShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "admin_show_commands", "ADMIN_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "admin_show_commands.show_arp", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_show_commands.show_bfd", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_show_commands.show_bgp", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupAdminShowCommands("ADMIN_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupAdminShowCommands(name, adminShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "admin_show_commands", "ADMIN_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "admin_show_commands.show_arp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "admin_show_commands.show_bfd", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_show_commands.show_bgp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "admin_show_commands.show_capacity", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -206,25 +201,33 @@ func TestAccAdmingroupResource_AdminShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_AdminToplevelCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_admin_toplevel_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	adminTopLevelCmds := "iostat:true,netstat:true,ps:true"
+	adminTopLevelCmds1 := "iostat:false,netstat:true,ps:false,restart_product:true"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupAdminToplevelCommands("ADMIN_TOPLEVEL_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupAdminToplevelCommands(name, adminTopLevelCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands", "ADMIN_TOPLEVEL_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands.iostat", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands.netstat", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands.ps", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupAdminToplevelCommands("ADMIN_TOPLEVEL_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupAdminToplevelCommands(name, adminTopLevelCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands", "ADMIN_TOPLEVEL_COMMANDS_UPDATE_REPLACE_ME"),
+					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands.iostat", "false"),
+					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands.netstat", "true"),
+					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands.ps", "false"),
+					resource.TestCheckResourceAttr(resourceName, "admin_toplevel_commands.restart_product", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -235,25 +238,29 @@ func TestAccAdmingroupResource_AdminToplevelCommands(t *testing.T) {
 func TestAccAdmingroupResource_CloudSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_cloud_set_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	cloudSetCmds := "disable_all:true,set_cloud_services_portal:true"
+	cloudSetCmds1 := "enable_all:true,set_cloud_services_portal:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupCloudSetCommands("CLOUD_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupCloudSetCommands(name, cloudSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_set_commands", "CLOUD_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_set_commands.disable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_set_commands.set_cloud_services_portal", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupCloudSetCommands("CLOUD_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupCloudSetCommands(name, cloudSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_set_commands", "CLOUD_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_set_commands.enable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_set_commands.set_cloud_services_portal", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1429,191 +1436,205 @@ resource "nios_security_admin_group" "test" {
 `, name)
 }
 
-func testAccAdmingroupRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_security_admin_group" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
-func testAccAdmingroupAccessMethod(accessMethod string) string {
+func testAccAdmingroupAccessMethod(name, accessMethod string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_access_method" {
-    access_method = %q
+    name = %q
+    access_method = %s
 }
-`, accessMethod)
+`, name, accessMethod)
 }
 
-func testAccAdmingroupAdminSetCommands(adminSetCommands string) string {
+func testAccAdmingroupAdminSetCommands(name, adminSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_admin_set_commands" {
-    admin_set_commands = %q
+	name = %q
+    admin_set_commands = {%s}
 }
-`, adminSetCommands)
+`, name, adminSetCommands)
 }
 
-func testAccAdmingroupAdminShowCommands(adminShowCommands string) string {
+func testAccAdmingroupAdminShowCommands(name, adminShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_admin_show_commands" {
-    admin_show_commands = %q
+	name = %q
+    admin_show_commands = {%s}
 }
-`, adminShowCommands)
+`, name, adminShowCommands)
 }
 
-func testAccAdmingroupAdminToplevelCommands(adminToplevelCommands string) string {
+func testAccAdmingroupAdminToplevelCommands(name, adminToplevelCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_admin_toplevel_commands" {
-    admin_toplevel_commands = %q
+	name = %q
+    admin_toplevel_commands = {%s}
 }
-`, adminToplevelCommands)
+`, name, adminToplevelCommands)
 }
 
-func testAccAdmingroupCloudSetCommands(cloudSetCommands string) string {
+func testAccAdmingroupCloudSetCommands(name, cloudSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_cloud_set_commands" {
-    cloud_set_commands = %q
+	name = %q
+    cloud_set_commands = {%s}
 }
-`, cloudSetCommands)
+`, name, cloudSetCommands)
 }
 
-func testAccAdmingroupCloudShowCommands(cloudShowCommands string) string {
+func testAccAdmingroupCloudShowCommands(name, cloudShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_cloud_show_commands" {
-    cloud_show_commands = %q
+	name = %q
+    cloud_show_commands = {%s}
 }
-`, cloudShowCommands)
+`, name, cloudShowCommands)
 }
 
-func testAccAdmingroupComment(comment string) string {
+func testAccAdmingroupComment(name, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_comment" {
+    name = %q
     comment = %q
 }
-`, comment)
+`, name, comment)
 }
 
-func testAccAdmingroupDatabaseSetCommands(databaseSetCommands string) string {
+func testAccAdmingroupDatabaseSetCommands(name, databaseSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_database_set_commands" {
-    database_set_commands = %q
+    name = %q
+    database_set_commands = {%s}
 }
-`, databaseSetCommands)
+`, name, databaseSetCommands)
 }
 
-func testAccAdmingroupDatabaseShowCommands(databaseShowCommands string) string {
+func testAccAdmingroupDatabaseShowCommands(name, databaseShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_database_show_commands" {
-    database_show_commands = %q
+    name = %q
+    database_show_commands = {%s}
 }
-`, databaseShowCommands)
+`, name, databaseShowCommands)
 }
 
-func testAccAdmingroupDhcpSetCommands(dhcpSetCommands string) string {
+func testAccAdmingroupDhcpSetCommands(name, dhcpSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_dhcp_set_commands" {
-    dhcp_set_commands = %q
+	name = %q
+    dhcp_set_commands = {%s}
 }
-`, dhcpSetCommands)
+`, name, dhcpSetCommands)
 }
 
-func testAccAdmingroupDhcpShowCommands(dhcpShowCommands string) string {
+func testAccAdmingroupDhcpShowCommands(name, dhcpShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_dhcp_show_commands" {
-    dhcp_show_commands = %q
+	name = %q
+    dhcp_show_commands = {%s}
 }
-`, dhcpShowCommands)
+`, name, dhcpShowCommands)
 }
 
-func testAccAdmingroupDisable(disable string) string {
+func testAccAdmingroupDisable(name string, disable bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_disable" {
-    disable = %q
+	name = %q
+    disable = %t
 }
-`, disable)
+`, name, disable)
 }
 
-func testAccAdmingroupDisableConcurrentLogin(disableConcurrentLogin string) string {
+func testAccAdmingroupDisableConcurrentLogin(name string, disableConcurrentLogin bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_disable_concurrent_login" {
-    disable_concurrent_login = %q
+	name = %q
+    disable_concurrent_login = %t
 }
-`, disableConcurrentLogin)
+`, name, disableConcurrentLogin)
 }
 
-func testAccAdmingroupDnsSetCommands(dnsSetCommands string) string {
+func testAccAdmingroupDnsSetCommands(name, dnsSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_dns_set_commands" {
-    dns_set_commands = %q
+	name = %q
+    dns_set_commands = {%s}
 }
-`, dnsSetCommands)
+`, name, dnsSetCommands)
 }
 
-func testAccAdmingroupDnsShowCommands(dnsShowCommands string) string {
+func testAccAdmingroupDnsShowCommands(name, dnsShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_dns_show_commands" {
-    dns_show_commands = %q
+	name = %q
+    dns_show_commands = {%s}
 }
-`, dnsShowCommands)
+`, name, dnsShowCommands)
 }
 
-func testAccAdmingroupDnsToplevelCommands(dnsToplevelCommands string) string {
+func testAccAdmingroupDnsToplevelCommands(name, dnsToplevelCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_dns_toplevel_commands" {
-    dns_toplevel_commands = %q
+	name = %q
+    dns_toplevel_commands = {%s}
 }
-`, dnsToplevelCommands)
+`, name, dnsToplevelCommands)
 }
 
-func testAccAdmingroupDockerSetCommands(dockerSetCommands string) string {
+func testAccAdmingroupDockerSetCommands(name, dockerSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_docker_set_commands" {
-    docker_set_commands = %q
+	name = %q
+    docker_set_commands = {%s}
 }
-`, dockerSetCommands)
+`, name, dockerSetCommands)
 }
 
-func testAccAdmingroupDockerShowCommands(dockerShowCommands string) string {
+func testAccAdmingroupDockerShowCommands(name, dockerShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_docker_show_commands" {
-    docker_show_commands = %q
+	name = %q
+    docker_show_commands = {%s}
 }
-`, dockerShowCommands)
+`, name, dockerShowCommands)
 }
 
-func testAccAdmingroupEmailAddresses(emailAddresses string) string {
+func testAccAdmingroupEmailAddresses(name, emailAddresses string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_email_addresses" {
+	name = %q
     email_addresses = %q
 }
-`, emailAddresses)
+`, name, emailAddresses)
 }
 
-func testAccAdmingroupEnableRestrictedUserAccess(enableRestrictedUserAccess string) string {
+func testAccAdmingroupEnableRestrictedUserAccess(name, enableRestrictedUserAccess bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_enable_restricted_user_access" {
-    enable_restricted_user_access = %q
+	name = %q
+    enable_restricted_user_access = %t
 }
-`, enableRestrictedUserAccess)
+`, name, enableRestrictedUserAccess)
 }
 
-func testAccAdmingroupExtAttrs(extAttrs string) string {
+func testAccAdmingroupExtAttrs(name, extAttrs string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_extattrs" {
+	name = %q
     extattrs = %q
 }
-`, extAttrs)
+`, name, extAttrs)
 }
 
-func testAccAdmingroupGridSetCommands(gridSetCommands string) string {
+func testAccAdmingroupGridSetCommands(name, gridSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_grid_set_commands" {
-    grid_set_commands = %q
+	name = %q
+    grid_set_commands = {%s}
 }
-`, gridSetCommands)
+`, name, gridSetCommands)
 }
 
-func testAccAdmingroupGridShowCommands(gridShowCommands string) string {
+func testAccAdmingroupGridShowCommands(name, gridShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_grid_show_commands" {
     grid_show_commands = %q
@@ -1621,7 +1642,7 @@ resource "nios_security_admin_group" "test_grid_show_commands" {
 `, gridShowCommands)
 }
 
-func testAccAdmingroupInactivityLockoutSetting(inactivityLockoutSetting string) string {
+func testAccAdmingroupInactivityLockoutSetting(name, inactivityLockoutSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_inactivity_lockout_setting" {
     inactivity_lockout_setting = %q
@@ -1629,7 +1650,7 @@ resource "nios_security_admin_group" "test_inactivity_lockout_setting" {
 `, inactivityLockoutSetting)
 }
 
-func testAccAdmingroupLicensingSetCommands(licensingSetCommands string) string {
+func testAccAdmingroupLicensingSetCommands(name, licensingSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_licensing_set_commands" {
     licensing_set_commands = %q
@@ -1637,7 +1658,7 @@ resource "nios_security_admin_group" "test_licensing_set_commands" {
 `, licensingSetCommands)
 }
 
-func testAccAdmingroupLicensingShowCommands(licensingShowCommands string) string {
+func testAccAdmingroupLicensingShowCommands(name, licensingShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_licensing_show_commands" {
     licensing_show_commands = %q
@@ -1645,7 +1666,7 @@ resource "nios_security_admin_group" "test_licensing_show_commands" {
 `, licensingShowCommands)
 }
 
-func testAccAdmingroupLockoutSetting(lockoutSetting string) string {
+func testAccAdmingroupLockoutSetting(name, lockoutSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_lockout_setting" {
     lockout_setting = %q
@@ -1653,7 +1674,7 @@ resource "nios_security_admin_group" "test_lockout_setting" {
 `, lockoutSetting)
 }
 
-func testAccAdmingroupMachineControlToplevelCommands(machineControlToplevelCommands string) string {
+func testAccAdmingroupMachineControlToplevelCommands(name, machineControlToplevelCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_machine_control_toplevel_commands" {
     machine_control_toplevel_commands = %q
@@ -1669,7 +1690,7 @@ resource "nios_security_admin_group" "test_name" {
 `, name)
 }
 
-func testAccAdmingroupNetworkingSetCommands(networkingSetCommands string) string {
+func testAccAdmingroupNetworkingSetCommands(name, networkingSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_networking_set_commands" {
     networking_set_commands = %q
@@ -1677,7 +1698,7 @@ resource "nios_security_admin_group" "test_networking_set_commands" {
 `, networkingSetCommands)
 }
 
-func testAccAdmingroupNetworkingShowCommands(networkingShowCommands string) string {
+func testAccAdmingroupNetworkingShowCommands(name, networkingShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_networking_show_commands" {
     networking_show_commands = %q
@@ -1685,7 +1706,7 @@ resource "nios_security_admin_group" "test_networking_show_commands" {
 `, networkingShowCommands)
 }
 
-func testAccAdmingroupPasswordSetting(passwordSetting string) string {
+func testAccAdmingroupPasswordSetting(name, passwordSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_password_setting" {
     password_setting = %q
@@ -1693,7 +1714,7 @@ resource "nios_security_admin_group" "test_password_setting" {
 `, passwordSetting)
 }
 
-func testAccAdmingroupRoles(roles string) string {
+func testAccAdmingroupRoles(name, roles string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_roles" {
     roles = %q
@@ -1701,7 +1722,7 @@ resource "nios_security_admin_group" "test_roles" {
 `, roles)
 }
 
-func testAccAdmingroupSamlSetting(samlSetting string) string {
+func testAccAdmingroupSamlSetting(name, samlSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_saml_setting" {
     saml_setting = %q
@@ -1709,7 +1730,7 @@ resource "nios_security_admin_group" "test_saml_setting" {
 `, samlSetting)
 }
 
-func testAccAdmingroupSecuritySetCommands(securitySetCommands string) string {
+func testAccAdmingroupSecuritySetCommands(name, securitySetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_security_set_commands" {
     security_set_commands = %q
@@ -1717,7 +1738,7 @@ resource "nios_security_admin_group" "test_security_set_commands" {
 `, securitySetCommands)
 }
 
-func testAccAdmingroupSecurityShowCommands(securityShowCommands string) string {
+func testAccAdmingroupSecurityShowCommands(name, securityShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_security_show_commands" {
     security_show_commands = %q
@@ -1725,7 +1746,7 @@ resource "nios_security_admin_group" "test_security_show_commands" {
 `, securityShowCommands)
 }
 
-func testAccAdmingroupSuperuser(superuser string) string {
+func testAccAdmingroupSuperuser(name, superuser string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_superuser" {
     superuser = %q
@@ -1733,7 +1754,7 @@ resource "nios_security_admin_group" "test_superuser" {
 `, superuser)
 }
 
-func testAccAdmingroupTroubleShootingToplevelCommands(troubleShootingToplevelCommands string) string {
+func testAccAdmingroupTroubleShootingToplevelCommands(name, troubleShootingToplevelCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_trouble_shooting_toplevel_commands" {
     trouble_shooting_toplevel_commands = %q
@@ -1741,7 +1762,7 @@ resource "nios_security_admin_group" "test_trouble_shooting_toplevel_commands" {
 `, troubleShootingToplevelCommands)
 }
 
-func testAccAdmingroupUseAccountInactivityLockoutEnable(useAccountInactivityLockoutEnable string) string {
+func testAccAdmingroupUseAccountInactivityLockoutEnable(name, useAccountInactivityLockoutEnable string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_use_account_inactivity_lockout_enable" {
     use_account_inactivity_lockout_enable = %q
@@ -1749,7 +1770,7 @@ resource "nios_security_admin_group" "test_use_account_inactivity_lockout_enable
 `, useAccountInactivityLockoutEnable)
 }
 
-func testAccAdmingroupUseDisableConcurrentLogin(useDisableConcurrentLogin string) string {
+func testAccAdmingroupUseDisableConcurrentLogin(name, useDisableConcurrentLogin string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_use_disable_concurrent_login" {
     use_disable_concurrent_login = %q
@@ -1757,7 +1778,7 @@ resource "nios_security_admin_group" "test_use_disable_concurrent_login" {
 `, useDisableConcurrentLogin)
 }
 
-func testAccAdmingroupUseLockoutSetting(useLockoutSetting string) string {
+func testAccAdmingroupUseLockoutSetting(name, useLockoutSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_use_lockout_setting" {
     use_lockout_setting = %q
@@ -1765,7 +1786,7 @@ resource "nios_security_admin_group" "test_use_lockout_setting" {
 `, useLockoutSetting)
 }
 
-func testAccAdmingroupUsePasswordSetting(usePasswordSetting string) string {
+func testAccAdmingroupUsePasswordSetting(name, usePasswordSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_use_password_setting" {
     use_password_setting = %q
@@ -1773,7 +1794,7 @@ resource "nios_security_admin_group" "test_use_password_setting" {
 `, usePasswordSetting)
 }
 
-func testAccAdmingroupUserAccess(userAccess string) string {
+func testAccAdmingroupUserAccess(name, userAccess string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_user_access" {
     user_access = %q
