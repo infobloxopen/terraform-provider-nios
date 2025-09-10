@@ -3,12 +3,12 @@
 page_title: "nios_dns_nsgroup_forwardstubserver Resource - nios"
 subcategory: "DNS"
 description: |-
-  
+  Manages a NS group Forward Stub Member.
 ---
 
 # nios_dns_nsgroup_forwardstubserver (Resource)
 
-
+Manages a NS group Forward Stub Member.
 
 ## Example Usage
 

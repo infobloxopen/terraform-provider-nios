@@ -3,12 +3,12 @@
 page_title: "nios_dns_nsgroup_forwardstubserver Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about NS Group Forward Stub Members.
 ---
 
 # nios_dns_nsgroup_forwardstubserver (Data Source)
 
-
+Retrieves information about NS Group Forward Stub Members.
 
 ## Example Usage
 
