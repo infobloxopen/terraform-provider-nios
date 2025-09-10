@@ -31,7 +31,7 @@ type SnmpuserDataSource struct {
 }
 
 func (d *SnmpuserDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "security_snmpuser"
+	resp.TypeName = req.ProviderTypeName + "_" + "security_snmp_user"
 }
 
 type SnmpuserModelWithFilter struct {

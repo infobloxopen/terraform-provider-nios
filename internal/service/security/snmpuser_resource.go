@@ -32,7 +32,7 @@ type SnmpuserResource struct {
 }
 
 func (r *SnmpuserResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "security_snmpuser"
+	resp.TypeName = req.ProviderTypeName + "_" + "security_snmp_user"
 }
 
 func (r *SnmpuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
