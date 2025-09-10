@@ -31,7 +31,7 @@ type NsgroupForwardingmemberResource struct {
 }
 
 func (r *NsgroupForwardingmemberResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dns_nsgroup_forwarding_member"
+	resp.TypeName = req.ProviderTypeName + "_" + "dns_nsgroup_forwardingmember"
 }
 
 func (r *NsgroupForwardingmemberResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

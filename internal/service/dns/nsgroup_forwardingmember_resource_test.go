@@ -20,7 +20,7 @@ import (
 var readableAttributesForNsgroupForwardingmember = "comment,extattrs,forwarding_servers,name"
 
 func TestAccNsgroupForwardingmemberResource_basic(t *testing.T) {
-	var resourceName = "nios_dns_nsgroup_forwarding_member.test"
+	var resourceName = "nios_dns_nsgroup_forwardingmember.test"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
@@ -50,7 +50,7 @@ func TestAccNsgroupForwardingmemberResource_basic(t *testing.T) {
 }
 
 func TestAccNsgroupForwardingmemberResource_disappears(t *testing.T) {
-	resourceName := "nios_dns_nsgroup_forwarding_member.test"
+	resourceName := "nios_dns_nsgroup_forwardingmember.test"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
@@ -77,7 +77,7 @@ func TestAccNsgroupForwardingmemberResource_disappears(t *testing.T) {
 }
 
 func TestAccNsgroupForwardingmemberResource_Comment(t *testing.T) {
-	var resourceName = "nios_dns_nsgroup_forwarding_member.test_comment"
+	var resourceName = "nios_dns_nsgroup_forwardingmember.test_comment"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
@@ -112,7 +112,7 @@ func TestAccNsgroupForwardingmemberResource_Comment(t *testing.T) {
 }
 
 func TestAccNsgroupForwardingmemberResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_dns_nsgroup_forwarding_member.test_extattrs"
+	var resourceName = "nios_dns_nsgroup_forwardingmember.test_extattrs"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
@@ -153,7 +153,7 @@ func TestAccNsgroupForwardingmemberResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
-	var resourceName = "nios_dns_nsgroup_forwarding_member.test_forwarding_servers"
+	var resourceName = "nios_dns_nsgroup_forwardingmember.test_forwarding_servers"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
@@ -200,7 +200,7 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 }
 
 func TestAccNsgroupForwardingmemberResource_Name(t *testing.T) {
-	var resourceName = "nios_dns_nsgroup_forwarding_member.test_name"
+	var resourceName = "nios_dns_nsgroup_forwardingmember.test_name"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	nameUpdate := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
@@ -295,7 +295,7 @@ func testAccCheckNsgroupForwardingmemberDisappears(ctx context.Context, v *dns.N
 func testAccNsgroupForwardingmemberBasicConfig(name string, forwardingServer []map[string]any) string {
 	forwardingServerStr := utils.ConvertSliceOfMapsToHCL(forwardingServer)
 	return fmt.Sprintf(`
-resource "nios_dns_nsgroup_forwarding_member" "test" {
+resource "nios_dns_nsgroup_forwardingmember" "test" {
 	name = %q
 	forwarding_servers = %s
 }
@@ -305,7 +305,7 @@ resource "nios_dns_nsgroup_forwarding_member" "test" {
 func testAccNsgroupForwardingmemberComment(name string, forwardingServer []map[string]any, comment string) string {
 	forwardingServerStr := utils.ConvertSliceOfMapsToHCL(forwardingServer)
 	return fmt.Sprintf(`
-resource "nios_dns_nsgroup_forwarding_member" "test_comment" {
+resource "nios_dns_nsgroup_forwardingmember" "test_comment" {
     name = %q
     forwarding_servers = %s
     comment = %q
@@ -323,7 +323,7 @@ func testAccNsgroupForwardingmemberExtAttrs(name string, forwardingServer []map[
 	extattrsStr += "\t}"
 	forwardingServerStr := utils.ConvertSliceOfMapsToHCL(forwardingServer)
 	return fmt.Sprintf(`
-resource "nios_dns_nsgroup_forwarding_member" "test_extattrs" {
+resource "nios_dns_nsgroup_forwardingmember" "test_extattrs" {
 	name = %q
 	forwarding_servers = %s
     extattrs = %s
@@ -334,7 +334,7 @@ resource "nios_dns_nsgroup_forwarding_member" "test_extattrs" {
 func testAccNsgroupForwardingmemberForwardingServers(name string, forwardingServers []map[string]any) string {
 	forwardingServersStr := utils.ConvertSliceOfMapsToHCL(forwardingServers)
 	return fmt.Sprintf(`
-resource "nios_dns_nsgroup_forwarding_member" "test_forwarding_servers" {
+resource "nios_dns_nsgroup_forwardingmember" "test_forwarding_servers" {
     name = %q
     forwarding_servers = %s
 }
@@ -344,7 +344,7 @@ resource "nios_dns_nsgroup_forwarding_member" "test_forwarding_servers" {
 func testAccNsgroupForwardingmemberName(name string, forwardingServers []map[string]any) string {
 	forwardingServersStr := utils.ConvertSliceOfMapsToHCL(forwardingServers)
 	return fmt.Sprintf(`
-resource "nios_dns_nsgroup_forwarding_member" "test_name" {
+resource "nios_dns_nsgroup_forwardingmember" "test_name" {
     name = %q
     forwarding_servers = %s
 }
