@@ -96,8 +96,8 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NsgroupExternalSecondariesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -127,6 +127,7 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_external_primary")),
 			listvalidator.SizeAtLeast(1),
+			customvalidator.ExactlyOneOf("grid_primary", "external_primaries"),
 		},
 		MarkdownDescription: "The list with Grid members that are secondary servers for this group.",
 	},

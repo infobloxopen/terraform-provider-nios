@@ -607,11 +607,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.ConflictsWith(path.MatchRoot("ns_group")),
-			listvalidator.Any(
-				listvalidator.AlsoRequires(path.MatchRoot("grid_primary")),
-				listvalidator.AlsoRequires(path.MatchRoot("external_primaries")),
-				listvalidator.AlsoRequires(path.MatchRoot("ms_primaries")),
-			),
+			customvalidator.ExactlyOneOf("grid_primary", "external_primaries", "ms_primaries"),
 		},
 		MarkdownDescription: "The list of external secondary servers.",
 	},
@@ -656,11 +652,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("ns_group"),
 			),
 			listvalidator.SizeAtLeast(1),
-			listvalidator.Any(
-				listvalidator.AlsoRequires(path.MatchRoot("grid_primary")),
-				listvalidator.AlsoRequires(path.MatchRoot("external_primaries")),
-				listvalidator.AlsoRequires(path.MatchRoot("ms_primaries")),
-			),
+			customvalidator.ExactlyOneOf("grid_primary", "external_primaries", "ms_primaries"),
 		},
 		MarkdownDescription: "The list with Grid members that are secondary servers for this zone.",
 	},
@@ -763,8 +755,8 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthMsDcNsRecordCreationResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -811,11 +803,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.ConflictsWith(path.MatchRoot("ns_group")),
-			listvalidator.Any(
-				listvalidator.AlsoRequires(path.MatchRoot("grid_primary")),
-				listvalidator.AlsoRequires(path.MatchRoot("external_primaries")),
-				listvalidator.AlsoRequires(path.MatchRoot("ms_primaries")),
-			),
+			customvalidator.ExactlyOneOf("grid_primary", "external_primaries", "ms_primaries"),
 		},
 		MarkdownDescription: "The list with the Microsoft DNS servers that are secondary servers for the zone.",
 	},
