@@ -31,7 +31,6 @@ func (v exactlyOneOfValidator) ValidateList(ctx context.Context, request validat
 	}
 
 	count := 0
-	var attrs []string
 
 	for _, attrName := range v.attributes {
 		// Get the attribute value
@@ -46,7 +45,6 @@ func (v exactlyOneOfValidator) ValidateList(ctx context.Context, request validat
 		// Check if the attribute is specified
 		if !attrValue.IsNull() && !attrValue.IsUnknown() {
 			count++
-			attrs = append(attrs, attrName)
 		}
 	}
 
