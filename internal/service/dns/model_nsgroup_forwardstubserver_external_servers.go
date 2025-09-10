@@ -92,11 +92,6 @@ func (m *NsgroupForwardstubserverExternalServersModel) Expand(ctx context.Contex
 	to := &dns.NsgroupForwardstubserverExternalServers{
 		Address:        flex.ExpandIPAddress(m.Address),
 		Name:           flex.ExpandStringPointer(m.Name),
-		Stealth:        flex.ExpandBoolPointer(m.Stealth),
-		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
-		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
-		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
-		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
 	}
 	return to
 }
