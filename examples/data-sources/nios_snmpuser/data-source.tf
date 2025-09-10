@@ -1,0 +1,16 @@
+// Retrieve a specific SNMP user by filters
+data "nios_security_snmpuser" "get_snmpuser_with_filter" {
+  filters = {
+    name = "snmpuser_example_2"
+  }
+}
+
+// Retrieve specific SNMP users using Extensible Attributes
+data "nios_security_snmpuser" "get_snmpuser_with_extattr_filter" {
+  extattrfilters = {
+    Site = "location-1"
+  }
+}
+
+// Retrieve all SNMP users
+data "nios_security_snmpuser" "get_all_snmpusers" {}

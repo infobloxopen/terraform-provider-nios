@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -54,8 +55,6 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"authentication_password": schema.StringAttribute{
 		Optional: true,
 		//Sensitive: true,
-		//ForceNew:  true,
-		//Computed: true,
 		// Required if authentication_protocol is set to a value other than NONE
 		MarkdownDescription: "Determines an authentication password for the user. This is a write-only attribute.",
 	},
@@ -78,6 +77,7 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"disable": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if SNMPv3 user is disabled or not.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -105,10 +105,7 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"privacy_password": schema.StringAttribute{
 		Optional: true,
 		//Computed: true,
-		Sensitive: true,
-		// PlanModifiers: []planmodifier.String{
-		// 	stringplanmodifier.RequiresReplace(),
-		// },
+		//Sensitive: true,
 		//Required if privacy_protocol is set to a value other than NONE
 		MarkdownDescription: "Determines a password for the privacy protocol.",
 	},
@@ -156,7 +153,7 @@ func FlattenSnmpuser(ctx context.Context, from *security.Snmpuser, diags *diag.D
 	}
 	m := SnmpuserModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrs = types.MapNull(types.StringType)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, SnmpuserAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -170,12 +167,10 @@ func (m *SnmpuserModel) Flatten(ctx context.Context, from *security.Snmpuser, di
 		*m = SnmpuserModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.AuthenticationPassword = flex.FlattenStringPointer(from.AuthenticationPassword)
 	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.PrivacyPassword = flex.FlattenStringPointer(from.PrivacyPassword)
 	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
 }

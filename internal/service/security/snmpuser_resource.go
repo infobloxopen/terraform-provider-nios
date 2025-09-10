@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -35,7 +37,7 @@ func (r *SnmpuserResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *SnmpuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages SNMPv3 Users",
+		MarkdownDescription: "Manage a SNMPv3 User.",
 		Attributes:          SnmpuserResourceSchemaAttributes,
 	}
 }
@@ -71,11 +73,11 @@ func (r *SnmpuserResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	// // Add internal ID exists in the Extensible Attributes if not already present
-	// if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
-	// 	return
-	// }
+	// Add internal ID exists in the Extensible Attributes if not already present
+	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
+		return
+	}
 
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
@@ -257,11 +259,11 @@ func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	// // Add internal ID exists in the Extensible Attributes if not already present
-	// if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
-	// 	return
-	// }
+	// Add internal ID exists in the Extensible Attributes if not already present
+	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
+		return
+	}
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
 	if diags.HasError() {
@@ -319,36 +321,32 @@ func (r *SnmpuserResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 }
 
-// func (r *SnmpuserResource) addInternalIDToExtAttrs(ctx context.Context, data *SnmpuserModel) error {
-// 	var internalId string
+func (r *SnmpuserResource) addInternalIDToExtAttrs(ctx context.Context, data *SnmpuserModel) error {
+	var internalId string
 
-// 	if !data.ExtAttrsAll.IsNull() {
-// 		elements := data.ExtAttrsAll.Elements()
-// 		if tId, ok := elements["Terraform Internal ID"]; ok {
-// 			if tIdStr, ok := tId.(types.String); ok {
-// 				internalId = tIdStr.ValueString()
-// 			}
-// 		}
-// 	}
+	if !data.ExtAttrsAll.IsNull() {
+		elements := data.ExtAttrsAll.Elements()
+		if tId, ok := elements["Terraform Internal ID"]; ok {
+			if tIdStr, ok := tId.(types.String); ok {
+				internalId = tIdStr.ValueString()
+			}
+		}
+	}
 
-// 	if internalId == "" {
-// 		var err error
-// 		internalId, err = uuid.GenerateUUID()
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
+	if internalId == "" {
+		var err error
+		internalId, err = uuid.GenerateUUID()
+		if err != nil {
+			return err
+		}
+	}
 
-// 	r.client.SecurityAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
-// 		"Terraform Internal ID": {Value: internalId},
-// 	}
+	r.client.SecurityAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
+		"Terraform Internal ID": {Value: internalId},
+	}
 
-// 	return nil
-// }
-
-// func (r *SnmpuserResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-// 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
-// }
+	return nil
+}
 
 func (r *SnmpuserResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics

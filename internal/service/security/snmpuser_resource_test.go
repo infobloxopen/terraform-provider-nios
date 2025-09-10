@@ -29,14 +29,14 @@ func TestAccSnmpuserResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserBasicConfig(name, "SHA", "abcd1234", "AES", "efgh5678"),
+				Config: testAccSnmpuserBasicConfig(name, "NONE", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "authentication_protocol", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "privacy_protocol", "NONE"),
 					// Test fields with default value
-					resource.TestCheckResourceAttr(resourceName, "authentication_protocol", "SHA"),
-					resource.TestCheckResourceAttr(resourceName, "authentication_password", "abcd1234"),
-					resource.TestCheckResourceAttr(resourceName, "privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName, "privacy_password", "efgh5678"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -56,7 +56,7 @@ func TestAccSnmpuserResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckSnmpuserDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnmpuserBasicConfig(name, "SHA", "abcd1234", "AES", "efgh5678"),
+				Config: testAccSnmpuserBasicConfig(name, "NONE", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
 					testAccCheckSnmpuserDisappears(context.Background(), &v),
@@ -71,24 +71,26 @@ func TestAccSnmpuserResource_AuthenticationPassword(t *testing.T) {
 	var resourceName = "nios_security_snmpuser.test_authentication_password"
 	var v security.Snmpuser
 
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserAuthenticationPassword("AUTHENTICATION_PASSWORD_REPLACE_ME"),
+				Config: testAccSnmpuserAuthenticationPassword(name, "SHA", "TestPassword123!", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_password", "AUTHENTICATION_PASSWORD_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_password", "TestPassword123!"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserAuthenticationPassword("AUTHENTICATION_PASSWORD_UPDATE_REPLACE_ME"),
+				Config: testAccSnmpuserAuthenticationPassword(name, "SHA", "UpdatedPassword123!", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_password", "AUTHENTICATION_PASSWORD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_password", "UpdatedPassword123!"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -100,24 +102,26 @@ func TestAccSnmpuserResource_AuthenticationProtocol(t *testing.T) {
 	var resourceName = "nios_security_snmpuser.test_authentication_protocol"
 	var v security.Snmpuser
 
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserAuthenticationProtocol("AUTHENTICATION_PROTOCOL_REPLACE_ME"),
+				Config: testAccSnmpuserAuthenticationProtocol(name, "SHA", "TestPassword@123", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_protocol", "AUTHENTICATION_PROTOCOL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_protocol", "SHA"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserAuthenticationProtocol("AUTHENTICATION_PROTOCOL_UPDATE_REPLACE_ME"),
+				Config: testAccSnmpuserAuthenticationProtocol(name, "MD5", "TestPassword@123", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_protocol", "AUTHENTICATION_PROTOCOL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_protocol", "MD5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -129,24 +133,26 @@ func TestAccSnmpuserResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_snmpuser.test_comment"
 	var v security.Snmpuser
 
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserComment("COMMENT_REPLACE_ME"),
+				Config: testAccSnmpuserComment(name, "NONE", "NONE", "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccSnmpuserComment(name, "NONE", "NONE", "Updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -158,24 +164,26 @@ func TestAccSnmpuserResource_Disable(t *testing.T) {
 	var resourceName = "nios_security_snmpuser.test_disable"
 	var v security.Snmpuser
 
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserDisable("DISABLE_REPLACE_ME"),
+				Config: testAccSnmpuserDisable(name, "NONE", "NONE", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccSnmpuserDisable(name, "NONE", "NONE", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -187,24 +195,28 @@ func TestAccSnmpuserResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_security_snmpuser.test_extattrs"
 	var v security.Snmpuser
 
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccSnmpuserExtAttrs(name, "NONE", "NONE", map[string]string{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccSnmpuserExtAttrs(name, "NONE", "NONE", map[string]string{"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -216,24 +228,27 @@ func TestAccSnmpuserResource_Name(t *testing.T) {
 	var resourceName = "nios_security_snmpuser.test_name"
 	var v security.Snmpuser
 
+	name1 := acctest.RandomNameWithPrefix("example-snmpuser-")
+	name2 := acctest.RandomNameWithPrefix("updated-snmpuser-")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserName("NAME_REPLACE_ME"),
+				Config: testAccSnmpuserName(name1, "NONE", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccSnmpuserName(name2, "NONE", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -245,24 +260,26 @@ func TestAccSnmpuserResource_PrivacyPassword(t *testing.T) {
 	var resourceName = "nios_security_snmpuser.test_privacy_password"
 	var v security.Snmpuser
 
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserPrivacyPassword("PRIVACY_PASSWORD_REPLACE_ME"),
+				Config: testAccSnmpuserPrivacyPassword(name, "MD5", "TestPassword@123", "DES", "Test-PrivacyPassword123!"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "privacy_password", "PRIVACY_PASSWORD_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "privacy_password", "Test-PrivacyPassword123!"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserPrivacyPassword("PRIVACY_PASSWORD_UPDATE_REPLACE_ME"),
+				Config: testAccSnmpuserPrivacyPassword(name, "MD5", "UpdatedPassword@123", "DES", "Test-PrivacyPasswordUpdated!"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "privacy_password", "PRIVACY_PASSWORD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "privacy_password", "Test-PrivacyPasswordUpdated!"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -274,24 +291,26 @@ func TestAccSnmpuserResource_PrivacyProtocol(t *testing.T) {
 	var resourceName = "nios_security_snmpuser.test_privacy_protocol"
 	var v security.Snmpuser
 
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSnmpuserPrivacyProtocol("PRIVACY_PROTOCOL_REPLACE_ME"),
+				Config: testAccSnmpuserPrivacyProtocol(name, "MD5", "TestPassword@123", "AES", "Test-PrivacyPassword123!"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "privacy_protocol", "PRIVACY_PROTOCOL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "privacy_protocol", "AES"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSnmpuserPrivacyProtocol("PRIVACY_PROTOCOL_UPDATE_REPLACE_ME"),
+				Config: testAccSnmpuserPrivacyProtocol(name, "MD5", "UpdatedPassword@123", "DES", "Test-PrivacyPasswordUpdated!"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "privacy_protocol", "PRIVACY_PROTOCOL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "privacy_protocol", "DES"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -357,78 +376,106 @@ func testAccCheckSnmpuserDisappears(ctx context.Context, v *security.Snmpuser) r
 	}
 }
 
-func testAccSnmpuserBasicConfig(name, authentication_protocol, authentication_password, privacy_protocol, privacy_password string) string {
+func testAccSnmpuserBasicConfig(name, authentication_protocol, privacy_protocol string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test" {
     name                 	= %q
     authentication_protocol = %q
-	authentication_password = %q
     privacy_protocol     	= %q
-    privacy_password     	= %q
 }
-`, name, authentication_protocol, authentication_password, privacy_protocol, privacy_password)
+`, name, authentication_protocol, privacy_protocol)
 }
 
-func testAccSnmpuserAuthenticationPassword(authenticationPassword string) string {
+func testAccSnmpuserAuthenticationPassword(name, authentication_protocol, authenticationPassword, privacy_protocol string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test_authentication_password" {
+	name                    = %q
+	authentication_protocol = %q
     authentication_password = %q
+    privacy_protocol        = %q
 }
-`, authenticationPassword)
+`, name, authentication_protocol, authenticationPassword, privacy_protocol)
 }
 
-func testAccSnmpuserAuthenticationProtocol(authenticationProtocol string) string {
+func testAccSnmpuserAuthenticationProtocol(name, authenticationProtocol, authentication_password, privacy_protocol string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test_authentication_protocol" {
+    name                    = %q
     authentication_protocol = %q
+    authentication_password = %q
+    privacy_protocol        = %q
 }
-`, authenticationProtocol)
+`, name, authenticationProtocol, authentication_password, privacy_protocol)
 }
 
-func testAccSnmpuserComment(comment string) string {
+func testAccSnmpuserComment(name, authentication_protocol, privacy_protocol, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test_comment" {
+    name                  	= %q
+    authentication_protocol = %q
+    privacy_protocol      	= %q
     comment = %q
 }
-`, comment)
+`, name, authentication_protocol, privacy_protocol, comment)
 }
 
-func testAccSnmpuserDisable(disable string) string {
+func testAccSnmpuserDisable(name, authentication_protocol, privacy_protocol string, disable bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test_disable" {
-    disable = %q
+    name                  	= %q
+    authentication_protocol = %q
+    privacy_protocol        = %q
+    disable = %t
 }
-`, disable)
+`, name, authentication_protocol, privacy_protocol, disable)
 }
 
-func testAccSnmpuserExtAttrs(extAttrs string) string {
+func testAccSnmpuserExtAttrs(name, authentication_protocol, privacy_protocol string, extAttrs map[string]string) string {
+	extattrsStr := "{"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`%s = %q`, k, v)
+	}
+	extattrsStr += "}"
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test_extattrs" {
-    extattrs = %q
+	name                  	= %q
+	authentication_protocol = %q
+	privacy_protocol        = %q
+    extattrs 				= %s
 }
-`, extAttrs)
+`, name, authentication_protocol, privacy_protocol, extattrsStr)
 }
 
-func testAccSnmpuserName(name string) string {
+func testAccSnmpuserName(name, authentication_protocol, privacy_protocol string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test_name" {
-    name = %q
+    name                  	= %q
+    authentication_protocol = %q
+    privacy_protocol      	= %q
 }
-`, name)
+`, name, authentication_protocol, privacy_protocol)
 }
 
-func testAccSnmpuserPrivacyPassword(privacyPassword string) string {
+func testAccSnmpuserPrivacyPassword(name, authentication_protocol, authentication_password, privacy_protocol, privacyPassword string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test_privacy_password" {
-    privacy_password = %q
+	name                   	= %q
+	authentication_protocol = %q
+	authentication_password = %q
+	privacy_protocol        = %q
+    privacy_password        = %q
 }
-`, privacyPassword)
+`, name, authentication_protocol, authentication_password, privacy_protocol, privacyPassword)
 }
 
-func testAccSnmpuserPrivacyProtocol(privacyProtocol string) string {
+func testAccSnmpuserPrivacyProtocol(name, authentication_protocol, authentication_password, privacy_protocol, privacy_password string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test_privacy_protocol" {
-    privacy_protocol = %q
+    name                    = %q
+    authentication_protocol = %q
+    authentication_password = %q
+    privacy_protocol        = %q
+	privacy_password        = %q
 }
-`, privacyProtocol)
+`, name, authentication_protocol, authentication_password, privacy_protocol, privacy_password)
 }

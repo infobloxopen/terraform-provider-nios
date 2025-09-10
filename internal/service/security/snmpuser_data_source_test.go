@@ -16,13 +16,15 @@ func TestAccSnmpuserDataSource_Filters(t *testing.T) {
 	resourceName := "nios_security_snmpuser.test"
 	var v security.Snmpuser
 
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckSnmpuserDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnmpuserDataSourceConfigFilters(),
+				Config: testAccSnmpuserDataSourceConfigFilters(name, "NONE", "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
@@ -37,13 +39,17 @@ func TestAccSnmpuserDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_security_snmpuser.test"
 	resourceName := "nios_security_snmpuser.test"
 	var v security.Snmpuser
+
+	name := acctest.RandomNameWithPrefix("example-snmpuser-")
+	extAttrValue := acctest.RandomNameWithPrefix("snmp-user")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckSnmpuserDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnmpuserDataSourceConfigExtAttrFilters("value1"),
+				Config: testAccSnmpuserDataSourceConfigExtAttrFilters(name, "NONE", "NONE", extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
@@ -70,22 +76,28 @@ func testAccCheckSnmpuserResourceAttrPair(resourceName, dataSourceName string) [
 	}
 }
 
-func testAccSnmpuserDataSourceConfigFilters() string {
+func testAccSnmpuserDataSourceConfigFilters(name, authentication_protocol, privacy_protocol string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test" {
+	  name = %q
+	  authentication_protocol = %q
+	  privacy_protocol = %q
 }
 
 data "nios_security_snmpuser" "test" {
   filters = {
-	 = nios_security_snmpuser.test.
+	  name = nios_security_snmpuser.test.name
   }
 }
-`)
+`, name, authentication_protocol, privacy_protocol)
 }
 
-func testAccSnmpuserDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccSnmpuserDataSourceConfigExtAttrFilters(name, authentication_protocol, privacy_protocol, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmpuser" "test" {
+  name = %q
+  authentication_protocol = %q
+  privacy_protocol = %q
   extattrs = {
     Site = %q
   } 
@@ -93,8 +105,8 @@ resource "nios_security_snmpuser" "test" {
 
 data "nios_security_snmpuser" "test" {
   extattrfilters = {
-	"Site" = nios_security_snmpuser.test.extattrs.Site
+	Site = nios_security_snmpuser.test.extattrs.Site
   }
 }
-`, extAttrsValue)
+`, name, authentication_protocol, privacy_protocol, extAttrsValue)
 }
