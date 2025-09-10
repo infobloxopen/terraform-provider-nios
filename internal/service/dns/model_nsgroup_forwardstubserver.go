@@ -3,20 +3,21 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 )
 
 type NsgroupForwardstubserverModel struct {
@@ -47,6 +48,7 @@ var NsgroupForwardstubserverResourceSchemaAttributes = map[string]schema.Attribu
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the Forward Stub Server Name Server Group; maximum 256 characters.",
@@ -70,11 +72,14 @@ var NsgroupForwardstubserverResourceSchemaAttributes = map[string]schema.Attribu
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NsgroupForwardstubserverExternalServersResourceSchemaAttributes,
 		},
-		Required:            true,
+		Required: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of external servers.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -82,24 +87,11 @@ var NsgroupForwardstubserverResourceSchemaAttributes = map[string]schema.Attribu
 	},
 }
 
-func ExpandNsgroupForwardstubserver(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.NsgroupForwardstubserver {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m NsgroupForwardstubserverModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *NsgroupForwardstubserverModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.NsgroupForwardstubserver {
 	if m == nil {
 		return nil
 	}
 	to := &dns.NsgroupForwardstubserver{
-		Ref:             flex.ExpandStringPointer(m.Ref),
 		Comment:         flex.ExpandStringPointer(m.Comment),
 		ExtAttrs:        ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ExternalServers: flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalServers, diags, ExpandNsgroupForwardstubserverExternalServers),

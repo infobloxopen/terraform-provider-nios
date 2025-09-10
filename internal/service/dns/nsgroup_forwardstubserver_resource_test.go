@@ -23,8 +23,8 @@ func TestAccNsgroupForwardstubserverResource_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
 	externalServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
-			"address":"2.3.3.4",
+			"name":    "example.com",
+			"address": "2.3.3.4",
 		},
 	}
 
@@ -34,12 +34,12 @@ func TestAccNsgroupForwardstubserverResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardstubserverBasicConfig(name,externalServers),
+				Config: testAccNsgroupForwardstubserverBasicConfig(name, externalServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "external_servers.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "external_servers.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "external_servers.0.name", "example.com"),
 					resource.TestCheckResourceAttr(resourceName, "external_servers.0.address", "2.3.3.4"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
@@ -56,8 +56,8 @@ func TestAccNsgroupForwardstubserverResource_disappears(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
 	externalServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
-			"address":"2.3.3.4",
+			"name":    "example.com",
+			"address": "2.3.3.4",
 		},
 	}
 
@@ -67,7 +67,7 @@ func TestAccNsgroupForwardstubserverResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardstubserverDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardstubserverBasicConfig(name,externalServers),
+				Config: testAccNsgroupForwardstubserverBasicConfig(name, externalServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
 					testAccCheckNsgroupForwardstubserverDisappears(context.Background(), &v),
@@ -78,15 +78,14 @@ func TestAccNsgroupForwardstubserverResource_disappears(t *testing.T) {
 	})
 }
 
-
 func TestAccNsgroupForwardstubserverResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_forwardstubserver.test_comment"
 	var v dns.NsgroupForwardstubserver
 	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
 	externalServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
-			"address":"2.3.3.4",
+			"name":    "example.com",
+			"address": "2.3.3.4",
 		},
 	}
 
@@ -96,7 +95,7 @@ func TestAccNsgroupForwardstubserverResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardstubserverComment(name , externalServers , "This is a comment"),
+				Config: testAccNsgroupForwardstubserverComment(name, externalServers, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -104,7 +103,7 @@ func TestAccNsgroupForwardstubserverResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupForwardstubserverComment(name , externalServers , "This is an updated comment"),
+				Config: testAccNsgroupForwardstubserverComment(name, externalServers, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
@@ -121,8 +120,8 @@ func TestAccNsgroupForwardstubserverResource_ExtAttrs(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
 	externalServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
-			"address":"2.3.3.4",
+			"name":    "example.com",
+			"address": "2.3.3.4",
 		},
 	}
 	extAttrValue1 := acctest.RandomName()
@@ -134,7 +133,7 @@ func TestAccNsgroupForwardstubserverResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardstubserverExtAttrs(name , externalServers , map[string]string{
+				Config: testAccNsgroupForwardstubserverExtAttrs(name, externalServers, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -144,7 +143,7 @@ func TestAccNsgroupForwardstubserverResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupForwardstubserverExtAttrs(name , externalServers , map[string]string{
+				Config: testAccNsgroupForwardstubserverExtAttrs(name, externalServers, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -163,14 +162,14 @@ func TestAccNsgroupForwardstubserverResource_ExternalServers(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
 	externalServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
-			"address":"2.3.3.4",
+			"name":    "example.com",
+			"address": "2.3.3.4",
 		},
 	}
 	externalServersUpdate := []map[string]any{
 		{
-			"name": "example.com",
-			"address":"2.3.4.4",
+			"name":    "example1.com",
+			"address": "2.3.4.4",
 		},
 	}
 
@@ -180,19 +179,19 @@ func TestAccNsgroupForwardstubserverResource_ExternalServers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardstubserverExternalServers(name , externalServers),
+				Config: testAccNsgroupForwardstubserverExternalServers(name, externalServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_servers.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "external_servers.0.name", "example.com"),
 					resource.TestCheckResourceAttr(resourceName, "external_servers.0.address", "2.3.3.4"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupForwardstubserverExternalServers(name , externalServersUpdate),
+				Config: testAccNsgroupForwardstubserverExternalServers(name, externalServersUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_servers.0.name", "example.com"),
+					resource.TestCheckResourceAttr(resourceName, "external_servers.0.name", "example1.com"),
 					resource.TestCheckResourceAttr(resourceName, "external_servers.0.address", "2.3.4.4"),
 				),
 			},
@@ -208,8 +207,8 @@ func TestAccNsgroupForwardstubserverResource_Name(t *testing.T) {
 	nameUpdate := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
 	externalServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
-			"address":"2.3.3.4",
+			"name":    "example.com",
+			"address": "2.3.3.4",
 		},
 	}
 
@@ -219,7 +218,7 @@ func TestAccNsgroupForwardstubserverResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupForwardstubserverName(name , externalServers),
+				Config: testAccNsgroupForwardstubserverName(name, externalServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -227,7 +226,7 @@ func TestAccNsgroupForwardstubserverResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupForwardstubserverName(nameUpdate,externalServers),
+				Config: testAccNsgroupForwardstubserverName(nameUpdate, externalServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
@@ -306,8 +305,7 @@ resource "nios_dns_nsgroup_forwardstubserver" "test" {
 `, name, externalServersStr)
 }
 
-
-func testAccNsgroupForwardstubserverComment(name string , externalServer []map[string]any , comment string) string {
+func testAccNsgroupForwardstubserverComment(name string, externalServer []map[string]any, comment string) string {
 	externalServersStr := utils.ConvertSliceOfMapsToHCL(externalServer)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardstubserver" "test_comment" {
@@ -318,15 +316,15 @@ resource "nios_dns_nsgroup_forwardstubserver" "test_comment" {
 `, name, externalServersStr, comment)
 }
 
-func testAccNsgroupForwardstubserverExtAttrs(name string , externalServer []map[string]any , extAttrs map[string]string) string {
+func testAccNsgroupForwardstubserverExtAttrs(name string, externalServer []map[string]any, extAttrs map[string]string) string {
 	externalServersStr := utils.ConvertSliceOfMapsToHCL(externalServer)
 	extattrsStr := "{\n"
-    for k, v := range extAttrs {
-        extattrsStr += fmt.Sprintf(`
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
   %s = %q
 `, k, v)
-    }
-    extattrsStr += "\t}"
+	}
+	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardstubserver" "test_extattrs" {
     name = %q
@@ -336,7 +334,7 @@ resource "nios_dns_nsgroup_forwardstubserver" "test_extattrs" {
 `, name, externalServersStr, extattrsStr)
 }
 
-func testAccNsgroupForwardstubserverExternalServers(name string , externalServers []map[string]any) string {
+func testAccNsgroupForwardstubserverExternalServers(name string, externalServers []map[string]any) string {
 	externalServersStr := utils.ConvertSliceOfMapsToHCL(externalServers)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardstubserver" "test_external_servers" {
@@ -346,7 +344,7 @@ resource "nios_dns_nsgroup_forwardstubserver" "test_external_servers" {
 `, name, externalServersStr)
 }
 
-func testAccNsgroupForwardstubserverName(name string , externalServers []map[string]any) string {
+func testAccNsgroupForwardstubserverName(name string, externalServers []map[string]any) string {
 	externalServersStr := utils.ConvertSliceOfMapsToHCL(externalServers)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_forwardstubserver" "test_name" {

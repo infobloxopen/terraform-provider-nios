@@ -42,13 +42,10 @@ var NsgroupForwardstubserverExternalServersResourceSchemaAttributes = map[string
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
 		Required:            true,
-		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -97,8 +94,8 @@ func (m *NsgroupForwardstubserverExternalServersModel) Expand(ctx context.Contex
 		return nil
 	}
 	to := &dns.NsgroupForwardstubserverExternalServers{
-		Address:        flex.ExpandIPAddress(m.Address),
-		Name:           flex.ExpandStringPointer(m.Name),
+		Address: flex.ExpandIPAddress(m.Address),
+		Name:    flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }

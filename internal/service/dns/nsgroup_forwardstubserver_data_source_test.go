@@ -1,4 +1,3 @@
-
 package dns_test
 
 import (
@@ -20,8 +19,8 @@ func TestAccNsgroupForwardstubserverDataSource_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
 	externalServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
-			"address":"2.3.3.4",
+			"name":    "example.com",
+			"address": "2.3.3.4",
 		},
 	}
 
@@ -31,11 +30,11 @@ func TestAccNsgroupForwardstubserverDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardstubserverDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardstubserverDataSourceConfigFilters(name , externalServers),
+				Config: testAccNsgroupForwardstubserverDataSourceConfigFilters(name, externalServers),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
-						}, testAccCheckNsgroupForwardstubserverResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
+					}, testAccCheckNsgroupForwardstubserverResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -49,8 +48,8 @@ func TestAccNsgroupForwardstubserverDataSource_ExtAttrFilters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group-forwardstubserver")
 	externalServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
-			"address":"2.3.3.4",
+			"name":    "example.com",
+			"address": "2.3.3.4",
 		},
 	}
 	resource.Test(t, resource.TestCase{
@@ -59,11 +58,11 @@ func TestAccNsgroupForwardstubserverDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupForwardstubserverDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupForwardstubserverDataSourceConfigExtAttrFilters( name , externalServers , acctest.RandomName()),
+				Config: testAccNsgroupForwardstubserverDataSourceConfigExtAttrFilters(name, externalServers, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
-						}, testAccCheckNsgroupForwardstubserverResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckNsgroupForwardstubserverExists(context.Background(), resourceName, &v),
+					}, testAccCheckNsgroupForwardstubserverResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -72,14 +71,14 @@ func TestAccNsgroupForwardstubserverDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckNsgroupForwardstubserverResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "external_servers", dataSourceName, "result.0.external_servers"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-    }
+func testAccCheckNsgroupForwardstubserverResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "external_servers", dataSourceName, "result.0.external_servers"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+	}
 }
 
 func testAccNsgroupForwardstubserverDataSourceConfigFilters(name string, externalServers []map[string]any) string {
@@ -116,4 +115,3 @@ data "nios_dns_nsgroup_forwardstubserver" "test" {
 }
 `, name, externalServersStr, extAttrsValue)
 }
-

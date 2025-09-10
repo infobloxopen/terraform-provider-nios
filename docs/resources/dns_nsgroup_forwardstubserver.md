@@ -3,34 +3,34 @@
 page_title: "nios_dns_nsgroup_forwardstubserver Resource - nios"
 subcategory: "DNS"
 description: |-
-  Manages a NS group Forward Stub Member.
+  Manages NS group Forward Stub Server.
 ---
 
 # nios_dns_nsgroup_forwardstubserver (Resource)
 
-Manages a NS group Forward Stub Member.
+Manages NS group Forward Stub Server.
 
 ## Example Usage
 
 ```terraform
 // Create NS group Forward Stub Server with Basic Fields
-resource "nios_dns_nsgroup_forwardstubserver" "create_ns_group_forward_stub_server" {
+resource "nios_dns_nsgroup_forwardstubserver" "nsgroup_forward_stub_server_with_basic_fields" {
   name = "example_ns_group_forward_stub_server"
   external_servers = [
     {
-      name    = "infoblox.localdomain"
+      name    = "example.com"
       address = "2.3.4.4"
     }
   ]
 }
 
 // Create NS Group Forward Stub Server with Additional Fields
-resource "nios_dns_nsgroup_forwardstubserver" "create_ns_group_forward_stub_server_with_additional_fields" {
+resource "nios_dns_nsgroup_forwardstubserver" "nsgroup_forward_stub_server_with_additional_fields" {
   name    = "example_ns_group_forward_stub_server1"
   comment = "Example NS Group Forward Stub Server"
   external_servers = [
     {
-      name    = "infoblox.localdomain"
+      name    = "example.com"
       address = "2.3.4.4"
     }
   ]

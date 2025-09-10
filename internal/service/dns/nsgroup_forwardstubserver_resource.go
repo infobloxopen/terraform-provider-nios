@@ -36,7 +36,7 @@ func (r *NsgroupForwardstubserverResource) Metadata(ctx context.Context, req res
 
 func (r *NsgroupForwardstubserverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a NS group Forward Stub Member.",
+		MarkdownDescription: "Manages NS group Forward Stub Server.",
 		Attributes:          NsgroupForwardstubserverResourceSchemaAttributes,
 	}
 }
