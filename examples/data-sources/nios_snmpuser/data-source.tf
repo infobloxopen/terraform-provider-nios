@@ -5,7 +5,7 @@ data "nios_security_snmpuser" "get_snmpuser_with_filter" {
   }
 }
 
-// Retrieve specific SNMP users using Extensible Attributes
+// Retrieve a specific SNMP user using Extensible Attributes
 data "nios_security_snmpuser" "get_snmpuser_with_extattr_filter" {
   extattrfilters = {
     Site = "location-1"
