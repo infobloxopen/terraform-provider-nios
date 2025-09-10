@@ -114,6 +114,7 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"delegated_ttl": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_delegated_ttl")),
 		},
