@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccSnmpuserDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_security_snmpuser.test"
-	resourceName := "nios_security_snmpuser.test"
+	dataSourceName := "data.nios_security_snmp_user.test"
+	resourceName := "nios_security_snmp_user.test"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -36,8 +36,8 @@ func TestAccSnmpuserDataSource_Filters(t *testing.T) {
 }
 
 func TestAccSnmpuserDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_security_snmpuser.test"
-	resourceName := "nios_security_snmpuser.test"
+	dataSourceName := "data.nios_security_snmp_user.test"
+	resourceName := "nios_security_snmp_user.test"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -78,15 +78,15 @@ func testAccCheckSnmpuserResourceAttrPair(resourceName, dataSourceName string) [
 
 func testAccSnmpuserDataSourceConfigFilters(name, authentication_protocol, privacy_protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test" {
+resource "nios_security_snmp_user" "test" {
 	  name = %q
 	  authentication_protocol = %q
 	  privacy_protocol = %q
 }
 
-data "nios_security_snmpuser" "test" {
+data "nios_security_snmp_user" "test" {
   filters = {
-	  name = nios_security_snmpuser.test.name
+	  name = nios_security_snmp_user.test.name
   }
 }
 `, name, authentication_protocol, privacy_protocol)
@@ -94,7 +94,7 @@ data "nios_security_snmpuser" "test" {
 
 func testAccSnmpuserDataSourceConfigExtAttrFilters(name, authentication_protocol, privacy_protocol, extAttrsValue string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test" {
+resource "nios_security_snmp_user" "test" {
   name = %q
   authentication_protocol = %q
   privacy_protocol = %q
@@ -103,9 +103,9 @@ resource "nios_security_snmpuser" "test" {
   } 
 }
 
-data "nios_security_snmpuser" "test" {
+data "nios_security_snmp_user" "test" {
   extattrfilters = {
-	Site = nios_security_snmpuser.test.extattrs.Site
+	Site = nios_security_snmp_user.test.extattrs.Site
   }
 }
 `, name, authentication_protocol, privacy_protocol, extAttrsValue)

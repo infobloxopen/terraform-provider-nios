@@ -18,7 +18,7 @@ import (
 var readableAttributesForSnmpuser = "authentication_protocol,comment,disable,extattrs,name,privacy_protocol"
 
 func TestAccSnmpuserResource_basic(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test"
+	var resourceName = "nios_security_snmp_user.test"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -45,7 +45,7 @@ func TestAccSnmpuserResource_basic(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_disappears(t *testing.T) {
-	resourceName := "nios_security_snmpuser.test"
+	resourceName := "nios_security_snmp_user.test"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -68,7 +68,7 @@ func TestAccSnmpuserResource_disappears(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_AuthenticationPassword(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test_authentication_password"
+	var resourceName = "nios_security_snmp_user.test_authentication_password"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -101,7 +101,7 @@ func TestAccSnmpuserResource_AuthenticationPassword(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_AuthenticationProtocol(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test_authentication_protocol"
+	var resourceName = "nios_security_snmp_user.test_authentication_protocol"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -133,7 +133,7 @@ func TestAccSnmpuserResource_AuthenticationProtocol(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_Comment(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test_comment"
+	var resourceName = "nios_security_snmp_user.test_comment"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -164,7 +164,7 @@ func TestAccSnmpuserResource_Comment(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_Disable(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test_disable"
+	var resourceName = "nios_security_snmp_user.test_disable"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -195,7 +195,7 @@ func TestAccSnmpuserResource_Disable(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test_extattrs"
+	var resourceName = "nios_security_snmp_user.test_extattrs"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -228,7 +228,7 @@ func TestAccSnmpuserResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_Name(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test_name"
+	var resourceName = "nios_security_snmp_user.test_name"
 	var v security.Snmpuser
 
 	name1 := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -260,7 +260,7 @@ func TestAccSnmpuserResource_Name(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_PrivacyPassword(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test_privacy_password"
+	var resourceName = "nios_security_snmp_user.test_privacy_password"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -294,7 +294,7 @@ func TestAccSnmpuserResource_PrivacyPassword(t *testing.T) {
 }
 
 func TestAccSnmpuserResource_PrivacyProtocol(t *testing.T) {
-	var resourceName = "nios_security_snmpuser.test_privacy_protocol"
+	var resourceName = "nios_security_snmp_user.test_privacy_protocol"
 	var v security.Snmpuser
 
 	name := acctest.RandomNameWithPrefix("example-snmpuser-")
@@ -386,7 +386,7 @@ func testAccCheckSnmpuserDisappears(ctx context.Context, v *security.Snmpuser) r
 
 func testAccSnmpuserBasicConfig(name, authentication_protocol, privacy_protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test" {
+resource "nios_security_snmp_user" "test" {
     name                 	= %q
     authentication_protocol = %q
     privacy_protocol     	= %q
@@ -396,7 +396,7 @@ resource "nios_security_snmpuser" "test" {
 
 func testAccSnmpuserAuthenticationPassword(name, authentication_protocol, authenticationPassword, privacy_protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test_authentication_password" {
+resource "nios_security_snmp_user" "test_authentication_password" {
 	name                    = %q
 	authentication_protocol = %q
     authentication_password = %q
@@ -407,7 +407,7 @@ resource "nios_security_snmpuser" "test_authentication_password" {
 
 func testAccSnmpuserAuthenticationProtocol(name, authenticationProtocol, authentication_password, privacy_protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test_authentication_protocol" {
+resource "nios_security_snmp_user" "test_authentication_protocol" {
     name                    = %q
     authentication_protocol = %q
     authentication_password = %q
@@ -418,7 +418,7 @@ resource "nios_security_snmpuser" "test_authentication_protocol" {
 
 func testAccSnmpuserComment(name, authentication_protocol, privacy_protocol, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test_comment" {
+resource "nios_security_snmp_user" "test_comment" {
     name                  	= %q
     authentication_protocol = %q
     privacy_protocol      	= %q
@@ -429,7 +429,7 @@ resource "nios_security_snmpuser" "test_comment" {
 
 func testAccSnmpuserDisable(name, authentication_protocol, privacy_protocol string, disable bool) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test_disable" {
+resource "nios_security_snmp_user" "test_disable" {
     name                  	= %q
     authentication_protocol = %q
     privacy_protocol        = %q
@@ -445,7 +445,7 @@ func testAccSnmpuserExtAttrs(name, authentication_protocol, privacy_protocol str
 	}
 	extattrsStr += "}"
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test_extattrs" {
+resource "nios_security_snmp_user" "test_extattrs" {
 	name                  	= %q
 	authentication_protocol = %q
 	privacy_protocol        = %q
@@ -456,7 +456,7 @@ resource "nios_security_snmpuser" "test_extattrs" {
 
 func testAccSnmpuserName(name, authentication_protocol, privacy_protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test_name" {
+resource "nios_security_snmp_user" "test_name" {
     name                  	= %q
     authentication_protocol = %q
     privacy_protocol      	= %q
@@ -466,7 +466,7 @@ resource "nios_security_snmpuser" "test_name" {
 
 func testAccSnmpuserPrivacyPassword(name, authentication_protocol, authentication_password, privacy_protocol, privacyPassword string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test_privacy_password" {
+resource "nios_security_snmp_user" "test_privacy_password" {
 	name                   	= %q
 	authentication_protocol = %q
 	authentication_password = %q
@@ -478,7 +478,7 @@ resource "nios_security_snmpuser" "test_privacy_password" {
 
 func testAccSnmpuserPrivacyProtocol(name, authentication_protocol, authentication_password, privacy_protocol, privacy_password string) string {
 	return fmt.Sprintf(`
-resource "nios_security_snmpuser" "test_privacy_protocol" {
+resource "nios_security_snmp_user" "test_privacy_protocol" {
     name                    = %q
     authentication_protocol = %q
     authentication_password = %q

@@ -21,6 +21,7 @@ var readableAttributesForSnmpuser = "authentication_protocol,comment,disable,ext
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &SnmpuserResource{}
 var _ resource.ResourceWithImportState = &SnmpuserResource{}
+var _ resource.ResourceWithValidateConfig = &SnmpuserResource{}
 
 func NewSnmpuserResource() resource.Resource {
 	return &SnmpuserResource{}
@@ -60,6 +61,27 @@ func (r *SnmpuserResource) Configure(ctx context.Context, req resource.Configure
 	}
 
 	r.client = client
+}
+
+func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var authenticationProtocol, privacyProtocol types.String
+
+	req.Config.GetAttribute(ctx, path.Root("authentication_protocol"), &authenticationProtocol)
+	req.Config.GetAttribute(ctx, path.Root("privacy_protocol"), &privacyProtocol)
+
+	if privacyProtocol.IsNull() || privacyProtocol.IsUnknown() ||
+		authenticationProtocol.IsNull() || authenticationProtocol.IsUnknown() {
+		return
+	}
+
+	if privacyProtocol.ValueString() != "NONE" {
+		if authenticationProtocol.ValueString() == "NONE" {
+			resp.Diagnostics.AddError(
+				"Invalid SNMPv3 Configuration",
+				"When privacy_protocol is set to a value other than 'NONE' (e.g., 'AES', 'DES'), the authentication_protocol must also be set to a value other than 'NONE' (e.g., 'SHA', 'MD5').",
+			)
+		}
+	}
 }
 
 func (r *SnmpuserResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
