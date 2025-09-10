@@ -3,12 +3,12 @@
 page_title: "nios_security_snmp_user Resource - nios"
 subcategory: "SECURITY"
 description: |-
-  Manage a SNMPv3 User.
+  Manages a SNMPv3 User.
 ---
 
 # nios_security_snmp_user (Resource)
 
-Manage a SNMPv3 User.
+Manages a SNMPv3 User.
 
 ## Example Usage
 

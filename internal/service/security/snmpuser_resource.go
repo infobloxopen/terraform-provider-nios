@@ -38,7 +38,7 @@ func (r *SnmpuserResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *SnmpuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a SNMPv3 User.",
+		MarkdownDescription: "Manages a SNMPv3 User.",
 		Attributes:          SnmpuserResourceSchemaAttributes,
 	}
 }
