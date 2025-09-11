@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -67,11 +68,7 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 	var useGridZoneTimer types.Bool
 	req.Config.GetAttribute(ctx, path.Root("use_grid_zone_timer"), &useGridZoneTimer)
 
-	if useGridZoneTimer.IsNull() {
-		return
-	}
-
-	if !useGridZoneTimer.ValueBool() {
+	if !useGridZoneTimer.IsNull() && !useGridZoneTimer.ValueBool() {
 		var soaDefaultTTL, soaExpire, soaNegativeTTL, soaRefresh, soaRetry types.Int64
 		req.Config.GetAttribute(ctx, path.Root("soa_default_ttl"), &soaDefaultTTL)
 		req.Config.GetAttribute(ctx, path.Root("soa_expire"), &soaExpire)
@@ -83,6 +80,54 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 			resp.Diagnostics.AddError(
 				"SOA Values Not Allowed",
 				"When grid_zone_timer is set to false, the SOA Values (soa_default_ttl, soa_expire, soa_negative_ttl, soa_refresh, soa_retry) cannot be set.",
+			)
+		}
+	}
+
+	// Validation for mutually exclusive primary servers
+	var gridPrimary, externalPrimaries, msPrimaries types.List
+	req.Config.GetAttribute(ctx, path.Root("grid_primary"), &gridPrimary)
+	req.Config.GetAttribute(ctx, path.Root("external_primaries"), &externalPrimaries)
+	req.Config.GetAttribute(ctx, path.Root("ms_primaries"), &msPrimaries)
+
+	specifiedPrimaries := []string{}
+
+	if !gridPrimary.IsNull() && !gridPrimary.IsUnknown() {
+		specifiedPrimaries = append(specifiedPrimaries, "grid_primary")
+	}
+
+	if !externalPrimaries.IsNull() && !externalPrimaries.IsUnknown() {
+		specifiedPrimaries = append(specifiedPrimaries, "external_primaries")
+	}
+
+	if !msPrimaries.IsNull() && !msPrimaries.IsUnknown() {
+		specifiedPrimaries = append(specifiedPrimaries, "ms_primaries")
+	}
+
+	// If more than one primary server type is specified, add an error
+	if len(specifiedPrimaries) > 1 {
+		resp.Diagnostics.AddError(
+			"Conflicting Primary Servers",
+			fmt.Sprintf(
+				"Only one of grid_primary, external_primaries, or ms_primaries can be specified. Found: %s.",
+				strings.Join(specifiedPrimaries, ", "),
+			),
+		)
+		return
+	}
+
+	var gridSecondaries, externalSecondaries, msSecondaries types.List
+	req.Config.GetAttribute(ctx, path.Root("grid_secondaries"), &gridSecondaries)
+	req.Config.GetAttribute(ctx, path.Root("external_secondaries"), &externalSecondaries)
+	req.Config.GetAttribute(ctx, path.Root("ms_secondaries"), &msSecondaries)
+
+	if !gridSecondaries.IsNull() && !gridSecondaries.IsUnknown() ||
+		!externalSecondaries.IsNull() && !externalSecondaries.IsUnknown() ||
+		!msSecondaries.IsNull() && !msSecondaries.IsUnknown() {
+		if len(specifiedPrimaries) == 0 || len(specifiedPrimaries) > 1 {
+			resp.Diagnostics.AddError(
+				"Secondary Server Requires Exactly One Primary Server",
+				"When secondary servers (grid_secondaries, external_secondaries, or ms_secondaries) are specified, exactly one primary server (grid_primary, external_primaries, or ms_primaries) is required.",
 			)
 		}
 	}

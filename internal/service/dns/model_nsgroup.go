@@ -100,7 +100,6 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-			customvalidator.ExactlyOneOf("grid_primary", "external_primaries"),
 		},
 		MarkdownDescription: "The list of external secondary servers.",
 	},
@@ -128,7 +127,6 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_external_primary")),
 			listvalidator.SizeAtLeast(1),
-			customvalidator.ExactlyOneOf("grid_primary", "external_primaries"),
 		},
 		MarkdownDescription: "The list with Grid members that are secondary servers for this group.",
 	},
