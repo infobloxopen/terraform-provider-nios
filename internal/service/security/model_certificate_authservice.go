@@ -3,15 +3,16 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
@@ -90,84 +91,100 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The descriptive comment for the certificate authentication service.",
 	},
 	"disabled": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if this certificate authentication service is enabled or disabled.",
 	},
 	"enable_password_request": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Optional: true,
+		Computed: true,
+		 Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if username/password authentication together with client certificate authentication is enabled or disabled.",
 	},
 	"enable_remote_lookup": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the lookup for user group membership information on remote services is enabled or disabled.",
 	},
 	"max_retries": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             
+		Optional: true,
+		Computed: true,
+		Default:             int64default.StaticInt64(0),
 		MarkdownDescription: "The number of validation attempts before the appliance contacts the next responder.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The name of the certificate authentication service.",
 	},
 	"ocsp_check": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		//Default:  stringdefault.StaticString("MANUAL"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("AIA_AND_MANUAL", "AIA_ONLY", "DISABLED", "MANUAL"),
+		},
 		MarkdownDescription: "Specifies the source of OCSP settings.",
 	},
 	"ocsp_responders": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: CertificateAuthserviceOcspRespondersResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "An ordered list of OCSP responders that are part of the certificate authentication service.",
 	},
 	"recovery_interval": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:             int64default.StaticInt64(30),
 		MarkdownDescription: "The period of time the appliance waits before it attempts to contact a responder that is out of service again. The value must be between 1 and 600 seconds.",
 	},
 	"remote_lookup_password": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The password for the service account.",
 	},
 	"remote_lookup_service": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The service that will be used for remote lookup.",
 	},
 	"remote_lookup_username": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The username for the service account.",
 	},
 	"response_timeout": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:             int64default.StaticInt64(1000),
 		MarkdownDescription: "The validation timeout period in milliseconds.",
 	},
 	"trust_model": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:             stringdefault.StaticString("DIRECT"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("DELEGATED", "DIRECT"),
+		},
 		MarkdownDescription: "The OCSP trust model.",
 	},
 	"user_match_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default: 		   stringdefault.StaticString("AUTO_MATCH"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("AUTO_MATCH", "DIRECT_MATCH"),
+		},
 		MarkdownDescription: "Specifies how to search for a user.",
 	},
-}
-
-func ExpandCertificateAuthservice(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.CertificateAuthservice {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m CertificateAuthserviceModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *CertificateAuthserviceModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.CertificateAuthservice {
