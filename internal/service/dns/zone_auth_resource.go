@@ -104,7 +104,7 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 		specifiedPrimaries = append(specifiedPrimaries, "ms_primaries")
 	}
 
-	// If more than one primary server type is specified, add an error
+	// If more than one primary server is specified, raise an error
 	if len(specifiedPrimaries) > 1 {
 		resp.Diagnostics.AddError(
 			"Conflicting Primary Servers",
