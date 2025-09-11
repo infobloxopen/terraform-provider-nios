@@ -70,7 +70,7 @@ type RangeModel struct {
 	HighWaterMarkReset               types.Int64                      `tfsdk:"high_water_mark_reset"`
 	IgnoreDhcpOptionListRequest      types.Bool                       `tfsdk:"ignore_dhcp_option_list_request"`
 	IgnoreId                         types.String                     `tfsdk:"ignore_id"`
-	IgnoreMacAddresses               types.List                       `tfsdk:"ignore_mac_addresses"`
+	IgnoreMacAddresses               internaltypes.UnorderedListValue `tfsdk:"ignore_mac_addresses"`
 	IsSplitScope                     types.Bool                       `tfsdk:"is_split_scope"`
 	KnownClients                     types.String                     `tfsdk:"known_clients"`
 	LeaseScavengeTime                types.Int64                      `tfsdk:"lease_scavenge_time"`
@@ -171,7 +171,7 @@ var RangeAttrTypes = map[string]attr.Type{
 	"high_water_mark_reset":                types.Int64Type,
 	"ignore_dhcp_option_list_request":      types.BoolType,
 	"ignore_id":                            types.StringType,
-	"ignore_mac_addresses":                 types.ListType{ElemType: types.StringType},
+	"ignore_mac_addresses":                 internaltypes.UnorderedListOfStringType,
 	"is_split_scope":                       types.BoolType,
 	"known_clients":                        types.StringType,
 	"lease_scavenge_time":                  types.Int64Type,
@@ -512,8 +512,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
-		ElementType: types.StringType,
-		Optional:    true,
+		CustomType:          internaltypes.UnorderedListOfStringType,
+		ElementType:         types.StringType,
+		Optional:            true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -1091,7 +1092,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.HighWaterMarkReset = flex.FlattenInt64Pointer(from.HighWaterMarkReset)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.IgnoreId = flex.FlattenStringPointer(from.IgnoreId)
-	m.IgnoreMacAddresses = flex.FlattenFrameworkListString(ctx, from.IgnoreMacAddresses, diags)
+	m.IgnoreMacAddresses = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.IgnoreMacAddresses, diags)
 	m.IsSplitScope = types.BoolPointerValue(from.IsSplitScope)
 	m.KnownClients = flex.FlattenStringPointer(from.KnownClients)
 	m.LeaseScavengeTime = flex.FlattenInt64Pointer(from.LeaseScavengeTime)
