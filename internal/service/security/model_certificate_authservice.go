@@ -3,15 +3,20 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type CertificateAuthserviceModel struct {
@@ -58,40 +63,58 @@ var CertificateAuthserviceAttrTypes = map[string]attr.Type{
 
 var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"auto_populate_login": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("S_DN_CN"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("AD_SUBJECT_ISSUER", "SAN_EMAIL", "SAN_UPN", "SERIAL_NUMBER", "S_DN_CN", "S_DN_EMAIL"),
+		},
 		MarkdownDescription: "Specifies the value of the client certificate for automatically populating the NIOS login name.",
 	},
 	"ca_certificates": schema.ListAttribute{
 		ElementType:         types.StringType,
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The list of CA certificates.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The descriptive comment for the certificate authentication service.",
 	},
 	"disabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if this certificate authentication service is enabled or disabled.",
 	},
 	"enable_password_request": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if username/password authentication together with client certificate authentication is enabled or disabled.",
 	},
 	"enable_remote_lookup": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the lookup for user group membership information on remote services is enabled or disabled.",
 	},
 	"max_retries": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             
 		MarkdownDescription: "The number of validation attempts before the appliance contacts the next responder.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The name of the certificate authentication service.",
 	},
 	"ocsp_check": schema.StringAttribute{
@@ -152,7 +175,6 @@ func (m *CertificateAuthserviceModel) Expand(ctx context.Context, diags *diag.Di
 		return nil
 	}
 	to := &security.CertificateAuthservice{
-		Ref:                   flex.ExpandStringPointer(m.Ref),
 		AutoPopulateLogin:     flex.ExpandStringPointer(m.AutoPopulateLogin),
 		CaCertificates:        flex.ExpandFrameworkListString(ctx, m.CaCertificates, diags),
 		Comment:               flex.ExpandStringPointer(m.Comment),
@@ -180,7 +202,6 @@ func FlattenCertificateAuthservice(ctx context.Context, from *security.Certifica
 	}
 	m := CertificateAuthserviceModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, CertificateAuthserviceAttrTypes, m)
 	diags.Append(d...)
 	return t

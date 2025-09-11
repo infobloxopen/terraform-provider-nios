@@ -91,7 +91,6 @@ func FlattenCertificateAuthserviceOcspResponders(ctx context.Context, from *secu
 	}
 	m := CertificateAuthserviceOcspRespondersModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, CertificateAuthserviceOcspRespondersAttrTypes, m)
 	diags.Append(d...)
 	return t

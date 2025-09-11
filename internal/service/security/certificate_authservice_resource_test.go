@@ -27,7 +27,7 @@ func TestAccCertificateAuthserviceResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceBasicConfig(),
+				Config: testAccCertificateAuthserviceBasicConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
@@ -49,7 +49,7 @@ func TestAccCertificateAuthserviceResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckCertificateAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateAuthserviceBasicConfig(),
+				Config: testAccCertificateAuthserviceBasicConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
 					testAccCheckCertificateAuthserviceDisappears(context.Background(), &v),

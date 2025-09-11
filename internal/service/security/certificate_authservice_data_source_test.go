@@ -44,7 +44,7 @@ func TestAccCertificateAuthserviceDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckCertificateAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateAuthserviceDataSourceConfigExtAttrFilters(, acctest.RandomName()),
+				Config: testAccCertificateAuthserviceDataSourceConfigExtAttrFilters( acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
