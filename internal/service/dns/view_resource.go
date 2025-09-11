@@ -14,7 +14,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 var readableAttributesForView = "blacklist_action,blacklist_log_query,blacklist_redirect_addresses,blacklist_redirect_ttl,blacklist_rulesets,cloud_info,comment,custom_root_name_servers,ddns_force_creation_timestamp_update,ddns_principal_group,ddns_principal_tracking,ddns_restrict_patterns,ddns_restrict_patterns_list,ddns_restrict_protected,ddns_restrict_secure,ddns_restrict_static,disable,dns64_enabled,dns64_groups,dnssec_enabled,dnssec_expired_signatures_enabled,dnssec_negative_trust_anchors,dnssec_trusted_keys,dnssec_validation_enabled,edns_udp_size,enable_blacklist,enable_fixed_rrset_order_fqdns,enable_match_recursive_only,extattrs,filter_aaaa,filter_aaaa_list,fixed_rrset_order_fqdns,forward_only,forwarders,is_default,last_queried_acl,match_clients,match_destinations,max_cache_ttl,max_ncache_ttl,max_udp_size,name,network_view,notify_delay,nxdomain_log_query,nxdomain_redirect,nxdomain_redirect_addresses,nxdomain_redirect_addresses_v6,nxdomain_redirect_ttl,nxdomain_rulesets,recursion,response_rate_limiting,root_name_server_type,rpz_drop_ip_rule_enabled,rpz_drop_ip_rule_min_prefix_length_ipv4,rpz_drop_ip_rule_min_prefix_length_ipv6,rpz_qname_wait_recurse,scavenging_settings,sortlist,use_blacklist,use_ddns_force_creation_timestamp_update,use_ddns_patterns_restriction,use_ddns_principal_security,use_ddns_restrict_protected,use_ddns_restrict_static,use_dns64,use_dnssec,use_edns_udp_size,use_filter_aaaa,use_fixed_rrset_order_fqdns,use_forwarders,use_max_cache_ttl,use_max_ncache_ttl,use_max_udp_size,use_nxdomain_redirect,use_recursion,use_response_rate_limiting,use_root_name_server,use_rpz_drop_ip_rule,use_rpz_qname_wait_recurse,use_scavenging_settings,use_sortlist"
@@ -366,48 +365,47 @@ func (r *ViewResource) ImportState(ctx context.Context, req resource.ImportState
 }
 
 func (r *ViewResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-    var data ViewModel
+	var data ViewModel
 
-    // Retrieve the resource configuration
-    diags := req.Config.Get(ctx, &data)
-    resp.Diagnostics.Append(diags...)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+	// Retrieve the resource configuration
+	diags := req.Config.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-    // Check if filter_aaaa_list contains items with a ref field
-    if !data.FilterAaaaList.IsNull() && !data.FilterAaaaList.IsUnknown() {
-        var filterAaaaListItems []types.Object
-        diags = data.FilterAaaaList.ElementsAs(ctx, &filterAaaaListItems, false)
-        resp.Diagnostics.Append(diags...)
-        
-        hasRefInList := false
-        for _, item := range filterAaaaListItems {
-            var itemMap map[string]attr.Value
-            itemMap = item.Attributes()
-            
-            // Check if ref field exists and is not empty
-            if refAttr, ok := itemMap["ref"]; ok {
-                refValue, _ := refAttr.(types.String)
-                if !refValue.IsNull() && !refValue.IsUnknown() && refValue.ValueString() != "" {
-                    hasRefInList = true
-                    break
-                }
-            }
-        }
+	// Check if filter_aaaa_list contains items with a ref field
+	if !data.FilterAaaaList.IsNull() && !data.FilterAaaaList.IsUnknown() {
+		var filterAaaaListItems []types.Object
+		diags = data.FilterAaaaList.ElementsAs(ctx, &filterAaaaListItems, false)
+		resp.Diagnostics.Append(diags...)
 
-        // If ref field is found, validate filter_aaaa value
-        if hasRefInList {
-            if !data.FilterAaaa.IsNull() && !data.FilterAaaa.IsUnknown() {
-                filterAaaaValue := data.FilterAaaa.ValueString()
-                if filterAaaaValue == "NO" {
-                    resp.Diagnostics.AddAttributeError(
-                        path.Root("filter_aaaa"),
-                        "Invalid Filter AAAA Configuration",
-                        "When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', not 'NO'.",
-                    )
-                }
-            }
-        }
-    }
+		hasRefInList := false
+		for _, item := range filterAaaaListItems {
+			itemMap := item.Attributes()
+
+			// Check if ref field exists and is not empty
+			if refAttr, ok := itemMap["ref"]; ok {
+				refValue, _ := refAttr.(types.String)
+				if !refValue.IsNull() && !refValue.IsUnknown() && refValue.ValueString() != "" {
+					hasRefInList = true
+					break
+				}
+			}
+		}
+
+		// If ref field is found, validate filter_aaaa value
+		if hasRefInList {
+			if !data.FilterAaaa.IsNull() && !data.FilterAaaa.IsUnknown() {
+				filterAaaaValue := data.FilterAaaa.ValueString()
+				if filterAaaaValue == "NO" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("filter_aaaa"),
+						"Invalid Filter AAAA Configuration",
+						"When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', not 'NO'.",
+					)
+				}
+			}
+		}
+	}
 }
