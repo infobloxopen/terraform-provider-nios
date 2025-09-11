@@ -8,9 +8,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -493,4 +495,249 @@ func ConvertMapToHCL(data map[string]any) string {
 	}
 
 	return fmt.Sprintf("{\n%s\n}", strings.Join(keyValues, "\n"))
+}
+
+func ReorderAndFilterNestedListResponse(
+	ctx context.Context,
+	planValue attr.Value,
+	stateValue attr.Value,
+	primaryKey string,
+) (attr.Value, *diag.Diagnostics) {
+
+	var diags diag.Diagnostics
+
+	// Handle null/unknown cases gracefully
+	if planValue.IsNull() || planValue.IsUnknown() {
+		return stateValue, &diags
+	}
+	if stateValue.IsNull() || stateValue.IsUnknown() {
+		return planValue, &diags
+	}
+
+	planList, ok := planValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "planValue must be a ListValue")
+		return stateValue, &diags
+	}
+	stateList, ok := stateValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "stateValue must be a ListValue")
+		return planValue, &diags
+	}
+
+	// Convert state list into a lookup by primary key
+	stateMap := make(map[string]attr.Value)
+	for _, v := range stateList.Elements() {
+		obj := v.(basetypes.ObjectValue)
+		keyAttr, ok := obj.Attributes()[primaryKey]
+		if !ok {
+			diags.AddError("Missing Primary Key", fmt.Sprintf("State object missing primary key: %s", primaryKey))
+			continue
+		}
+		if keyAttr.IsNull() || keyAttr.IsUnknown() {
+			continue
+		}
+		key := keyAttr.(basetypes.StringValue).ValueString()
+		stateMap[key] = v
+	}
+
+	// Rebuild state list in the same order as plan
+	var reordered []attr.Value
+	for _, v := range planList.Elements() {
+		obj := v.(basetypes.ObjectValue)
+		keyAttr := obj.Attributes()[primaryKey]
+		if keyAttr.IsNull() || keyAttr.IsUnknown() {
+			continue
+		}
+		key := keyAttr.(basetypes.StringValue).ValueString()
+
+		// Use existing state object if found, else use planned object
+		if stateObj, exists := stateMap[key]; exists {
+			reordered = append(reordered, stateObj)
+		} else {
+			reordered = append(reordered, v)
+		}
+	}
+
+	// Build new ListValue
+	newList, d := basetypes.NewListValue(planList.ElementType(ctx), reordered)
+	diags.Append(d...)
+
+	return newList, &diags
+}
+
+func ReorderAndFilterListOlderDHCPOptions(
+	ctx context.Context,
+	planValue attr.Value,
+	stateValue attr.Value,
+) (attr.Value, *diag.Diagnostics) {
+
+	var diags diag.Diagnostics
+	primaryKey := "name"
+	backupKey := "num"
+
+	// Handle null/unknown cases gracefully
+	if planValue.IsNull() || planValue.IsUnknown() {
+		return stateValue, &diags
+	}
+	if stateValue.IsNull() || stateValue.IsUnknown() {
+		return planValue, &diags
+	}
+
+	planList, ok := planValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "planValue must be a ListValue")
+		return stateValue, &diags
+	}
+	stateList, ok := stateValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "stateValue must be a ListValue")
+		return planValue, &diags
+	}
+
+	// Convert state list into a lookup by primary key
+	stateMap := make(map[string]attr.Value)
+	for _, v := range stateList.Elements() {
+		obj := v.(basetypes.ObjectValue)
+		keyAttr := obj.Attributes()[primaryKey]
+		if keyAttr.IsNull() || keyAttr.IsUnknown() {
+			continue
+		}
+		key := keyAttr.(basetypes.StringValue).ValueString()
+		stateMap[key] = v
+	}
+
+	// Rebuild state list in the same order as plan
+	var reordered []attr.Value
+	for _, v := range planList.Elements() {
+		obj := v.(basetypes.ObjectValue)
+		keyAttr := obj.Attributes()[primaryKey]
+		if keyAttr.IsUnknown() || keyAttr.(basetypes.StringValue).ValueString() == "" {
+			keyAttr, ok = obj.Attributes()[backupKey]
+			if !ok {
+				diags.AddError("Missing Primary Key", "Either Name or Num is required for DHCP Options")
+				continue
+			}
+		}
+		if keyAttr.IsUnknown() || keyAttr.IsNull() {
+			continue
+		}
+		key := keyAttr.(basetypes.StringValue).ValueString()
+
+		// Use existing state object if found, else use planned object
+		if stateObj, exists := stateMap[key]; exists {
+			reordered = append(reordered, stateObj)
+		} else {
+			reordered = append(reordered, v)
+		}
+	}
+
+	// Build new ListValue
+	newList, d := basetypes.NewListValue(planList.ElementType(ctx), reordered)
+	diags.Append(d...)
+
+	return newList, &diags
+}
+
+func ReorderAndFilterDHCPOptions(
+	ctx context.Context,
+	planValue attr.Value,
+	stateValue attr.Value,
+) (attr.Value, *diag.Diagnostics) {
+
+	var diags diag.Diagnostics
+	primaryKey := "name"
+	backupKey := "num"
+
+	// Handle null/unknown gracefully
+	if planValue.IsNull() || planValue.IsUnknown() {
+		return stateValue, &diags
+	}
+	if stateValue.IsNull() || stateValue.IsUnknown() {
+		return planValue, &diags
+	}
+
+	planList, ok := planValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "planValue must be a basetypes.ListValue")
+		return stateValue, &diags
+	}
+	stateList, ok := stateValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "stateValue must be a basetypes.ListValue")
+		return planValue, &diags
+	}
+
+	// Build lookup maps from state: name->element and num->element
+	nameToState := make(map[string]attr.Value)
+	numToState := make(map[int64]attr.Value)
+
+	for _, elem := range stateList.Elements() {
+		obj, ok := elem.(basetypes.ObjectValue)
+		if !ok {
+			continue
+		}
+		attrs := obj.Attributes()
+
+		// name -> basetypes.StringValue (per your note state has both keys)
+		if nameAttr, has := attrs[primaryKey]; has && nameAttr != nil && !nameAttr.IsNull() && !nameAttr.IsUnknown() {
+			if sv, ok := nameAttr.(basetypes.StringValue); ok {
+				nameToState[sv.ValueString()] = elem
+			}
+		}
+
+		// num -> basetypes.Int64Value (per your note state has both keys)
+		if numAttr, has := attrs[backupKey]; has && numAttr != nil && !numAttr.IsNull() && !numAttr.IsUnknown() {
+			if iv, ok := numAttr.(basetypes.Int64Value); ok {
+				numToState[iv.ValueInt64()] = elem
+			}
+		}
+	}
+
+	// Rebuild ordered slice based on plan order
+	var reordered []attr.Value
+	for _, pElem := range planList.Elements() {
+		pObj, ok := pElem.(basetypes.ObjectValue)
+		if !ok {
+			// if plan contains something else, append it as fallback
+			reordered = append(reordered, pElem)
+			continue
+		}
+		pAttrs := pObj.Attributes()
+
+		var matchedState attr.Value
+
+		// Try primaryKey (name) first if present and valid
+		if pkAttr, has := pAttrs[primaryKey]; has && pkAttr != nil && !pkAttr.IsNull() && !pkAttr.IsUnknown() {
+			if psv, ok := pkAttr.(basetypes.StringValue); ok {
+				if s, exists := nameToState[psv.ValueString()]; exists {
+					matchedState = s
+				}
+			}
+		}
+
+		// If not matched by name, try backupKey (num)
+		if matchedState == nil {
+			if bkAttr, has := pAttrs[backupKey]; has && bkAttr != nil && !bkAttr.IsNull() && !bkAttr.IsUnknown() {
+				if piv, ok := bkAttr.(basetypes.Int64Value); ok {
+					if s, exists := numToState[piv.ValueInt64()]; exists {
+						matchedState = s
+					}
+				}
+			}
+		}
+
+		// If matchedState found, use it; else fall back to plan element itself
+		if matchedState != nil {
+			reordered = append(reordered, matchedState)
+		} else {
+			reordered = append(reordered, pElem)
+		}
+	}
+
+	// Create new ListValue with same element type as plan list
+	newList, d := basetypes.NewListValue(planList.ElementType(ctx), reordered)
+	diags.Append(d...)
+
+	return newList, &diags
 }

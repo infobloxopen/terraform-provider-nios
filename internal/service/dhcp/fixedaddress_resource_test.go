@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -1199,8 +1200,31 @@ func TestAccFixedaddressResource_Nextserver(t *testing.T) {
 func TestAccFixedaddressResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_options"
 	var v dhcp.Fixedaddress
-	ip := "15.0.0.37"
+	ip := "15.0.0.237"
 	agentCircuitID := acctest.RandomNumber(1000)
+
+	options := []map[string]any{
+		{
+			"name":  "time-offset",
+			"num":   2,
+			"value": "50",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+
+	optionsUpdated := []map[string]any{
+		{
+			"name":  "dhcp-lease-time",
+			"value": "7200",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1208,20 +1232,25 @@ func TestAccFixedaddressResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, "time-offset", "50", true, "2"),
+				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, options, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "2"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "50"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, "dhcp-lease-time", "7200", true, "51"),
+				Config: testAccFixedaddressOptions(ip, "CIRCUIT_ID", agentCircuitID, optionsUpdated, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2359,21 +2388,18 @@ resource "nios_dhcp_fixed_address" "test_nextserver" {
 `, ip, matchClient, agentCircuitID, nextserver, useNextServer)
 }
 
-func testAccFixedaddressOptions(ip, matchClient string, agentCircuitID int, optionsName, optionValue string, useOptions bool, num string) string {
+func testAccFixedaddressOptions(ip, matchClient string, agentCircuitID int, options []map[string]any, useOptions bool) string {
+	cOptions := utils.ConvertSliceOfMapsToHCL(options)
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_options" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	options = [ {
-		name         = %q
-		num 		= %q
-		value        = %q
-	} ]
+	options = %s
 	use_options = %t
 	
 }
-`, ip, matchClient, agentCircuitID, optionsName, num, optionValue, useOptions)
+`, ip, matchClient, agentCircuitID, cOptions, useOptions)
 }
 
 func testAccFixedaddressPxeLeaseTime(ip, matchClient string, agentCircuitID int, pxeLeaseTime string, usePXELeaseTime bool) string {

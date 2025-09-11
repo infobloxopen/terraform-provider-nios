@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
@@ -61,7 +62,7 @@ type SharednetworkModel struct {
 	NetworkView                    types.String                     `tfsdk:"network_view"`
 	Networks                       internaltypes.UnorderedListValue `tfsdk:"networks"`
 	Nextserver                     types.String                     `tfsdk:"nextserver"`
-	Options                        internaltypes.UnorderedListValue `tfsdk:"options"`
+	Options                        types.List                       `tfsdk:"options"`
 	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
 	StaticHosts                    types.Int64                      `tfsdk:"static_hosts"`
 	TotalHosts                     types.Int64                      `tfsdk:"total_hosts"`
@@ -117,7 +118,7 @@ var SharednetworkAttrTypes = map[string]attr.Type{
 	"network_view":                        types.StringType,
 	"networks":                            internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}}},
 	"nextserver":                          types.StringType,
-	"options":                             internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}}},
+	"options":                             types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}},
 	"pxe_lease_time":                      types.Int64Type,
 	"static_hosts":                        types.Int64Type,
 	"total_hosts":                         types.Int64Type,
@@ -309,9 +310,9 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Indicates whether the appliance will ignore DHCP client IDs or MAC addresses. Valid values are \"NONE\", \"CLIENT\", or \"MACADDR\". The default is \"NONE\".",
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -363,7 +364,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: SharednetworkNetworksResourceSchemaAttributes,
 		},
-		Required:            true,
+		Required: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -378,7 +379,6 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
-		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: SharednetworkOptionsResourceSchemaAttributes,
 		},
@@ -628,19 +628,14 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Networks = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FilterDHCPOptions(
-		ctx,
-		diags,
-		from.Options,
-		m.Options,
-		SharednetworkOptionsAttrTypes,
-		func(ctx context.Context, opt *dhcp.SharednetworkOptions, d *diag.Diagnostics) types.Object {
-			return FlattenSharednetworkOptions(ctx, opt, d)
-		},
-		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *dhcp.SharednetworkOptions {
-			return ExpandSharednetworkOptions(ctx, obj, d)
-		},
-	)
+	planOptions := m.Options
+	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, SharednetworkOptionsAttrTypes, diags, FlattenSharednetworkOptions)
+	if !planOptions.IsUnknown() {
+		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
+		if !diags.HasError() {
+			m.Options = reOrderedOptions.(basetypes.ListValue)
+		}
+	}
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.TotalHosts = flex.FlattenInt64Pointer(from.TotalHosts)

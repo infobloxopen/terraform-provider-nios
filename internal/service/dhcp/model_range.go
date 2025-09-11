@@ -22,8 +22,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -86,7 +88,7 @@ type RangeModel struct {
 	NetworkView                      types.String                     `tfsdk:"network_view"`
 	Nextserver                       types.String                     `tfsdk:"nextserver"`
 	OptionFilterRules                types.List                       `tfsdk:"option_filter_rules"`
-	Options                          internaltypes.UnorderedListValue `tfsdk:"options"`
+	Options                          types.List                       `tfsdk:"options"`
 	PortControlBlackoutSetting       types.Object                     `tfsdk:"port_control_blackout_setting"`
 	PxeLeaseTime                     types.Int64                      `tfsdk:"pxe_lease_time"`
 	RecycleLeases                    types.Bool                       `tfsdk:"recycle_leases"`
@@ -187,7 +189,7 @@ var RangeAttrTypes = map[string]attr.Type{
 	"network_view":                         types.StringType,
 	"nextserver":                           types.StringType,
 	"option_filter_rules":                  types.ListType{ElemType: types.ObjectType{AttrTypes: RangeOptionFilterRulesAttrTypes}},
-	"options":                              internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: RangeOptionsAttrTypes}}},
+	"options":                              types.ListType{ElemType: types.ObjectType{AttrTypes: RangeOptionsAttrTypes}},
 	"port_control_blackout_setting":        types.ObjectType{AttrTypes: RangePortControlBlackoutSettingAttrTypes},
 	"pxe_lease_time":                       types.Int64Type,
 	"recycle_leases":                       types.BoolType,
@@ -435,8 +437,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeExcludeResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -466,7 +468,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeFingerprintFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -510,8 +512,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -579,7 +581,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeMacFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -617,7 +619,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeNacFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -656,14 +658,13 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeOptionFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the Option filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"options": schema.ListNestedAttribute{
-		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: RangeOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeOptionsResourceSchemaAttributes,
 		},
@@ -704,7 +705,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeRelayAgentFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -1108,19 +1109,14 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangeOptionFilterRulesAttrTypes, diags, FlattenRangeOptionFilterRules)
-	m.Options = flex.FilterDHCPOptions(
-		ctx,
-		diags,
-		from.Options,
-		m.Options,
-		RangeOptionsAttrTypes,
-		func(ctx context.Context, opt *dhcp.RangeOptions, d *diag.Diagnostics) types.Object {
-			return FlattenRangeOptions(ctx, opt, d)
-		},
-		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *dhcp.RangeOptions {
-			return ExpandRangeOptions(ctx, obj, d)
-		},
-	)
+	planOptions := m.Options
+	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RangeOptionsAttrTypes, diags, FlattenRangeOptions)
+	if !planOptions.IsUnknown() {
+		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
+		if !diags.HasError() {
+			m.Options = reOrderedOptions.(basetypes.ListValue)
+		}
+	}
 	m.PortControlBlackoutSetting = FlattenRangePortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
