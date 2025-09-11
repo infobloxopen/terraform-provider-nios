@@ -52,7 +52,7 @@ func (v exactlyOneOfValidator) ValidateList(ctx context.Context, request validat
 		response.Diagnostics.Append(validatordiag.InvalidAttributeCombinationDiagnostic(
 			request.Path,
 			fmt.Sprintf(
-				"When %s is specified, exactly one of these attributes must also be specified: %s",
+				"When %s is specified, exactly one of these attributes should be specified: %s",
 				request.Path.String(),
 				strings.Join(v.attributes, ", "),
 			),
