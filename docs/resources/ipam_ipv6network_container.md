@@ -292,15 +292,12 @@ Required:
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Required:
+Optional:
 
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
-- `value` (String) Value of the DHCP option
-
-Optional:
-
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
+- `value` (String) Value of the DHCP option
 - `vendor_class` (String) The name of the space this DHCP option is associated to.
 
 
