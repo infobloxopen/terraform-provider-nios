@@ -21,6 +21,7 @@ var readableAttributesForPermission = "group,object,permission,resource_type,rol
 func TestAccPermissionResource_basic(t *testing.T) {
 	var resourceName = "nios_security_permission.test"
 	var v security.Permission
+	view := acctest.RandomNameWithPrefix("tf-test-view-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -28,7 +29,7 @@ func TestAccPermissionResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccPermissionBasicConfig("cloud-api-only", "WRITE", "NETWORK"),
+				Config: testAccPermissionBasicConfig(view, "cloud-api-only", "WRITE", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group", "cloud-api-only"),
@@ -43,6 +44,7 @@ func TestAccPermissionResource_basic(t *testing.T) {
 func TestAccPermissionResource_disappears(t *testing.T) {
 	resourceName := "nios_security_permission.test"
 	var v security.Permission
+	view := acctest.RandomNameWithPrefix("tf-test-view-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -50,7 +52,7 @@ func TestAccPermissionResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckPermissionDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPermissionBasicConfig("cloud-api-only", "WRITE", "NETWORK"),
+				Config: testAccPermissionBasicConfig(view, "cloud-api-only", "WRITE", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					testAccCheckPermissionDisappears(context.Background(), &v),
@@ -64,6 +66,7 @@ func TestAccPermissionResource_disappears(t *testing.T) {
 func TestAccPermissionResource_Group(t *testing.T) {
 	var resourceName = "nios_security_permission.test_group"
 	var v security.Permission
+	view := acctest.RandomNameWithPrefix("tf-test-view-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -71,22 +74,22 @@ func TestAccPermissionResource_Group(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccPermissionGroup("cloud-api-only", "READ", "NETWORK"),
+				Config: testAccPermissionGroup(view, "cloud-api-only", "READ", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group", "cloud-api-only"),
 					resource.TestCheckResourceAttr(resourceName, "permission", "READ"),
-					resource.TestCheckResourceAttr(resourceName, "resource_type", "NETWORK"),
+					resource.TestCheckResourceAttr(resourceName, "resource_type", "ZONE"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccPermissionGroup("saml-group", "READ", "NETWORK"),
+				Config: testAccPermissionGroup(view, "saml-group", "READ", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "group", "saml-group"),
 					resource.TestCheckResourceAttr(resourceName, "permission", "READ"),
-					resource.TestCheckResourceAttr(resourceName, "resource_type", "NETWORK"),
+					resource.TestCheckResourceAttr(resourceName, "resource_type", "ZONE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -97,6 +100,7 @@ func TestAccPermissionResource_Group(t *testing.T) {
 func TestAccPermissionResource_Object(t *testing.T) {
 	var resourceName = "nios_security_permission.test_object"
 	var v security.Permission
+	view := acctest.RandomNameWithPrefix("tf-test-view-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -104,7 +108,7 @@ func TestAccPermissionResource_Object(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccPermissionObject("test-view-1", "cloud-api-only", "READ", "ZONE"),
+				Config: testAccPermissionObject(view, "cloud-api-only", "READ", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrPair(resourceName, "object", "nios_dns_view.test_view", "ref"),
@@ -114,7 +118,7 @@ func TestAccPermissionResource_Object(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccPermissionObject("test-view-2", "cloud-api-only", "WRITE", "ZONE"),
+				Config: testAccPermissionObject(view, "cloud-api-only", "WRITE", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrPair(resourceName, "object", "nios_dns_view.test_view", "ref"),
@@ -130,6 +134,7 @@ func TestAccPermissionResource_Object(t *testing.T) {
 func TestAccPermissionResource_Permission(t *testing.T) {
 	var resourceName = "nios_security_permission.test_permission"
 	var v security.Permission
+	view := acctest.RandomNameWithPrefix("tf-test-view-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -137,7 +142,7 @@ func TestAccPermissionResource_Permission(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccPermissionPermission("cloud-api-only", "WRITE", "NETWORK"),
+				Config: testAccPermissionPermission(view, "cloud-api-only", "WRITE", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "permission", "WRITE"),
@@ -145,7 +150,7 @@ func TestAccPermissionResource_Permission(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccPermissionPermission("cloud-api-only", "READ", "NETWORK"),
+				Config: testAccPermissionPermission(view, "cloud-api-only", "READ", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "permission", "READ"),
@@ -159,6 +164,7 @@ func TestAccPermissionResource_Permission(t *testing.T) {
 func TestAccPermissionResource_ResourceType(t *testing.T) {
 	var resourceName = "nios_security_permission.test_resource_type"
 	var v security.Permission
+	view := acctest.RandomNameWithPrefix("tf-test-view-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -166,7 +172,7 @@ func TestAccPermissionResource_ResourceType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{ //view, fqdn, group, object, permission, resourceType
-				Config: testAccPermissionResourceType("test-view-21", "example.com", "cloud-api-only", "READ", "ZONE"),
+				Config: testAccPermissionResourceType(view, "example.com", "cloud-api-only", "READ", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "resource_type", "ZONE"),
@@ -174,7 +180,7 @@ func TestAccPermissionResource_ResourceType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccPermissionResourceTypeUpdate("test-view-21", "example.com", "cloud-api-only", "READ", "HOST"),
+				Config: testAccPermissionResourceTypeUpdate(view, "example.com", "cloud-api-only", "READ", "HOST"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "resource_type", "HOST"),
@@ -188,6 +194,7 @@ func TestAccPermissionResource_ResourceType(t *testing.T) {
 func TestAccPermissionResource_Role(t *testing.T) {
 	var resourceName = "nios_security_permission.test_role"
 	var v security.Permission
+	view := acctest.RandomNameWithPrefix("tf-test-view-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -195,7 +202,7 @@ func TestAccPermissionResource_Role(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccPermissionRole("CustomRole1", "WRITE", "NETWORK"),
+				Config: testAccPermissionRole(view, "CustomRole1", "WRITE", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "role", "CustomRole1"),
@@ -203,7 +210,7 @@ func TestAccPermissionResource_Role(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccPermissionRole("CustomRole2", "WRITE", "NETWORK"),
+				Config: testAccPermissionRole(view, "CustomRole2", "WRITE", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "role", "CustomRole2"),
@@ -272,24 +279,34 @@ func testAccCheckPermissionDisappears(ctx context.Context, v *security.Permissio
 	}
 }
 
-func testAccPermissionBasicConfig(group, permission, resourceType string) string {
+func testAccPermissionBasicConfig(view, group, permission, resourceType string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_view" "test_view" {
+    name = %q
+}
+
 resource "nios_security_permission" "test" {
     group = %q
     permission = %q
     resource_type = %q
+	object = nios_dns_view.test_view.ref
 }
-`, group, permission, resourceType)
+`, view, group, permission, resourceType)
 }
 
-func testAccPermissionGroup(group, permission, resourceType string) string {
+func testAccPermissionGroup(view, group, permission, resourceType string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_view" "test_view" {
+    name = %q
+}
+
 resource "nios_security_permission" "test_group" {
     group = %q
     permission = %q
     resource_type = %q
+	object = nios_dns_view.test_view.ref
 }
-`, group, permission, resourceType)
+`, view, group, permission, resourceType)
 }
 
 func testAccPermissionObject(viewName, group, permission, resourceType string) string {
@@ -307,14 +324,18 @@ resource "nios_security_permission" "test_object" {
 `, viewName, group, permission, resourceType)
 }
 
-func testAccPermissionPermission(group, permission, resourceType string) string {
+func testAccPermissionPermission(view, group, permission, resourceType string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_view" "test_view" {
+    name = %q
+}
 resource "nios_security_permission" "test_permission" {
     group = %q
     permission = %q
     resource_type = %q
+	object = nios_dns_view.test_view.ref
 }
-`, group, permission, resourceType)
+`, view, group, permission, resourceType)
 }
 
 func testAccPermissionResourceType(view, fqdn, group, permission, resourceType string) string {
@@ -357,12 +378,16 @@ resource "nios_security_permission" "test_resource_type" {
 `, view, fqdn, group, permission, resourceType)
 }
 
-func testAccPermissionRole(role, permission, resourceType string) string {
+func testAccPermissionRole(view, role, permission, resourceType string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_view" "test_view" {
+    name = %q
+}
 resource "nios_security_permission" "test_role" {
     role = %q
     permission = %q
     resource_type = %q
+	object = nios_dns_view.test_view.ref
 }
-`, role, permission, resourceType)
+`, view, role, permission, resourceType)
 }

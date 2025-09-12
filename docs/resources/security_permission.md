@@ -3,12 +3,12 @@
 page_title: "nios_security_permission Resource - nios"
 subcategory: "SECURITY"
 description: |-
-  
+  Manages security permissions for resources in Infoblox NIOS.
 ---
 
 # nios_security_permission (Resource)
 
-
+Manages security permissions for resources in Infoblox NIOS.
 
 ## Example Usage
 

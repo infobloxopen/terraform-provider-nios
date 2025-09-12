@@ -3,12 +3,12 @@
 page_title: "nios_security_permission Data Source - nios"
 subcategory: "SECURITY"
 description: |-
-  
+  The permission data source retrieves a list of permissions
 ---
 
 # nios_security_permission (Data Source)
 
-
+The permission data source retrieves a list of permissions
 
 ## Example Usage
 
