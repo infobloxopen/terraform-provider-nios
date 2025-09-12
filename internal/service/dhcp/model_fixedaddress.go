@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -394,6 +395,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: FixedaddressLogicFilterRulesResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
 			listvalidator.SizeAtLeast(1),
@@ -486,6 +488,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_pxe_lease_time")),
 			int64validator.Between(0, 4294967295),
@@ -504,6 +507,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"snmp3_credential": schema.SingleNestedAttribute{
 		Attributes: FixedaddressSnmp3CredentialResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
 		},
@@ -512,6 +516,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"snmp_credential": schema.SingleNestedAttribute{
 		Attributes: FixedaddressSnmpCredentialResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp_credential")),
 		},
