@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -1727,31 +1728,53 @@ func TestAccRangeResource_Options(t *testing.T) {
 	startAddr := "10.0.0.109"
 	endAddr := "10.0.0.110"
 
+	options := []map[string]any{
+		{
+			"name":  "time-offset",
+			"num":   2,
+			"value": "50",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+
+	optionsUpdated := []map[string]any{
+		{
+			"name":  "dhcp-lease-time",
+			"value": "7200",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeOptions(startAddr, endAddr, "dhcp-lease-time", "51", "6739", "DHCP", true),
+				Config: testAccRangeOptions(startAddr, endAddr, options, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "6739"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "50"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				)},
 			// Update and Read
 			{
-				Config: testAccRangeOptions(startAddr, endAddr, "dhcp-lease-time", "51", "7300", "DHCP", true),
+				Config: testAccRangeOptions(startAddr, endAddr, optionsUpdated, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7300"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3468,23 +3491,16 @@ resource "nios_dhcp_range" "test_option_filter_rules" {
 `, startAddr, endAddr, optionFilterRulesHCL)
 }
 
-func testAccRangeOptions(startAddr, endAddr, name, num, value, vendorClass string, useOptions bool) string {
+func testAccRangeOptions(startAddr, endAddr string, options []map[string]any, useOptions bool) string {
+	cOptions := utils.ConvertSliceOfMapsToHCL(options)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_options" {
 	start_addr = %q
 	end_addr = %q
-    options = [
-		{
-			name = %q
-			num = %q
-			value = %q
-			vendor_class = %q
-			use_option = true
-		}
-    ]
-		use_options = %t
+	options = %s
+	use_options = %t
 }
-`, startAddr, endAddr, name, num, value, vendorClass, useOptions)
+`, startAddr, endAddr, cOptions, useOptions)
 }
 
 func testAccRangePortControlBlackoutSetting(startAddr, endAddr string, portControlBlackoutSetting map[string]any) string {

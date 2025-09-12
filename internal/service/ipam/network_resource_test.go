@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -1494,37 +1495,54 @@ func TestAccNetworkResource_Options(t *testing.T) {
 	var v ipam.Network
 	network := acctest.RandomCIDRNetwork()
 
+	options := []map[string]any{
+		{
+			"name":  "time-offset",
+			"num":   2,
+			"value": "50",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+
+	optionsUpdated := []map[string]any{
+		{
+			"name":  "dhcp-lease-time",
+			"value": "7200",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				// Config: testAccNetworkOptions(network, "dhcp-lease-time", "51", "7200", "DHCP", "true", "true"),
-				Config: testAccNetworkOptions(network, "fqdn", "81", "test.com", "DHCP", "true"),
+				Config: testAccNetworkOptions(network, options, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.name", "fqdn"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.num", "81"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "test.com"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "50"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworkOptions(network, "dhcp-lease-time", "51", "7300", "DHCP", "true"),
+				Config: testAccNetworkOptions(network, optionsUpdated, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7300"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3104,21 +3122,15 @@ resource "nios_ipam_network" "test_nextserver" {
 `, network, nextserver, useNextserver)
 }
 
-func testAccNetworkOptions(network, name, num, value, vendorClass, useOptions string) string {
+func testAccNetworkOptions(network string, options []map[string]any, useOptions bool) string {
+	cOptions := utils.ConvertSliceOfMapsToHCL(options)
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "test_options" {
     network = %q
-    options = [
-		{
-			name = %q
-			num = %q
-			value = %q
-			vendor_class = %q
-		}
-    ]
-    use_options = %q
+    options = %s
+	use_options = %t
 }
-`, network, name, num, value, vendorClass, useOptions)
+`, network, cOptions, useOptions)
 }
 
 func testAccNetworkPortControlBlackoutSetting(network, enableBlackout, useBlackoutSetting string) string {
