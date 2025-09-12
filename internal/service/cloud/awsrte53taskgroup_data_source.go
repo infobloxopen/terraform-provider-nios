@@ -1,4 +1,4 @@
-package security
+package cloud
 
 import (
 	"context"
@@ -13,44 +13,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/security"
+	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &PermissionDataSource{}
+var _ datasource.DataSource = &Awsrte53taskgroupDataSource{}
 
-func NewPermissionDataSource() datasource.DataSource {
-	return &PermissionDataSource{}
+func NewAwsrte53taskgroupDataSource() datasource.DataSource {
+	return &Awsrte53taskgroupDataSource{}
 }
 
-// PermissionDataSource defines the data source implementation.
-type PermissionDataSource struct {
+// Awsrte53taskgroupDataSource defines the data source implementation.
+type Awsrte53taskgroupDataSource struct {
 	client *niosclient.APIClient
 }
 
-func (d *PermissionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "security_permission"
+func (d *Awsrte53taskgroupDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "cloud_aws_route53_task_group"
 }
 
-type PermissionModelWithFilter struct {
+type Awsrte53taskgroupModelWithFilter struct {
 	Filters    types.Map   `tfsdk:"filters"`
 	Result     types.List  `tfsdk:"result"`
 	MaxResults types.Int32 `tfsdk:"max_results"`
 	Paging     types.Int32 `tfsdk:"paging"`
 }
 
-func (m *PermissionModelWithFilter) FlattenResults(ctx context.Context, from []security.Permission, diags *diag.Diagnostics) {
+func (m *Awsrte53taskgroupModelWithFilter) FlattenResults(ctx context.Context, from []cloud.Awsrte53taskgroup, diags *diag.Diagnostics) {
 	if len(from) == 0 {
 		return
 	}
-	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, PermissionAttrTypes, diags, FlattenPermission)
+	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, Awsrte53taskgroupAttrTypes, diags, FlattenAwsrte53taskgroup)
 }
 
-func (d *PermissionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *Awsrte53taskgroupDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Retrieves information about existing AWS Route 53 Task Groups.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
@@ -59,7 +59,7 @@ func (d *PermissionDataSource) Schema(ctx context.Context, req datasource.Schema
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: utils.DataSourceAttributeMap(PermissionResourceSchemaAttributes, &resp.Diagnostics),
+					Attributes: utils.DataSourceAttributeMap(Awsrte53taskgroupResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
 			},
@@ -78,7 +78,7 @@ func (d *PermissionDataSource) Schema(ctx context.Context, req datasource.Schema
 	}
 }
 
-func (d *PermissionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *Awsrte53taskgroupDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -98,8 +98,8 @@ func (d *PermissionDataSource) Configure(ctx context.Context, req datasource.Con
 	d.client = client
 }
 
-func (d *PermissionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data PermissionModelWithFilter
+func (d *Awsrte53taskgroupDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data Awsrte53taskgroupModelWithFilter
 	pageCount := 0
 
 	// Read Terraform prior state data into the model
@@ -110,7 +110,7 @@ func (d *PermissionDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	allResults, err := utils.ReadWithPages(
-		func(pageID string, maxResults int32) ([]security.Permission, string, error) {
+		func(pageID string, maxResults int32) ([]cloud.Awsrte53taskgroup, string, error) {
 
 			if !data.MaxResults.IsNull() {
 				maxResults = data.MaxResults.ValueInt32()
@@ -123,12 +123,12 @@ func (d *PermissionDataSource) Read(ctx context.Context, req datasource.ReadRequ
 			//Increment the page count
 			pageCount++
 
-			request := d.client.SecurityAPI.
-				PermissionAPI.
+			request := d.client.CloudAPI.
+				Awsrte53taskgroupAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
 				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForPermission).
+				ReturnFieldsPlus(readableAttributesForAwsrte53taskgroup).
 				Paging(paging).
 				MaxResults(maxResults)
 
@@ -140,15 +140,15 @@ func (d *PermissionDataSource) Read(ctx context.Context, req datasource.ReadRequ
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Permission, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Awsrte53taskgroup, got error: %s", err))
 				return nil, "", err
 			}
 
-			res := apiRes.ListPermissionResponseObject.GetResult()
+			res := apiRes.ListAwsrte53taskgroupResponseObject.GetResult()
 			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
 
 			// Check for next page ID in additional properties
-			additionalProperties := apiRes.ListPermissionResponseObject.AdditionalProperties
+			additionalProperties := apiRes.ListAwsrte53taskgroupResponseObject.AdditionalProperties
 			var nextPageID string
 			npId, ok := additionalProperties["next_page_id"]
 			if ok {
@@ -163,7 +163,7 @@ func (d *PermissionDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Permission, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Awsrte53taskgroup, got error: %s", err))
 		return
 	}
 	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
