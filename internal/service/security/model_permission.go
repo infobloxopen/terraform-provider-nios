@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -43,27 +45,14 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 	"group": schema.StringAttribute{
 		Optional:   true,
 		Computed:   true,
-		Validators: []validator.String{
-			// stringvalidator.ExactlyOneOf(
-			// 	path.MatchRoot("group"),
-			// 	path.MatchRoot("role"),
-			// ),
-			// stringvalidator.ConflictsWith(
-			// 	path.MatchRoot("object"),
-			// 	path.MatchRoot("resource_type"),
-			// ),
-		},
 		MarkdownDescription: "The name of the admin group this permission applies to.",
 	},
 	"object": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		// Validators: []validator.String{
-		// 	stringvalidator.AtLeastOneOf(
-		// 		path.MatchRoot("object"),
-		// 		path.MatchRoot("resource_type"),
-		// 	),
-		// },
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplaceIfConfigured(),
+		},
 		MarkdownDescription: "A reference to a WAPI object, which will be the object this permission applies to.",
 	},
 	"permission": schema.StringAttribute{
@@ -77,6 +66,9 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 	"resource_type": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplaceIfConfigured(),
+		},
 		Validators: []validator.String{
 			stringvalidator.AtLeastOneOf(
 				path.MatchRoot("object"),
@@ -107,9 +99,6 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("role"),
 				path.MatchRoot("group"),
 			),
-			// stringvalidator.ConflictsWith(
-			// 	path.MatchRoot("group"),
-			// ),
 		},
 		MarkdownDescription: "The name of the role this permission applies to.",
 	},

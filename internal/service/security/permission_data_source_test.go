@@ -22,7 +22,7 @@ func TestAccPermissionDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckPermissionDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPermissionDataSourceConfigFilters(),
+				Config: testAccPermissionDataSourceConfigFilters("cloud-api-only", "HOST", "READ"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckPermissionExists(context.Background(), resourceName, &v),
@@ -46,15 +46,22 @@ func testAccCheckPermissionResourceAttrPair(resourceName, dataSourceName string)
 	}
 }
 
-func testAccPermissionDataSourceConfigFilters() string {
+func testAccPermissionDataSourceConfigFilters(group, resourceType, permission string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_view" "test_view" {
+    name = "test-view-ds"
+}
 resource "nios_security_permission" "test" {
+    group = %q
+    resource_type = %q
+	permission = %q
 }
-
 data "nios_security_permission" "test" {
-  filters = {
-	 = nios_security_permission.test.
-  }
+    filters = {
+        group = nios_security_permission.test.group
+        resource_type = nios_security_permission.test.resource_type
+        permission = nios_security_permission.test.permission
+    }
 }
-`)
+`, group, resourceType, permission)
 }
