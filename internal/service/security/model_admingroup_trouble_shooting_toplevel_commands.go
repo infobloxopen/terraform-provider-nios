@@ -49,54 +49,67 @@ var AdmingroupTroubleShootingToplevelCommandsAttrTypes = map[string]attr.Type{
 var AdmingroupTroubleShootingToplevelCommandsResourceSchemaAttributes = map[string]schema.Attribute{
 	"ping": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"ping6": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"strace": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"traceroute": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"traffic_capture": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"dig": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"rotate": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"snmpwalk": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"snmpget": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"console": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"tracepath": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then disable all fields",
 	},
 }

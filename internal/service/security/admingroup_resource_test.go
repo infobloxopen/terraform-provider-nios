@@ -271,14 +271,16 @@ func TestAccAdmingroupResource_CloudSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_CloudShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_cloud_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	cloudShowCmds := "disable_all:true,set_cloud_services_portal:true"
+	cloudShowCmds1 := "enable_all:true,set_cloud_services_portal:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupCloudShowCommands("CLOUD_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupCloudShowCommands(name, cloudShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cloud_show_commands", "CLOUD_SHOW_COMMANDS_REPLACE_ME"),
@@ -286,7 +288,7 @@ func TestAccAdmingroupResource_CloudShowCommands(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupCloudShowCommands("CLOUD_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupCloudShowCommands(name, cloudShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cloud_show_commands", "CLOUD_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
@@ -300,25 +302,25 @@ func TestAccAdmingroupResource_CloudShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_comment"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupComment("COMMENT_REPLACE_ME"),
+				Config: testAccAdmingroupComment(name, "admin group comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "admin group comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupComment(name, "admin group comment updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "admin group comment updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -329,25 +331,29 @@ func TestAccAdmingroupResource_Comment(t *testing.T) {
 func TestAccAdmingroupResource_DatabaseSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_database_set_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	databaseSetCmds := "disable_all:true,set_database_transfer:true"
+	databaseSetCmds1 := "enable_all:true,set_database_transfer:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDatabaseSetCommands("DATABASE_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDatabaseSetCommands(name, databaseSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "database_set_commands", "DATABASE_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "database_set_commands.disable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "database_set_commands.set_database_transfer", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDatabaseSetCommands("DATABASE_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDatabaseSetCommands(name, databaseSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "database_set_commands", "DATABASE_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "database_set_commands.enable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "database_set_commands.set_database_transfer", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -358,25 +364,29 @@ func TestAccAdmingroupResource_DatabaseSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_DatabaseShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_database_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	databaseShowCmds := "show_backup:true,show_dbsize:true"
+	databaseShowCmds1 := "show_backup:false,show_dbsize:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDatabaseShowCommands("DATABASE_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDatabaseShowCommands(name, databaseShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "database_show_commands", "DATABASE_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "database_show_commands.show_backup", "true"),
+					resource.TestCheckResourceAttr(resourceName, "database_show_commands.show_dbsize", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDatabaseShowCommands("DATABASE_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDatabaseShowCommands(name, databaseShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "database_show_commands", "DATABASE_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "database_show_commands.show_backup", "false"),
+					resource.TestCheckResourceAttr(resourceName, "database_show_commands.show_dbsize", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -387,6 +397,9 @@ func TestAccAdmingroupResource_DatabaseShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_DhcpSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_dhcp_set_commands"
 	var v security.Admingroup
+	name := acctest.RandomNameWithPrefix("admin-group")
+	dhcpSetCmds := "set_log_txn_id:true,set_overload_bootp:true"
+	dhcpSetCmds1 := "set_log_txn_id:false,set_overload_bootp:false"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -394,18 +407,20 @@ func TestAccAdmingroupResource_DhcpSetCommands(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDhcpSetCommands("DHCP_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDhcpSetCommands(name, dhcpSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_set_commands", "DHCP_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_set_commands.set_log_txn_id", "true"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_set_commands.set_overload_bootp", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDhcpSetCommands("DHCP_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDhcpSetCommands(name, dhcpSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_set_commands", "DHCP_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_set_commands.set_log_txn_id", "false"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_set_commands.set_overload_bootp", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -416,25 +431,29 @@ func TestAccAdmingroupResource_DhcpSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_DhcpShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_dhcp_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	dhcpShowCmds := "show_overload_bootp:true,show_log_txn_id:true"
+	dhcpShowCmds1 := "show_overload_bootp:false,show_log_txn_id:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDhcpShowCommands("DHCP_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDhcpShowCommands(name, dhcpShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_show_commands", "DHCP_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_show_commands.show_overload_bootp", "true"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_show_commands.show_log_txn_id", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDhcpShowCommands("DHCP_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDhcpShowCommands(name, dhcpShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_show_commands", "DHCP_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_show_commands.show_overload_bootp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_show_commands.show_log_txn_id", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -445,25 +464,25 @@ func TestAccAdmingroupResource_DhcpShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_Disable(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_disable"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDisable("DISABLE_REPLACE_ME"),
+				Config: testAccAdmingroupDisable(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDisable(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -474,25 +493,25 @@ func TestAccAdmingroupResource_Disable(t *testing.T) {
 func TestAccAdmingroupResource_DisableConcurrentLogin(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_disable_concurrent_login"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDisableConcurrentLogin("DISABLE_CONCURRENT_LOGIN_REPLACE_ME"),
+				Config: testAccAdmingroupDisableConcurrentLogin(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable_concurrent_login", "DISABLE_CONCURRENT_LOGIN_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable_concurrent_login", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDisableConcurrentLogin("DISABLE_CONCURRENT_LOGIN_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDisableConcurrentLogin(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable_concurrent_login", "DISABLE_CONCURRENT_LOGIN_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable_concurrent_login", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -503,6 +522,9 @@ func TestAccAdmingroupResource_DisableConcurrentLogin(t *testing.T) {
 func TestAccAdmingroupResource_DnsSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_dns_set_commands"
 	var v security.Admingroup
+	name := acctest.RandomNameWithPrefix("admin-group")
+	dnsSetCmds := "set_allow_query_domain:true,set_dns_accel_debug:true"
+	dnsSetCmds1 := "set_allow_query_domain:false,set_dns_accel_debug:false"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -510,18 +532,20 @@ func TestAccAdmingroupResource_DnsSetCommands(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDnsSetCommands("DNS_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDnsSetCommands(name, dnsSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_set_commands", "DNS_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_set_commands.set_allow_query_domain", "true"),
+					resource.TestCheckResourceAttr(resourceName, "dns_set_commands.set_dns_accel_debug", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDnsSetCommands("DNS_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDnsSetCommands(name, dnsSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_set_commands", "DNS_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_set_commands.set_allow_query_domain", "false"),
+					resource.TestCheckResourceAttr(resourceName, "dns_set_commands.set_dns_accel_debug", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -532,25 +556,29 @@ func TestAccAdmingroupResource_DnsSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_DnsShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_dns_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	dndShowCmds := `show_allow_query_domain:true,show_dns:true`
+	dnsShowCmds1 := `show_allow_query_domain:false,show_dns:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDnsShowCommands("DNS_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDnsShowCommands(name, dndShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_show_commands", "DNS_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_show_commands.show_allow_query_domain", "true"),
+					resource.TestCheckResourceAttr(resourceName, "dns_show_commands.show_dns", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDnsShowCommands("DNS_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDnsShowCommands(name, dnsShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_show_commands", "DNS_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_show_commands.show_allow_query_domain", "false"),
+					resource.TestCheckResourceAttr(resourceName, "dns_show_commands.show_dns", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -561,25 +589,29 @@ func TestAccAdmingroupResource_DnsShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_DnsToplevelCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_dns_toplevel_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	dnsTopLevelCmds := `ddns_add:true,ddns_delete:true`
+	dnsTopLevelCmds1 := `ddns_add:false,ddns_delete:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDnsToplevelCommands("DNS_TOPLEVEL_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDnsToplevelCommands(name, dnsTopLevelCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_toplevel_commands", "DNS_TOPLEVEL_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_toplevel_commands.ddns_add", "true"),
+					resource.TestCheckResourceAttr(resourceName, "dns_toplevel_commands.ddns_delete", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDnsToplevelCommands("DNS_TOPLEVEL_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDnsToplevelCommands(name, dnsTopLevelCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_toplevel_commands", "DNS_TOPLEVEL_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_toplevel_commands.ddns_add", "false"),
+					resource.TestCheckResourceAttr(resourceName, "dns_toplevel_commands.ddns_delete", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -590,6 +622,9 @@ func TestAccAdmingroupResource_DnsToplevelCommands(t *testing.T) {
 func TestAccAdmingroupResource_DockerSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_docker_set_commands"
 	var v security.Admingroup
+	name := acctest.RandomNameWithPrefix("admin-group")
+	dockerSetCmds := "set_docker_bridge:true,enable_all:true"
+	dockerSetCmds1 := "set_docker_bridge:false,enable_all:false"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -597,18 +632,20 @@ func TestAccAdmingroupResource_DockerSetCommands(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDockerSetCommands("DOCKER_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDockerSetCommands(name, dockerSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "docker_set_commands", "DOCKER_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "docker_set_commands.set_docker_bridge", "true"),
+					resource.TestCheckResourceAttr(resourceName, "docker_set_commands.enable_all", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDockerSetCommands("DOCKER_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDockerSetCommands(name, dockerSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "docker_set_commands", "DOCKER_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "docker_set_commands.set_docker_bridge", "false"),
+					resource.TestCheckResourceAttr(resourceName, "docker_set_commands.enable_all", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -619,25 +656,29 @@ func TestAccAdmingroupResource_DockerSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_DockerShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_docker_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	dockerShowCmds := "show_docker_bridge:true,enable_all:true"
+	dockerShowCmds1 := "show_docker_bridge:false,enable_all:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupDockerShowCommands("DOCKER_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupDockerShowCommands(name, dockerShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "docker_show_commands", "DOCKER_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "docker_show_commands.show_docker_bridge", "true"),
+					resource.TestCheckResourceAttr(resourceName, "docker_show_commands.enable_all", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupDockerShowCommands("DOCKER_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupDockerShowCommands(name, dockerShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "docker_show_commands", "DOCKER_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "docker_show_commands.show_docker_bridge", "false"),
+					resource.TestCheckResourceAttr(resourceName, "docker_show_commands.enable_all", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -648,25 +689,29 @@ func TestAccAdmingroupResource_DockerShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_EmailAddresses(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_email_addresses"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	emailAddresses := `["abc@info.com","xyz@example.com"]`
+	emailAddresses1 := `["abc@info1.com","xyz@example1.com"]`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupEmailAddresses("EMAIL_ADDRESSES_REPLACE_ME"),
+				Config: testAccAdmingroupEmailAddresses(name, emailAddresses),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "email_addresses", "EMAIL_ADDRESSES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "email_addresses.0", "abc@info.com"),
+					resource.TestCheckResourceAttr(resourceName, "email_addresses.1", "xyz@example.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupEmailAddresses("EMAIL_ADDRESSES_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupEmailAddresses(name, emailAddresses1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "email_addresses", "EMAIL_ADDRESSES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "email_addresses.0", "abc@info1.com"),
+					resource.TestCheckResourceAttr(resourceName, "email_addresses.1", "xyz@example1.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -677,25 +722,25 @@ func TestAccAdmingroupResource_EmailAddresses(t *testing.T) {
 func TestAccAdmingroupResource_EnableRestrictedUserAccess(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_enable_restricted_user_access"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupEnableRestrictedUserAccess("ENABLE_RESTRICTED_USER_ACCESS_REPLACE_ME"),
+				Config: testAccAdmingroupEnableRestrictedUserAccess(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "ENABLE_RESTRICTED_USER_ACCESS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupEnableRestrictedUserAccess("ENABLE_RESTRICTED_USER_ACCESS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupEnableRestrictedUserAccess(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "ENABLE_RESTRICTED_USER_ACCESS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -706,25 +751,27 @@ func TestAccAdmingroupResource_EnableRestrictedUserAccess(t *testing.T) {
 func TestAccAdmingroupResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_extattrs"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccAdmingroupExtAttrs(name, map[string]string{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupExtAttrs(name, map[string]string{"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -735,25 +782,29 @@ func TestAccAdmingroupResource_ExtAttrs(t *testing.T) {
 func TestAccAdmingroupResource_GridSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_grid_set_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	gridSetCmds := "enable_all:true,set_dscp:true"
+	gridSetCmds1 := "enable_all:false,set_dscp:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupGridSetCommands("GRID_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupGridSetCommands(name, gridSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_set_commands", "GRID_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "grid_set_commands.enable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "grid_set_commands.set_dscp", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupGridSetCommands("GRID_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupGridSetCommands(name, gridSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_set_commands", "GRID_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "grid_set_commands.enable_all", "false"),
+					resource.TestCheckResourceAttr(resourceName, "grid_set_commands.set_dscp", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -764,25 +815,29 @@ func TestAccAdmingroupResource_GridSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_GridShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_grid_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	gridShowCmds := "enable_all:true,show_dscp:true"
+	gridShowCmds1 := "enable_all:false,show_dscp:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupGridShowCommands("GRID_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupGridShowCommands(name, gridShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_show_commands", "GRID_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "grid_show_commands.enable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "grid_show_commands.show_dscp", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupGridShowCommands("GRID_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupGridShowCommands(name, gridShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_show_commands", "GRID_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "grid_show_commands.enable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "grid_show_commands.show_dscp", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -793,25 +848,31 @@ func TestAccAdmingroupResource_GridShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_InactivityLockoutSetting(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_inactivity_lockout_setting"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	inactivityLockoutSetting := `account_inactivity_lockout_enable:true,inactive_days:50,reminder_days:15`
+	inactivityLockoutSetting1 := `account_inactivity_lockout_enable:false,inactive_days:20,reminder_days:10`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupInactivityLockoutSetting("INACTIVITY_LOCKOUT_SETTING_REPLACE_ME"),
+				Config: testAccAdmingroupInactivityLockoutSetting(name, inactivityLockoutSetting),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting", "INACTIVITY_LOCKOUT_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.account_inactivity_lockout_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.inactive_days", "50"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.reminder_days", "15"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupInactivityLockoutSetting("INACTIVITY_LOCKOUT_SETTING_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupInactivityLockoutSetting(name, inactivityLockoutSetting1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting", "INACTIVITY_LOCKOUT_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.account_inactivity_lockout_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.inactive_days", "20"),
+					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.reminder_days", "10"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -822,25 +883,29 @@ func TestAccAdmingroupResource_InactivityLockoutSetting(t *testing.T) {
 func TestAccAdmingroupResource_LicensingSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_licensing_set_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	licensingSetCmds := "enable_all:true,set_license:true"
+	licensingSetCmds1 := "enable_all:false,set_license:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupLicensingSetCommands("LICENSING_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupLicensingSetCommands(name, licensingSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "licensing_set_commands", "LICENSING_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "licensing_set_commands.enable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "licensing_set_commands.set_license", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupLicensingSetCommands("LICENSING_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupLicensingSetCommands(name, licensingSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "licensing_set_commands", "LICENSING_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "licensing_set_commands.enable_all", "false"),
+					resource.TestCheckResourceAttr(resourceName, "licensing_set_commands.set_license", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -851,25 +916,29 @@ func TestAccAdmingroupResource_LicensingSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_LicensingShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_licensing_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	licensingShowCmds := "enable_all:true,show_license:true"
+	licensingShowCmds1 := "enable_all:false,show_license:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupLicensingShowCommands("LICENSING_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupLicensingShowCommands(name, licensingShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "licensing_show_commands", "LICENSING_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "licensing_show_commands.enable_all", "true"),
+					resource.TestCheckResourceAttr(resourceName, "licensing_show_commands.show_license", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupLicensingShowCommands("LICENSING_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupLicensingShowCommands(name, licensingShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "licensing_show_commands", "LICENSING_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "licensing_show_commands.enable_all", "false"),
+					resource.TestCheckResourceAttr(resourceName, "licensing_show_commands.show_license", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -880,25 +949,29 @@ func TestAccAdmingroupResource_LicensingShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_LockoutSetting(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_lockout_setting"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	lockoutSetting := `failed_lockout_duration:20,never_unlock_user:true`
+	lockoutSetting1 := `failed_lockout_duration:30,never_unlock_user:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupLockoutSetting("LOCKOUT_SETTING_REPLACE_ME"),
+				Config: testAccAdmingroupLockoutSetting(name, lockoutSetting),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lockout_setting", "LOCKOUT_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "lockout_setting.failed_lockout_duration", "20"),
+					resource.TestCheckResourceAttr(resourceName, "lockout_setting.never_unlock_user", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupLockoutSetting("LOCKOUT_SETTING_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupLockoutSetting(name, lockoutSetting1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lockout_setting", "LOCKOUT_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "lockout_setting.failed_lockout_duration", "30"),
+					resource.TestCheckResourceAttr(resourceName, "lockout_setting.never_unlock_user", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -909,25 +982,29 @@ func TestAccAdmingroupResource_LockoutSetting(t *testing.T) {
 func TestAccAdmingroupResource_MachineControlToplevelCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_machine_control_toplevel_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	mcTopLevelCmds := `reboot:true,reset:true`
+	mcTopLevelCmds1 := `reboot:false,reset:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupMachineControlToplevelCommands("MACHINE_CONTROL_TOPLEVEL_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupMachineControlToplevelCommands(name, mcTopLevelCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "machine_control_toplevel_commands", "MACHINE_CONTROL_TOPLEVEL_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "machine_control_toplevel_commands.reboot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "machine_control_toplevel_commands.reset", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupMachineControlToplevelCommands("MACHINE_CONTROL_TOPLEVEL_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupMachineControlToplevelCommands(name, mcTopLevelCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "machine_control_toplevel_commands", "MACHINE_CONTROL_TOPLEVEL_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "machine_control_toplevel_commands.reboot", "false"),
+					resource.TestCheckResourceAttr(resourceName, "machine_control_toplevel_commands.reset", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -938,25 +1015,26 @@ func TestAccAdmingroupResource_MachineControlToplevelCommands(t *testing.T) {
 func TestAccAdmingroupResource_Name(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_name"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	name1 := acctest.RandomNameWithPrefix("admin-group1")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupName("NAME_REPLACE_ME"),
+				Config: testAccAdmingroupName(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupName(name1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -967,25 +1045,29 @@ func TestAccAdmingroupResource_Name(t *testing.T) {
 func TestAccAdmingroupResource_NetworkingSetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_networking_set_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	networkingSetCmds := `set_connection_limit:true,set_prompt:true`
+	networkingSetCmds1 := `set_connection_limit:false,set_prompt:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupNetworkingSetCommands("NETWORKING_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupNetworkingSetCommands(name, networkingSetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "networking_set_commands", "NETWORKING_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "networking_set_commands.set_connection_limit", "true"),
+					resource.TestCheckResourceAttr(resourceName, "networking_set_commands.set_prompt", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupNetworkingSetCommands("NETWORKING_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupNetworkingSetCommands(name, networkingSetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "networking_set_commands", "NETWORKING_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "networking_set_commands.set_connection_limit", "false"),
+					resource.TestCheckResourceAttr(resourceName, "networking_set_commands.set_prompt", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -996,25 +1078,29 @@ func TestAccAdmingroupResource_NetworkingSetCommands(t *testing.T) {
 func TestAccAdmingroupResource_NetworkingShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_networking_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	networkingShowCmds := `show_connection_limit:true,show_connections:true`
+	networkingShowCmds1 := `show_connection_limit:false,show_connections:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupNetworkingShowCommands("NETWORKING_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupNetworkingShowCommands(name, networkingShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "networking_show_commands", "NETWORKING_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "networking_show_commands.show_connection_limit", "true"),
+					resource.TestCheckResourceAttr(resourceName, "networking_show_commands.show_connections", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupNetworkingShowCommands("NETWORKING_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupNetworkingShowCommands(name, networkingShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "networking_show_commands", "NETWORKING_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "networking_show_commands.show_connection_limit", "false"),
+					resource.TestCheckResourceAttr(resourceName, "networking_show_commands.show_connections", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1025,25 +1111,29 @@ func TestAccAdmingroupResource_NetworkingShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_PasswordSetting(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_password_setting"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	passwordSetting := "expire_days:20,expire_enable:true"
+	passwordSetting1 := "expire_days:30,expire_enable:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupPasswordSetting("PASSWORD_SETTING_REPLACE_ME"),
+				Config: testAccAdmingroupPasswordSetting(name, passwordSetting),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password_setting", "PASSWORD_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "password_setting.expire_days", "20"),
+					resource.TestCheckResourceAttr(resourceName, "password_setting.expire_enable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupPasswordSetting("PASSWORD_SETTING_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupPasswordSetting(name, passwordSetting1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password_setting", "PASSWORD_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "password_setting.expire_days", "30"),
+					resource.TestCheckResourceAttr(resourceName, "password_setting.expire_enable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1054,25 +1144,31 @@ func TestAccAdmingroupResource_PasswordSetting(t *testing.T) {
 func TestAccAdmingroupResource_Roles(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_roles"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	roles := `["DNS Admin","SAML Admin","DHCP Admin"]`
+	roles1 := `["DHCP Admin"]`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupRoles("ROLES_REPLACE_ME"),
+				Config: testAccAdmingroupRoles(name, roles),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "roles", "ROLES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "roles.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "roles.0", "DNS Admin"),
+					resource.TestCheckResourceAttr(resourceName, "roles.1", "SAML Admin"),
+					resource.TestCheckResourceAttr(resourceName, "roles.2", "DHCP Admin"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupRoles("ROLES_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupRoles(name, roles1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "roles", "ROLES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "roles.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "roles.0", "DHCP Admin"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1083,25 +1179,29 @@ func TestAccAdmingroupResource_Roles(t *testing.T) {
 func TestAccAdmingroupResource_SamlSetting(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_saml_setting"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	samlSetting := "auto_create_user:true,persist_auto_created_user:true"
+	samlSetting1 := "auto_create_user:false,persist_auto_created_user:false"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupSamlSetting("SAML_SETTING_REPLACE_ME"),
+				Config: testAccAdmingroupSamlSetting(name, samlSetting),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "saml_setting", "SAML_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "saml_setting.auto_create_user", "true"),
+					resource.TestCheckResourceAttr(resourceName, "saml_setting.persist_auto_created_user", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupSamlSetting("SAML_SETTING_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupSamlSetting(name, samlSetting1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "saml_setting", "SAML_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "saml_setting.auto_create_user", "false"),
+					resource.TestCheckResourceAttr(resourceName, "saml_setting.persist_auto_created_user", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1112,25 +1212,29 @@ func TestAccAdmingroupResource_SamlSetting(t *testing.T) {
 func TestAccAdmingroupResource_SecuritySetCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_security_set_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	securitySetCmds := `set_adp:true,set_cc_mode:true`
+	securitySetCmds1 := `set_adp:false,set_cc_mode:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupSecuritySetCommands("SECURITY_SET_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupSecuritySetCommands(name, securitySetCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "security_set_commands", "SECURITY_SET_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "security_set_commands.set_adp", "true"),
+					resource.TestCheckResourceAttr(resourceName, "security_set_commands.set_cc_mode", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupSecuritySetCommands("SECURITY_SET_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupSecuritySetCommands(name, securitySetCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "security_set_commands", "SECURITY_SET_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "security_set_commands.set_adp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "security_set_commands.set_cc_mode", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1141,25 +1245,29 @@ func TestAccAdmingroupResource_SecuritySetCommands(t *testing.T) {
 func TestAccAdmingroupResource_SecurityShowCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_security_show_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	secutiryShowCmds := `show_security:true,show_cc_mode:true`
+	secutiryShowCmds1 := `show_security:false,show_cc_mode:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupSecurityShowCommands("SECURITY_SHOW_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupSecurityShowCommands(name, secutiryShowCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "security_show_commands", "SECURITY_SHOW_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "security_show_commands.show_security", "true"),
+					resource.TestCheckResourceAttr(resourceName, "security_show_commands.show_cc_mode", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupSecurityShowCommands("SECURITY_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupSecurityShowCommands(name, secutiryShowCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "security_show_commands", "SECURITY_SHOW_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "security_show_commands.show_security", "false"),
+					resource.TestCheckResourceAttr(resourceName, "security_show_commands.show_cc_mode", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1170,25 +1278,25 @@ func TestAccAdmingroupResource_SecurityShowCommands(t *testing.T) {
 func TestAccAdmingroupResource_Superuser(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_superuser"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupSuperuser("SUPERUSER_REPLACE_ME"),
+				Config: testAccAdmingroupSuperuser(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "superuser", "SUPERUSER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "superuser", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupSuperuser("SUPERUSER_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupSuperuser(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "superuser", "SUPERUSER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "superuser", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1199,25 +1307,31 @@ func TestAccAdmingroupResource_Superuser(t *testing.T) {
 func TestAccAdmingroupResource_TroubleShootingToplevelCommands(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_trouble_shooting_toplevel_commands"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	troubleShootingTopLevelCmds := `console:true,ping:true,dig:true`
+	troubleShootingTopLevelCmds1 := `console:false,ping:false,dig:false`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupTroubleShootingToplevelCommands("TROUBLE_SHOOTING_TOPLEVEL_COMMANDS_REPLACE_ME"),
+				Config: testAccAdmingroupTroubleShootingToplevelCommands(name, troubleShootingTopLevelCmds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "trouble_shooting_toplevel_commands", "TROUBLE_SHOOTING_TOPLEVEL_COMMANDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "trouble_shooting_toplevel_commands.console", "true"),
+					resource.TestCheckResourceAttr(resourceName, "trouble_shooting_toplevel_commands.ping", "true"),
+					resource.TestCheckResourceAttr(resourceName, "trouble_shooting_toplevel_commands.dig", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupTroubleShootingToplevelCommands("TROUBLE_SHOOTING_TOPLEVEL_COMMANDS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupTroubleShootingToplevelCommands(name, troubleShootingTopLevelCmds1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "trouble_shooting_toplevel_commands", "TROUBLE_SHOOTING_TOPLEVEL_COMMANDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "trouble_shooting_toplevel_commands.console", "false"),
+					resource.TestCheckResourceAttr(resourceName, "trouble_shooting_toplevel_commands.ping", "false"),
+					resource.TestCheckResourceAttr(resourceName, "trouble_shooting_toplevel_commands.dig", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1228,6 +1342,7 @@ func TestAccAdmingroupResource_TroubleShootingToplevelCommands(t *testing.T) {
 func TestAccAdmingroupResource_UseAccountInactivityLockoutEnable(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_use_account_inactivity_lockout_enable"
 	var v security.Admingroup
+	name := acctest.RandomNameWithPrefix("admin-group")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1235,18 +1350,18 @@ func TestAccAdmingroupResource_UseAccountInactivityLockoutEnable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupUseAccountInactivityLockoutEnable("USE_ACCOUNT_INACTIVITY_LOCKOUT_ENABLE_REPLACE_ME"),
+				Config: testAccAdmingroupUseAccountInactivityLockoutEnable(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_account_inactivity_lockout_enable", "USE_ACCOUNT_INACTIVITY_LOCKOUT_ENABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_account_inactivity_lockout_enable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupUseAccountInactivityLockoutEnable("USE_ACCOUNT_INACTIVITY_LOCKOUT_ENABLE_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupUseAccountInactivityLockoutEnable(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_account_inactivity_lockout_enable", "USE_ACCOUNT_INACTIVITY_LOCKOUT_ENABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_account_inactivity_lockout_enable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1257,25 +1372,25 @@ func TestAccAdmingroupResource_UseAccountInactivityLockoutEnable(t *testing.T) {
 func TestAccAdmingroupResource_UseDisableConcurrentLogin(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_use_disable_concurrent_login"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupUseDisableConcurrentLogin("USE_DISABLE_CONCURRENT_LOGIN_REPLACE_ME"),
+				Config: testAccAdmingroupUseDisableConcurrentLogin(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_disable_concurrent_login", "USE_DISABLE_CONCURRENT_LOGIN_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_disable_concurrent_login", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupUseDisableConcurrentLogin("USE_DISABLE_CONCURRENT_LOGIN_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupUseDisableConcurrentLogin(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_disable_concurrent_login", "USE_DISABLE_CONCURRENT_LOGIN_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_disable_concurrent_login", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1286,25 +1401,25 @@ func TestAccAdmingroupResource_UseDisableConcurrentLogin(t *testing.T) {
 func TestAccAdmingroupResource_UseLockoutSetting(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_use_lockout_setting"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupUseLockoutSetting("USE_LOCKOUT_SETTING_REPLACE_ME"),
+				Config: testAccAdmingroupUseLockoutSetting(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_lockout_setting", "USE_LOCKOUT_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_lockout_setting", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupUseLockoutSetting("USE_LOCKOUT_SETTING_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupUseLockoutSetting(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_lockout_setting", "USE_LOCKOUT_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_lockout_setting", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1315,25 +1430,25 @@ func TestAccAdmingroupResource_UseLockoutSetting(t *testing.T) {
 func TestAccAdmingroupResource_UsePasswordSetting(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_use_password_setting"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupUsePasswordSetting("USE_PASSWORD_SETTING_REPLACE_ME"),
+				Config: testAccAdmingroupUsePasswordSetting(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_password_setting", "USE_PASSWORD_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_password_setting", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupUsePasswordSetting("USE_PASSWORD_SETTING_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupUsePasswordSetting(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_password_setting", "USE_PASSWORD_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_password_setting", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1344,25 +1459,29 @@ func TestAccAdmingroupResource_UsePasswordSetting(t *testing.T) {
 func TestAccAdmingroupResource_UserAccess(t *testing.T) {
 	var resourceName = "nios_security_admin_group.test_user_access"
 	var v security.Admingroup
-
+	name := acctest.RandomNameWithPrefix("admin-group")
+	userAccess := `[{"address":"12.12.1.1","permission":"ALLOW"}]`
+	userAccess1 := `[{"address":"12.12.1.1","permission":"DENY"}]`
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdmingroupUserAccess("USER_ACCESS_REPLACE_ME"),
+				Config: testAccAdmingroupUserAccess(name, userAccess),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "user_access", "USER_ACCESS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "user_access.0.", "12.12.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "user_access.0.permission", "ALLOW"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAdmingroupUserAccess("USER_ACCESS_UPDATE_REPLACE_ME"),
+				Config: testAccAdmingroupUserAccess(name, userAccess1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "user_access", "USER_ACCESS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "user_access.0", "12.12.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "user_access.0.permission", "DENY"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1602,12 +1721,12 @@ func testAccAdmingroupEmailAddresses(name, emailAddresses string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_email_addresses" {
 	name = %q
-    email_addresses = %q
+    email_addresses = %s
 }
 `, name, emailAddresses)
 }
 
-func testAccAdmingroupEnableRestrictedUserAccess(name, enableRestrictedUserAccess bool) string {
+func testAccAdmingroupEnableRestrictedUserAccess(name string, enableRestrictedUserAccess bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_enable_restricted_user_access" {
 	name = %q
@@ -1616,13 +1735,18 @@ resource "nios_security_admin_group" "test_enable_restricted_user_access" {
 `, name, enableRestrictedUserAccess)
 }
 
-func testAccAdmingroupExtAttrs(name, extAttrs string) string {
+func testAccAdmingroupExtAttrs(name string, extAttrs map[string]string) string {
+	extattrsStr := "{"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`%s = %q`, k, v)
+	}
+	extattrsStr += "}"
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_extattrs" {
-	name = %q
-    extattrs = %q
+    name = %q
+    extattrs = %s
 }
-`, name, extAttrs)
+`, name, extattrsStr)
 }
 
 func testAccAdmingroupGridSetCommands(name, gridSetCommands string) string {
@@ -1637,49 +1761,56 @@ resource "nios_security_admin_group" "test_grid_set_commands" {
 func testAccAdmingroupGridShowCommands(name, gridShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_grid_show_commands" {
-    grid_show_commands = %q
+	name = %q
+    grid_show_commands = {%s}
 }
-`, gridShowCommands)
+`, name, gridShowCommands)
 }
 
 func testAccAdmingroupInactivityLockoutSetting(name, inactivityLockoutSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_inactivity_lockout_setting" {
-    inactivity_lockout_setting = %q
+	name = %q
+    inactivity_lockout_setting = {%s}
+    use_account_inactivity_lockout_enable = true
 }
-`, inactivityLockoutSetting)
+`, name, inactivityLockoutSetting)
 }
 
 func testAccAdmingroupLicensingSetCommands(name, licensingSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_licensing_set_commands" {
-    licensing_set_commands = %q
+    name = %q
+    licensing_set_commands = {%s}
 }
-`, licensingSetCommands)
+`, name, licensingSetCommands)
 }
 
 func testAccAdmingroupLicensingShowCommands(name, licensingShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_licensing_show_commands" {
-    licensing_show_commands = %q
+	name = %q
+    licensing_show_commands = {%s}
 }
-`, licensingShowCommands)
+`, name, licensingShowCommands)
 }
 
 func testAccAdmingroupLockoutSetting(name, lockoutSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_lockout_setting" {
-    lockout_setting = %q
+	name = %q
+    lockout_setting = {%s}
 }
-`, lockoutSetting)
+`, name, lockoutSetting)
 }
 
 func testAccAdmingroupMachineControlToplevelCommands(name, machineControlToplevelCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_machine_control_toplevel_commands" {
-    machine_control_toplevel_commands = %q
+    name = %q
+    machine_control_toplevel_commands = {%s}
 }
-`, machineControlToplevelCommands)
+`, name, machineControlToplevelCommands)
 }
 
 func testAccAdmingroupName(name string) string {
@@ -1693,111 +1824,126 @@ resource "nios_security_admin_group" "test_name" {
 func testAccAdmingroupNetworkingSetCommands(name, networkingSetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_networking_set_commands" {
-    networking_set_commands = %q
+    name = %q
+    networking_set_commands = {%s}
 }
-`, networkingSetCommands)
+`, name, networkingSetCommands)
 }
 
 func testAccAdmingroupNetworkingShowCommands(name, networkingShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_networking_show_commands" {
-    networking_show_commands = %q
+    name = %q
+    networking_show_commands = {%s}
 }
-`, networkingShowCommands)
+`, name, networkingShowCommands)
 }
 
 func testAccAdmingroupPasswordSetting(name, passwordSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_password_setting" {
-    password_setting = %q
+	name = %q
+    password_setting = {%s}
+    use_password_setting = true
 }
-`, passwordSetting)
+`, name, passwordSetting)
 }
 
 func testAccAdmingroupRoles(name, roles string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_roles" {
-    roles = %q
+	name = %q
+    roles = %s
 }
-`, roles)
+`, name, roles)
 }
 
 func testAccAdmingroupSamlSetting(name, samlSetting string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_saml_setting" {
-    saml_setting = %q
+	name = %q
+    saml_setting = {%s}
 }
-`, samlSetting)
+`, name, samlSetting)
 }
 
 func testAccAdmingroupSecuritySetCommands(name, securitySetCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_security_set_commands" {
-    security_set_commands = %q
+	name = %q
+    security_set_commands = {%s}
 }
-`, securitySetCommands)
+`, name, securitySetCommands)
 }
 
 func testAccAdmingroupSecurityShowCommands(name, securityShowCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_security_show_commands" {
-    security_show_commands = %q
+    name = %q
+    security_show_commands = {%s}
 }
-`, securityShowCommands)
+`, name, securityShowCommands)
 }
 
-func testAccAdmingroupSuperuser(name, superuser string) string {
+func testAccAdmingroupSuperuser(name string, superuser bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_superuser" {
-    superuser = %q
+	name = %q
+    superuser = %t
 }
-`, superuser)
+`, name, superuser)
 }
 
 func testAccAdmingroupTroubleShootingToplevelCommands(name, troubleShootingToplevelCommands string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_trouble_shooting_toplevel_commands" {
-    trouble_shooting_toplevel_commands = %q
+    name = %q
+    trouble_shooting_toplevel_commands = {%s}
 }
-`, troubleShootingToplevelCommands)
+`, name, troubleShootingToplevelCommands)
 }
 
-func testAccAdmingroupUseAccountInactivityLockoutEnable(name, useAccountInactivityLockoutEnable string) string {
+func testAccAdmingroupUseAccountInactivityLockoutEnable(name string, useAccountInactivityLockoutEnable bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_use_account_inactivity_lockout_enable" {
-    use_account_inactivity_lockout_enable = %q
+    name = %q
+    use_account_inactivity_lockout_enable = %t
 }
-`, useAccountInactivityLockoutEnable)
+`, name, useAccountInactivityLockoutEnable)
 }
 
-func testAccAdmingroupUseDisableConcurrentLogin(name, useDisableConcurrentLogin string) string {
+func testAccAdmingroupUseDisableConcurrentLogin(name string, useDisableConcurrentLogin bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_use_disable_concurrent_login" {
-    use_disable_concurrent_login = %q
+    name = %q
+    use_disable_concurrent_login = %t
 }
-`, useDisableConcurrentLogin)
+`, name, useDisableConcurrentLogin)
 }
 
-func testAccAdmingroupUseLockoutSetting(name, useLockoutSetting string) string {
+func testAccAdmingroupUseLockoutSetting(name string, useLockoutSetting bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_use_lockout_setting" {
-    use_lockout_setting = %q
+    name = %q
+    use_lockout_setting = %t
 }
-`, useLockoutSetting)
+`, name, useLockoutSetting)
 }
 
-func testAccAdmingroupUsePasswordSetting(name, usePasswordSetting string) string {
+func testAccAdmingroupUsePasswordSetting(name string, usePasswordSetting bool) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_use_password_setting" {
-    use_password_setting = %q
+    name = %q
+    use_password_setting = %t
 }
-`, usePasswordSetting)
+`, name, usePasswordSetting)
 }
 
 func testAccAdmingroupUserAccess(name, userAccess string) string {
 	return fmt.Sprintf(`
 resource "nios_security_admin_group" "test_user_access" {
-    user_access = %q
+    name = %q
+    user_access = %s
 }
-`, userAccess)
+`, name, userAccess)
 }

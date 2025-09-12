@@ -30,27 +30,23 @@ var AdmingroupCloudSetCommandsAttrTypes = map[string]attr.Type{
 
 var AdmingroupCloudSetCommandsResourceSchemaAttributes = map[string]schema.Attribute{
 	"set_cloud_services_portal_forcerefresh": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_cloud_services_portal": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If True then disable all fields",
 	},
 }

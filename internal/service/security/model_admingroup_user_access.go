@@ -30,7 +30,7 @@ var AdmingroupUserAccessAttrTypes = map[string]attr.Type{
 
 var AdmingroupUserAccessResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional: true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},

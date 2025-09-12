@@ -6,15 +6,15 @@ resource "nios_security_admin_group" "admin_group_basic_fields" {
   extattrs = {
     Site = "location-1"
   }
-  admin_set_commands = {
-    set_collect_old_logs = true
-    set_core_files_quota = false
-  }
-  # access_method = ["GUI", "API"]
 }
 
 // Create an Admin Group with Additional Fields
 resource "nios_security_admin_group" "admin_group_additional_fields" {
   name    = "example_admin_group2"
-  
+  admin_set_commands = {
+    set_collect_old_logs = true
+    set_core_files_quota = false
+  }
+  access_method = ["GUI", "API", "CLI"]
+  admin
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -47,67 +46,56 @@ var AdmingroupGridSetCommandsResourceSchemaAttributes = map[string]schema.Attrib
 	"set_default_revert_window": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_dscp": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_membership": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_nogrid": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_nomastergrid": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_promote_master": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_revert_grid": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_token": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_test_promote_master": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then disable all fields",
 	},
 }

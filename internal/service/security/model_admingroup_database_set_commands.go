@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -45,61 +44,51 @@ var AdmingroupDatabaseSetCommandsResourceSchemaAttributes = map[string]schema.At
 	"set_named_max_journal_size": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_txn_trace": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_database_transfer": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_db_rollover": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_db_snapshot": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_dbsize": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_debug_tools": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"set_circ_txn_trace": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If True then disable all fields",
 	},
 }
