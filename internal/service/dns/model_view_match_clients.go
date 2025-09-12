@@ -20,6 +20,7 @@ import (
 )
 
 type ViewMatchClientsModel struct {
+	Ref            types.String `tfsdk:"ref"`
 	Address        types.String `tfsdk:"address"`
 	Struct         types.String `tfsdk:"struct"`
 	Permission     types.String `tfsdk:"permission"`
@@ -30,6 +31,7 @@ type ViewMatchClientsModel struct {
 }
 
 var ViewMatchClientsAttrTypes = map[string]attr.Type{
+	"ref":               types.StringType,
 	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
@@ -47,6 +49,21 @@ var ViewMatchClientsResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.OneOf("addressac", "tsigac"),
 		},
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
+	},
+	"ref": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("struct"),
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
+			),
+		},
+		MarkdownDescription: "The reference to the Named ACL object.",
 	},
 	"address": schema.StringAttribute{
 		Optional: true,
@@ -138,6 +155,7 @@ func (m *ViewMatchClientsModel) Expand(ctx context.Context, diags *diag.Diagnost
 		return nil
 	}
 	to := &dns.ViewMatchClients{
+		Ref:            flex.ExpandStringPointer(m.Ref),
 		Address:        flex.ExpandStringPointer(m.Address),
 		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
@@ -167,6 +185,7 @@ func (m *ViewMatchClientsModel) Flatten(ctx context.Context, from *dns.ViewMatch
 	if m == nil {
 		*m = ViewMatchClientsModel{}
 	}
+	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
