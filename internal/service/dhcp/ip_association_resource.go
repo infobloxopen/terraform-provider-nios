@@ -1,0 +1,372 @@
+package dhcp
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+)
+
+var readableAttributesForIpAssociation = "aliases,allow_telnet,cli_credentials,cloud_info,comment,configure_for_dns,creation_time,ddns_protected,device_description,device_location,device_type,device_vendor,disable,disable_discovery,dns_aliases,dns_name,extattrs,ipv4addrs,ipv6addrs,last_queried,ms_ad_user_data,name,network_view,rrset_order,snmp3_credential,snmp_credential,ttl,use_cli_credentials,use_dns_ea_inheritance,use_snmp3_credential,use_snmp_credential,use_ttl,view,zone"
+
+// Ensure provider defined types fully satisfy framework interfaces.
+var _ resource.Resource = &IpAssociationResource{}
+
+// var _ resource.ResourceWithImportState = &IpAssociationResource{}
+
+func NewIpAssociationResource() resource.Resource {
+	return &IpAssociationResource{}
+}
+
+// IpAssociationResource defines the resource implementation.
+type IpAssociationResource struct {
+	client *niosclient.APIClient
+}
+
+func (r *IpAssociationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "dns_ip_association"
+}
+
+func (r *IpAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		MarkdownDescription: "",
+		Attributes:          IpAssociationResourceSchemaAttributes,
+	}
+}
+
+func (r *IpAssociationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*niosclient.APIClient)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *niosclient.APIClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = client
+}
+
+func (r *IpAssociationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data IpAssociationModel
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	hostRecord, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record, got error: %s", err))
+		return
+	}
+
+	data.Ref = types.StringValue(ref)
+	data.InternalID = types.StringValue(internalID)
+
+	// Update the host record with DHCP settings
+	updatedHostRec, err := r.updateHostRecordDHCP(ctx, hostRecord, &data)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update host record with DHCP settings, got error: %s", err))
+		return
+	}
+
+	// Extract DHCP-specific data from response
+	data = r.flattenDHCPData(updatedHostRec, data)
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *IpAssociationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data IpAssociationModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	hostRecord, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record, got error: %s", err))
+		return
+	}
+
+	data.Ref = types.StringValue(ref)
+	data.InternalID = types.StringValue(internalID)
+
+	// Update data with current DHCP settings
+	data = r.flattenDHCPData(hostRecord, data)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *IpAssociationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var diags diag.Diagnostics
+	var data IpAssociationModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	diags = req.State.GetAttribute(ctx, path.Root("internal_id"), &data.InternalID)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	hostRecord, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record, got error: %s", err))
+		return
+	}
+
+	data.Ref = types.StringValue(ref)
+	data.InternalID = types.StringValue(internalID)
+
+	updatedHostRec, err := r.updateHostRecordDHCP(ctx, hostRecord, &data)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update DHCP settings, got error: %s", err))
+		return
+	}
+
+	// Update data with response
+	data = r.flattenDHCPData(updatedHostRec, data)
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *IpAssociationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data IpAssociationModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	hostRecord, _, _, notFound, err := r.getOrFindHostRecord(ctx, &data)
+	if err != nil {
+		if notFound {
+			// If the host record is already gone, consider it deleted
+			resp.State.RemoveResource(ctx)
+			return
+		}
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record, got error: %s", err))
+		return
+	}
+
+	// Clear DHCP settings (reset to defaults) but keep the host record
+	clearData := IpAssociationModel{
+		MacAddr:          types.StringValue(""),
+		Duid:             types.StringValue(""),
+		ConfigureForDhcp: types.BoolValue(false),
+	}
+
+	_, err = r.updateHostRecordDHCP(ctx, hostRecord, &clearData)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to clear DHCP settings, got error: %s", err))
+		return
+	}
+}
+
+func (r *IpAssociationResource) getOrFindHostRecord(ctx context.Context, data *IpAssociationModel) (*dns.RecordHost, string, string, bool, error) {
+	// Always try ref first if it exists
+	if !data.Ref.IsNull() && !data.Ref.IsUnknown() && data.Ref.ValueString() != "" {
+		hostRecord, notFound, err := r.getHostRecordByRef(ctx, data.Ref.ValueString())
+		if err == nil {
+			internalID, err := r.extractInternalIDFromExtAttrs(hostRecord)
+			if err != nil {
+				return nil, "", "", notFound, fmt.Errorf("failed to extract internal_id from extensible attributes: %w", err)
+			}
+			return hostRecord, data.Ref.ValueString(), internalID, notFound, nil
+		}
+	}
+
+	// Fallback to internal_id search
+	if !data.InternalID.IsNull() && !data.InternalID.IsUnknown() && data.InternalID.ValueString() != "" {
+		hostRecord, notFound, err := r.getHostRecordByInternalID(ctx, data.InternalID.ValueString())
+		if err != nil {
+			return nil, "", "", notFound, fmt.Errorf("host record not found by ref or internal_id: %w", err)
+		}
+		if hostRecord != nil && hostRecord.Ref == nil {
+			return nil, "", "", notFound, fmt.Errorf("nil ref found on host record located by internal_id")
+		}
+		return hostRecord, *hostRecord.Ref, data.InternalID.ValueString(), notFound, nil
+	}
+
+	return nil, "", "", false, fmt.Errorf("both ref and internal_id are empty or null")
+}
+
+func (r *IpAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.RecordHost) (string, error) {
+	if hostRecord.ExtAttrs == nil {
+		return "", fmt.Errorf("no extensible attributes found")
+	}
+
+	extAttrs := *hostRecord.ExtAttrs
+	if internalAttr, exists := extAttrs[terraformInternalIDEA]; exists {
+		if stringVal, ok := internalAttr.Value.(string); ok && stringVal != "" {
+			return stringVal, nil
+		}
+	}
+
+	return "", fmt.Errorf("terraform internal ID not found in extensible attributes")
+}
+
+func (r *IpAssociationResource) getHostRecordByRef(ctx context.Context, ref string) (*dns.RecordHost, bool, error) {
+	apiRes, httpRes, err := r.client.DNSAPI.
+		RecordHostAPI.
+		Read(ctx, utils.ExtractResourceRef(ref)).
+		ReturnFieldsPlus(readableAttributesForIpAssociation).
+		ReturnAsObject(1).
+		Execute()
+
+	if err != nil {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			return nil, true, fmt.Errorf("host record not found with ref: %s", ref)
+		}
+		return nil, false, fmt.Errorf("failed to read host record by ref %s: %w", ref, err)
+	}
+
+	hostRecord := apiRes.GetRecordHostResponseObjectAsResult.GetResult()
+	return &hostRecord, false, nil
+}
+
+func (r *IpAssociationResource) getHostRecordByInternalID(ctx context.Context, internalID string) (*dns.RecordHost, bool, error) {
+	searchFilter := map[string]any{
+		terraformInternalIDEA: internalID,
+	}
+
+	apiRes, httpRes, err := r.client.DNSAPI.
+		RecordHostAPI.
+		List(ctx).
+		Extattrfilter(searchFilter).
+		ReturnAsObject(1).
+		ReturnFieldsPlus(readableAttributesForIpAssociation).
+		Execute()
+
+	if err != nil {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			return nil, true, fmt.Errorf("host record not found with internal_id: %s", internalID)
+		}
+		return nil, false, fmt.Errorf("failed to search host record by internal_id %s: %w", internalID, err)
+	}
+
+	results := apiRes.ListRecordHostResponseObject.GetResult()
+	if len(results) == 0 {
+		return nil, false, fmt.Errorf("no host record found with internal_id: %s", internalID)
+	}
+
+	return &results[0], false, nil
+}
+
+func (r *IpAssociationResource) updateHostRecordDHCP(ctx context.Context, hostRec *dns.RecordHost, data *IpAssociationModel) (*dns.RecordHost, error) {
+	// Build update request preserving all existing settings except DHCP
+	updateReq := *hostRec
+
+	// Update IPv4 DHCP settings
+	if len(updateReq.Ipv4addrs) > 0 {
+		updateReq.Ipv4addrs[0].Mac = flex.ExpandStringPointer(data.MacAddr)
+		updateReq.Ipv4addrs[0].ConfigureForDhcp = flex.ExpandBoolPointer(data.ConfigureForDhcp)
+	}
+
+	// Update IPv6 DHCP settings
+	if len(updateReq.Ipv6addrs) > 0 {
+		ipv6 := &updateReq.Ipv6addrs[0]
+		match_client := ""
+		if !data.Duid.IsNull() && data.Duid.ValueString() != "" {
+			ipv6.Duid = flex.ExpandStringPointer(data.Duid)
+			match_client = "DUID"
+		} else if !data.MacAddr.IsNull() && data.MacAddr.ValueString() != "" {
+			ipv6.Mac = flex.ExpandStringPointer(data.MacAddr)
+			match_client = "MAC_ADDRESS"
+		}
+		ipv6.ConfigureForDhcp = flex.ExpandBoolPointer(data.ConfigureForDhcp)
+		if data.ConfigureForDhcp.ValueBool() && match_client != "" {
+			ipv6.MatchClient = &match_client
+		}
+	}
+
+	// Clear out read-only fields that should not be sent in update
+	updateReq.CloudInfo = nil
+	updateReq.CreationTime = nil
+	updateReq.DnsName = nil
+	updateReq.LastQueried = nil
+	updateReq.Zone = nil
+	if len(updateReq.Ipv4addrs) > 0 {
+		updateReq.Ipv4addrs[0].Host = nil
+	}
+	if len(updateReq.Ipv6addrs) > 0 {
+		updateReq.Ipv6addrs[0].Host = nil
+	}
+	updateReq.NetworkView = nil
+
+	apiRes, _, err := r.client.DNSAPI.
+		RecordHostAPI.
+		Update(ctx, utils.ExtractResourceRef(*hostRec.Ref)).
+		RecordHost(updateReq).
+		ReturnFieldsPlus(readableAttributesForIpAssociation).
+		ReturnAsObject(1).
+		Execute()
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := apiRes.UpdateRecordHostResponseAsObject.GetResult()
+	return &result, nil
+}
+
+func (r *IpAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IpAssociationModel) IpAssociationModel {
+	// Extract DHCP settings from IPv4 addresses
+	if hostRec != nil && len(hostRec.Ipv4addrs) > 0 {
+		ipv4 := hostRec.Ipv4addrs[0]
+		if ipv4.Mac != nil {
+			data.MacAddr = types.StringValue(*ipv4.Mac)
+		}
+		if ipv4.ConfigureForDhcp != nil {
+			data.ConfigureForDhcp = types.BoolValue(*ipv4.ConfigureForDhcp)
+		}
+	}
+
+	// Extract DHCP settings from IPv6 addresses
+	if hostRec != nil && len(hostRec.Ipv6addrs) > 0 {
+		ipv6 := hostRec.Ipv6addrs[0]
+		if ipv6.Duid != nil {
+			data.Duid = types.StringValue(*ipv6.Duid)
+		}
+		if ipv6.ConfigureForDhcp != nil {
+			data.ConfigureForDhcp = types.BoolValue(*ipv6.ConfigureForDhcp)
+		}
+	}
+
+	return data
+}
