@@ -8,9 +8,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -495,4 +497,92 @@ func ConvertMapToHCL(data map[string]any) string {
 	}
 
 	return fmt.Sprintf("{\n%s\n}", strings.Join(keyValues, "\n"))
+}
+
+// UsePlanValueForAttributes preserves planned values for specified attributes in nested list elements
+// when the backend doesn't return those values.
+func UsePlanValueForAttributes(ctx context.Context, plannedList, currentList types.List, attributeNames []string, attrTypes map[string]attr.Type, diags *diag.Diagnostics) types.List {
+	// Return current list if either is null/unknown
+	if plannedList.IsNull() || plannedList.IsUnknown() || currentList.IsNull() || currentList.IsUnknown() {
+		return currentList
+	}
+
+	// Convert to slices of types.Object
+	var plannedElements, currentElements []types.Object
+	diags.Append(plannedList.ElementsAs(ctx, &plannedElements, false)...)
+	diags.Append(currentList.ElementsAs(ctx, &currentElements, false)...)
+
+	if diags.HasError() {
+		return currentList
+	}
+
+	// Process each element pair
+	for i := 0; i < len(plannedElements) && i < len(currentElements); i++ {
+		plannedObj := plannedElements[i]
+		currentObj := currentElements[i]
+
+		if plannedObj.IsNull() || plannedObj.IsUnknown() || currentObj.IsNull() || currentObj.IsUnknown() {
+			continue
+		}
+
+		plannedAttrs := plannedObj.Attributes()
+		currentAttrs := currentObj.Attributes()
+		newAttrs := make(map[string]attr.Value)
+
+		// Copy all current attributes first
+		for k, v := range currentAttrs {
+			newAttrs[k] = v
+		}
+
+		changed := false
+
+		// Check each attribute name
+		for _, attributeName := range attributeNames {
+			if plannedVal, exists := plannedAttrs[attributeName]; exists {
+				if currentVal, currentExists := currentAttrs[attributeName]; currentExists {
+					// Check if current value is null/empty and planned value is not
+					shouldUsePlanned := false
+
+					switch plannedV := plannedVal.(type) {
+					case types.String:
+						if currentV, ok := currentVal.(types.String); ok {
+							shouldUsePlanned = !plannedV.IsNull() && !plannedV.IsUnknown() &&
+								(currentV.IsNull() || currentV.ValueString() == "")
+						}
+					case types.Bool:
+						if currentV, ok := currentVal.(types.Bool); ok {
+							shouldUsePlanned = !plannedV.IsNull() && !plannedV.IsUnknown() && currentV.IsNull()
+						}
+					case types.Int64:
+						if currentV, ok := currentVal.(types.Int64); ok {
+							shouldUsePlanned = !plannedV.IsNull() && !plannedV.IsUnknown() && currentV.IsNull()
+						}
+					}
+
+					if shouldUsePlanned {
+						newAttrs[attributeName] = plannedVal
+						changed = true
+					}
+				}
+			}
+		}
+
+		// Only create new object if there were changes
+		if changed {
+			newObj, d := types.ObjectValue(attrTypes, newAttrs)
+			diags.Append(d...)
+			if !diags.HasError() {
+				currentElements[i] = newObj
+			}
+		}
+	}
+
+	// Convert back to ListValue
+	elementType := types.ObjectType{AttrTypes: attrTypes}
+	updatedList, d := types.ListValueFrom(ctx, elementType, currentElements)
+	diags.Append(d...)
+	if diags.HasError() {
+		return currentList
+	}
+	return updatedList
 }

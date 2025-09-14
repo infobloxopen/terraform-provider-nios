@@ -24,6 +24,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -763,8 +764,8 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthMsDcNsRecordCreationResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -1292,6 +1293,12 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	if m == nil {
 		*m = ZoneAuthModel{}
 	}
+
+	plannedExternalSecondaries := m.ExternalSecondaries
+	plannedAllowQuery := m.AllowQuery
+	plannedAllowTransfer := m.AllowTransfer
+	plannedAllowUpdate := m.AllowUpdate
+
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Address = flex.FlattenIPAddress(from.Address)
 	m.AllowActiveDir = flex.FlattenFrameworkListNestedBlock(ctx, from.AllowActiveDir, ZoneAuthAllowActiveDirAttrTypes, diags, FlattenZoneAuthAllowActiveDir)
@@ -1404,4 +1411,10 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.View = flex.FlattenStringPointer(from.View)
 	m.ZoneFormat = flex.FlattenStringPointer(from.ZoneFormat)
 	m.ZoneNotQueriedEnabledTime = flex.FlattenInt64Pointer(from.ZoneNotQueriedEnabledTime)
+
+	// Set attributes to planned value if they are present in the plan but missing in the API response
+	m.ExternalSecondaries = utils.UsePlanValueForAttributes(ctx, plannedExternalSecondaries, m.ExternalSecondaries, []string{"tsig_key_name"}, ZoneAuthExternalSecondariesAttrTypes, diags)
+	m.AllowQuery = utils.UsePlanValueForAttributes(ctx, plannedAllowQuery, m.AllowQuery, []string{"use_tsig_key_name"}, ZoneAuthAllowQueryAttrTypes, diags)
+	m.AllowTransfer = utils.UsePlanValueForAttributes(ctx, plannedAllowTransfer, m.AllowTransfer, []string{"use_tsig_key_name"}, ZoneAuthAllowTransferAttrTypes, diags)
+	m.AllowUpdate = utils.UsePlanValueForAttributes(ctx, plannedAllowUpdate, m.AllowUpdate, []string{"use_tsig_key_name"}, ZoneAuthAllowUpdateAttrTypes, diags)
 }
