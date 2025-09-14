@@ -156,7 +156,7 @@ Optional:
 
 - `comment` (String) The comment for the credential.
 - `credential_group` (String) Group for the CLI credential.
-- `password` (String) The CLI password.
+- `password` (String, Sensitive) The CLI password.
 - `user` (String) The CLI user name.
 
 Read-Only:
@@ -242,10 +242,10 @@ Required:
 
 Optional:
 
-- `authentication_password` (String) Authentication password for the SNMPv3 user.
+- `authentication_password` (String, Sensitive) Authentication password for the SNMPv3 user.
 - `comment` (String) Comments for the SNMPv3 user.
 - `credential_group` (String) Group for the SNMPv3 credential.
-- `privacy_password` (String) Privacy password for the SNMPv3 user.
+- `privacy_password` (String, Sensitive) Privacy password for the SNMPv3 user.
 
 
 <a id="nestedatt--result--snmp_credential"></a>
