@@ -437,10 +437,40 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			}
 		}
 	}
+
+	if !data.AllowTelnet.IsUnknown() && !data.AllowTelnet.IsNull() && data.AllowTelnet.ValueBool() {
+		isTelnet := false
+		if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
+			// Iterate through cli_credentials to check if an element has credentials_type set to "telnet"
+			var cliCredentials []FixedaddressCliCredentialsModel
+			diags := data.CliCredentials.ElementsAs(ctx, &cliCredentials, false)
+			resp.Diagnostics.Append(diags...)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+
+			for _, credentials := range cliCredentials {
+				if credentials.CredentialType.IsUnknown() || credentials.CredentialType.IsNull() {
+					continue
+				}
+				credentialsType := credentials.CredentialType.ValueString()
+				if credentialsType == "TELNET" {
+					isTelnet = true
+					break
+				}
+			}
+		}
+		if !isTelnet {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("allow_telnet"),
+				"Invalid configuration",
+				"The 'allow_telnet' attribute must be set to false when 'cli_credentials' is not set or does not contain any credentials with 'credentials_type' set to 'TELNET'.",
+			)
+		}
+	}
+
 	if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
-		var useCLICredential bool
-		req.Config.GetAttribute(ctx, path.Root("use_cli_credentials"), &useCLICredential)
-		if !useCLICredential {
+		if !data.UseCliCredentials.IsUnknown() && !data.UseCliCredentials.IsNull() && !data.UseCliCredentials.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("cli_credentials"),
 				"Invalid configuration",
@@ -449,10 +479,8 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			)
 		}
 	}
-	if !data.SnmpCredential.IsNull() && !data.SnmpCredential.IsUnknown() {
-		var useSNMPCredential bool
-		req.Config.GetAttribute(ctx, path.Root("use_snmp_credential"), &useSNMPCredential)
-		if !useSNMPCredential {
+	if !data.SnmpCredential.IsUnknown() && !data.SnmpCredential.IsNull() {
+		if !data.UseSnmpCredential.IsUnknown() && !data.UseSnmpCredential.IsNull() && !data.UseSnmpCredential.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("snmp_credential"),
 				"Invalid configuration",
@@ -461,15 +489,22 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			)
 		}
 	}
-	if !data.Snmp3Credential.IsNull() && !data.Snmp3Credential.IsUnknown() {
-		var useSNMP3Credential bool
-		req.Config.GetAttribute(ctx, path.Root("use_snmp3_credential"), &useSNMP3Credential)
-		if !useSNMP3Credential {
+
+	if !data.Snmp3Credential.IsUnknown() && !data.Snmp3Credential.IsNull() {
+		if !data.UseSnmp3Credential.IsUnknown() && !data.UseSnmp3Credential.IsNull() && !data.UseSnmp3Credential.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("snmp3_credential"),
 				"Invalid configuration",
 				"The 'snmp3_credential' attribute is set, but 'use_snmp3_credential' is false. "+
 					"Please set 'use_snmp3_credential' to true to use SNMP3 Credentials.",
+			)
+		}
+		if !data.UseCliCredentials.IsUnknown() && !data.UseCliCredentials.IsNull() && !data.UseCliCredentials.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp3_credential"),
+				"Invalid configuration",
+				"The 'snmp3_credential' attribute is set, but 'use_cli_credentials' is false. "+
+					"Please set 'use_cli_credentials' to true to use SNMP3 Credentials.",
 			)
 		}
 	}

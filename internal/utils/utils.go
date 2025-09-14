@@ -8,9 +8,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -493,4 +496,251 @@ func ConvertMapToHCL(data map[string]any) string {
 	}
 
 	return fmt.Sprintf("{\n%s\n}", strings.Join(keyValues, "\n"))
+}
+
+// ReorderAndFilterNestedListResponse reorders and filters the state list to match the order of the plan list based on a primary key field.
+func ReorderAndFilterNestedListResponse(
+	ctx context.Context,
+	planValue attr.Value,
+	stateValue attr.Value,
+	primaryKey string,
+) (attr.Value, *diag.Diagnostics) {
+
+	var diags diag.Diagnostics
+
+	if planValue.IsNull() || planValue.IsUnknown() {
+		return stateValue, &diags
+	}
+	if stateValue.IsNull() || stateValue.IsUnknown() {
+		return planValue, &diags
+	}
+
+	planList, ok := planValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "planValue must be a ListValue")
+		return stateValue, &diags
+	}
+	stateList, ok := stateValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "stateValue must be a ListValue")
+		return planValue, &diags
+	}
+
+	// Convert state list into a lookup by primary key
+	stateMap := make(map[string]attr.Value)
+	for _, v := range stateList.Elements() {
+		obj := v.(basetypes.ObjectValue)
+		keyAttr, ok := obj.Attributes()[primaryKey]
+		if !ok {
+			diags.AddError("Missing Primary Key", fmt.Sprintf("State object missing primary key: %s", primaryKey))
+			continue
+		}
+		if keyAttr.IsNull() || keyAttr.IsUnknown() {
+			continue
+		}
+		key := keyAttr.(basetypes.StringValue).ValueString()
+		stateMap[key] = v
+	}
+
+	// Rebuild state list in the same order as plan
+	var reordered []attr.Value
+	for _, v := range planList.Elements() {
+		obj := v.(basetypes.ObjectValue)
+		keyAttr := obj.Attributes()[primaryKey]
+		if keyAttr.IsNull() || keyAttr.IsUnknown() {
+			continue
+		}
+		key := keyAttr.(basetypes.StringValue).ValueString()
+
+		// Use existing state object if found, else use planned object
+		if stateObj, exists := stateMap[key]; exists {
+			reordered = append(reordered, stateObj)
+		} else {
+			reordered = append(reordered, v)
+		}
+	}
+
+	// Build new ListValue
+	newList, d := basetypes.NewListValue(planList.ElementType(ctx), reordered)
+	diags.Append(d...)
+
+	return newList, &diags
+}
+
+// CopyFieldFromPlanToRespList copies a specific field from each object in the plan list to the corresponding object in the response list.
+// The lists must be of the same length and contain objects in the same order of the plan values.
+func CopyFieldFromPlanToRespList(ctx context.Context, planValue, respValue attr.Value, fieldName string) (attr.Value, *diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Check if both values are null or unknown
+	if planValue.IsNull() || planValue.IsUnknown() {
+		return respValue, &diags
+	}
+
+	if respValue.IsNull() || respValue.IsUnknown() {
+		return respValue, &diags
+	}
+
+	planList, ok := planValue.(types.List)
+	if !ok {
+		diags.AddError(
+			"Invalid Plan Value Type",
+			fmt.Sprintf("Expected types.List, got %T", planValue),
+		)
+		return respValue, &diags
+	}
+
+	respList, ok := respValue.(types.List)
+	if !ok {
+		diags.AddError(
+			"Invalid Response Value Type",
+			fmt.Sprintf("Expected types.List, got %T", respValue),
+		)
+		return respValue, &diags
+	}
+
+	// Get the elements from both lists
+	planElements := planList.Elements()
+	respElements := respList.Elements()
+
+	if len(planElements) != len(respElements) {
+		diags.AddError(
+			"List Length Mismatch",
+			fmt.Sprintf("Plan list has %d elements, response list has %d elements",
+				len(planElements), len(respElements)),
+		)
+		return respValue, &diags
+	}
+
+	modifiedElements := make([]attr.Value, len(respElements))
+
+	for i, respElement := range respElements {
+		planElement := planElements[i]
+
+		// Convert elements to objects
+		planObj, ok := planElement.(types.Object)
+		if !ok {
+			diags.AddError(
+				"Invalid Plan Element Type",
+				fmt.Sprintf("Expected types.Object at index %d, got %T", i, planElement),
+			)
+			return respValue, &diags
+		}
+
+		respObj, ok := respElement.(types.Object)
+		if !ok {
+			diags.AddError(
+				"Invalid Response Element Type",
+				fmt.Sprintf("Expected types.Object at index %d, got %T", i, respElement),
+			)
+			return respValue, &diags
+		}
+
+		planAttrs := planObj.Attributes()
+		respAttrs := respObj.Attributes()
+
+		// Check if the field exists in the plan object
+		planFieldValue, exists := planAttrs[fieldName]
+		if !exists {
+			diags.AddError(
+				"Field Not Found in Plan",
+				fmt.Sprintf("Field '%s' not found in plan object at index %d", fieldName, i),
+			)
+			return respValue, &diags
+		}
+
+		// Check if the field exists in the response object
+		if _, exists := respAttrs[fieldName]; !exists {
+			diags.AddError(
+				"Field Not Found in Response",
+				fmt.Sprintf("Field '%s' not found in response object at index %d", fieldName, i),
+			)
+			return respValue, &diags
+		}
+
+		newAttrs := make(map[string]attr.Value)
+		for k, v := range respAttrs {
+			newAttrs[k] = v
+		}
+		newAttrs[fieldName] = planFieldValue
+
+		// Create a new object with the modified attributes
+		newObj, objDiags := types.ObjectValue(respObj.AttributeTypes(ctx), newAttrs)
+		diags.Append(objDiags...)
+		if objDiags.HasError() {
+			return respValue, &diags
+		}
+
+		modifiedElements[i] = newObj
+	}
+
+	// Create a new list with the modified elements
+	newList, listDiags := types.ListValue(respList.ElementType(ctx), modifiedElements)
+	diags.Append(listDiags...)
+	if listDiags.HasError() {
+		return respValue, &diags
+	}
+
+	return newList, &diags
+}
+
+// CopyFieldFromPlanToRespObject copies a specific field from the plan object to the response object.
+func CopyFieldFromPlanToRespObject(ctx context.Context, planValue, respValue attr.Value, fieldName string) (attr.Value, *diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if planValue.IsNull() || planValue.IsUnknown() {
+		return respValue, &diags
+	}
+
+	if respValue.IsNull() || respValue.IsUnknown() {
+		return respValue, &diags
+	}
+
+	planObject, ok := planValue.(types.Object)
+	if !ok {
+		diags.AddError(
+			"Invalid Plan Value Type",
+			fmt.Sprintf("Expected types.Object, got %T", planValue),
+		)
+		return respValue, &diags
+	}
+
+	respObject, ok := respValue.(types.Object)
+	if !ok {
+		diags.AddError(
+			"Invalid Response Value Type",
+			fmt.Sprintf("Expected types.Object, got %T", respValue),
+		)
+		return respValue, &diags
+	}
+
+	planAttrs := planObject.Attributes()
+	respAttrs := respObject.Attributes()
+
+	planFieldValue, exists := planAttrs[fieldName]
+	if !exists {
+		diags.AddError(
+			"Field Not Found in Plan",
+			fmt.Sprintf("Field '%s' not found in plan object", fieldName),
+		)
+		return respValue, &diags
+	}
+
+	if _, exists := respAttrs[fieldName]; !exists {
+		diags.AddError(
+			"Field Not Found in Response",
+			fmt.Sprintf("Field '%s' not found in response object", fieldName),
+		)
+		return respValue, &diags
+	}
+
+	respAttrs[fieldName] = planFieldValue
+
+	newObj, objDiags := types.ObjectValue(respObject.AttributeTypes(ctx), respAttrs)
+	diags.Append(objDiags...)
+	if objDiags.HasError() {
+		return respValue, &diags
+	}
+
+	return newObj, &diags
 }

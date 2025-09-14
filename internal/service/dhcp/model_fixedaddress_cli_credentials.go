@@ -45,8 +45,9 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		MarkdownDescription: "The CLI user name.",
 	},
 	"password": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Optional:  true,
+		Computed:  true,
+		Sensitive: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},

@@ -26,6 +26,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -510,6 +511,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
+			objectvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
 		},
 		MarkdownDescription: "The SNMPv3 credential for this fixed address.For SNMP Credentials to be applied to this fixed address,.",
 	},
@@ -709,7 +711,18 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.AlwaysUpdateDns = types.BoolPointerValue(from.AlwaysUpdateDns)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
+	planCredentials := m.CliCredentials
 	m.CliCredentials = flex.FlattenFrameworkListNestedBlock(ctx, from.CliCredentials, FixedaddressCliCredentialsAttrTypes, diags, FlattenFixedaddressCliCredentials)
+	if !planCredentials.IsUnknown() {
+		credentialVal, diags := utils.CopyFieldFromPlanToRespList(ctx, planCredentials, m.CliCredentials, "password")
+		if !diags.HasError() {
+			m.CliCredentials = credentialVal.(basetypes.ListValue)
+			reOrderedCredentials, diags := utils.ReorderAndFilterNestedListResponse(ctx, planCredentials, m.CliCredentials, "credential_type")
+			if !diags.HasError() {
+				m.CliCredentials = reOrderedCredentials.(basetypes.ListValue)
+			}
+		}
+	}
 	m.ClientIdentifierPrependZero = types.BoolPointerValue(from.ClientIdentifierPrependZero)
 	m.CloudInfo = FlattenFixedaddressCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
@@ -756,7 +769,18 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
+	planSnmp3Credential := m.Snmp3Credential
 	m.Snmp3Credential = FlattenFixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
+	if !planSnmp3Credential.IsUnknown() {
+		snmp3CredentialVal, diags := utils.CopyFieldFromPlanToRespObject(ctx, planSnmp3Credential, m.Snmp3Credential, "privacy_password")
+		if !diags.HasError() {
+			m.Snmp3Credential = snmp3CredentialVal.(types.Object)
+		}
+		snmp3CredentialVal2, diags := utils.CopyFieldFromPlanToRespObject(ctx, planSnmp3Credential, m.Snmp3Credential, "authentication_password")
+		if !diags.HasError() {
+			m.Snmp3Credential = snmp3CredentialVal2.(types.Object)
+		}
+	}
 	m.SnmpCredential = FlattenFixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
 	m.Template = flex.FlattenStringPointer(from.Template)
 	m.UseBootfile = types.BoolPointerValue(from.UseBootfile)

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -18,8 +19,6 @@ import (
 //TODO : Following Objects required configurations to be defined in the grid
 // - CLI Credentials
 // - Restart if Needed
-// - SNMP3 Credential , Use SNMP3 Credential
-// - SNMP Credential , Use SNMP Credential
 // - MS Server , Options
 
 //TODO : add tests
@@ -181,10 +180,10 @@ func TestAccFixedaddressResource_AllowTelnet(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressAllowTelnet(ip, "CIRCUIT_ID", agentCircuitID, "false"),
+				Config: testAccFixedaddressAllowTelnet(ip, "CIRCUIT_ID", agentCircuitID, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "allow_telnet", "false"),
+					resource.TestCheckResourceAttr(resourceName, "allow_telnet", "true"),
 				),
 			},
 		},
@@ -302,7 +301,7 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.password", ""),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_group", "default"),
 				),
@@ -313,9 +312,9 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", ""),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_TELNET"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "TELNET"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
 				),
 			},
@@ -325,7 +324,7 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", ""),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_TELNET"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
@@ -337,9 +336,9 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", ""),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_TELNET"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
 				),
 			},
@@ -1359,7 +1358,7 @@ func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
 func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_snmp3_credential"
 	var v dhcp.Fixedaddress
-	ip := "16.0.0.41"
+	ip := "16.0.0.121"
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1371,13 +1370,13 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "snmp", "MD5", "snmp1234", "3DES", "snmp1234", "SNMP3 Credential Comment", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.user", "snmp"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.authentication_protocol", "MD5"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.authentication_password", "snmp1234"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.privacy_protocol", "3DES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.privacy_password", "snmp1234"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.comment", "SNMP3 Credential Comment"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "snmp"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "MD5"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_password", "snmp1234"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "3DES"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_password", "snmp1234"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.credential_group", "default"),
 				),
 			},
 			//Update and Read
@@ -1385,13 +1384,13 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 				Config: testAccFixedaddressSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "SNMP3_USER_UPDATE", "SHA-224", "AUTH_PASSWORD", "AES-256", "PRIVACY_PASSWORD", "SNMP3 Credential Comment Updated", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.user", "SNMP3_USER_UPDATE"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.authentication_protocol", "SHA-224"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.authentication_password", "AUTH_PASSWORD"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.privacy_protocol", "AES-256"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.privacy_password", "PRIVACY_PASSWORD"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.comment", "SNMP3 Credential Comment Updated"),
-					resource.TestCheckResourceAttr(resourceName, "snmp_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "SNMP3_USER_UPDATE"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA-224"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_password", "AUTH_PASSWORD"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES-256"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_password", "PRIVACY_PASSWORD"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.comment", "SNMP3 Credential Comment Updated"),
+					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.credential_group", "default"),
 				),
 			},
 			//Delete testing automatically occurs in TestCase
@@ -2499,6 +2498,7 @@ resource "nios_dhcp_fixed_address" "test_snmp3_credential" {
 		credential_group = %q
 	}
 	use_snmp3_credential = %q
+	use_cli_credentials = true
 }
 `, ip, matchClient, agentCircuitID, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup, useSnmp3Credentials)
 }
