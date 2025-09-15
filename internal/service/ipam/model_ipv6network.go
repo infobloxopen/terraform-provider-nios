@@ -296,6 +296,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered bridge domain.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -304,6 +305,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered tenant.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -431,7 +433,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: Ipv6networkFederatedRealmsResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -540,7 +542,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network object.",
 		Computed:            true,
-		Default:             int64default.StaticInt64(27000),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_preferred_lifetime")),
 		},
@@ -758,7 +759,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},
-		Default: int64default.StaticInt64(43200),
 	},
 	"vlans": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
