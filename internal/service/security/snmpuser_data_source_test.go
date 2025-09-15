@@ -79,14 +79,14 @@ func testAccCheckSnmpuserResourceAttrPair(resourceName, dataSourceName string) [
 func testAccSnmpuserDataSourceConfigFilters(name, authentication_protocol, privacy_protocol string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmp_user" "test" {
-	  name = %q
+	  name 					  = %q
 	  authentication_protocol = %q
-	  privacy_protocol = %q
+	  privacy_protocol 		  = %q
 }
 
 data "nios_security_snmp_user" "test" {
   filters = {
-	  name = nios_security_snmp_user.test.name
+	name  = nios_security_snmp_user.test.name
   }
 }
 `, name, authentication_protocol, privacy_protocol)
@@ -95,11 +95,11 @@ data "nios_security_snmp_user" "test" {
 func testAccSnmpuserDataSourceConfigExtAttrFilters(name, authentication_protocol, privacy_protocol, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmp_user" "test" {
-  name = %q
+  name 					  = %q
   authentication_protocol = %q
-  privacy_protocol = %q
+  privacy_protocol 		  = %q
   extattrs = {
-    Site = %q
+    Site   = %q
   } 
 }
 

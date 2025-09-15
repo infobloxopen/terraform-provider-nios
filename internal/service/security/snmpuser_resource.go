@@ -64,13 +64,15 @@ func (r *SnmpuserResource) Configure(ctx context.Context, req resource.Configure
 }
 
 func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var authenticationProtocol, privacyProtocol types.String
+	var authenticationProtocol, privacyProtocol, authenticationPassword, privacyPassword types.String
 
 	req.Config.GetAttribute(ctx, path.Root("authentication_protocol"), &authenticationProtocol)
 	req.Config.GetAttribute(ctx, path.Root("privacy_protocol"), &privacyProtocol)
+	req.Config.GetAttribute(ctx, path.Root("authentication_password"), &authenticationPassword)
+	req.Config.GetAttribute(ctx, path.Root("privacy_password"), &privacyPassword)
 
-	if privacyProtocol.IsNull() || privacyProtocol.IsUnknown() ||
-		authenticationProtocol.IsNull() || authenticationProtocol.IsUnknown() {
+	if authenticationProtocol.IsNull() || authenticationProtocol.IsUnknown() ||
+		privacyProtocol.IsNull() || privacyProtocol.IsUnknown() {
 		return
 	}
 
@@ -78,7 +80,27 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 		if authenticationProtocol.ValueString() == "NONE" {
 			resp.Diagnostics.AddError(
 				"Invalid SNMPv3 Configuration",
-				"When privacy_protocol is set to a value other than 'NONE' (e.g., 'AES', 'DES'), the authentication_protocol must also be set to a value other than 'NONE' (e.g., 'SHA', 'MD5').",
+				"When privacy_protocol is set to a value other than 'NONE' (e.g., 'AES', 'DES'), authentication_protocol must also be set to a value other than 'NONE' (e.g., 'SHA', 'MD5').",
+			)
+		}
+	}
+
+	// Validate authentication password requirement
+	if authenticationProtocol.ValueString() != "NONE" {
+		if authenticationPassword.IsNull() || authenticationPassword.IsUnknown() || authenticationPassword.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"Missing Authentication Password",
+				"When authentication_protocol is set to a value other than 'NONE', authentication_password must be provided.",
+			)
+		}
+	}
+
+	// Validate privacy password requirement
+	if privacyProtocol.ValueString() != "NONE" {
+		if privacyPassword.IsNull() || privacyPassword.IsUnknown() || privacyPassword.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"Missing Privacy Password",
+				"When privacy_protocol is set to a value other than 'NONE', privacy_password must be provided.",
 			)
 		}
 	}

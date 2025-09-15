@@ -422,7 +422,7 @@ resource "nios_security_snmp_user" "test_comment" {
     name                  	= %q
     authentication_protocol = %q
     privacy_protocol      	= %q
-    comment = %q
+    comment 				= %q
 }
 `, name, authentication_protocol, privacy_protocol, comment)
 }
@@ -433,7 +433,7 @@ resource "nios_security_snmp_user" "test_disable" {
     name                  	= %q
     authentication_protocol = %q
     privacy_protocol        = %q
-    disable = %t
+    disable 				= %t
 }
 `, name, authentication_protocol, privacy_protocol, disable)
 }
