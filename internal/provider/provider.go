@@ -11,13 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/grid"
+	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
-	gridservice "github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
@@ -109,6 +110,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordNaptrResource,
 		dns.NewRecordTlsaResource,
 		dns.NewRecordCaaResource,
+		dns.NewRecordUnknownResource,
 		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
@@ -116,6 +118,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewZoneStubResource,
 		dns.NewNsgroupResource,
 		dns.NewNsgroupDelegationResource,
+		dns.NewNsgroupForwardingmemberResource,
+		dns.NewNsgroupForwardstubserverResource,
 		dns.NewNsgroupStubmemberResource,
 
 		dhcp.NewFixedaddressResource,
@@ -133,17 +137,22 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
 
-		misc.NewRulesetResource,
+		cloud.NewAwsrte53taskgroupResource,
+		cloud.NewAwsuserResource,
 
-		security.NewAdminroleResource,
 		security.NewAdminuserResource,
+		security.NewAdminroleResource,
+
+		misc.NewRulesetResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
 
 		acl.NewNamedaclResource,
 
-		gridservice.NewNatgroupResource,
+		grid.NewNatgroupResource,
+		grid.NewExtensibleattributedefResource,
+		grid.NewUpgradegroupResource,
 	}
 }
 
@@ -164,6 +173,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordNaptrDataSource,
 		dns.NewRecordTlsaDataSource,
 		dns.NewRecordCaaDataSource,
+		dns.NewRecordUnknownDataSource,
 		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
@@ -171,6 +181,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewZoneStubDataSource,
 		dns.NewNsgroupDataSource,
 		dns.NewNsgroupDelegationDataSource,
+		dns.NewNsgroupForwardingmemberDataSource,
+		dns.NewNsgroupForwardstubserverDataSource,
 		dns.NewNsgroupStubmemberDataSource,
 
 		dhcp.NewFixedaddressDataSource,
@@ -188,17 +200,22 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
 
-		misc.NewRulesetDataSource,
+		cloud.NewAwsrte53taskgroupDataSource,
+		cloud.NewAwsuserDataSource,
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+
+		misc.NewRulesetDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
 
 		acl.NewNamedaclDataSource,
 
-		gridservice.NewNatgroupDataSource,
+		grid.NewNatgroupDataSource,
+		grid.NewExtensibleattributedefDataSource,
+		grid.NewUpgradegroupDataSource,
 	}
 }
 
@@ -235,11 +252,11 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 	}
 
 	// Create EA if it doesn't exist
-	data := grid.Extensibleattributedef{
-		Name:    grid.PtrString(terraformInternalIDEA),
-		Type:    grid.PtrString("STRING"),
-		Comment: grid.PtrString("Internal ID for Terraform Resource"),
-		Flags:   grid.PtrString("CR"),
+	data := gridclient.Extensibleattributedef{
+		Name:    gridclient.PtrString(terraformInternalIDEA),
+		Type:    gridclient.PtrString("STRING"),
+		Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
+		Flags:   gridclient.PtrString("CR"),
 	}
 
 	_, _, err = client.GridAPI.ExtensibleattributedefAPI.

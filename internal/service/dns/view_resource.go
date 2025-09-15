@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -361,4 +362,50 @@ func (r *ViewResource) ImportState(ctx context.Context, req resource.ImportState
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *ViewResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data ViewModel
+
+	// Retrieve the resource configuration
+	diags := req.Config.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if filter_aaaa_list contains items with a ref field
+	if !data.FilterAaaaList.IsNull() && !data.FilterAaaaList.IsUnknown() {
+		var filterAaaaListItems []types.Object
+		diags = data.FilterAaaaList.ElementsAs(ctx, &filterAaaaListItems, false)
+		resp.Diagnostics.Append(diags...)
+
+		hasRefInList := false
+		for _, item := range filterAaaaListItems {
+			itemMap := item.Attributes()
+
+			// Check if ref field exists and is not empty
+			if refAttr, ok := itemMap["ref"]; ok {
+				refValue, _ := refAttr.(types.String)
+				if !refValue.IsNull() && !refValue.IsUnknown() && refValue.ValueString() != "" {
+					hasRefInList = true
+					break
+				}
+			}
+		}
+
+		// If ref field is found, validate filter_aaaa value
+		if hasRefInList {
+			if !data.FilterAaaa.IsNull() && !data.FilterAaaa.IsUnknown() {
+				filterAaaaValue := data.FilterAaaa.ValueString()
+				if filterAaaaValue == "NO" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("filter_aaaa"),
+						"Invalid Filter AAAA Configuration",
+						"When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', not 'NO'.",
+					)
+				}
+			}
+		}
+	}
 }
