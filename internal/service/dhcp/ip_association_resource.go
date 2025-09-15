@@ -35,7 +35,7 @@ type IpAssociationResource struct {
 }
 
 func (r *IpAssociationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dns_ip_association"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ip_association"
 }
 
 func (r *IpAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -305,9 +305,11 @@ func (r *IpAssociationResource) updateHostRecordDHCP(ctx context.Context, hostRe
 		if !data.Duid.IsNull() && data.Duid.ValueString() != "" {
 			ipv6.Duid = flex.ExpandStringPointer(data.Duid)
 			match_client = "DUID"
+			ipv6.Mac = nil
 		} else if !data.MacAddr.IsNull() && data.MacAddr.ValueString() != "" {
 			ipv6.Mac = flex.ExpandStringPointer(data.MacAddr)
 			match_client = "MAC_ADDRESS"
+			ipv6.Duid = nil
 		}
 		ipv6.ConfigureForDhcp = flex.ExpandBoolPointer(data.ConfigureForDhcp)
 		if data.ConfigureForDhcp.ValueBool() && match_client != "" {
