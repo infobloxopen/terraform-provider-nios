@@ -20,6 +20,8 @@ var readableAttributesForFtpuser = "extattrs,home_dir,permission,username"
 func TestAccFtpuserResource_basic(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test"
 	var v security.Ftpuser
+	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	password := acctest.RandomAlphaNumeric(12)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +29,12 @@ func TestAccFtpuserResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFtpuserBasicConfig(),
+				Config: testAccFtpuserBasicConfig(username, password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					// Test fields with default value
+					// Test fields with required value
+					resource.TestCheckResourceAttr(resourceName, "username", username),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +45,8 @@ func TestAccFtpuserResource_basic(t *testing.T) {
 func TestAccFtpuserResource_disappears(t *testing.T) {
 	resourceName := "nios_security_ftpuser.test"
 	var v security.Ftpuser
+	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	password := acctest.RandomAlphaNumeric(12)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +54,7 @@ func TestAccFtpuserResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckFtpuserDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFtpuserBasicConfig(),
+				Config: testAccFtpuserBasicConfig(username, password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
 					testAccCheckFtpuserDisappears(context.Background(), &v),
@@ -60,38 +65,12 @@ func TestAccFtpuserResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccFtpuserResource_Ref(t *testing.T) {
-	var resourceName = "nios_security_ftpuser.test_ref"
-	var v security.Ftpuser
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccFtpuserRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFtpuserRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccFtpuserResource_CreateHomeDir(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_create_home_dir"
 	var v security.Ftpuser
+	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	password := acctest.RandomAlphaNumeric(12)
+	homeDir := "/ftpusers"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +78,11 @@ func TestAccFtpuserResource_CreateHomeDir(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFtpuserCreateHomeDir("CREATE_HOME_DIR_REPLACE_ME"),
+				Config: testAccFtpuserCreateHomeDir(username, password, "false", homeDir),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "create_home_dir", "CREATE_HOME_DIR_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFtpuserCreateHomeDir("CREATE_HOME_DIR_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "create_home_dir", "CREATE_HOME_DIR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "create_home_dir", "false"),
+					resource.TestCheckResourceAttr(resourceName, "home_dir", homeDir),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +93,10 @@ func TestAccFtpuserResource_CreateHomeDir(t *testing.T) {
 func TestAccFtpuserResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_extattrs"
 	var v security.Ftpuser
+	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	password := acctest.RandomAlphaNumeric(12)
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,18 +104,22 @@ func TestAccFtpuserResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFtpuserExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccFtpuserExtAttrs(username, password, map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFtpuserExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccFtpuserExtAttrs(username, password, map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -150,6 +130,9 @@ func TestAccFtpuserResource_ExtAttrs(t *testing.T) {
 func TestAccFtpuserResource_HomeDir(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_home_dir"
 	var v security.Ftpuser
+	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	password := acctest.RandomAlphaNumeric(12)
+	homeDir := "/ftpusers"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,47 +140,10 @@ func TestAccFtpuserResource_HomeDir(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFtpuserHomeDir("HOME_DIR_REPLACE_ME"),
+				Config: testAccFtpuserHomeDir(username, password, homeDir, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "home_dir", "HOME_DIR_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFtpuserHomeDir("HOME_DIR_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "home_dir", "HOME_DIR_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccFtpuserResource_Password(t *testing.T) {
-	var resourceName = "nios_security_ftpuser.test_password"
-	var v security.Ftpuser
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccFtpuserPassword("PASSWORD_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password", "PASSWORD_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFtpuserPassword("PASSWORD_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password", "PASSWORD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "home_dir", homeDir),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -208,6 +154,8 @@ func TestAccFtpuserResource_Password(t *testing.T) {
 func TestAccFtpuserResource_Permission(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_permission"
 	var v security.Ftpuser
+	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	password := acctest.RandomAlphaNumeric(12)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,18 +163,18 @@ func TestAccFtpuserResource_Permission(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFtpuserPermission("PERMISSION_REPLACE_ME"),
+				Config: testAccFtpuserPermission(username, password, "RW"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "permission", "PERMISSION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "permission", "RW"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFtpuserPermission("PERMISSION_UPDATE_REPLACE_ME"),
+				Config: testAccFtpuserPermission(username, password, "RO"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "permission", "PERMISSION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "permission", "RO"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -237,6 +185,8 @@ func TestAccFtpuserResource_Permission(t *testing.T) {
 func TestAccFtpuserResource_Username(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_username"
 	var v security.Ftpuser
+	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	password := acctest.RandomAlphaNumeric(12)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -244,18 +194,10 @@ func TestAccFtpuserResource_Username(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFtpuserUsername("USERNAME_REPLACE_ME"),
+				Config: testAccFtpuserUsername(username, password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "username", "USERNAME_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFtpuserUsername("USERNAME_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "username", "USERNAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "username", username),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -321,66 +263,70 @@ func testAccCheckFtpuserDisappears(ctx context.Context, v *security.Ftpuser) res
 	}
 }
 
-func testAccFtpuserBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccFtpuserBasicConfig(username, password string) string {
+
 	return fmt.Sprintf(`
 resource "nios_security_ftpuser" "test" {
-}
-`)
-}
-
-func testAccFtpuserRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_security_ftpuser" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
-func testAccFtpuserCreateHomeDir(createHomeDir string) string {
-	return fmt.Sprintf(`
-resource "nios_security_ftpuser" "test_create_home_dir" {
-    create_home_dir = %q
-}
-`, createHomeDir)
-}
-
-func testAccFtpuserExtAttrs(extAttrs string) string {
-	return fmt.Sprintf(`
-resource "nios_security_ftpuser" "test_extattrs" {
-    extattrs = %q
-}
-`, extAttrs)
-}
-
-func testAccFtpuserHomeDir(homeDir string) string {
-	return fmt.Sprintf(`
-resource "nios_security_ftpuser" "test_home_dir" {
-    home_dir = %q
-}
-`, homeDir)
-}
-
-func testAccFtpuserPassword(password string) string {
-	return fmt.Sprintf(`
-resource "nios_security_ftpuser" "test_password" {
+    username = %q
     password = %q
 }
-`, password)
+`, username, password)
 }
 
-func testAccFtpuserPermission(permission string) string {
+func testAccFtpuserCreateHomeDir(username, password, createHomeDir, homeDir string) string {
+	return fmt.Sprintf(`
+resource "nios_security_ftpuser" "test_create_home_dir" {
+    username      = %q
+    password      = %q
+    create_home_dir = %q
+    home_dir     = %q
+}
+`, username, password, createHomeDir, homeDir)
+}
+
+func testAccFtpuserExtAttrs(username, password string, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
+	}
+	extattrsStr += "\t}"
+	return fmt.Sprintf(`
+resource "nios_security_ftpuser" "test_extattrs" {
+	username      = %q
+    password      = %q
+    extattrs      = %s
+}
+	`, username, password, extattrsStr)
+}
+
+func testAccFtpuserHomeDir(username, password, homeDir string, createHomeDir bool) string {
+	return fmt.Sprintf(`
+resource "nios_security_ftpuser" "test_home_dir" {
+    username      = %q
+    password      = %q
+    home_dir      = %q
+    create_home_dir = %t
+}
+`, username, password, homeDir, createHomeDir)
+}
+
+func testAccFtpuserPermission(username, password, permission string) string {
 	return fmt.Sprintf(`
 resource "nios_security_ftpuser" "test_permission" {
+    username = %q
+    password = %q
     permission = %q
 }
-`, permission)
+`, username, password, permission)
 }
 
-func testAccFtpuserUsername(username string) string {
+func testAccFtpuserUsername(username, password string) string {
 	return fmt.Sprintf(`
 resource "nios_security_ftpuser" "test_username" {
     username = %q
+    password = %q
 }
-`, username)
+`, username, password)
 }

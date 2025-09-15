@@ -36,7 +36,7 @@ func (r *FtpuserResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *FtpuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages an FTP user.",
 		Attributes:          FtpuserResourceSchemaAttributes,
 	}
 }
@@ -81,7 +81,7 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 	apiRes, _, err := r.client.SecurityAPI.
 		FtpuserAPI.
 		Create(ctx).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics)).
+		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
 		ReturnAsObject(1).
 		Execute()
@@ -254,7 +254,7 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 	apiRes, _, err := r.client.SecurityAPI.
 		FtpuserAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics)).
+		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
 		ReturnAsObject(1).
 		Execute()
@@ -342,7 +342,7 @@ func (r *FtpuserResource) ImportState(ctx context.Context, req resource.ImportSt
 	updateRes, _, err := r.client.SecurityAPI.
 		FtpuserAPI.
 		Update(ctx, resourceRef).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics)).
+		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
 		ReturnAsObject(1).
 		Execute()
