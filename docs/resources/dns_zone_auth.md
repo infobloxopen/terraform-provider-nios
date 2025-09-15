@@ -224,14 +224,12 @@ Optional:
 <a id="nestedatt--allow_query"></a>
 ### Nested Schema for `allow_query`
 
-Required:
-
-- `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
-
 Optional:
 
 - `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
+- `ref` (String) The reference to the Named ACL object.
+- `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
 - `tsig_key` (String) A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.
@@ -241,14 +239,12 @@ Optional:
 <a id="nestedatt--allow_transfer"></a>
 ### Nested Schema for `allow_transfer`
 
-Required:
-
-- `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
-
 Optional:
 
 - `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
+- `ref` (String) The reference to the Named ACL object.
+- `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
 - `tsig_key` (String) A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String)
@@ -258,14 +254,12 @@ Optional:
 <a id="nestedatt--allow_update"></a>
 ### Nested Schema for `allow_update`
 
-Required:
-
-- `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
-
 Optional:
 
 - `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
+- `ref` (String) The reference to the Named ACL object.
+- `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
 - `tsig_key` (String) A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.

@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -14,11 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneAuthAllowQueryModel struct {
+	Ref            types.String `tfsdk:"ref"`
 	Address        types.String `tfsdk:"address"`
 	Struct         types.String `tfsdk:"struct"`
 	Permission     types.String `tfsdk:"permission"`
@@ -29,6 +30,7 @@ type ZoneAuthAllowQueryModel struct {
 }
 
 var ZoneAuthAllowQueryAttrTypes = map[string]attr.Type{
+	"ref":               types.StringType,
 	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
@@ -40,11 +42,27 @@ var ZoneAuthAllowQueryAttrTypes = map[string]attr.Type{
 
 var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 	"struct": schema.StringAttribute{
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("addressac", "tsigac"),
 		},
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
+	},
+	"ref": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("struct"),
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
+			),
+		},
+		MarkdownDescription: "The reference to the Named ACL object.",
 	},
 	"address": schema.StringAttribute{
 		Optional:            true,
@@ -54,7 +72,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
-				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
 			),
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -67,7 +85,7 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
-				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
 			),
 		},
 	},
@@ -76,46 +94,29 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
 			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The TSIG key algorithm.",
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
+			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
 		},
+		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
 			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
-		Validators: []validator.Bool{
-			boolvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
-		},
 	},
 }
 
@@ -136,6 +137,7 @@ func (m *ZoneAuthAllowQueryModel) Expand(ctx context.Context, diags *diag.Diagno
 		return nil
 	}
 	to := &dns.ZoneAuthAllowQuery{
+		Ref:            flex.ExpandStringPointer(m.Ref),
 		Address:        flex.ExpandStringPointer(m.Address),
 		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
@@ -165,8 +167,9 @@ func (m *ZoneAuthAllowQueryModel) Flatten(ctx context.Context, from *dns.ZoneAut
 	if m == nil {
 		*m = ZoneAuthAllowQueryModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
+	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
 	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)

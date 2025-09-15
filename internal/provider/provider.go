@@ -19,7 +19,6 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
-	gridservice "github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
@@ -111,6 +110,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordNaptrResource,
 		dns.NewRecordTlsaResource,
 		dns.NewRecordCaaResource,
+		dns.NewRecordUnknownResource,
 		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
@@ -119,6 +119,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewNsgroupResource,
 		dns.NewNsgroupDelegationResource,
 		dns.NewNsgroupForwardingmemberResource,
+		dns.NewNsgroupForwardstubserverResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -148,7 +149,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		acl.NewNamedaclResource,
 
-		gridservice.NewNatgroupResource,
+		grid.NewNatgroupResource,
+		grid.NewExtensibleattributedefResource,
 		grid.NewUpgradegroupResource,
 	}
 }
@@ -170,6 +172,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordNaptrDataSource,
 		dns.NewRecordTlsaDataSource,
 		dns.NewRecordCaaDataSource,
+		dns.NewRecordUnknownDataSource,
 		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
@@ -178,6 +181,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewNsgroupDataSource,
 		dns.NewNsgroupDelegationDataSource,
 		dns.NewNsgroupForwardingmemberDataSource,
+		dns.NewNsgroupForwardstubserverDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -207,7 +211,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		acl.NewNamedaclDataSource,
 
-		gridservice.NewNatgroupDataSource,
+		grid.NewNatgroupDataSource,
+		grid.NewExtensibleattributedefDataSource,
 		grid.NewUpgradegroupDataSource,
 	}
 }

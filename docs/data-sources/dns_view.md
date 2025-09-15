@@ -177,13 +177,11 @@ Optional:
 <a id="nestedatt--result--filter_aaaa_list"></a>
 ### Nested Schema for `result.filter_aaaa_list`
 
-Required:
-
-- `address` (String) The address this rule applies to or "Any".
-
 Optional:
 
+- `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
+- `ref` (String) The reference to the Named ACL object.
 
 
 <a id="nestedatt--result--fixed_rrset_order_fqdns"></a>
@@ -217,6 +215,7 @@ Optional:
 
 - `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
+- `ref` (String) The reference to the Named ACL object.
 - `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
 - `tsig_key` (String) A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.
 - `tsig_key_alg` (String) The TSIG key algorithm.
@@ -231,6 +230,7 @@ Optional:
 
 - `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
+- `ref` (String) The reference to the Named ACL object.
 - `struct` (String) The struct type of the object. The value must be one of 'addressac' and 'tsigac'.
 - `tsig_key` (String) A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.
 - `tsig_key_alg` (String) The TSIG key algorithm.
