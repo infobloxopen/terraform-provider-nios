@@ -301,20 +301,22 @@ func (r *IPAssociationResource) updateHostRecordDHCP(ctx context.Context, hostRe
 	// Update IPv6 DHCP settings
 	if len(updateReq.Ipv6addrs) > 0 {
 		ipv6 := &updateReq.Ipv6addrs[0]
-		match_client := ""
-		if !data.Duid.IsNull() && data.Duid.ValueString() != "" {
+
+		match_client := data.MatchClient.ValueString()
+		switch match_client {
+		case "DUID":
 			ipv6.Duid = flex.ExpandStringPointer(data.Duid)
-			match_client = "DUID"
 			ipv6.Mac = nil
-		} else if !data.MacAddr.IsNull() && data.MacAddr.ValueString() != "" {
+		case "MAC_ADDRESS":
 			ipv6.Mac = flex.ExpandStringPointer(data.MacAddr)
-			match_client = "MAC_ADDRESS"
 			ipv6.Duid = nil
 		}
-		ipv6.ConfigureForDhcp = flex.ExpandBoolPointer(data.ConfigureForDhcp)
 		if data.ConfigureForDhcp.ValueBool() && match_client != "" {
 			ipv6.MatchClient = &match_client
 		}
+
+		ipv6.ConfigureForDhcp = flex.ExpandBoolPointer(data.ConfigureForDhcp)
+
 	}
 
 	// Clear out read-only fields that should not be sent in update

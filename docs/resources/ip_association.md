@@ -21,4 +21,5 @@ description: |-
 - `duid` (String) The DUID of the IP association.
 - `internal_id` (String) Internal ID of the IP association.
 - `mac` (String) The MAC address of the IP association.
+- `match_client` (String) The match_client value for this IP association. Valid values are: "DUID": The host IP address is leased to the matching DUID. "MAC_ADDRESS": The host IP address is leased to the matching MAC address.
 - `ref` (String) The reference to the object.

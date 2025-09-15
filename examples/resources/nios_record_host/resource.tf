@@ -31,26 +31,26 @@ resource "nios_ip_allocation" "allocation2" {
   }
 }
 
-# IP address allocation with dynamically allocated IPv4 address from network pool
-resource "nios_ip_allocation" "allocation3" {
-  name = "host3.example.com"
-  view = "default"
+# # IP address allocation with dynamically allocated IPv4 address from network pool
+# resource "nios_ip_allocation" "allocation3" {
+#   name = "host3.example.com"
+#   view = "default"
 
-  ipv4addrs = [
-    {
-      func_call = {
-        attribute_name  = "ipv4addr"
-        object_function = "next_available_ip"
-        result_field    = "ips"
-        object          = "network"
-        object_parameters = {
-          network      = "10.10.0.0/16"
-          network_view = "default"
-        }
-      }
-    }
-  ]
-}
+#   ipv4addrs = [
+#     {
+#       func_call = {
+#         attribute_name  = "ipv4addr"
+#         object_function = "next_available_ip"
+#         result_field    = "ips"
+#         object          = "network"
+#         object_parameters = {
+#           network      = "10.10.0.0/16"
+#           network_view = "default"
+#         }
+#       }
+#     }
+#   ]
+# }
 
 # Associate MAC address with host1's IP without DHCP configuration
 resource "nios_ip_association" "association1" {
@@ -65,6 +65,7 @@ resource "nios_ip_association" "association2" {
   ref                = nios_ip_allocation.allocation2.ref
   mac                = "12:43:fd:ba:9c:c9"
   duid               = "00:43:d2:0a:11:e6"
+  match_client       = "DUID"
   configure_for_dhcp = true
   internal_id        = nios_ip_allocation.allocation2.internal_id
 }

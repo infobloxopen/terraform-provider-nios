@@ -1,10 +1,12 @@
 package dns
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -14,6 +16,7 @@ type IPAssociationModel struct {
 	Duid             types.String `tfsdk:"duid"`
 	InternalID       types.String `tfsdk:"internal_id"`
 	MacAddr          types.String `tfsdk:"mac"`
+	MatchClient      types.String `tfsdk:"match_client"`
 }
 
 var IPAssociationAttrTypes = map[string]attr.Type{
@@ -22,6 +25,7 @@ var IPAssociationAttrTypes = map[string]attr.Type{
 	"duid":               types.StringType,
 	"internal_id":        types.StringType,
 	"mac":                types.StringType,
+	"match_client":       types.StringType,
 }
 
 var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
@@ -52,5 +56,14 @@ var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The MAC address of the IP association.",
 		Default:             stringdefault.StaticString(""),
+	},
+	"match_client": schema.StringAttribute{
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The match_client value for this IP association. Valid values are: \"DUID\": The host IP address is leased to the matching DUID. \"MAC_ADDRESS\": The host IP address is leased to the matching MAC address.",
+		Default:             stringdefault.StaticString("DUID"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("DUID", "MAC_ADDRESS"),
+		},
 	},
 }
