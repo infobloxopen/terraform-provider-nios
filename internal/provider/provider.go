@@ -111,6 +111,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordNaptrResource,
 		dns.NewRecordTlsaResource,
 		dns.NewRecordCaaResource,
+		dns.NewRecordUnknownResource,
 		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
@@ -118,6 +119,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewZoneStubResource,
 		dns.NewNsgroupResource,
 		dns.NewNsgroupDelegationResource,
+		dns.NewNsgroupForwardingmemberResource,
 		dns.NewNsgroupForwardstubserverResource,
 
 		dhcp.NewFixedaddressResource,
@@ -170,6 +172,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordNaptrDataSource,
 		dns.NewRecordTlsaDataSource,
 		dns.NewRecordCaaDataSource,
+		dns.NewRecordUnknownDataSource,
 		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
@@ -177,6 +180,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewZoneStubDataSource,
 		dns.NewNsgroupDataSource,
 		dns.NewNsgroupDelegationDataSource,
+		dns.NewNsgroupForwardingmemberDataSource,
 		dns.NewNsgroupForwardstubserverDataSource,
 
 		dhcp.NewFixedaddressDataSource,
