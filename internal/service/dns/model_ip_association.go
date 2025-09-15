@@ -1,4 +1,4 @@
-package dhcp
+package dns
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type IpAssociationModel struct {
+type IPAssociationModel struct {
 	Ref              types.String `tfsdk:"ref"`
 	ConfigureForDhcp types.Bool   `tfsdk:"configure_for_dhcp"`
 	Duid             types.String `tfsdk:"duid"`
@@ -16,7 +16,7 @@ type IpAssociationModel struct {
 	MacAddr          types.String `tfsdk:"mac"`
 }
 
-var RecordHostAttrTypes = map[string]attr.Type{
+var IPAssociationAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
 	"configure_for_dhcp": types.BoolType,
 	"duid":               types.StringType,

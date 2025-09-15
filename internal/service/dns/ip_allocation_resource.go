@@ -17,33 +17,33 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForRecordHost = "aliases,allow_telnet,cli_credentials,cloud_info,comment,configure_for_dns,creation_time,ddns_protected,device_description,device_location,device_type,device_vendor,disable,disable_discovery,dns_aliases,dns_name,extattrs,ipv4addrs,ipv6addrs,last_queried,ms_ad_user_data,name,network_view,rrset_order,snmp3_credential,snmp_credential,ttl,use_cli_credentials,use_dns_ea_inheritance,use_snmp3_credential,use_snmp_credential,use_ttl,view,zone"
+var readableAttributesForIPAllocation = "aliases,allow_telnet,cli_credentials,cloud_info,comment,configure_for_dns,creation_time,ddns_protected,device_description,device_location,device_type,device_vendor,disable,disable_discovery,dns_aliases,dns_name,extattrs,ipv4addrs,ipv6addrs,last_queried,ms_ad_user_data,name,network_view,rrset_order,snmp3_credential,snmp_credential,ttl,use_cli_credentials,use_dns_ea_inheritance,use_snmp3_credential,use_snmp_credential,use_ttl,view,zone"
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &RecordHostResource{}
-var _ resource.ResourceWithImportState = &RecordHostResource{}
+var _ resource.Resource = &IPAllocationResource{}
+var _ resource.ResourceWithImportState = &IPAllocationResource{}
 
-func NewRecordHostResource() resource.Resource {
-	return &RecordHostResource{}
+func NewIPAllocationResource() resource.Resource {
+	return &IPAllocationResource{}
 }
 
-// RecordHostResource defines the resource implementation.
-type RecordHostResource struct {
+// IPAllocationResource defines the resource implementation.
+type IPAllocationResource struct {
 	client *niosclient.APIClient
 }
 
-func (r *RecordHostResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dns_record_host"
+func (r *IPAllocationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "ip_allocation"
 }
 
-func (r *RecordHostResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *IPAllocationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "",
-		Attributes:          RecordHostResourceSchemaAttributes,
+		Attributes:          IPAllocationResourceSchemaAttributes,
 	}
 }
 
-func (r *RecordHostResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *IPAllocationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -63,9 +63,9 @@ func (r *RecordHostResource) Configure(ctx context.Context, req resource.Configu
 	r.client = client
 }
 
-func (r *RecordHostResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
-	var data RecordHostModel
+	var data IPAllocationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -98,7 +98,7 @@ func (r *RecordHostResource) Create(ctx context.Context, req resource.CreateRequ
 		RecordHostAPI.
 		Create(ctx).
 		RecordHost(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForRecordHost).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
@@ -119,9 +119,9 @@ func (r *RecordHostResource) Create(ctx context.Context, req resource.CreateRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *RecordHostResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var diags diag.Diagnostics
-	var data RecordHostModel
+	var data IPAllocationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -133,7 +133,7 @@ func (r *RecordHostResource) Read(ctx context.Context, req resource.ReadRequest,
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForRecordHost).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
 
@@ -181,7 +181,7 @@ func (r *RecordHostResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *RecordHostResource) ReadByExtAttrs(ctx context.Context, data *RecordHostModel, resp *resource.ReadResponse) bool {
+func (r *IPAllocationResource) ReadByExtAttrs(ctx context.Context, data *IPAllocationModel, resp *resource.ReadResponse) bool {
 	var diags diag.Diagnostics
 
 	if data.ExtAttrsAll.IsNull() {
@@ -207,7 +207,7 @@ func (r *RecordHostResource) ReadByExtAttrs(ctx context.Context, data *RecordHos
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForRecordHost).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordHost by extattrs, got error: %s", err))
@@ -236,9 +236,9 @@ func (r *RecordHostResource) ReadByExtAttrs(ctx context.Context, data *RecordHos
 	return true
 }
 
-func (r *RecordHostResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
-	var data RecordHostModel
+	var data IPAllocationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -277,7 +277,7 @@ func (r *RecordHostResource) Update(ctx context.Context, req resource.UpdateRequ
 	currentApiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForRecordHost).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
 
@@ -317,7 +317,7 @@ func (r *RecordHostResource) Update(ctx context.Context, req resource.UpdateRequ
 		RecordHostAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		RecordHost(*updateReq).
-		ReturnFieldsPlus(readableAttributesForRecordHost).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
@@ -373,8 +373,8 @@ func preserveDHCPSettings(updateReq *dns.RecordHost, currentHost *dns.RecordHost
 	}
 }
 
-func (r *RecordHostResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data RecordHostModel
+func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data IPAllocationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -419,16 +419,16 @@ func (r *RecordHostResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 }
 
-func (r *RecordHostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *IPAllocationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
-	var data RecordHostModel
+	var data IPAllocationModel
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForRecordHost).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
@@ -462,7 +462,7 @@ func (r *RecordHostResource) ImportState(ctx context.Context, req resource.Impor
 		RecordHostAPI.
 		Update(ctx, resourceRef).
 		RecordHost(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForRecordHost).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
@@ -482,7 +482,7 @@ func (r *RecordHostResource) ImportState(ctx context.Context, req resource.Impor
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *RecordHostResource) findHostByInternalID(ctx context.Context, data *RecordHostModel) (*dns.RecordHost, string, *http.Response, error) {
+func (r *IPAllocationResource) findHostByInternalID(ctx context.Context, data *IPAllocationModel) (*dns.RecordHost, string, *http.Response, error) {
 	var diags diag.Diagnostics
 
 	if data.ExtAttrsAll.IsNull() {
@@ -509,7 +509,7 @@ func (r *RecordHostResource) findHostByInternalID(ctx context.Context, data *Rec
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForRecordHost).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		Execute()
 	if err != nil {
 		return nil, "", httpRes, err

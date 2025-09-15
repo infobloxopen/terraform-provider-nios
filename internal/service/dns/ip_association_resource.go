@@ -1,4 +1,4 @@
-package dhcp
+package dns
 
 import (
 	"context"
@@ -18,34 +18,34 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForIpAssociation = "aliases,allow_telnet,cli_credentials,cloud_info,comment,configure_for_dns,creation_time,ddns_protected,device_description,device_location,device_type,device_vendor,disable,disable_discovery,dns_aliases,dns_name,extattrs,ipv4addrs,ipv6addrs,last_queried,ms_ad_user_data,name,network_view,rrset_order,snmp3_credential,snmp_credential,ttl,use_cli_credentials,use_dns_ea_inheritance,use_snmp3_credential,use_snmp_credential,use_ttl,view,zone"
+var readableAttributesForIPAssociation = "aliases,allow_telnet,cli_credentials,cloud_info,comment,configure_for_dns,creation_time,ddns_protected,device_description,device_location,device_type,device_vendor,disable,disable_discovery,dns_aliases,dns_name,extattrs,ipv4addrs,ipv6addrs,last_queried,ms_ad_user_data,name,network_view,rrset_order,snmp3_credential,snmp_credential,ttl,use_cli_credentials,use_dns_ea_inheritance,use_snmp3_credential,use_snmp_credential,use_ttl,view,zone"
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &IpAssociationResource{}
+var _ resource.Resource = &IPAssociationResource{}
 
-// var _ resource.ResourceWithImportState = &IpAssociationResource{}
+// var _ resource.ResourceWithImportState = &IPAssociationResource{}
 
-func NewIpAssociationResource() resource.Resource {
-	return &IpAssociationResource{}
+func NewIPAssociationResource() resource.Resource {
+	return &IPAssociationResource{}
 }
 
-// IpAssociationResource defines the resource implementation.
-type IpAssociationResource struct {
+// IPAssociationResource defines the resource implementation.
+type IPAssociationResource struct {
 	client *niosclient.APIClient
 }
 
-func (r *IpAssociationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ip_association"
+func (r *IPAssociationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "ip_association"
 }
 
-func (r *IpAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *IPAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "",
 		Attributes:          IpAssociationResourceSchemaAttributes,
 	}
 }
 
-func (r *IpAssociationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *IPAssociationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -65,8 +65,8 @@ func (r *IpAssociationResource) Configure(ctx context.Context, req resource.Conf
 	r.client = client
 }
 
-func (r *IpAssociationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data IpAssociationModel
+func (r *IPAssociationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data IPAssociationModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -95,8 +95,8 @@ func (r *IpAssociationResource) Create(ctx context.Context, req resource.CreateR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpAssociationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data IpAssociationModel
+func (r *IPAssociationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data IPAssociationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -119,9 +119,9 @@ func (r *IpAssociationResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpAssociationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *IPAssociationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
-	var data IpAssociationModel
+	var data IPAssociationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -163,8 +163,8 @@ func (r *IpAssociationResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpAssociationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data IpAssociationModel
+func (r *IPAssociationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data IPAssociationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -185,7 +185,7 @@ func (r *IpAssociationResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	// Clear DHCP settings (reset to defaults) but keep the host record
-	clearData := IpAssociationModel{
+	clearData := IPAssociationModel{
 		MacAddr:          types.StringValue(""),
 		Duid:             types.StringValue(""),
 		ConfigureForDhcp: types.BoolValue(false),
@@ -198,7 +198,7 @@ func (r *IpAssociationResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-func (r *IpAssociationResource) getOrFindHostRecord(ctx context.Context, data *IpAssociationModel) (*dns.RecordHost, string, string, bool, error) {
+func (r *IPAssociationResource) getOrFindHostRecord(ctx context.Context, data *IPAssociationModel) (*dns.RecordHost, string, string, bool, error) {
 	// Always try ref first if it exists
 	if !data.Ref.IsNull() && !data.Ref.IsUnknown() && data.Ref.ValueString() != "" {
 		hostRecord, notFound, err := r.getHostRecordByRef(ctx, data.Ref.ValueString())
@@ -226,7 +226,7 @@ func (r *IpAssociationResource) getOrFindHostRecord(ctx context.Context, data *I
 	return nil, "", "", false, fmt.Errorf("both ref and internal_id are empty or null")
 }
 
-func (r *IpAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.RecordHost) (string, error) {
+func (r *IPAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.RecordHost) (string, error) {
 	if hostRecord.ExtAttrs == nil {
 		return "", fmt.Errorf("no extensible attributes found")
 	}
@@ -241,11 +241,11 @@ func (r *IpAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.Re
 	return "", fmt.Errorf("terraform internal ID not found in extensible attributes")
 }
 
-func (r *IpAssociationResource) getHostRecordByRef(ctx context.Context, ref string) (*dns.RecordHost, bool, error) {
+func (r *IPAssociationResource) getHostRecordByRef(ctx context.Context, ref string) (*dns.RecordHost, bool, error) {
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Read(ctx, utils.ExtractResourceRef(ref)).
-		ReturnFieldsPlus(readableAttributesForIpAssociation).
+		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).
 		Execute()
 
@@ -260,7 +260,7 @@ func (r *IpAssociationResource) getHostRecordByRef(ctx context.Context, ref stri
 	return &hostRecord, false, nil
 }
 
-func (r *IpAssociationResource) getHostRecordByInternalID(ctx context.Context, internalID string) (*dns.RecordHost, bool, error) {
+func (r *IPAssociationResource) getHostRecordByInternalID(ctx context.Context, internalID string) (*dns.RecordHost, bool, error) {
 	searchFilter := map[string]any{
 		terraformInternalIDEA: internalID,
 	}
@@ -270,7 +270,7 @@ func (r *IpAssociationResource) getHostRecordByInternalID(ctx context.Context, i
 		List(ctx).
 		Extattrfilter(searchFilter).
 		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForIpAssociation).
+		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		Execute()
 
 	if err != nil {
@@ -288,7 +288,7 @@ func (r *IpAssociationResource) getHostRecordByInternalID(ctx context.Context, i
 	return &results[0], false, nil
 }
 
-func (r *IpAssociationResource) updateHostRecordDHCP(ctx context.Context, hostRec *dns.RecordHost, data *IpAssociationModel) (*dns.RecordHost, error) {
+func (r *IPAssociationResource) updateHostRecordDHCP(ctx context.Context, hostRec *dns.RecordHost, data *IPAssociationModel) (*dns.RecordHost, error) {
 	// Build update request preserving all existing settings except DHCP
 	updateReq := *hostRec
 
@@ -335,7 +335,7 @@ func (r *IpAssociationResource) updateHostRecordDHCP(ctx context.Context, hostRe
 		RecordHostAPI.
 		Update(ctx, utils.ExtractResourceRef(*hostRec.Ref)).
 		RecordHost(updateReq).
-		ReturnFieldsPlus(readableAttributesForIpAssociation).
+		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).
 		Execute()
 
@@ -347,7 +347,7 @@ func (r *IpAssociationResource) updateHostRecordDHCP(ctx context.Context, hostRe
 	return &result, nil
 }
 
-func (r *IpAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IpAssociationModel) IpAssociationModel {
+func (r *IPAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IPAssociationModel) IPAssociationModel {
 	// Extract DHCP settings from IPv4 addresses
 	if hostRec != nil && len(hostRec.Ipv4addrs) > 0 {
 		ipv4 := hostRec.Ipv4addrs[0]

@@ -31,7 +31,7 @@ type RecordHostDataSource struct {
 }
 
 func (d *RecordHostDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dns_record_host"
+	resp.TypeName = req.ProviderTypeName + "_" + "record_host"
 }
 
 type RecordHostModelWithFilter struct {
@@ -46,7 +46,7 @@ func (m *RecordHostModelWithFilter) FlattenResults(ctx context.Context, from []d
 	if len(from) == 0 {
 		return
 	}
-	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, RecordHostAttrTypes, diags, FlattenRecordHost)
+	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, IPAllocationAttrTypes, diags, FlattenRecordHost)
 }
 
 func (d *RecordHostDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -65,7 +65,7 @@ func (d *RecordHostDataSource) Schema(ctx context.Context, req datasource.Schema
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: utils.DataSourceAttributeMap(RecordHostResourceSchemaAttributes, &resp.Diagnostics),
+					Attributes: utils.DataSourceAttributeMap(IPAllocationResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
 			},
@@ -135,7 +135,7 @@ func (d *RecordHostDataSource) Read(ctx context.Context, req datasource.ReadRequ
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
 				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForRecordHost).
+				ReturnFieldsPlus(readableAttributesForIPAllocation).
 				Paging(paging).
 				MaxResults(maxResults)
 

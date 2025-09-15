@@ -26,7 +26,7 @@ import (
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
-type RecordHostModel struct {
+type IPAllocationModel struct {
 	Ref                      types.String `tfsdk:"ref"`
 	Aliases                  types.List   `tfsdk:"aliases"`
 	AllowTelnet              types.Bool   `tfsdk:"allow_telnet"`
@@ -68,7 +68,7 @@ type RecordHostModel struct {
 	Zone                     types.String `tfsdk:"zone"`
 }
 
-var RecordHostAttrTypes = map[string]attr.Type{
+var IPAllocationAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
 	"aliases":                    types.ListType{ElemType: types.StringType},
 	"allow_telnet":               types.BoolType,
@@ -110,7 +110,7 @@ var RecordHostAttrTypes = map[string]attr.Type{
 	"zone":                       types.StringType,
 }
 
-var RecordHostResourceSchemaAttributes = map[string]schema.Attribute{
+var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
@@ -378,7 +378,7 @@ func ExpandRecordHost(ctx context.Context, o types.Object, diags *diag.Diagnosti
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m RecordHostModel
+	var m IPAllocationModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -386,7 +386,7 @@ func ExpandRecordHost(ctx context.Context, o types.Object, diags *diag.Diagnosti
 	return m.Expand(ctx, diags)
 }
 
-func (m *RecordHostModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordHost {
+func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordHost {
 	if m == nil {
 		return nil
 	}
@@ -430,22 +430,22 @@ func (m *RecordHostModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 
 func FlattenRecordHost(ctx context.Context, from *dns.RecordHost, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(RecordHostAttrTypes)
+		return types.ObjectNull(IPAllocationAttrTypes)
 	}
-	m := RecordHostModel{}
+	m := IPAllocationModel{}
 	m.Flatten(ctx, from, diags)
 	m.ExtAttrsAll = types.MapNull(types.StringType)
-	t, d := types.ObjectValueFrom(ctx, RecordHostAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, IPAllocationAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *RecordHostModel) Flatten(ctx context.Context, from *dns.RecordHost, diags *diag.Diagnostics) {
+func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = RecordHostModel{}
+		*m = IPAllocationModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Aliases = flex.FlattenFrameworkListString(ctx, from.Aliases, diags)

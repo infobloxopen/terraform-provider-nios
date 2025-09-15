@@ -1,5 +1,5 @@
-# Create a DNS host record with static IPv4 address and location metadata
-resource "nios_dns_record_host" "allocation1" {
+# IP address allocation with static IPv4 address and location metadata
+resource "nios_ip_allocation" "allocation1" {
   name = "host1.example.com"
   view = "default"
   ipv4addrs = [
@@ -12,8 +12,8 @@ resource "nios_dns_record_host" "allocation1" {
   }
 }
 
-# Create a dual-stack DNS host record with both IPv4 and IPv6 addresses
-resource "nios_dns_record_host" "allocation2" {
+# IP address allocation with both IPv4 and IPv6 addresses
+resource "nios_ip_allocation" "allocation2" {
   name = "host2.example.com"
   view = "default"
   ipv4addrs = [
@@ -31,8 +31,8 @@ resource "nios_dns_record_host" "allocation2" {
   }
 }
 
-# Create a DNS host record with dynamically allocated IPv4 address from network pool
-resource "nios_dns_record_host" "allocation3" {
+# IP address allocation with dynamically allocated IPv4 address from network pool
+resource "nios_ip_allocation" "allocation3" {
   name = "host3.example.com"
   view = "default"
 
@@ -53,18 +53,18 @@ resource "nios_dns_record_host" "allocation3" {
 }
 
 # Associate MAC address with host1's IP without DHCP configuration
-resource "nios_dhcp_ip_association" "association1" {
-  ref                = nios_dns_record_host.allocation1.ref
+resource "nios_ip_association" "association1" {
+  ref                = nios_ip_allocation.allocation1.ref
   mac                = "12:00:43:fe:9a:8c"
   configure_for_dhcp = false
-  internal_id        = nios_dns_record_host.allocation1.internal_id
+  internal_id        = nios_ip_allocation.allocation1.internal_id
 }
 
 # Associate MAC and DUID with host2's IP with DHCP configuration enabled
-resource "nios_dhcp_ip_association" "association2" {
-  ref                = nios_dns_record_host.allocation2.ref
+resource "nios_ip_association" "association2" {
+  ref                = nios_ip_allocation.allocation2.ref
   mac                = "12:43:fd:ba:9c:c9"
   duid               = "00:43:d2:0a:11:e6"
   configure_for_dhcp = true
-  internal_id        = nios_dns_record_host.allocation2.internal_id
+  internal_id        = nios_ip_allocation.allocation2.internal_id
 }

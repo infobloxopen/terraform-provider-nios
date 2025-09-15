@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccRecordHostDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dns_record_host.test"
-	resourceName := "nios_dns_record_host.test"
+	dataSourceName := "data.nios_record_host.test"
+	resourceName := "nios_ip_allocation.test"
 	var v dns.RecordHost
 
 	name := acctest.RandomName() + ".example.com"
@@ -27,13 +27,13 @@ func TestAccRecordHostDataSource_Filters(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckRecordHostDestroy(context.Background(), &v),
+		CheckDestroy:             testAccCheckIPAllocationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRecordHostDataSourceConfigFilters(name, "default", ipv4addr),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-						testAccCheckRecordHostExists(context.Background(), resourceName, &v),
+						testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					}, testAccCheckRecordHostResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
@@ -42,8 +42,8 @@ func TestAccRecordHostDataSource_Filters(t *testing.T) {
 }
 
 func TestAccRecordHostDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_dns_record_host.test"
-	resourceName := "nios_dns_record_host.test"
+	dataSourceName := "data.nios_record_host.test"
+	resourceName := "nios_ip_allocation.test"
 	var v dns.RecordHost
 
 	name := acctest.RandomName() + ".example.com"
@@ -57,13 +57,13 @@ func TestAccRecordHostDataSource_ExtAttrFilters(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckRecordHostDestroy(context.Background(), &v),
+		CheckDestroy:             testAccCheckIPAllocationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRecordHostDataSourceConfigExtAttrFilters(name, "default", extAttrValue, ipv4addr),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-						testAccCheckRecordHostExists(context.Background(), resourceName, &v),
+						testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					}, testAccCheckRecordHostResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
@@ -118,15 +118,15 @@ func testAccCheckRecordHostResourceAttrPair(resourceName, dataSourceName string)
 func testAccRecordHostDataSourceConfigFilters(name, view string, ipv4addr []map[string]any) string {
 	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
 	return fmt.Sprintf(`
-resource "nios_dns_record_host" "test" {
+resource "nios_ip_allocation" "test" {
 	name = %q
 	ipv4addrs = %s
 	view = %q
 }
 
-data "nios_dns_record_host" "test" {
+data "nios_record_host" "test" {
   filters = {
-	name = nios_dns_record_host.test.name
+	name = nios_ip_allocation.test.name
   }
 }
 `, name, ipv4addrHCL, view)
@@ -135,7 +135,7 @@ data "nios_dns_record_host" "test" {
 func testAccRecordHostDataSourceConfigExtAttrFilters(name, view, extAttrsValue string, ipv4addr []map[string]any) string {
 	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
 	return fmt.Sprintf(`
-resource "nios_dns_record_host" "test" {
+resource "nios_ip_allocation" "test" {
   name = %q
   ipv4addrs = %s
   view = %q
@@ -144,9 +144,9 @@ resource "nios_dns_record_host" "test" {
   }
 }
 
-data "nios_dns_record_host" "test" {
+data "nios_record_host" "test" {
   extattrfilters = {
-	Site = nios_dns_record_host.test.extattrs.Site
+	Site = nios_ip_allocation.test.extattrs.Site
   }
 }
 `, name, ipv4addrHCL, view, extAttrsValue)
