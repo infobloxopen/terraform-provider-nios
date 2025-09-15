@@ -768,7 +768,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 		},
 	)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
-	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
+	m.ReservedInterface = flex.FlattenStringPointerNilAsNotEmpty(from.ReservedInterface)
 	planSnmp3Credential := m.Snmp3Credential
 	m.Snmp3Credential = FlattenFixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
 	if !planSnmp3Credential.IsUnknown() {
