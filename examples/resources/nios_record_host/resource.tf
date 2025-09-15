@@ -64,7 +64,7 @@ resource "nios_ip_association" "association1" {
 resource "nios_ip_association" "association2" {
   ref                = nios_ip_allocation.allocation2.ref
   mac                = "12:43:fd:ba:9c:c9"
-  duid               = "00:43:d2:0a:11:e6"
+  duid               = "00:01:5f:3a:1b:2c:12:34:56:78:9a:bc"
   match_client       = "DUID"
   configure_for_dhcp = true
   internal_id        = nios_ip_allocation.allocation2.internal_id

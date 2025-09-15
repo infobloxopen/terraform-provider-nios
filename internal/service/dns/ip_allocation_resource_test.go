@@ -67,7 +67,7 @@ func TestAccIPAllocationResource_disappears(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.11",
 		},
 	}
 
@@ -97,7 +97,7 @@ func TestAccIPAllocationResource_Aliases(t *testing.T) {
 	aliasUpdate := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.12",
 		},
 	}
 
@@ -135,7 +135,7 @@ func TestAccIPAllocationResource_AllowTelnet(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.13",
 		},
 	}
 
@@ -201,7 +201,7 @@ func TestAccIPAllocationResource_CloudInfo(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.14",
 		},
 	}
 
@@ -232,7 +232,7 @@ func TestAccIPAllocationResource_Comment(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.15",
 		},
 	}
 	comment := "new host record"
@@ -270,7 +270,7 @@ func TestAccIPAllocationResource_ConfigureForDns(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.16",
 		},
 	}
 
@@ -306,7 +306,7 @@ func TestAccIPAllocationResource_DdnsProtected(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.17",
 		},
 	}
 
@@ -342,7 +342,7 @@ func TestAccIPAllocationResource_DeviceDescription(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.18",
 		},
 	}
 	deviceDesc := "device description"
@@ -380,7 +380,7 @@ func TestAccIPAllocationResource_DeviceLocation(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.19",
 		},
 	}
 	deviceLocn := "device location"
@@ -418,7 +418,7 @@ func TestAccIPAllocationResource_DeviceType(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.20",
 		},
 	}
 	deviceType := "device type"
@@ -456,7 +456,7 @@ func TestAccIPAllocationResource_DeviceVendor(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.21",
 		},
 	}
 	deviceVendor := "device vendor"
@@ -494,7 +494,7 @@ func TestAccIPAllocationResource_Disable(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.22",
 		},
 	}
 
@@ -530,7 +530,7 @@ func TestAccIPAllocationResource_DisableDiscovery(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.23",
 		},
 	}
 
@@ -568,7 +568,7 @@ func TestAccIPAllocationResource_DnsAliases(t *testing.T) {
 	aliasUpdate := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.24",
 		},
 	}
 
@@ -606,7 +606,7 @@ func TestAccIPAllocationResource_EnableImmediateDiscovery(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.25",
 		},
 	}
 
@@ -642,7 +642,7 @@ func TestAccIPAllocationResource_ExtAttrs(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.26",
 		},
 	}
 	extAttrValue1 := acctest.RandomName()
@@ -684,12 +684,12 @@ func TestAccIPAllocationResource_Ipv4addrs(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.1.27",
 		},
 	}
 	updatedIpv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.12",
+			"ipv4addr": "192.168.1.28",
 		},
 	}
 
@@ -703,7 +703,7 @@ func TestAccIPAllocationResource_Ipv4addrs(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addrs.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "ipv4addrs.0.ipv4addr", "192.168.1.10"),
+					resource.TestCheckResourceAttr(resourceName, "ipv4addrs.0.ipv4addr", "192.168.1.27"),
 				),
 			},
 			// Update and Read
@@ -712,7 +712,7 @@ func TestAccIPAllocationResource_Ipv4addrs(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addrs.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "ipv4addrs.0.ipv4addr", "192.168.1.12"),
+					resource.TestCheckResourceAttr(resourceName, "ipv4addrs.0.ipv4addr", "192.168.1.28"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -771,7 +771,7 @@ func TestAccIPAllocationResource_Name(t *testing.T) {
 	updatedName := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.2.10",
 		},
 	}
 
@@ -807,7 +807,7 @@ func TestAccIPAllocationResource_NetworkView(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.2.11",
 		},
 	}
 
@@ -865,7 +865,7 @@ func TestAccIPAllocationResource_RrsetOrder(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.2.12",
 		},
 	}
 	rrsetOrder := "cyclic"
@@ -963,7 +963,7 @@ func TestAccIPAllocationResource_Ttl(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.2.13",
 		},
 	}
 
@@ -1029,7 +1029,7 @@ func TestAccIPAllocationResource_UseDnsEaInheritance(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.2.14",
 		},
 	}
 
@@ -1125,7 +1125,7 @@ func TestAccIPAllocationResource_UseTtl(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.2.15",
 		},
 	}
 
@@ -1161,7 +1161,7 @@ func TestAccIPAllocationResource_View(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.10",
+			"ipv4addr": "192.168.2.16",
 		},
 	}
 
