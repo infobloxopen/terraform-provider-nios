@@ -116,7 +116,10 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "Namespace for the Extensible Attribute Definition.",
 	},
 	"type": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("DATE", "EMAIL", "ENUM", "INTEGER", "STRING", "URL"),
+		},
 		MarkdownDescription: "Type for the Extensible Attribute Definition.",
 	},
 }
