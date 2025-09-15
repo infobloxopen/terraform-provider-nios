@@ -115,6 +115,7 @@ var ZoneAuthAllowUpdateResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
@@ -136,13 +137,14 @@ func (m *ZoneAuthAllowUpdateModel) Expand(ctx context.Context, diags *diag.Diagn
 		return nil
 	}
 	to := &dns.ZoneAuthAllowUpdate{
-		Ref:         flex.ExpandStringPointer(m.Ref),
-		Address:     flex.ExpandStringPointer(m.Address),
-		Struct:      flex.ExpandStringPointer(m.Struct),
-		Permission:  flex.ExpandStringPointer(m.Permission),
-		TsigKey:     flex.ExpandStringPointer(m.TsigKey),
-		TsigKeyAlg:  flex.ExpandStringPointer(m.TsigKeyAlg),
-		TsigKeyName: flex.ExpandStringPointer(m.TsigKeyName),
+		Ref:            flex.ExpandStringPointer(m.Ref),
+		Address:        flex.ExpandStringPointer(m.Address),
+		Struct:         flex.ExpandStringPointer(m.Struct),
+		Permission:     flex.ExpandStringPointer(m.Permission),
+		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
+		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
+		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
+		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
 	}
 	return to
 }
