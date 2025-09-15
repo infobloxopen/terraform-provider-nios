@@ -7,27 +7,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
-type ViewCustomRootNameServersModel struct {
-	Address                      iptypes.IPAddress `tfsdk:"address"`
-	Name                         types.String      `tfsdk:"name"`
-	SharedWithMsParentDelegation types.Bool        `tfsdk:"shared_with_ms_parent_delegation"`
-	Stealth                      types.Bool        `tfsdk:"stealth"`
-	TsigKey                      types.String      `tfsdk:"tsig_key"`
-	TsigKeyAlg                   types.String      `tfsdk:"tsig_key_alg"`
-	TsigKeyName                  types.String      `tfsdk:"tsig_key_name"`
-	UseTsigKeyName               types.Bool        `tfsdk:"use_tsig_key_name"`
+type NsgroupforwardingmemberforwardingserversForwardToModel struct {
+	Address                      iptypes.IPv4Address `tfsdk:"address"`
+	Name                         types.String        `tfsdk:"name"`
+	SharedWithMsParentDelegation types.Bool          `tfsdk:"shared_with_ms_parent_delegation"`
+	Stealth                      types.Bool          `tfsdk:"stealth"`
+	TsigKey                      types.String        `tfsdk:"tsig_key"`
+	TsigKeyAlg                   types.String        `tfsdk:"tsig_key_alg"`
+	TsigKeyName                  types.String        `tfsdk:"tsig_key_name"`
+	UseTsigKeyName               types.Bool          `tfsdk:"use_tsig_key_name"`
 }
 
-var ViewCustomRootNameServersAttrTypes = map[string]attr.Type{
-	"address":                          iptypes.IPAddressType{},
+var NsgroupforwardingmemberforwardingserversForwardToAttrTypes = map[string]attr.Type{
+	"address":                          iptypes.IPv4AddressType{},
 	"name":                             types.StringType,
 	"shared_with_ms_parent_delegation": types.BoolType,
 	"stealth":                          types.BoolType,
@@ -37,14 +38,20 @@ var ViewCustomRootNameServersAttrTypes = map[string]attr.Type{
 	"use_tsig_key_name":                types.BoolType,
 }
 
-var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attribute{
+var NsgroupforwardingmemberforwardingserversForwardToResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType:          iptypes.IPAddressType{},
-		Required:            true,
+		CustomType: iptypes.IPv4AddressType{},
+		Required:   true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
@@ -56,15 +63,15 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
@@ -73,11 +80,11 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 	},
 }
 
-func ExpandViewCustomRootNameServers(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ViewCustomRootNameServers {
+func ExpandNsgroupforwardingmemberforwardingserversForwardTo(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.NsgroupforwardingmemberforwardingserversForwardTo {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
-	var m ViewCustomRootNameServersModel
+	var m NsgroupforwardingmemberforwardingserversForwardToModel
 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil
@@ -85,36 +92,36 @@ func ExpandViewCustomRootNameServers(ctx context.Context, o types.Object, diags 
 	return m.Expand(ctx, diags)
 }
 
-func (m *ViewCustomRootNameServersModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ViewCustomRootNameServers {
+func (m *NsgroupforwardingmemberforwardingserversForwardToModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.NsgroupforwardingmemberforwardingserversForwardTo {
 	if m == nil {
 		return nil
 	}
-	to := &dns.ViewCustomRootNameServers{
-		Address:        flex.ExpandIPAddress(m.Address),
-		Name:           flex.ExpandStringPointer(m.Name),
+	to := &dns.NsgroupforwardingmemberforwardingserversForwardTo{
+		Address: flex.ExpandIPv4Address(m.Address),
+		Name:    flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }
 
-func FlattenViewCustomRootNameServers(ctx context.Context, from *dns.ViewCustomRootNameServers, diags *diag.Diagnostics) types.Object {
+func FlattenNsgroupforwardingmemberforwardingserversForwardTo(ctx context.Context, from *dns.NsgroupforwardingmemberforwardingserversForwardTo, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(ViewCustomRootNameServersAttrTypes)
+		return types.ObjectNull(NsgroupforwardingmemberforwardingserversForwardToAttrTypes)
 	}
-	m := ViewCustomRootNameServersModel{}
+	m := NsgroupforwardingmemberforwardingserversForwardToModel{}
 	m.Flatten(ctx, from, diags)
-	t, d := types.ObjectValueFrom(ctx, ViewCustomRootNameServersAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, NsgroupforwardingmemberforwardingserversForwardToAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *ViewCustomRootNameServersModel) Flatten(ctx context.Context, from *dns.ViewCustomRootNameServers, diags *diag.Diagnostics) {
+func (m *NsgroupforwardingmemberforwardingserversForwardToModel) Flatten(ctx context.Context, from *dns.NsgroupforwardingmemberforwardingserversForwardTo, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = ViewCustomRootNameServersModel{}
+		*m = NsgroupforwardingmemberforwardingserversForwardToModel{}
 	}
-	m.Address = flex.FlattenIPAddress(from.Address)
+	m.Address = flex.FlattenIPv4Address(from.Address)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)
