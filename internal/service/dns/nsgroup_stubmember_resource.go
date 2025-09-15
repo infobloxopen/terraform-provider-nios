@@ -36,7 +36,7 @@ func (r *NsgroupStubmemberResource) Metadata(ctx context.Context, req resource.M
 
 func (r *NsgroupStubmemberResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an NS group stub member.",
+		MarkdownDescription: "Manages an NS Group Stub Member.",
 		Attributes:          NsgroupStubmemberResourceSchemaAttributes,
 	}
 }

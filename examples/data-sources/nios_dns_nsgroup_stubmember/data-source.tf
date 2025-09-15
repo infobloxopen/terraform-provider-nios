@@ -1,11 +1,11 @@
-// Retrieve a NS Group stub members by filters
+// Retrieve a NS Group Stub Member by filters
 data "nios_dns_nsgroup_stubmember" "get_ns_group_stubmember_using_filters" {
   filters = {
     name = "example_ns_group"
   }
 }
 
-// Retrieve a NS Group stub members using Extensible Attributes
+// Retrieve NS Group Stub Members using Extensible Attributes
 data "nios_dns_nsgroup_stubmember" "get_ns_group_stubmember_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"

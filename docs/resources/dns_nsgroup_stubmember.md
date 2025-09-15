@@ -3,17 +3,17 @@
 page_title: "nios_dns_nsgroup_stubmember Resource - nios"
 subcategory: "DNS"
 description: |-
-  Manages an NS group stub member.
+  Manages an NS Group Stub Member.
 ---
 
 # nios_dns_nsgroup_stubmember (Resource)
 
-Manages an NS group stub member.
+Manages an NS Group Stub Member.
 
 ## Example Usage
 
 ```terraform
-// Create a NS Group Stubmember with Basic Fields
+// Create a NS Group Stub Member with Basic Fields
 resource "nios_dns_nsgroup_stubmember" "nsgroup_stubmember_with_basic_fields" {
   name = "stubmember1"
   stub_members = [
@@ -23,7 +23,7 @@ resource "nios_dns_nsgroup_stubmember" "nsgroup_stubmember_with_basic_fields" {
   ]
 }
 
-// Create a NS Group Stubmember with Additional Fields
+// Create a NS Group Stub Member with Additional Fields
 resource "nios_dns_nsgroup_stubmember" "nsgroup_stubmember_with_additional_fields" {
   name = "stubmember2"
   stub_members = [
