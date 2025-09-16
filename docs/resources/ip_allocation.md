@@ -33,7 +33,6 @@ description: |-
 - `device_vendor` (String) The vendor of the device.
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `disable_discovery` (Boolean) Determines if the discovery for the record is disabled or not. False means that the discovery is enabled.
-- `dns_aliases` (List of String) The list of aliases for the host in punycode format.
 - `enable_immediate_discovery` (Boolean) Determines if the discovery for the record should be immediately enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `ipv4addrs` (Attributes List) This is a list of IPv4 Addresses for the host. (see [below for nested schema](#nestedatt--ipv4addrs))
@@ -54,6 +53,7 @@ description: |-
 
 - `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
+- `dns_aliases` (List of String) The list of aliases for the host in punycode format.
 - `dns_name` (String) The name for a host record in punycode format.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `internal_id` (String) Internal ID of the object.
