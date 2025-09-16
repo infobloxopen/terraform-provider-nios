@@ -24,9 +24,7 @@ func TestAccDiscoveryCredentialgroupDataSource_Filters(t *testing.T) {
 			{
 				Config: testAccDiscoveryCredentialgroupDataSourceConfigFilters(name),
 				Check: resource.ComposeTestCheckFunc(
-					append([]resource.TestCheckFunc{
-						testAccCheckDiscoveryCredentialgroupExists(context.Background(), resourceName, &v),
-					})...,
+					testAccCheckDiscoveryCredentialgroupExists(context.Background(), resourceName, &v),
 				),
 			},
 		},
