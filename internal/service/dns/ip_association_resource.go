@@ -24,6 +24,7 @@ var readableAttributesForIPAssociation = "aliases,allow_telnet,cli_credentials,c
 var _ resource.Resource = &IPAssociationResource{}
 
 // var _ resource.ResourceWithImportState = &IPAssociationResource{}
+var _ resource.ResourceWithValidateConfig = &IPAssociationResource{}
 
 func NewIPAssociationResource() resource.Resource {
 	return &IPAssociationResource{}
@@ -63,6 +64,27 @@ func (r *IPAssociationResource) Configure(ctx context.Context, req resource.Conf
 	}
 
 	r.client = client
+}
+
+func (r *IPAssociationResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data IPAssociationModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if both mac and duid are null or empty and dhcp is enabled
+	macEmpty := data.MacAddr.IsNull() || data.MacAddr.ValueString() == ""
+	duidEmpty := data.Duid.IsNull() || data.Duid.ValueString() == ""
+	configur_for_dhcp := data.ConfigureForDhcp.ValueBool()
+
+	if configur_for_dhcp && macEmpty && duidEmpty {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"At least one of 'mac' or 'duid' must be configured.",
+		)
+	}
 }
 
 func (r *IPAssociationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

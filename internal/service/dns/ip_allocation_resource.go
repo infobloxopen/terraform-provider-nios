@@ -22,6 +22,7 @@ var readableAttributesForIPAllocation = "aliases,allow_telnet,cli_credentials,cl
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &IPAllocationResource{}
 var _ resource.ResourceWithImportState = &IPAllocationResource{}
+var _ resource.ResourceWithValidateConfig = &IPAllocationResource{}
 
 func NewIPAllocationResource() resource.Resource {
 	return &IPAllocationResource{}
@@ -61,6 +62,26 @@ func (r *IPAllocationResource) Configure(ctx context.Context, req resource.Confi
 	}
 
 	r.client = client
+}
+
+func (r *IPAllocationResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data IPAllocationModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if both ipv4addrs and ipv6addrs are null or empty
+	ipv4Empty := data.Ipv4addrs.IsNull() || len(data.Ipv4addrs.Elements()) == 0
+	ipv6Empty := data.Ipv6addrs.IsNull() || len(data.Ipv6addrs.Elements()) == 0
+
+	if ipv4Empty && ipv6Empty {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"At least one of 'ipv4addrs' or 'ipv6addrs' must be configured.",
+		)
+	}
 }
 
 func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
