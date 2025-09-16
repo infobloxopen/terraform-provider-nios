@@ -31,7 +31,7 @@ func TestAccCertificateAuthserviceResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceBasicConfig(name,caCertificate),
+				Config: testAccCertificateAuthserviceBasicConfig(name, caCertificate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -94,7 +94,7 @@ func TestAccCertificateAuthserviceResource_AutoPopulateLogin(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceAutoPopulateLogin(name , caCertificate, "SAN_EMAIL"),
+				Config: testAccCertificateAuthserviceAutoPopulateLogin(name, caCertificate, "SAN_EMAIL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_populate_login", "SAN_EMAIL"),
@@ -102,10 +102,10 @@ func TestAccCertificateAuthserviceResource_AutoPopulateLogin(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceAutoPopulateLogin(name , caCertificate, "S_DN_CN"),
+				Config: testAccCertificateAuthserviceAutoPopulateLogin(name, caCertificate, "S_DN_CN"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auto_populate_login", "S_DN_EMAIL"),
+					resource.TestCheckResourceAttr(resourceName, "auto_populate_login", "S_DN_CN"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -116,6 +116,13 @@ func TestAccCertificateAuthserviceResource_AutoPopulateLogin(t *testing.T) {
 func TestAccCertificateAuthserviceResource_CaCertificates(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_ca_certificates"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	}
+	caCertificateUpdate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuZGM2MTlhMWYyYmI0NGYwYjUzMWFiNzcwZjk1ZDQ0MDRhNWY2ODQxZGQxOTQ3Y2Q0YjcxMjU1YWU1MjY5MzM1MTRhMDljNWI5OTMwNmNhYzRiMjczY2JhN2NhODYwOWQ5ODY2YWYxYzU3NDdkNTVmNTFjZjM0ZGY4NzRmYTFjZWU:CN%3D%22ib-root-ca%22",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -123,18 +130,18 @@ func TestAccCertificateAuthserviceResource_CaCertificates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceCaCertificates("CA_CERTIFICATES_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceCaCertificates(name, caCertificate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ca_certificates", "CA_CERTIFICATES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ca_certificates.0", caCertificate[0]),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceCaCertificates("CA_CERTIFICATES_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceCaCertificates(name, caCertificateUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ca_certificates", "CA_CERTIFICATES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ca_certificates.0", caCertificateUpdate[0]),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -145,6 +152,10 @@ func TestAccCertificateAuthserviceResource_CaCertificates(t *testing.T) {
 func TestAccCertificateAuthserviceResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_comment"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -152,18 +163,18 @@ func TestAccCertificateAuthserviceResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceComment("COMMENT_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceComment(name, caCertificate, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceComment(name, caCertificate, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -174,6 +185,10 @@ func TestAccCertificateAuthserviceResource_Comment(t *testing.T) {
 func TestAccCertificateAuthserviceResource_Disabled(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_disabled"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -181,18 +196,18 @@ func TestAccCertificateAuthserviceResource_Disabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceDisabled("DISABLED_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceDisabled(name , caCertificate , "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disabled", "DISABLED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disabled", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceDisabled("DISABLED_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceDisabled(name , caCertificate , "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disabled", "DISABLED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disabled", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -203,6 +218,10 @@ func TestAccCertificateAuthserviceResource_Disabled(t *testing.T) {
 func TestAccCertificateAuthserviceResource_EnablePasswordRequest(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_enable_password_request"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -210,18 +229,18 @@ func TestAccCertificateAuthserviceResource_EnablePasswordRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceEnablePasswordRequest("ENABLE_PASSWORD_REQUEST_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceEnablePasswordRequest(name , caCertificate , "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_password_request", "ENABLE_PASSWORD_REQUEST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_password_request", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceEnablePasswordRequest("ENABLE_PASSWORD_REQUEST_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceEnablePasswordRequest(name , caCertificate , "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_password_request", "ENABLE_PASSWORD_REQUEST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_password_request", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -232,6 +251,10 @@ func TestAccCertificateAuthserviceResource_EnablePasswordRequest(t *testing.T) {
 func TestAccCertificateAuthserviceResource_EnableRemoteLookup(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_enable_remote_lookup"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	}     
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -239,18 +262,18 @@ func TestAccCertificateAuthserviceResource_EnableRemoteLookup(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceEnableRemoteLookup("ENABLE_REMOTE_LOOKUP_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceEnableRemoteLookup(name, caCertificate, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_remote_lookup", "ENABLE_REMOTE_LOOKUP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_remote_lookup", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceEnableRemoteLookup("ENABLE_REMOTE_LOOKUP_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceEnableRemoteLookup(name, caCertificate, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_remote_lookup", "ENABLE_REMOTE_LOOKUP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_remote_lookup", "true"),     
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -261,6 +284,10 @@ func TestAccCertificateAuthserviceResource_EnableRemoteLookup(t *testing.T) {
 func TestAccCertificateAuthserviceResource_MaxRetries(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_max_retries"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	}    
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -268,18 +295,18 @@ func TestAccCertificateAuthserviceResource_MaxRetries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceMaxRetries("MAX_RETRIES_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceMaxRetries(name, caCertificate, "4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "max_retries", "MAX_RETRIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "max_retries", "4"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceMaxRetries("MAX_RETRIES_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceMaxRetries(name, caCertificate, "5"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "max_retries", "MAX_RETRIES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "max_retries", "5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -290,6 +317,11 @@ func TestAccCertificateAuthserviceResource_MaxRetries(t *testing.T) {
 func TestAccCertificateAuthserviceResource_Name(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_name"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	nameUpdate := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	}  
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -297,18 +329,18 @@ func TestAccCertificateAuthserviceResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceName("NAME_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceName(name, caCertificate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceName(nameUpdate, caCertificate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -637,7 +669,6 @@ func testAccCheckCertificateAuthserviceDisappears(ctx context.Context, v *securi
 
 func testAccCertificateAuthserviceBasicConfig(name string, caCertificate []string) string {
 	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test" {
     name = %q
@@ -646,18 +677,11 @@ resource "nios_security_certificate_authservice" "test" {
 `, name, caCertificateStr)
 }
 
-func testAccCertificateAuthserviceRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_security_certificate_authservice" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
-func testAccCertificateAuthserviceAutoPopulateLogin(name string, caCertificate []string ,autoPopulateLogin string ) string {
+func testAccCertificateAuthserviceAutoPopulateLogin(name string, caCertificate []string, autoPopulateLogin string) string {
 	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_auto_populate_login" {
+	ocsp_check = "DISABLED"	
 	name = %q
 	ca_certificates = %s
 	auto_populate_login = %q
@@ -665,60 +689,87 @@ resource "nios_security_certificate_authservice" "test_auto_populate_login" {
 `, name, caCertificateStr, autoPopulateLogin)
 }
 
-func testAccCertificateAuthserviceCaCertificates(caCertificates string) string {
+func testAccCertificateAuthserviceCaCertificates(name string, caCertificates []string) string {
+	caCertificatesStr := utils.ConvertStringSliceToHCL(caCertificates)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_ca_certificates" {
-    ca_certificates = %q
+	ocsp_check = "DISABLED"       
+    name = %q
+    ca_certificates = %s
 }
-`, caCertificates)
+`, name, caCertificatesStr)
 }
 
-func testAccCertificateAuthserviceComment(comment string) string {
+func testAccCertificateAuthserviceComment(name string, cacertificate []string, comment string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(cacertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_comment" {
+	ocsp_check = "DISABLED"
+    name = %q
+    ca_certificates = %s
     comment = %q
 }
-`, comment)
+`, name, caCertificateStr, comment)
 }
 
-func testAccCertificateAuthserviceDisabled(disabled string) string {
+func testAccCertificateAuthserviceDisabled(name string , caCertificate []string , disabled string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_disabled" {
+	ocsp_check = "DISABLED"
+    name = %q
+    ca_certificates = %s
     disabled = %q
 }
-`, disabled)
+`, name, caCertificateStr, disabled)
 }
 
-func testAccCertificateAuthserviceEnablePasswordRequest(enablePasswordRequest string) string {
+func testAccCertificateAuthserviceEnablePasswordRequest(name string , caCertificate []string , enablePasswordRequest string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_enable_password_request" {
+	ocsp_check = "DISABLED"
     enable_password_request = %q
+    name = %q
+    ca_certificates = %s
 }
-`, enablePasswordRequest)
+`, enablePasswordRequest, name, caCertificateStr)
 }
 
-func testAccCertificateAuthserviceEnableRemoteLookup(enableRemoteLookup string) string {
+func testAccCertificateAuthserviceEnableRemoteLookup(name string , caCertificate []string , enableRemoteLookup string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_enable_remote_lookup" {
+	ocsp_check = "DISABLED"
+	remote_lookup_service = "hfdjfd"
     enable_remote_lookup = %q
+    name = %q
+    ca_certificates = %s
 }
-`, enableRemoteLookup)
+`, enableRemoteLookup, name, caCertificateStr)
 }
 
-func testAccCertificateAuthserviceMaxRetries(maxRetries string) string {
+func testAccCertificateAuthserviceMaxRetries(name string , caCertificate []string , maxRetries string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_max_retries" {
+	ocsp_check = "DISABLED"
     max_retries = %q
+    name = %q
+    ca_certificates = %s
 }
-`, maxRetries)
+`, maxRetries, name, caCertificateStr)
 }
 
-func testAccCertificateAuthserviceName(name string) string {
+func testAccCertificateAuthserviceName(name string, caCertificate []string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_name" {
     name = %q
+    ca_certificates = %s
+	ocsp_check = "DISABLED"
 }
-`, name)
+`, name, caCertificateStr)
 }
 
 func testAccCertificateAuthserviceOcspCheck(ocspCheck string) string {
