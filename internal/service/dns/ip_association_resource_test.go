@@ -133,7 +133,7 @@ func TestAccIPAssociationResource_matchClient(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv6addr := []map[string]any{
 		{
-			"ipv6addr": "fd00:1234:5678::12",
+			"ipv6addr": "fd00:1234:5678::17",
 		},
 	}
 	mac := "12:00:43:fe:9a:8e"
