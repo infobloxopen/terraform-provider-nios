@@ -62,7 +62,6 @@ func (r *BulkhostnametemplateResource) Configure(ctx context.Context, req resour
 }
 
 func (r *BulkhostnametemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-
 	var data BulkhostnametemplateModel
 
 	// Read Terraform plan data into the model

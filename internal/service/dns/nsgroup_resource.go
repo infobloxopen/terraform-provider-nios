@@ -37,7 +37,7 @@ func (r *NsgroupResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *NsgroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a NS group.",
+		MarkdownDescription: "",
 		Attributes:          NsgroupResourceSchemaAttributes,
 	}
 }
@@ -82,7 +82,7 @@ func (r *NsgroupResource) Create(ctx context.Context, req resource.CreateRequest
 	apiRes, _, err := r.client.DNSAPI.
 		NsgroupAPI.
 		Create(ctx).
-		Nsgroup(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Nsgroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNsgroup).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 	apiRes, _, err := r.client.DNSAPI.
 		NsgroupAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Nsgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Nsgroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNsgroup).
 		ReturnAsObject(1).
 		Execute()
@@ -327,6 +327,20 @@ func (r *NsgroupResource) ImportState(ctx context.Context, req resource.ImportSt
 	}
 
 	res := updateRes.UpdateNsgroupResponseAsObject.GetResult()
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Nsgroup due inherited Extensible attributes for import, got error: %s", diags))
+		return
+	}
+
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 

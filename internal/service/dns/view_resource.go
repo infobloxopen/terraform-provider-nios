@@ -331,6 +331,20 @@ func (r *ViewResource) ImportState(ctx context.Context, req resource.ImportState
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update View due inherited Extensible attributes for import, got error: %s", diags))
+		return
+	}
+
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
