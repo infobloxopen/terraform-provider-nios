@@ -405,6 +405,12 @@ func (r *ViewResource) ValidateConfig(ctx context.Context, req resource.Validate
 						"When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', not 'NO'.",
 					)
 				}
+			}else{
+				resp.Diagnostics.AddAttributeError(
+					path.Root("filter_aaaa"),
+					"Missing Filter AAAA Configuration",
+					"When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', it cannot be null or empty.",
+				)
 			}
 		}
 	}
