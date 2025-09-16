@@ -16,18 +16,19 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type GridServicerestartGroupRecurringScheduleModel struct {
-	Services types.List   `tfsdk:"services"`
-	Mode     types.String `tfsdk:"mode"`
-	Schedule types.Object `tfsdk:"schedule"`
-	Force    types.Bool   `tfsdk:"force"`
+	Services internaltypes.UnorderedListValue `tfsdk:"services"`
+	Mode     types.String                     `tfsdk:"mode"`
+	Schedule types.Object                     `tfsdk:"schedule"`
+	Force    types.Bool                       `tfsdk:"force"`
 }
 
 var GridServicerestartGroupRecurringScheduleAttrTypes = map[string]attr.Type{
-	"services": types.ListType{ElemType: types.StringType},
+	"services": internaltypes.UnorderedListOfStringType,
 	"mode":     types.StringType,
 	"schedule": types.ObjectType{AttrTypes: GridservicerestartgrouprecurringscheduleScheduleAttrTypes},
 	"force":    types.BoolType,
@@ -35,6 +36,7 @@ var GridServicerestartGroupRecurringScheduleAttrTypes = map[string]attr.Type{
 
 var GridServicerestartGroupRecurringScheduleResourceSchemaAttributes = map[string]schema.Attribute{
 	"services": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		ElementType: types.StringType,
 		Validators: []validator.List{
 			customvalidator.StringsInSlice([]string{"ALL", "DHCP", "DHCPV4", "DHCPV6", "DNS"}),
@@ -56,7 +58,6 @@ var GridServicerestartGroupRecurringScheduleResourceSchemaAttributes = map[strin
 		Attributes: GridservicerestartgrouprecurringscheduleScheduleResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
-		//Required:   true,
 	},
 	"force": schema.BoolAttribute{
 		Optional:            true,
@@ -109,7 +110,7 @@ func (m *GridServicerestartGroupRecurringScheduleModel) Flatten(ctx context.Cont
 	if m == nil {
 		*m = GridServicerestartGroupRecurringScheduleModel{}
 	}
-	m.Services = flex.FlattenFrameworkListString(ctx, from.Services, diags)
+	m.Services = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Services, diags)
 	m.Mode = flex.FlattenStringPointer(from.Mode)
 	m.Schedule = FlattenGridservicerestartgrouprecurringscheduleSchedule(ctx, from.Schedule, diags)
 	m.Force = types.BoolPointerValue(from.Force)

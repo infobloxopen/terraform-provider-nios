@@ -227,8 +227,36 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 	var v grid.GridServicerestartGroup
 	name := acctest.RandomNameWithPrefix("grid-service")
 
-	//recurringSchedule := map[string]any{}
-	//recurringScheduleUpdated := map[string]any{}
+	recurringSchedule := map[string]any{
+		"services": []string{"DHCPV6", "DNS"},
+		"mode":     "SIMULTANEOUS",
+		"force":    false,
+		"schedule": map[string]any{
+			"weekdays":          []string{"TUESDAY", "WEDNESDAY", "MONDAY"},
+			"frequency":         "WEEKLY",
+			"every":             15,
+			"minutes_past_hour": 6,
+			"disable":           false,
+			"repeat":            "RECUR",
+			"day_of_month":      30,
+			"month":             1,
+			"year":              2026,
+			"hour_of_day":       20,
+		},
+	}
+	recurringScheduleUpdated := map[string]any{
+		"services": []string{"ALL"},
+		"mode":     "SIMULTANEOUS",
+		"force":    false,
+		"schedule": map[string]any{
+			"minutes_past_hour": 6,
+			"repeat":            "ONCE",
+			"day_of_month":      30,
+			"month":             1,
+			"year":              2026,
+			"hour_of_day":       20,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -236,18 +264,18 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccGridServicerestartGroupRecurringSchedule(name, "DNS", "RECURRING_SCHEDULE_REPLACE_ME"),
+				Config: testAccGridServicerestartGroupRecurringSchedule(name, "DNS", recurringSchedule),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recurring_schedule", "RECURRING_SCHEDULE_REPLACE_ME"),
+					//resource.TestCheckResourceAttr(resourceName, "recurring_schedule", "RECURRING_SCHEDULE_REPLACE_ME"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccGridServicerestartGroupRecurringSchedule(name, "DNS", "RECURRING_SCHEDULE_UPDATE_REPLACE_ME"),
+				Config: testAccGridServicerestartGroupRecurringSchedule(name, "DNS", recurringScheduleUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recurring_schedule", "RECURRING_SCHEDULE_UPDATE_REPLACE_ME"),
+					//resource.TestCheckResourceAttr(resourceName, "recurring_schedule", "RECURRING_SCHEDULE_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -408,14 +436,15 @@ resource "nios_grid_servicerestart_group" "test_name" {
 `, name, service)
 }
 
-func testAccGridServicerestartGroupRecurringSchedule(name, service, recurringSchedule string) string {
+func testAccGridServicerestartGroupRecurringSchedule(name, service string, recurringSchedule map[string]any) string {
+	recurringScheduleMap := utils.ConvertMapToHCL(recurringSchedule)
 	return fmt.Sprintf(`
 resource "nios_grid_servicerestart_group" "test_recurring_schedule" {
 	name = %q
 	service = %q
-	recurring_schedule = %q
+	recurring_schedule = %s
 }
-`, name, service, recurringSchedule)
+`, name, service, recurringScheduleMap)
 }
 
 func testAccGridServicerestartGroupService(name, service string) string {
