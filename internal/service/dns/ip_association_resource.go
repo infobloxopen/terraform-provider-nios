@@ -22,8 +22,7 @@ var readableAttributesForIPAssociation = "aliases,allow_telnet,cli_credentials,c
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &IPAssociationResource{}
-
-// var _ resource.ResourceWithImportState = &IPAssociationResource{}
+var _ resource.ResourceWithImportState = &IPAssociationResource{}
 var _ resource.ResourceWithValidateConfig = &IPAssociationResource{}
 
 func NewIPAssociationResource() resource.Resource {
@@ -218,6 +217,10 @@ func (r *IPAssociationResource) Delete(ctx context.Context, req resource.DeleteR
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to clear DHCP settings, got error: %s", err))
 		return
 	}
+}
+
+func (r *IPAssociationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
 }
 
 func (r *IPAssociationResource) getOrFindHostRecord(ctx context.Context, data *IPAssociationModel) (*dns.RecordHost, string, string, bool, error) {

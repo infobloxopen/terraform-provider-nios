@@ -264,7 +264,7 @@ func (m *RecordHostIpv6addrModel) Expand(ctx context.Context, diags *diag.Diagno
 		MsAdUserData:         ExpandRecordHostIpv6addrMsAdUserData(ctx, m.MsAdUserData, diags),
 		Options:              flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandRecordHostIpv6addrOptions),
 		PreferredLifetime:    flex.ExpandInt64Pointer(m.PreferredLifetime),
-		ReservedInterface:    flex.ExpandStringPointer(m.ReservedInterface),
+		ReservedInterface:    flex.ExpandStringPointerEmptyAsNil(m.ReservedInterface),
 		UseDomainName:        flex.ExpandBoolPointer(m.UseDomainName),
 		UseDomainNameServers: flex.ExpandBoolPointer(m.UseDomainNameServers),
 		UseForEaInheritance:  flex.ExpandBoolPointer(m.UseForEaInheritance),
@@ -317,7 +317,7 @@ func (m *RecordHostIpv6addrModel) Flatten(ctx context.Context, from *dns.RecordH
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RecordHostIpv6addrOptionsAttrTypes, diags, FlattenRecordHostIpv6addrOptions)
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
-	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
+	m.ReservedInterface = flex.FlattenStringPointerNilAsNotEmpty(from.ReservedInterface)
 	m.UseDomainName = types.BoolPointerValue(from.UseDomainName)
 	m.UseDomainNameServers = types.BoolPointerValue(from.UseDomainNameServers)
 	m.UseForEaInheritance = types.BoolPointerValue(from.UseForEaInheritance)

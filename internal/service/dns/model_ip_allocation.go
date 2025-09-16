@@ -224,13 +224,8 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"dns_aliases": schema.ListAttribute{
 		ElementType:         types.StringType,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The list of aliases for the host in punycode format.",
-		Default:             listdefault.StaticValue(types.ListNull(types.StringType)),
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
 	},
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
@@ -404,7 +399,6 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		DeviceVendor:             flex.ExpandStringPointer(m.DeviceVendor),
 		Disable:                  flex.ExpandBoolPointer(m.Disable),
 		DisableDiscovery:         flex.ExpandBoolPointer(m.DisableDiscovery),
-		DnsAliases:               flex.ExpandFrameworkListString(ctx, m.DnsAliases, diags),
 		EnableImmediateDiscovery: flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		ExtAttrs:                 ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Ipv4addrs:                flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv4addrs, diags, ExpandRecordHostIpv4addr),

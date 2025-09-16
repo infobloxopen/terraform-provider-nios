@@ -299,7 +299,7 @@ func (m *RecordHostIpv4addrModel) Expand(ctx context.Context, diags *diag.Diagno
 		Nextserver:                      flex.ExpandStringPointer(m.Nextserver),
 		Options:                         flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandRecordHostIpv4addrOptions),
 		PxeLeaseTime:                    flex.ExpandInt64Pointer(m.PxeLeaseTime),
-		ReservedInterface:               flex.ExpandStringPointer(m.ReservedInterface),
+		ReservedInterface:               flex.ExpandStringPointerEmptyAsNil(m.ReservedInterface),
 		UseBootfile:                     flex.ExpandBoolPointer(m.UseBootfile),
 		UseBootserver:                   flex.ExpandBoolPointer(m.UseBootserver),
 		UseDenyBootp:                    flex.ExpandBoolPointer(m.UseDenyBootp),
@@ -353,7 +353,7 @@ func (m *RecordHostIpv4addrModel) Flatten(ctx context.Context, from *dns.RecordH
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RecordHostIpv4addrOptionsAttrTypes, diags, FlattenRecordHostIpv4addrOptions)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
-	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
+	m.ReservedInterface = flex.FlattenStringPointerNilAsNotEmpty(from.ReservedInterface)
 	m.UseBootfile = types.BoolPointerValue(from.UseBootfile)
 	m.UseBootserver = types.BoolPointerValue(from.UseBootserver)
 	m.UseDenyBootp = types.BoolPointerValue(from.UseDenyBootp)

@@ -559,46 +559,6 @@ func TestAccIPAllocationResource_DisableDiscovery(t *testing.T) {
 	})
 }
 
-func TestAccIPAllocationResource_DnsAliases(t *testing.T) {
-	var resourceName = "nios_ip_allocation.test_dns_aliases"
-	var v dns.RecordHost
-
-	name := acctest.RandomName() + ".example.com"
-	alias := acctest.RandomName() + ".example.com"
-	aliasUpdate := acctest.RandomName() + ".example.com"
-	ipv4addr := []map[string]any{
-		{
-			"ipv4addr": "192.168.1.24",
-		},
-	}
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIPAllocationDnsAliases(name, "default", []string{alias}, ipv4addr),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "aliases.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "aliases.0", alias),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIPAllocationDnsAliases(name, "default", []string{aliasUpdate}, ipv4addr),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "aliases.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "aliases.0", aliasUpdate),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccIPAllocationResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_ip_allocation.test_extattrs"
 	var v dns.RecordHost
@@ -1343,19 +1303,6 @@ resource "nios_ip_allocation" "test_disable_discovery" {
     disable_discovery = %q
 }
 `, name, view, ipv4addrHCL, disableDiscovery)
-}
-
-func testAccIPAllocationDnsAliases(name, view string, dnsAliases []string, ipv4addr []map[string]any) string {
-	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
-	dnsAliasesHCL := utils.ConvertStringSliceToHCL(dnsAliases)
-	return fmt.Sprintf(`
-resource "nios_ip_allocation" "test_dns_aliases" {
-	name = %q
-	view = %q
-	ipv4addrs = %s
-    dns_aliases = %s
-}
-`, name, view, ipv4addrHCL, dnsAliasesHCL)
 }
 
 func testAccIPAllocationExtAttrs(name, view string, ipv4addr []map[string]any, extAttrs map[string]string) string {
