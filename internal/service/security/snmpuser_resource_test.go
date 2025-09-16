@@ -479,7 +479,7 @@ resource "nios_security_snmp_user" "test_privacy_password" {
 func testAccSnmpuserPrivacyProtocol(name, authentication_protocol, authentication_password, privacy_protocol, privacy_password string) string {
 	return fmt.Sprintf(`
 resource "nios_security_snmp_user" "test_privacy_protocol" {
-    name                    = %q
+	name                    = %q
     authentication_protocol = %q
     authentication_password = %q
     privacy_protocol        = %q
