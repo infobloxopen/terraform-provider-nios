@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -642,7 +643,7 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		Network:                        flex.ExpandStringPointer(m.Network),
 		NetworkView:                    flex.ExpandStringPointer(m.NetworkView),
 		Nextserver:                     flex.ExpandStringPointer(m.Nextserver),
-		Options:                        flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandFixedaddressOptions),
+		Options:                        flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.Options, diags, ExpandFixedaddressOptions),
 		PxeLeaseTime:                   flex.ExpandInt64Pointer(m.PxeLeaseTime),
 		ReservedInterface:              flex.ExpandStringPointer(m.ReservedInterface),
 		RestartIfNeeded:                flex.ExpandBoolPointer(m.RestartIfNeeded),
@@ -742,7 +743,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 		},
 	)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
-	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
+	m.ReservedInterface = flex.FlattenStringPointerNilAsNotEmpty(from.ReservedInterface)
 	m.Snmp3Credential = FlattenFixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
 	m.SnmpCredential = FlattenFixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
 	m.Template = flex.FlattenStringPointer(from.Template)
