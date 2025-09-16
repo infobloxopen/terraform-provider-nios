@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -303,46 +304,20 @@ func (r *ZoneForwardResource) Delete(ctx context.Context, req resource.DeleteReq
 func (r *ZoneForwardResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data ZoneForwardModel
+	var goClientData dns.ZoneForward
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.DNSAPI.
-		ZoneForwardAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForZoneForward).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read ZoneForward for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetZoneForwardResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading ZoneForward for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.DNSAPI.
 		ZoneForwardAPI.
 		Update(ctx, resourceRef).
-		ZoneForward(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ZoneForward(goClientData).
 		ReturnFieldsPlus(readableAttributesForZoneForward).
 		ReturnAsObject(1).
 		Execute()
@@ -351,13 +326,22 @@ func (r *ZoneForwardResource) ImportState(ctx context.Context, req resource.Impo
 		return
 	}
 
-	res = updateRes.UpdateZoneForwardResponseAsObject.GetResult()
+	res := updateRes.UpdateZoneForwardResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update ZoneForward due inherited Extensible attributes for import, got error: %s", diags))
 		return
 	}
+
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

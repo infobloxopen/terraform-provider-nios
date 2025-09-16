@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -329,46 +330,20 @@ func (r *FixedaddressResource) UpdateFuncCallAttributeName(ctx context.Context, 
 func (r *FixedaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data FixedaddressModel
+	var goClientData dhcp.Fixedaddress
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.DHCPAPI.
-		FixedaddressAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForFixedaddress).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read Fixedaddress for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetFixedaddressResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Fixedaddress for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.DHCPAPI.
 		FixedaddressAPI.
 		Update(ctx, resourceRef).
-		Fixedaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Fixedaddress(goClientData).
 		ReturnFieldsPlus(readableAttributesForFixedaddress).
 		ReturnAsObject(1).
 		Execute()
@@ -377,13 +352,22 @@ func (r *FixedaddressResource) ImportState(ctx context.Context, req resource.Imp
 		return
 	}
 
-	res = updateRes.UpdateFixedaddressResponseAsObject.GetResult()
+	res := updateRes.UpdateFixedaddressResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Fixedaddress due inherited Extensible attributes for import, got error: %s", diags))
 		return
 	}
+
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
