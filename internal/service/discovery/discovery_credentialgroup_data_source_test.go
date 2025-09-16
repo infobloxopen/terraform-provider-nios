@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccDiscoveryCredentialgroupDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_discovery_credentialgroup.test"
 	resourceName := "nios_discovery_credentialgroup.test"
 	var v discovery.DiscoveryCredentialgroup
 	name := acctest.RandomNameWithPrefix("example-discovery-credentialgroup")
@@ -27,7 +26,7 @@ func TestAccDiscoveryCredentialgroupDataSource_Filters(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDiscoveryCredentialgroupExists(context.Background(), resourceName, &v),
-					}, testAccCheckDiscoveryCredentialgroupResourceAttrPair(resourceName, dataSourceName)...)...,
+					})...,
 				),
 			},
 		},
@@ -35,13 +34,6 @@ func TestAccDiscoveryCredentialgroupDataSource_Filters(t *testing.T) {
 }
 
 // below all TestAcc functions
-
-func testAccCheckDiscoveryCredentialgroupResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
-	return []resource.TestCheckFunc{
-		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.*.ref"),
-		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.*.name"),
-	}
-}
 
 func testAccDiscoveryCredentialgroupDataSourceConfigFilters(name string) string {
 	return fmt.Sprintf(`

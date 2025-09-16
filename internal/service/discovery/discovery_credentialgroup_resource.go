@@ -62,7 +62,6 @@ func (r *DiscoveryCredentialgroupResource) Configure(ctx context.Context, req re
 }
 
 func (r *DiscoveryCredentialgroupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
 	var data DiscoveryCredentialgroupModel
 
 	// Read Terraform plan data into the model
@@ -85,10 +84,6 @@ func (r *DiscoveryCredentialgroupResource) Create(ctx context.Context, req resou
 	}
 
 	res := apiRes.CreateDiscoveryCredentialgroupResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create DiscoveryCredentialgroup, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -165,11 +160,6 @@ func (r *DiscoveryCredentialgroupResource) Update(ctx context.Context, req resou
 	}
 
 	res := apiRes.UpdateDiscoveryCredentialgroupResponseAsObject.GetResult()
-
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update DiscoveryCredentialgroup, got error: %s", diags))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
