@@ -2,10 +2,7 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -16,21 +13,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneAuthAllowTransferModel struct {
-	Address        iptypes.IPAddress `tfsdk:"address"`
-	Struct         types.String      `tfsdk:"struct"`
-	Permission     types.String      `tfsdk:"permission"`
-	TsigKey        types.String      `tfsdk:"tsig_key"`
-	TsigKeyAlg     types.String      `tfsdk:"tsig_key_alg"`
-	TsigKeyName    types.String      `tfsdk:"tsig_key_name"`
-	UseTsigKeyName types.Bool        `tfsdk:"use_tsig_key_name"`
+	Ref            types.String `tfsdk:"ref"`
+	Address        types.String `tfsdk:"address"`
+	Struct         types.String `tfsdk:"struct"`
+	Permission     types.String `tfsdk:"permission"`
+	TsigKey        types.String `tfsdk:"tsig_key"`
+	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
+	TsigKeyName    types.String `tfsdk:"tsig_key_name"`
+	UseTsigKeyName types.Bool   `tfsdk:"use_tsig_key_name"`
 }
 
 var ZoneAuthAllowTransferAttrTypes = map[string]attr.Type{
-	"address":           iptypes.IPAddressType{},
+	"ref":               types.StringType,
+	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -41,26 +42,38 @@ var ZoneAuthAllowTransferAttrTypes = map[string]attr.Type{
 
 var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 	"struct": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
 		Validators: []validator.String{
 			stringvalidator.OneOf("addressac", "tsigac"),
 		},
 	},
+	"ref": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("struct"),
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
+			),
+		},
+		MarkdownDescription: "The reference to the Named ACL object.",
+	},
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Optional:   true,
-		Computed:   true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
-				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
@@ -72,7 +85,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
-				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
 			),
 		},
 	},
@@ -80,14 +93,7 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
@@ -96,36 +102,20 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
+			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
 		},
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
-		Validators: []validator.Bool{
-			boolvalidator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("address"),
-				path.MatchRelative().AtParent().AtName("permission"),
-			),
-		},
 	},
 }
 
@@ -145,17 +135,15 @@ func (m *ZoneAuthAllowTransferModel) Expand(ctx context.Context, diags *diag.Dia
 	if m == nil {
 		return nil
 	}
-	structValue := m.Struct.ValueString()
 	to := &dns.ZoneAuthAllowTransfer{
-		Struct: flex.ExpandStringPointer(m.Struct),
-	}
-	if structValue == "addressac" {
-		to.Address = flex.ExpandIPAddress(m.Address)
-		to.Permission = flex.ExpandStringPointer(m.Permission)
-	} else if structValue == "tsigac" {
-		to.TsigKey = flex.ExpandStringPointer(m.TsigKey)
-		to.TsigKeyAlg = flex.ExpandStringPointer(m.TsigKeyAlg)
-		to.TsigKeyName = flex.ExpandStringPointer(m.TsigKeyName)
+		Ref:            flex.ExpandStringPointer(m.Ref),
+		Address:        flex.ExpandStringPointer(m.Address),
+		Struct:         flex.ExpandStringPointer(m.Struct),
+		Permission:     flex.ExpandStringPointer(m.Permission),
+		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
+		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
+		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
+		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
 	}
 	return to
 }
@@ -178,16 +166,12 @@ func (m *ZoneAuthAllowTransferModel) Flatten(ctx context.Context, from *dns.Zone
 	if m == nil {
 		*m = ZoneAuthAllowTransferModel{}
 	}
-
 	m.Struct = flex.FlattenStringPointer(from.Struct)
-
-	if m.Struct.ValueString() == "addressac" {
-		m.Address = flex.FlattenIPAddress(from.Address)
-		m.Permission = flex.FlattenStringPointer(from.Permission)
-	} else if m.Struct.ValueString() == "tsigac" {
-		m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
-		m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)
-		m.TsigKeyName = flex.FlattenStringPointer(from.TsigKeyName)
-		m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
-	}
+	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Permission = flex.FlattenStringPointer(from.Permission)
+	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
+	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)
+	m.TsigKeyName = flex.FlattenStringPointer(from.TsigKeyName)
+	m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
 }

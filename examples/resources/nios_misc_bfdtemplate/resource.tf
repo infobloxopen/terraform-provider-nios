@@ -1,11 +1,11 @@
-// Create nios_misc_bfdtemplate with Basic fields
-resource "nios_misc_bfdtemplate" "test_bfdtemplate_basic" {
-  name = "tf_test_bfd_name"
+// Create a BFD template with Basic Fields
+resource "nios_misc_bfdtemplate" "bfd_template_with_basic_fields" {
+  name = "example_bfd_name"
 }
 
-// Create nios_misc_bfdtemplate with additional fields
-resource "nios_misc_bfdtemplate" "test_bfdtemplate_additional" {
-  name                  = "tf_test_bfd_name_additional"
+// Create a BFD template with Additional Fields
+resource "nios_misc_bfdtemplate" "bfd_template_with_additional_fields" {
+  name                  = "example_bfd_name_additional"
   authentication_key_id = 4
   authentication_type   = "MD5"
   detection_multiplier  = 5

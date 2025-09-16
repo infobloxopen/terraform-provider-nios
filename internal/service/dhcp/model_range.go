@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
@@ -69,7 +68,7 @@ type RangeModel struct {
 	HighWaterMarkReset               types.Int64                      `tfsdk:"high_water_mark_reset"`
 	IgnoreDhcpOptionListRequest      types.Bool                       `tfsdk:"ignore_dhcp_option_list_request"`
 	IgnoreId                         types.String                     `tfsdk:"ignore_id"`
-	IgnoreMacAddresses               types.List                       `tfsdk:"ignore_mac_addresses"`
+	IgnoreMacAddresses               internaltypes.UnorderedListValue `tfsdk:"ignore_mac_addresses"`
 	IsSplitScope                     types.Bool                       `tfsdk:"is_split_scope"`
 	KnownClients                     types.String                     `tfsdk:"known_clients"`
 	LeaseScavengeTime                types.Int64                      `tfsdk:"lease_scavenge_time"`
@@ -170,7 +169,7 @@ var RangeAttrTypes = map[string]attr.Type{
 	"high_water_mark_reset":                types.Int64Type,
 	"ignore_dhcp_option_list_request":      types.BoolType,
 	"ignore_id":                            types.StringType,
-	"ignore_mac_addresses":                 types.ListType{ElemType: types.StringType},
+	"ignore_mac_addresses":                 internaltypes.UnorderedListOfStringType,
 	"is_split_scope":                       types.BoolType,
 	"known_clients":                        types.StringType,
 	"lease_scavenge_time":                  types.Int64Type,
@@ -269,10 +268,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the range; maximum 256 characters.",
 	},
@@ -281,10 +277,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.",
 	},
@@ -444,6 +437,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "These are ranges of IP addresses that the appliance does not use to assign to clients. You can use these exclusion addresses as static IP addresses. They contain the start and end addresses of the exclusion range, and optionally, information about this exclusion range.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -471,6 +467,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangeFingerprintFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the fingerprint filters for this DHCP range. The appliance uses matching rules in these filters to select the address range from which it assigns a lease.",
 	},
 	"high_water_mark": schema.Int64Attribute{
@@ -511,8 +510,12 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
+		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of MAC addresses the appliance will ignore.",
 	},
 	"is_split_scope": schema.BoolAttribute{
@@ -548,6 +551,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied to this range. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"low_water_mark": schema.Int64Attribute{
@@ -577,6 +581,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangeMacFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the MAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"member": schema.SingleNestedAttribute{
@@ -598,6 +605,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ms_options")),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "This field contains the Microsoft DHCP options for this range.",
 	},
@@ -611,16 +619,16 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangeNacFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the NAC filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"name": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^\S.*\S$`),
-				"should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "This field contains the name of the Microsoft scope.",
 	},
@@ -650,6 +658,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangeOptionFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the Option filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"options": schema.ListNestedAttribute{
@@ -695,6 +706,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RangeRelayAgentFilterRulesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the Relay Agent filters to be applied to this range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"restart_if_needed": schema.BoolAttribute{
@@ -1077,7 +1091,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.HighWaterMarkReset = flex.FlattenInt64Pointer(from.HighWaterMarkReset)
 	m.IgnoreDhcpOptionListRequest = types.BoolPointerValue(from.IgnoreDhcpOptionListRequest)
 	m.IgnoreId = flex.FlattenStringPointer(from.IgnoreId)
-	m.IgnoreMacAddresses = flex.FlattenFrameworkListString(ctx, from.IgnoreMacAddresses, diags)
+	m.IgnoreMacAddresses = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.IgnoreMacAddresses, diags)
 	m.IsSplitScope = types.BoolPointerValue(from.IsSplitScope)
 	m.KnownClients = flex.FlattenStringPointer(from.KnownClients)
 	m.LeaseScavengeTime = flex.FlattenInt64Pointer(from.LeaseScavengeTime)

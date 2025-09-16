@@ -11,14 +11,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/grid"
+	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
@@ -100,14 +104,22 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordTxtResource,
 		dns.NewRecordPtrResource,
 		dns.NewRecordNsResource,
-		dns.NewZoneForwardResource,
+		dns.NewRecordDnameResource,
 		dns.NewRecordCnameResource,
 		dns.NewRecordMxResource,
 		dns.NewRecordNaptrResource,
+		dns.NewRecordTlsaResource,
+		dns.NewRecordCaaResource,
+		dns.NewRecordUnknownResource,
+		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
 		dns.NewViewResource,
 		dns.NewZoneStubResource,
+		dns.NewNsgroupResource,
+		dns.NewNsgroupDelegationResource,
+		dns.NewNsgroupForwardingmemberResource,
+		dns.NewNsgroupForwardstubserverResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -124,10 +136,23 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
 
+		cloud.NewAwsrte53taskgroupResource,
+		cloud.NewAwsuserResource,
+
+		security.NewAdminuserResource,
 		security.NewAdminroleResource,
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
+
+		smartfolder.NewSmartfolderPersonalResource,
+		smartfolder.NewSmartfolderGlobalResource,
+
+		acl.NewNamedaclResource,
+
+		grid.NewNatgroupResource,
+		grid.NewExtensibleattributedefResource,
+		grid.NewUpgradegroupResource,
 	}
 }
 
@@ -142,14 +167,22 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordTxtDataSource,
 		dns.NewRecordPtrDataSource,
 		dns.NewRecordNsDataSource,
-		dns.NewZoneForwardDataSource,
+		dns.NewRecordDnameDataSource,
 		dns.NewRecordCnameDataSource,
 		dns.NewRecordMxDataSource,
 		dns.NewRecordNaptrDataSource,
+		dns.NewRecordTlsaDataSource,
+		dns.NewRecordCaaDataSource,
+		dns.NewRecordUnknownDataSource,
+		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
 		dns.NewViewDataSource,
 		dns.NewZoneStubDataSource,
+		dns.NewNsgroupDataSource,
+		dns.NewNsgroupDelegationDataSource,
+		dns.NewNsgroupForwardingmemberDataSource,
+		dns.NewNsgroupForwardstubserverDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -166,10 +199,23 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
 
+		cloud.NewAwsrte53taskgroupDataSource,
+		cloud.NewAwsuserDataSource,
+
 		security.NewAdminroleDataSource,
+		security.NewAdminuserDataSource,
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
+
+		smartfolder.NewSmartfolderPersonalDataSource,
+		smartfolder.NewSmartfolderGlobalDataSource,
+
+		acl.NewNamedaclDataSource,
+
+		grid.NewNatgroupDataSource,
+		grid.NewExtensibleattributedefDataSource,
+		grid.NewUpgradegroupDataSource,
 	}
 }
 
@@ -206,11 +252,11 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 	}
 
 	// Create EA if it doesn't exist
-	data := grid.Extensibleattributedef{
-		Name:    grid.PtrString(terraformInternalIDEA),
-		Type:    grid.PtrString("STRING"),
-		Comment: grid.PtrString("Internal ID for Terraform Resource"),
-		Flags:   grid.PtrString("CR"),
+	data := gridclient.Extensibleattributedef{
+		Name:    gridclient.PtrString(terraformInternalIDEA),
+		Type:    gridclient.PtrString("STRING"),
+		Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
+		Flags:   gridclient.PtrString("CR"),
 	}
 
 	_, _, err = client.GridAPI.ExtensibleattributedefAPI.

@@ -168,10 +168,13 @@ resource "nios_dhcp_range" "create_range_with_additional_fields" {
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`
 
+Optional:
+
+- `delegated_member` (Attributes) This field contains the delegated member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
+
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
-- `delegated_member` (Attributes) This field contains the delegated member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network. (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.

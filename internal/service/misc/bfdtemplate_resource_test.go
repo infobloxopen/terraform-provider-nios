@@ -20,7 +20,7 @@ var readableAttributesForBfdtemplate = "authentication_key_id,authentication_typ
 func TestAccBfdtemplateResource_basic(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -32,7 +32,7 @@ func TestAccBfdtemplateResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					//Test with basic fields
+					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "authentication_type", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "detection_multiplier", "3"),
 					resource.TestCheckResourceAttr(resourceName, "min_rx_interval", "100"),
@@ -47,7 +47,7 @@ func TestAccBfdtemplateResource_basic(t *testing.T) {
 func TestAccBfdtemplateResource_disappears(t *testing.T) {
 	resourceName := "nios_misc_bfdtemplate.test"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -69,7 +69,7 @@ func TestAccBfdtemplateResource_disappears(t *testing.T) {
 func TestAccBfdtemplateResource_AuthenticationKeyId(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test_authentication_key_id"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
 	authType := "MD5"
 	authKey := "1234"
 	minRxInterval := 1000
@@ -103,7 +103,7 @@ func TestAccBfdtemplateResource_AuthenticationKeyId(t *testing.T) {
 func TestAccBfdtemplateResource_AuthenticationType(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test_authentication_type"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
 	authKey := "1234"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -134,7 +134,7 @@ func TestAccBfdtemplateResource_AuthenticationType(t *testing.T) {
 func TestAccBfdtemplateResource_DetectionMultiplier(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test_detection_multiplier"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -164,7 +164,7 @@ func TestAccBfdtemplateResource_DetectionMultiplier(t *testing.T) {
 func TestAccBfdtemplateResource_MinRxInterval(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test_min_rx_interval"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -194,7 +194,7 @@ func TestAccBfdtemplateResource_MinRxInterval(t *testing.T) {
 func TestAccBfdtemplateResource_MinTxInterval(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test_min_tx_interval"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -224,7 +224,7 @@ func TestAccBfdtemplateResource_MinTxInterval(t *testing.T) {
 func TestAccBfdtemplateResource_Name(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test_name"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

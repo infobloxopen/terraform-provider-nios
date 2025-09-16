@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -24,93 +23,95 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ViewModel struct {
-	Ref                                 types.String `tfsdk:"ref"`
-	BlacklistAction                     types.String `tfsdk:"blacklist_action"`
-	BlacklistLogQuery                   types.Bool   `tfsdk:"blacklist_log_query"`
-	BlacklistRedirectAddresses          types.List   `tfsdk:"blacklist_redirect_addresses"`
-	BlacklistRedirectTtl                types.Int64  `tfsdk:"blacklist_redirect_ttl"`
-	BlacklistRulesets                   types.List   `tfsdk:"blacklist_rulesets"`
-	CloudInfo                           types.Object `tfsdk:"cloud_info"`
-	Comment                             types.String `tfsdk:"comment"`
-	CustomRootNameServers               types.List   `tfsdk:"custom_root_name_servers"`
-	DdnsForceCreationTimestampUpdate    types.Bool   `tfsdk:"ddns_force_creation_timestamp_update"`
-	DdnsPrincipalGroup                  types.String `tfsdk:"ddns_principal_group"`
-	DdnsPrincipalTracking               types.Bool   `tfsdk:"ddns_principal_tracking"`
-	DdnsRestrictPatterns                types.Bool   `tfsdk:"ddns_restrict_patterns"`
-	DdnsRestrictPatternsList            types.List   `tfsdk:"ddns_restrict_patterns_list"`
-	DdnsRestrictProtected               types.Bool   `tfsdk:"ddns_restrict_protected"`
-	DdnsRestrictSecure                  types.Bool   `tfsdk:"ddns_restrict_secure"`
-	DdnsRestrictStatic                  types.Bool   `tfsdk:"ddns_restrict_static"`
-	Disable                             types.Bool   `tfsdk:"disable"`
-	Dns64Enabled                        types.Bool   `tfsdk:"dns64_enabled"`
-	Dns64Groups                         types.List   `tfsdk:"dns64_groups"`
-	DnssecEnabled                       types.Bool   `tfsdk:"dnssec_enabled"`
-	DnssecExpiredSignaturesEnabled      types.Bool   `tfsdk:"dnssec_expired_signatures_enabled"`
-	DnssecNegativeTrustAnchors          types.List   `tfsdk:"dnssec_negative_trust_anchors"`
-	DnssecTrustedKeys                   types.List   `tfsdk:"dnssec_trusted_keys"`
-	DnssecValidationEnabled             types.Bool   `tfsdk:"dnssec_validation_enabled"`
-	EdnsUdpSize                         types.Int64  `tfsdk:"edns_udp_size"`
-	EnableBlacklist                     types.Bool   `tfsdk:"enable_blacklist"`
-	EnableFixedRrsetOrderFqdns          types.Bool   `tfsdk:"enable_fixed_rrset_order_fqdns"`
-	EnableMatchRecursiveOnly            types.Bool   `tfsdk:"enable_match_recursive_only"`
-	ExtAttrs                            types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                         types.Map    `tfsdk:"extattrs_all"`
-	FilterAaaa                          types.String `tfsdk:"filter_aaaa"`
-	FilterAaaaList                      types.List   `tfsdk:"filter_aaaa_list"`
-	FixedRrsetOrderFqdns                types.List   `tfsdk:"fixed_rrset_order_fqdns"`
-	ForwardOnly                         types.Bool   `tfsdk:"forward_only"`
-	Forwarders                          types.List   `tfsdk:"forwarders"`
-	IsDefault                           types.Bool   `tfsdk:"is_default"`
-	LastQueriedAcl                      types.List   `tfsdk:"last_queried_acl"`
-	MatchClients                        types.List   `tfsdk:"match_clients"`
-	MatchDestinations                   types.List   `tfsdk:"match_destinations"`
-	MaxCacheTtl                         types.Int64  `tfsdk:"max_cache_ttl"`
-	MaxNcacheTtl                        types.Int64  `tfsdk:"max_ncache_ttl"`
-	MaxUdpSize                          types.Int64  `tfsdk:"max_udp_size"`
-	Name                                types.String `tfsdk:"name"`
-	NetworkView                         types.String `tfsdk:"network_view"`
-	NotifyDelay                         types.Int64  `tfsdk:"notify_delay"`
-	NxdomainLogQuery                    types.Bool   `tfsdk:"nxdomain_log_query"`
-	NxdomainRedirect                    types.Bool   `tfsdk:"nxdomain_redirect"`
-	NxdomainRedirectAddresses           types.List   `tfsdk:"nxdomain_redirect_addresses"`
-	NxdomainRedirectAddressesV6         types.List   `tfsdk:"nxdomain_redirect_addresses_v6"`
-	NxdomainRedirectTtl                 types.Int64  `tfsdk:"nxdomain_redirect_ttl"`
-	NxdomainRulesets                    types.List   `tfsdk:"nxdomain_rulesets"`
-	Recursion                           types.Bool   `tfsdk:"recursion"`
-	ResponseRateLimiting                types.Object `tfsdk:"response_rate_limiting"`
-	RootNameServerType                  types.String `tfsdk:"root_name_server_type"`
-	RpzDropIpRuleEnabled                types.Bool   `tfsdk:"rpz_drop_ip_rule_enabled"`
-	RpzDropIpRuleMinPrefixLengthIpv4    types.Int64  `tfsdk:"rpz_drop_ip_rule_min_prefix_length_ipv4"`
-	RpzDropIpRuleMinPrefixLengthIpv6    types.Int64  `tfsdk:"rpz_drop_ip_rule_min_prefix_length_ipv6"`
-	RpzQnameWaitRecurse                 types.Bool   `tfsdk:"rpz_qname_wait_recurse"`
-	ScavengingSettings                  types.Object `tfsdk:"scavenging_settings"`
-	Sortlist                            types.List   `tfsdk:"sortlist"`
-	UseBlacklist                        types.Bool   `tfsdk:"use_blacklist"`
-	UseDdnsForceCreationTimestampUpdate types.Bool   `tfsdk:"use_ddns_force_creation_timestamp_update"`
-	UseDdnsPatternsRestriction          types.Bool   `tfsdk:"use_ddns_patterns_restriction"`
-	UseDdnsPrincipalSecurity            types.Bool   `tfsdk:"use_ddns_principal_security"`
-	UseDdnsRestrictProtected            types.Bool   `tfsdk:"use_ddns_restrict_protected"`
-	UseDdnsRestrictStatic               types.Bool   `tfsdk:"use_ddns_restrict_static"`
-	UseDns64                            types.Bool   `tfsdk:"use_dns64"`
-	UseDnssec                           types.Bool   `tfsdk:"use_dnssec"`
-	UseEdnsUdpSize                      types.Bool   `tfsdk:"use_edns_udp_size"`
-	UseFilterAaaa                       types.Bool   `tfsdk:"use_filter_aaaa"`
-	UseFixedRrsetOrderFqdns             types.Bool   `tfsdk:"use_fixed_rrset_order_fqdns"`
-	UseForwarders                       types.Bool   `tfsdk:"use_forwarders"`
-	UseMaxCacheTtl                      types.Bool   `tfsdk:"use_max_cache_ttl"`
-	UseMaxNcacheTtl                     types.Bool   `tfsdk:"use_max_ncache_ttl"`
-	UseMaxUdpSize                       types.Bool   `tfsdk:"use_max_udp_size"`
-	UseNxdomainRedirect                 types.Bool   `tfsdk:"use_nxdomain_redirect"`
-	UseRecursion                        types.Bool   `tfsdk:"use_recursion"`
-	UseResponseRateLimiting             types.Bool   `tfsdk:"use_response_rate_limiting"`
-	UseRootNameServer                   types.Bool   `tfsdk:"use_root_name_server"`
-	UseRpzDropIpRule                    types.Bool   `tfsdk:"use_rpz_drop_ip_rule"`
-	UseRpzQnameWaitRecurse              types.Bool   `tfsdk:"use_rpz_qname_wait_recurse"`
-	UseScavengingSettings               types.Bool   `tfsdk:"use_scavenging_settings"`
-	UseSortlist                         types.Bool   `tfsdk:"use_sortlist"`
+	Ref                                 types.String                     `tfsdk:"ref"`
+	BlacklistAction                     types.String                     `tfsdk:"blacklist_action"`
+	BlacklistLogQuery                   types.Bool                       `tfsdk:"blacklist_log_query"`
+	BlacklistRedirectAddresses          types.List                       `tfsdk:"blacklist_redirect_addresses"`
+	BlacklistRedirectTtl                types.Int64                      `tfsdk:"blacklist_redirect_ttl"`
+	BlacklistRulesets                   types.List                       `tfsdk:"blacklist_rulesets"`
+	CloudInfo                           types.Object                     `tfsdk:"cloud_info"`
+	Comment                             types.String                     `tfsdk:"comment"`
+	CustomRootNameServers               types.List                       `tfsdk:"custom_root_name_servers"`
+	DdnsForceCreationTimestampUpdate    types.Bool                       `tfsdk:"ddns_force_creation_timestamp_update"`
+	DdnsPrincipalGroup                  types.String                     `tfsdk:"ddns_principal_group"`
+	DdnsPrincipalTracking               types.Bool                       `tfsdk:"ddns_principal_tracking"`
+	DdnsRestrictPatterns                types.Bool                       `tfsdk:"ddns_restrict_patterns"`
+	DdnsRestrictPatternsList            types.List                       `tfsdk:"ddns_restrict_patterns_list"`
+	DdnsRestrictProtected               types.Bool                       `tfsdk:"ddns_restrict_protected"`
+	DdnsRestrictSecure                  types.Bool                       `tfsdk:"ddns_restrict_secure"`
+	DdnsRestrictStatic                  types.Bool                       `tfsdk:"ddns_restrict_static"`
+	Disable                             types.Bool                       `tfsdk:"disable"`
+	Dns64Enabled                        types.Bool                       `tfsdk:"dns64_enabled"`
+	Dns64Groups                         internaltypes.UnorderedListValue `tfsdk:"dns64_groups"`
+	DnssecEnabled                       types.Bool                       `tfsdk:"dnssec_enabled"`
+	DnssecExpiredSignaturesEnabled      types.Bool                       `tfsdk:"dnssec_expired_signatures_enabled"`
+	DnssecNegativeTrustAnchors          types.List                       `tfsdk:"dnssec_negative_trust_anchors"`
+	DnssecTrustedKeys                   types.List                       `tfsdk:"dnssec_trusted_keys"`
+	DnssecValidationEnabled             types.Bool                       `tfsdk:"dnssec_validation_enabled"`
+	EdnsUdpSize                         types.Int64                      `tfsdk:"edns_udp_size"`
+	EnableBlacklist                     types.Bool                       `tfsdk:"enable_blacklist"`
+	EnableFixedRrsetOrderFqdns          types.Bool                       `tfsdk:"enable_fixed_rrset_order_fqdns"`
+	EnableMatchRecursiveOnly            types.Bool                       `tfsdk:"enable_match_recursive_only"`
+	ExtAttrs                            types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll                         types.Map                        `tfsdk:"extattrs_all"`
+	FilterAaaa                          types.String                     `tfsdk:"filter_aaaa"`
+	FilterAaaaList                      types.List                       `tfsdk:"filter_aaaa_list"`
+	FixedRrsetOrderFqdns                types.List                       `tfsdk:"fixed_rrset_order_fqdns"`
+	ForwardOnly                         types.Bool                       `tfsdk:"forward_only"`
+	Forwarders                          types.List                       `tfsdk:"forwarders"`
+	IsDefault                           types.Bool                       `tfsdk:"is_default"`
+	LastQueriedAcl                      types.List                       `tfsdk:"last_queried_acl"`
+	MatchClients                        types.List                       `tfsdk:"match_clients"`
+	MatchDestinations                   types.List                       `tfsdk:"match_destinations"`
+	MaxCacheTtl                         types.Int64                      `tfsdk:"max_cache_ttl"`
+	MaxNcacheTtl                        types.Int64                      `tfsdk:"max_ncache_ttl"`
+	MaxUdpSize                          types.Int64                      `tfsdk:"max_udp_size"`
+	Name                                types.String                     `tfsdk:"name"`
+	NetworkView                         types.String                     `tfsdk:"network_view"`
+	NotifyDelay                         types.Int64                      `tfsdk:"notify_delay"`
+	NxdomainLogQuery                    types.Bool                       `tfsdk:"nxdomain_log_query"`
+	NxdomainRedirect                    types.Bool                       `tfsdk:"nxdomain_redirect"`
+	NxdomainRedirectAddresses           types.List                       `tfsdk:"nxdomain_redirect_addresses"`
+	NxdomainRedirectAddressesV6         types.List                       `tfsdk:"nxdomain_redirect_addresses_v6"`
+	NxdomainRedirectTtl                 types.Int64                      `tfsdk:"nxdomain_redirect_ttl"`
+	NxdomainRulesets                    types.List                       `tfsdk:"nxdomain_rulesets"`
+	Recursion                           types.Bool                       `tfsdk:"recursion"`
+	ResponseRateLimiting                types.Object                     `tfsdk:"response_rate_limiting"`
+	RootNameServerType                  types.String                     `tfsdk:"root_name_server_type"`
+	RpzDropIpRuleEnabled                types.Bool                       `tfsdk:"rpz_drop_ip_rule_enabled"`
+	RpzDropIpRuleMinPrefixLengthIpv4    types.Int64                      `tfsdk:"rpz_drop_ip_rule_min_prefix_length_ipv4"`
+	RpzDropIpRuleMinPrefixLengthIpv6    types.Int64                      `tfsdk:"rpz_drop_ip_rule_min_prefix_length_ipv6"`
+	RpzQnameWaitRecurse                 types.Bool                       `tfsdk:"rpz_qname_wait_recurse"`
+	ScavengingSettings                  types.Object                     `tfsdk:"scavenging_settings"`
+	Sortlist                            types.List                       `tfsdk:"sortlist"`
+	UseBlacklist                        types.Bool                       `tfsdk:"use_blacklist"`
+	UseDdnsForceCreationTimestampUpdate types.Bool                       `tfsdk:"use_ddns_force_creation_timestamp_update"`
+	UseDdnsPatternsRestriction          types.Bool                       `tfsdk:"use_ddns_patterns_restriction"`
+	UseDdnsPrincipalSecurity            types.Bool                       `tfsdk:"use_ddns_principal_security"`
+	UseDdnsRestrictProtected            types.Bool                       `tfsdk:"use_ddns_restrict_protected"`
+	UseDdnsRestrictStatic               types.Bool                       `tfsdk:"use_ddns_restrict_static"`
+	UseDns64                            types.Bool                       `tfsdk:"use_dns64"`
+	UseDnssec                           types.Bool                       `tfsdk:"use_dnssec"`
+	UseEdnsUdpSize                      types.Bool                       `tfsdk:"use_edns_udp_size"`
+	UseFilterAaaa                       types.Bool                       `tfsdk:"use_filter_aaaa"`
+	UseFixedRrsetOrderFqdns             types.Bool                       `tfsdk:"use_fixed_rrset_order_fqdns"`
+	UseForwarders                       types.Bool                       `tfsdk:"use_forwarders"`
+	UseMaxCacheTtl                      types.Bool                       `tfsdk:"use_max_cache_ttl"`
+	UseMaxNcacheTtl                     types.Bool                       `tfsdk:"use_max_ncache_ttl"`
+	UseMaxUdpSize                       types.Bool                       `tfsdk:"use_max_udp_size"`
+	UseNxdomainRedirect                 types.Bool                       `tfsdk:"use_nxdomain_redirect"`
+	UseRecursion                        types.Bool                       `tfsdk:"use_recursion"`
+	UseResponseRateLimiting             types.Bool                       `tfsdk:"use_response_rate_limiting"`
+	UseRootNameServer                   types.Bool                       `tfsdk:"use_root_name_server"`
+	UseRpzDropIpRule                    types.Bool                       `tfsdk:"use_rpz_drop_ip_rule"`
+	UseRpzQnameWaitRecurse              types.Bool                       `tfsdk:"use_rpz_qname_wait_recurse"`
+	UseScavengingSettings               types.Bool                       `tfsdk:"use_scavenging_settings"`
+	UseSortlist                         types.Bool                       `tfsdk:"use_sortlist"`
 }
 
 var ViewAttrTypes = map[string]attr.Type{
@@ -133,7 +134,7 @@ var ViewAttrTypes = map[string]attr.Type{
 	"ddns_restrict_static":                     types.BoolType,
 	"disable":                                  types.BoolType,
 	"dns64_enabled":                            types.BoolType,
-	"dns64_groups":                             types.ListType{ElemType: types.StringType},
+	"dns64_groups":                             internaltypes.UnorderedListOfStringType,
 	"dnssec_enabled":                           types.BoolType,
 	"dnssec_expired_signatures_enabled":        types.BoolType,
 	"dnssec_negative_trust_anchors":            types.ListType{ElemType: types.StringType},
@@ -226,10 +227,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"blacklist_redirect_addresses": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_blacklist")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The array of IP addresses the appliance includes in the response it sends in place of a blacklisted IP address.",
 	},
 	"blacklist_redirect_ttl": schema.Int64Attribute{
@@ -242,7 +244,10 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Time To Live (TTL) value of the synthetic DNS responses resulted from blacklist redirection. The TTL value is a 32-bit unsigned integer that represents the TTL in seconds.",
 	},
 	"blacklist_rulesets": schema.ListAttribute{
-		ElementType:         types.StringType,
+		ElementType: types.StringType,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
 		MarkdownDescription: "The name of the Ruleset object assigned at the Grid level for blacklist redirection.",
 	},
@@ -255,10 +260,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Comment for the DNS view; maximum 64 characters.",
 	},
@@ -266,11 +268,12 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewCustomRootNameServersResourceSchemaAttributes,
 		},
-		Optional: true,
-		Computed: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_root_name_server")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of customized root name servers. You can either select and use Internet root name servers or specify custom root name servers by providing a host name and IP address to which the Infoblox appliance can send queries. Include the specified parameter to set the attribute value. Omit the parameter to retrieve the attribute value.",
 	},
 	"ddns_force_creation_timestamp_update": schema.BoolAttribute{
@@ -310,10 +313,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_restrict_patterns_list": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_ddns_patterns_restriction")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The unordered list of restriction patterns for an option of to restrict DDNS updates based on FQDN patterns.",
 	},
 	"ddns_restrict_protected": schema.BoolAttribute{
@@ -359,11 +363,13 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the DNS64 s enabled or not.",
 	},
 	"dns64_groups": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_dns64")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The list of DNS64 synthesis groups associated with this DNS view.",
 	},
 	"dnssec_enabled": schema.BoolAttribute{
@@ -385,7 +391,10 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the DNS security extension accepts expired signatures or not.",
 	},
 	"dnssec_negative_trust_anchors": schema.ListAttribute{
-		ElementType:         types.StringType,
+		ElementType: types.StringType,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
 		MarkdownDescription: "A list of zones for which the server does not perform DNSSEC validation.",
 	},
@@ -393,10 +402,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewDnssecTrustedKeysResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_dnssec")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The list of trusted keys for the DNS security extension.",
 	},
 	"dnssec_validation_enabled": schema.BoolAttribute{
@@ -470,20 +480,22 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewFilterAaaaListResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_filter_aaaa")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "Applies AAAA filtering to a named ACL, or to a list of IPv4/IPv6 addresses and networks from which queries are received. This field does not allow TSIG keys.",
 	},
 	"fixed_rrset_order_fqdns": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewFixedRrsetOrderFqdnsResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_fixed_rrset_order_fqdns")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The fixed RRset order FQDN. If this field does not contain an empty value, the appliance will automatically set the enable_fixed_rrset_order_fqdns field to 'true', unless the same request sets the enable field to 'false'.",
 	},
 	"forward_only": schema.BoolAttribute{
@@ -497,10 +509,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"forwarders": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_forwarders")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The list of forwarders for the DNS view. A forwarder is a name server to which other name servers first send their off-site queries. The forwarder builds up a cache of information, avoiding the need for other name servers to send queries off-site.",
 	},
 	"is_default": schema.BoolAttribute{
@@ -511,26 +524,31 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewLastQueriedAclResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_scavenging_settings")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "Determines last queried ACL for the specified IPv4 or IPv6 addresses and networks in scavenging settings.",
 	},
 	"match_clients": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewMatchClientsResourceSchemaAttributes,
 		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "A list of forwarders for the match clients. This list specifies a named ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"match_destinations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewMatchDestinationsResourceSchemaAttributes,
 		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "A list of forwarders for the match destinations. This list specifies a name ACL, or a list of IPv4/IPv6 addresses, networks, TSIG keys of clients that are allowed or denied access to the DNS view.",
 	},
 	"max_cache_ttl": schema.Int64Attribute{
@@ -563,10 +581,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Name of the DNS view.",
 	},
@@ -602,18 +617,20 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"nxdomain_redirect_addresses": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The array with IPv4 addresses the appliance includes in the response it sends in place of an NXDOMAIN response.",
 	},
 	"nxdomain_redirect_addresses_v6": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The array with IPv6 addresses the appliance includes in the response it sends in place of an NXDOMAIN response.",
 	},
 	"nxdomain_redirect_ttl": schema.Int64Attribute{
@@ -627,10 +644,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"nxdomain_rulesets": schema.ListAttribute{
 		ElementType: types.StringType,
-		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_nxdomain_redirect")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "The names of the Ruleset objects assigned at the grid level for NXDOMAIN redirection.",
 	},
 	"recursion": schema.BoolAttribute{
@@ -710,10 +728,11 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ViewSortlistResourceSchemaAttributes,
 		},
-		Optional: true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_sortlist")),
+			listvalidator.SizeAtLeast(1),
 		},
+		Optional:            true,
 		MarkdownDescription: "A sort list that determines the order of IP addresses in responses sent to DNS queries.",
 	},
 	"use_blacklist": schema.BoolAttribute{
@@ -983,7 +1002,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.DdnsRestrictStatic = types.BoolPointerValue(from.DdnsRestrictStatic)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Dns64Enabled = types.BoolPointerValue(from.Dns64Enabled)
-	m.Dns64Groups = flex.FlattenFrameworkListString(ctx, from.Dns64Groups, diags)
+	m.Dns64Groups = flex.FlattenFrameworkUnorderedList(ctx, types.StringType,from.Dns64Groups, diags)
 	m.DnssecEnabled = types.BoolPointerValue(from.DnssecEnabled)
 	m.DnssecExpiredSignaturesEnabled = types.BoolPointerValue(from.DnssecExpiredSignaturesEnabled)
 	m.DnssecNegativeTrustAnchors = flex.FlattenFrameworkListString(ctx, from.DnssecNegativeTrustAnchors, diags)

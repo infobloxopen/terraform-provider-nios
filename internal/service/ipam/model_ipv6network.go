@@ -2,7 +2,6 @@ package ipam
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -27,6 +26,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6networkModel struct {
@@ -225,10 +225,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Comment for the network; maximum 256 characters.",
 		Computed:            true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"ddns_domainname": schema.StringAttribute{
@@ -236,10 +233,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		Computed: true,
 	},
@@ -302,22 +296,18 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered bridge domain.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"discovered_tenant": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Discovered tenant.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"discovered_vlan_id": schema.StringAttribute{
@@ -383,9 +373,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the dynamic DNS updates flag of a DHCP IPv6 Network object. The DHCP server can send DDNS updates to DNS servers in the same Grid and to external DNS servers. This setting overrides the member level settings.",
-		Computed:            true,
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"enable_ddns": schema.BoolAttribute{
@@ -443,7 +433,10 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: Ipv6networkFederatedRealmsResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the federated realms associated to this network",
 	},
 	"last_rir_registration_update_sent": schema.Int64Attribute{
@@ -462,6 +455,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on this IPv6 network. This list corresponds to the match rules that are written to the DHCPv6 configuration file.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"members": schema.ListNestedAttribute{
@@ -471,6 +465,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "A list of members servers that serve DHCP for the network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the \"_struct\" member to the struct type.",
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	},
 	"mgm_private": schema.BoolAttribute{
 		Optional:            true,
@@ -545,7 +542,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network object.",
 		Computed:            true,
-		Default:             int64default.StaticInt64(27000),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_preferred_lifetime")),
 		},
@@ -763,7 +759,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},
-		Default: int64default.StaticInt64(43200),
 	},
 	"vlans": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -772,6 +767,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "List of VLANs assigned to Network.",
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	},
 	"zone_associations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -781,6 +779,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of zones associated with this network.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_zone_associations")),
+			listvalidator.SizeAtLeast(1),
 		},
 		Computed: true,
 	},

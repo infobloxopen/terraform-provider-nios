@@ -2,7 +2,6 @@ package ipam
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -26,6 +25,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6networkcontainerModel struct {
@@ -190,10 +190,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Comment for the network; maximum 256 characters.",
 		Computed:            true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"ddns_domainname": schema.StringAttribute{
@@ -201,9 +198,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network container.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace"),
+			customvalidator.ValidateTrimmedString(),
 		},
 		Computed: true,
 	},
@@ -286,6 +281,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use this method to set or retrieve the dynamic DNS updates flag of a DHCP IPv6 Network Container object. The DHCP server can send DDNS updates to DNS servers in the same Grid and to external DNS servers. This setting overrides the member level settings.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"enable_ddns": schema.BoolAttribute{
@@ -334,7 +330,10 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: Ipv6networkcontainerFederatedRealmsResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "This field contains the federated realms associated to this network container.",
 	},
 	"last_rir_registration_update_sent": schema.Int64Attribute{
@@ -353,6 +352,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 	"mgm_private": schema.BoolAttribute{
@@ -420,7 +420,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network Container object.",
 		Computed:            true,
-		Default:             int64default.StaticInt64(27000),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_preferred_lifetime")),
 		},
@@ -610,7 +609,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},
-		Default: int64default.StaticInt64(43200),
 	},
 	"zone_associations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -620,6 +618,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of zones associated with this network container.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_zone_associations")),
+			listvalidator.SizeAtLeast(1),
 		},
 	},
 }
@@ -730,7 +729,6 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.DomainNameServers = flex.FlattenFrameworkListString(ctx, from.DomainNameServers, diags)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.EnableDiscovery = types.BoolPointerValue(from.EnableDiscovery)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.EndpointSources = flex.FlattenFrameworkListString(ctx, from.EndpointSources, diags)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, Ipv6networkcontainerFederatedRealmsAttrTypes, diags, FlattenIpv6networkcontainerFederatedRealms)
@@ -767,7 +765,6 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
-	m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)
 	m.SubscribeSettings = FlattenIpv6networkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)
 	m.Unmanaged = types.BoolPointerValue(from.Unmanaged)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)
@@ -809,4 +806,3 @@ func FlattenIpv6NetworkcontainerNetwork(from *ipam.Ipv6networkcontainerNetwork) 
 	m := flex.FlattenIPv6CIDR(from.String)
 	return m
 }
-

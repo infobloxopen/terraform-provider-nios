@@ -3,13 +3,11 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -64,7 +62,6 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 	"enable_ksk_auto_rollover": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to True, automatic rollovers for the signing key is enabled.",
 	},
 	"ksk_algorithm": schema.StringAttribute{
@@ -78,14 +75,16 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneauthdnsseckeyparamsKskAlgorithmsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of Key Signing Key Algorithms.",
 	},
 	"ksk_rollover": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(31536000),
 		MarkdownDescription: "Key Signing Key rollover interval, in seconds.",
 	},
 	"ksk_size": schema.Int64Attribute{
@@ -95,7 +94,6 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 	"next_secure_type": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("NSEC3"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("NSEC", "NSEC3"),
 		},
@@ -104,7 +102,6 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 	"ksk_rollover_notification_config": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("REQUIRE_MANUAL_INTERVENTION"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ALL", "NONE", "REQUIRE_MANUAL_INTERVENTION", "AUTOMATIC"),
 		},
@@ -113,37 +110,31 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 	"ksk_snmp_notification_enabled": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Enable SNMP notifications for KSK related events.",
 	},
 	"ksk_email_notification_enabled": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable email notifications for KSK related events.",
 	},
 	"nsec3_salt_min_length": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The minimum length for NSEC3 salts.",
 	},
 	"nsec3_salt_max_length": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "The maximum length for NSEC3 salts.",
 	},
 	"nsec3_iterations": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(10),
 		MarkdownDescription: "The number of iterations used for hashing NSEC3.",
 	},
 	"signature_expiration": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(345600),
 		MarkdownDescription: "Signature expiration time, in seconds.",
 	},
 	"zsk_algorithm": schema.StringAttribute{
@@ -157,20 +148,21 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneauthdnsseckeyparamsZskAlgorithmsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "A list of Zone Signing Key Algorithms.",
 	},
 	"zsk_rollover": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(2592000),
 		MarkdownDescription: "Zone Signing Key rollover interval, in seconds.",
 	},
 	"zsk_rollover_mechanism": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("PRE_PUBLISH"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("PRE_PUBLISH", "DOUBLE_SIGN"),
 		},

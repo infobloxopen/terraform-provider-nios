@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -373,10 +372,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Comment for the zone; maximum 256 characters.",
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"copy_xfer_to_notify": schema.BoolAttribute{
@@ -622,7 +618,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			stringvalidator.Any(
+				customvalidator.IsValidFQDN(),
+				customvalidator.IsValidIPCIDR(),
+			),
+			customvalidator.IsNotArpa(),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
 	},
@@ -765,6 +765,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of domain controllers that are allowed to create NS records for authoritative zones.",
 	},
 	"ms_ddns_mode": schema.StringAttribute{
@@ -861,10 +864,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The RFC2317 prefix value of this DNS zone. Use this field only when the netmask is greater than 24 bits; that is, for a mask between 25 and 31 bits. Enter a prefix, such as the name of the allocated address block. The prefix can be alphanumeric characters, such as 128/26 , 128-189 , or sub-B.",
 	},
@@ -933,10 +933,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_soa_email")),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The SOA email value for this zone. This value can be in unicode format.",
 	},
@@ -1156,10 +1153,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the DNS view in which the zone resides. Example \"external\".",

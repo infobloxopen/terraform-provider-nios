@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -12,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
@@ -49,13 +49,17 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"authentication_key": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Sensitive:           true,
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The authentication key for BFD protocol message-digest authentication.",
 	},
 	"authentication_key_id": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(1),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 255),
+		},
 		MarkdownDescription: "The authentication key identifier for BFD protocol authentication. Valid values are between 1 and 255.",
 	},
 	"authentication_type": schema.StringAttribute{
@@ -68,21 +72,30 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The authentication type for BFD protocol.",
 	},
 	"detection_multiplier": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(3),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(3),
+		Validators: []validator.Int64{
+			int64validator.Between(3, 50),
+		},
 		MarkdownDescription: "The detection time multiplier value for BFD protocol. The negotiated transmit interval, multiplied by this value, provides the detection time for the receiving system in asynchronous BFD mode. Valid values are between 3 and 50.",
 	},
 	"min_rx_interval": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(100),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(100),
+		Validators: []validator.Int64{
+			int64validator.Between(50, 9999),
+		},
 		MarkdownDescription: "The minimum receive time (in seconds) for BFD protocol. Valid values are between 50 and 9999.",
 	},
 	"min_tx_interval": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(100),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(100),
+		Validators: []validator.Int64{
+			int64validator.Between(50, 9999),
+		},
 		MarkdownDescription: "The minimum transmission time (in seconds) for BFD protocol. Valid values are between 50 and 9999.",
 	},
 	"name": schema.StringAttribute{
@@ -95,18 +108,6 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The name of the BFD template object.",
 	},
-}
-
-func ExpandBfdtemplate(ctx context.Context, o types.Object, diags *diag.Diagnostics) *misc.Bfdtemplate {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m BfdtemplateModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *BfdtemplateModel) Expand(ctx context.Context, diags *diag.Diagnostics) *misc.Bfdtemplate {

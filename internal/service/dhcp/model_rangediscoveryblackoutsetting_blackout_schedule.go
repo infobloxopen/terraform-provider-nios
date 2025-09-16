@@ -7,15 +7,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -58,6 +56,7 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 			listvalidator.ValueStringsAre(
 				stringvalidator.OneOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"),
 			),
+			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 	},
@@ -120,7 +119,7 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 	"disable": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default: 		   booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to True, the scheduled task is disabled.",
 	},
 }

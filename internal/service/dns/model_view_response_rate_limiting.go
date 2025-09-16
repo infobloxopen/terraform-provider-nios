@@ -6,8 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -36,31 +34,26 @@ var ViewResponseRateLimitingResourceSchemaAttributes = map[string]schema.Attribu
 	"enable_rrl": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the response rate limiting is enabled or not.",
 	},
 	"log_only": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if logging for response rate limiting without dropping any requests is enabled or not.",
 	},
 	"responses_per_second": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(100),
 		MarkdownDescription: "The number of responses per client per second.",
 	},
 	"window": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "The time interval in seconds over which responses are tracked.",
 	},
 	"slip": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(2),
 		MarkdownDescription: "The response rate limiting slip. Note that if slip is not equal to 0 every n-th rate-limited UDP request is sent a truncated response instead of being dropped.",
 	},
 }

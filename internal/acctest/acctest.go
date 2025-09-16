@@ -82,6 +82,16 @@ func RandomIPv6Network() string {
 	return fmt.Sprintf("2001:db8:%x:%x::/%d", third, fourth, cidr)
 }
 
+// RandomAlphaNumeric generates a random alphanumeric string of the specified length.
+func RandomAlphaNumeric(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
+}
+
 func PreCheck(t *testing.T) {
 	hostURL := os.Getenv("NIOS_HOST_URL")
 	if hostURL == "" {

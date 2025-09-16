@@ -36,7 +36,7 @@ func (r *BfdtemplateResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *BfdtemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing BFD.",
+		MarkdownDescription: "Manages a BFD template.",
 		Attributes:          BfdtemplateResourceSchemaAttributes,
 	}
 }
@@ -113,7 +113,7 @@ func (r *BfdtemplateResource) Read(ctx context.Context, req resource.ReadRequest
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle case not found
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -162,11 +162,6 @@ func (r *BfdtemplateResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	res := apiRes.UpdateBfdtemplateResponseAsObject.GetResult()
-
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Bfdtemplate due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 

@@ -2,9 +2,7 @@ package dns
 
 import (
 	"context"
-	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -18,20 +16,23 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ViewMatchDestinationsModel struct {
-	Address        iptypes.IPAddress `tfsdk:"address"`
-	Struct         types.String      `tfsdk:"struct"`
-	Permission     types.String      `tfsdk:"permission"`
-	TsigKey        types.String      `tfsdk:"tsig_key"`
-	TsigKeyAlg     types.String      `tfsdk:"tsig_key_alg"`
-	TsigKeyName    types.String      `tfsdk:"tsig_key_name"`
-	UseTsigKeyName types.Bool        `tfsdk:"use_tsig_key_name"`
+	Ref            types.String `tfsdk:"ref"`
+	Address        types.String `tfsdk:"address"`
+	Struct         types.String `tfsdk:"struct"`
+	Permission     types.String `tfsdk:"permission"`
+	TsigKey        types.String `tfsdk:"tsig_key"`
+	TsigKeyAlg     types.String `tfsdk:"tsig_key_alg"`
+	TsigKeyName    types.String `tfsdk:"tsig_key_name"`
+	UseTsigKeyName types.Bool   `tfsdk:"use_tsig_key_name"`
 }
 
 var ViewMatchDestinationsAttrTypes = map[string]attr.Type{
-	"address":           iptypes.IPAddressType{},
+	"ref":               types.StringType,
+	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -49,20 +50,31 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
 	},
+	"ref": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.ConflictsWith(
+				path.MatchRelative().AtParent().AtName("struct"),
+				path.MatchRelative().AtParent().AtName("address"),
+				path.MatchRelative().AtParent().AtName("permission"),
+				path.MatchRelative().AtParent().AtName("tsig_key"),
+				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
+				path.MatchRelative().AtParent().AtName("tsig_key_name"),
+			),
+		},
+		MarkdownDescription: "The reference to the Named ACL object.",
+	},
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Optional:   true,
-		Computed:   true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(
 				path.MatchRelative().AtParent().AtName("tsig_key"),
 				path.MatchRelative().AtParent().AtName("tsig_key_alg"),
 				path.MatchRelative().AtParent().AtName("use_tsig_key_name"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
@@ -86,10 +98,7 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "A generated TSIG key. If the external primary server is a NIOS appliance running DNS One 2.x code, this can be set to :2xCOMPAT.",
 	},
@@ -112,10 +121,7 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRelative().AtParent().AtName("address"),
 				path.MatchRelative().AtParent().AtName("permission"),
 			),
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.",
 	},
@@ -149,7 +155,8 @@ func (m *ViewMatchDestinationsModel) Expand(ctx context.Context, diags *diag.Dia
 		return nil
 	}
 	to := &dns.ViewMatchDestinations{
-		Address:        flex.ExpandIPAddress(m.Address),
+		Ref:            flex.ExpandStringPointer(m.Ref),
+		Address:        flex.ExpandStringPointer(m.Address),
 		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -178,7 +185,8 @@ func (m *ViewMatchDestinationsModel) Flatten(ctx context.Context, from *dns.View
 	if m == nil {
 		*m = ViewMatchDestinationsModel{}
 	}
-	m.Address = flex.FlattenIPAddress(from.Address)
+	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

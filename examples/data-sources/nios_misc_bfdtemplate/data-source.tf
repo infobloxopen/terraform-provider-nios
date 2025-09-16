@@ -1,6 +1,6 @@
 // Retrieve a specific BFD Template by filters
-data "nios_misc_bfdtemplate" "test_bfdtemplate_filters" {
+data "nios_misc_bfdtemplate" "bfd_template_with_filters" {
   filters = {
-    name = "tf_test_bfd_name"
+    name = "example_bfd_name"
   }
 }

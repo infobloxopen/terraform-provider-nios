@@ -2,10 +2,9 @@ package dtc
 
 import (
 	"context"
-	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator" 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,6 +18,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcServerModel struct {
@@ -111,10 +111,7 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "The DTC Server display name.",
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^[^\s].*[^\s]$`),
-				"Name should not have leading or trailing whitespace",
-			),
+			customvalidator.ValidateTrimmedString(),
 		},
 	},
 	"sni_hostname": schema.StringAttribute{
@@ -143,7 +140,7 @@ func (m *DtcServerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		Disable:              flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:             ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Host:                 flex.ExpandStringPointer(m.Host),
-		Monitors:             flex.ExpandFrameworkListNestedBlockNilAsEmpty(ctx, m.Monitors, diags, ExpandDtcServerMonitors),
+		Monitors:             flex.ExpandFrameworkListNestedBlock(ctx, m.Monitors, diags, ExpandDtcServerMonitors),
 		Name:                 flex.ExpandStringPointer(m.Name),
 		SniHostname:          flex.ExpandStringPointer(m.SniHostname),
 		UseSniHostname:       flex.ExpandBoolPointer(m.UseSniHostname),
