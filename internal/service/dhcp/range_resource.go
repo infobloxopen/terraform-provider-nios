@@ -317,7 +317,7 @@ func (r *RangeResource) ImportState(ctx context.Context, req resource.ImportStat
 	updateRes, _, err := r.client.DHCPAPI.
 		RangeAPI.
 		Update(ctx, resourceRef).
-		Range(goClientData).
+		Range_(goClientData).
 		ReturnFieldsPlus(readableAttributesForRange).
 		ReturnAsObject(1).
 		Execute()
