@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -48,9 +47,9 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"create_home_dir": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines whether to create the home directory with the user name or to use the existing directory as the home directory.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -100,7 +99,6 @@ func (m *FtpuserModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		return nil
 	}
 	to := &security.Ftpuser{
-		Ref:        flex.ExpandStringPointer(m.Ref),
 		ExtAttrs:   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Permission: flex.ExpandStringPointer(m.Permission),
 	}

@@ -362,3 +362,30 @@ func (r *FtpuserResource) ImportState(ctx context.Context, req resource.ImportSt
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
+
+func (r *FtpuserResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data FtpuserModel
+
+	// Read Terraform configuration data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	createHomeDir := data.CreateHomeDir
+	homeDir := data.HomeDir
+
+	// If create_home_dir is unknown, we can't validate (during planning)
+	if createHomeDir.IsUnknown() {
+		return
+	}
+
+	// If create_home_dir is true and home_dir is specified, that's invalid
+	if !createHomeDir.IsNull() && createHomeDir.ValueBool() && !homeDir.IsNull() && !homeDir.IsUnknown() {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"You cannot specify 'home_dir' when 'create_home_dir' is set to true. When create_home_dir is true, the system automatically creates the home directory using the username.",
+		)
+	}
+}

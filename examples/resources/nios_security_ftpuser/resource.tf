@@ -5,7 +5,7 @@ resource "nios_security_ftpuser" "ftpusers_basic_fields" {
 }
 // Create an FTPuser with Additional Fields
 resource "nios_security_ftpuser" "ftpusers_additional_fields" {
-  username        = "example_ftpuser"
+  username        = "example_ftpuser2"
   password        = "example_password"
   permission      = "RW"
   create_home_dir = "false"

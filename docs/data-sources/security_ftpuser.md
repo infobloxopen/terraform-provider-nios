@@ -13,7 +13,7 @@ Retrieves a specific FTP users based on filters.
 ## Example Usage
 
 ```terraform
-// Retrieve a specific ftp userr by filters
+// Retrieve a specific ftp user by filters
 data "nios_security_ftpuser" "get_ftpuser_using_filters" {
   filters = {
     username = "example_ftpuser"
