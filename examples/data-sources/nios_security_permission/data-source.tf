@@ -9,4 +9,3 @@ data "nios_security_permission" "get_permission_using_filters" {
 
 // Retrieve all Permissions
 data "nios_security_permission" "get_all_permissions" {}
-
