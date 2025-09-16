@@ -462,11 +462,11 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 	req.Config.GetAttribute(ctx,path.Root("rir_registration_status"),&rirRegistrationStatus)
 	req.Config.GetAttribute(ctx,path.Root("rir_organization"),&rirOrganization)
 
-	if !rirRegistrationStatus.IsNull() && !rirRegistrationStatus.IsUnknown() {
+	if !rirRegistrationStatus.IsNull() && !rirRegistrationStatus.IsUnknown() && rirRegistrationStatus.ValueString() == "REGISTERED" {
 		if rirOrganization.IsNull() || rirOrganization.IsUnknown() {
 			resp.Diagnostics.AddError(
 				"Missing RIR Organization",
-				"The 'rir_organization' attribute must be set when 'rir_registration_status' is defined.",
+				"The 'rir_organization' attribute must be set when 'rir_registration_status' is set to REGISTERED.",
 			)
 		}
 	}
