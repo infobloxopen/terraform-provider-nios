@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
@@ -43,8 +42,8 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"group": schema.StringAttribute{
-		Optional:   true,
-		Computed:   true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the admin group this permission applies to.",
 	},
 	"object": schema.StringAttribute{
@@ -56,8 +55,7 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A reference to a WAPI object, which will be the object this permission applies to.",
 	},
 	"permission": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("DENY", "READ", "WRITE"),
 		},
@@ -102,18 +100,6 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The name of the role this permission applies to.",
 	},
-}
-
-func ExpandPermission(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.Permission {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m PermissionModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *PermissionModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.Permission {

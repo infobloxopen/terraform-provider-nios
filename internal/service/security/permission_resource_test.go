@@ -17,7 +17,8 @@ import (
 
 var readableAttributesForPermission = "group,object,permission,resource_type,role"
 
-// TODO: Create CustomRole1 and CustomRole2 in the NIOS before running these tests.
+// TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// Create CustomRole1 and CustomRole2 in the NIOS Grid before running these tests.
 func TestAccPermissionResource_basic(t *testing.T) {
 	var resourceName = "nios_security_permission.test"
 	var v security.Permission
@@ -142,10 +143,10 @@ func TestAccPermissionResource_Permission(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccPermissionPermission(view, "cloud-api-only", "WRITE", "ZONE"),
+				Config: testAccPermissionPermission(view, "cloud-api-only", "DENY", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "permission", "WRITE"),
+					resource.TestCheckResourceAttr(resourceName, "permission", "DENY"),
 				),
 			},
 			// Update and Read

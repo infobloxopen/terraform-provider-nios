@@ -36,7 +36,7 @@ func (r *PermissionResource) Metadata(ctx context.Context, req resource.Metadata
 
 func (r *PermissionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages security permissions for resources in Infoblox NIOS.",
+		MarkdownDescription: "Manages a permission.",
 		Attributes:          PermissionResourceSchemaAttributes,
 	}
 }
