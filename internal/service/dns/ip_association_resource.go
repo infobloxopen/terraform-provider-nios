@@ -104,9 +104,9 @@ func (r *IPAssociationResource) Create(ctx context.Context, req resource.CreateR
 	data.InternalID = types.StringValue(internalID)
 
 	// Update the host record with DHCP settings
-	updatedHostRec, err := r.updateHostRecordDHCP(ctx, hostRecord, &data)
+	updatedHostRec, err := r.updateHostRecord(ctx, hostRecord, &data)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update host record with DHCP settings, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to associate host record with DHCP settings, got error: %s", err))
 		return
 	}
 
@@ -172,7 +172,7 @@ func (r *IPAssociationResource) Update(ctx context.Context, req resource.UpdateR
 	data.Ref = types.StringValue(ref)
 	data.InternalID = types.StringValue(internalID)
 
-	updatedHostRec, err := r.updateHostRecordDHCP(ctx, hostRecord, &data)
+	updatedHostRec, err := r.updateHostRecord(ctx, hostRecord, &data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update DHCP settings, got error: %s", err))
 		return
@@ -212,7 +212,7 @@ func (r *IPAssociationResource) Delete(ctx context.Context, req resource.DeleteR
 		ConfigureForDhcp: types.BoolValue(false),
 	}
 
-	_, err = r.updateHostRecordDHCP(ctx, hostRecord, &clearData)
+	_, err = r.updateHostRecord(ctx, hostRecord, &clearData)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to clear DHCP settings, got error: %s", err))
 		return
@@ -313,7 +313,7 @@ func (r *IPAssociationResource) getHostRecordByInternalID(ctx context.Context, i
 	return &results[0], false, nil
 }
 
-func (r *IPAssociationResource) updateHostRecordDHCP(ctx context.Context, hostRec *dns.RecordHost, data *IPAssociationModel) (*dns.RecordHost, error) {
+func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *dns.RecordHost, data *IPAssociationModel) (*dns.RecordHost, error) {
 	// Build update request preserving all existing settings except DHCP
 	updateReq := *hostRec
 
@@ -384,6 +384,9 @@ func (r *IPAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IP
 		if ipv4.ConfigureForDhcp != nil {
 			data.ConfigureForDhcp = types.BoolValue(*ipv4.ConfigureForDhcp)
 		}
+		if ipv4.MatchClient != nil {
+			data.MatchClient = types.StringValue(*ipv4.MatchClient)
+		}
 	}
 
 	// Extract DHCP settings from IPv6 addresses
@@ -394,6 +397,9 @@ func (r *IPAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IP
 		}
 		if ipv6.ConfigureForDhcp != nil {
 			data.ConfigureForDhcp = types.BoolValue(*ipv6.ConfigureForDhcp)
+		}
+		if ipv6.MatchClient != nil {
+			data.MatchClient = types.StringValue(*ipv6.MatchClient)
 		}
 	}
 

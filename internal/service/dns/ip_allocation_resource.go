@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -81,6 +82,25 @@ func (r *IPAllocationResource) ValidateConfig(ctx context.Context, req resource.
 			"Invalid Configuration",
 			"At least one of 'ipv4addrs' or 'ipv6addrs' must be configured.",
 		)
+	}
+
+	// Validate FQDN if configure_for_dns is true
+	if data.ConfigureForDns.ValueBool() {
+		name := data.Name.ValueString()
+		if strings.TrimSpace(name) != name {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("name"),
+				"Invalid FQDN",
+				"must not contain leading or trailing whitespaces",
+			)
+		}
+		if strings.HasSuffix(name, ".") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("name"),
+				"Invalid FQDN",
+				"must not end with a dot",
+			)
+		}
 	}
 }
 
@@ -376,6 +396,9 @@ func preserveDHCPSettings(updateReq *dns.RecordHost, currentHost *dns.RecordHost
 		if currentIPv4.ConfigureForDhcp != nil {
 			updateIPv4.ConfigureForDhcp = currentIPv4.ConfigureForDhcp
 		}
+		if currentIPv4.MatchClient != nil {
+			updateIPv4.MatchClient = currentIPv4.MatchClient
+		}
 	}
 
 	// Preserve IPv6 DHCP settings
@@ -390,6 +413,9 @@ func preserveDHCPSettings(updateReq *dns.RecordHost, currentHost *dns.RecordHost
 		}
 		if currentIPv6.ConfigureForDhcp != nil {
 			updateIPv6.ConfigureForDhcp = currentIPv6.ConfigureForDhcp
+		}
+		if currentIPv6.MatchClient != nil {
+			updateIPv6.MatchClient = currentIPv6.MatchClient
 		}
 	}
 }
