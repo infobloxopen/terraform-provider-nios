@@ -393,6 +393,8 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 	var data Ipv6networkModel
 	var useDiscoveryBasicPollingSettings types.Bool
 	var discoveryBasicPollSettings types.Object
+	var rirRegistrationStatus types.String
+	var rirOrganization types.String
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -453,6 +455,18 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			resp.Diagnostics.AddError(
 				"Discovery Basic Poll Settings Not Allowed",
 				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings cannot be configured. Either set use_discovery_basic_polling_settings to true or remove the discovery_basic_poll_settings block.",
+			)
+		}
+	}
+
+	req.Config.GetAttribute(ctx,path.Root("rir_registration_status"),&rirRegistrationStatus)
+	req.Config.GetAttribute(ctx,path.Root("rir_organization"),&rirOrganization)
+
+	if !rirRegistrationStatus.IsNull() && !rirRegistrationStatus.IsUnknown() {
+		if rirOrganization.IsNull() || rirOrganization.IsUnknown() {
+			resp.Diagnostics.AddError(
+				"Missing RIR Organization",
+				"The 'rir_organization' attribute must be set when 'rir_registration_status' is defined.",
 			)
 		}
 	}
