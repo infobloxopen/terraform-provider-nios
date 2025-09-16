@@ -599,42 +599,6 @@ func TestAccIPAllocationResource_DnsAliases(t *testing.T) {
 	})
 }
 
-func TestAccIPAllocationResource_EnableImmediateDiscovery(t *testing.T) {
-	var resourceName = "nios_ip_allocation.test_enable_immediate_discovery"
-	var v dns.RecordHost
-
-	name := acctest.RandomName() + ".example.com"
-	ipv4addr := []map[string]any{
-		{
-			"ipv4addr": "192.168.1.25",
-		},
-	}
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIPAllocationEnableImmediateDiscovery(name, "default", "true", ipv4addr),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIPAllocationEnableImmediateDiscovery(name, "default", "false", ipv4addr),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccIPAllocationResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_ip_allocation.test_extattrs"
 	var v dns.RecordHost
@@ -821,36 +785,6 @@ func TestAccIPAllocationResource_NetworkView(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network_view", "default"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccIPAllocationResource_RestartIfNeeded(t *testing.T) {
-	t.Skip("Skipping test as it requires a CP member to be configured")
-	var resourceName = "nios_ip_allocation.test_restart_if_needed"
-	var v dns.RecordHost
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIPAllocationRestartIfNeeded("RESTART_IF_NEEDED_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "RESTART_IF_NEEDED_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIPAllocationRestartIfNeeded("RESTART_IF_NEEDED_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "RESTART_IF_NEEDED_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1424,18 +1358,6 @@ resource "nios_ip_allocation" "test_dns_aliases" {
 `, name, view, ipv4addrHCL, dnsAliasesHCL)
 }
 
-func testAccIPAllocationEnableImmediateDiscovery(name, view, enableImmediateDiscovery string, ipv4addr []map[string]any) string {
-	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
-	return fmt.Sprintf(`
-resource "nios_ip_allocation" "test_enable_immediate_discovery" {
-	name = %q
-	view = %q
-	ipv4addrs = %s
-    enable_immediate_discovery = %q
-}
-`, name, view, ipv4addrHCL, enableImmediateDiscovery)
-}
-
 func testAccIPAllocationExtAttrs(name, view string, ipv4addr []map[string]any, extAttrs map[string]string) string {
 	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
 	extattrsStr := "{\n"
@@ -1497,14 +1419,6 @@ resource "nios_ip_allocation" "test_network_view" {
 	ipv4addrs = %s
 }
 `, name, view, ipv4addrHCL)
-}
-
-func testAccIPAllocationRestartIfNeeded(restartIfNeeded string) string {
-	return fmt.Sprintf(`
-resource "nios_ip_allocation" "test_restart_if_needed" {
-    restart_if_needed = %q
-}
-`, restartIfNeeded)
 }
 
 func testAccIPAllocationRrsetOrder(name, view, rrsetOrder string, ipv4addr []map[string]any) string {

@@ -395,7 +395,6 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Aliases:                  flex.ExpandFrameworkListString(ctx, m.Aliases, diags),
 		AllowTelnet:              flex.ExpandBoolPointer(m.AllowTelnet),
 		CliCredentials:           flex.ExpandFrameworkListNestedBlock(ctx, m.CliCredentials, diags, ExpandRecordHostCliCredentials),
-		CloudInfo:                ExpandRecordHostCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:                  flex.ExpandStringPointer(m.Comment),
 		ConfigureForDns:          flex.ExpandBoolPointer(m.ConfigureForDns),
 		DdnsProtected:            flex.ExpandBoolPointer(m.DdnsProtected),
@@ -412,7 +411,6 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Ipv6addrs:                flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv6addrs, diags, ExpandRecordHostIpv6addr),
 		MsAdUserData:             ExpandRecordHostMsAdUserData(ctx, m.MsAdUserData, diags),
 		Name:                     flex.ExpandStringPointer(m.Name),
-		NetworkView:              flex.ExpandStringPointer(m.NetworkView),
 		RestartIfNeeded:          flex.ExpandBoolPointer(m.RestartIfNeeded),
 		RrsetOrder:               flex.ExpandStringPointer(m.RrsetOrder),
 		Snmp3Credential:          ExpandRecordHostSnmp3Credential(ctx, m.Snmp3Credential, diags),
@@ -464,7 +462,6 @@ func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, d
 	m.DisableDiscovery = types.BoolPointerValue(from.DisableDiscovery)
 	m.DnsAliases = flex.FlattenFrameworkListString(ctx, from.DnsAliases, diags)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Ipv4addrs = flex.FlattenFrameworkListNestedBlock(ctx, from.Ipv4addrs, RecordHostIpv4addrAttrTypes, diags, FlattenRecordHostIpv4addr)
 	m.Ipv6addrs = flex.FlattenFrameworkListNestedBlock(ctx, from.Ipv6addrs, RecordHostIpv6addrAttrTypes, diags, FlattenRecordHostIpv6addr)
@@ -472,7 +469,6 @@ func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, d
 	m.MsAdUserData = FlattenRecordHostMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	m.RrsetOrder = flex.FlattenStringPointer(from.RrsetOrder)
 	m.Snmp3Credential = FlattenRecordHostSnmp3Credential(ctx, from.Snmp3Credential, diags)
 	m.SnmpCredential = FlattenRecordHostSnmpCredential(ctx, from.SnmpCredential, diags)
