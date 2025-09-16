@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -47,10 +48,10 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"create_home_dir": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(true),
-		MarkdownDescription: "Determines whether to create the home directory with the user name or to use the existing directory as the home directory.",
+		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
+		MarkdownDescription: "Determines whether to create the home directory with the user name or to use the existing directory as the home directory. Default is true. Cannot be used together with 'home_dir'.",
 	},
 	"extattrs": schema.MapAttribute{
 		ElementType: types.StringType,
@@ -70,7 +71,7 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"home_dir": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The absolute path of the FTP user's home directory.",
+		MarkdownDescription: "The absolute path of the FTP user's home directory. set create_home_dir to false to set home_dir",
 	},
 	"password": schema.StringAttribute{
 		Required:            true,

@@ -53,9 +53,9 @@ Required:
 
 Optional:
 
-- `create_home_dir` (Boolean) Determines whether to create the home directory with the user name or to use the existing directory as the home directory.
+- `create_home_dir` (Boolean) Determines whether to create the home directory with the user name or to use the existing directory as the home directory. Default is true. Cannot be used together with 'home_dir'.
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
-- `home_dir` (String) The absolute path of the FTP user's home directory.
+- `home_dir` (String) The absolute path of the FTP user's home directory. set create_home_dir to false to set home_dir
 - `permission` (String) The FTP user permission.
 
 Read-Only:

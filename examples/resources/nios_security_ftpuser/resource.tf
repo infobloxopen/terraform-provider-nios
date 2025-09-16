@@ -8,7 +8,7 @@ resource "nios_security_ftpuser" "ftpusers_additional_fields" {
   username        = "example_ftpuser2"
   password        = "example_password"
   permission      = "RW"
-  create_home_dir = "false"
+  create_home_dir = false
   home_dir        = "/ftpusers"
   extattrs = {
     Site = "location-1"
