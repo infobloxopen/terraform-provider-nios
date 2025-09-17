@@ -72,6 +72,12 @@ func (r *CertificateAuthserviceResource) Create(ctx context.Context, req resourc
 		return
 	}
 
+	token, err := utils.UploadPEMFile(ctx, r.client, "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/utils/cert.pem")
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to upload PEM file, got error: %s", err))
+		return
+	}
+	fmt.Printf("Uploaded PEM file, received token: %s\n", token)
 
 	apiRes, _, err := r.client.SecurityAPI.
 		CertificateAuthserviceAPI.

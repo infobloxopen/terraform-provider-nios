@@ -1,12 +1,21 @@
 package utils
 
 import (
+	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
+
+	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -496,3 +505,105 @@ func ConvertMapToHCL(data map[string]any) string {
 
 	return fmt.Sprintf("{\n%s\n}", strings.Join(keyValues, "\n"))
 }
+
+// ...existing code...
+
+// UploadPEMFile uploads a PEM file to the Infoblox NIOS server using the provided client.
+// It returns the token that can be used to reference the uploaded file in subsequent operations.
+func UploadPEMFile(ctx context.Context, client *niosclient.APIClient, pemFilePath string) (string, error) {
+    baseURL := client.SecurityAPI.Cfg.NIOSHostURL
+    
+    // Get credentials from client configuration
+    username := client.SecurityAPI.Cfg.NIOSUsername
+    password := client.SecurityAPI.Cfg.NIOSPassword
+    
+    // Create HTTP client with TLS config similar to the main client
+    httpClient := &http.Client{
+        Transport: &http.Transport{
+            TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+        },
+    }
+
+    // Step 1: Generate upload token and URL by calling uploadinit
+    uploadInitURL := fmt.Sprintf("%s/wapi/v2.13.6/fileop?_function=uploadinit", baseURL)
+    req, err := http.NewRequestWithContext(ctx, "POST", uploadInitURL, bytes.NewReader([]byte("{}")))
+    if err != nil {
+        return "", fmt.Errorf("error creating uploadinit request: %w", err)
+    }
+
+    req.Header.Set("Content-Type", "application/json")
+    req.SetBasicAuth(username, password)
+
+    tflog.Debug(ctx, fmt.Sprintf("Making uploadinit request to: %s", uploadInitURL))
+    resp, err := httpClient.Do(req)
+    if err != nil {
+        return "", fmt.Errorf("error making uploadinit request: %w", err)
+    }
+    defer resp.Body.Close()
+
+    if resp.StatusCode != http.StatusOK {
+        bodyBytes, _ := io.ReadAll(resp.Body)
+        return "", fmt.Errorf("uploadinit request failed with status %d: %s", resp.StatusCode, string(bodyBytes))
+    }
+
+    var uploadInitResponse struct {
+        Token string `json:"token"`
+        URL   string `json:"url"`
+    }
+
+    if err := json.NewDecoder(resp.Body).Decode(&uploadInitResponse); err != nil {
+        return "", fmt.Errorf("error decoding uploadinit response: %w", err)
+    }
+
+    // Step 2: Upload the PEM file to the received URL
+    file, err := os.Open(pemFilePath)
+    if err != nil {
+        return "", fmt.Errorf("error opening PEM file: %w", err)
+    }
+    defer file.Close()
+
+    // Create a buffer for the multipart form
+    var requestBody bytes.Buffer
+    writer := multipart.NewWriter(&requestBody)
+    
+    // Create the form file field
+    part, err := writer.CreateFormFile("file", filepath.Base(pemFilePath))
+    if err != nil {
+        return "", fmt.Errorf("error creating form file: %w", err)
+    }
+    
+    // Copy the file content to the form field
+    if _, err = io.Copy(part, file); err != nil {
+        return "", fmt.Errorf("error copying file content: %w", err)
+    }
+    
+    // Close the multipart writer to finalize the form
+    if err = writer.Close(); err != nil {
+        return "", fmt.Errorf("error finalizing multipart form: %w", err)
+    }
+
+    // Create a new request to upload the file
+    uploadReq, err := http.NewRequestWithContext(ctx, "POST", uploadInitResponse.URL, &requestBody)
+    if err != nil {
+        return "", fmt.Errorf("error creating file upload request: %w", err)
+    }
+
+    uploadReq.Header.Set("Content-Type", writer.FormDataContentType())
+    uploadReq.SetBasicAuth(username, password)
+
+    tflog.Debug(ctx, fmt.Sprintf("Uploading PEM file to: %s", uploadInitResponse.URL))
+    uploadResp, err := httpClient.Do(uploadReq)
+    if err != nil {
+        return "", fmt.Errorf("error uploading PEM file: %w", err)
+    }
+    defer uploadResp.Body.Close()
+
+    if uploadResp.StatusCode != http.StatusOK {
+        bodyBytes, _ := io.ReadAll(uploadResp.Body)
+        return "", fmt.Errorf("file upload failed with status %d: %s", uploadResp.StatusCode, string(bodyBytes))
+    }
+
+    tflog.Info(ctx, fmt.Sprintf("PEM file %s successfully uploaded with token: %s", pemFilePath, uploadInitResponse.Token))
+    return uploadInitResponse.Token, nil
+}
+
