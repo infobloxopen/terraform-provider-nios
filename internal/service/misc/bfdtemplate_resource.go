@@ -86,7 +86,7 @@ func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateReq
 
 	res := apiRes.CreateBfdtemplateResponseAsObject.GetResult()
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Bfdtemplate due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Bfdtemplate, got error: %s", err))
 		return
 	}
 

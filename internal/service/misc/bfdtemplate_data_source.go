@@ -140,7 +140,7 @@ func (d *BfdtemplateDataSource) Read(ctx context.Context, req datasource.ReadReq
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Bfdtemplate by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Bfdtemplate, got error: %s", err))
 				return nil, "", err
 			}
 

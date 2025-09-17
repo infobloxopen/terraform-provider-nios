@@ -15,7 +15,7 @@ func TestAccBfdtemplateDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_misc_bfdtemplate.test"
 	resourceName := "nios_misc_bfdtemplate.test"
 	var v misc.Bfdtemplate
-	name := "tf_test_bfd_" + acctest.RandomName()
+	name := acctest.RandomNameWithPrefix("tf-test-bfdtemplate-")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
