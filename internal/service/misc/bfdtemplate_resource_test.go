@@ -126,6 +126,14 @@ func TestAccBfdtemplateResource_AuthenticationType(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "authentication_type", "METICULOUS-SHA1"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccBfdtemplateAuthenticationType(name, "SHA1", authKey),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "authentication_type", "SHA1"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
