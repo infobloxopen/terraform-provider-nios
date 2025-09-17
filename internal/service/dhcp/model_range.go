@@ -435,8 +435,8 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeExcludeResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -466,7 +466,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeFingerprintFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -510,9 +510,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -580,7 +580,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeMacFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -618,7 +618,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeNacFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -657,7 +657,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeOptionFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -705,7 +705,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangeRelayAgentFilterRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -1128,6 +1128,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangeRelayAgentFilterRulesAttrTypes, diags, FlattenRangeRelayAgentFilterRules)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.ServerAssociationType = flex.FlattenStringPointer(from.ServerAssociationType)
+	m.SplitMember = FlattenRangeSplitMember(ctx, from.SplitMember, diags)
 	m.StartAddr = flex.FlattenIPv4Address(from.StartAddr)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.SubscribeSettings = FlattenRangeSubscribeSettings(ctx, from.SubscribeSettings, diags)
