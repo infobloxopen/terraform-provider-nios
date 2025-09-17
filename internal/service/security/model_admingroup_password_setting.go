@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -28,21 +30,21 @@ var AdmingroupPasswordSettingAttrTypes = map[string]attr.Type{
 
 var AdmingroupPasswordSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"expire_enable": schema.BoolAttribute{
-		Optional: true,
-		//Computed:            true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Whether password expiry enabled or not.",
 	},
 	"expire_days": schema.Int64Attribute{
-		Optional: true,
-		//Computed:            true,
-		//Default:             int64default.StaticInt64(30),
+		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(30),
 		MarkdownDescription: "The days that password must expire",
 	},
 	"reminder_days": schema.Int64Attribute{
-		Optional: true,
-		//Computed:            true,
-		//Default:             int64default.StaticInt64(15),
+		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "Days to show up reminder prior to expiration",
 	},
 }

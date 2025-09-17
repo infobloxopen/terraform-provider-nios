@@ -16,5 +16,10 @@ resource "nios_security_admin_group" "admin_group_additional_fields" {
     set_core_files_quota = false
   }
   access_method = ["GUI", "API", "CLI"]
-  admin
+  admin_set_commands = {
+
+  }
+  admin_show_commands = {
+
+  }
 }
