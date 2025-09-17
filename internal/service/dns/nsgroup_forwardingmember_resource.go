@@ -328,17 +328,9 @@ func (r *NsgroupForwardingmemberResource) ImportState(ctx context.Context, req r
 
 	res := updateRes.UpdateNsgroupForwardingmemberResponseAsObject.GetResult()
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update NsgroupForwardingmember due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 

@@ -328,17 +328,9 @@ func (r *RecordTlsaResource) ImportState(ctx context.Context, req resource.Impor
 
 	res := updateRes.UpdateRecordTlsaResponseAsObject.GetResult()
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordTlsa due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 
