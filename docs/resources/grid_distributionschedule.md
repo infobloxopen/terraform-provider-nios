@@ -49,14 +49,11 @@ resource "nios_grid_distributionschedule" "schedule_with_upgrade_groups" {
 <a id="nestedatt--upgrade_groups"></a>
 ### Nested Schema for `upgrade_groups`
 
-Required:
-
-- `name` (String) The upgrade group name.
-
 Optional:
 
 - `distribution_dependent_group` (String) The distribution dependent group name.
 - `distribution_time` (String) The time of the next scheduled distribution.
+- `name` (String) The upgrade group name. Required when specifying upgrade_groups
 
 Read-Only:
 

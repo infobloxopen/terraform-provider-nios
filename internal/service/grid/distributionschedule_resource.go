@@ -22,6 +22,7 @@ var readableAttributesForDistributionschedule = "active,start_time,time_zone,upg
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &DistributionscheduleResource{}
 var _ resource.ResourceWithImportState = &DistributionscheduleResource{}
+var _ resource.ResourceWithValidateConfig = &DistributionscheduleResource{}
 
 func NewDistributionscheduleResource() resource.Resource {
 	return &DistributionscheduleResource{}
@@ -61,6 +62,34 @@ func (r *DistributionscheduleResource) Configure(ctx context.Context, req resour
 	}
 
 	r.client = client
+}
+
+func (r *DistributionscheduleResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data DistributionscheduleModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.UpgradeGroups.IsNull() && !data.UpgradeGroups.IsUnknown() {
+		var groups []DistributionscheduleUpgradeGroupsModel
+		diags := data.UpgradeGroups.ElementsAs(ctx, &groups, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for idx, group := range groups {
+			if group.Name.IsNull() || group.Name.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("upgrade_groups"),
+					"Invalid upgrade_groups.name",
+					fmt.Sprintf("upgrade_groups[%d].name must be set", idx),
+				)
+			}
+		}
+	}
 }
 
 func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

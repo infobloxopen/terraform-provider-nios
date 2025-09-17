@@ -41,14 +41,11 @@ Read-Only:
 <a id="nestedatt--result--upgrade_groups"></a>
 ### Nested Schema for `result.upgrade_groups`
 
-Required:
-
-- `name` (String) The upgrade group name.
-
 Optional:
 
 - `distribution_dependent_group` (String) The distribution dependent group name.
 - `distribution_time` (String) The time of the next scheduled distribution.
+- `name` (String) The upgrade group name. Required when specifying upgrade_groups
 
 Read-Only:
 

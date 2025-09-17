@@ -38,8 +38,9 @@ var DistributionscheduleUpgradeGroupsAttrTypes = map[string]attr.Type{
 
 var DistributionscheduleUpgradeGroupsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Required:            true,
-		MarkdownDescription: "The upgrade group name.",
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "The upgrade group name. Required when specifying upgrade_groups",
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
