@@ -112,18 +112,18 @@ func TestAccBfdtemplateResource_AuthenticationType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccBfdtemplateAuthenticationType(name, "MD5", authKey),
+				Config: testAccBfdtemplateAuthenticationType(name, "METICULOUS-MD5", authKey),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_type", "MD5"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_type", "METICULOUS-MD5"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccBfdtemplateAuthenticationType(name, "SHA1", authKey),
+				Config: testAccBfdtemplateAuthenticationType(name, "METICULOUS-SHA1", authKey),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_type", "SHA1"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_type", "METICULOUS-SHA1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
