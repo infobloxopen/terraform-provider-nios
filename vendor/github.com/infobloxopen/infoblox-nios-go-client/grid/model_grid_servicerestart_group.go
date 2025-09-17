@@ -45,9 +45,8 @@ type GridServicerestartGroup struct {
 	// The list of requests associated with a restart group.
 	Requests []string `json:"requests,omitempty"`
 	// The applicable service for this Restart Group.
-	Service *string `json:"service,omitempty"`
-	// The restart status for a restart group.
-	Status *string `json:"status,omitempty"`
+	Service *string                   `json:"service,omitempty"`
+	Status  *GridServicerestartStatus `json:"status,omitempty"`
 }
 
 // NewGridServicerestartGroup instantiates a new GridServicerestartGroup object
@@ -516,9 +515,9 @@ func (o *GridServicerestartGroup) SetService(v string) {
 }
 
 // GetStatus returns the Status field value if set, zero value otherwise.
-func (o *GridServicerestartGroup) GetStatus() string {
+func (o *GridServicerestartGroup) GetStatus() GridServicerestartStatus {
 	if o == nil || IsNil(o.Status) {
-		var ret string
+		var ret GridServicerestartStatus
 		return ret
 	}
 	return *o.Status
@@ -526,7 +525,7 @@ func (o *GridServicerestartGroup) GetStatus() string {
 
 // GetStatusOk returns a tuple with the Status field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GridServicerestartGroup) GetStatusOk() (*string, bool) {
+func (o *GridServicerestartGroup) GetStatusOk() (*GridServicerestartStatus, bool) {
 	if o == nil || IsNil(o.Status) {
 		return nil, false
 	}
@@ -542,8 +541,8 @@ func (o *GridServicerestartGroup) HasStatus() bool {
 	return false
 }
 
-// SetStatus gets a reference to the given string and assigns it to the Status field.
-func (o *GridServicerestartGroup) SetStatus(v string) {
+// SetStatus gets a reference to the given GridServicerestartStatus and assigns it to the Status field.
+func (o *GridServicerestartGroup) SetStatus(v GridServicerestartStatus) {
 	o.Status = &v
 }
 
