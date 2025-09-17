@@ -2,7 +2,6 @@ package grid
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,7 +16,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -116,22 +114,7 @@ func (m *DistributionscheduleModel) Expand(ctx context.Context, diags *diag.Diag
 		UpgradeGroups: groups,
 	}
 
-	if !m.StartTime.IsNull() && !m.StartTime.IsUnknown() {
-		startTime, err := utils.ToUnixWithTimezone(m.StartTime.ValueString(), m.TimeZone.ValueString())
-		if err != nil {
-			diags.AddError(
-				"Invalid Start Time or Timezone",
-				fmt.Sprintf(
-					"Failed to parse start_time %q with timezone %q: %s",
-					m.StartTime.ValueString(),
-					m.TimeZone.ValueString(),
-					err.Error(),
-				),
-			)
-			return nil
-		}
-		to.StartTime = &startTime
-	}
+	to.StartTime = flex.ExpandTimeToUnix(m.StartTime, m.TimeZone, diags)
 
 	return to
 }
@@ -148,11 +131,6 @@ func FlattenDistributionschedule(ctx context.Context, from *grid.Distributionsch
 }
 
 func (m *DistributionscheduleModel) Flatten(ctx context.Context, from *grid.Distributionschedule, diags *diag.Diagnostics) {
-	var (
-		startTime string
-		err       error
-	)
-
 	if from == nil {
 		return
 	}
@@ -160,25 +138,9 @@ func (m *DistributionscheduleModel) Flatten(ctx context.Context, from *grid.Dist
 		*m = DistributionscheduleModel{}
 	}
 
-	if from.StartTime != nil && from.TimeZone != nil {
-		startTime, err = utils.FromUnixWithTimezone(*from.StartTime, *from.TimeZone)
-		if err != nil {
-			diags.AddError(
-				"Invalid Start Time or Timezone",
-				fmt.Sprintf(
-					"Failed to format start_time %d (Unix) with timezone %q: %s",
-					*from.StartTime,
-					*from.TimeZone,
-					err,
-				),
-			)
-			return
-		}
-	}
-
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Active = types.BoolPointerValue(from.Active)
-	m.StartTime = types.StringValue(startTime)
+	m.StartTime = flex.FlattenUnixTime(from.StartTime, from.TimeZone, diags)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.UpgradeGroups = flex.FlattenFrameworkListNestedBlock(ctx, from.UpgradeGroups, DistributionscheduleUpgradeGroupsAttrTypes, diags, FlattenDistributionscheduleUpgradeGroups)
 }

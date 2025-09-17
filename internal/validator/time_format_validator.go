@@ -33,7 +33,7 @@ func (v timeFormatValidator) ValidateString(ctx context.Context, req validator.S
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Invalid time format",
-			"Expected format:"+utils.NaiveDatetimeLayout+". Got: "+value,
+			fmt.Sprintf("Expected format: YYYY-MM-DDTHH:MM:SS (example: %s), Got: %s", utils.NaiveDatetimeLayout, value),
 		)
 	}
 }
