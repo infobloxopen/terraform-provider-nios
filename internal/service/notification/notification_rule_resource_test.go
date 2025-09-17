@@ -19,7 +19,6 @@ import (
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
 
 var (
-	name               = acctest.RandomNameWithPrefix("example-notification-rule")
 	notificationTarget = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:rest_api"
 	eventType          = "DHCP_LEASES"
 	expressionList     = []map[string]any{
@@ -47,6 +46,7 @@ var (
 func TestAccNotificationRuleResource_basic(t *testing.T) {
 	var resourceName = "nios_notification_rule.test"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -84,6 +84,7 @@ func TestAccNotificationRuleResource_basic(t *testing.T) {
 func TestAccNotificationRuleResource_disappears(t *testing.T) {
 	resourceName := "nios_notification_rule.test"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -105,6 +106,7 @@ func TestAccNotificationRuleResource_disappears(t *testing.T) {
 func TestAccNotificationRuleResource_AllMembers(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_all_members"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 	selectedMembers := []string{"infoblox.localdomain1"}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -135,6 +137,7 @@ func TestAccNotificationRuleResource_AllMembers(t *testing.T) {
 func TestAccNotificationRuleResource_Comment(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_comment"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -164,6 +167,7 @@ func TestAccNotificationRuleResource_Comment(t *testing.T) {
 func TestAccNotificationRuleResource_Disable(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_disable"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -194,6 +198,7 @@ func TestAccNotificationRuleResource_Disable(t *testing.T) {
 func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -223,6 +228,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication_log"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -252,6 +258,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_event_deduplication_fields"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -281,6 +288,7 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_event_deduplication_lookback_period"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -310,6 +318,7 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_event_priority"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -339,6 +348,7 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 func TestAccNotificationRuleResource_EventType(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_event_type"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -368,6 +378,7 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_expression_list"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -397,6 +408,7 @@ func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 func TestAccNotificationRuleResource_Name(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_name"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -418,6 +430,7 @@ func TestAccNotificationRuleResource_Name(t *testing.T) {
 func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_notification_action"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -447,6 +460,7 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_notification_target"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -476,6 +490,7 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_publish_settings"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -505,6 +520,7 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_scheduled_event"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -534,6 +550,7 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 func TestAccNotificationRuleResource_SelectedMembers(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_selected_members"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -563,6 +580,7 @@ func TestAccNotificationRuleResource_SelectedMembers(t *testing.T) {
 func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_template_instance"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -592,6 +610,7 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 func TestAccNotificationRuleResource_UsePublishSettings(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_use_publish_settings"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
