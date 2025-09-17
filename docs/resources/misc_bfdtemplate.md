@@ -3,24 +3,24 @@
 page_title: "nios_misc_bfdtemplate Resource - nios"
 subcategory: "MISC"
 description: |-
-  Retrieves information about existing BFD.
+  Manages a BFD template.
 ---
 
 # nios_misc_bfdtemplate (Resource)
 
-Retrieves information about existing BFD.
+Manages a BFD template.
 
 ## Example Usage
 
 ```terraform
-// Create nios_misc_bfdtemplate with Basic fields
-resource "nios_misc_bfdtemplate" "test_bfdtemplate_basic" {
-  name = "tf_test_bfd_name"
+// Create a BFD template with Basic Fields
+resource "nios_misc_bfdtemplate" "bfd_template_with_basic_fields" {
+  name = "example_bfd_name"
 }
 
-// Create nios_misc_bfdtemplate with additional fields
-resource "nios_misc_bfdtemplate" "test_bfdtemplate_additional" {
-  name                  = "tf_test_bfd_name_additional"
+// Create a BFD template with Additional Fields
+resource "nios_misc_bfdtemplate" "bfd_template_with_additional_fields" {
+  name                  = "example_bfd_name_additional"
   authentication_key_id = 4
   authentication_type   = "MD5"
   detection_multiplier  = 5
@@ -38,7 +38,7 @@ resource "nios_misc_bfdtemplate" "test_bfdtemplate_additional" {
 
 ### Optional
 
-- `authentication_key` (String) The authentication key for BFD protocol message-digest authentication.
+- `authentication_key` (String, Sensitive) The authentication key for BFD protocol message-digest authentication.
 - `authentication_key_id` (Number) The authentication key identifier for BFD protocol authentication. Valid values are between 1 and 255.
 - `authentication_type` (String) The authentication type for BFD protocol.
 - `detection_multiplier` (Number) The detection time multiplier value for BFD protocol. The negotiated transmit interval, multiplied by this value, provides the detection time for the receiving system in asynchronous BFD mode. Valid values are between 3 and 50.

@@ -3,20 +3,20 @@
 page_title: "nios_misc_bfdtemplate Data Source - nios"
 subcategory: "MISC"
 description: |-
-  Manages an BFD.
+  Retrieves information about existing BFD templates.
 ---
 
 # nios_misc_bfdtemplate (Data Source)
 
-Manages an BFD.
+Retrieves information about existing BFD templates.
 
 ## Example Usage
 
 ```terraform
 // Retrieve a specific BFD Template by filters
-data "nios_misc_bfdtemplate" "test_bfdtemplate_filters" {
+data "nios_misc_bfdtemplate" "bfd_template_with_filters" {
   filters = {
-    name = "tf_test_bfd_name"
+    name = "example_bfd_name"
   }
 }
 ```
@@ -26,7 +26,6 @@ data "nios_misc_bfdtemplate" "test_bfdtemplate_filters" {
 
 ### Optional
 
-- `extattrfilters` (Map of String) External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
 - `filters` (Map of String) Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
 - `max_results` (Number) Maximum number of objects to be returned. Defaults to 1000.
 - `paging` (Number) Enable (1) or disable (0) paging for the data source query. When enabled, the system retrieves results in pages, allowing efficient handling of large result sets. Paging is enabled by default.
@@ -44,7 +43,7 @@ Required:
 
 Optional:
 
-- `authentication_key` (String) The authentication key for BFD protocol message-digest authentication.
+- `authentication_key` (String, Sensitive) The authentication key for BFD protocol message-digest authentication.
 - `authentication_key_id` (Number) The authentication key identifier for BFD protocol authentication. Valid values are between 1 and 255.
 - `authentication_type` (String) The authentication type for BFD protocol.
 - `detection_multiplier` (Number) The detection time multiplier value for BFD protocol. The negotiated transmit interval, multiplied by this value, provides the detection time for the receiving system in asynchronous BFD mode. Valid values are between 3 and 50.
