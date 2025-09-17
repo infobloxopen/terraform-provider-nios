@@ -1,0 +1,966 @@
+package notification_test
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/infobloxopen/infoblox-nios-go-client/notification"
+
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+)
+
+var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
+
+var (
+	name               = acctest.RandomNameWithPrefix("example-notification-rule")
+	notificationTarget = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:rest_api"
+	eventType          = "DHCP_LEASES"
+	expressionList     = []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DHCP_LEASE_STATE",
+			"op1_type": "FIELD",
+			"op2":      "DHCP_LEASE_STATE_ACTIVE",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	templateInstance = map[string]any{
+		"template": "DHCP_Lease",
+	}
+	notificationAction = "RESTAPI_TEMPLATE_INSTANCE"
+)
+
+func TestAccNotificationRuleResource_basic(t *testing.T) {
+	var resourceName = "nios_notification_rule.test"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleBasicConfig(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "event_type", eventType),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "notification_action", notificationAction),
+					resource.TestCheckResourceAttr(resourceName, "notification_target", notificationTarget),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "DHCP_Lease"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.0.op", "AND"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.0.op1_type", "LIST"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op", "EQ"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op1", "DHCP_LEASE_STATE"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op1_type", "FIELD"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op2", "DHCP_LEASE_STATE_ACTIVE"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op2_type", "STRING"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.2.op", "ENDLIST"),
+
+					// Test fields with default value
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_disappears(t *testing.T) {
+	resourceName := "nios_notification_rule.test"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNotificationRuleDestroy(context.Background(), &v),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNotificationRuleBasicConfig(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					testAccCheckNotificationRuleDisappears(context.Background(), &v),
+				),
+			},
+		},
+	})
+}
+
+// You can select any Grid member for outbound notification rules
+func TestAccNotificationRuleResource_AllMembers(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_all_members"
+	var v notification.NotificationRule
+	selectedMembers := []string{"infoblox.localdomain1"}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleAllMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "all_members", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleAllMembersUpdate(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "false", selectedMembers),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "all_members", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_Comment(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_comment"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleComment(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "This is a comment"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleComment(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "This is an updated comment"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_Disable(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_disable"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleDisable(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleDisable(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+// Deduplication events are supported only for DNS_RPZ, SECURITY_ADP, DB_CHANGE_DNS_DISCOVERY_DATA, DXL_EVENT_SUBSCRIBER event types
+func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_enable_event_deduplication"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleEnableEventDeduplication(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleEnableEventDeduplication(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication", "true"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_enable_event_deduplication_log"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleEnableEventDeduplicationLog(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "ENABLE_EVENT_DEDUPLICATION_LOG_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication_log", "ENABLE_EVENT_DEDUPLICATION_LOG_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleEnableEventDeduplicationLog(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "ENABLE_EVENT_DEDUPLICATION_LOG_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication_log", "ENABLE_EVENT_DEDUPLICATION_LOG_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_event_deduplication_fields"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleEventDeduplicationFields(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_DEDUPLICATION_FIELDS_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields", "EVENT_DEDUPLICATION_FIELDS_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleEventDeduplicationFields(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_DEDUPLICATION_FIELDS_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields", "EVENT_DEDUPLICATION_FIELDS_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_event_deduplication_lookback_period"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_DEDUPLICATION_LOOKBACK_PERIOD_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_lookback_period", "EVENT_DEDUPLICATION_LOOKBACK_PERIOD_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_DEDUPLICATION_LOOKBACK_PERIOD_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_lookback_period", "EVENT_DEDUPLICATION_LOOKBACK_PERIOD_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_event_priority"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_PRIORITY_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_priority", "EVENT_PRIORITY_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_PRIORITY_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_priority", "EVENT_PRIORITY_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_EventType(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_event_type"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleEventType(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_type", "EVENT_TYPE_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleEventType(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_type", "EVENT_TYPE_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_expression_list"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleExpressionList(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "expression_list", "EXPRESSION_LIST_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleExpressionList(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "expression_list", "EXPRESSION_LIST_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_Name(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_name"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleName(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_notification_action"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_notification_target"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleNotificationTarget(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "notification_target", "NOTIFICATION_TARGET_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleNotificationTarget(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "notification_target", "NOTIFICATION_TARGET_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_publish_settings"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRulePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "PUBLISH_SETTINGS_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings", "PUBLISH_SETTINGS_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRulePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "PUBLISH_SETTINGS_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings", "PUBLISH_SETTINGS_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_scheduled_event"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleScheduledEvent(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "SCHEDULED_EVENT_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event", "SCHEDULED_EVENT_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleScheduledEvent(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "SCHEDULED_EVENT_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event", "SCHEDULED_EVENT_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_SelectedMembers(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_selected_members"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleSelectedMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "SELECTED_MEMBERS_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "selected_members", "SELECTED_MEMBERS_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleSelectedMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "SELECTED_MEMBERS_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "selected_members", "SELECTED_MEMBERS_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_template_instance"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleTemplateInstance(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "template_instance", "TEMPLATE_INSTANCE_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleTemplateInstance(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "template_instance", "TEMPLATE_INSTANCE_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_UsePublishSettings(t *testing.T) {
+	var resourceName = "nios_notification_rule.test_use_publish_settings"
+	var v notification.NotificationRule
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleUsePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "USE_PUBLISH_SETTINGS_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_publish_settings", "USE_PUBLISH_SETTINGS_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRuleUsePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "USE_PUBLISH_SETTINGS_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_publish_settings", "USE_PUBLISH_SETTINGS_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func testAccCheckNotificationRuleExists(ctx context.Context, resourceName string, v *notification.NotificationRule) resource.TestCheckFunc {
+	// Verify the resource exists in the cloud
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("not found: %s", resourceName)
+		}
+		apiRes, _, err := acctest.NIOSClient.NotificationAPI.
+			NotificationRuleAPI.
+			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			ReturnFieldsPlus(readableAttributesForNotificationRule).
+			ReturnAsObject(1).
+			Execute()
+		if err != nil {
+			return err
+		}
+		if !apiRes.GetNotificationRuleResponseObjectAsResult.HasResult() {
+			return fmt.Errorf("expected result to be returned: %s", resourceName)
+		}
+		*v = apiRes.GetNotificationRuleResponseObjectAsResult.GetResult()
+		return nil
+	}
+}
+
+func testAccCheckNotificationRuleDestroy(ctx context.Context, v *notification.NotificationRule) resource.TestCheckFunc {
+	// Verify the resource was destroyed
+	return func(state *terraform.State) error {
+		_, httpRes, err := acctest.NIOSClient.NotificationAPI.
+			NotificationRuleAPI.
+			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			ReturnAsObject(1).
+			ReturnFieldsPlus(readableAttributesForNotificationRule).
+			Execute()
+		if err != nil {
+			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+				// resource was deleted
+				return nil
+			}
+			return err
+		}
+		return errors.New("expected to be deleted")
+	}
+}
+
+func testAccCheckNotificationRuleDisappears(ctx context.Context, v *notification.NotificationRule) resource.TestCheckFunc {
+	// Delete the resource externally to verify disappears test
+	return func(state *terraform.State) error {
+		_, err := acctest.NIOSClient.NotificationAPI.
+			NotificationRuleAPI.
+			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Execute()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
+func testAccNotificationRuleBasicConfig(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
+}
+
+func testAccNotificationRuleAllMembers(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, allMembers string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_all_members" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+    all_members = %q
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, allMembers)
+}
+
+func testAccNotificationRuleAllMembersUpdate(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, allMembers string, selectedMembers []string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	selectedMembersHCL := utils.ConvertStringSliceToHCL(selectedMembers)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_all_members" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+    all_members = %q
+	selected_members = %s
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, allMembers, selectedMembersHCL)
+}
+
+func testAccNotificationRuleComment(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, comment string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_comment" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+    comment = %q
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, comment)
+}
+
+func testAccNotificationRuleDisable(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, disable string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_disable" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+    disable = %q
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, disable)
+}
+
+func testAccNotificationRuleEnableEventDeduplication(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, enableEventDeduplication string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_enable_event_deduplication" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+    enable_event_deduplication = %q
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, enableEventDeduplication)
+}
+
+func testAccNotificationRuleEnableEventDeduplicationLog(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, enableEventDeduplicationLog string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_enable_event_deduplication_log" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+    enable_event_deduplication_log = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, enableEventDeduplicationLog)
+}
+
+func testAccNotificationRuleEventDeduplicationFields(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventDeduplicationFields string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_event_deduplication_fields" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+    event_deduplication_fields = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventDeduplicationFields)
+}
+
+func testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventDeduplicationLookbackPeriod string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_event_deduplication_lookback_period" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+    event_deduplication_lookback_period = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventDeduplicationLookbackPeriod)
+}
+
+func testAccNotificationRuleEventPriority(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventPriority string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_event_priority" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+    event_priority = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventPriority)
+}
+
+func testAccNotificationRuleEventType(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_event_type" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+}
+
+func testAccNotificationRuleExpressionList(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_expression_list" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+}
+
+func testAccNotificationRuleName(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_name" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
+}
+
+func testAccNotificationRuleNotificationAction(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_notification_action" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+}
+
+func testAccNotificationRuleNotificationTarget(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_notification_target" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+}
+
+func testAccNotificationRulePublishSettings(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, publishSettings string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_publish_settings" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+    publish_settings = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, publishSettings)
+}
+
+func testAccNotificationRuleScheduledEvent(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, scheduledEvent string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_scheduled_event" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+    scheduled_event = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, scheduledEvent)
+}
+
+func testAccNotificationRuleSelectedMembers(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, selectedMembers string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_selected_members" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+    selected_members = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, selectedMembers)
+}
+
+func testAccNotificationRuleTemplateInstance(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_template_instance" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+}
+
+func testAccNotificationRuleUsePublishSettings(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, usePublishSettings string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_use_publish_settings" {
+    event_type = %q
+    expression_list = %q
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %q
+    use_publish_settings = %q
+}
+`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, usePublishSettings)
+}
