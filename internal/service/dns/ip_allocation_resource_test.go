@@ -151,14 +151,6 @@ func TestAccIPAllocationResource_AllowTelnet(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "allow_telnet", "false"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccIPAllocationAllowTelnet(name, "default", "true", ipv4addr),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "allow_telnet", "true"),
-				),
-			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})

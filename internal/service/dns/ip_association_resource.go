@@ -349,6 +349,7 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 	updateReq.CreationTime = nil
 	updateReq.DnsName = nil
 	updateReq.LastQueried = nil
+	updateReq.NetworkView = nil
 	updateReq.Zone = nil
 	if len(updateReq.Ipv4addrs) > 0 {
 		updateReq.Ipv4addrs[0].Host = nil
@@ -356,7 +357,10 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 	if len(updateReq.Ipv6addrs) > 0 {
 		updateReq.Ipv6addrs[0].Host = nil
 	}
-	updateReq.NetworkView = nil
+	if updateReq.ConfigureForDns != nil && !*updateReq.ConfigureForDns {
+		updateReq.Name = nil
+		updateReq.View = nil
+	}
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.

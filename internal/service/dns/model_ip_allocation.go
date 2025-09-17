@@ -404,7 +404,6 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Ipv4addrs:                flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv4addrs, diags, ExpandRecordHostIpv4addr),
 		Ipv6addrs:                flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv6addrs, diags, ExpandRecordHostIpv6addr),
 		MsAdUserData:             ExpandRecordHostMsAdUserData(ctx, m.MsAdUserData, diags),
-		Name:                     flex.ExpandStringPointer(m.Name),
 		RestartIfNeeded:          flex.ExpandBoolPointer(m.RestartIfNeeded),
 		RrsetOrder:               flex.ExpandStringPointer(m.RrsetOrder),
 		Snmp3Credential:          ExpandRecordHostSnmp3Credential(ctx, m.Snmp3Credential, diags),
@@ -415,7 +414,11 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		UseSnmp3Credential:       flex.ExpandBoolPointer(m.UseSnmp3Credential),
 		UseSnmpCredential:        flex.ExpandBoolPointer(m.UseSnmpCredential),
 		UseTtl:                   flex.ExpandBoolPointer(m.UseTtl),
-		View:                     flex.ExpandStringPointer(m.View),
+	}
+
+	if m.ConfigureForDns.IsUnknown() || m.ConfigureForDns.IsNull() || m.ConfigureForDns.ValueBool() {
+		to.View = flex.ExpandStringPointer(m.View)
+		to.Name = flex.ExpandStringPointer(m.Name)
 	}
 	return to
 }
@@ -461,7 +464,6 @@ func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, d
 	m.Ipv6addrs = flex.FlattenFrameworkListNestedBlock(ctx, from.Ipv6addrs, RecordHostIpv6addrAttrTypes, diags, FlattenRecordHostIpv6addr)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)
 	m.MsAdUserData = FlattenRecordHostMsAdUserData(ctx, from.MsAdUserData, diags)
-	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.RrsetOrder = flex.FlattenStringPointer(from.RrsetOrder)
 	m.Snmp3Credential = FlattenRecordHostSnmp3Credential(ctx, from.Snmp3Credential, diags)
@@ -472,6 +474,10 @@ func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, d
 	m.UseSnmp3Credential = types.BoolPointerValue(from.UseSnmp3Credential)
 	m.UseSnmpCredential = types.BoolPointerValue(from.UseSnmpCredential)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
-	m.View = flex.FlattenStringPointer(from.View)
 	m.Zone = flex.FlattenStringPointer(from.Zone)
+
+	if from.ConfigureForDns != nil && *from.ConfigureForDns {
+		m.Name = flex.FlattenStringPointer(from.Name)
+		m.View = flex.FlattenStringPointer(from.View)
+	}
 }
