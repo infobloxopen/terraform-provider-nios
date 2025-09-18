@@ -108,10 +108,10 @@ func (r *UpgradegroupResource) Read(ctx context.Context, req resource.ReadReques
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			// Handle not found case
+			// Resource no longer exists, remove from state
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -186,6 +186,7 @@ func (r *UpgradegroupResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 }
+
 func (r *UpgradegroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
 }
