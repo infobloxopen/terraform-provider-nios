@@ -104,9 +104,9 @@ func testAccNsgroupStubmemberDataSourceConfigExtAttrFilters(name string, stubMem
 resource "nios_dns_nsgroup_stubmember" "test" {
 	name = %q
 	stub_members = %s
-  extattrs = {
-    Site = %q
-  } 
+  	extattrs = {
+    	Site = %q
+  	} 
 }
 
 data "nios_dns_nsgroup_stubmember" "test" {
