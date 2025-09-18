@@ -27,7 +27,7 @@ data "nios_dns_nsgroup_stubmember" "get_ns_group_stubmember_using_extensible_att
   }
 }
 
-// Retrieve all NS Group stub members
+// Retrieve all NS Group Stub Members
 data "nios_dns_nsgroup_stubmember" "get_all_ns_group_stubmembers" {}
 ```
 
