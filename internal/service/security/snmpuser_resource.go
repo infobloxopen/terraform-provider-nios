@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -64,20 +64,19 @@ func (r *SnmpuserResource) Configure(ctx context.Context, req resource.Configure
 }
 
 func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var authenticationProtocol, privacyProtocol, authenticationPassword, privacyPassword types.String
-
-	req.Config.GetAttribute(ctx, path.Root("authentication_protocol"), &authenticationProtocol)
-	req.Config.GetAttribute(ctx, path.Root("privacy_protocol"), &privacyProtocol)
-	req.Config.GetAttribute(ctx, path.Root("authentication_password"), &authenticationPassword)
-	req.Config.GetAttribute(ctx, path.Root("privacy_password"), &privacyPassword)
-
-	if authenticationProtocol.IsNull() || authenticationProtocol.IsUnknown() ||
-		privacyProtocol.IsNull() || privacyProtocol.IsUnknown() {
+	var data SnmpuserModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if privacyProtocol.ValueString() != "NONE" {
-		if authenticationProtocol.ValueString() == "NONE" {
+	if data.AuthenticationProtocol.IsNull() || data.AuthenticationProtocol.IsUnknown() ||
+		data.PrivacyProtocol.IsNull() || data.PrivacyProtocol.IsUnknown() {
+		return
+	}
+
+	if data.PrivacyProtocol.ValueString() != "NONE" {
+		if data.AuthenticationProtocol.ValueString() == "NONE" {
 			resp.Diagnostics.AddError(
 				"Invalid SNMPv3 Configuration",
 				"When privacy_protocol is set to a value other than 'NONE' (e.g., 'AES', 'DES'), authentication_protocol must also be set to a value other than 'NONE' (e.g., 'SHA', 'MD5').",
@@ -86,8 +85,8 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 	}
 
 	// Validate authentication password requirement
-	if authenticationProtocol.ValueString() != "NONE" {
-		if authenticationPassword.IsNull() || authenticationPassword.IsUnknown() || authenticationPassword.ValueString() == "" {
+	if data.AuthenticationProtocol.ValueString() != "NONE" {
+		if data.AuthenticationPassword.IsNull() || data.AuthenticationPassword.IsUnknown() || data.AuthenticationPassword.ValueString() == "" {
 			resp.Diagnostics.AddError(
 				"Missing Authentication Password",
 				"When authentication_protocol is set to a value other than 'NONE', authentication_password must be provided.",
@@ -96,8 +95,8 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 	}
 
 	// Validate privacy password requirement
-	if privacyProtocol.ValueString() != "NONE" {
-		if privacyPassword.IsNull() || privacyPassword.IsUnknown() || privacyPassword.ValueString() == "" {
+	if data.PrivacyProtocol.ValueString() != "NONE" {
+		if data.PrivacyPassword.IsNull() || data.PrivacyPassword.IsUnknown() || data.PrivacyPassword.ValueString() == "" {
 			resp.Diagnostics.AddError(
 				"Missing Privacy Password",
 				"When privacy_protocol is set to a value other than 'NONE', privacy_password must be provided.",
@@ -114,12 +113,6 @@ func (r *SnmpuserResource) Create(ctx context.Context, req resource.CreateReques
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Add internal ID exists in the Extensible Attributes if not already present
-	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
 		return
 	}
 
@@ -144,7 +137,7 @@ func (r *SnmpuserResource) Create(ctx context.Context, req resource.CreateReques
 	res := apiRes.CreateSnmpuserResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Snmpuser due to inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Snmpuser due inherited Extensible attributes, got error: %s", err))
 		return
 	}
 
@@ -192,15 +185,7 @@ func (r *SnmpuserResource) Read(ctx context.Context, req resource.ReadRequest, r
 	if stateExtAttrs == nil {
 		resp.Diagnostics.AddError(
 			"Missing Internal ID",
-			"Unable to read RecordMx because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	if res.ExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Extensible Attributes",
-			"Unable to read Snmpuser because no extensible attributes were returned from the API.",
+			"Unable to read Snmpuser because the internal ID (from extattrs_all) is missing or invalid.",
 		)
 		return
 	}
@@ -267,7 +252,7 @@ func (r *SnmpuserResource) ReadByExtAttrs(ctx context.Context, data *SnmpuserMod
 
 	res := results[0]
 
-	// Remove inherited external attributes and check for errors
+	// Remove inherited external attributes from extattrs
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		return true
@@ -303,11 +288,6 @@ func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	// Add internal ID exists in the Extensible Attributes if not already present
-	if err := r.addInternalIDToExtAttrs(ctx, &data); err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add internal ID to Extensible Attributes, got error: %s", err))
-		return
-	}
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
 	if diags.HasError() {
@@ -322,7 +302,6 @@ func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateReques
 		ReturnFieldsPlus(readableAttributesForSnmpuser).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Snmpuser, got error: %s", err))
 		return
@@ -365,76 +344,23 @@ func (r *SnmpuserResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 }
 
-func (r *SnmpuserResource) addInternalIDToExtAttrs(ctx context.Context, data *SnmpuserModel) error {
-	var internalId string
-
-	if !data.ExtAttrsAll.IsNull() {
-		elements := data.ExtAttrsAll.Elements()
-		if tId, ok := elements["Terraform Internal ID"]; ok {
-			if tIdStr, ok := tId.(types.String); ok {
-				internalId = tIdStr.ValueString()
-			}
-		}
-	}
-
-	if internalId == "" {
-		var err error
-		internalId, err = uuid.GenerateUUID()
-		if err != nil {
-			return err
-		}
-	}
-
-	r.client.SecurityAPI.APIClient.Cfg.DefaultExtAttrs = map[string]struct{ Value string }{
-		"Terraform Internal ID": {Value: internalId},
-	}
-
-	return nil
-}
-
 func (r *SnmpuserResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data SnmpuserModel
+	var goClientData security.Snmpuser
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.SecurityAPI.
-		SnmpuserAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForSnmpuser).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read Snmpuser for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetSnmpuserResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Snmpuser for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.SecurityAPI.
 		SnmpuserAPI.
 		Update(ctx, resourceRef).
-		Snmpuser(*data.Expand(ctx, &resp.Diagnostics)).
+		Snmpuser(goClientData).
 		ReturnFieldsPlus(readableAttributesForSnmpuser).
 		ReturnAsObject(1).
 		Execute()
@@ -443,14 +369,15 @@ func (r *SnmpuserResource) ImportState(ctx context.Context, req resource.ImportS
 		return
 	}
 
-	res = updateRes.UpdateSnmpuserResponseAsObject.GetResult()
+	res := updateRes.UpdateSnmpuserResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating Snmpuser due inherited Extensible attributes for import, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Snmpuser due inherited Extensible attributes for import, got error: %s", diags))
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
