@@ -62,7 +62,6 @@ func (r *AwsuserResource) Configure(ctx context.Context, req resource.ConfigureR
 }
 
 func (r *AwsuserResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
 	var data AwsuserModel
 
 	// Read Terraform plan data into the model
@@ -85,10 +84,6 @@ func (r *AwsuserResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	res := apiRes.CreateAwsuserResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Awsuser, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -136,6 +131,7 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 	var diags diag.Diagnostics
 	var data AwsuserModel
 
+	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -143,7 +139,6 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -162,11 +157,6 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	res := apiRes.UpdateAwsuserResponseAsObject.GetResult()
-
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Awsuser, got error: %s", diags))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
