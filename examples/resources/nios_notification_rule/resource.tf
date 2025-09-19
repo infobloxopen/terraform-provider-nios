@@ -1,0 +1,87 @@
+// Create a Notification Rule with Basic Fields (Event Type : DHCP_LEASES)
+resource "nios_notification_rule" "notification_rule_basic_fields" {
+  name                = "example_notification_rule"
+  notification_target = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:Rest_Api"
+  event_type          = "DHCP_LEASES"
+  notification_action = "RESTAPI_TEMPLATE_INSTANCE"
+
+  expression_list = [
+    {
+      op       = "AND"
+      op1_type = "LIST"
+    },
+    {
+      op       = "EQ"
+      op1      = "DHCP_LEASE_STATE"
+      op1_type = "FIELD"
+      op2      = "DHCP_LEASE_STATE_ACTIVE"
+      op2_type = "STRING"
+    },
+    {
+      op = "ENDLIST"
+    }
+  ]
+  template_instance = {
+    template = "DHCP_Lease"
+  }
+}
+
+// Create a Notification Rule with Additional Fields
+resource "nios_notification_rule" "notification_rule_basic_fields" {
+  name                = "example_notification_rule_1"
+  notification_target = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:Rest_Api"
+  event_type          = "DHCP_LEASES"
+  notification_action = "RESTAPI_TEMPLATE_INSTANCE"
+
+  expression_list = [
+    {
+      op       = "AND"
+      op1_type = "LIST"
+    },
+    {
+      op       = "EQ"
+      op1      = "DHCP_LEASE_STATE"
+      op1_type = "FIELD"
+      op2      = "DHCP_LEASE_STATE_ACTIVE"
+      op2_type = "STRING"
+    },
+    {
+      op = "ENDLIST"
+    }
+  ]
+  template_instance = {
+    template = "DHCP_Lease"
+  }
+
+  // Additional Fields
+  comment = "Example Notification Rule"
+  disable = true
+}
+
+// Create a Notification Rule with Basic Fields (Event Type : DNS_RPZ)
+resource "nios_notification_rule" "example_1" {
+  name                = "example-notification-rule-abc123"
+  notification_target = "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+  event_type          = "DNS_RPZ"
+  notification_action = "RESTAPI_TEMPLATE_INSTANCE"
+
+  expression_list = [
+    {
+      op       = "AND"
+      op1_type = "LIST"
+    },
+    {
+      op       = "EQ"
+      op1      = "DNS_RPZ_TYPE"
+      op1_type = "FIELD"
+      op2      = "DNS_RPZ_TYPE_IP"
+      op2_type = "STRING"
+    },
+    {
+      op = "ENDLIST"
+    }
+  ]
+  template_instance = {
+    template = "syslog_action_template"
+  }
+}
