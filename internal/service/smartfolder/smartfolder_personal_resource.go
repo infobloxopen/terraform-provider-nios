@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -61,7 +62,6 @@ func (r *SmartfolderPersonalResource) Configure(ctx context.Context, req resourc
 }
 
 func (r *SmartfolderPersonalResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
 	var data SmartfolderPersonalModel
 
 	// Read Terraform plan data into the model
@@ -84,10 +84,6 @@ func (r *SmartfolderPersonalResource) Create(ctx context.Context, req resource.C
 	}
 
 	res := apiRes.CreateSmartfolderPersonalResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create SmartfolderPersonal, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -96,7 +92,6 @@ func (r *SmartfolderPersonalResource) Create(ctx context.Context, req resource.C
 }
 
 func (r *SmartfolderPersonalResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	//var diags diag.Diagnostics
 	var data SmartfolderPersonalModel
 
 	// Read Terraform prior state data into the model
@@ -113,9 +108,10 @@ func (r *SmartfolderPersonalResource) Read(ctx context.Context, req resource.Rea
 		ReturnAsObject(1).
 		Execute()
 
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			//Handle not found case
+			// Resource no longer exists, remove from state
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -124,6 +120,7 @@ func (r *SmartfolderPersonalResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	res := apiRes.GetSmartfolderPersonalResponseObjectAsResult.GetResult()
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
@@ -142,7 +139,6 @@ func (r *SmartfolderPersonalResource) Update(ctx context.Context, req resource.U
 	}
 
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -155,7 +151,6 @@ func (r *SmartfolderPersonalResource) Update(ctx context.Context, req resource.U
 		ReturnFieldsPlus(readableAttributesForSmartfolderPersonal).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update SmartfolderPersonal, got error: %s", err))
 		return

@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -17,7 +18,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-const ReadPageSizeLimit int32 = 1000
+const (
+	ReadPageSizeLimit   int32  = 1000
+	NaiveDatetimeLayout string = "2006-01-02T15:04:05"
+)
 
 // Ptr is a helper routine that returns a pointer to given value.
 func Ptr[T any](t T) *T {
@@ -498,6 +502,39 @@ func ConvertMapToHCL(data map[string]any) string {
 	}
 
 	return fmt.Sprintf("{\n%s\n}", strings.Join(keyValues, "\n"))
+}
+
+// ToUnixWithTimezone converts a naive datetime string (without offset) into a Unix timestamp using the given timezone.
+func ToUnixWithTimezone(datetimeStr, tz string) (int64, error) {
+	naive, err := time.Parse(NaiveDatetimeLayout, datetimeStr)
+	if err != nil {
+		return 0, fmt.Errorf("invalid datetime %q: %w", datetimeStr, err)
+	}
+
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		return 0, fmt.Errorf("invalid timezone %q: %w", tz, err)
+	}
+
+	localTime := time.Date(
+		naive.Year(), naive.Month(), naive.Day(),
+		naive.Hour(), naive.Minute(), naive.Second(),
+		0, loc,
+	)
+
+	return localTime.Unix(), nil
+}
+
+// FromUnixWithTimezone converts a Unix timestamp into a naive datetime string (without offset) using the given timezone.
+func FromUnixWithTimezone(ts int64, tz string) (string, error) {
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		return "", fmt.Errorf("invalid timezone %q: %w", tz, err)
+	}
+
+	t := time.Unix(ts, 0).In(loc)
+
+	return t.Format(NaiveDatetimeLayout), nil
 }
 
 // ReorderAndFilterNestedListResponse reorders and filters the state list to match the order of the plan list based on a primary key field.
