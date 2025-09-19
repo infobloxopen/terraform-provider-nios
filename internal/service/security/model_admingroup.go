@@ -256,9 +256,9 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The e-mail addresses for the Admin Group.",
 	},
 	"enable_restricted_user_access": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether the restrictions will be applied to the admin connector level for users of this Admin Group.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -412,7 +412,11 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: AdmingroupUserAccessResourceSchemaAttributes,
 		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The access control items for this Admin Group.",
 	},
 }
@@ -432,6 +436,10 @@ func ExpandAdmingroup(ctx context.Context, o types.Object, diags *diag.Diagnosti
 func (m *AdmingroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.Admingroup {
 	if m == nil {
 		return nil
+	}
+	enableRestrictedUserAcess := flex.ExpandBoolPointer(types.BoolValue(false))
+	if len(m.UserAccess.Elements()) == 0 {
+		enableRestrictedUserAcess = flex.ExpandBoolPointer(types.BoolValue(true))
 	}
 	to := &security.Admingroup{
 		AccessMethod:                      flex.ExpandFrameworkListString(ctx, m.AccessMethod, diags),
@@ -453,7 +461,7 @@ func (m *AdmingroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		DockerSetCommands:                 ExpandAdmingroupDockerSetCommands(ctx, m.DockerSetCommands, diags),
 		DockerShowCommands:                ExpandAdmingroupDockerShowCommands(ctx, m.DockerShowCommands, diags),
 		EmailAddresses:                    flex.ExpandFrameworkListString(ctx, m.EmailAddresses, diags),
-		EnableRestrictedUserAccess:        flex.ExpandBoolPointer(m.EnableRestrictedUserAccess),
+		EnableRestrictedUserAccess:        enableRestrictedUserAcess,
 		ExtAttrs:                          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		GridSetCommands:                   ExpandAdmingroupGridSetCommands(ctx, m.GridSetCommands, diags),
 		GridShowCommands:                  ExpandAdmingroupGridShowCommands(ctx, m.GridShowCommands, diags),
@@ -520,6 +528,11 @@ func (m *AdmingroupModel) Flatten(ctx context.Context, from *security.Admingroup
 	m.DockerSetCommands = FlattenAdmingroupDockerSetCommands(ctx, from.DockerSetCommands, diags)
 	m.DockerShowCommands = FlattenAdmingroupDockerShowCommands(ctx, from.DockerShowCommands, diags)
 	m.EmailAddresses = flex.FlattenFrameworkListString(ctx, from.EmailAddresses, diags)
+	if len(m.UserAccess.Elements()) == 0 {
+		m.EnableRestrictedUserAccess = types.BoolValue(true)
+	} else {
+		m.EnableRestrictedUserAccess = types.BoolValue(false)
+	}
 	m.EnableRestrictedUserAccess = types.BoolPointerValue(from.EnableRestrictedUserAccess)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.GridSetCommands = FlattenAdmingroupGridSetCommands(ctx, from.GridSetCommands, diags)

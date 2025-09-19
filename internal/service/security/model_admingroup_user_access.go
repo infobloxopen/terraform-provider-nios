@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -21,16 +20,19 @@ import (
 type AdmingroupUserAccessModel struct {
 	Address    types.String `tfsdk:"address"`
 	Permission types.String `tfsdk:"permission"`
+	Ref        types.String `tfsdk:"ref"`
 }
 
 var AdmingroupUserAccessAttrTypes = map[string]attr.Type{
 	"address":    types.StringType,
 	"permission": types.StringType,
+	"ref":        types.StringType,
 }
 
 var AdmingroupUserAccessResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -39,11 +41,16 @@ var AdmingroupUserAccessResourceSchemaAttributes = map[string]schema.Attribute{
 	"permission": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString("ALLOW"),
+		//Default:  stringdefault.StaticString("ALLOW"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ALLOW", "DENY"),
 		},
 		MarkdownDescription: "The permission to use for this address.",
+	},
+	"ref": schema.StringAttribute{
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The reference of the ACL object.",
 	},
 }
 
@@ -66,6 +73,7 @@ func (m *AdmingroupUserAccessModel) Expand(ctx context.Context, diags *diag.Diag
 	to := &security.AdmingroupUserAccess{
 		Address:    flex.ExpandStringPointer(m.Address),
 		Permission: flex.ExpandStringPointer(m.Permission),
+		Ref:        flex.ExpandStringPointer(m.Ref),
 	}
 	return to
 }
@@ -90,4 +98,5 @@ func (m *AdmingroupUserAccessModel) Flatten(ctx context.Context, from *security.
 	}
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
+	m.Ref = flex.FlattenStringPointer(from.Ref)
 }

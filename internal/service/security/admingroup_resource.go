@@ -328,6 +328,12 @@ func (r *AdmingroupResource) ImportState(ctx context.Context, req resource.Impor
 
 	res := updateRes.UpdateAdmingroupResponseAsObject.GetResult()
 
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Admingroup due inherited Extensible attributes for import, got error: %s", diags))
+		return
+	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
