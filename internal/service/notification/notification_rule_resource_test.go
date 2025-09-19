@@ -16,6 +16,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// Objects to be present on the grid for testing
+// Notification Rest Endpoint - rest_api, syslog
+// Notification Template - DHCP_Lease, syslog_action_template
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
 
 var (
@@ -199,6 +202,31 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	eventType := "DNS_RPZ"
+	expressionList := []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DNS_RPZ_TYPE",
+			"op1_type": "FIELD",
+			"op2":      "DNS_RPZ_TYPE_IP",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+	templateInstance := map[string]any{
+		"template": "syslog_action_template",
+	}
+	eventDeduplicationFields := []string{
+		"SOURCE_IP",
+		"QUERY_NAME",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -206,7 +234,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleEnableEventDeduplication(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "false"),
+				Config: testAccNotificationRuleEnableEventDeduplication(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "false", eventDeduplicationFields),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication", "false"),
@@ -214,7 +242,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleEnableEventDeduplication(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "true"),
+				Config: testAccNotificationRuleEnableEventDeduplication(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "true", eventDeduplicationFields),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication", "true"),
@@ -229,6 +257,31 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication_log"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	eventType := "DNS_RPZ"
+	expressionList := []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DNS_RPZ_TYPE",
+			"op1_type": "FIELD",
+			"op2":      "DNS_RPZ_TYPE_IP",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+	templateInstance := map[string]any{
+		"template": "syslog_action_template",
+	}
+	eventDeduplicationFields := []string{
+		"SOURCE_IP",
+		"QUERY_NAME",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -236,18 +289,18 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleEnableEventDeduplicationLog(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "ENABLE_EVENT_DEDUPLICATION_LOG_REPLACE_ME"),
+				Config: testAccNotificationRuleEnableEventDeduplicationLog(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "false", eventDeduplicationFields),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication_log", "ENABLE_EVENT_DEDUPLICATION_LOG_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication_log", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleEnableEventDeduplicationLog(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "ENABLE_EVENT_DEDUPLICATION_LOG_UPDATE_REPLACE_ME"),
+				Config: testAccNotificationRuleEnableEventDeduplicationLog(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "true", eventDeduplicationFields),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication_log", "ENABLE_EVENT_DEDUPLICATION_LOG_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication_log", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -259,6 +312,34 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_event_deduplication_fields"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	eventType := "DNS_RPZ"
+	expressionList := []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DNS_RPZ_TYPE",
+			"op1_type": "FIELD",
+			"op2":      "DNS_RPZ_TYPE_IP",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+	templateInstance := map[string]any{
+		"template": "syslog_action_template",
+	}
+	eventDeduplicationFields := []string{
+		"SOURCE_IP",
+	}
+	eventDeduplicationFieldsUpdate := []string{
+		"SOURCE_IP",
+		"QUERY_NAME",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -266,18 +347,21 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleEventDeduplicationFields(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_DEDUPLICATION_FIELDS_REPLACE_ME"),
+				Config: testAccNotificationRuleEventDeduplicationFields(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventDeduplicationFields),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields", "EVENT_DEDUPLICATION_FIELDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields.0", "SOURCE_IP"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleEventDeduplicationFields(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_DEDUPLICATION_FIELDS_UPDATE_REPLACE_ME"),
+				Config: testAccNotificationRuleEventDeduplicationFields(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventDeduplicationFieldsUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields", "EVENT_DEDUPLICATION_FIELDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields.0", "SOURCE_IP"),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_fields.1", "QUERY_NAME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -289,6 +373,31 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 	var resourceName = "nios_notification_rule.test_event_deduplication_lookback_period"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	eventType := "DNS_RPZ"
+	expressionList := []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DNS_RPZ_TYPE",
+			"op1_type": "FIELD",
+			"op2":      "DNS_RPZ_TYPE_IP",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+	templateInstance := map[string]any{
+		"template": "syslog_action_template",
+	}
+	eventDeduplicationFields := []string{
+		"SOURCE_IP",
+		"QUERY_NAME",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -296,18 +405,18 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_DEDUPLICATION_LOOKBACK_PERIOD_REPLACE_ME"),
+				Config: testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventDeduplicationFields, "500"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "event_deduplication_lookback_period", "EVENT_DEDUPLICATION_LOOKBACK_PERIOD_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_lookback_period", "500"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_DEDUPLICATION_LOOKBACK_PERIOD_UPDATE_REPLACE_ME"),
+				Config: testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventDeduplicationFields, "600"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "event_deduplication_lookback_period", "EVENT_DEDUPLICATION_LOOKBACK_PERIOD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_deduplication_lookback_period", "600"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -315,6 +424,7 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 	})
 }
 
+// The event priority can be configured only for outbound notification rules that contain the scheduled event type
 func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_event_priority"
 	var v notification.NotificationRule
@@ -326,20 +436,20 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_PRIORITY_REPLACE_ME"),
+				Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "NORMAL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "event_priority", "EVENT_PRIORITY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_priority", "NORMAL"),
 				),
 			},
 			// Update and Read
-			{
-				Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "EVENT_PRIORITY_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "event_priority", "EVENT_PRIORITY_UPDATE_REPLACE_ME"),
-				),
-			},
+			// {
+			// 	Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "HIGH"),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+			// 		resource.TestCheckResourceAttr(resourceName, "event_priority", "HIGH"),
+			// 	),
+			// },
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -349,6 +459,27 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_event_type"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	updatedEventType := "DNS_RPZ"
+	updatedExpressionList := []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DNS_RPZ_TYPE",
+			"op1_type": "FIELD",
+			"op2":      "DNS_RPZ_TYPE_IP",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+	updatedTemplateInstance := map[string]any{
+		"template": "syslog_action_template",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -359,15 +490,15 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 				Config: testAccNotificationRuleEventType(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "event_type", "EVENT_TYPE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_type", "DHCP_LEASES"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleEventType(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Config: testAccNotificationRuleEventType(updatedEventType, updatedExpressionList, name, notificationAction, updatedNotificationTarget, updatedTemplateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "event_type", "EVENT_TYPE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_type", "DNS_RPZ"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -379,6 +510,27 @@ func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_expression_list"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	updatedEventType := "DNS_RPZ"
+	updatedExpressionList := []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DNS_RPZ_TYPE",
+			"op1_type": "FIELD",
+			"op2":      "DNS_RPZ_TYPE_IP",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+	updatedTemplateInstance := map[string]any{
+		"template": "syslog_action_template",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -389,15 +541,39 @@ func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 				Config: testAccNotificationRuleExpressionList(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "expression_list", "EXPRESSION_LIST_REPLACE_ME"),
+					// Check expression list length
+					resource.TestCheckResourceAttr(resourceName, "expression_list.#", "3"),
+					// Check first expression (AND)
+					resource.TestCheckResourceAttr(resourceName, "expression_list.0.op", "AND"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.0.op1_type", "LIST"),
+					// Check second expression (EQ)
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op", "EQ"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op1", "DHCP_LEASE_STATE"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op1_type", "FIELD"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op2", "DHCP_LEASE_STATE_ACTIVE"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op2_type", "STRING"),
+					// Check third expression (ENDLIST)
+					resource.TestCheckResourceAttr(resourceName, "expression_list.2.op", "ENDLIST"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleExpressionList(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Config: testAccNotificationRuleExpressionList(updatedEventType, updatedExpressionList, name, notificationAction, updatedNotificationTarget, updatedTemplateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "expression_list", "EXPRESSION_LIST_UPDATE_REPLACE_ME"),
+					// Check updated expression list length
+					resource.TestCheckResourceAttr(resourceName, "expression_list.#", "3"),
+					// Check first updated expression (AND)
+					resource.TestCheckResourceAttr(resourceName, "expression_list.0.op", "AND"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.0.op1_type", "LIST"),
+					// Check second updated expression (EQ)
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op", "EQ"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op1", "DNS_RPZ_TYPE"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op1_type", "FIELD"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op2", "DNS_RPZ_TYPE_IP"),
+					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op2_type", "STRING"),
+					// Check third updated expression (ENDLIST)
+					resource.TestCheckResourceAttr(resourceName, "expression_list.2.op", "ENDLIST"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -461,6 +637,27 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_notification_target"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	updatedEventType := "DNS_RPZ"
+	updatedExpressionList := []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DNS_RPZ_TYPE",
+			"op1_type": "FIELD",
+			"op2":      "DNS_RPZ_TYPE_IP",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+	updatedTemplateInstance := map[string]any{
+		"template": "syslog_action_template",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -471,15 +668,15 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 				Config: testAccNotificationRuleNotificationTarget(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_target", "NOTIFICATION_TARGET_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "notification_target", notificationTarget),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleNotificationTarget(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Config: testAccNotificationRuleNotificationTarget(updatedEventType, updatedExpressionList, name, notificationAction, updatedNotificationTarget, updatedTemplateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_target", "NOTIFICATION_TARGET_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "notification_target", updatedNotificationTarget),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -581,6 +778,27 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_template_instance"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	updatedEventType := "DNS_RPZ"
+	updatedExpressionList := []map[string]any{
+		{
+			"op":       "AND",
+			"op1_type": "LIST",
+		},
+		{
+			"op":       "EQ",
+			"op1":      "DNS_RPZ_TYPE",
+			"op1_type": "FIELD",
+			"op2":      "DNS_RPZ_TYPE_IP",
+			"op2_type": "STRING",
+		},
+		{
+			"op": "ENDLIST",
+		},
+	}
+	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
+	updatedTemplateInstance := map[string]any{
+		"template": "syslog_action_template",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -591,15 +809,15 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 				Config: testAccNotificationRuleTemplateInstance(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance", "TEMPLATE_INSTANCE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "DHCP_Lease"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleTemplateInstance(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Config: testAccNotificationRuleTemplateInstance(updatedEventType, updatedExpressionList, name, notificationAction, updatedNotificationTarget, updatedTemplateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance", "TEMPLATE_INSTANCE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "syslog_action_template"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -776,9 +994,10 @@ resource "nios_notification_rule" "test_disable" {
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, disable)
 }
 
-func testAccNotificationRuleEnableEventDeduplication(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, enableEventDeduplication string) string {
+func testAccNotificationRuleEnableEventDeduplication(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, enableEventDeduplication string, eventDeduplicationFields []string) string {
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	eventDeduplicationFieldsHCL := utils.ConvertStringSliceToHCL(eventDeduplicationFields)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_enable_event_deduplication" {
     event_type = %q
@@ -788,90 +1007,108 @@ resource "nios_notification_rule" "test_enable_event_deduplication" {
     notification_target = %q
     template_instance = %s
     enable_event_deduplication = %q
+	event_deduplication_fields = %s
 }
-`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, enableEventDeduplication)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, enableEventDeduplication, eventDeduplicationFieldsHCL)
 }
 
-func testAccNotificationRuleEnableEventDeduplicationLog(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, enableEventDeduplicationLog string) string {
+func testAccNotificationRuleEnableEventDeduplicationLog(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, enableEventDeduplicationLog string, eventDeduplicationFields []string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	eventDeduplicationFieldsHCL := utils.ConvertStringSliceToHCL(eventDeduplicationFields)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_enable_event_deduplication_log" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
     enable_event_deduplication_log = %q
+	event_deduplication_fields = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, enableEventDeduplicationLog)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, enableEventDeduplicationLog, eventDeduplicationFieldsHCL)
 }
 
-func testAccNotificationRuleEventDeduplicationFields(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventDeduplicationFields string) string {
+func testAccNotificationRuleEventDeduplicationFields(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventDeduplicationFields []string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	eventDeduplicationFieldsHCL := utils.ConvertStringSliceToHCL(eventDeduplicationFields)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_event_deduplication_fields" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
-    event_deduplication_fields = %q
+    template_instance = %s
+    event_deduplication_fields = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventDeduplicationFields)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, eventDeduplicationFieldsHCL)
 }
 
-func testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventDeduplicationLookbackPeriod string) string {
+func testAccNotificationRuleEventDeduplicationLookbackPeriod(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventDeduplicationFields []string, eventDeduplicationLookbackPeriod string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	eventDeduplicationFieldsHCL := utils.ConvertStringSliceToHCL(eventDeduplicationFields)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_event_deduplication_lookback_period" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
     event_deduplication_lookback_period = %q
+	event_deduplication_fields = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventDeduplicationLookbackPeriod)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, eventDeduplicationLookbackPeriod, eventDeduplicationFieldsHCL)
 }
 
 func testAccNotificationRuleEventPriority(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventPriority string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_event_priority" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
     event_priority = %q
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, eventPriority)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, eventPriority)
 }
 
 func testAccNotificationRuleEventType(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_event_type" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
 
 func testAccNotificationRuleExpressionList(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_expression_list" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
 
 func testAccNotificationRuleName(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
@@ -903,16 +1140,18 @@ resource "nios_notification_rule" "test_notification_action" {
 }
 
 func testAccNotificationRuleNotificationTarget(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_notification_target" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
 
 func testAccNotificationRulePublishSettings(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, publishSettings string) string {
@@ -958,16 +1197,18 @@ resource "nios_notification_rule" "test_selected_members" {
 }
 
 func testAccNotificationRuleTemplateInstance(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_template_instance" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
 
 func testAccNotificationRuleUsePublishSettings(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, usePublishSettings string) string {

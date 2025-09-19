@@ -1,0 +1,9 @@
+// Retrieve a specific Notification Rule by filters
+data "nios_notification_rule" "get_notification_rule_using_filters" {
+  filters = {
+    name = "ex-rule-tf"
+  }
+}
+
+// Retrieve all Notification Rules
+data "nios_notification_rule" "get_all_notification_rules" {}

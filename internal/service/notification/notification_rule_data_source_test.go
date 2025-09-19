@@ -9,12 +9,14 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccNotificationRuleDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_notification_rule.test"
 	resourceName := "nios_notification_rule.test"
 	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,28 +24,7 @@ func TestAccNotificationRuleDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckNotificationRuleDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNotificationRuleDataSourceConfigFilters("EVENT_TYPE_REPLACE_ME", "EXPRESSION_LIST_REPLACE_ME", "NAME_REPLACE_ME", "NOTIFICATION_ACTION_REPLACE_ME", "NOTIFICATION_TARGET_REPLACE_ME", "TEMPLATE_INSTANCE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					append([]resource.TestCheckFunc{
-						testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					}, testAccCheckNotificationRuleResourceAttrPair(resourceName, dataSourceName)...)...,
-				),
-			},
-		},
-	})
-}
-
-func TestAccNotificationRuleDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_notification_rule.test"
-	resourceName := "nios_notification_rule.test"
-	var v notification.NotificationRule
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckNotificationRuleDestroy(context.Background(), &v),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNotificationRuleDataSourceConfigExtAttrFilters("EVENT_TYPE_REPLACE_ME", "EXPRESSION_LIST_REPLACE_ME", "NAME_REPLACE_ME", "NOTIFICATION_ACTION_REPLACE_ME", "NOTIFICATION_TARGET_REPLACE_ME", "TEMPLATE_INSTANCE_REPLACE_ME", acctest.RandomName()),
+				Config: testAccNotificationRuleDataSourceConfigFilters(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
@@ -55,7 +36,6 @@ func TestAccNotificationRuleDataSource_ExtAttrFilters(t *testing.T) {
 }
 
 // below all TestAcc functions
-
 func testAccCheckNotificationRuleResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
@@ -80,43 +60,23 @@ func testAccCheckNotificationRuleResourceAttrPair(resourceName, dataSourceName s
 	}
 }
 
-func testAccNotificationRuleDataSourceConfigFilters(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance string) string {
+func testAccNotificationRuleDataSourceConfigFilters(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test" {
-  event_type = %q
-  expression_list = %q
-  name = %q
-  notification_action = %q
-  notification_target = %q
-  template_instance = %q
+	event_type = %q
+	expression_list = %s
+	name = %q
+	notification_action = %q
+	notification_target = %q
+	template_instance = %s
 }
 
 data "nios_notification_rule" "test" {
-  filters = {
-	event_type = nios_notification_rule.test.event_type
-  }
+	filters = {
+		name = nios_notification_rule.test.name
+	}
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
-}
-
-func testAccNotificationRuleDataSourceConfigExtAttrFilters(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance string, extAttrsValue string) string {
-	return fmt.Sprintf(`
-resource "nios_notification_rule" "test" {
-  event_type = %q
-  expression_list = %q
-  name = %q
-  notification_action = %q
-  notification_target = %q
-  template_instance = %q
-  extattrs = {
-    Site = %q
-  } 
-}
-
-data "nios_notification_rule" "test" {
-  extattrfilters = {
-	Site = nios_notification_rule.test.extattrs.Site
-  }
-}
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, extAttrsValue)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
