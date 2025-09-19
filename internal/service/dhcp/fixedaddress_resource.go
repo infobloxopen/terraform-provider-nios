@@ -413,4 +413,79 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			}
 		}
 	}
+
+	// Check if allow_telnet is true, then cli_credentials must contain at least one element with credentials_type set to "TELNET"
+	if !data.AllowTelnet.IsUnknown() && !data.AllowTelnet.IsNull() && data.AllowTelnet.ValueBool() {
+		isTelnet := false
+		if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
+			// Iterate through cli_credentials to check if an element has credentials_type set to "TELNET"
+			var cliCredentials []FixedaddressCliCredentialsModel
+			diags := data.CliCredentials.ElementsAs(ctx, &cliCredentials, false)
+			resp.Diagnostics.Append(diags...)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+
+			for _, credentials := range cliCredentials {
+				if credentials.CredentialType.IsUnknown() || credentials.CredentialType.IsNull() {
+					continue
+				}
+				credentialsType := credentials.CredentialType.ValueString()
+				if credentialsType == "TELNET" {
+					isTelnet = true
+					break
+				}
+			}
+		}
+		if !isTelnet {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("allow_telnet"),
+				"Invalid configuration",
+				"The 'allow_telnet' attribute must be set to false when 'cli_credentials' is not set or does not contain any credentials with 'credentials_type' set to 'TELNET'.",
+			)
+		}
+	}
+
+	// Check if credentials are defined, then the corresponding use_cli_credentials attribute must be set to true
+	if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
+		if !data.UseCliCredentials.IsUnknown() && !data.UseCliCredentials.IsNull() && !data.UseCliCredentials.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("cli_credentials"),
+				"Invalid configuration",
+				"The 'cli_credentials' attribute is set, but 'use_cli_credentials' is false. "+
+					"Please set 'use_cli_credentials' to true to use CLI credentials.",
+			)
+		}
+	}
+	// Check if SNMP , then the corresponding use_snmp_credential attribute must be set to true
+	if !data.SnmpCredential.IsUnknown() && !data.SnmpCredential.IsNull() {
+		if !data.UseSnmpCredential.IsUnknown() && !data.UseSnmpCredential.IsNull() && !data.UseSnmpCredential.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp_credential"),
+				"Invalid configuration",
+				"The 'snmp_credential' attribute is set, but 'use_snmp_credential' is false. "+
+					"Please set 'use_snmp_credential' to true to use SNMP Credentials.",
+			)
+		}
+	}
+
+	// Check if SNMP3 credentials are set , then the corresponding use_snmp3_credential and use_cli_credentials attribute must be set to true
+	if !data.Snmp3Credential.IsUnknown() && !data.Snmp3Credential.IsNull() {
+		if !data.UseSnmp3Credential.IsUnknown() && !data.UseSnmp3Credential.IsNull() && !data.UseSnmp3Credential.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp3_credential"),
+				"Invalid configuration",
+				"The 'snmp3_credential' attribute is set, but 'use_snmp3_credential' is false. "+
+					"Please set 'use_snmp3_credential' to true to use SNMP3 Credentials.",
+			)
+		}
+		if !data.UseCliCredentials.IsUnknown() && !data.UseCliCredentials.IsNull() && !data.UseCliCredentials.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp3_credential"),
+				"Invalid configuration",
+				"The 'snmp3_credential' attribute is set, but 'use_cli_credentials' is false. "+
+					"Please set 'use_cli_credentials' to true to use SNMP3 Credentials.",
+			)
+		}
+	}
 }

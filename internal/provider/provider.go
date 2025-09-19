@@ -16,6 +16,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/discovery"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
@@ -119,6 +120,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewNsgroupDelegationResource,
 		dns.NewNsgroupForwardingmemberResource,
 		dns.NewNsgroupForwardstubserverResource,
+		dns.NewNsgroupStubmemberResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -155,6 +157,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewExtensibleattributedefResource,
 		grid.NewUpgradegroupResource,
 		grid.NewDistributionscheduleResource,
+
+		discovery.NewDiscoveryCredentialgroupResource,
 	}
 }
 
@@ -185,6 +189,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewNsgroupDelegationDataSource,
 		dns.NewNsgroupForwardingmemberDataSource,
 		dns.NewNsgroupForwardstubserverDataSource,
+		dns.NewNsgroupStubmemberDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -220,6 +225,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewExtensibleattributedefDataSource,
 		grid.NewUpgradegroupDataSource,
 		grid.NewDistributionscheduleDataSource,
+
+		discovery.NewDiscoveryCredentialgroupDataSource,
 	}
 }
 
