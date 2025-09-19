@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -303,46 +304,20 @@ func (r *NsgroupStubmemberResource) Delete(ctx context.Context, req resource.Del
 func (r *NsgroupStubmemberResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data NsgroupStubmemberModel
+	var goClientData dns.NsgroupStubmember
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.DNSAPI.
-		NsgroupStubmemberAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForNsgroupStubmember).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read NsgroupStubmember for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetNsgroupStubmemberResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading NsgroupStubmember for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.DNSAPI.
 		NsgroupStubmemberAPI.
 		Update(ctx, resourceRef).
-		NsgroupStubmember(*data.Expand(ctx, &resp.Diagnostics)).
+		NsgroupStubmember(goClientData).
 		ReturnFieldsPlus(readableAttributesForNsgroupStubmember).
 		ReturnAsObject(1).
 		Execute()
@@ -351,13 +326,14 @@ func (r *NsgroupStubmemberResource) ImportState(ctx context.Context, req resourc
 		return
 	}
 
-	res = updateRes.UpdateNsgroupStubmemberResponseAsObject.GetResult()
+	res := updateRes.UpdateNsgroupStubmemberResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update NsgroupStubmember due inherited Extensible attributes for import, got error: %s", diags))
 		return
 	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
