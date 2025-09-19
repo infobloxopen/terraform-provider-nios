@@ -91,26 +91,26 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The descriptive comment for the certificate authentication service.",
 	},
 	"disabled": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
+		Optional:            true,
+		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if this certificate authentication service is enabled or disabled.",
 	},
 	"enable_password_request": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		 Default:             booldefault.StaticBool(true),
+		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if username/password authentication together with client certificate authentication is enabled or disabled.",
 	},
 	"enable_remote_lookup": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
+		Optional:            true,
+		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the lookup for user group membership information on remote services is enabled or disabled.",
 	},
 	"max_retries": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
+		Optional:            true,
+		Computed:            true,
 		Default:             int64default.StaticInt64(0),
 		MarkdownDescription: "The number of validation attempts before the appliance contacts the next responder.",
 	},
@@ -141,8 +141,8 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "An ordered list of OCSP responders that are part of the certificate authentication service.",
 	},
 	"recovery_interval": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
+		Optional:            true,
+		Computed:            true,
 		Default:             int64default.StaticInt64(30),
 		MarkdownDescription: "The period of time the appliance waits before it attempts to contact a responder that is out of service again. The value must be between 1 and 600 seconds.",
 	},
@@ -162,15 +162,15 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The username for the service account.",
 	},
 	"response_timeout": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
+		Optional:            true,
+		Computed:            true,
 		Default:             int64default.StaticInt64(1000),
 		MarkdownDescription: "The validation timeout period in milliseconds.",
 	},
 	"trust_model": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:             stringdefault.StaticString("DIRECT"),
+		Default:  stringdefault.StaticString("DIRECT"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("DELEGATED", "DIRECT"),
 		},
@@ -179,7 +179,7 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	"user_match_type": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default: 		   stringdefault.StaticString("AUTO_MATCH"),
+		Default:  stringdefault.StaticString("AUTO_MATCH"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("AUTO_MATCH", "DIRECT_MATCH"),
 		},
@@ -204,7 +204,7 @@ func (m *CertificateAuthserviceModel) Expand(ctx context.Context, diags *diag.Di
 		OcspResponders:        flex.ExpandFrameworkListNestedBlock(ctx, m.OcspResponders, diags, ExpandCertificateAuthserviceOcspResponders),
 		RecoveryInterval:      flex.ExpandInt64Pointer(m.RecoveryInterval),
 		RemoteLookupPassword:  flex.ExpandStringPointer(m.RemoteLookupPassword),
-		RemoteLookupService:   flex.ExpandStringPointer(m.RemoteLookupService),
+		RemoteLookupService:   ExpandCertificateAuthserviceRemoteLookupService(ctx, m.RemoteLookupService, diags),
 		RemoteLookupUsername:  flex.ExpandStringPointer(m.RemoteLookupUsername),
 		ResponseTimeout:       flex.ExpandInt64Pointer(m.ResponseTimeout),
 		TrustModel:            flex.ExpandStringPointer(m.TrustModel),
@@ -244,7 +244,7 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 	m.OcspResponders = flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
 	m.RecoveryInterval = flex.FlattenInt64Pointer(from.RecoveryInterval)
 	m.RemoteLookupPassword = flex.FlattenStringPointer(from.RemoteLookupPassword)
-	m.RemoteLookupService = flex.FlattenStringPointer(from.RemoteLookupService)
+	m.RemoteLookupService = FlattenCertificateAuthserviceRemoteLookupService(ctx, from.RemoteLookupService, diags)
 	m.RemoteLookupUsername = flex.FlattenStringPointer(from.RemoteLookupUsername)
 	m.ResponseTimeout = flex.FlattenInt64Pointer(from.ResponseTimeout)
 	m.TrustModel = flex.FlattenStringPointer(from.TrustModel)
