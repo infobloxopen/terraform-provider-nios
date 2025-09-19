@@ -16,7 +16,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// Objects to be present on the grid for testing
+// OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // Notification Rest Endpoint - rest_api, syslog
 // Notification Template - DHCP_Lease, syslog_action_template
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
