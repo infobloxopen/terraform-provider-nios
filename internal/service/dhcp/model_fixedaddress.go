@@ -513,7 +513,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
 			objectvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
 		},
-		MarkdownDescription: "The SNMPv3 credential for this fixed address.For SNMP Credentials to be applied to this fixed address,.",
+		MarkdownDescription: "The SNMPv3 credential for this fixed address.For SNMP3 Credentials to be applied to this fixed address,use_snmp3_credential and use_cli_credentials must be true.",
 	},
 	"snmp_credential": schema.SingleNestedAttribute{
 		Attributes: FixedaddressSnmpCredentialResourceSchemaAttributes,
@@ -522,7 +522,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp_credential")),
 		},
-		MarkdownDescription: "The SNMP credential for this fixed address. If set to true, the SNMP credential will override member-level settings.",
+		MarkdownDescription: "The SNMP credential for this fixed address. If set to true, the SNMP credential will override member-level settings..For SNMP Credentials to be applied to this fixed address,use_snmp_credential must be true.",
 	},
 	"template": schema.StringAttribute{
 		Optional:            true,

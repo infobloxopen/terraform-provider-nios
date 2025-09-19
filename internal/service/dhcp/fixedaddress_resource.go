@@ -438,10 +438,11 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 		}
 	}
 
+	// Check if allow_telnet is true, then cli_credentials must contain at least one element with credentials_type set to "TELNET"
 	if !data.AllowTelnet.IsUnknown() && !data.AllowTelnet.IsNull() && data.AllowTelnet.ValueBool() {
 		isTelnet := false
 		if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
-			// Iterate through cli_credentials to check if an element has credentials_type set to "telnet"
+			// Iterate through cli_credentials to check if an element has credentials_type set to "TELNET"
 			var cliCredentials []FixedaddressCliCredentialsModel
 			diags := data.CliCredentials.ElementsAs(ctx, &cliCredentials, false)
 			resp.Diagnostics.Append(diags...)
@@ -469,6 +470,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 		}
 	}
 
+	// Check if credentials are defined, then the corresponding use_cli_credentials attribute must be set to true
 	if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
 		if !data.UseCliCredentials.IsUnknown() && !data.UseCliCredentials.IsNull() && !data.UseCliCredentials.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
@@ -479,6 +481,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			)
 		}
 	}
+	// Check if SNMP , then the corresponding use_snmp_credential attribute must be set to true
 	if !data.SnmpCredential.IsUnknown() && !data.SnmpCredential.IsNull() {
 		if !data.UseSnmpCredential.IsUnknown() && !data.UseSnmpCredential.IsNull() && !data.UseSnmpCredential.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
@@ -490,6 +493,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 		}
 	}
 
+	// Check if SNMP3 credentials are set , then the corresponding use_snmp3_credential and use_cli_credentials attribute must be set to true
 	if !data.Snmp3Credential.IsUnknown() && !data.Snmp3Credential.IsNull() {
 		if !data.UseSnmp3Credential.IsUnknown() && !data.UseSnmp3Credential.IsNull() && !data.UseSnmp3Credential.ValueBool() {
 			resp.Diagnostics.AddAttributeError(

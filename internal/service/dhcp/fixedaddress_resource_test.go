@@ -284,7 +284,6 @@ func TestAccFixedaddressResource_Bootserver(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
-	//t.Skip("Skipping test as CLI Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_cli_credentials"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.9"
