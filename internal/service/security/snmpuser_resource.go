@@ -137,7 +137,7 @@ func (r *SnmpuserResource) Create(ctx context.Context, req resource.CreateReques
 	res := apiRes.CreateSnmpuserResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Snmpuser due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Snmpuser due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
