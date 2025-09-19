@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -369,7 +370,7 @@ func TestAccZoneStubResource_Prefix(t *testing.T) {
 	var v dns.ZoneStub
 	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
 	stubServerName := acctest.RandomNameWithPrefix("stub_server")
-	prefix := acctest.RandomName()
+	prefix := "STUB-b"
 	prefixUpdated := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
