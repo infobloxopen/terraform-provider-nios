@@ -1,2 +1,2 @@
 // Retrieve all Discovery Credential Groups
-data "nios_discovery_credentialgroup" "get_all_credentialgroups" {}
+data "nios_discovery_credentialgroup" "get_all_discovery_credentialgroups" {}

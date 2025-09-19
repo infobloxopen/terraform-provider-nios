@@ -44,7 +44,6 @@ func (m *DiscoveryCredentialgroupModel) Expand(ctx context.Context, diags *diag.
 		return nil
 	}
 	to := &discovery.DiscoveryCredentialgroup{
-		Ref:  flex.ExpandStringPointer(m.Ref),
 		Name: flex.ExpandStringPointer(m.Name),
 	}
 	return to
