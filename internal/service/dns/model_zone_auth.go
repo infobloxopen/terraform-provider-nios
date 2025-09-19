@@ -316,7 +316,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthAllowQueryResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "Determines whether DNS queries are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_query")),
@@ -328,7 +327,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthAllowTransferResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "Determines whether zone transfers are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_transfer")),
@@ -340,7 +338,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneAuthAllowUpdateResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "Determines whether dynamic DNS updates are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_update")),
@@ -763,8 +760,8 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthMsDcNsRecordCreationResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
