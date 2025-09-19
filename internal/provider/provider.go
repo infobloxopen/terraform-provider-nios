@@ -96,7 +96,6 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		dhcp.NewRangeResource,
 
 		dns.NewRecordAResource,
 		dns.NewRecordAaaaResource,
@@ -124,6 +123,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
+		dhcp.NewRangeResource,
 		dhcp.NewRangetemplateResource,
 
 		dtc.NewDtcLbdnResource,
@@ -144,6 +144,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdminroleResource,
 
 		misc.NewRulesetResource,
+		misc.NewBfdtemplateResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -153,6 +154,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewNatgroupResource,
 		grid.NewExtensibleattributedefResource,
 		grid.NewUpgradegroupResource,
+		grid.NewDistributionscheduleResource,
 
 		notification.NewNotificationRuleResource,
 	}
@@ -208,6 +210,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewAdminuserDataSource,
 
 		misc.NewRulesetDataSource,
+		misc.NewBfdtemplateDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
@@ -217,6 +220,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewNatgroupDataSource,
 		grid.NewExtensibleattributedefDataSource,
 		grid.NewUpgradegroupDataSource,
+		grid.NewDistributionscheduleDataSource,
 
 		notification.NewNotificationRuleDataSource,
 	}
