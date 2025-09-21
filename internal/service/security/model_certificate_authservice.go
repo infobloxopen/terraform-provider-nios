@@ -3,7 +3,6 @@ package security
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -13,11 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type CertificateAuthserviceModel struct {
@@ -34,7 +33,7 @@ type CertificateAuthserviceModel struct {
 	OcspResponders        types.List   `tfsdk:"ocsp_responders"`
 	RecoveryInterval      types.Int64  `tfsdk:"recovery_interval"`
 	RemoteLookupPassword  types.String `tfsdk:"remote_lookup_password"`
-	RemoteLookupService   types.String `tfsdk:"remote_lookup_service"`
+	RemoteLookupService   types.String  `tfsdk:"remote_lookup_service"`
 	RemoteLookupUsername  types.String `tfsdk:"remote_lookup_username"`
 	ResponseTimeout       types.Int64  `tfsdk:"response_timeout"`
 	TrustModel            types.String `tfsdk:"trust_model"`
@@ -64,30 +63,20 @@ var CertificateAuthserviceAttrTypes = map[string]attr.Type{
 
 var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"auto_populate_login": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString("S_DN_CN"),
-		Validators: []validator.String{
-			stringvalidator.OneOf("AD_SUBJECT_ISSUER", "SAN_EMAIL", "SAN_UPN", "SERIAL_NUMBER", "S_DN_CN", "S_DN_EMAIL"),
-		},
+		Optional:            true,
 		MarkdownDescription: "Specifies the value of the client certificate for automatically populating the NIOS login name.",
 	},
 	"ca_certificates": schema.ListAttribute{
 		ElementType:         types.StringType,
-		Required:            true,
+		Optional:            true,
 		MarkdownDescription: "The list of CA certificates.",
 	},
 	"comment": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString(""),
-		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-		},
+		Optional:            true,
 		MarkdownDescription: "The descriptive comment for the certificate authentication service.",
 	},
 	"disabled": schema.BoolAttribute{
@@ -115,29 +104,18 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The number of validation attempts before the appliance contacts the next responder.",
 	},
 	"name": schema.StringAttribute{
-		Required: true,
-		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-		},
+		Optional:            true,
 		MarkdownDescription: "The name of the certificate authentication service.",
 	},
 	"ocsp_check": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:  stringdefault.StaticString("MANUAL"),
-		Validators: []validator.String{
-			stringvalidator.OneOf("AIA_AND_MANUAL", "AIA_ONLY", "DISABLED", "MANUAL"),
-		},
+		Optional:            true,
 		MarkdownDescription: "Specifies the source of OCSP settings.",
 	},
 	"ocsp_responders": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: CertificateAuthserviceOcspRespondersResourceSchemaAttributes,
 		},
-		Optional: true,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
+		Optional:            true,
 		MarkdownDescription: "An ordered list of OCSP responders that are part of the certificate authentication service.",
 	},
 	"recovery_interval": schema.Int64Attribute{
@@ -148,17 +126,15 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"remote_lookup_password": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The password for the service account.",
 	},
 	"remote_lookup_service": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The service that will be used for remote lookup.",
+		MarkdownDescription: "The password for the service account.",
 	},
 	"remote_lookup_username": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The username for the service account.",
 	},
 	"response_timeout": schema.Int64Attribute{
@@ -187,11 +163,24 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 }
 
+func ExpandCertificateAuthservice(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.CertificateAuthservice {
+	if o.IsNull() || o.IsUnknown() {
+		return nil
+	}
+	var m CertificateAuthserviceModel
+	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil
+	}
+	return m.Expand(ctx, diags)
+}
+
 func (m *CertificateAuthserviceModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.CertificateAuthservice {
 	if m == nil {
 		return nil
 	}
 	to := &security.CertificateAuthservice{
+		Ref:                   flex.ExpandStringPointer(m.Ref),
 		AutoPopulateLogin:     flex.ExpandStringPointer(m.AutoPopulateLogin),
 		CaCertificates:        flex.ExpandFrameworkListString(ctx, m.CaCertificates, diags),
 		Comment:               flex.ExpandStringPointer(m.Comment),

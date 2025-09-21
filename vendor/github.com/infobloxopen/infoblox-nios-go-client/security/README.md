@@ -217,6 +217,8 @@ Class | Method | HTTP request | Description
  - [Cacertificate](docs/Cacertificate.md)
  - [CertificateAuthservice](docs/CertificateAuthservice.md)
  - [CertificateAuthserviceOcspResponders](docs/CertificateAuthserviceOcspResponders.md)
+ - [CertificateAuthserviceRemoteLookupService](docs/CertificateAuthserviceRemoteLookupService.md)
+ - [CertificateAuthserviceRemoteLookupServiceOneOf](docs/CertificateAuthserviceRemoteLookupServiceOneOf.md)
  - [CreateAdAuthServiceResponse](docs/CreateAdAuthServiceResponse.md)
  - [CreateAdAuthServiceResponseAsObject](docs/CreateAdAuthServiceResponseAsObject.md)
  - [CreateAdmingroupResponse](docs/CreateAdmingroupResponse.md)

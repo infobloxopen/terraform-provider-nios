@@ -409,6 +409,10 @@ func TestAccCertificateAuthserviceResource_OcspResponders(t *testing.T) {
 func TestAccCertificateAuthserviceResource_RecoveryInterval(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_recovery_interval"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	} 
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -416,47 +420,18 @@ func TestAccCertificateAuthserviceResource_RecoveryInterval(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceRecoveryInterval("RECOVERY_INTERVAL_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceRecoveryInterval(name, caCertificate, "3"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "RECOVERY_INTERVAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "3"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceRecoveryInterval("RECOVERY_INTERVAL_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceRecoveryInterval(name, caCertificate, "5"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "RECOVERY_INTERVAL_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccCertificateAuthserviceResource_RemoteLookupPassword(t *testing.T) {
-	var resourceName = "nios_security_certificate_authservice.test_remote_lookup_password"
-	var v security.CertificateAuthservice
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccCertificateAuthserviceRemoteLookupPassword("REMOTE_LOOKUP_PASSWORD_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "remote_lookup_password", "REMOTE_LOOKUP_PASSWORD_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccCertificateAuthserviceRemoteLookupPassword("REMOTE_LOOKUP_PASSWORD_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "remote_lookup_password", "REMOTE_LOOKUP_PASSWORD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -525,6 +500,10 @@ func TestAccCertificateAuthserviceResource_RemoteLookupUsername(t *testing.T) {
 func TestAccCertificateAuthserviceResource_ResponseTimeout(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_response_timeout"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	} 
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -532,18 +511,18 @@ func TestAccCertificateAuthserviceResource_ResponseTimeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceResponseTimeout("RESPONSE_TIMEOUT_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceResponseTimeout(name, caCertificate, "3000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "response_timeout", "RESPONSE_TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "response_timeout", "3000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceResponseTimeout("RESPONSE_TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceResponseTimeout(name, caCertificate, "5000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "response_timeout", "RESPONSE_TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "response_timeout", "5000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -554,6 +533,10 @@ func TestAccCertificateAuthserviceResource_ResponseTimeout(t *testing.T) {
 func TestAccCertificateAuthserviceResource_TrustModel(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_trust_model"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	} 
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -561,18 +544,18 @@ func TestAccCertificateAuthserviceResource_TrustModel(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceTrustModel("TRUST_MODEL_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceTrustModel(name, caCertificate, "DELEGATED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "trust_model", "TRUST_MODEL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "trust_model", "DELEGATED"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceTrustModel("TRUST_MODEL_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceTrustModel(name, caCertificate, "DIRECT"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "trust_model", "TRUST_MODEL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "trust_model", "DIRECT"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -583,6 +566,10 @@ func TestAccCertificateAuthserviceResource_TrustModel(t *testing.T) {
 func TestAccCertificateAuthserviceResource_UserMatchType(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_user_match_type"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	} 
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -590,18 +577,18 @@ func TestAccCertificateAuthserviceResource_UserMatchType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccCertificateAuthserviceUserMatchType("USER_MATCH_TYPE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceUserMatchType(name, caCertificate, "DIRECT_MATCH"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "user_match_type", "USER_MATCH_TYPE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "user_match_type", "DIRECT_MATCH"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceUserMatchType("USER_MATCH_TYPE_UPDATE_REPLACE_ME"),
+				Config: testAccCertificateAuthserviceUserMatchType(name, caCertificate, "AUTO_MATCH"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "user_match_type", "USER_MATCH_TYPE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "user_match_type", "AUTO_MATCH"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -788,20 +775,16 @@ resource "nios_security_certificate_authservice" "test_ocsp_responders" {
 `, ocspResponders)
 }
 
-func testAccCertificateAuthserviceRecoveryInterval(recoveryInterval string) string {
+func testAccCertificateAuthserviceRecoveryInterval(name string , caCertificate []string , recoveryInterval string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_recovery_interval" {
-    recovery_interval = %q
+	ocsp_check = "DISABLED"
+	name = %q
+	ca_certificates = %s
+	recovery_interval = %q
 }
-`, recoveryInterval)
-}
-
-func testAccCertificateAuthserviceRemoteLookupPassword(remoteLookupPassword string) string {
-	return fmt.Sprintf(`
-resource "nios_security_certificate_authservice" "test_remote_lookup_password" {
-    remote_lookup_password = %q
-}
-`, remoteLookupPassword)
+`, name, caCertificateStr, recoveryInterval)
 }
 
 func testAccCertificateAuthserviceRemoteLookupService(remoteLookupService string) string {
@@ -820,26 +803,38 @@ resource "nios_security_certificate_authservice" "test_remote_lookup_username" {
 `, remoteLookupUsername)
 }
 
-func testAccCertificateAuthserviceResponseTimeout(responseTimeout string) string {
+func testAccCertificateAuthserviceResponseTimeout(name string , caCertificate []string , responseTimeout string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_response_timeout" {
+	ocsp_check = "DISABLED"
     response_timeout = %q
+    name = %q
+    ca_certificates = %s
 }
-`, responseTimeout)
+`, responseTimeout, name, caCertificateStr)
 }
 
-func testAccCertificateAuthserviceTrustModel(trustModel string) string {
+func testAccCertificateAuthserviceTrustModel(name string , caCertificate []string , trustModel string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_trust_model" {
+	ocsp_check = "DISABLED"
+    name = %q
+    ca_certificates = %s
     trust_model = %q
 }
-`, trustModel)
+`, name, caCertificateStr, trustModel)
 }
 
-func testAccCertificateAuthserviceUserMatchType(userMatchType string) string {
+func testAccCertificateAuthserviceUserMatchType(name string , caCertificate []string , userMatchType string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_user_match_type" {
+	ocsp_check = "DISABLED"
     user_match_type = %q
+    ca_certificates = %s
+    name = %q
 }
-`, userMatchType)
+`, userMatchType, caCertificateStr, name)
 }

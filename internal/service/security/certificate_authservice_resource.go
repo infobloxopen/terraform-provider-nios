@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -72,12 +73,34 @@ func (r *CertificateAuthserviceResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	token, err := utils.UploadPEMFile(ctx, r.client, "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/utils/cert.pem")
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to upload PEM file, got error: %s", err))
-		return
+	if !data.OcspResponders.IsNull() && !data.OcspResponders.IsUnknown() {
+		var ocspResponders []CertificateAuthserviceOcspRespondersModel
+		diags := data.OcspResponders.ElementsAs(ctx, &ocspResponders, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		for i, ocspResponder := range ocspResponders {
+			if !ocspResponder.CertificateFilePath.IsNull() && !ocspResponder.CertificateFilePath.IsUnknown() {
+				filePath := ocspResponder.CertificateFilePath.ValueString()
+				certToken , err := utils.UploadPEMFile(ctx, r.client, filePath)
+				if err != nil {
+					resp.Diagnostics.AddError(
+						"Client Error",
+						fmt.Sprintf("Unable to upload certificate file %s, got error: %s", filePath, err),
+					)
+					return
+				}
+				ocspResponders[i].CertificateToken = types.StringValue(certToken)
+			}
+		}
+		listValue , diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}, ocspResponders)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		data.OcspResponders = listValue
 	}
-	fmt.Printf("Uploaded PEM file, received token: %s\n", token)
 
 	apiRes, _, err := r.client.SecurityAPI.
 		CertificateAuthserviceAPI.
@@ -117,7 +140,7 @@ func (r *CertificateAuthserviceResource) Read(ctx context.Context, req resource.
 		ReturnAsObject(1).
 		Execute()
 
-	//remove from the state if not found 
+	//remove from the state if not found
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -135,7 +158,6 @@ func (r *CertificateAuthserviceResource) Read(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-
 func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
 	var data CertificateAuthserviceModel
@@ -152,7 +174,6 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-
 
 	apiRes, _, err := r.client.SecurityAPI.
 		CertificateAuthserviceAPI.
