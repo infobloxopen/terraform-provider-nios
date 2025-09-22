@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -41,16 +40,15 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI user name.",
 	},
 	"password": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Optional:  true,
+		Computed:  true,
+		Sensitive: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI password.",
@@ -66,7 +64,6 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The comment for the credential.",
