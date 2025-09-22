@@ -33,6 +33,7 @@ resource "nios_ip_allocation" "allocation2" {
   }
 }
 
+# IP address allocation using function call to retrieve ipv4addr
 resource "nios_ip_allocation" "allocation3" {
   name              = "host3.example.com"
   view              = "default"
