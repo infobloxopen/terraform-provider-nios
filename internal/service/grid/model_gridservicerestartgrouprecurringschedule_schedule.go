@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -93,13 +92,11 @@ var GridservicerestartgrouprecurringscheduleScheduleResourceSchemaAttributes = m
 	"every": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The number of frequency to wait before repeating the scheduled task.",
 	},
 	"minutes_past_hour": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(1),
 		Validators: []validator.Int64{
 			int64validator.Between(0, 59),
 		},
@@ -108,7 +105,6 @@ var GridservicerestartgrouprecurringscheduleScheduleResourceSchemaAttributes = m
 	"hour_of_day": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(1),
 		Validators: []validator.Int64{
 			int64validator.Between(0, 23),
 		},
@@ -121,7 +117,6 @@ var GridservicerestartgrouprecurringscheduleScheduleResourceSchemaAttributes = m
 	"month": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(1),
 		Validators: []validator.Int64{
 			int64validator.Between(1, 12),
 		},
@@ -130,7 +125,6 @@ var GridservicerestartgrouprecurringscheduleScheduleResourceSchemaAttributes = m
 	"day_of_month": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(1),
 		Validators: []validator.Int64{
 			int64validator.Between(1, 31),
 		},

@@ -3,12 +3,12 @@
 page_title: "nios_grid_servicerestart_group Resource - nios"
 subcategory: "GRID"
 description: |-
-  Manages an GRID Service Restart Group.
+  Manages a GRID Service Restart Group.
 ---
 
 # nios_grid_servicerestart_group (Resource)
 
-Manages an GRID Service Restart Group.
+Manages a GRID Service Restart Group.
 
 ## Example Usage
 

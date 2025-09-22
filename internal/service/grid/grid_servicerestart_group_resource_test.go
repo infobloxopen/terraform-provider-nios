@@ -238,10 +238,6 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 			"minutes_past_hour": 6,
 			"disable":           false,
 			"repeat":            "RECUR",
-			"day_of_month":      30,
-			"month":             1,
-			"year":              2026,
-			"hour_of_day":       20,
 		},
 	}
 	recurringScheduleUpdated := map[string]any{
