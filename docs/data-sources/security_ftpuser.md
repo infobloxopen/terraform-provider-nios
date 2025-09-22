@@ -48,7 +48,7 @@ data "nios_security_ftpuser" "get_all_ftpusers" {}
 
 Required:
 
-- `password` (String) The FTP user password.
+- `password` (String, Sensitive) The FTP user password.
 - `username` (String) The FTP user name.
 
 Optional:

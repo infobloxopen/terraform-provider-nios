@@ -20,7 +20,7 @@ var readableAttributesForFtpuser = "extattrs,home_dir,permission,username"
 func TestAccFtpuserResource_basic(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test"
 	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -35,6 +35,8 @@ func TestAccFtpuserResource_basic(t *testing.T) {
 					// Test fields with required value
 					resource.TestCheckResourceAttr(resourceName, "username", username),
 					resource.TestCheckResourceAttr(resourceName, "password", password),
+					resource.TestCheckResourceAttr(resourceName, "permission", "RO"),
+					resource.TestCheckResourceAttr(resourceName, "create_home_dir", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -45,7 +47,7 @@ func TestAccFtpuserResource_basic(t *testing.T) {
 func TestAccFtpuserResource_disappears(t *testing.T) {
 	resourceName := "nios_security_ftpuser.test"
 	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -68,7 +70,7 @@ func TestAccFtpuserResource_disappears(t *testing.T) {
 func TestAccFtpuserResource_CreateHomeDir(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_create_home_dir"
 	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 	homeDir := "/ftpusers"
 
@@ -93,7 +95,7 @@ func TestAccFtpuserResource_CreateHomeDir(t *testing.T) {
 func TestAccFtpuserResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_extattrs"
 	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -130,7 +132,7 @@ func TestAccFtpuserResource_ExtAttrs(t *testing.T) {
 func TestAccFtpuserResource_HomeDir(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_home_dir"
 	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 	homeDir := "/ftpusers"
 
@@ -154,7 +156,7 @@ func TestAccFtpuserResource_HomeDir(t *testing.T) {
 func TestAccFtpuserResource_Permission(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_permission"
 	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -185,7 +187,7 @@ func TestAccFtpuserResource_Permission(t *testing.T) {
 func TestAccFtpuserResource_Username(t *testing.T) {
 	var resourceName = "nios_security_ftpuser.test_username"
 	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 
 	resource.ParallelTest(t, resource.TestCase{

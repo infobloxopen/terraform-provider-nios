@@ -15,7 +15,7 @@ func TestAccFtpuserDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_security_ftpuser.test"
 	resourceName := "nios_security_ftpuser.test"
 	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 
 	resource.Test(t, resource.TestCase{
@@ -40,7 +40,7 @@ func TestAccFtpuserDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_security_ftpuser.test"
 	var v security.Ftpuser
 	extAttrValue := acctest.RandomNameWithPrefix("ftp-user")
-	username := acctest.RandomNameWithPrefix("tf-test-user-")
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
 	password := acctest.RandomAlphaNumeric(12)
 
 	resource.Test(t, resource.TestCase{

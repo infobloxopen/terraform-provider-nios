@@ -14,12 +14,12 @@ Manages an FTP user.
 
 ```terraform
 // Create an FTPuser with Basic Fields
-resource "nios_security_ftpuser" "ftpusers_basic_fields" {
+resource "nios_security_ftpuser" "ftpusers_with_basic_fields" {
   username = "example_ftpuser"
   password = "example_password"
 }
 // Create an FTPuser with Additional Fields
-resource "nios_security_ftpuser" "ftpusers_additional_fields" {
+resource "nios_security_ftpuser" "ftpusers_with_additional_fields" {
   username        = "example_ftpuser2"
   password        = "example_password"
   permission      = "RW"
@@ -36,7 +36,7 @@ resource "nios_security_ftpuser" "ftpusers_additional_fields" {
 
 ### Required
 
-- `password` (String) The FTP user password.
+- `password` (String, Sensitive) The FTP user password.
 - `username` (String) The FTP user name.
 
 ### Optional

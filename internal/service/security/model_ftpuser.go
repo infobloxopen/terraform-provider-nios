@@ -75,6 +75,7 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password": schema.StringAttribute{
 		Required:            true,
+		Sensitive:           true,
 		MarkdownDescription: "The FTP user password.",
 	},
 	"permission": schema.StringAttribute{
