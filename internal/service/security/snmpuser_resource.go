@@ -79,7 +79,7 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 		if data.AuthenticationProtocol.ValueString() == "NONE" {
 			resp.Diagnostics.AddError(
 				"Invalid SNMPv3 Configuration",
-				"When privacy_protocol is set to a value other than 'NONE' (e.g., 'AES', 'DES'), authentication_protocol must also be set to a value other than 'NONE' (e.g., 'SHA', 'MD5').",
+				"When privacy_protocol is set to a value other than 'AES' or 'DES', authentication_protocol cannot be set to 'NONE' ",
 			)
 		}
 	}
@@ -89,7 +89,7 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 		if data.AuthenticationPassword.IsNull() || data.AuthenticationPassword.IsUnknown() || data.AuthenticationPassword.ValueString() == "" {
 			resp.Diagnostics.AddError(
 				"Missing Authentication Password",
-				"When authentication_protocol is set to a value other than 'NONE', authentication_password must be provided.",
+				"When authentication_protocol is set to 'SHA' or 'MD5', authentication_password must be provided.",
 			)
 		}
 	}
@@ -99,7 +99,7 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 		if data.PrivacyPassword.IsNull() || data.PrivacyPassword.IsUnknown() || data.PrivacyPassword.ValueString() == "" {
 			resp.Diagnostics.AddError(
 				"Missing Privacy Password",
-				"When privacy_protocol is set to a value other than 'NONE', privacy_password must be provided.",
+				"When privacy_protocol is set to 'AES' or 'DES', privacy_password must be provided.",
 			)
 		}
 	}
