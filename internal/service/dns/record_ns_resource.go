@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -61,7 +62,6 @@ func (r *RecordNsResource) Configure(ctx context.Context, req resource.Configure
 }
 
 func (r *RecordNsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
 	var data RecordNsModel
 
 	// Read Terraform plan data into the model
@@ -84,10 +84,6 @@ func (r *RecordNsResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	res := apiRes.CreateRecordNsResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordNs due inherited Extensible attributes, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -96,7 +92,6 @@ func (r *RecordNsResource) Create(ctx context.Context, req resource.CreateReques
 }
 
 func (r *RecordNsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	//var diags diag.Diagnostics
 	var data RecordNsModel
 
 	// Read Terraform prior state data into the model
@@ -144,7 +139,6 @@ func (r *RecordNsResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -157,18 +151,12 @@ func (r *RecordNsResource) Update(ctx context.Context, req resource.UpdateReques
 		ReturnFieldsPlus(readableAttributesForRecordNs).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordNs, got error: %s", err))
 		return
 	}
 
 	res := apiRes.UpdateRecordNsResponseAsObject.GetResult()
-
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordNs due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
