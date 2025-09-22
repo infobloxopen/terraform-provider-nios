@@ -14,6 +14,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -315,9 +316,57 @@ func (r *GridServicerestartGroupResource) ValidateConfig(ctx context.Context, re
 	if len(recurringScheduleAttr) == 0 {
 		return
 	}
+
+	servicesAttr := data.RecurringSchedule.Attributes()["services"]
+	if !servicesAttr.IsNull() && !servicesAttr.IsUnknown() {
+		servicesList, ok := servicesAttr.(internaltypes.UnorderedListValue)
+		if !ok {
+			resp.Diagnostics.AddError(
+				"Invalid Services Attribute",
+				"Expected services to be a list but got different type",
+			)
+			return
+		}
+		// Traverse the list and check both the values is "DHCP" and "DNS" , if yes then return error
+		hasDHCP := false
+		hasDNS := false
+		for _, v := range servicesList.Elements() {
+			service, ok := v.(types.String)
+			if !ok {
+				resp.Diagnostics.AddError(
+					"Invalid Service Value",
+					"Expected service value to be a string but got different type",
+				)
+				return
+			}
+			if service.ValueString() == "DHCP" {
+				hasDHCP = true
+			}
+			if service.ValueString() == "DNS" {
+				hasDNS = true
+			}
+			if hasDHCP && hasDNS {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("recurring_schedule").AtName("services"),
+					"Invalid Services Configuration",
+					"If both DHCP and DNS are selected in services, then the services must be set to ALL",
+				)
+				return
+			}
+		}
+	}
+
 	scheduleAttr := data.RecurringSchedule.Attributes()["schedule"]
 	if !scheduleAttr.IsNull() && !scheduleAttr.IsUnknown() {
-		schedule := scheduleAttr.(types.Object).Attributes()
+		scheduleObj, ok := scheduleAttr.(types.Object)
+		if !ok {
+			resp.Diagnostics.AddError(
+				"Invalid Schedule Attribute",
+				"Expected schedule to be an object but got different type",
+			)
+			return
+		}
+		schedule := scheduleObj.Attributes()
 		recurringTime := schedule["recurring_time"]
 		if !recurringTime.IsNull() && !recurringTime.IsUnknown() {
 			if !schedule["hour_of_day"].IsNull() || !schedule["hour_of_day"].IsUnknown() || !schedule["year"].IsNull() || !schedule["year"].IsUnknown() || !schedule["month"].IsNull() || !schedule["month"].IsUnknown() || !schedule["day_of_month"].IsNull() || !schedule["day_of_month"].IsUnknown() {
@@ -331,7 +380,15 @@ func (r *GridServicerestartGroupResource) ValidateConfig(ctx context.Context, re
 
 		repeat := schedule["repeat"]
 		if !repeat.IsNull() && !repeat.IsUnknown() {
-			if repeat.(types.String).ValueString() == "ONCE" {
+			repeatStr, ok := repeat.(types.String)
+			if !ok {
+				resp.Diagnostics.AddError(
+					"Invalid Repeat Attribute",
+					"Expected repeat to be a string but got different type",
+				)
+				return
+			}
+			if repeatStr.ValueString() == "ONCE" {
 				if (!schedule["weekdays"].IsNull() && !schedule["weekdays"].IsUnknown()) || (!schedule["frequency"].IsNull() && !schedule["frequency"].IsUnknown()) || (!schedule["every"].IsNull() && !schedule["every"].IsUnknown()) {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("recurring_schedule").AtName("schedule").AtName("repeat"),
@@ -355,11 +412,11 @@ func (r *GridServicerestartGroupResource) ValidateConfig(ctx context.Context, re
 					)
 				}
 
-				if schedule["weekdays"].IsNull() || schedule["weekdays"].IsUnknown() || schedule["frequency"].IsNull() || schedule["frequency"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() {
+				if schedule["weekdays"].IsNull() || schedule["weekdays"].IsUnknown() || schedule["frequency"].IsNull() || schedule["frequency"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("recurring_schedule").AtName("schedule").AtName("repeat"),
 						"Invalid Configuration for Schedule",
-						"If REPEAT is set to RECUR, then weekdays, frequency and minutes_past_hour must be set",
+						"If REPEAT is set to RECUR, then weekdays, frequency, hour_of_day and minutes_past_hour must be set",
 					)
 				}
 			}

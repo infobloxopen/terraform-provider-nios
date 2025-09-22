@@ -16,6 +16,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO: Objects required to be set in the grid
+// - Members - infoblox.member, infoblox.localdomain
+
 var readableAttributesForGridServicerestartGroup = "comment,extattrs,is_default,last_updated_time,members,mode,name,position,recurring_schedule,requests,service,status"
 
 func TestAccGridServicerestartGroupResource_basic(t *testing.T) {
@@ -132,6 +135,7 @@ func TestAccGridServicerestartGroupResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccGridServicerestartGroupResource_Members(t *testing.T) {
+	t.Skip("Requires members to be present in the grid to test against")
 	var resourceName = "nios_grid_servicerestart_group.test_members"
 	var v grid.GridServicerestartGroup
 	name := acctest.RandomNameWithPrefix("grid-service")
@@ -238,12 +242,13 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 			"minutes_past_hour": 6,
 			"disable":           false,
 			"repeat":            "RECUR",
+			"hour_of_day":       20,
 		},
 	}
 	recurringScheduleUpdated := map[string]any{
 		"services": []string{"ALL"},
 		"mode":     "SIMULTANEOUS",
-		"force":    false,
+		"force":    true,
 		"schedule": map[string]any{
 			"minutes_past_hour": 6,
 			"repeat":            "ONCE",
@@ -263,7 +268,19 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 				Config: testAccGridServicerestartGroupRecurringSchedule(name, "DNS", recurringSchedule),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					//resource.TestCheckResourceAttr(resourceName, "recurring_schedule", "RECURRING_SCHEDULE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.services.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.services.0", "DHCPV6"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.services.1", "DNS"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.mode", "SIMULTANEOUS"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.force", "false"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.weekdays.0", "TUESDAY"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.weekdays.1", "WEDNESDAY"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.weekdays.2", "MONDAY"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.repeat", "RECUR"),
 				),
 			},
 			// Update and Read
@@ -271,7 +288,16 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 				Config: testAccGridServicerestartGroupRecurringSchedule(name, "DNS", recurringScheduleUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					//resource.TestCheckResourceAttr(resourceName, "recurring_schedule", "RECURRING_SCHEDULE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.services.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.services.0", "ALL"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.mode", "SIMULTANEOUS"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.force", "true"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.repeat", "ONCE"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.day_of_month", "30"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.month", "1"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.year", "2026"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.hour_of_day", "20"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
