@@ -102,6 +102,7 @@ func TestAccPermissionResource_Object(t *testing.T) {
 	var resourceName = "nios_security_permission.test_object"
 	var v security.Permission
 	view := acctest.RandomNameWithPrefix("tf-test-view-")
+	view2 := acctest.RandomNameWithPrefix("tf-test-view-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -119,7 +120,7 @@ func TestAccPermissionResource_Object(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccPermissionObject(view, "cloud-api-only", "WRITE", "ZONE"),
+				Config: testAccPermissionObject(view2, "cloud-api-only", "WRITE", "ZONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPermissionExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrPair(resourceName, "object", "nios_dns_view.test_view", "ref"),
