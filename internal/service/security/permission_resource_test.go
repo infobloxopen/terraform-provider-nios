@@ -381,11 +381,16 @@ resource "nios_security_permission" "test_resource_type" {
 
 func testAccPermissionRole(view, role, permission, resourceType string) string {
 	return fmt.Sprintf(`
+
 resource "nios_dns_view" "test_view" {
     name = %q
 }
+resource "nios_security_admin_role" "test_admin_role" {
+  	name = %q
+}
+
 resource "nios_security_permission" "test_role" {
-    role = %q
+    role = nios_security_admin_role.test_admin_role.name
     permission = %q
     resource_type = %q
 	object = nios_dns_view.test_view.ref

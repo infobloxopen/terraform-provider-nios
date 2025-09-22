@@ -62,7 +62,6 @@ func (r *PermissionResource) Configure(ctx context.Context, req resource.Configu
 }
 
 func (r *PermissionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
 	var data PermissionModel
 
 	// Read Terraform plan data into the model
@@ -85,10 +84,6 @@ func (r *PermissionResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	res := apiRes.CreatePermissionResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Permission, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -162,10 +157,6 @@ func (r *PermissionResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	res := apiRes.UpdatePermissionResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Permission , got error: %s", diags))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 

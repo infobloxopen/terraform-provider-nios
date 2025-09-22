@@ -12,7 +12,7 @@ resource "nios_security_permission" "example_permission_basic_fields" {
 }
 
 // Addition of more permissions to same object
-resource "nios_security_permission" "example_permission_same_object" {
+resource "nios_security_permission" "example_permission_additional_fields" {
   group         = "cloud-api-only"
   permission    = "READ"
   resource_type = "ZONE"

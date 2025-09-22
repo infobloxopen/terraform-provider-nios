@@ -98,6 +98,9 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("group"),
 			),
 		},
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplaceIfConfigured(),
+		},
 		MarkdownDescription: "The name of the role this permission applies to.",
 	},
 }
