@@ -3,9 +3,11 @@ package dns
 import (
 	"context"
 	"fmt"
+	"maps"
 	"net/http"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -135,6 +137,28 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
+	// Save original IPv4 function call attributes
+	savedIPv4FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv4addrs)
+
+	// Update IPv4 function call attribute names if any exist
+	if savedIPv4FuncCalls != nil {
+		data.Ipv4addrs = r.updateNestedFuncCallAttributeName(ctx, data, data.Ipv4addrs, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	// Save original IPv6 function call attributes
+	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
+
+	// Update IPv6 function call attribute names if any exist
+	if savedIPv6FuncCalls != nil {
+		data.Ipv6addrs = r.updateNestedFuncCallAttributeName(ctx, data, data.Ipv6addrs, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Create(ctx).
@@ -155,6 +179,16 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Restore original IPv4 function call attributes
+	if savedIPv4FuncCalls != nil {
+		data.Ipv4addrs = r.restoreNestedFuncCallAttrs(ctx, data.Ipv4addrs, savedIPv4FuncCalls)
+	}
+
+	// Restore original IPv6 function call attributes
+	if savedIPv6FuncCalls != nil {
+		data.Ipv6addrs = r.restoreNestedFuncCallAttrs(ctx, data.Ipv6addrs, savedIPv6FuncCalls)
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -553,4 +587,149 @@ func (r *IPAllocationResource) findHostByInternalID(ctx context.Context, data *I
 	}
 
 	return &found, refStr, httpRes, nil
+}
+
+func (r *IPAllocationResource) saveNestedFuncCallAttrs(ipList types.List) []map[string]attr.Value {
+	if ipList.IsNull() || ipList.IsUnknown() {
+		return nil
+	}
+
+	elements := ipList.Elements()
+	if len(elements) == 0 {
+		return nil
+	}
+
+	savedAttrs := make([]map[string]attr.Value, len(elements))
+
+	for i, element := range elements {
+		if element.IsNull() || element.IsUnknown() {
+			continue
+		}
+
+		elementObj := element.(types.Object)
+		elementAttrs := elementObj.Attributes()
+
+		if funcCallAttr, exists := elementAttrs["func_call"]; exists && !funcCallAttr.IsNull() && !funcCallAttr.IsUnknown() {
+			funcCallObj := funcCallAttr.(types.Object)
+			// Save a copy of the original attributes
+			savedAttrs[i] = make(map[string]attr.Value)
+			maps.Copy(savedAttrs[i], funcCallObj.Attributes())
+		}
+	}
+
+	return savedAttrs
+}
+
+func (r *IPAllocationResource) updateNestedFuncCallAttributeName(ctx context.Context, data IPAllocationModel, ipList types.List, diags *diag.Diagnostics) types.List {
+	if ipList.IsNull() || ipList.IsUnknown() {
+		return ipList
+	}
+
+	elements := ipList.Elements()
+	if len(elements) == 0 {
+		return ipList
+	}
+
+	updated := false
+	updatedElements := make([]attr.Value, len(elements))
+
+	// Process all elements in the list
+	for i, element := range elements {
+		if element.IsNull() || element.IsUnknown() {
+			updatedElements[i] = element
+			continue
+		}
+
+		elementObj := element.(types.Object)
+		elementAttrs := elementObj.Attributes()
+
+		// Check and update FuncCall if it exists
+		if funcCallAttr, exists := elementAttrs["func_call"]; exists && !funcCallAttr.IsNull() && !funcCallAttr.IsUnknown() {
+			funcCallObj := funcCallAttr.(types.Object)
+			funcCallAttrs := funcCallObj.Attributes()
+
+			if attrNameVal, hasAttrName := funcCallAttrs["attribute_name"]; hasAttrName {
+				attrVal := attrNameVal.(types.String).ValueString()
+				// pathVar, found := utils.FindModelFieldByTFSdkTag(data, attrVal)
+				// if !found {
+				// 	diags.AddError("Client Error", fmt.Sprintf("Unable to find attribute '%s' in IPAllocation model", attrVal))
+				// 	updatedElements[i] = element
+				// 	continue
+				// }
+
+				var pathVar string
+				switch attrVal {
+				case "ipv4addr":
+					pathVar = "Ipv4addr"
+				case "ipv6addr":
+					pathVar = "Ipv6addr"
+				default:
+					diags.AddError("Client Error", fmt.Sprintf("Unsupported attribute '%s' for function call", attrVal))
+					updatedElements[i] = element
+					continue
+				}
+
+				// Update the attribute_name with the mapped field name
+				funcCallAttrs["attribute_name"] = types.StringValue(pathVar)
+				elementAttrs["func_call"] = types.ObjectValueMust(FuncCallAttrTypes, funcCallAttrs)
+
+				// Create updated element using the original object's type
+				updatedElements[i] = types.ObjectValueMust(elementObj.Type(ctx).(types.ObjectType).AttrTypes, elementAttrs)
+				updated = true
+			} else {
+				updatedElements[i] = element
+			}
+		} else {
+			updatedElements[i] = element
+		}
+	}
+
+	// Return updated list only if changes were made
+	if updated {
+		updatedList, listDiags := types.ListValue(elements[0].(types.Object).Type(ctx), updatedElements)
+		diags.Append(listDiags...)
+		return updatedList
+	}
+
+	return ipList
+}
+
+func (r *IPAllocationResource) restoreNestedFuncCallAttrs(ctx context.Context, ipList types.List, savedAttrs []map[string]attr.Value) types.List {
+	if ipList.IsNull() || ipList.IsUnknown() || savedAttrs == nil {
+		return ipList
+	}
+
+	elements := ipList.Elements()
+	if len(elements) == 0 || len(savedAttrs) != len(elements) {
+		return ipList
+	}
+
+	updatedElements := make([]attr.Value, len(elements))
+	hasUpdates := false
+
+	for i, element := range elements {
+		if element.IsNull() || element.IsUnknown() || savedAttrs[i] == nil {
+			updatedElements[i] = element
+			continue
+		}
+
+		elementObj := element.(types.Object)
+		elementAttrs := elementObj.Attributes()
+
+		if _, exists := elementAttrs["func_call"]; exists && len(savedAttrs[i]) > 0 {
+			// Restore original FuncCall attributes
+			elementAttrs["func_call"] = types.ObjectValueMust(FuncCallAttrTypes, savedAttrs[i])
+			updatedElements[i] = types.ObjectValueMust(elementObj.Type(ctx).(types.ObjectType).AttrTypes, elementAttrs)
+			hasUpdates = true
+		} else {
+			updatedElements[i] = element
+		}
+	}
+
+	if hasUpdates {
+		updatedList, _ := types.ListValue(elements[0].(types.Object).Type(ctx), updatedElements)
+		return updatedList
+	}
+
+	return ipList
 }

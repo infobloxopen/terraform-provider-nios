@@ -33,6 +33,32 @@ resource "nios_ip_allocation" "allocation2" {
   }
 }
 
+resource "nios_ip_allocation" "allocation3" {
+  name              = "host3.example.com"
+  view              = "default"
+  configure_for_dns = true
+  ipv4addrs = [
+    {
+      func_call = {
+        attribute_name  = "ipv4addr"
+        object_function = "next_available_ip"
+        result_field    = "ips"
+        object          = "network"
+        object_parameters = {
+          network      = "10.10.0.0/16"
+          network_view = "default"
+        }
+        parameters = {
+          exclude = jsonencode(["10.10.0.1", "10.10.0.2"]),
+        }
+      }
+    }
+  ]
+  extattrs = {
+    Site = "location-1"
+  }
+}
+
 # Associate MAC address with host1's IP without DHCP configuration
 resource "nios_ip_association" "association1" {
   ref                = nios_ip_allocation.allocation1.ref
