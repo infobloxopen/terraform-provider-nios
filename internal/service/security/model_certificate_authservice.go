@@ -3,6 +3,7 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -33,7 +34,7 @@ type CertificateAuthserviceModel struct {
 	OcspResponders        types.List   `tfsdk:"ocsp_responders"`
 	RecoveryInterval      types.Int64  `tfsdk:"recovery_interval"`
 	RemoteLookupPassword  types.String `tfsdk:"remote_lookup_password"`
-	RemoteLookupService   types.String  `tfsdk:"remote_lookup_service"`
+	RemoteLookupService   types.String `tfsdk:"remote_lookup_service"`
 	RemoteLookupUsername  types.String `tfsdk:"remote_lookup_username"`
 	ResponseTimeout       types.Int64  `tfsdk:"response_timeout"`
 	TrustModel            types.String `tfsdk:"trust_model"`
@@ -63,20 +64,25 @@ var CertificateAuthserviceAttrTypes = map[string]attr.Type{
 
 var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"auto_populate_login": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Specifies the value of the client certificate for automatically populating the NIOS login name.",
 	},
 	"ca_certificates": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Required:    true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The list of CA certificates.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The descriptive comment for the certificate authentication service.",
 	},
 	"disabled": schema.BoolAttribute{
@@ -104,18 +110,23 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The number of validation attempts before the appliance contacts the next responder.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The name of the certificate authentication service.",
 	},
 	"ocsp_check": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		//Default:             stringdefault.StaticString("MANUAL"),
 		MarkdownDescription: "Specifies the source of OCSP settings.",
 	},
 	"ocsp_responders": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: CertificateAuthserviceOcspRespondersResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true, 
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "An ordered list of OCSP responders that are part of the certificate authentication service.",
 	},
 	"recovery_interval": schema.Int64Attribute{
@@ -126,6 +137,7 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"remote_lookup_password": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The password for the service account.",
 	},
 	"remote_lookup_service": schema.StringAttribute{
@@ -135,6 +147,7 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"remote_lookup_username": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The username for the service account.",
 	},
 	"response_timeout": schema.Int64Attribute{
@@ -230,7 +243,22 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 	m.MaxRetries = flex.FlattenInt64Pointer(from.MaxRetries)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OcspCheck = flex.FlattenStringPointer(from.OcspCheck)
-	m.OcspResponders = flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
+	var responders []CertificateAuthserviceOcspRespondersModel
+	diags.Append(m.OcspResponders.ElementsAs(ctx, &responders, false)...)
+	filePath := responders[0].CertificateFilePath.ValueString()
+	flattenedResponders := flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
+	
+	// Update the first responder's certificate file path
+	var updatedResponders []CertificateAuthserviceOcspRespondersModel
+	diags.Append(flattenedResponders.ElementsAs(ctx, &updatedResponders, false)...)
+	if len(updatedResponders) > 0 {
+		updatedResponders[0].CertificateFilePath = types.StringValue(filePath)
+		updatedList, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}, updatedResponders)
+        diags.Append(d...)
+        
+        // Set the updated list back to the model
+        m.OcspResponders = updatedList
+	}
 	m.RecoveryInterval = flex.FlattenInt64Pointer(from.RecoveryInterval)
 	m.RemoteLookupPassword = flex.FlattenStringPointer(from.RemoteLookupPassword)
 	m.RemoteLookupService = FlattenCertificateAuthserviceRemoteLookupService(ctx, from.RemoteLookupService, diags)

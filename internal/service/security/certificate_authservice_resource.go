@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -73,33 +72,12 @@ func (r *CertificateAuthserviceResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	if !data.OcspResponders.IsNull() && !data.OcspResponders.IsUnknown() {
-		var ocspResponders []CertificateAuthserviceOcspRespondersModel
-		diags := data.OcspResponders.ElementsAs(ctx, &ocspResponders, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		for i, ocspResponder := range ocspResponders {
-			if !ocspResponder.CertificateFilePath.IsNull() && !ocspResponder.CertificateFilePath.IsUnknown() {
-				filePath := ocspResponder.CertificateFilePath.ValueString()
-				certToken , err := utils.UploadPEMFile(ctx, r.client, filePath)
-				if err != nil {
-					resp.Diagnostics.AddError(
-						"Client Error",
-						fmt.Sprintf("Unable to upload certificate file %s, got error: %s", filePath, err),
-					)
-					return
-				}
-				ocspResponders[i].CertificateToken = types.StringValue(certToken)
-			}
-		}
-		listValue , diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}, ocspResponders)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		data.OcspResponders = listValue
+	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
+	username := r.client.SecurityAPI.Cfg.NIOSUsername
+	password := r.client.SecurityAPI.Cfg.NIOSPassword
+	// Process OCSP responders
+	if !r.processOcspResponders(ctx, &data, baseUrl, username, password, &resp.Diagnostics) {
+		return
 	}
 
 	apiRes, _, err := r.client.SecurityAPI.
@@ -168,7 +146,13 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
+	username := r.client.SecurityAPI.Cfg.NIOSUsername
+	password := r.client.SecurityAPI.Cfg.NIOSPassword
+	// Process OCSP responders
+	if !r.processOcspResponders(ctx, &data, baseUrl, username, password, &resp.Diagnostics) {
+		return
+	}
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -220,4 +204,47 @@ func (r *CertificateAuthserviceResource) Delete(ctx context.Context, req resourc
 
 func (r *CertificateAuthserviceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// processOcspResponders processes certificate files in OCSP responders list
+func (r *CertificateAuthserviceResource) processOcspResponders(
+	ctx context.Context,
+	data *CertificateAuthserviceModel,
+	baseUrl, username, password string,
+	diag *diag.Diagnostics,
+) bool {
+	if data.OcspResponders.IsNull() || data.OcspResponders.IsUnknown() {
+		return true
+	}
+
+	var ocspResponders []CertificateAuthserviceOcspRespondersModel
+	diagResult := data.OcspResponders.ElementsAs(ctx, &ocspResponders, false)
+	diag.Append(diagResult...)
+	if diag.HasError() {
+		return false
+	}
+
+	for i, ocspResponder := range ocspResponders {
+		if !ocspResponder.CertificateFilePath.IsNull() && !ocspResponder.CertificateFilePath.IsUnknown() {
+			filePath := ocspResponder.CertificateFilePath.ValueString()
+			token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+			if err != nil {
+				diag.AddError(
+					"Client Error",
+					fmt.Sprintf("Unable to process certificate file %s, got error: %s", filePath, err),
+				)
+				return false
+			}
+			ocspResponders[i].CertificateToken = types.StringValue(token)
+		}
+	}
+
+	listValue, diagResult := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}, ocspResponders)
+	diag.Append(diagResult...)
+	if diag.HasError() {
+		return false
+	}
+	
+	data.OcspResponders = listValue
+	return true
 }

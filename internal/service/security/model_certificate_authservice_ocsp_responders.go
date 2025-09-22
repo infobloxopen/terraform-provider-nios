@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -36,19 +38,24 @@ var CertificateAuthserviceOcspRespondersAttrTypes = map[string]attr.Type{
 
 var CertificateAuthserviceOcspRespondersResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn_or_ip": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The FQDN (Fully Qualified Domain Name) or IP address of the server.",
 	},
 	"port": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(80),
 		MarkdownDescription: "The port used for connecting.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The descriptive comment for the OCSP authentication responder.",
 	},
 	"disabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if this OCSP authentication responder is disabled.",
 	},
 	"certificate": schema.StringAttribute{
@@ -113,6 +120,6 @@ func (m *CertificateAuthserviceOcspRespondersModel) Flatten(ctx context.Context,
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disabled = types.BoolPointerValue(from.Disabled)
-	m.Certificate = flex.FlattenStringPointer(from.Certificate)
+	//m.Certificate = flex.FlattenStringPointer(from.Certificate)
 	m.CertificateToken = flex.FlattenStringPointer(from.CertificateToken)
 }
