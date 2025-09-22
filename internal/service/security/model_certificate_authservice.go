@@ -243,22 +243,22 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 	m.MaxRetries = flex.FlattenInt64Pointer(from.MaxRetries)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OcspCheck = flex.FlattenStringPointer(from.OcspCheck)
-	var responders []CertificateAuthserviceOcspRespondersModel
-	diags.Append(m.OcspResponders.ElementsAs(ctx, &responders, false)...)
-	filePath := responders[0].CertificateFilePath.ValueString()
-	flattenedResponders := flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
+	// var responders []CertificateAuthserviceOcspRespondersModel
+	// diags.Append(m.OcspResponders.ElementsAs(ctx, &responders, false)...)
+	// filePath := responders[0].CertificateFilePath.ValueString()
+	// flattenedResponders := flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
 	
-	// Update the first responder's certificate file path
-	var updatedResponders []CertificateAuthserviceOcspRespondersModel
-	diags.Append(flattenedResponders.ElementsAs(ctx, &updatedResponders, false)...)
-	if len(updatedResponders) > 0 {
-		updatedResponders[0].CertificateFilePath = types.StringValue(filePath)
-		updatedList, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}, updatedResponders)
-        diags.Append(d...)
+	// // Update the first responder's certificate file path
+	// var updatedResponders []CertificateAuthserviceOcspRespondersModel
+	// diags.Append(flattenedResponders.ElementsAs(ctx, &updatedResponders, false)...)
+	// if len(updatedResponders) > 0 {
+	// 	updatedResponders[0].CertificateFilePath = types.StringValue(filePath)
+	// 	updatedList, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}, updatedResponders)
+    //     diags.Append(d...)
         
-        // Set the updated list back to the model
-        m.OcspResponders = updatedList
-	}
+    //     // Set the updated list back to the model
+    //     m.OcspResponders = updatedList
+	// }
 	m.RecoveryInterval = flex.FlattenInt64Pointer(from.RecoveryInterval)
 	m.RemoteLookupPassword = flex.FlattenStringPointer(from.RemoteLookupPassword)
 	m.RemoteLookupService = FlattenCertificateAuthserviceRemoteLookupService(ctx, from.RemoteLookupService, diags)

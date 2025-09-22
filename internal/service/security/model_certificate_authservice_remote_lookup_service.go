@@ -57,10 +57,10 @@ func FlattenCertificateAuthserviceRemoteLookupService(ctx context.Context, from 
 	if from == nil {
 		return types.StringNull()
 	}
-	if from.String == nil {
+	if from.CertificateAuthserviceRemoteLookupServiceOneOf == nil {
 		return types.StringNull()
 	}
-	t := from.String
+	t := from.CertificateAuthserviceRemoteLookupServiceOneOf.Ref
 	return flex.FlattenStringPointer(t)
 }
 

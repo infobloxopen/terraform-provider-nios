@@ -143,7 +143,6 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		security.NewAdminuserResource,
 		security.NewAdminroleResource,
-		security.NewAdminuserResource,
 		security.NewCertificateAuthserviceResource,
 
 		misc.NewRulesetResource,
