@@ -631,6 +631,48 @@ func FlattenIPv6CIDR(ipv6addr *string) cidrtypes.IPv6Prefix {
 	}
 }
 
+func ExpandTimeToUnix(time, timezone types.String, diags *diag.Diagnostics) *int64 {
+	if !time.IsNull() && !time.IsUnknown() {
+		startTime, err := utils.ToUnixWithTimezone(time.ValueString(), timezone.ValueString())
+		if err != nil {
+			diags.AddError(
+				"Invalid Time or Timezone",
+				fmt.Sprintf(
+					"Failed to parse ßtime %q with timezone %q: %s",
+					time.ValueString(),
+					timezone.ValueString(),
+					err.Error(),
+				),
+			)
+			return nil
+		}
+		return &startTime
+	}
+	return nil
+}
+
+func FlattenUnixTime(timestamp *int64, timezone *string, diags *diag.Diagnostics) types.String {
+	var (
+		time string
+		err  error
+	)
+	if timestamp != nil && timezone != nil {
+		time, err = utils.FromUnixWithTimezone(*timestamp, *timezone)
+		if err != nil {
+			diags.AddError(
+				"Invalid Time or Timezone",
+				fmt.Sprintf(
+					"Failed to format time %d (Unix) with timezone %q: %s",
+					*timestamp,
+					*timezone,
+					err,
+				),
+			)
+		}
+	}
+	return types.StringValue(time)
+}
+
 // FilterDHCPOptions is a generic function to filter DHCP options based on planned values
 func FilterDHCPOptions[T any](
 	ctx context.Context,
