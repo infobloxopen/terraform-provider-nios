@@ -63,7 +63,7 @@ var CertificateAuthserviceOcspRespondersResourceSchemaAttributes = map[string]sc
 		MarkdownDescription: "The reference to the OCSP responder certificate.",
 	},
 	"certificate_token": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop.",
 	},
 	"certificate_file_path": schema.StringAttribute{

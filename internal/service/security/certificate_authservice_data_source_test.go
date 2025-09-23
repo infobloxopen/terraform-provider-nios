@@ -1,4 +1,3 @@
-
 package security_test
 
 import (
@@ -10,12 +9,17 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccCertificateAuthserviceDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_security_certificate_authservice.test"
 	resourceName := "nios_security_certificate_authservice.test"
 	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{
+		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,28 +27,7 @@ func TestAccCertificateAuthserviceDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckCertificateAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateAuthserviceDataSourceConfigFilters(),
-				Check: resource.ComposeTestCheckFunc(
-					append([]resource.TestCheckFunc{
-							testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-						}, testAccCheckCertificateAuthserviceResourceAttrPair(resourceName, dataSourceName)...)...,
-				),
-			},
-		},
-	})
-}
-
-func TestAccCertificateAuthserviceDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_security_certificate_authservice.test"
-	resourceName := "nios_security_certificate_authservice.test"
-	var v security.CertificateAuthservice
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckCertificateAuthserviceDestroy(context.Background(), &v),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCertificateAuthserviceDataSourceConfigExtAttrFilters( acctest.RandomName()),
+				Config: testAccCertificateAuthserviceDataSourceConfigFilters(name , caCertificate),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
@@ -80,32 +63,19 @@ func testAccCheckCertificateAuthserviceResourceAttrPair(resourceName, dataSource
     }
 }
 
-func testAccCertificateAuthserviceDataSourceConfigFilters() string {
+func testAccCertificateAuthserviceDataSourceConfigFilters(name string, caCertificate []string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test" {
+  name            = %q
+  ca_certificates = %s
 }
 
 data "nios_security_certificate_authservice" "test" {
   filters = {
-	 = nios_security_certificate_authservice.test.
+    name = nios_security_certificate_authservice.test.name
   }
 }
-`)
-}
-
-func testAccCertificateAuthserviceDataSourceConfigExtAttrFilters(extAttrsValue string) string {
-	return fmt.Sprintf(`
-resource "nios_security_certificate_authservice" "test" {
-  extattrs = {
-    Site = %q
-  } 
-}
-
-data "nios_security_certificate_authservice" "test" {
-  extattrfilters = {
-	Site = nios_security_certificate_authservice.test.extattrs.Site
-  }
-}
-`,extAttrsValue)
+`, name, caCertificateStr)
 }
 
