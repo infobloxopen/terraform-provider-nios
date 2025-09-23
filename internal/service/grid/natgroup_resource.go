@@ -158,11 +158,6 @@ func (r *NatgroupResource) Update(ctx context.Context, req resource.UpdateReques
 
 	res := apiRes.UpdateNatgroupResponseAsObject.GetResult()
 
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Natgroup, got error: %s", diags))
-		return
-	}
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
