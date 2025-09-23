@@ -1,15 +1,15 @@
-//Create a Ruleset with Basic Fields
-resource "nios_misc_ruleset" "ruleset_basic" {
+//Create a Service Restart Group with Basic Fields
+resource "nios_grid_servicerestart_group" "grid_servicerestart_group_basic" {
   name    = "example_grid_service_restart_group"
   service = "DNS"
 }
 
-//Create a Ruleset with Additional Fields
-resource "nios_misc_ruleset" "ruleset_with_additional_fields" {
-  name     = "example_grid_service_restart_group_additional"
-  service  = "DHCP"
-  comment  = "Comment for GRID Service Restart Group"
-  disabled = false
+//Create a Service Restart Group with Additional Fields
+resource "nios_grid_servicerestart_group" "grid_servicerestart_group_with_additional_fields" {
+  name    = "example_grid_service_restart_group_additional"
+  service = "DHCP"
+  comment = "Comment for GRID Service Restart Group"
+
 
   extattrs = {
     Site = "location-1"
@@ -22,6 +22,7 @@ resource "nios_misc_ruleset" "ruleset_with_additional_fields" {
     services = ["ALL"]
     mode     = "SIMULTANEOUS"
     force    = false
+    disabled = false
 
     schedule = {
       minutes_past_hour = 6
