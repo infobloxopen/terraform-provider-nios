@@ -103,11 +103,11 @@ func (m *FtpuserModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 	to := &security.Ftpuser{
 		ExtAttrs:   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Permission: flex.ExpandStringPointer(m.Permission),
+		Password:   flex.ExpandStringPointer(m.Password),
 	}
 	if isCreate {
 		to.CreateHomeDir = flex.ExpandBoolPointer(m.CreateHomeDir)
 		to.HomeDir = flex.ExpandStringPointer(m.HomeDir)
-		to.Password = flex.ExpandStringPointer(m.Password)
 		to.Username = flex.ExpandStringPointer(m.Username)
 	}
 	return to
