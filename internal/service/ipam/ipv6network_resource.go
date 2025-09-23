@@ -367,8 +367,6 @@ func (r *Ipv6networkResource) ImportState(ctx context.Context, req resource.Impo
 
 func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
 	var data Ipv6networkModel
-	var useDiscoveryBasicPollingSettings types.Bool
-	var discoveryBasicPollSettings types.Object
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -416,12 +414,8 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 		}
 	}
 
-	// Get the use_discovery_basic_polling_settings attribute
-	req.Config.GetAttribute(ctx, path.Root("use_discovery_basic_polling_settings"), &useDiscoveryBasicPollingSettings)
-
-	// Get the discovery_basic_poll_settings attribute
-	req.Config.GetAttribute(ctx, path.Root("discovery_basic_poll_settings"), &discoveryBasicPollSettings)
-
+	useDiscoveryBasicPollingSettings := data.UseDiscoveryBasicPollingSettings
+	discoveryBasicPollSettings := data.DiscoveryBasicPollSettings
 	//  discovery_basic_poll_settings is provided and use_discovery_basic_polling_settings is false
 	if !discoveryBasicPollSettings.IsUnknown() && !discoveryBasicPollSettings.IsNull() {
 		// Only then check if use_discovery_basic_polling_settings is false
@@ -447,5 +441,16 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			"Invalid DDNS Configuration",
 			"You cannot set 'ddns_server_always_updates' to false when 'ddns_enable_option_fqdn' is false.",
 		)
+	}
+	rirRegistrationStatus := data.RirRegistrationStatus
+	rirOrganization := data.RirOrganization
+
+	if !rirRegistrationStatus.IsNull() && !rirRegistrationStatus.IsUnknown() && rirRegistrationStatus.ValueString() == "REGISTERED" {
+		if rirOrganization.IsNull() || rirOrganization.IsUnknown() {
+			resp.Diagnostics.AddError(
+				"Missing RIR Organization",
+				"The 'rir_organization' attribute must be set when 'rir_registration_status' is set to REGISTERED.",
+			)
+		}
 	}
 }

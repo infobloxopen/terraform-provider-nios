@@ -22,6 +22,7 @@ var readableAttributesForNetwork = "authority,bootfile,bootserver,cloud_info,clo
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &NetworkResource{}
 var _ resource.ResourceWithImportState = &NetworkResource{}
+var _ resource.ResourceWithValidateConfig = &NetworkResource{}
 
 func NewNetworkResource() resource.Resource {
 	return &NetworkResource{}
@@ -410,6 +411,36 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
 						optionName),
 				)
+			}
+		}
+	}
+
+	// Members validation
+	if !data.Members.IsNull() && !data.Members.IsUnknown() {
+		var members []NetworkMembersModel
+		diags := data.Members.ElementsAs(ctx, &members, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for i, member := range members {
+			if member.Struct.ValueString() == "msdhcpserver" {
+				if !member.Ipv6addr.IsNull() && !member.Ipv6addr.IsUnknown() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("members").AtListIndex(i).AtName("ipv6addr"),
+						"Invalid Configuration",
+						"ipv6addr cannot be set when struct is 'msdhcpserver'. Only ipv4addr is supported for msdhcpserver.",
+					)
+				}
+
+				if !member.Name.IsNull() && !member.Name.IsUnknown() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("members").AtListIndex(i).AtName("name"),
+						"Invalid Configuration",
+						"name cannot be set when struct is 'msdhcpserver'. Only ipv4addr is supported for msdhcpserver.",
+					)
+				}
 			}
 		}
 	}
