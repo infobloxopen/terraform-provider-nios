@@ -427,6 +427,18 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 		}
 	}
 
+	rirRegistrationStatus := data.RirRegistrationStatus
+	rirOrganization := data.RirOrganization
+
+	if !rirRegistrationStatus.IsNull() && !rirRegistrationStatus.IsUnknown() && rirRegistrationStatus.ValueString() == "REGISTERED" {
+		if rirOrganization.IsNull() || rirOrganization.IsUnknown() {
+			resp.Diagnostics.AddError(
+				"Missing RIR Organization",
+				"The 'rir_organization' attribute must be set when 'rir_registration_status' is set to REGISTERED.",
+			)
+		}
+	}
+
 	ddnsEnableOptionFqdn := data.DdnsEnableOptionFqdn
 	ddnsServerAlwaysUpdates := data.DdnsServerAlwaysUpdates
 
@@ -441,16 +453,5 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			"Invalid DDNS Configuration",
 			"You cannot set 'ddns_server_always_updates' to false when 'ddns_enable_option_fqdn' is false.",
 		)
-	}
-	rirRegistrationStatus := data.RirRegistrationStatus
-	rirOrganization := data.RirOrganization
-
-	if !rirRegistrationStatus.IsNull() && !rirRegistrationStatus.IsUnknown() && rirRegistrationStatus.ValueString() == "REGISTERED" {
-		if rirOrganization.IsNull() || rirOrganization.IsUnknown() {
-			resp.Diagnostics.AddError(
-				"Missing RIR Organization",
-				"The 'rir_organization' attribute must be set when 'rir_registration_status' is set to REGISTERED.",
-			)
-		}
 	}
 }
