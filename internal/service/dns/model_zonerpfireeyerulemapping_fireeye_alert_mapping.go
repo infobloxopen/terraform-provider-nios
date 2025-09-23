@@ -3,9 +3,11 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -28,15 +30,24 @@ var ZonerpfireeyerulemappingFireeyeAlertMappingAttrTypes = map[string]attr.Type{
 
 var ZonerpfireeyerulemappingFireeyeAlertMappingResourceSchemaAttributes = map[string]schema.Attribute{
 	"alert_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("DOMAIN_MATCH", "INFECTION_MATCH", "MALWARE_CALLBACK", "MALWARE_OBJECT", "WEB_INFECTION"),
+		},
 		MarkdownDescription: "The type of Fireeye Alert.",
 	},
 	"rpz_rule": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("NODATA", "NOOVERRIDE", "NXDOMAIN", "PASSTHRU", "SUBSTITUTE"),
+		},
 		MarkdownDescription: "The RPZ rule for the alert.",
 	},
 	"lifetime": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The expiration Lifetime of alert type. The 32-bit unsigned integer represents the amount of seconds this alert type will live for. 0 means the alert will never expire.",
 	},
 }
@@ -71,7 +82,6 @@ func FlattenZonerpfireeyerulemappingFireeyeAlertMapping(ctx context.Context, fro
 	}
 	m := ZonerpfireeyerulemappingFireeyeAlertMappingModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ZonerpfireeyerulemappingFireeyeAlertMappingAttrTypes, m)
 	diags.Append(d...)
 	return t

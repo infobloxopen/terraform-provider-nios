@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -30,7 +31,11 @@ var ZoneRpFireeyeRuleMappingAttrTypes = map[string]attr.Type{
 
 var ZoneRpFireeyeRuleMappingResourceSchemaAttributes = map[string]schema.Attribute{
 	"apt_override": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("NODATA", "NOOVERRIDE", "NXDOMAIN", "PASSTHRU", "SUBSTITUTE"),
+		},
 		MarkdownDescription: "The override setting for APT alerts.",
 	},
 	"fireeye_alert_mapping": schema.ListNestedAttribute{
@@ -41,10 +46,12 @@ var ZoneRpFireeyeRuleMappingResourceSchemaAttributes = map[string]schema.Attribu
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The FireEye alert mapping.",
 	},
 	"substituted_domain_name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The domain name to be substituted, this is applicable only when apt_override is set to \"SUBSTITUTE\".",
 	},
 }
@@ -79,7 +86,6 @@ func FlattenZoneRpFireeyeRuleMapping(ctx context.Context, from *dns.ZoneRpFireey
 	}
 	m := ZoneRpFireeyeRuleMappingModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ZoneRpFireeyeRuleMappingAttrTypes, m)
 	diags.Append(d...)
 	return t

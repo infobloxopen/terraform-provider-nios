@@ -3,30 +3,35 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneRpExternalPrimariesModel struct {
-	Address                      types.String `tfsdk:"address"`
-	Name                         types.String `tfsdk:"name"`
-	SharedWithMsParentDelegation types.Bool   `tfsdk:"shared_with_ms_parent_delegation"`
-	Stealth                      types.Bool   `tfsdk:"stealth"`
-	TsigKey                      types.String `tfsdk:"tsig_key"`
-	TsigKeyAlg                   types.String `tfsdk:"tsig_key_alg"`
-	TsigKeyName                  types.String `tfsdk:"tsig_key_name"`
-	UseTsigKeyName               types.Bool   `tfsdk:"use_tsig_key_name"`
+	Address                      iptypes.IPAddress `tfsdk:"address"`
+	Name                         types.String      `tfsdk:"name"`
+	SharedWithMsParentDelegation types.Bool        `tfsdk:"shared_with_ms_parent_delegation"`
+	Stealth                      types.Bool        `tfsdk:"stealth"`
+	TsigKey                      types.String      `tfsdk:"tsig_key"`
+	TsigKeyAlg                   types.String      `tfsdk:"tsig_key_alg"`
+	TsigKeyName                  types.String      `tfsdk:"tsig_key_name"`
+	UseTsigKeyName               types.Bool        `tfsdk:"use_tsig_key_name"`
 }
 
 var ZoneRpExternalPrimariesAttrTypes = map[string]attr.Type{
-	"address":                          types.StringType,
+	"address":                          iptypes.IPAddressType{},
 	"name":                             types.StringType,
 	"shared_with_ms_parent_delegation": types.BoolType,
 	"stealth":                          types.BoolType,
@@ -38,11 +43,15 @@ var ZoneRpExternalPrimariesAttrTypes = map[string]attr.Type{
 
 var ZoneRpExternalPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
+		CustomType:          iptypes.IPAddressType{},
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
@@ -51,22 +60,35 @@ var ZoneRpExternalPrimariesResourceSchemaAttributes = map[string]schema.Attribut
 	},
 	"stealth": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
+		},
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: tsig_key_name",
 	},
 }
@@ -88,7 +110,7 @@ func (m *ZoneRpExternalPrimariesModel) Expand(ctx context.Context, diags *diag.D
 		return nil
 	}
 	to := &dns.ZoneRpExternalPrimaries{
-		Address:        flex.ExpandStringPointer(m.Address),
+		Address:        flex.ExpandIPAddress(m.Address),
 		Name:           flex.ExpandStringPointer(m.Name),
 		Stealth:        flex.ExpandBoolPointer(m.Stealth),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -117,7 +139,7 @@ func (m *ZoneRpExternalPrimariesModel) Flatten(ctx context.Context, from *dns.Zo
 	if m == nil {
 		*m = ZoneRpExternalPrimariesModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)

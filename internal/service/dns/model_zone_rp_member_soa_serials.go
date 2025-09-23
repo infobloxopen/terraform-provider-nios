@@ -67,7 +67,6 @@ func FlattenZoneRpMemberSoaSerials(ctx context.Context, from *dns.ZoneRpMemberSo
 	}
 	m := ZoneRpMemberSoaSerialsModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, ZoneRpMemberSoaSerialsAttrTypes, m)
 	diags.Append(d...)
 	return t

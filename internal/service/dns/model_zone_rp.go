@@ -217,6 +217,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"fireeye_rule_mapping": schema.SingleNestedAttribute{
 		Attributes: ZoneRpFireeyeRuleMappingResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 	"fqdn": schema.StringAttribute{
 		Required: true,
