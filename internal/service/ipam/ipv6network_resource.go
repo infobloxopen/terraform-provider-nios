@@ -438,4 +438,20 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			)
 		}
 	}
+
+	ddnsEnableOptionFqdn := data.DdnsEnableOptionFqdn
+	ddnsServerAlwaysUpdates := data.DdnsServerAlwaysUpdates
+
+	// If ddns_enable_option_fqdn is unknown, we can't validate (during planning)
+	if ddnsEnableOptionFqdn.IsUnknown() {
+		return
+	}
+	// If ddns_enable_option_fqdn is false and ddns_server_always_updates is explicitly set to false, that's invalid
+	if !ddnsEnableOptionFqdn.IsNull() && !ddnsEnableOptionFqdn.ValueBool() &&
+		!ddnsServerAlwaysUpdates.IsNull() && !ddnsServerAlwaysUpdates.IsUnknown() && !ddnsServerAlwaysUpdates.ValueBool() {
+		resp.Diagnostics.AddError(
+			"Invalid DDNS Configuration",
+			"You cannot set 'ddns_server_always_updates' to false when 'ddns_enable_option_fqdn' is false.",
+		)
+	}
 }
