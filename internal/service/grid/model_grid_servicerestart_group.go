@@ -3,6 +3,8 @@ package grid
 import (
 	"context"
 
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -13,9 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
-	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -133,8 +132,7 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 		MarkdownDescription: "The list of requests associated with a restart group.",
 	},
 	"service": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("DHCP", "DNS"),
 		},
@@ -145,18 +143,6 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 		Computed:            true,
 		MarkdownDescription: "The restart status for a restart group.",
 	},
-}
-
-func ExpandGridServicerestartGroup(ctx context.Context, o types.Object, diags *diag.Diagnostics) *grid.GridServicerestartGroup {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m GridServicerestartGroupModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *GridServicerestartGroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.GridServicerestartGroup {

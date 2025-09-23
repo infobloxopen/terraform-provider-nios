@@ -57,6 +57,7 @@ resource "nios_grid_servicerestart_group" "grid_servicerestart_group_with_additi
 ### Required
 
 - `name` (String) The name of this Restart Group.
+- `service` (String) The applicable service for this Restart Group.
 
 ### Optional
 
@@ -65,7 +66,6 @@ resource "nios_grid_servicerestart_group" "grid_servicerestart_group_with_additi
 - `members` (List of String) The list of members belonging to the group.
 - `mode` (String) The default restart method for this Restart Group.
 - `recurring_schedule` (Attributes) (see [below for nested schema](#nestedatt--recurring_schedule))
-- `service` (String) The applicable service for this Restart Group.
 
 ### Read-Only
 
@@ -101,21 +101,14 @@ Optional:
 - `month` (Number) The month for the scheduled task.
 - `recurring_time` (Number) The recurring time for the schedule in Epoch seconds format. This field is obsolete and is preserved only for backward compatibility purposes. Please use other applicable fields to define the recurring schedule. DO NOT use recurring_time together with these fields. If you use recurring_time with other fields to define the recurring schedule, recurring_time has priority over year, hour_of_day, and minutes_past_hour and will override the values of these fields, although it does not override month and day_of_month. In this case, the recurring time value might be different than the intended value that you define.
 - `repeat` (String) Indicates if the scheduled task will be repeated or run only once.
+- `time_zone` (String) The time zone for the schedule.
 - `weekdays` (List of String) Days of the week when scheduling is triggered.
 - `year` (Number) The year for the scheduled task.
-
-Read-Only:
-
-- `time_zone` (String) The time zone for the schedule.
 
 
 
 <a id="nestedatt--status"></a>
 ### Nested Schema for `status`
-
-Optional:
-
-- `ref` (String) The reference to the object.
 
 Read-Only:
 
@@ -128,6 +121,7 @@ Read-Only:
 - `pending` (Number) The number of requests that are pending a restart.
 - `pending_restart` (Number) The number of forced or needed requests pending for restart.
 - `processing` (Number) The number of not forced and not needed requests pending for restart.
+- `ref` (String) The reference to the object.
 - `restarting` (Number) The number of service restarts for corresponding members.
 - `success` (Number) The number of requests associated with successful restarts.
 - `timeouts` (Number) The number of timeout requests.

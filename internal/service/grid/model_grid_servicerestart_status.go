@@ -48,7 +48,7 @@ var GridServicerestartStatusAttrTypes = map[string]attr.Type{
 
 var GridServicerestartStatusResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"failures": schema.Int64Attribute{

@@ -35,7 +35,8 @@ func TestAccGridServicerestartGroupResource_basic(t *testing.T) {
 				Config: testAccGridServicerestartGroupBasicConfig(name, "DNS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "service", "DNS"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 					resource.TestCheckResourceAttr(resourceName, "mode", "SIMULTANEOUS"),

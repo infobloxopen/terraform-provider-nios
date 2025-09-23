@@ -66,7 +66,9 @@ var GridservicerestartgrouprecurringscheduleScheduleResourceSchemaAttributes = m
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 	},
 	"time_zone": schema.StringAttribute{
+		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("UTC"),
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{

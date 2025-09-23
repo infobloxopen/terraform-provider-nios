@@ -357,6 +357,14 @@ func (r *GridServicerestartGroupResource) ValidateConfig(ctx context.Context, re
 	}
 
 	scheduleAttr := data.RecurringSchedule.Attributes()["schedule"]
+	if scheduleAttr.IsNull() || scheduleAttr.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("recurring_schedule"),
+			"Invalid Configuration for Recurring Schedule",
+			"Schedule must be set if recurring_schedule is set",
+		)
+		return
+	}
 	if !scheduleAttr.IsNull() && !scheduleAttr.IsUnknown() {
 		scheduleObj, ok := scheduleAttr.(types.Object)
 		if !ok {
