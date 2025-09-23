@@ -114,8 +114,8 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The name of the certificate authentication service.",
 	},
 	"ocsp_check": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		//Default:             stringdefault.StaticString("MANUAL"),
 		MarkdownDescription: "Specifies the source of OCSP settings.",
 	},
@@ -123,7 +123,7 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: CertificateAuthserviceOcspRespondersResourceSchemaAttributes,
 		},
-		Optional: true, 
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -137,7 +137,7 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"remote_lookup_password": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
+		//Sensitive:           true,
 		MarkdownDescription: "The password for the service account.",
 	},
 	"remote_lookup_service": schema.StringAttribute{
@@ -193,7 +193,6 @@ func (m *CertificateAuthserviceModel) Expand(ctx context.Context, diags *diag.Di
 		return nil
 	}
 	to := &security.CertificateAuthservice{
-		Ref:                   flex.ExpandStringPointer(m.Ref),
 		AutoPopulateLogin:     flex.ExpandStringPointer(m.AutoPopulateLogin),
 		CaCertificates:        flex.ExpandFrameworkListString(ctx, m.CaCertificates, diags),
 		Comment:               flex.ExpandStringPointer(m.Comment),
@@ -244,11 +243,11 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OcspCheck = flex.FlattenStringPointer(from.OcspCheck)
 	// Get flattened responders from API response
-    flattenedResponders := flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
-    // Preserve certificate file paths
-    m.OcspResponders = preserveResponderCertificatePaths(ctx, m.OcspResponders, flattenedResponders, diags)
+	flattenedResponders := flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
+	// Preserve certificate file paths
+	m.OcspResponders = preserveResponderCertificatePaths(ctx, m.OcspResponders, flattenedResponders, diags)
 	m.RecoveryInterval = flex.FlattenInt64Pointer(from.RecoveryInterval)
-	m.RemoteLookupPassword = flex.FlattenStringPointer(from.RemoteLookupPassword)
+	//m.RemoteLookupPassword = flex.FlattenStringPointer(from.RemoteLookupPassword)
 	m.RemoteLookupService = FlattenCertificateAuthserviceRemoteLookupService(ctx, from.RemoteLookupService, diags)
 	m.RemoteLookupUsername = flex.FlattenStringPointer(from.RemoteLookupUsername)
 	m.ResponseTimeout = flex.FlattenInt64Pointer(from.ResponseTimeout)
@@ -256,43 +255,43 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 	m.UserMatchType = flex.FlattenStringPointer(from.UserMatchType)
 }
 
-func preserveResponderCertificatePaths(ctx context.Context, 
-    originalRespondersList types.List, 
-    flattenedRespondersList types.List,
-    diags *diag.Diagnostics) types.List {
-    
-    // Exit early if there are no responders to process
-    if originalRespondersList.IsNull() || originalRespondersList.IsUnknown() || 
-       flattenedRespondersList.IsNull() || flattenedRespondersList.IsUnknown() {
-        return flattenedRespondersList
-    }
-    
-    // Extract certificate file paths from original responders
-    var originalResponders []CertificateAuthserviceOcspRespondersModel
-    diags.Append(originalRespondersList.ElementsAs(ctx, &originalResponders, false)...)
-    
-    certificateFilePaths := make([]string, len(originalResponders))
-    for i, responder := range originalResponders {
-        certificateFilePaths[i] = responder.CertificateFilePath.ValueString()
-    }
-    
-    // Extract flattened responders
-    var updatedResponders []CertificateAuthserviceOcspRespondersModel
-    diags.Append(flattenedRespondersList.ElementsAs(ctx, &updatedResponders, false)...)
-    
-    // Update each responder with its corresponding file path, if available
-    for i := range updatedResponders {
-        if i < len(certificateFilePaths) {
-            updatedResponders[i].CertificateFilePath = types.StringValue(certificateFilePaths[i])
-        }
-    }
-    
-    // Create updated list value
-    if len(updatedResponders) > 0 {
-        updatedList, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}, updatedResponders)
-        diags.Append(d...)
-        return updatedList
-    }
-    
-    return flattenedRespondersList
+func preserveResponderCertificatePaths(ctx context.Context,
+	originalRespondersList types.List,
+	flattenedRespondersList types.List,
+	diags *diag.Diagnostics) types.List {
+
+	// Exit early if there are no responders to process
+	if originalRespondersList.IsNull() || originalRespondersList.IsUnknown() ||
+		flattenedRespondersList.IsNull() || flattenedRespondersList.IsUnknown() {
+		return flattenedRespondersList
+	}
+
+	// Extract certificate file paths from original responders
+	var originalResponders []CertificateAuthserviceOcspRespondersModel
+	diags.Append(originalRespondersList.ElementsAs(ctx, &originalResponders, false)...)
+
+	certificateFilePaths := make([]string, len(originalResponders))
+	for i, responder := range originalResponders {
+		certificateFilePaths[i] = responder.CertificateFilePath.ValueString()
+	}
+
+	// Extract flattened responders
+	var updatedResponders []CertificateAuthserviceOcspRespondersModel
+	diags.Append(flattenedRespondersList.ElementsAs(ctx, &updatedResponders, false)...)
+
+	// Update each responder with its corresponding file path, if available
+	for i := range updatedResponders {
+		if i < len(certificateFilePaths) {
+			updatedResponders[i].CertificateFilePath = types.StringValue(certificateFilePaths[i])
+		}
+	}
+
+	// Create updated list value
+	if len(updatedResponders) > 0 {
+		updatedList, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}, updatedResponders)
+		diags.Append(d...)
+		return updatedList
+	}
+
+	return flattenedRespondersList
 }
