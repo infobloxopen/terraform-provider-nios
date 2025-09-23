@@ -16,10 +16,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/discovery"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
-	gridservice "github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
@@ -96,7 +96,6 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		dhcp.NewRangeResource,
 
 		dns.NewRecordAResource,
 		dns.NewRecordAaaaResource,
@@ -111,6 +110,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewRecordNaptrResource,
 		dns.NewRecordTlsaResource,
 		dns.NewRecordCaaResource,
+		dns.NewRecordUnknownResource,
 		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
@@ -118,9 +118,13 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewZoneStubResource,
 		dns.NewNsgroupResource,
 		dns.NewNsgroupDelegationResource,
+		dns.NewNsgroupForwardingmemberResource,
+		dns.NewNsgroupForwardstubserverResource,
+		dns.NewNsgroupStubmemberResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
+		dhcp.NewRangeResource,
 		dhcp.NewRangetemplateResource,
 
 		dtc.NewDtcLbdnResource,
@@ -140,16 +144,22 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdminuserResource,
 		security.NewPermissionResource,
 		security.NewAdminroleResource,
+		security.NewSnmpuserResource,
 
 		misc.NewRulesetResource,
+		misc.NewBfdtemplateResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
 
 		acl.NewNamedaclResource,
 
-		gridservice.NewNatgroupResource,
+		grid.NewNatgroupResource,
+		grid.NewExtensibleattributedefResource,
 		grid.NewUpgradegroupResource,
+		grid.NewDistributionscheduleResource,
+
+		discovery.NewDiscoveryCredentialgroupResource,
 	}
 }
 
@@ -170,6 +180,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordNaptrDataSource,
 		dns.NewRecordTlsaDataSource,
 		dns.NewRecordCaaDataSource,
+		dns.NewRecordUnknownDataSource,
 		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
@@ -177,6 +188,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewZoneStubDataSource,
 		dns.NewNsgroupDataSource,
 		dns.NewNsgroupDelegationDataSource,
+		dns.NewNsgroupForwardingmemberDataSource,
+		dns.NewNsgroupForwardstubserverDataSource,
+		dns.NewNsgroupStubmemberDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -199,16 +213,22 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
 		security.NewPermissionDataSource,
+		security.NewSnmpuserDataSource,
 
 		misc.NewRulesetDataSource,
+		misc.NewBfdtemplateDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
 
 		acl.NewNamedaclDataSource,
 
-		gridservice.NewNatgroupDataSource,
+		grid.NewNatgroupDataSource,
+		grid.NewExtensibleattributedefDataSource,
 		grid.NewUpgradegroupDataSource,
+		grid.NewDistributionscheduleDataSource,
+
+		discovery.NewDiscoveryCredentialgroupDataSource,
 	}
 }
 

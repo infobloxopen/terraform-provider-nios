@@ -3,6 +3,7 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -14,49 +15,50 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneStubModel struct {
-	Ref                  types.String `tfsdk:"ref"`
-	Address              types.String `tfsdk:"address"`
-	Comment              types.String `tfsdk:"comment"`
-	Disable              types.Bool   `tfsdk:"disable"`
-	DisableForwarding    types.Bool   `tfsdk:"disable_forwarding"`
-	DisplayDomain        types.String `tfsdk:"display_domain"`
-	DnsFqdn              types.String `tfsdk:"dns_fqdn"`
-	ExtAttrs             types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll          types.Map    `tfsdk:"extattrs_all"`
-	ExternalNsGroup      types.String `tfsdk:"external_ns_group"`
-	Fqdn                 types.String `tfsdk:"fqdn"`
-	Locked               types.Bool   `tfsdk:"locked"`
-	LockedBy             types.String `tfsdk:"locked_by"`
-	MaskPrefix           types.String `tfsdk:"mask_prefix"`
-	MsAdIntegrated       types.Bool   `tfsdk:"ms_ad_integrated"`
-	MsDdnsMode           types.String `tfsdk:"ms_ddns_mode"`
-	MsManaged            types.String `tfsdk:"ms_managed"`
-	MsReadOnly           types.Bool   `tfsdk:"ms_read_only"`
-	MsSyncMasterName     types.String `tfsdk:"ms_sync_master_name"`
-	NsGroup              types.String `tfsdk:"ns_group"`
-	Parent               types.String `tfsdk:"parent"`
-	Prefix               types.String `tfsdk:"prefix"`
-	SoaEmail             types.String `tfsdk:"soa_email"`
-	SoaExpire            types.Int64  `tfsdk:"soa_expire"`
-	SoaMname             types.String `tfsdk:"soa_mname"`
-	SoaNegativeTtl       types.Int64  `tfsdk:"soa_negative_ttl"`
-	SoaRefresh           types.Int64  `tfsdk:"soa_refresh"`
-	SoaRetry             types.Int64  `tfsdk:"soa_retry"`
-	SoaSerialNumber      types.Int64  `tfsdk:"soa_serial_number"`
-	StubFrom             types.List   `tfsdk:"stub_from"`
-	StubMembers          types.List   `tfsdk:"stub_members"`
-	StubMsservers        types.List   `tfsdk:"stub_msservers"`
-	UsingSrgAssociations types.Bool   `tfsdk:"using_srg_associations"`
-	View                 types.String `tfsdk:"view"`
-	ZoneFormat           types.String `tfsdk:"zone_format"`
+	Ref                  types.String                             `tfsdk:"ref"`
+	Address              types.String                             `tfsdk:"address"`
+	Comment              types.String                             `tfsdk:"comment"`
+	Disable              types.Bool                               `tfsdk:"disable"`
+	DisableForwarding    types.Bool                               `tfsdk:"disable_forwarding"`
+	DisplayDomain        types.String                             `tfsdk:"display_domain"`
+	DnsFqdn              types.String                             `tfsdk:"dns_fqdn"`
+	ExtAttrs             types.Map                                `tfsdk:"extattrs"`
+	ExtAttrsAll          types.Map                                `tfsdk:"extattrs_all"`
+	ExternalNsGroup      types.String                             `tfsdk:"external_ns_group"`
+	Fqdn                 types.String                             `tfsdk:"fqdn"`
+	Locked               types.Bool                               `tfsdk:"locked"`
+	LockedBy             types.String                             `tfsdk:"locked_by"`
+	MaskPrefix           types.String                             `tfsdk:"mask_prefix"`
+	MsAdIntegrated       types.Bool                               `tfsdk:"ms_ad_integrated"`
+	MsDdnsMode           types.String                             `tfsdk:"ms_ddns_mode"`
+	MsManaged            types.String                             `tfsdk:"ms_managed"`
+	MsReadOnly           types.Bool                               `tfsdk:"ms_read_only"`
+	MsSyncMasterName     types.String                             `tfsdk:"ms_sync_master_name"`
+	NsGroup              types.String                             `tfsdk:"ns_group"`
+	Parent               types.String                             `tfsdk:"parent"`
+	Prefix               internaltypes.CaseInsensitiveStringValue `tfsdk:"prefix"`
+	SoaEmail             types.String                             `tfsdk:"soa_email"`
+	SoaExpire            types.Int64                              `tfsdk:"soa_expire"`
+	SoaMname             types.String                             `tfsdk:"soa_mname"`
+	SoaNegativeTtl       types.Int64                              `tfsdk:"soa_negative_ttl"`
+	SoaRefresh           types.Int64                              `tfsdk:"soa_refresh"`
+	SoaRetry             types.Int64                              `tfsdk:"soa_retry"`
+	SoaSerialNumber      types.Int64                              `tfsdk:"soa_serial_number"`
+	StubFrom             types.List                               `tfsdk:"stub_from"`
+	StubMembers          types.List                               `tfsdk:"stub_members"`
+	StubMsservers        types.List                               `tfsdk:"stub_msservers"`
+	UsingSrgAssociations types.Bool                               `tfsdk:"using_srg_associations"`
+	View                 types.String                             `tfsdk:"view"`
+	ZoneFormat           types.String                             `tfsdk:"zone_format"`
 }
 
 var ZoneStubAttrTypes = map[string]attr.Type{
@@ -81,7 +83,7 @@ var ZoneStubAttrTypes = map[string]attr.Type{
 	"ms_sync_master_name":    types.StringType,
 	"ns_group":               types.StringType,
 	"parent":                 types.StringType,
-	"prefix":                 types.StringType,
+	"prefix":                 internaltypes.CaseInsensitiveString{},
 	"soa_email":              types.StringType,
 	"soa_expire":             types.Int64Type,
 	"soa_mname":              types.StringType,
@@ -224,8 +226,9 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The parent zone of this zone. Note that when searching for reverse zones, the \"in-addr.arpa\" notation should be used.",
 	},
 	"prefix": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -263,8 +266,8 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneStubStubFromResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -274,8 +277,8 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneStubStubMembersResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -285,8 +288,8 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneStubStubMsserversResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -330,7 +333,7 @@ func (m *ZoneStubModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		MsAdIntegrated:    flex.ExpandBoolPointer(m.MsAdIntegrated),
 		MsDdnsMode:        flex.ExpandStringPointer(m.MsDdnsMode),
 		NsGroup:           flex.ExpandStringPointer(m.NsGroup),
-		Prefix:            flex.ExpandStringPointer(m.Prefix),
+		Prefix:            flex.ExpandStringPointer(m.Prefix.StringValue),
 		StubFrom:          flex.ExpandFrameworkListNestedBlock(ctx, m.StubFrom, diags, ExpandZoneStubStubFrom),
 		StubMembers:       flex.ExpandFrameworkListNestedBlock(ctx, m.StubMembers, diags, ExpandZoneStubStubMembers),
 		StubMsservers:     flex.ExpandFrameworkListNestedBlock(ctx, m.StubMsservers, diags, ExpandZoneStubStubMsservers),
@@ -384,7 +387,7 @@ func (m *ZoneStubModel) Flatten(ctx context.Context, from *dns.ZoneStub, diags *
 	m.MsSyncMasterName = flex.FlattenStringPointer(from.MsSyncMasterName)
 	m.NsGroup = flex.FlattenStringPointer(from.NsGroup)
 	m.Parent = flex.FlattenStringPointer(from.Parent)
-	m.Prefix = flex.FlattenStringPointer(from.Prefix)
+	m.Prefix.StringValue = flex.FlattenStringPointer(from.Prefix)
 	m.SoaEmail = flex.FlattenStringPointer(from.SoaEmail)
 	m.SoaExpire = flex.FlattenInt64Pointer(from.SoaExpire)
 	m.SoaMname = flex.FlattenStringPointer(from.SoaMname)

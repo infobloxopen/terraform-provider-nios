@@ -14,6 +14,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -21,19 +22,19 @@ import (
 // All attributes of this model except 'name' and 'address' are Computed, as input values for stub from are ignored.
 
 type ZoneStubStubFromModel struct {
-	Address                      iptypes.IPAddress `tfsdk:"address"`
-	Name                         types.String      `tfsdk:"name"`
-	SharedWithMsParentDelegation types.Bool        `tfsdk:"shared_with_ms_parent_delegation"`
-	Stealth                      types.Bool        `tfsdk:"stealth"`
-	TsigKey                      types.String      `tfsdk:"tsig_key"`
-	TsigKeyAlg                   types.String      `tfsdk:"tsig_key_alg"`
-	TsigKeyName                  types.String      `tfsdk:"tsig_key_name"`
-	UseTsigKeyName               types.Bool        `tfsdk:"use_tsig_key_name"`
+	Address                      iptypes.IPAddress                        `tfsdk:"address"`
+	Name                         internaltypes.CaseInsensitiveStringValue `tfsdk:"name"`
+	SharedWithMsParentDelegation types.Bool                               `tfsdk:"shared_with_ms_parent_delegation"`
+	Stealth                      types.Bool                               `tfsdk:"stealth"`
+	TsigKey                      types.String                             `tfsdk:"tsig_key"`
+	TsigKeyAlg                   types.String                             `tfsdk:"tsig_key_alg"`
+	TsigKeyName                  types.String                             `tfsdk:"tsig_key_name"`
+	UseTsigKeyName               types.Bool                               `tfsdk:"use_tsig_key_name"`
 }
 
 var ZoneStubStubFromAttrTypes = map[string]attr.Type{
 	"address":                          iptypes.IPAddressType{},
-	"name":                             types.StringType,
+	"name":                             internaltypes.CaseInsensitiveString{},
 	"shared_with_ms_parent_delegation": types.BoolType,
 	"stealth":                          types.BoolType,
 	"tsig_key":                         types.StringType,
@@ -49,7 +50,8 @@ var ZoneStubStubFromResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Required: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Required:   true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -99,7 +101,7 @@ func (m *ZoneStubStubFromModel) Expand(ctx context.Context, diags *diag.Diagnost
 	}
 	to := &dns.ZoneStubStubFrom{
 		Address: flex.ExpandIPAddress(m.Address),
-		Name:    flex.ExpandStringPointer(m.Name),
+		Name:    flex.ExpandStringPointer(m.Name.StringValue),
 	}
 	return to
 }
@@ -123,7 +125,7 @@ func (m *ZoneStubStubFromModel) Flatten(ctx context.Context, from *dns.ZoneStubS
 		*m = ZoneStubStubFromModel{}
 	}
 	m.Address = flex.FlattenIPAddress(from.Address)
-	m.Name = flex.FlattenStringPointer(from.Name)
+	m.Name.StringValue = flex.FlattenStringPointer(from.Name)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

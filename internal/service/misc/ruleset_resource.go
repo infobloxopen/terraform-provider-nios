@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -91,7 +92,6 @@ func (r *RulesetResource) Create(ctx context.Context, req resource.CreateRequest
 }
 
 func (r *RulesetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	//var diags diag.Diagnostics
 	var data RulesetModel
 
 	// Read Terraform prior state data into the model
@@ -108,9 +108,10 @@ func (r *RulesetResource) Read(ctx context.Context, req resource.ReadRequest, re
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			// Resource no longer exists, remove from state
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -138,7 +139,6 @@ func (r *RulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -151,7 +151,6 @@ func (r *RulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 		ReturnFieldsPlus(readableAttributesForRuleset).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ruleset, got error: %s", err))
 		return

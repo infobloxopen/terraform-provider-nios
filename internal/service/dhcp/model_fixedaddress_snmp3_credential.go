@@ -53,8 +53,9 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 		MarkdownDescription: "Authentication protocol for the SNMPv3 user.",
 	},
 	"authentication_password": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Optional:  true,
+		Computed:  true,
+		Sensitive: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -68,8 +69,9 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 		MarkdownDescription: "Privacy protocol for the SNMPv3 user.",
 	},
 	"privacy_password": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Optional:  true,
+		Computed:  true,
+		Sensitive: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
