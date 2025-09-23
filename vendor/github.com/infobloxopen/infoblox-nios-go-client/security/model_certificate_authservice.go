@@ -491,9 +491,7 @@ func (o *CertificateAuthservice) SetRemoteLookupPassword(v string) {
 
 // GetRemoteLookupService returns the RemoteLookupService field value if set, zero value otherwise.
 func (o *CertificateAuthservice) GetRemoteLookupService() CertificateAuthserviceRemoteLookupService {
-func (o *CertificateAuthservice) GetRemoteLookupService() CertificateAuthserviceRemoteLookupService {
 	if o == nil || IsNil(o.RemoteLookupService) {
-		var ret CertificateAuthserviceRemoteLookupService
 		var ret CertificateAuthserviceRemoteLookupService
 		return ret
 	}
@@ -502,7 +500,6 @@ func (o *CertificateAuthservice) GetRemoteLookupService() CertificateAuthservice
 
 // GetRemoteLookupServiceOk returns a tuple with the RemoteLookupService field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CertificateAuthservice) GetRemoteLookupServiceOk() (*CertificateAuthserviceRemoteLookupService, bool) {
 func (o *CertificateAuthservice) GetRemoteLookupServiceOk() (*CertificateAuthserviceRemoteLookupService, bool) {
 	if o == nil || IsNil(o.RemoteLookupService) {
 		return nil, false
@@ -519,8 +516,6 @@ func (o *CertificateAuthservice) HasRemoteLookupService() bool {
 	return false
 }
 
-// SetRemoteLookupService gets a reference to the given CertificateAuthserviceRemoteLookupService and assigns it to the RemoteLookupService field.
-func (o *CertificateAuthservice) SetRemoteLookupService(v CertificateAuthserviceRemoteLookupService) {
 // SetRemoteLookupService gets a reference to the given CertificateAuthserviceRemoteLookupService and assigns it to the RemoteLookupService field.
 func (o *CertificateAuthservice) SetRemoteLookupService(v CertificateAuthserviceRemoteLookupService) {
 	o.RemoteLookupService = &v
