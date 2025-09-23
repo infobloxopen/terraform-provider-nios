@@ -13,6 +13,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -114,6 +115,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
+		dns.NewZoneRpResource,
 		dns.NewViewResource,
 		dns.NewZoneStubResource,
 		dns.NewNsgroupResource,
@@ -182,6 +184,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
+		dns.NewZoneRpDataSource,
 		dns.NewViewDataSource,
 		dns.NewZoneStubDataSource,
 		dns.NewNsgroupDataSource,

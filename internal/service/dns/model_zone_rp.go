@@ -70,15 +70,15 @@ type ZoneRpModel struct {
 	SoaNegativeTtl                   types.Int64       `tfsdk:"soa_negative_ttl"`
 	SoaRefresh                       types.Int64       `tfsdk:"soa_refresh"`
 	SoaRetry                         types.Int64       `tfsdk:"soa_retry"`
-	SoaSerialNumber                  types.Int64       `tfsdk:"soa_serial_number"`
-	SubstituteName                   types.String      `tfsdk:"substitute_name"`
-	UseExternalPrimary               types.Bool        `tfsdk:"use_external_primary"`
-	UseGridZoneTimer                 types.Bool        `tfsdk:"use_grid_zone_timer"`
-	UseLogRpz                        types.Bool        `tfsdk:"use_log_rpz"`
-	UseRecordNamePolicy              types.Bool        `tfsdk:"use_record_name_policy"`
-	UseRpzDropIpRule                 types.Bool        `tfsdk:"use_rpz_drop_ip_rule"`
-	UseSoaEmail                      types.Bool        `tfsdk:"use_soa_email"`
-	View                             types.String      `tfsdk:"view"`
+	//SoaSerialNumber                  types.Int64       `tfsdk:"soa_serial_number"`
+	SubstituteName      types.String `tfsdk:"substitute_name"`
+	UseExternalPrimary  types.Bool   `tfsdk:"use_external_primary"`
+	UseGridZoneTimer    types.Bool   `tfsdk:"use_grid_zone_timer"`
+	UseLogRpz           types.Bool   `tfsdk:"use_log_rpz"`
+	UseRecordNamePolicy types.Bool   `tfsdk:"use_record_name_policy"`
+	UseRpzDropIpRule    types.Bool   `tfsdk:"use_rpz_drop_ip_rule"`
+	UseSoaEmail         types.Bool   `tfsdk:"use_soa_email"`
+	View                types.String `tfsdk:"view"`
 }
 
 var ZoneRpAttrTypes = map[string]attr.Type{
@@ -124,20 +124,20 @@ var ZoneRpAttrTypes = map[string]attr.Type{
 	"soa_negative_ttl":                        types.Int64Type,
 	"soa_refresh":                             types.Int64Type,
 	"soa_retry":                               types.Int64Type,
-	"soa_serial_number":                       types.Int64Type,
-	"substitute_name":                         types.StringType,
-	"use_external_primary":                    types.BoolType,
-	"use_grid_zone_timer":                     types.BoolType,
-	"use_log_rpz":                             types.BoolType,
-	"use_record_name_policy":                  types.BoolType,
-	"use_rpz_drop_ip_rule":                    types.BoolType,
-	"use_soa_email":                           types.BoolType,
-	"view":                                    types.StringType,
+	//"soa_serial_number":                       types.Int64Type,
+	"substitute_name":        types.StringType,
+	"use_external_primary":   types.BoolType,
+	"use_grid_zone_timer":    types.BoolType,
+	"use_log_rpz":            types.BoolType,
+	"use_record_name_policy": types.BoolType,
+	"use_rpz_drop_ip_rule":   types.BoolType,
+	"use_soa_email":          types.BoolType,
+	"view":                   types.StringType,
 }
 
 var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"address": schema.StringAttribute{
@@ -394,9 +394,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The type of rpz zone.",
 	},
 	"set_soa_serial_number": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
 	},
 	"soa_default_ttl": schema.Int64Attribute{
@@ -478,14 +478,14 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "This indicates how long a secondary server must wait before attempting to recontact the primary server after a connection failure between the two servers occurs.",
 	},
-	"soa_serial_number": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.Int64{
-			int64validator.AlsoRequires(path.MatchRoot("set_soa_serial_number")),
-		},
-		MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
-	},
+	//"soa_serial_number": schema.Int64Attribute{
+	//	Optional: true,
+	//	Computed: true,
+	//	Validators: []validator.Int64{
+	//		int64validator.AlsoRequires(path.MatchRoot("set_soa_serial_number")),
+	//	},
+	//	MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
+	//},
 	"substitute_name": schema.StringAttribute{
 		Optional: true,
 		Computed: true,

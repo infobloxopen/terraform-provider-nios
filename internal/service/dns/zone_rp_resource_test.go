@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -27,7 +28,7 @@ func TestAccZoneRpResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpBasicConfig(),
+				Config: testAccZoneRpBasicConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
@@ -49,42 +50,13 @@ func TestAccZoneRpResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneRpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneRpBasicConfig(),
+				Config: testAccZoneRpBasicConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					testAccCheckZoneRpDisappears(context.Background(), &v),
 				),
 				ExpectNonEmptyPlan: true,
 			},
-		},
-	})
-}
-
-func TestAccZoneRpResource_Ref(t *testing.T) {
-	var resourceName = "nios_dns_zone_rp.test_ref"
-	var v dns.ZoneRp
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneRpRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneRpRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
