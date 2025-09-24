@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
@@ -61,37 +60,6 @@ func (r *NsgroupResource) Configure(ctx context.Context, req resource.ConfigureR
 	}
 
 	r.client = client
-}
-
-func (r *NsgroupResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-
-	var gridPrimary, externalPrimaries types.List
-	req.Config.GetAttribute(ctx, path.Root("grid_primary"), &gridPrimary)
-	req.Config.GetAttribute(ctx, path.Root("external_primaries"), &externalPrimaries)
-
-	specifiedPrimaries := []string{}
-
-	if !gridPrimary.IsNull() && !gridPrimary.IsUnknown() {
-		specifiedPrimaries = append(specifiedPrimaries, "grid_primary")
-	}
-
-	if !externalPrimaries.IsNull() && !externalPrimaries.IsUnknown() {
-		specifiedPrimaries = append(specifiedPrimaries, "external_primaries")
-	}
-
-	var gridSecondaries, externalSecondaries types.List
-	req.Config.GetAttribute(ctx, path.Root("grid_secondaries"), &gridSecondaries)
-	req.Config.GetAttribute(ctx, path.Root("external_secondaries"), &externalSecondaries)
-
-	if !gridSecondaries.IsNull() && !gridSecondaries.IsUnknown() ||
-		!externalSecondaries.IsNull() && !externalSecondaries.IsUnknown() {
-		if len(specifiedPrimaries) == 0 || len(specifiedPrimaries) > 1 {
-			resp.Diagnostics.AddError(
-				"Secondary Server Requires Exactly One Primary Server",
-				"When secondary servers (grid_secondaries, external_secondaries) are specified, exactly one primary server (grid_primary, external_primaries) is required.",
-			)
-		}
-	}
 }
 
 func (r *NsgroupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
