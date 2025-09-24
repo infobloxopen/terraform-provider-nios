@@ -113,9 +113,9 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 
 	now := time.Now()
 
-	startTime := now.Add(6 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	startTime := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
-	distribution_time := now.Add(8 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	distribution_time := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	upgrade_groups := []map[string]any{
 		{
@@ -128,7 +128,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 		},
 	}
 
-	updated_distribution_time := now.Add(10 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	updated_distribution_time := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	updated_upgrade_groups := []map[string]any{
 		{
