@@ -14,7 +14,6 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -36,11 +35,10 @@ func (d *NotificationRuleDataSource) Metadata(ctx context.Context, req datasourc
 }
 
 type NotificationRuleModelWithFilter struct {
-	Filters        types.Map   `tfsdk:"filters"`
-	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
-	Result         types.List  `tfsdk:"result"`
-	MaxResults     types.Int32 `tfsdk:"max_results"`
-	Paging         types.Int32 `tfsdk:"paging"`
+	Filters    types.Map   `tfsdk:"filters"`
+	Result     types.List  `tfsdk:"result"`
+	MaxResults types.Int32 `tfsdk:"max_results"`
+	Paging     types.Int32 `tfsdk:"paging"`
 }
 
 func (m *NotificationRuleModelWithFilter) FlattenResults(ctx context.Context, from []notification.NotificationRule, diags *diag.Diagnostics) {
@@ -52,15 +50,10 @@ func (m *NotificationRuleModelWithFilter) FlattenResults(ctx context.Context, fr
 
 func (d *NotificationRuleDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Retrieves information about existing Notification Rules.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
-				ElementType: types.StringType,
-				Optional:    true,
-			},
-			"extattrfilters": schema.MapAttribute{
-				Description: "External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType: types.StringType,
 				Optional:    true,
 			},
@@ -134,7 +127,6 @@ func (d *NotificationRuleDataSource) Read(ctx context.Context, req datasource.Re
 				NotificationRuleAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForNotificationRule).
 				Paging(paging).
@@ -148,7 +140,7 @@ func (d *NotificationRuleDataSource) Read(ctx context.Context, req datasource.Re
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NotificationRule by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NotificationRule by filter, got error: %s", err))
 				return nil, "", err
 			}
 

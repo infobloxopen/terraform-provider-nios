@@ -3,12 +3,12 @@
 page_title: "nios_notification_rule Resource - nios"
 subcategory: "NOTIFICATION"
 description: |-
-  
+  Manages a Notification Rule.
 ---
 
 # nios_notification_rule (Resource)
 
-
+Manages a Notification Rule.
 
 ## Example Usage
 

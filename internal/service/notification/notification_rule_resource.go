@@ -36,7 +36,7 @@ func (r *NotificationRuleResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *NotificationRuleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Notification Rule.",
 		Attributes:          NotificationRuleResourceSchemaAttributes,
 	}
 }
@@ -108,9 +108,11 @@ func (r *NotificationRuleResource) Read(ctx context.Context, req resource.ReadRe
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			// Resource no longer exists, remove from state
+			resp.State.RemoveResource(ctx)
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NotificationRule, got error: %s", err))
