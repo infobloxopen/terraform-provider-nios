@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
@@ -66,18 +65,12 @@ func (r *ZoneAuthResource) Configure(ctx context.Context, req resource.Configure
 }
 
 func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var useGridZoneTimer types.Bool
-	req.Config.GetAttribute(ctx, path.Root("use_grid_zone_timer"), &useGridZoneTimer)
 
-	if !useGridZoneTimer.IsNull() && !useGridZoneTimer.ValueBool() {
-		var soaDefaultTTL, soaExpire, soaNegativeTTL, soaRefresh, soaRetry types.Int64
-		req.Config.GetAttribute(ctx, path.Root("soa_default_ttl"), &soaDefaultTTL)
-		req.Config.GetAttribute(ctx, path.Root("soa_expire"), &soaExpire)
-		req.Config.GetAttribute(ctx, path.Root("soa_negative_ttl"), &soaNegativeTTL)
-		req.Config.GetAttribute(ctx, path.Root("soa_refresh"), &soaRefresh)
-		req.Config.GetAttribute(ctx, path.Root("soa_retry"), &soaRetry)
+	var data ZoneAuthModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
-		if !soaDefaultTTL.IsNull() || !soaExpire.IsNull() || !soaNegativeTTL.IsNull() || !soaRefresh.IsNull() || !soaRetry.IsNull() {
+	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.ValueBool() {
+		if !data.SoaDefaultTtl.IsNull() || !data.SoaExpire.IsNull() || !data.SoaNegativeTtl.IsNull() || !data.SoaRefresh.IsNull() || !data.SoaRetry.IsNull() {
 			resp.Diagnostics.AddError(
 				"SOA Values Not Allowed",
 				"When grid_zone_timer is set to false, the SOA Values (soa_default_ttl, soa_expire, soa_negative_ttl, soa_refresh, soa_retry) will reset to their default values. And hence they should not be set in the configuration. Either remove these values or set use_grid_zone_timer = true.",
@@ -86,22 +79,17 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 	}
 
 	// Validation for mutually exclusive primary servers
-	var gridPrimary, externalPrimaries, msPrimaries types.List
-	req.Config.GetAttribute(ctx, path.Root("grid_primary"), &gridPrimary)
-	req.Config.GetAttribute(ctx, path.Root("external_primaries"), &externalPrimaries)
-	req.Config.GetAttribute(ctx, path.Root("ms_primaries"), &msPrimaries)
-
 	specifiedPrimaries := []string{}
 
-	if !gridPrimary.IsNull() && !gridPrimary.IsUnknown() {
+	if !data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown() {
 		specifiedPrimaries = append(specifiedPrimaries, "grid_primary")
 	}
 
-	if !externalPrimaries.IsNull() && !externalPrimaries.IsUnknown() {
+	if !data.ExternalPrimaries.IsNull() && !data.ExternalPrimaries.IsUnknown() {
 		specifiedPrimaries = append(specifiedPrimaries, "external_primaries")
 	}
 
-	if !msPrimaries.IsNull() && !msPrimaries.IsUnknown() {
+	if !data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown() {
 		specifiedPrimaries = append(specifiedPrimaries, "ms_primaries")
 	}
 
@@ -117,14 +105,9 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 		return
 	}
 
-	var gridSecondaries, externalSecondaries, msSecondaries types.List
-	req.Config.GetAttribute(ctx, path.Root("grid_secondaries"), &gridSecondaries)
-	req.Config.GetAttribute(ctx, path.Root("external_secondaries"), &externalSecondaries)
-	req.Config.GetAttribute(ctx, path.Root("ms_secondaries"), &msSecondaries)
-
-	if !gridSecondaries.IsNull() && !gridSecondaries.IsUnknown() ||
-		!externalSecondaries.IsNull() && !externalSecondaries.IsUnknown() ||
-		!msSecondaries.IsNull() && !msSecondaries.IsUnknown() {
+	if !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown() ||
+		!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown() ||
+		!data.MsSecondaries.IsNull() && !data.MsSecondaries.IsUnknown() {
 		if len(specifiedPrimaries) == 0 || len(specifiedPrimaries) > 1 {
 			resp.Diagnostics.AddError(
 				"Secondary Server Requires Exactly One Primary Server",
