@@ -418,6 +418,13 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 		}
 
 		for i, option := range options {
+			if option.Value.IsNull() || option.Value.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("value"),
+					"Invalid configuration for DHCP Option",
+					"The 'value' attribute is a required field and must be set for all DHCP Options.",
+				)
+			}
 			if option.Name.IsNull() || option.Name.IsUnknown() {
 				continue
 			}

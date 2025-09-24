@@ -14,6 +14,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -384,6 +385,12 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional: true,
 		Computed: true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes},
+				[]attr.Value{},
+			),
+		),
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
 			listvalidator.SizeAtLeast(1),

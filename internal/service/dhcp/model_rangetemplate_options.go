@@ -6,8 +6,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
@@ -32,8 +34,11 @@ var RangetemplateOptionsAttrTypes = map[string]attr.Type{
 
 var RangetemplateOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Name of the DHCP option.",
 	},
 	"num": schema.Int64Attribute{
@@ -42,13 +47,19 @@ var RangetemplateOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The code of the DHCP option.",
 	},
 	"vendor_class": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 	},
 	"value": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Value of the DHCP option",
 	},
 	"use_option": schema.BoolAttribute{

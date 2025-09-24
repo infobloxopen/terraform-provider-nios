@@ -14,6 +14,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -482,6 +483,12 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Optional: true,
 		Computed: true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: RangetemplateOptionsAttrTypes},
+				[]attr.Value{},
+			),
+		),
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
 			listvalidator.SizeAtLeast(1),
@@ -786,8 +793,8 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 	m.NumberOfAddresses = flex.FlattenInt64Pointer(from.NumberOfAddresses)
 	m.Offset = flex.FlattenInt64Pointer(from.Offset)
 	m.OptionFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.OptionFilterRules, RangetemplateOptionFilterRulesAttrTypes, diags, FlattenRangetemplateOptionFilterRules)
-	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
 	planOptions := m.Options
+	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, RangetemplateOptionsAttrTypes, diags, FlattenRangetemplateOptions)
 	if !planOptions.IsUnknown() {
 		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
 		if !diags.HasError() {

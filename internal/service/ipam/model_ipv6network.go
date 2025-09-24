@@ -16,6 +16,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -521,6 +522,12 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 		Computed:            true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: Ipv6networkOptionsAttrTypes},
+				[]attr.Value{},
+			),
+		),
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
 			listvalidator.SizeAtLeast(1),

@@ -1509,7 +1509,7 @@ func TestAccNetworkResource_Options(t *testing.T) {
 
 	optionsUpdated := []map[string]any{
 		{
-			"name":  "dhcp-lease-time",
+			"num":   "51",
 			"value": "7200",
 		},
 		{

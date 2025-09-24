@@ -34,8 +34,11 @@ var SharednetworkOptionsAttrTypes = map[string]attr.Type{
 
 var SharednetworkOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Name of the DHCP option.",
 	},
 	"num": schema.Int64Attribute{
@@ -52,8 +55,11 @@ var SharednetworkOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 	},
 	"value": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Value of the DHCP option",
 	},
 	"use_option": schema.BoolAttribute{
