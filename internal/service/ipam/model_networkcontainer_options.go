@@ -60,7 +60,7 @@ var NetworkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attribut
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
-		MarkdownDescription: "Value of the DHCP option",
+		MarkdownDescription: "Value of the DHCP option. Required to be set for all options.",
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,

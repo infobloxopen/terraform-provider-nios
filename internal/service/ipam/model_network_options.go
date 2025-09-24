@@ -56,7 +56,7 @@ var NetworkOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"value": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "Value of the DHCP option",
+		MarkdownDescription: "Value of the DHCP option. Required to be set for all options.",
 		Computed:            true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
