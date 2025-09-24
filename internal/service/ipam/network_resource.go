@@ -387,6 +387,17 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 			"dhcp6.name-servers":       true,
 		}
 
+		specialOptionsNum := map[int64]bool{
+			3: true,
+			//"router-templates":         true,
+			6:  true,
+			15: true,
+			28: true,
+			//"broadcast-address-offset": true,
+			51: true,
+			//"dhcp6.name-servers":       true,
+		}
+
 		var options []NetworkOptionsModel
 		diags := data.Options.ElementsAs(ctx, &options, false)
 		resp.Diagnostics.Append(diags...)
@@ -395,6 +406,8 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 		}
 
 		for i, option := range options {
+			isSpecialOption := false
+			optionName := ""
 			if option.Value.IsNull() || option.Value.IsUnknown() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
@@ -402,19 +415,29 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 					"The 'value' attribute is a required field and must be set for all DHCP Options.",
 				)
 			}
-			if option.Name.IsNull() || option.Name.IsUnknown() {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() {
+				optionName = option.Name.ValueString()
+				isSpecialOption = specialOptions[optionName]
+			} else if !option.Num.IsNull() && !option.Num.IsUnknown() {
+				optionNum := option.Num.ValueInt64()
+				isSpecialOption = specialOptionsNum[optionNum]
+				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("name"),
+					"Invalid configuration for DHCP Option",
+					"Either the 'name' or 'num' attribute must be set for all DHCP Options. "+
+						"Missing both attributes for 'option' at index "+fmt.Sprint(i)+".",
+				)
 				continue
 			}
-
-			optionName := option.Name.ValueString()
-			isSpecialOption := specialOptions[optionName]
 
 			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("use_option"),
 					"Invalid configuration",
-					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Options '%s'. "+
-						"It is only applicable for special options: routers, router-templates, domain-name-servers, "+
+					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Option '%s'. "+
+						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
 						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
 						optionName),
 				)
