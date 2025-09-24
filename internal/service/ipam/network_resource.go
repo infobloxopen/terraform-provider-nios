@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -21,6 +22,7 @@ var readableAttributesForNetwork = "authority,bootfile,bootserver,cloud_info,clo
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &NetworkResource{}
 var _ resource.ResourceWithImportState = &NetworkResource{}
+var _ resource.ResourceWithValidateConfig = &NetworkResource{}
 
 func NewNetworkResource() resource.Resource {
 	return &NetworkResource{}
@@ -329,46 +331,20 @@ func (r *NetworkResource) UpdateFuncCallAttributeName(ctx context.Context, data 
 func (r *NetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data NetworkModel
+	var goClientData ipam.Network
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.IPAMAPI.
-		NetworkAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForNetwork).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read Network for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetNetworkResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Network for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.IPAMAPI.
 		NetworkAPI.
 		Update(ctx, resourceRef).
-		Network(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Network(goClientData).
 		ReturnFieldsPlus(readableAttributesForNetwork).
 		ReturnAsObject(1).
 		Execute()
@@ -377,13 +353,14 @@ func (r *NetworkResource) ImportState(ctx context.Context, req resource.ImportSt
 		return
 	}
 
-	res = updateRes.UpdateNetworkResponseAsObject.GetResult()
+	res := updateRes.UpdateNetworkResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Network due inherited Extensible attributes for import, got error: %s", diags))
 		return
 	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -441,6 +418,36 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
 						optionName),
 				)
+			}
+		}
+	}
+
+	// Members validation
+	if !data.Members.IsNull() && !data.Members.IsUnknown() {
+		var members []NetworkMembersModel
+		diags := data.Members.ElementsAs(ctx, &members, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for i, member := range members {
+			if member.Struct.ValueString() == "msdhcpserver" {
+				if !member.Ipv6addr.IsNull() && !member.Ipv6addr.IsUnknown() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("members").AtListIndex(i).AtName("ipv6addr"),
+						"Invalid Configuration",
+						"ipv6addr cannot be set when struct is 'msdhcpserver'. Only ipv4addr is supported for msdhcpserver.",
+					)
+				}
+
+				if !member.Name.IsNull() && !member.Name.IsUnknown() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("members").AtListIndex(i).AtName("name"),
+						"Invalid Configuration",
+						"name cannot be set when struct is 'msdhcpserver'. Only ipv4addr is supported for msdhcpserver.",
+					)
+				}
 			}
 		}
 	}

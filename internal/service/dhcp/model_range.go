@@ -1131,6 +1131,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.RelayAgentFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.RelayAgentFilterRules, RangeRelayAgentFilterRulesAttrTypes, diags, FlattenRangeRelayAgentFilterRules)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.ServerAssociationType = flex.FlattenStringPointer(from.ServerAssociationType)
+	m.SplitMember = FlattenRangeSplitMember(ctx, from.SplitMember, diags)
 	m.StartAddr = flex.FlattenIPv4Address(from.StartAddr)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.SubscribeSettings = FlattenRangeSubscribeSettings(ctx, from.SubscribeSettings, diags)

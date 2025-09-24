@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -329,46 +330,20 @@ func (r *Ipv6networkcontainerResource) UpdateFuncCallAttributeName(ctx context.C
 func (r *Ipv6networkcontainerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var diags diag.Diagnostics
 	var data Ipv6networkcontainerModel
+	var goClientData ipam.Ipv6networkcontainer
 
 	resourceRef := utils.ExtractResourceRef(req.ID)
-
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
-		Read(ctx, resourceRef).
-		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Cannot read Ipv6networkcontainer for import, got error: %s", err))
-		return
-	}
-
-	res := apiRes.GetIpv6networkcontainerResponseObjectAsResult.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Ipv6networkcontainer for import due inherited Extensible attributes, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	planExtAttrs := data.ExtAttrs
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
 		return
 	}
+	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
+	data.ExtAttrsAll = extattrs
 
 	updateRes, _, err := r.client.IPAMAPI.
 		Ipv6networkcontainerAPI.
 		Update(ctx, resourceRef).
-		Ipv6networkcontainer(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Ipv6networkcontainer(goClientData).
 		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
 		ReturnAsObject(1).
 		Execute()
@@ -377,13 +352,14 @@ func (r *Ipv6networkcontainerResource) ImportState(ctx context.Context, req reso
 		return
 	}
 
-	res = updateRes.UpdateIpv6networkcontainerResponseAsObject.GetResult()
+	res := updateRes.UpdateIpv6networkcontainerResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Ipv6networkcontainer due inherited Extensible attributes for import, got error: %s", diags))
 		return
 	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

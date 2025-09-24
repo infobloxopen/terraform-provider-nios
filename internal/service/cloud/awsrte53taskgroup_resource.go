@@ -62,7 +62,6 @@ func (r *Awsrte53taskgroupResource) Configure(ctx context.Context, req resource.
 }
 
 func (r *Awsrte53taskgroupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var diags diag.Diagnostics
 	var data Awsrte53taskgroupModel
 
 	// Read Terraform plan data into the model
@@ -85,10 +84,6 @@ func (r *Awsrte53taskgroupResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	res := apiRes.CreateAwsrte53taskgroupResponseAsObject.GetResult()
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Awsrte53taskgroup, got error: %s", err))
-		return
-	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -142,8 +137,8 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 
+	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

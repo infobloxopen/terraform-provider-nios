@@ -17,7 +17,8 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO: Add test cases for Members.
+//TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+//MS DHCP SERVER : 10.10.0.0
 
 var readableAttributesForNetwork = "authority,bootfile,bootserver,cloud_info,cloud_shared,comment,conflict_count,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,deny_bootp,dhcp_utilization,dhcp_utilization_status,disable,discover_now_status,discovered_bgp_as,discovered_bridge_domain,discovered_tenant,discovered_vlan_id,discovered_vlan_name,discovered_vrf_description,discovered_vrf_name,discovered_vrf_rd,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,dynamic_hosts,email_list,enable_ddns,enable_dhcp_thresholds,enable_discovery,enable_email_warnings,enable_ifmap_publishing,enable_pxe_lease_time,enable_snmp_warnings,endpoint_sources,extattrs,federated_realms,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,ipam_email_addresses,ipam_threshold_settings,ipam_trap_settings,ipv4addr,last_rir_registration_update_sent,last_rir_registration_update_status,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,members,mgm_private,mgm_private_overridable,ms_ad_user_data,netmask,network,network_container,network_view,nextserver,options,port_control_blackout_setting,pxe_lease_time,recycle_leases,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,static_hosts,subscribe_settings,total_hosts,unmanaged,unmanaged_count,update_dns_on_lease_renewal,use_authority,use_blackout_setting,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_discovery_basic_polling_settings,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_enable_discovery,use_enable_ifmap_publishing,use_ignore_dhcp_option_list_request,use_ignore_id,use_ipam_email_addresses,use_ipam_threshold_settings,use_ipam_trap_settings,use_lease_scavenge_time,use_logic_filter_rules,use_mgm_private,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_subscribe_settings,use_update_dns_on_lease_renewal,use_zone_associations,utilization,utilization_update,vlans,zone_associations"
 
@@ -1354,6 +1355,57 @@ func TestAccNetworkResource_LowWaterMarkReset(t *testing.T) {
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "20"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNetworkResource_Members(t *testing.T) {
+	var resourceName = "nios_ipam_network.test_members"
+	var v ipam.Network
+
+	network := acctest.RandomCIDRNetwork()
+	member1 := []map[string]any{
+
+		{
+			"struct":   "dhcpmember",
+			"ipv4addr": "172.28.83.29",
+			"name":     "infoblox.172_28_83_29",
+		},
+	}
+	member2 := []map[string]any{
+		{
+			"struct":   "msdhcpserver",
+			"ipv4addr": "10.10.0.0",
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkMembers(network, member1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.ipv4addr", "172.28.83.29"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.ipv6addr", ""),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.172_28_83_29"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkMembers(network, member2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "msdhcpserver"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.ipv4addr", "10.10.0.0"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3075,6 +3127,16 @@ resource "nios_ipam_network" "test_low_water_mark_reset" {
     low_water_mark_reset = %q
 }
 `, network, lowWaterMarkReset)
+}
+
+func testAccNetworkMembers(network string, members []map[string]any) string {
+	membersHCL := utils.ConvertSliceOfMapsToHCL(members)
+	return fmt.Sprintf(`
+resource "nios_ipam_network" "test_members" {
+	network = %q	
+	members = %s
+}
+`, network, membersHCL)
 }
 
 func testAccNetworkMgmPrivate(network, mgmPrivate, useMgmPrivate string) string {
