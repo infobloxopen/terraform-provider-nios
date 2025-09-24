@@ -68,8 +68,7 @@ resource "nios_security_admin_group" "admin_group_additional_fields" {
   docker_show_commands = {
     show_docker_bridge = true
   }
-  enable_restricted_user_access = true
-  email_addresses               = ["abd@info.com", "xyz@example.com"]
+  email_addresses = ["abd@info.com", "xyz@example.com"]
   grid_set_commands = {
     set_dscp       = true
     set_membership = false
@@ -117,7 +116,6 @@ resource "nios_security_admin_group" "admin_group_additional_fields2" {
     show_log_txn_id               = false
     show_dhcpd_recv_sock_buf_size = true
   }
-  enable_restricted_user_access = false
   licensing_set_commands = {
     set_license                 = true
     set_reporting_reset_license = false
@@ -141,7 +139,7 @@ resource "nios_security_admin_group" "admin_group_additional_fields2" {
   }
   networking_set_commands = {
     set_connection_limit = true
-    set_interface        = false
+    set_network          = false
   }
   networking_show_commands = {
     show_connection_limit = true
@@ -197,7 +195,6 @@ resource "nios_security_admin_group" "admin_group_additional_fields2" {
 - `docker_set_commands` (Attributes) Docker set commands for the docker command group. (see [below for nested schema](#nestedatt--docker_set_commands))
 - `docker_show_commands` (Attributes) Docker show commands for the docker command group. (see [below for nested schema](#nestedatt--docker_show_commands))
 - `email_addresses` (List of String) The e-mail addresses for the Admin Group.
-- `enable_restricted_user_access` (Boolean) Determines whether the restrictions will be applied to the admin connector level for users of this Admin Group.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `grid_set_commands` (Attributes) Grid set commands for the grid command group. (see [below for nested schema](#nestedatt--grid_set_commands))
 - `grid_show_commands` (Attributes) Grid show commands for the grid command group. (see [below for nested schema](#nestedatt--grid_show_commands))
@@ -223,6 +220,7 @@ resource "nios_security_admin_group" "admin_group_additional_fields2" {
 
 ### Read-Only
 
+- `enable_restricted_user_access` (Boolean) Determines whether the restrictions will be applied to the admin connector level for users of this Admin Group.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
 

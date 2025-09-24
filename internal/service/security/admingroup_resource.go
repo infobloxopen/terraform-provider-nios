@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
@@ -21,6 +22,7 @@ var readableAttributesForAdmingroup = "access_method,admin_set_commands,admin_sh
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &AdmingroupResource{}
 var _ resource.ResourceWithImportState = &AdmingroupResource{}
+var _ resource.ResourceWithValidateConfig = &AdmingroupResource{}
 
 func NewAdmingroupResource() resource.Resource {
 	return &AdmingroupResource{}
@@ -60,6 +62,69 @@ func (r *AdmingroupResource) Configure(ctx context.Context, req resource.Configu
 	}
 
 	r.client = client
+}
+
+func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var config AdmingroupModel
+	diags := req.Config.Get(ctx, &config)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+
+	if config.UserAccess.IsNull() || config.UserAccess.IsUnknown() {
+		return
+	}
+
+	refCount := 0
+	hasAddress := false
+	hasPermission := false
+
+	for i, elem := range config.UserAccess.Elements() {
+		obj := elem.(types.Object)
+		attrMap := obj.Attributes()
+
+		hasAddress = !attrMap["address"].IsUnknown() && !attrMap["address"].IsNull() && !attrMap["address"].Equal(types.StringValue(""))
+		hasPermission = !attrMap["permission"].IsUnknown() && !attrMap["permission"].IsNull() && !attrMap["permission"].Equal(types.StringValue(""))
+		hasRef := !attrMap["ref"].IsUnknown() && !attrMap["ref"].IsNull()
+
+		if hasRef && (hasAddress || hasPermission) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("user_access").AtListIndex(i),
+				"Invalid combination of fields",
+				"An entry cannot contain both ACL and ACEs",
+			)
+			continue
+		}
+
+		if hasRef {
+			refCount++
+		}
+
+		if !hasRef && !hasAddress {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("user_access").AtListIndex(i),
+				"Incomplete entry",
+				"An entry must contain 'address' if 'ref' is not provided.",
+			)
+			continue
+		}
+	}
+	if refCount == 1 && (hasAddress && hasPermission) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("user_access"),
+			"Invalid combination of fields",
+			"Either only one ACL or a set of ACEs is allowed in user_access.",
+		)
+	}
+
+	if refCount > 1 {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("user_access"),
+			"Too many references",
+			"Either only one ACL or a set of ACEs is allowed in user_access.",
+		)
+	}
 }
 
 func (r *AdmingroupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

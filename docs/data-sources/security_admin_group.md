@@ -73,7 +73,6 @@ Optional:
 - `docker_set_commands` (Attributes) Docker set commands for the docker command group. (see [below for nested schema](#nestedatt--result--docker_set_commands))
 - `docker_show_commands` (Attributes) Docker show commands for the docker command group. (see [below for nested schema](#nestedatt--result--docker_show_commands))
 - `email_addresses` (List of String) The e-mail addresses for the Admin Group.
-- `enable_restricted_user_access` (Boolean) Determines whether the restrictions will be applied to the admin connector level for users of this Admin Group.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `grid_set_commands` (Attributes) Grid set commands for the grid command group. (see [below for nested schema](#nestedatt--result--grid_set_commands))
 - `grid_show_commands` (Attributes) Grid show commands for the grid command group. (see [below for nested schema](#nestedatt--result--grid_show_commands))
@@ -99,6 +98,7 @@ Optional:
 
 Read-Only:
 
+- `enable_restricted_user_access` (Boolean) Determines whether the restrictions will be applied to the admin connector level for users of this Admin Group.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
 

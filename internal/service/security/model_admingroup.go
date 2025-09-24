@@ -256,9 +256,7 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The e-mail addresses for the Admin Group.",
 	},
 	"enable_restricted_user_access": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Computed:            true,
 		MarkdownDescription: "Determines whether the restrictions will be applied to the admin connector level for users of this Admin Group.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -437,10 +435,6 @@ func (m *AdmingroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 	if m == nil {
 		return nil
 	}
-	enableRestrictedUserAcess := flex.ExpandBoolPointer(types.BoolValue(false))
-	if len(m.UserAccess.Elements()) == 0 {
-		enableRestrictedUserAcess = flex.ExpandBoolPointer(types.BoolValue(true))
-	}
 	to := &security.Admingroup{
 		AccessMethod:                      flex.ExpandFrameworkListString(ctx, m.AccessMethod, diags),
 		AdminSetCommands:                  ExpandAdmingroupAdminSetCommands(ctx, m.AdminSetCommands, diags),
@@ -461,7 +455,7 @@ func (m *AdmingroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		DockerSetCommands:                 ExpandAdmingroupDockerSetCommands(ctx, m.DockerSetCommands, diags),
 		DockerShowCommands:                ExpandAdmingroupDockerShowCommands(ctx, m.DockerShowCommands, diags),
 		EmailAddresses:                    flex.ExpandFrameworkListString(ctx, m.EmailAddresses, diags),
-		EnableRestrictedUserAccess:        enableRestrictedUserAcess,
+		EnableRestrictedUserAccess:        flex.ExpandBoolPointer(m.EnableRestrictedUserAccess),
 		ExtAttrs:                          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		GridSetCommands:                   ExpandAdmingroupGridSetCommands(ctx, m.GridSetCommands, diags),
 		GridShowCommands:                  ExpandAdmingroupGridShowCommands(ctx, m.GridShowCommands, diags),
@@ -528,11 +522,6 @@ func (m *AdmingroupModel) Flatten(ctx context.Context, from *security.Admingroup
 	m.DockerSetCommands = FlattenAdmingroupDockerSetCommands(ctx, from.DockerSetCommands, diags)
 	m.DockerShowCommands = FlattenAdmingroupDockerShowCommands(ctx, from.DockerShowCommands, diags)
 	m.EmailAddresses = flex.FlattenFrameworkListString(ctx, from.EmailAddresses, diags)
-	if len(m.UserAccess.Elements()) == 0 {
-		m.EnableRestrictedUserAccess = types.BoolValue(true)
-	} else {
-		m.EnableRestrictedUserAccess = types.BoolValue(false)
-	}
 	m.EnableRestrictedUserAccess = types.BoolPointerValue(from.EnableRestrictedUserAccess)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.GridSetCommands = FlattenAdmingroupGridSetCommands(ctx, from.GridSetCommands, diags)

@@ -41,7 +41,6 @@ var AdmingroupUserAccessResourceSchemaAttributes = map[string]schema.Attribute{
 	"permission": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		//Default:  stringdefault.StaticString("ALLOW"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ALLOW", "DENY"),
 		},

@@ -40,7 +40,6 @@ func TestAccAdmingroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "access_method.3", "CLI"),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "disable_concurrent_login", "false"),
-					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "false"),
 					// Test inactivity_lockout_setting default values
 					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.account_inactivity_lockout_enable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "inactivity_lockout_setting.inactive_days", "30"),
@@ -706,35 +705,6 @@ func TestAccAdmingroupResource_EmailAddresses(t *testing.T) {
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "email_addresses.0", "abc@info1.com"),
 					resource.TestCheckResourceAttr(resourceName, "email_addresses.1", "xyz@example1.com"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccAdmingroupResource_EnableRestrictedUserAccess(t *testing.T) {
-	var resourceName = "nios_security_admin_group.test_enable_restricted_user_access"
-	var v security.Admingroup
-	name := acctest.RandomNameWithPrefix("admin-group")
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccAdmingroupEnableRestrictedUserAccess(name, true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccAdmingroupEnableRestrictedUserAccess(name, false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1721,15 +1691,6 @@ resource "nios_security_admin_group" "test_email_addresses" {
 `, name, emailAddresses)
 }
 
-func testAccAdmingroupEnableRestrictedUserAccess(name string, enableRestrictedUserAccess bool) string {
-	return fmt.Sprintf(`
-resource "nios_security_admin_group" "test_enable_restricted_user_access" {
-	name = %q
-    enable_restricted_user_access = %t
-}
-`, name, enableRestrictedUserAccess)
-}
-
 func testAccAdmingroupExtAttrs(name string, extAttrs map[string]string) string {
 	extattrsStr := "{"
 	for k, v := range extAttrs {
@@ -1939,7 +1900,6 @@ func testAccAdmingroupUserAccess(name, userAccess string) string {
 resource "nios_security_admin_group" "test_user_access" {
     name = %q
     user_access = %s
-    enable_restricted_user_access = true
 }
 `, name, userAccess)
 }
