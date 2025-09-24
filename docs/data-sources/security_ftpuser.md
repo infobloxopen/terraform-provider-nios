@@ -3,12 +3,12 @@
 page_title: "nios_security_ftpuser Data Source - nios"
 subcategory: "SECURITY"
 description: |-
-  Retrieves a specific FTP users based on filters.
+  Retrieves information about existing FTP Users.
 ---
 
 # nios_security_ftpuser (Data Source)
 
-Retrieves a specific FTP users based on filters.
+Retrieves information about existing FTP Users.
 
 ## Example Usage
 
