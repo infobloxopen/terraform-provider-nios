@@ -631,7 +631,7 @@ func ExpandTimeToUnix(time, timezone types.String, diags *diag.Diagnostics) *int
 			diags.AddError(
 				"Invalid Time or Timezone",
 				fmt.Sprintf(
-					"Failed to parse ßtime %q with timezone %q: %s",
+					"Failed to parse time %q with timezone %q: %s",
 					time.ValueString(),
 					timezone.ValueString(),
 					err.Error(),

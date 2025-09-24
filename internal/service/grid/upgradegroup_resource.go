@@ -12,6 +12,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	//"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -139,6 +140,13 @@ func (r *UpgradegroupResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Preserve timezone from state
+	diags = req.State.GetAttribute(ctx, path.Root("time_zone"), &data.TimeZone)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

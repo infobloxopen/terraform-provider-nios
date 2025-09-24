@@ -23,13 +23,13 @@ type UpgradegroupModel struct {
 	Comment                    types.String `tfsdk:"comment"`
 	DistributionDependentGroup types.String `tfsdk:"distribution_dependent_group"`
 	DistributionPolicy         types.String `tfsdk:"distribution_policy"`
-	DistributionTime           types.Int64  `tfsdk:"distribution_time"`
+	DistributionTime           types.String `tfsdk:"distribution_time"`
 	Members                    types.List   `tfsdk:"members"`
 	Name                       types.String `tfsdk:"name"`
 	TimeZone                   types.String `tfsdk:"time_zone"`
 	UpgradeDependentGroup      types.String `tfsdk:"upgrade_dependent_group"`
 	UpgradePolicy              types.String `tfsdk:"upgrade_policy"`
-	UpgradeTime                types.Int64  `tfsdk:"upgrade_time"`
+	UpgradeTime                types.String `tfsdk:"upgrade_time"`
 }
 
 var UpgradegroupAttrTypes = map[string]attr.Type{
@@ -37,13 +37,13 @@ var UpgradegroupAttrTypes = map[string]attr.Type{
 	"comment":                      types.StringType,
 	"distribution_dependent_group": types.StringType,
 	"distribution_policy":          types.StringType,
-	"distribution_time":            types.Int64Type,
+	"distribution_time":            types.StringType,
 	"members":                      types.ListType{ElemType: types.ObjectType{AttrTypes: UpgradegroupMembersAttrTypes}},
 	"name":                         types.StringType,
 	"time_zone":                    types.StringType,
 	"upgrade_dependent_group":      types.StringType,
 	"upgrade_policy":               types.StringType,
-	"upgrade_time":                 types.Int64Type,
+	"upgrade_time":                 types.StringType,
 }
 
 var UpgradegroupResourceSchemaAttributes = map[string]schema.Attribute{
@@ -71,9 +71,12 @@ var UpgradegroupResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The distribution scheduling policy.",
 	},
-	"distribution_time": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+	"distribution_time": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTimeFormat(),
+		},
 		MarkdownDescription: "The time of the next scheduled distribution.",
 	},
 	"members": schema.ListNestedAttribute{
@@ -112,9 +115,12 @@ var UpgradegroupResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The upgrade scheduling policy.",
 	},
-	"upgrade_time": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+	"upgrade_time": schema.StringAttribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTimeFormat(),
+		},
 		MarkdownDescription: "The time of the next scheduled upgrade.",
 	},
 }
@@ -127,13 +133,15 @@ func (m *UpgradegroupModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Comment:                    flex.ExpandStringPointer(m.Comment),
 		DistributionDependentGroup: flex.ExpandStringPointer(m.DistributionDependentGroup),
 		DistributionPolicy:         flex.ExpandStringPointer(m.DistributionPolicy),
-		DistributionTime:           flex.ExpandInt64Pointer(m.DistributionTime),
 		Members:                    flex.ExpandFrameworkListNestedBlock(ctx, m.Members, diags, ExpandUpgradegroupMembers),
 		Name:                       flex.ExpandStringPointer(m.Name),
 		UpgradeDependentGroup:      flex.ExpandStringPointer(m.UpgradeDependentGroup),
 		UpgradePolicy:              flex.ExpandStringPointer(m.UpgradePolicy),
-		UpgradeTime:                flex.ExpandInt64Pointer(m.UpgradeTime),
 	}
+
+	to.DistributionTime = flex.ExpandTimeToUnix(m.DistributionTime, m.TimeZone, diags)
+	to.UpgradeTime = flex.ExpandTimeToUnix(m.UpgradeTime, m.TimeZone, diags)
+
 	return to
 }
 
@@ -159,11 +167,11 @@ func (m *UpgradegroupModel) Flatten(ctx context.Context, from *grid.Upgradegroup
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DistributionDependentGroup = flex.FlattenStringPointer(from.DistributionDependentGroup)
 	m.DistributionPolicy = flex.FlattenStringPointer(from.DistributionPolicy)
-	m.DistributionTime = flex.FlattenInt64Pointer(from.DistributionTime)
+	m.DistributionTime = flex.FlattenUnixTime(from.DistributionTime, from.TimeZone, diags)
 	m.Members = flex.FlattenFrameworkListNestedBlock(ctx, from.Members, UpgradegroupMembersAttrTypes, diags, FlattenUpgradegroupMembers)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.UpgradeDependentGroup = flex.FlattenStringPointer(from.UpgradeDependentGroup)
 	m.UpgradePolicy = flex.FlattenStringPointer(from.UpgradePolicy)
-	m.UpgradeTime = flex.FlattenInt64Pointer(from.UpgradeTime)
+	m.UpgradeTime = flex.FlattenUnixTime(from.UpgradeTime, from.TimeZone, diags)
 }
