@@ -19,12 +19,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneRpModel struct {
@@ -544,19 +543,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandZoneRp(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.ZoneRp {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m ZoneRpModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
-func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneRp {
+func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.ZoneRp {
 	if m == nil {
 		return nil
 	}
@@ -568,7 +555,6 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.
 		ExternalPrimaries:                flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalPrimaries, diags, ExpandZoneRpExternalPrimaries),
 		ExternalSecondaries:              flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneRpExternalSecondaries),
 		FireeyeRuleMapping:               ExpandZoneRpFireeyeRuleMapping(ctx, m.FireeyeRuleMapping, diags),
-		Fqdn:                             flex.ExpandStringPointer(m.Fqdn),
 		GridPrimary:                      flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneRpGridPrimary),
 		GridSecondaries:                  flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneRpGridSecondaries),
 		Locked:                           flex.ExpandBoolPointer(m.Locked),
@@ -582,7 +568,6 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.
 		RpzDropIpRuleMinPrefixLengthIpv6: flex.ExpandInt64Pointer(m.RpzDropIpRuleMinPrefixLengthIpv6),
 		RpzPolicy:                        flex.ExpandStringPointer(m.RpzPolicy),
 		RpzSeverity:                      flex.ExpandStringPointer(m.RpzSeverity),
-		RpzType:                          flex.ExpandStringPointer(m.RpzType),
 		SetSoaSerialNumber:               flex.ExpandBoolPointer(m.SetSoaSerialNumber),
 		SoaDefaultTtl:                    flex.ExpandInt64Pointer(m.SoaDefaultTtl),
 		SoaEmail:                         flex.ExpandStringPointer(m.SoaEmail),
@@ -600,6 +585,12 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.
 		UseSoaEmail:         flex.ExpandBoolPointer(m.UseSoaEmail),
 		View:                flex.ExpandStringPointer(m.View),
 	}
+
+	if isCreate {
+		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
+		to.RpzType = flex.ExpandStringPointer(m.RpzType)
+	}
+
 	return to
 }
 

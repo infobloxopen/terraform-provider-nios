@@ -21,6 +21,7 @@ var readableAttributesForZoneRp = "address,comment,disable,display_domain,dns_so
 func TestAccZoneRpResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -28,10 +29,11 @@ func TestAccZoneRpResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpBasicConfig(""),
+				Config: testAccZoneRpBasicConfig(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					// Test fields with default value
 				),
 			},
@@ -43,6 +45,7 @@ func TestAccZoneRpResource_basic(t *testing.T) {
 func TestAccZoneRpResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_zone_rp.test"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -50,7 +53,7 @@ func TestAccZoneRpResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckZoneRpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccZoneRpBasicConfig(""),
+				Config: testAccZoneRpBasicConfig(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					testAccCheckZoneRpDisappears(context.Background(), &v),
@@ -64,6 +67,7 @@ func TestAccZoneRpResource_disappears(t *testing.T) {
 func TestAccZoneRpResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_comment"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -71,18 +75,18 @@ func TestAccZoneRpResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpComment("COMMENT_REPLACE_ME"),
+				Config: testAccZoneRpComment(zoneFqdn, "default", "Comment for ZONE RP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for ZONE RP"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpComment(zoneFqdn, "default", "Updated Comment for ZONE RP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Updated Comment for ZONE RP"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -93,6 +97,7 @@ func TestAccZoneRpResource_Comment(t *testing.T) {
 func TestAccZoneRpResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_disable"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -100,18 +105,18 @@ func TestAccZoneRpResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpDisable("DISABLE_REPLACE_ME"),
+				Config: testAccZoneRpDisable(zoneFqdn, "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpDisable(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -122,6 +127,9 @@ func TestAccZoneRpResource_Disable(t *testing.T) {
 func TestAccZoneRpResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_extattrs"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -129,7 +137,9 @@ func TestAccZoneRpResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccZoneRpExtAttrs(zoneFqdn, "default", map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
@@ -137,7 +147,9 @@ func TestAccZoneRpResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpExtAttrs(zoneFqdn, "default", map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
@@ -151,6 +163,24 @@ func TestAccZoneRpResource_ExtAttrs(t *testing.T) {
 func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_external_primaries"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	externalPrimaries := []map[string]any{
+		{
+			"address": "10.0.0.0",
+			"name":    "example-server",
+		},
+	}
+	updatedExternalPrimaries := []map[string]any{
+		{
+			"address": "10.0.0.2",
+			"name":    "example-server",
+		},
+	}
+	gridSecondary := []map[string]any{
+		{
+			"name": "infoblox.localdomain",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -158,19 +188,21 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpExternalPrimaries("EXTERNAL_PRIMARIES_REPLACE_ME"),
+				Config: testAccZoneRpExternalPrimaries(zoneFqdn, "default", externalPrimaries, gridSecondary, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_primaries", "EXTERNAL_PRIMARIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "10.0.0.0"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "example-server"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpExternalPrimaries("EXTERNAL_PRIMARIES_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpExternalPrimaries(zoneFqdn, "default", updatedExternalPrimaries, gridSecondary, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_primaries", "EXTERNAL_PRIMARIES_UPDATE_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "10.0.0.2"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "example-server")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -180,6 +212,24 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_external_secondaries"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	externalSecondaries := []map[string]any{
+		{
+			"address": "10.0.0.0",
+			"name":    "example.com",
+		},
+	}
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.member",
+		},
+	}
+	updatedExternalSecondaries := []map[string]any{
+		{
+			"address": "10.0.0.2",
+			"name":    "updated-example.com",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -187,19 +237,22 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpExternalSecondaries("EXTERNAL_SECONDARIES_REPLACE_ME"),
+				Config: testAccZoneRpExternalSecondaries(zoneFqdn, "default", externalSecondaries, gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_secondaries", "EXTERNAL_SECONDARIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.address", "10.0.0.0"),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.name", "example.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpExternalSecondaries("EXTERNAL_SECONDARIES_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpExternalSecondaries(zoneFqdn, "default", updatedExternalSecondaries, gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_secondaries", "EXTERNAL_SECONDARIES_UPDATE_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.address", "10.0.0.2"),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.name", "updated-example.com")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -209,6 +262,7 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_fireeye_rule_mapping"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -216,7 +270,7 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpFireeyeRuleMapping("FIREEYE_RULE_MAPPING_REPLACE_ME"),
+				Config: testAccZoneRpFireeyeRuleMapping(zoneFqdn, "default", "FIREEYE_RULE_MAPPING_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping", "FIREEYE_RULE_MAPPING_REPLACE_ME"),
@@ -224,7 +278,7 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpFireeyeRuleMapping("FIREEYE_RULE_MAPPING_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpFireeyeRuleMapping(zoneFqdn, "default", "FIREEYE_RULE_MAPPING_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping", "FIREEYE_RULE_MAPPING_UPDATE_REPLACE_ME"),
@@ -235,38 +289,20 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 	})
 }
 
-func TestAccZoneRpResource_Fqdn(t *testing.T) {
-	var resourceName = "nios_dns_zone_rp.test_fqdn"
-	var v dns.ZoneRp
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneRpFqdn("FQDN_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", "FQDN_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneRpFqdn("FQDN_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", "FQDN_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_grid_primary"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.member",
+		},
+	}
+	gridPrimaryUpdated := []map[string]any{
+		{
+			"name": "infoblox.localdomain",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -274,19 +310,19 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpGridPrimary("GRID_PRIMARY_REPLACE_ME"),
+				Config: testAccZoneRpGridPrimary(zoneFqdn, "default", gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary", "GRID_PRIMARY_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.member")),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpGridPrimary("GRID_PRIMARY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpGridPrimary(zoneFqdn, "default", gridPrimaryUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary", "GRID_PRIMARY_UPDATE_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -296,6 +332,22 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_grid_secondaries"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.localdomain2",
+		},
+	}
+	gridSecondary := []map[string]any{
+		{
+			"name": "infoblox.localdomain",
+		},
+	}
+	updatedGridSecondary := []map[string]any{
+		{
+			"name": "infoblox.member",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -303,19 +355,19 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpGridSecondaries("GRID_SECONDARIES_REPLACE_ME"),
+				Config: testAccZoneRpGridSecondaries(zoneFqdn, "default", gridPrimary, gridSecondary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries", "GRID_SECONDARIES_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain")),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpGridSecondaries("GRID_SECONDARIES_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpGridSecondaries(zoneFqdn, "default", gridPrimary, updatedGridSecondary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries", "GRID_SECONDARIES_UPDATE_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.member")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -325,6 +377,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 func TestAccZoneRpResource_Locked(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_locked"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -332,18 +385,18 @@ func TestAccZoneRpResource_Locked(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpLocked("LOCKED_REPLACE_ME"),
+				Config: testAccZoneRpLocked(zoneFqdn, "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "locked", "LOCKED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "locked", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpLocked("LOCKED_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpLocked(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "locked", "LOCKED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "locked", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -354,6 +407,7 @@ func TestAccZoneRpResource_Locked(t *testing.T) {
 func TestAccZoneRpResource_LogRpz(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_log_rpz"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -361,18 +415,18 @@ func TestAccZoneRpResource_LogRpz(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpLogRpz("LOG_RPZ_REPLACE_ME"),
+				Config: testAccZoneRpLogRpz(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "log_rpz", "LOG_RPZ_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "log_rpz", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpLogRpz("LOG_RPZ_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpLogRpz(zoneFqdn, "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "log_rpz", "LOG_RPZ_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "log_rpz", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -383,6 +437,23 @@ func TestAccZoneRpResource_LogRpz(t *testing.T) {
 func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_member_soa_mnames"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.localdomain",
+		},
+	}
+	memberSoaMnames := []map[string]any{
+		{
+			"grid_primary": "infoblox.localdomain",
+			"mname":        "infoblox.localdomain",
+		},
+	}
+	updatedMemberSoaMnames := []map[string]any{
+		{
+			"mname": "example.com",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -390,7 +461,7 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpMemberSoaMnames("MEMBER_SOA_MNAMES_REPLACE_ME"),
+				Config: testAccZoneRpMemberSoaMnames(zoneFqdn, "default", gridPrimary, memberSoaMnames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames", "MEMBER_SOA_MNAMES_REPLACE_ME"),
@@ -398,7 +469,7 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpMemberSoaMnames("MEMBER_SOA_MNAMES_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpMemberSoaMnames(zoneFqdn, "default", gridPrimary, updatedMemberSoaMnames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames", "MEMBER_SOA_MNAMES_UPDATE_REPLACE_ME"),
@@ -412,6 +483,12 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 func TestAccZoneRpResource_NsGroup(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_ns_group"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	gridPrimary := []map[string]any{
+		{
+			"name": "infoblox.member",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -419,18 +496,18 @@ func TestAccZoneRpResource_NsGroup(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpNsGroup("NS_GROUP_REPLACE_ME"),
+				Config: testAccZoneRpNsGroup(zoneFqdn, "default", "nsgroup1", gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ns_group", "NS_GROUP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ns_group", "nsgroup1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpNsGroup("NS_GROUP_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpNsGroup(zoneFqdn, "default", "nsgroup2", gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ns_group", "NS_GROUP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ns_group", "nsgroup2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -441,6 +518,7 @@ func TestAccZoneRpResource_NsGroup(t *testing.T) {
 func TestAccZoneRpResource_Prefix(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_prefix"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -448,18 +526,18 @@ func TestAccZoneRpResource_Prefix(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpPrefix("PREFIX_REPLACE_ME"),
+				Config: testAccZoneRpPrefix(zoneFqdn, "default", "STUB-b"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "prefix", "PREFIX_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "prefix", "STUB-b"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpPrefix("PREFIX_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpPrefix(zoneFqdn, "default", "121/26"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "prefix", "PREFIX_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "prefix", "121/26"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -470,6 +548,7 @@ func TestAccZoneRpResource_Prefix(t *testing.T) {
 func TestAccZoneRpResource_RecordNamePolicy(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_record_name_policy"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -477,7 +556,7 @@ func TestAccZoneRpResource_RecordNamePolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRecordNamePolicy("RECORD_NAME_POLICY_REPLACE_ME"),
+				Config: testAccZoneRpRecordNamePolicy(zoneFqdn, "default", "RECORD_NAME_POLICY_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "record_name_policy", "RECORD_NAME_POLICY_REPLACE_ME"),
@@ -485,7 +564,7 @@ func TestAccZoneRpResource_RecordNamePolicy(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRecordNamePolicy("RECORD_NAME_POLICY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRecordNamePolicy(zoneFqdn, "default", "RECORD_NAME_POLICY_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "record_name_policy", "RECORD_NAME_POLICY_UPDATE_REPLACE_ME"),
@@ -499,6 +578,7 @@ func TestAccZoneRpResource_RecordNamePolicy(t *testing.T) {
 func TestAccZoneRpResource_RpzDropIpRuleEnabled(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_rpz_drop_ip_rule_enabled"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -506,7 +586,7 @@ func TestAccZoneRpResource_RpzDropIpRuleEnabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleEnabled("RPZ_DROP_IP_RULE_ENABLED_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleEnabled(zoneFqdn, "default", "RPZ_DROP_IP_RULE_ENABLED_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_enabled", "RPZ_DROP_IP_RULE_ENABLED_REPLACE_ME"),
@@ -514,7 +594,7 @@ func TestAccZoneRpResource_RpzDropIpRuleEnabled(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleEnabled("RPZ_DROP_IP_RULE_ENABLED_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleEnabled(zoneFqdn, "default", "RPZ_DROP_IP_RULE_ENABLED_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_enabled", "RPZ_DROP_IP_RULE_ENABLED_UPDATE_REPLACE_ME"),
@@ -528,6 +608,7 @@ func TestAccZoneRpResource_RpzDropIpRuleEnabled(t *testing.T) {
 func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv4(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_rpz_drop_ip_rule_min_prefix_length_ipv4"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -535,7 +616,7 @@ func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv4(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4("RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4(zoneFqdn, "default", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv4", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_REPLACE_ME"),
@@ -543,7 +624,7 @@ func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv4(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4("RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4(zoneFqdn, "default", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv4", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_UPDATE_REPLACE_ME"),
@@ -557,6 +638,7 @@ func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv4(t *testing.T) {
 func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv6(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_rpz_drop_ip_rule_min_prefix_length_ipv6"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -564,7 +646,7 @@ func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv6(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6("RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6(zoneFqdn, "default", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv6", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_REPLACE_ME"),
@@ -572,7 +654,7 @@ func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv6(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6("RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6(zoneFqdn, "default", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv6", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_UPDATE_REPLACE_ME"),
@@ -586,6 +668,7 @@ func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv6(t *testing.T) {
 func TestAccZoneRpResource_RpzPolicy(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_rpz_policy"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -593,7 +676,7 @@ func TestAccZoneRpResource_RpzPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzPolicy("RPZ_POLICY_REPLACE_ME"),
+				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "RPZ_POLICY_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "RPZ_POLICY_REPLACE_ME"),
@@ -601,7 +684,7 @@ func TestAccZoneRpResource_RpzPolicy(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzPolicy("RPZ_POLICY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "RPZ_POLICY_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "RPZ_POLICY_UPDATE_REPLACE_ME"),
@@ -615,6 +698,7 @@ func TestAccZoneRpResource_RpzPolicy(t *testing.T) {
 func TestAccZoneRpResource_RpzSeverity(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_rpz_severity"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -622,7 +706,7 @@ func TestAccZoneRpResource_RpzSeverity(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzSeverity("RPZ_SEVERITY_REPLACE_ME"),
+				Config: testAccZoneRpRpzSeverity(zoneFqdn, "default", "RPZ_SEVERITY_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_severity", "RPZ_SEVERITY_REPLACE_ME"),
@@ -630,7 +714,7 @@ func TestAccZoneRpResource_RpzSeverity(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzSeverity("RPZ_SEVERITY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzSeverity(zoneFqdn, "default", "RPZ_SEVERITY_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_severity", "RPZ_SEVERITY_UPDATE_REPLACE_ME"),
@@ -644,6 +728,7 @@ func TestAccZoneRpResource_RpzSeverity(t *testing.T) {
 func TestAccZoneRpResource_RpzType(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_rpz_type"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -651,7 +736,7 @@ func TestAccZoneRpResource_RpzType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzType("RPZ_TYPE_REPLACE_ME"),
+				Config: testAccZoneRpRpzType(zoneFqdn, "default", "RPZ_TYPE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_type", "RPZ_TYPE_REPLACE_ME"),
@@ -659,7 +744,7 @@ func TestAccZoneRpResource_RpzType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzType("RPZ_TYPE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzType(zoneFqdn, "default", "RPZ_TYPE_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_type", "RPZ_TYPE_UPDATE_REPLACE_ME"),
@@ -673,6 +758,7 @@ func TestAccZoneRpResource_RpzType(t *testing.T) {
 func TestAccZoneRpResource_SetSoaSerialNumber(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_set_soa_serial_number"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -680,7 +766,7 @@ func TestAccZoneRpResource_SetSoaSerialNumber(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSetSoaSerialNumber("SET_SOA_SERIAL_NUMBER_REPLACE_ME"),
+				Config: testAccZoneRpSetSoaSerialNumber(zoneFqdn, "default", "SET_SOA_SERIAL_NUMBER_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "set_soa_serial_number", "SET_SOA_SERIAL_NUMBER_REPLACE_ME"),
@@ -688,7 +774,7 @@ func TestAccZoneRpResource_SetSoaSerialNumber(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSetSoaSerialNumber("SET_SOA_SERIAL_NUMBER_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSetSoaSerialNumber(zoneFqdn, "default", "SET_SOA_SERIAL_NUMBER_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "set_soa_serial_number", "SET_SOA_SERIAL_NUMBER_UPDATE_REPLACE_ME"),
@@ -702,6 +788,7 @@ func TestAccZoneRpResource_SetSoaSerialNumber(t *testing.T) {
 func TestAccZoneRpResource_SoaDefaultTtl(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_default_ttl"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -709,7 +796,7 @@ func TestAccZoneRpResource_SoaDefaultTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSoaDefaultTtl("SOA_DEFAULT_TTL_REPLACE_ME"),
+				Config: testAccZoneRpSoaDefaultTtl(zoneFqdn, "default", "SOA_DEFAULT_TTL_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_default_ttl", "SOA_DEFAULT_TTL_REPLACE_ME"),
@@ -717,7 +804,7 @@ func TestAccZoneRpResource_SoaDefaultTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSoaDefaultTtl("SOA_DEFAULT_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSoaDefaultTtl(zoneFqdn, "default", "SOA_DEFAULT_TTL_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_default_ttl", "SOA_DEFAULT_TTL_UPDATE_REPLACE_ME"),
@@ -731,6 +818,7 @@ func TestAccZoneRpResource_SoaDefaultTtl(t *testing.T) {
 func TestAccZoneRpResource_SoaEmail(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_email"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -738,7 +826,7 @@ func TestAccZoneRpResource_SoaEmail(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSoaEmail("SOA_EMAIL_REPLACE_ME"),
+				Config: testAccZoneRpSoaEmail(zoneFqdn, "default", "SOA_EMAIL_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_email", "SOA_EMAIL_REPLACE_ME"),
@@ -746,7 +834,7 @@ func TestAccZoneRpResource_SoaEmail(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSoaEmail("SOA_EMAIL_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSoaEmail(zoneFqdn, "default", "SOA_EMAIL_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_email", "SOA_EMAIL_UPDATE_REPLACE_ME"),
@@ -760,6 +848,7 @@ func TestAccZoneRpResource_SoaEmail(t *testing.T) {
 func TestAccZoneRpResource_SoaExpire(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_expire"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -767,7 +856,7 @@ func TestAccZoneRpResource_SoaExpire(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSoaExpire("SOA_EXPIRE_REPLACE_ME"),
+				Config: testAccZoneRpSoaExpire(zoneFqdn, "default", "SOA_EXPIRE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_expire", "SOA_EXPIRE_REPLACE_ME"),
@@ -775,7 +864,7 @@ func TestAccZoneRpResource_SoaExpire(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSoaExpire("SOA_EXPIRE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSoaExpire(zoneFqdn, "default", "SOA_EXPIRE_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_expire", "SOA_EXPIRE_UPDATE_REPLACE_ME"),
@@ -789,6 +878,7 @@ func TestAccZoneRpResource_SoaExpire(t *testing.T) {
 func TestAccZoneRpResource_SoaNegativeTtl(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_negative_ttl"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -796,7 +886,7 @@ func TestAccZoneRpResource_SoaNegativeTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSoaNegativeTtl("SOA_NEGATIVE_TTL_REPLACE_ME"),
+				Config: testAccZoneRpSoaNegativeTtl(zoneFqdn, "default", "SOA_NEGATIVE_TTL_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_negative_ttl", "SOA_NEGATIVE_TTL_REPLACE_ME"),
@@ -804,7 +894,7 @@ func TestAccZoneRpResource_SoaNegativeTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSoaNegativeTtl("SOA_NEGATIVE_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSoaNegativeTtl(zoneFqdn, "default", "SOA_NEGATIVE_TTL_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_negative_ttl", "SOA_NEGATIVE_TTL_UPDATE_REPLACE_ME"),
@@ -818,6 +908,7 @@ func TestAccZoneRpResource_SoaNegativeTtl(t *testing.T) {
 func TestAccZoneRpResource_SoaRefresh(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_refresh"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -825,7 +916,7 @@ func TestAccZoneRpResource_SoaRefresh(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSoaRefresh("SOA_REFRESH_REPLACE_ME"),
+				Config: testAccZoneRpSoaRefresh(zoneFqdn, "default", "SOA_REFRESH_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_refresh", "SOA_REFRESH_REPLACE_ME"),
@@ -833,7 +924,7 @@ func TestAccZoneRpResource_SoaRefresh(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSoaRefresh("SOA_REFRESH_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSoaRefresh(zoneFqdn, "default", "SOA_REFRESH_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_refresh", "SOA_REFRESH_UPDATE_REPLACE_ME"),
@@ -847,6 +938,7 @@ func TestAccZoneRpResource_SoaRefresh(t *testing.T) {
 func TestAccZoneRpResource_SoaRetry(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_retry"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -854,7 +946,7 @@ func TestAccZoneRpResource_SoaRetry(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSoaRetry("SOA_RETRY_REPLACE_ME"),
+				Config: testAccZoneRpSoaRetry(zoneFqdn, "default", "SOA_RETRY_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_retry", "SOA_RETRY_REPLACE_ME"),
@@ -862,7 +954,7 @@ func TestAccZoneRpResource_SoaRetry(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSoaRetry("SOA_RETRY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSoaRetry(zoneFqdn, "default", "SOA_RETRY_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_retry", "SOA_RETRY_UPDATE_REPLACE_ME"),
@@ -876,6 +968,7 @@ func TestAccZoneRpResource_SoaRetry(t *testing.T) {
 func TestAccZoneRpResource_SoaSerialNumber(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_serial_number"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -883,7 +976,7 @@ func TestAccZoneRpResource_SoaSerialNumber(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSoaSerialNumber("SOA_SERIAL_NUMBER_REPLACE_ME"),
+				Config: testAccZoneRpSoaSerialNumber(zoneFqdn, "default", "SOA_SERIAL_NUMBER_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_serial_number", "SOA_SERIAL_NUMBER_REPLACE_ME"),
@@ -891,7 +984,7 @@ func TestAccZoneRpResource_SoaSerialNumber(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSoaSerialNumber("SOA_SERIAL_NUMBER_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSoaSerialNumber(zoneFqdn, "default", "SOA_SERIAL_NUMBER_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "soa_serial_number", "SOA_SERIAL_NUMBER_UPDATE_REPLACE_ME"),
@@ -905,6 +998,7 @@ func TestAccZoneRpResource_SoaSerialNumber(t *testing.T) {
 func TestAccZoneRpResource_SubstituteName(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_substitute_name"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -912,7 +1006,7 @@ func TestAccZoneRpResource_SubstituteName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpSubstituteName("SUBSTITUTE_NAME_REPLACE_ME"),
+				Config: testAccZoneRpSubstituteName(zoneFqdn, "default", "SUBSTITUTE_NAME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "substitute_name", "SUBSTITUTE_NAME_REPLACE_ME"),
@@ -920,7 +1014,7 @@ func TestAccZoneRpResource_SubstituteName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpSubstituteName("SUBSTITUTE_NAME_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpSubstituteName(zoneFqdn, "default", "SUBSTITUTE_NAME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "substitute_name", "SUBSTITUTE_NAME_UPDATE_REPLACE_ME"),
@@ -934,6 +1028,7 @@ func TestAccZoneRpResource_SubstituteName(t *testing.T) {
 func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_external_primary"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -941,7 +1036,7 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseExternalPrimary("USE_EXTERNAL_PRIMARY_REPLACE_ME"),
+				Config: testAccZoneRpUseExternalPrimary(zoneFqdn, "default", "USE_EXTERNAL_PRIMARY_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "USE_EXTERNAL_PRIMARY_REPLACE_ME"),
@@ -949,7 +1044,7 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseExternalPrimary("USE_EXTERNAL_PRIMARY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpUseExternalPrimary(zoneFqdn, "default", "USE_EXTERNAL_PRIMARY_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "USE_EXTERNAL_PRIMARY_UPDATE_REPLACE_ME"),
@@ -963,6 +1058,7 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 func TestAccZoneRpResource_UseGridZoneTimer(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_grid_zone_timer"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -970,7 +1066,7 @@ func TestAccZoneRpResource_UseGridZoneTimer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseGridZoneTimer("USE_GRID_ZONE_TIMER_REPLACE_ME"),
+				Config: testAccZoneRpUseGridZoneTimer(zoneFqdn, "default", "USE_GRID_ZONE_TIMER_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "USE_GRID_ZONE_TIMER_REPLACE_ME"),
@@ -978,7 +1074,7 @@ func TestAccZoneRpResource_UseGridZoneTimer(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseGridZoneTimer("USE_GRID_ZONE_TIMER_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpUseGridZoneTimer(zoneFqdn, "default", "USE_GRID_ZONE_TIMER_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "USE_GRID_ZONE_TIMER_UPDATE_REPLACE_ME"),
@@ -992,6 +1088,7 @@ func TestAccZoneRpResource_UseGridZoneTimer(t *testing.T) {
 func TestAccZoneRpResource_UseLogRpz(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_log_rpz"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -999,7 +1096,7 @@ func TestAccZoneRpResource_UseLogRpz(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseLogRpz("USE_LOG_RPZ_REPLACE_ME"),
+				Config: testAccZoneRpUseLogRpz(zoneFqdn, "default", "USE_LOG_RPZ_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_log_rpz", "USE_LOG_RPZ_REPLACE_ME"),
@@ -1007,7 +1104,7 @@ func TestAccZoneRpResource_UseLogRpz(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseLogRpz("USE_LOG_RPZ_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpUseLogRpz(zoneFqdn, "default", "USE_LOG_RPZ_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_log_rpz", "USE_LOG_RPZ_UPDATE_REPLACE_ME"),
@@ -1021,6 +1118,7 @@ func TestAccZoneRpResource_UseLogRpz(t *testing.T) {
 func TestAccZoneRpResource_UseRecordNamePolicy(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_record_name_policy"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1028,7 +1126,7 @@ func TestAccZoneRpResource_UseRecordNamePolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseRecordNamePolicy("USE_RECORD_NAME_POLICY_REPLACE_ME"),
+				Config: testAccZoneRpUseRecordNamePolicy(zoneFqdn, "default", "USE_RECORD_NAME_POLICY_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "USE_RECORD_NAME_POLICY_REPLACE_ME"),
@@ -1036,7 +1134,7 @@ func TestAccZoneRpResource_UseRecordNamePolicy(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseRecordNamePolicy("USE_RECORD_NAME_POLICY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpUseRecordNamePolicy(zoneFqdn, "default", "USE_RECORD_NAME_POLICY_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "USE_RECORD_NAME_POLICY_UPDATE_REPLACE_ME"),
@@ -1050,6 +1148,7 @@ func TestAccZoneRpResource_UseRecordNamePolicy(t *testing.T) {
 func TestAccZoneRpResource_UseRpzDropIpRule(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_rpz_drop_ip_rule"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1057,7 +1156,7 @@ func TestAccZoneRpResource_UseRpzDropIpRule(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseRpzDropIpRule("USE_RPZ_DROP_IP_RULE_REPLACE_ME"),
+				Config: testAccZoneRpUseRpzDropIpRule(zoneFqdn, "default", "USE_RPZ_DROP_IP_RULE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_rpz_drop_ip_rule", "USE_RPZ_DROP_IP_RULE_REPLACE_ME"),
@@ -1065,7 +1164,7 @@ func TestAccZoneRpResource_UseRpzDropIpRule(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseRpzDropIpRule("USE_RPZ_DROP_IP_RULE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpUseRpzDropIpRule(zoneFqdn, "default", "USE_RPZ_DROP_IP_RULE_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_rpz_drop_ip_rule", "USE_RPZ_DROP_IP_RULE_UPDATE_REPLACE_ME"),
@@ -1079,6 +1178,7 @@ func TestAccZoneRpResource_UseRpzDropIpRule(t *testing.T) {
 func TestAccZoneRpResource_UseSoaEmail(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_soa_email"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1086,7 +1186,7 @@ func TestAccZoneRpResource_UseSoaEmail(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseSoaEmail("USE_SOA_EMAIL_REPLACE_ME"),
+				Config: testAccZoneRpUseSoaEmail(zoneFqdn, "default", "USE_SOA_EMAIL_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_soa_email", "USE_SOA_EMAIL_REPLACE_ME"),
@@ -1094,7 +1194,7 @@ func TestAccZoneRpResource_UseSoaEmail(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseSoaEmail("USE_SOA_EMAIL_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpUseSoaEmail(zoneFqdn, "default", "USE_SOA_EMAIL_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_soa_email", "USE_SOA_EMAIL_UPDATE_REPLACE_ME"),
@@ -1108,6 +1208,7 @@ func TestAccZoneRpResource_UseSoaEmail(t *testing.T) {
 func TestAccZoneRpResource_View(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_view"
 	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1115,7 +1216,7 @@ func TestAccZoneRpResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpView("VIEW_REPLACE_ME"),
+				Config: testAccZoneRpView(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_REPLACE_ME"),
@@ -1123,7 +1224,7 @@ func TestAccZoneRpResource_View(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpView("VIEW_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpView(zoneFqdn, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", "VIEW_UPDATE_REPLACE_ME"),
@@ -1192,314 +1293,407 @@ func testAccCheckZoneRpDisappears(ctx context.Context, v *dns.ZoneRp) resource.T
 	}
 }
 
-func testAccZoneRpBasicConfig(string) string {
+func testAccZoneRpBasicConfig(zoneFqdn, view string) string {
 	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dns_zone_rp" "test" {
-}
-`)
-}
-
-func testAccZoneRpRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
-func testAccZoneRpComment(comment string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_comment" {
-    comment = %q
-}
-`, comment)
-}
-
-func testAccZoneRpDisable(disable string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_disable" {
-    disable = %q
-}
-`, disable)
-}
-
-func testAccZoneRpExtAttrs(extAttrs string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_extattrs" {
-    extattrs = %q
-}
-`, extAttrs)
-}
-
-func testAccZoneRpExternalPrimaries(externalPrimaries string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_external_primaries" {
-    external_primaries = %q
-}
-`, externalPrimaries)
-}
-
-func testAccZoneRpExternalSecondaries(externalSecondaries string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_external_secondaries" {
-    external_secondaries = %q
-}
-`, externalSecondaries)
-}
-
-func testAccZoneRpFireeyeRuleMapping(fireeyeRuleMapping string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_fireeye_rule_mapping" {
-    fireeye_rule_mapping = %q
-}
-`, fireeyeRuleMapping)
-}
-
-func testAccZoneRpFqdn(fqdn string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_fqdn" {
     fqdn = %q
-}
-`, fqdn)
-}
-
-func testAccZoneRpGridPrimary(gridPrimary string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_grid_primary" {
-    grid_primary = %q
-}
-`, gridPrimary)
-}
-
-func testAccZoneRpGridSecondaries(gridSecondaries string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_grid_secondaries" {
-    grid_secondaries = %q
-}
-`, gridSecondaries)
-}
-
-func testAccZoneRpLocked(locked string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_locked" {
-    locked = %q
-}
-`, locked)
-}
-
-func testAccZoneRpLogRpz(logRpz string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_log_rpz" {
-    log_rpz = %q
-}
-`, logRpz)
-}
-
-func testAccZoneRpMemberSoaMnames(memberSoaMnames string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_member_soa_mnames" {
-    member_soa_mnames = %q
-}
-`, memberSoaMnames)
-}
-
-func testAccZoneRpNsGroup(nsGroup string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_ns_group" {
-    ns_group = %q
-}
-`, nsGroup)
-}
-
-func testAccZoneRpPrefix(prefix string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_prefix" {
-    prefix = %q
-}
-`, prefix)
-}
-
-func testAccZoneRpRecordNamePolicy(recordNamePolicy string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_record_name_policy" {
-    record_name_policy = %q
-}
-`, recordNamePolicy)
-}
-
-func testAccZoneRpRpzDropIpRuleEnabled(rpzDropIpRuleEnabled string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_enabled" {
-    rpz_drop_ip_rule_enabled = %q
-}
-`, rpzDropIpRuleEnabled)
-}
-
-func testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4(rpzDropIpRuleMinPrefixLengthIpv4 string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_min_prefix_length_ipv4" {
-    rpz_drop_ip_rule_min_prefix_length_ipv4 = %q
-}
-`, rpzDropIpRuleMinPrefixLengthIpv4)
-}
-
-func testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6(rpzDropIpRuleMinPrefixLengthIpv6 string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_min_prefix_length_ipv6" {
-    rpz_drop_ip_rule_min_prefix_length_ipv6 = %q
-}
-`, rpzDropIpRuleMinPrefixLengthIpv6)
-}
-
-func testAccZoneRpRpzPolicy(rpzPolicy string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_rpz_policy" {
-    rpz_policy = %q
-}
-`, rpzPolicy)
-}
-
-func testAccZoneRpRpzSeverity(rpzSeverity string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_rpz_severity" {
-    rpz_severity = %q
-}
-`, rpzSeverity)
-}
-
-func testAccZoneRpRpzType(rpzType string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_rpz_type" {
-    rpz_type = %q
-}
-`, rpzType)
-}
-
-func testAccZoneRpSetSoaSerialNumber(setSoaSerialNumber string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_set_soa_serial_number" {
-    set_soa_serial_number = %q
-}
-`, setSoaSerialNumber)
-}
-
-func testAccZoneRpSoaDefaultTtl(soaDefaultTtl string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_soa_default_ttl" {
-    soa_default_ttl = %q
-}
-`, soaDefaultTtl)
-}
-
-func testAccZoneRpSoaEmail(soaEmail string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_soa_email" {
-    soa_email = %q
-}
-`, soaEmail)
-}
-
-func testAccZoneRpSoaExpire(soaExpire string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_soa_expire" {
-    soa_expire = %q
-}
-`, soaExpire)
-}
-
-func testAccZoneRpSoaNegativeTtl(soaNegativeTtl string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_soa_negative_ttl" {
-    soa_negative_ttl = %q
-}
-`, soaNegativeTtl)
-}
-
-func testAccZoneRpSoaRefresh(soaRefresh string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_soa_refresh" {
-    soa_refresh = %q
-}
-`, soaRefresh)
-}
-
-func testAccZoneRpSoaRetry(soaRetry string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_soa_retry" {
-    soa_retry = %q
-}
-`, soaRetry)
-}
-
-func testAccZoneRpSoaSerialNumber(soaSerialNumber string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_soa_serial_number" {
-    soa_serial_number = %q
-}
-`, soaSerialNumber)
-}
-
-func testAccZoneRpSubstituteName(substituteName string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_substitute_name" {
-    substitute_name = %q
-}
-`, substituteName)
-}
-
-func testAccZoneRpUseExternalPrimary(useExternalPrimary string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_use_external_primary" {
-    use_external_primary = %q
-}
-`, useExternalPrimary)
-}
-
-func testAccZoneRpUseGridZoneTimer(useGridZoneTimer string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_use_grid_zone_timer" {
-    use_grid_zone_timer = %q
-}
-`, useGridZoneTimer)
-}
-
-func testAccZoneRpUseLogRpz(useLogRpz string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_use_log_rpz" {
-    use_log_rpz = %q
-}
-`, useLogRpz)
-}
-
-func testAccZoneRpUseRecordNamePolicy(useRecordNamePolicy string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_use_record_name_policy" {
-    use_record_name_policy = %q
-}
-`, useRecordNamePolicy)
-}
-
-func testAccZoneRpUseRpzDropIpRule(useRpzDropIpRule string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_use_rpz_drop_ip_rule" {
-    use_rpz_drop_ip_rule = %q
-}
-`, useRpzDropIpRule)
-}
-
-func testAccZoneRpUseSoaEmail(useSoaEmail string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_use_soa_email" {
-    use_soa_email = %q
-}
-`, useSoaEmail)
-}
-
-func testAccZoneRpView(view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_view" {
     view = %q
 }
-`, view)
+`, zoneFqdn, view)
+}
+
+func testAccZoneRpComment(zoneFqdn, view, comment string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_comment" {
+    fqdn = %q
+    view = %q
+    comment = %q
+}
+`, zoneFqdn, view, comment)
+}
+
+func testAccZoneRpDisable(zoneFqdn, view string, disable bool) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_disable" {
+    fqdn = %q
+    view = %q
+    disable = %t
+}
+`, zoneFqdn, view, disable)
+}
+
+func testAccZoneRpExtAttrs(zoneFqdn, view string, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
+	}
+	extattrsStr += "\t}"
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_extattrs" {
+    fqdn = %q
+    view = %q
+    extattrs = %s
+}
+`, zoneFqdn, view, extattrsStr)
+}
+
+func testAccZoneRpExternalPrimaries(zoneFqdn, view string, externalPrimaries, gridSecondary []map[string]any, useExternalPrimary bool) string {
+	externalPrimariesHCL := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
+	gridSecondaryHCL := utils.ConvertSliceOfMapsToHCL(gridSecondary)
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_external_primaries" {
+    fqdn = %q
+    view = %q
+    external_primaries = %s
+    grid_secondaries = %s
+    use_external_primary = %t
+}
+`, zoneFqdn, view, externalPrimariesHCL, gridSecondaryHCL, useExternalPrimary)
+}
+
+func testAccZoneRpExternalSecondaries(zoneFqdn, view string, externalSecondaries, gridPrimary []map[string]any) string {
+	externalSecondariesHCL := utils.ConvertSliceOfMapsToHCL(externalSecondaries)
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_external_secondaries" {
+    fqdn = %q
+    view = %q
+    grid_primary = %s
+    external_secondaries = %s
+}
+`, zoneFqdn, view, gridPrimaryHCL, externalSecondariesHCL)
+}
+
+func testAccZoneRpFireeyeRuleMapping(zoneFqdn, view, fireeyeRuleMapping string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_fireeye_rule_mapping" {
+    fqdn = %q
+    view = %q
+    fireeye_rule_mapping = %q
+}
+`, zoneFqdn, view, fireeyeRuleMapping)
+}
+
+func testAccZoneRpFqdn(zoneFqdn, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_fqdn" {
+	fqdn = %q
+	view = %q
+}
+`, zoneFqdn, view)
+}
+
+func testAccZoneRpGridPrimary(zoneFqdn, view string, gridPrimary []map[string]any) string {
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_grid_primary" {
+    fqdn = %q
+    view = %q
+    grid_primary = %s
+}
+`, zoneFqdn, view, gridPrimaryHCL)
+}
+
+func testAccZoneRpGridSecondaries(zoneFqdn, view string, gridPrimary, gridSecondary []map[string]any) string {
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	gridSecondaryHCL := utils.ConvertSliceOfMapsToHCL(gridSecondary)
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_grid_secondaries" {
+    fqdn = %q
+    view = %q
+	grid_primary = %s
+    grid_secondaries = %s
+}
+`, zoneFqdn, view, gridPrimaryHCL, gridSecondaryHCL)
+}
+
+func testAccZoneRpLocked(zoneFqdn, view string, locked bool) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_locked" {
+    fqdn = %q
+    view = %q
+    locked = %t
+}
+`, zoneFqdn, view, locked)
+}
+
+func testAccZoneRpLogRpz(zoneFqdn, view string, logRpz bool) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_log_rpz" {
+    fqdn = %q
+    view = %q
+    log_rpz = %t
+}
+`, zoneFqdn, view, logRpz)
+}
+
+func testAccZoneRpMemberSoaMnames(zoneFqdn, view string, gridPrimary, memberSoaMnames []map[string]any) string {
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	memberSoaMnamesHCL := utils.ConvertSliceOfMapsToHCL(memberSoaMnames)
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_member_soa_mnames" {
+    fqdn = %q
+    view = %q
+    grid_primary = %s
+    member_soa_mnames = %s
+}
+`, zoneFqdn, view, gridPrimaryHCL, memberSoaMnamesHCL)
+}
+
+func testAccZoneRpNsGroup(zoneFqdn, view string, nsGroupName string, gridPrimary []map[string]any) string {
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	return fmt.Sprintf(`
+resource "nios_dns_nsgroup" "test" {
+  name = %q
+  grid_primary = %s
+}
+
+resource "nios_dns_zone_rp" "test_ns_group" {
+    fqdn = %q
+    view = %q
+    ns_group = nios_dns_nsgroup.test.name
+}
+`, nsGroupName, gridPrimaryHCL, zoneFqdn, view)
+}
+
+func testAccZoneRpPrefix(zoneFqdn, view, prefix string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_prefix" {
+    fqdn = %q
+    view = %q
+    prefix = %q
+}
+`, zoneFqdn, view, prefix)
+}
+
+func testAccZoneRpRecordNamePolicy(zoneFqdn, view, recordNamePolicy string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_record_name_policy" {
+    fqdn = %q
+    view = %q
+    record_name_policy = %q
+}
+`, zoneFqdn, view, recordNamePolicy)
+}
+
+func testAccZoneRpRpzDropIpRuleEnabled(zoneFqdn, view, rpzDropIpRuleEnabled string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_enabled" {
+    fqdn = %q
+    view = %q
+    rpz_drop_ip_rule_enabled = %q
+}
+`, zoneFqdn, view, rpzDropIpRuleEnabled)
+}
+
+func testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4(zoneFqdn, view, rpzDropIpRuleMinPrefixLengthIpv4 string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_min_prefix_length_ipv4" {
+    fqdn = %q
+    view = %q
+    rpz_drop_ip_rule_min_prefix_length_ipv4 = %q
+}
+`, zoneFqdn, view, rpzDropIpRuleMinPrefixLengthIpv4)
+}
+
+func testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6(zoneFqdn, view, rpzDropIpRuleMinPrefixLengthIpv6 string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_min_prefix_length_ipv6" {
+    fqdn = %q
+    view = %q
+    rpz_drop_ip_rule_min_prefix_length_ipv6 = %q
+}
+`, zoneFqdn, view, rpzDropIpRuleMinPrefixLengthIpv6)
+}
+
+func testAccZoneRpRpzPolicy(zoneFqdn, view, rpzPolicy string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_rpz_policy" {
+    fqdn = %q
+    view = %q
+    rpz_policy = %q
+}
+`, zoneFqdn, view, rpzPolicy)
+}
+
+func testAccZoneRpRpzSeverity(zoneFqdn, view, rpzSeverity string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_rpz_severity" {
+    fqdn = %q
+    view = %q
+    rpz_severity = %q
+}
+`, zoneFqdn, view, rpzSeverity)
+}
+
+func testAccZoneRpRpzType(zoneFqdn, view, rpzType string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_rpz_type" {
+    fqdn = %q
+    view = %q
+    rpz_type = %q
+}
+`, zoneFqdn, view, rpzType)
+}
+
+func testAccZoneRpSetSoaSerialNumber(zoneFqdn, view, setSoaSerialNumber string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_set_soa_serial_number" {
+    fqdn = %q
+    view = %q
+    set_soa_serial_number = %q
+}
+`, zoneFqdn, view, setSoaSerialNumber)
+}
+
+func testAccZoneRpSoaDefaultTtl(zoneFqdn, view, soaDefaultTtl string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_soa_default_ttl" {
+    fqdn = %q
+    view = %q
+    soa_default_ttl = %q
+}
+`, zoneFqdn, view, soaDefaultTtl)
+}
+
+func testAccZoneRpSoaEmail(zoneFqdn, view, soaEmail string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_soa_email" {
+    fqdn = %q
+    view = %q
+    soa_email = %q
+}
+`, zoneFqdn, view, soaEmail)
+}
+
+func testAccZoneRpSoaExpire(zoneFqdn, view, soaExpire string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_soa_expire" {
+    fqdn = %q
+    view = %q
+    soa_expire = %q
+}
+`, zoneFqdn, view, soaExpire)
+}
+
+func testAccZoneRpSoaNegativeTtl(zoneFqdn, view, soaNegativeTtl string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_soa_negative_ttl" {
+    fqdn = %q
+    view = %q
+    soa_negative_ttl = %q
+}
+`, zoneFqdn, view, soaNegativeTtl)
+}
+
+func testAccZoneRpSoaRefresh(zoneFqdn, view, soaRefresh string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_soa_refresh" {
+    fqdn = %q
+    view = %q
+    soa_refresh = %q
+}
+`, zoneFqdn, view, soaRefresh)
+}
+
+func testAccZoneRpSoaRetry(zoneFqdn, view, soaRetry string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_soa_retry" {
+    fqdn = %q
+    view = %q
+    soa_retry = %q
+}
+`, zoneFqdn, view, soaRetry)
+}
+
+func testAccZoneRpSoaSerialNumber(zoneFqdn, view, soaSerialNumber string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_soa_serial_number" {
+    fqdn = %q
+    view = %q
+    soa_serial_number = %q
+}
+`, zoneFqdn, view, soaSerialNumber)
+}
+
+func testAccZoneRpSubstituteName(zoneFqdn, view, substituteName string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_substitute_name" {
+    fqdn = %q
+    view = %q
+    substitute_name = %q
+}
+`, zoneFqdn, view, substituteName)
+}
+
+func testAccZoneRpUseExternalPrimary(zoneFqdn, view, useExternalPrimary string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_use_external_primary" {
+    fqdn = %q
+    view = %q
+    use_external_primary = %q
+}
+`, zoneFqdn, view, useExternalPrimary)
+}
+
+func testAccZoneRpUseGridZoneTimer(zoneFqdn, view, useGridZoneTimer string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_use_grid_zone_timer" {
+    fqdn = %q
+    view = %q
+    use_grid_zone_timer = %q
+}
+`, zoneFqdn, view, useGridZoneTimer)
+}
+
+func testAccZoneRpUseLogRpz(zoneFqdn, view, useLogRpz string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_use_log_rpz" {
+    fqdn = %q
+    view = %q
+    use_log_rpz = %q
+}
+`, zoneFqdn, view, useLogRpz)
+}
+
+func testAccZoneRpUseRecordNamePolicy(zoneFqdn, view, useRecordNamePolicy string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_use_record_name_policy" {
+    fqdn = %q
+    view = %q
+    use_record_name_policy = %q
+}
+`, zoneFqdn, view, useRecordNamePolicy)
+}
+
+func testAccZoneRpUseRpzDropIpRule(zoneFqdn, view, useRpzDropIpRule string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_use_rpz_drop_ip_rule" {
+    fqdn = %q
+    view = %q
+    use_rpz_drop_ip_rule = %q
+}
+`, zoneFqdn, view, useRpzDropIpRule)
+}
+
+func testAccZoneRpUseSoaEmail(zoneFqdn, view, useSoaEmail string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_use_soa_email" {
+    fqdn = %q
+    view = %q
+    use_soa_email = %q
+}
+`, zoneFqdn, view, useSoaEmail)
+}
+
+func testAccZoneRpView(zoneFqdn, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_view" {
+	fqdn = %q
+	view = %q
+}
+`, zoneFqdn, view)
 }
