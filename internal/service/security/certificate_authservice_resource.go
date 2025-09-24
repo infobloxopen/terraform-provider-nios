@@ -72,11 +72,8 @@ func (r *CertificateAuthserviceResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
-	username := r.client.SecurityAPI.Cfg.NIOSUsername
-	password := r.client.SecurityAPI.Cfg.NIOSPassword
 	// Process OCSP responders
-	if !r.processOcspResponders(ctx, &data, baseUrl, username, password, &resp.Diagnostics) {
+	if !r.processOcspResponders(ctx, &data, &resp.Diagnostics) {
 		return
 	}
 
@@ -146,11 +143,9 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
-	username := r.client.SecurityAPI.Cfg.NIOSUsername
-	password := r.client.SecurityAPI.Cfg.NIOSPassword
+
 	// Process OCSP responders
-	if !r.processOcspResponders(ctx, &data, baseUrl, username, password, &resp.Diagnostics) {
+	if !r.processOcspResponders(ctx, &data, &resp.Diagnostics) {
 		return
 	}
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
@@ -210,12 +205,15 @@ func (r *CertificateAuthserviceResource) ImportState(ctx context.Context, req re
 func (r *CertificateAuthserviceResource) processOcspResponders(
 	ctx context.Context,
 	data *CertificateAuthserviceModel,
-	baseUrl, username, password string,
 	diag *diag.Diagnostics,
 ) bool {
 	if data.OcspResponders.IsNull() || data.OcspResponders.IsUnknown() {
 		return true
 	}
+
+	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
+	username := r.client.SecurityAPI.Cfg.NIOSUsername
+	password := r.client.SecurityAPI.Cfg.NIOSPassword
 
 	var ocspResponders []CertificateAuthserviceOcspRespondersModel
 	diagResult := data.OcspResponders.ElementsAs(ctx, &ocspResponders, false)
@@ -244,7 +242,7 @@ func (r *CertificateAuthserviceResource) processOcspResponders(
 	if diag.HasError() {
 		return false
 	}
-	
+
 	data.OcspResponders = listValue
 	return true
 }

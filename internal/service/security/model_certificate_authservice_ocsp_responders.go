@@ -66,7 +66,7 @@ var CertificateAuthserviceOcspRespondersResourceSchemaAttributes = map[string]sc
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop.",
 	},
 	"certificate_file_path": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The file path to the certificate.",
 	},
 }

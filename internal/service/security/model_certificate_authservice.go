@@ -254,7 +254,7 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 	m.MaxRetries = flex.FlattenInt64Pointer(from.MaxRetries)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OcspCheck = flex.FlattenStringPointer(from.OcspCheck)
-	// Get flattened responders from API response and preserve certificate file paths 
+	// Get flattened OCSP responders from API response and preserve certificate file paths 
 	flattenedResponders := flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
 	m.OcspResponders = preserveResponderCertificatePaths(ctx, m.OcspResponders, flattenedResponders, diags)
 	m.RecoveryInterval = flex.FlattenInt64Pointer(from.RecoveryInterval)
