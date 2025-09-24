@@ -3,6 +3,7 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -13,11 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type CertificateAuthserviceModel struct {
@@ -68,8 +69,12 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The reference to the object.",
 	},
 	"auto_populate_login": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("S_DN_CN"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("AD_SUBJECT_ISSUER", "SAN_EMAIL", "SAN_UPN", "SERIAL_NUMBER", "S_DN_CN", "S_DN_EMAIL"),
+		},
 		MarkdownDescription: "Specifies the value of the client certificate for automatically populating the NIOS login name.",
 	},
 	"ca_certificates": schema.ListAttribute{
@@ -81,8 +86,12 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The list of CA certificates.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The descriptive comment for the certificate authentication service.",
 	},
 	"disabled": schema.BoolAttribute{
@@ -104,19 +113,27 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "Determines if the lookup for user group membership information on remote services is enabled or disabled.",
 	},
 	"max_retries": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(0),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(0),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 5),
+		},
 		MarkdownDescription: "The number of validation attempts before the appliance contacts the next responder.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The name of the certificate authentication service.",
 	},
 	"ocsp_check": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		//Default:             stringdefault.StaticString("MANUAL"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("AIA_AND_MANUAL", "AIA_ONLY", "DISABLED", "MANUAL"),
+		},
 		MarkdownDescription: "Specifies the source of OCSP settings.",
 	},
 	"ocsp_responders": schema.ListNestedAttribute{
@@ -130,14 +147,17 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "An ordered list of OCSP responders that are part of the certificate authentication service.",
 	},
 	"recovery_interval": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(30),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(30),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 600),
+		},
 		MarkdownDescription: "The period of time the appliance waits before it attempts to contact a responder that is out of service again. The value must be between 1 and 600 seconds.",
 	},
 	"remote_lookup_password": schema.StringAttribute{
 		Optional:            true,
-		//Sensitive:           true,
+		Sensitive:           true,
 		MarkdownDescription: "The password for the service account.",
 	},
 	"remote_lookup_service": schema.StringAttribute{
@@ -154,6 +174,9 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(1000),
+		Validators: []validator.Int64{
+			int64validator.Between(1000, 60000),
+		},
 		MarkdownDescription: "The validation timeout period in milliseconds.",
 	},
 	"trust_model": schema.StringAttribute{
@@ -176,17 +199,6 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 }
 
-func ExpandCertificateAuthservice(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.CertificateAuthservice {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m CertificateAuthserviceModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
 
 func (m *CertificateAuthserviceModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.CertificateAuthservice {
 	if m == nil {
@@ -242,12 +254,10 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 	m.MaxRetries = flex.FlattenInt64Pointer(from.MaxRetries)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OcspCheck = flex.FlattenStringPointer(from.OcspCheck)
-	// Get flattened responders from API response
+	// Get flattened responders from API response and preserve certificate file paths 
 	flattenedResponders := flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
-	// Preserve certificate file paths
 	m.OcspResponders = preserveResponderCertificatePaths(ctx, m.OcspResponders, flattenedResponders, diags)
 	m.RecoveryInterval = flex.FlattenInt64Pointer(from.RecoveryInterval)
-	//m.RemoteLookupPassword = flex.FlattenStringPointer(from.RemoteLookupPassword)
 	m.RemoteLookupService = FlattenCertificateAuthserviceRemoteLookupService(ctx, from.RemoteLookupService, diags)
 	m.RemoteLookupUsername = flex.FlattenStringPointer(from.RemoteLookupUsername)
 	m.ResponseTimeout = flex.FlattenInt64Pointer(from.ResponseTimeout)

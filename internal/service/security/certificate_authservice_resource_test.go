@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"os"
+    "path/filepath"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -14,6 +16,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
+
+// TODO: Objects required to be set in the grid
+// cacertificate to be uploaded to NIOS Grid
+// Active Directory Service - active_dir , active_dir_test
 
 var readableAttributesForCertificateAuthservice = "auto_populate_login,ca_certificates,comment,disabled,enable_password_request,enable_remote_lookup,max_retries,name,ocsp_check,ocsp_responders,recovery_interval,remote_lookup_service,remote_lookup_username,response_timeout,trust_model,user_match_type"
 
@@ -55,6 +61,7 @@ func TestAccCertificateAuthserviceResource_basic(t *testing.T) {
 	})
 }
 
+//TODO 
 func TestAccCertificateAuthserviceResource_disappears(t *testing.T) {
 	resourceName := "nios_security_certificate_authservice.test"
 	var v security.CertificateAuthservice
@@ -74,7 +81,6 @@ func TestAccCertificateAuthserviceResource_disappears(t *testing.T) {
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
 					testAccCheckCertificateAuthserviceDisappears(context.Background(), &v),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -356,10 +362,11 @@ func TestAccCertificateAuthserviceResource_OcspCheck(t *testing.T) {
 	caCertificate := []string{
 		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
 	}
+	testDataPath := getTestDataPath()
 	ocspResponders := []map[string]any{
 		{
 			"fqdn_or_ip":            "2.2.2.2",
-			"certificate_file_path": "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/utils/cert.pem",
+			"certificate_file_path": filepath.Join(testDataPath, "cert.pem"),
 		},
 	}
 
@@ -396,21 +403,22 @@ func TestAccCertificateAuthserviceResource_OcspResponders(t *testing.T) {
 		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
 	}
 
+	testDataPath := getTestDataPath()
 	ocspResponders := []map[string]any{
 		{
 			"fqdn_or_ip":            "3.3.3.3",
-			"certificate_file_path": "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/utils/cert.pem",
+			"certificate_file_path": filepath.Join(testDataPath, "cert.pem"),
 		},
 		{
 			"fqdn_or_ip":            "3.3.32.3",
-			"certificate_file_path": "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/utils/client.cert.pem",
+			"certificate_file_path": filepath.Join(testDataPath, "client.cert.pem"),
 		},
 	}
 
 	ocspRespondersUpdate := []map[string]any{
 		{
 			"fqdn_or_ip":            "3.3.32.3",
-			"certificate_file_path": "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/utils/client.cert.pem",
+			"certificate_file_path": "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/testdata/nios_security_certificate_authservice/client.cert.pem",
 		},
 	}
 
@@ -707,6 +715,7 @@ func testAccCertificateAuthserviceBasicConfig(name string, caCertificate []strin
 	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test" {
+	ocsp_check = "DISABLED"
     name = %q
     ca_certificates = %s
 }
@@ -930,4 +939,12 @@ resource "nios_security_certificate_authservice" "test_user_match_type" {
     name = %q
 }
 `, userMatchType, caCertificateStr, name)
+}
+
+func getTestDataPath() string {
+    wd, err := os.Getwd()
+    if err != nil {
+        return "../../testdata/nios_security_certificate_authservice"
+    }
+    return filepath.Join(wd, "../../testdata/nios_security_certificate_authservice")
 }

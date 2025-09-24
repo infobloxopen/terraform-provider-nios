@@ -32,15 +32,15 @@ func ExpandCertificateAuthserviceRemoteLookupService(ctx context.Context, s type
 	if s.IsNull() || s.IsUnknown() {
 		return nil
 	}
-	
+
 	stringPtr := flex.ExpandStringPointer(s)
-    if stringPtr == nil {
-        return nil
-    }
+	if stringPtr == nil {
+		return nil
+	}
 
 	return &security.CertificateAuthserviceRemoteLookupService{
-        String: stringPtr,
-    }
+		String: stringPtr,
+	}
 }
 
 func (m *CertificateAuthserviceRemoteLookupServiceModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.CertificateAuthserviceRemoteLookupService {
@@ -57,7 +57,7 @@ func FlattenCertificateAuthserviceRemoteLookupService(ctx context.Context, from 
 	if from == nil {
 		return types.StringNull()
 	}
-	if from.CertificateAuthserviceRemoteLookupServiceOneOf == nil {
+	if from.CertificateAuthserviceRemoteLookupServiceOneOf == nil || from.CertificateAuthserviceRemoteLookupServiceOneOf.Ref == nil {
 		return types.StringNull()
 	}
 	t := from.CertificateAuthserviceRemoteLookupServiceOneOf.Ref
@@ -71,5 +71,12 @@ func (m *CertificateAuthserviceRemoteLookupServiceModel) Flatten(ctx context.Con
 	if m == nil {
 		*m = CertificateAuthserviceRemoteLookupServiceModel{}
 	}
-	m.Ref = flex.FlattenStringPointer(from.String)
+	// Check if OneOf structure exists
+	if from.CertificateAuthserviceRemoteLookupServiceOneOf == nil || from.CertificateAuthserviceRemoteLookupServiceOneOf.Ref == nil {
+		m.Ref = types.StringNull()
+		return
+	}
+
+	// Extract the Ref from the OneOf structure
+	m.Ref = flex.FlattenStringPointer(from.CertificateAuthserviceRemoteLookupServiceOneOf.Ref)
 }

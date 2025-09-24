@@ -20,7 +20,7 @@ resource "nios_security_certificate_authservice" "certificate_authservice_with_a
   ocsp_check              = "MANUAL"
   ocsp_responders = [
     {
-      certificate_file_path = "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/utils/cert.pem"
+      certificate_file_path = "<path-to-the-certificate-file>"
       fqdn_or_ip            = "2.2.2.2"
     }
   ]
