@@ -407,7 +407,7 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() || option.Value.IsUnknown() || option.Value.ValueString() == "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
