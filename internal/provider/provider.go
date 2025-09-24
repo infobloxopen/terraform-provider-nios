@@ -16,6 +16,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/discovery"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
@@ -120,6 +121,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewNsgroupDelegationResource,
 		dns.NewNsgroupForwardingmemberResource,
 		dns.NewNsgroupForwardstubserverResource,
+		dns.NewNsgroupStubmemberResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -141,7 +143,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		cloud.NewAwsuserResource,
 
 		security.NewAdminuserResource,
+		security.NewPermissionResource,
 		security.NewAdminroleResource,
+		security.NewSnmpuserResource,
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
@@ -155,6 +159,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewExtensibleattributedefResource,
 		grid.NewUpgradegroupResource,
 		grid.NewDistributionscheduleResource,
+
+		discovery.NewDiscoveryCredentialgroupResource,
 
 		notification.NewNotificationRuleResource,
 	}
@@ -187,6 +193,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewNsgroupDelegationDataSource,
 		dns.NewNsgroupForwardingmemberDataSource,
 		dns.NewNsgroupForwardstubserverDataSource,
+		dns.NewNsgroupStubmemberDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -208,6 +215,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+		security.NewPermissionDataSource,
+		security.NewSnmpuserDataSource,
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
@@ -221,6 +230,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewExtensibleattributedefDataSource,
 		grid.NewUpgradegroupDataSource,
 		grid.NewDistributionscheduleDataSource,
+
+		discovery.NewDiscoveryCredentialgroupDataSource,
 
 		notification.NewNotificationRuleDataSource,
 	}
