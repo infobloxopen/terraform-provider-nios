@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -91,7 +92,6 @@ func (r *SmartfolderGlobalResource) Create(ctx context.Context, req resource.Cre
 }
 
 func (r *SmartfolderGlobalResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	//var diags diag.Diagnostics
 	var data SmartfolderGlobalModel
 
 	// Read Terraform prior state data into the model
@@ -108,7 +108,7 @@ func (r *SmartfolderGlobalResource) Read(ctx context.Context, req resource.ReadR
 		ReturnAsObject(1).
 		Execute()
 
-	// Handle if the resource is not found
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -120,6 +120,7 @@ func (r *SmartfolderGlobalResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	res := apiRes.GetSmartfolderGlobalResponseObjectAsResult.GetResult()
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
@@ -138,7 +139,6 @@ func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
-
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -151,7 +151,6 @@ func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.Upd
 		ReturnFieldsPlus(readableAttributesForSmartfolderGlobal).
 		ReturnAsObject(1).
 		Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update SmartfolderGlobal, got error: %s", err))
 		return
@@ -187,8 +186,6 @@ func (r *SmartfolderGlobalResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 }
-
-// }
 
 func (r *SmartfolderGlobalResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
