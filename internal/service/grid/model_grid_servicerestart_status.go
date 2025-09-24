@@ -117,9 +117,7 @@ func (m *GridServicerestartStatusModel) Expand(ctx context.Context, diags *diag.
 	if m == nil {
 		return nil
 	}
-	to := &grid.GridServicerestartStatus{
-		Ref: flex.ExpandStringPointer(m.Ref),
-	}
+	to := &grid.GridServicerestartStatus{}
 	return to
 }
 

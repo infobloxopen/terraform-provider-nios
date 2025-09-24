@@ -14,7 +14,7 @@ Manages a GRID Service Restart Group.
 
 ```terraform
 //Create a Service Restart Group with Basic Fields
-resource "nios_grid_servicerestart_group" "grid_servicerestart_group_basic" {
+resource "nios_grid_servicerestart_group" "grid_servicerestart_group_with_basic_fields" {
   name    = "example_grid_service_restart_group"
   service = "DNS"
 }
