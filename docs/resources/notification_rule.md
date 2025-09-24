@@ -75,7 +75,7 @@ resource "nios_notification_rule" "notification_rule_basic_fields" {
 
 // Create a Notification Rule with Basic Fields (Event Type : DNS_RPZ)
 resource "nios_notification_rule" "example_1" {
-  name                = "example-notification-rule-abc123"
+  name                = "example-notification-rule-2"
   notification_target = "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
   event_type          = "DNS_RPZ"
   notification_action = "RESTAPI_TEMPLATE_INSTANCE"
@@ -98,6 +98,17 @@ resource "nios_notification_rule" "example_1" {
   ]
   template_instance = {
     template = "syslog_action_template"
+  }
+}
+
+// Create a Notification Rule with Basic Fields (Event Type : IPAM)
+resource "nios_notification_rule" "example_2" {
+  name                = "example-notification-rule-3"
+  notification_target = "pxgrid:endpoint/b25lLmVuZHBvaW50JDU:cisco"
+  event_type          = "IPAM"
+  notification_action = "RESTAPI_TEMPLATE_INSTANCE"
+  template_instance = {
+    template = "IPAM_PxgridEvent"
   }
 }
 ```

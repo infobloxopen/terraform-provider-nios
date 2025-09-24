@@ -16,7 +16,7 @@ description: |-
 // Retrieve a specific Notification Rule by filters
 data "nios_notification_rule" "get_notification_rule_using_filters" {
   filters = {
-    name = "ex-rule-tf"
+    name = "example_notification_rule"
   }
 }
 

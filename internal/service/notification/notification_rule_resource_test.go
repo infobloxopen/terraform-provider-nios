@@ -17,8 +17,15 @@ import (
 )
 
 // OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// Notification Rest Endpoint - rest_api, syslog
-// Notification Template - DHCP_Lease, syslog_action_template
+// Notification Rest Endpoint - rest_api, syslog, cisco
+// Notification Template - DHCP_Lease, syslog_action_template, IPAM_PxgridEvent
+
+// TODO
+// TestAccNotificationRuleResource_AllMembers
+// TestAccNotificationRuleResource_SelectedMembers
+// TestAccNotificationRuleResource_EventPriority
+// TestAccNotificationRuleResource_ScheduledEvent
+
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
 
 var (
@@ -60,7 +67,6 @@ func TestAccNotificationRuleResource_basic(t *testing.T) {
 				Config: testAccNotificationRuleBasicConfig(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "event_type", eventType),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "notification_action", notificationAction),
@@ -75,8 +81,13 @@ func TestAccNotificationRuleResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op2", "DHCP_LEASE_STATE_ACTIVE"),
 					resource.TestCheckResourceAttr(resourceName, "expression_list.1.op2_type", "STRING"),
 					resource.TestCheckResourceAttr(resourceName, "expression_list.2.op", "ENDLIST"),
-
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "all_members", "true"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication", "false"),
+					resource.TestCheckResourceAttr(resourceName, "enable_event_deduplication_log", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_publish_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -105,12 +116,12 @@ func TestAccNotificationRuleResource_disappears(t *testing.T) {
 	})
 }
 
-// You can select any Grid member for outbound notification rules
 func TestAccNotificationRuleResource_AllMembers(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_all_members"
 	var v notification.NotificationRule
+	t.Skip("Additional config is required for test")
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
-	selectedMembers := []string{"infoblox.localdomain1"}
+	selectedMembers := []string{"member/b25lLnZpcnR1YWxfbm9kZSQw:infoblox.localdomain"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -426,6 +437,7 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 
 // The event priority can be configured only for outbound notification rules that contain the scheduled event type
 func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
+	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_event_priority"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -443,13 +455,13 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 				),
 			},
 			// Update and Read
-			// {
-			// 	Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "HIGH"),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-			// 		resource.TestCheckResourceAttr(resourceName, "event_priority", "HIGH"),
-			// 	),
-			// },
+			{
+				Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "HIGH"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "event_priority", "HIGH"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -617,17 +629,17 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "notification_action", "RESTAPI_TEMPLATE_INSTANCE"),
 				),
 			},
 			// Update and Read
-			{
-				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_UPDATE_REPLACE_ME"),
-				),
-			},
+			// {
+			// 	Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+			// 		resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_UPDATE_REPLACE_ME"),
+			// 	),
+			// },
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -688,6 +700,16 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_publish_settings"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	notificationTarget := "pxgrid:endpoint/b25lLmVuZHBvaW50JDU:cisco"
+	templateInstance := map[string]any{
+		"template": "IPAM_PxgridEvent",
+	}
+	publishSettings := map[string]any{
+		"enabled_attributes": []string{"CLIENT_ID", "IPADDRESS"},
+	}
+	updatedPublishSettings := map[string]any{
+		"enabled_attributes": []string{"CLIENT_ID", "IPADDRESS", "LEASE_STATE"},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -695,18 +717,23 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRulePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "PUBLISH_SETTINGS_REPLACE_ME"),
+				Config: testAccNotificationRulePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, publishSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "publish_settings", "PUBLISH_SETTINGS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings.enabled_attributes.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings.enabled_attributes.0", "CLIENT_ID"),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings.enabled_attributes.1", "IPADDRESS"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRulePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "PUBLISH_SETTINGS_UPDATE_REPLACE_ME"),
+				Config: testAccNotificationRulePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, updatedPublishSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "publish_settings", "PUBLISH_SETTINGS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings.enabled_attributes.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings.enabled_attributes.0", "CLIENT_ID"),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings.enabled_attributes.1", "IPADDRESS"),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings.enabled_attributes.2", "LEASE_STATE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -715,6 +742,7 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
+	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_scheduled_event"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -745,6 +773,7 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_SelectedMembers(t *testing.T) {
+	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_selected_members"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -829,6 +858,13 @@ func TestAccNotificationRuleResource_UsePublishSettings(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_use_publish_settings"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	updatedNotificationTarget := "pxgrid:endpoint/b25lLmVuZHBvaW50JDU:cisco"
+	updatedTemplateInstance := map[string]any{
+		"template": "IPAM_PxgridEvent",
+	}
+	publishSettings := map[string]any{
+		"enabled_attributes": []string{"CLIENT_ID", "IPADDRESS"},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -836,18 +872,18 @@ func TestAccNotificationRuleResource_UsePublishSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleUsePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "USE_PUBLISH_SETTINGS_REPLACE_ME"),
+				Config: testAccNotificationRuleUsePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_publish_settings", "USE_PUBLISH_SETTINGS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_publish_settings", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleUsePublishSettings(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "USE_PUBLISH_SETTINGS_UPDATE_REPLACE_ME"),
+				Config: testAccNotificationRuleUsePublishSettingsUpdate(eventType, expressionList, name, notificationAction, updatedNotificationTarget, updatedTemplateInstance, publishSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_publish_settings", "USE_PUBLISH_SETTINGS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_publish_settings", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1127,16 +1163,18 @@ resource "nios_notification_rule" "test_name" {
 }
 
 func testAccNotificationRuleNotificationAction(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_notification_action" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
 
 func testAccNotificationRuleNotificationTarget(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
@@ -1154,18 +1192,22 @@ resource "nios_notification_rule" "test_notification_target" {
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
 
-func testAccNotificationRulePublishSettings(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, publishSettings string) string {
+func testAccNotificationRulePublishSettings(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, publishSettings map[string]any, usePublishSettings string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	publishSettingsHCL := utils.ConvertMapToHCL(publishSettings)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_publish_settings" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
-    publish_settings = %q
+    template_instance = %s
+    publish_settings = %s
+	use_publish_settings = %q
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, publishSettings)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, publishSettingsHCL, usePublishSettings)
 }
 
 func testAccNotificationRuleScheduledEvent(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, scheduledEvent string) string {
@@ -1212,15 +1254,35 @@ resource "nios_notification_rule" "test_template_instance" {
 }
 
 func testAccNotificationRuleUsePublishSettings(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, usePublishSettings string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_use_publish_settings" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
+    template_instance = %s
     use_publish_settings = %q
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, usePublishSettings)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, usePublishSettings)
+}
+
+func testAccNotificationRuleUsePublishSettingsUpdate(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, publishSettings map[string]any, usePublishSettings string) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	publishSettingsHCL := utils.ConvertMapToHCL(publishSettings)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_use_publish_settings" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+	publish_settings = %s
+    use_publish_settings = %q
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, publishSettingsHCL, usePublishSettings)
 }
