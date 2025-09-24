@@ -35,7 +35,7 @@ resource "nios_security_certificate_authservice" "certificate_authservice_with_a
   ocsp_check              = "MANUAL"
   ocsp_responders = [
     {
-      certificate_file_path = "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/utils/cert.pem"
+      certificate_file_path = "<path-to-the-certificate-file>"
       fqdn_or_ip            = "2.2.2.2"
     }
   ]
@@ -67,7 +67,7 @@ resource "nios_security_certificate_authservice" "certificate_authservice_with_a
 - `ocsp_check` (String) Specifies the source of OCSP settings.
 - `ocsp_responders` (Attributes List) An ordered list of OCSP responders that are part of the certificate authentication service. (see [below for nested schema](#nestedatt--ocsp_responders))
 - `recovery_interval` (Number) The period of time the appliance waits before it attempts to contact a responder that is out of service again. The value must be between 1 and 600 seconds.
-- `remote_lookup_password` (String) The password for the service account.
+- `remote_lookup_password` (String, Sensitive) The password for the service account.
 - `remote_lookup_service` (String) The password for the service account.
 - `remote_lookup_username` (String) The username for the service account.
 - `response_timeout` (Number) The validation timeout period in milliseconds.

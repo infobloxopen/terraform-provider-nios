@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -93,7 +92,6 @@ func (m *CertificateAuthserviceOcspRespondersModel) Expand(ctx context.Context, 
 		Port:             flex.ExpandInt64Pointer(m.Port),
 		Comment:          flex.ExpandStringPointer(m.Comment),
 		Disabled:         flex.ExpandBoolPointer(m.Disabled),
-		CertificateToken: flex.ExpandStringPointer(m.CertificateToken),
 	}
 	return to
 }
@@ -120,6 +118,5 @@ func (m *CertificateAuthserviceOcspRespondersModel) Flatten(ctx context.Context,
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disabled = types.BoolPointerValue(from.Disabled)
-	//m.Certificate = flex.FlattenStringPointer(from.Certificate)
 	m.CertificateToken = flex.FlattenStringPointer(from.CertificateToken)
 }
