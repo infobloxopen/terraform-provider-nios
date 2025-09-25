@@ -16,6 +16,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -315,8 +316,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthAllowQueryResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default: listdefault.StaticValue(
+			types.ListNull(types.ObjectType{AttrTypes: ZoneAuthAllowQueryAttrTypes}),
+		),
 		MarkdownDescription: "Determines whether DNS queries are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_query")),
@@ -327,8 +331,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthAllowTransferResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default: listdefault.StaticValue(
+			types.ListNull(types.ObjectType{AttrTypes: ZoneAuthAllowTransferAttrTypes}),
+		),
 		MarkdownDescription: "Determines whether zone transfers are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_transfer")),
@@ -339,8 +346,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneAuthAllowUpdateResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default: listdefault.StaticValue(
+			types.ListNull(types.ObjectType{AttrTypes: ZoneAuthAllowUpdateAttrTypes}),
+		),
 		MarkdownDescription: "Determines whether dynamic DNS updates are allowed from a named ACL, or from a list of IPv4/IPv6 addresses, networks, and TSIG keys for the hosts.",
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_allow_update")),
