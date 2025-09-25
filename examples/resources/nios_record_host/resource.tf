@@ -77,3 +77,11 @@ resource "nios_ip_association" "association2" {
   configure_for_dhcp = true
   internal_id        = nios_ip_allocation.allocation2.internal_id
 }
+
+# Associate MAC address with host3's IP without DHCP configuration
+resource "nios_ip_association" "association3" {
+  ref                = nios_ip_allocation.allocation3.ref
+  mac                = "12:00:43:fe:9a:8d"
+  configure_for_dhcp = false
+  internal_id        = nios_ip_allocation.allocation3.internal_id
+}
