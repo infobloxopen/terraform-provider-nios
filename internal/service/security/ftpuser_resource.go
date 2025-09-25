@@ -388,4 +388,10 @@ func (r *FtpuserResource) ValidateConfig(ctx context.Context, req resource.Valid
 			"You cannot specify 'home_dir' when 'create_home_dir' is set to true. When create_home_dir is true, the system automatically creates the home directory using the username.",
 		)
 	}
+	if !createHomeDir.IsNull() && !createHomeDir.ValueBool() && homeDir.IsNull() || homeDir.IsUnknown() {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"You must specify home_dir when create_home_dir is set to False.",
+		)
+	}
 }
