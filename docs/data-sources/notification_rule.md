@@ -48,7 +48,6 @@ Required:
 
 Optional:
 
-- `all_members` (Boolean) Determines whether the notification rule is applied on all members or not. When this is set to False, the notification rule is applied only on selected_members.
 - `comment` (String) The notification rule descriptive comment.
 - `disable` (Boolean) Determines whether a notification rule is disabled or not. When this is set to False, the notification rule is enabled.
 - `enable_event_deduplication` (Boolean) Determines whether the notification rule for event deduplication is enabled. Note that to enable event deduplication, you must set at least one deduplication field.
@@ -60,13 +59,14 @@ Optional:
 - `expression_list` (Attributes List) The notification rule expression list. (see [below for nested schema](#nestedatt--result--expression_list))
 - `publish_settings` (Attributes) The CISCO ISE publish settings. (see [below for nested schema](#nestedatt--result--publish_settings))
 - `scheduled_event` (Attributes) Schedule setting that must be specified if event_type is SCHEDULE (see [below for nested schema](#nestedatt--result--scheduled_event))
-- `selected_members` (List of String) The list of the members on which the notification rule is applied.
 - `template_instance` (Attributes) The notification REST template instance. (see [below for nested schema](#nestedatt--result--template_instance))
 - `use_publish_settings` (Boolean) Use flag for: publish_settings
 
 Read-Only:
 
+- `all_members` (Boolean) Determines whether the notification rule is applied on all members or not. When this is set to False, the notification rule is applied only on selected_members.
 - `ref` (String) The reference to the object.
+- `selected_members` (List of String) The list of the members on which the notification rule is applied. This field is deprecated.
 
 <a id="nestedatt--result--expression_list"></a>
 ### Nested Schema for `result.expression_list`

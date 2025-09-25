@@ -21,8 +21,6 @@ import (
 // Notification Template - DHCP_Lease, syslog_action_template, IPAM_PxgridEvent
 
 // TODO
-// TestAccNotificationRuleResource_AllMembers
-// TestAccNotificationRuleResource_SelectedMembers
 // TestAccNotificationRuleResource_EventPriority
 // TestAccNotificationRuleResource_ScheduledEvent
 
@@ -112,38 +110,6 @@ func TestAccNotificationRuleResource_disappears(t *testing.T) {
 					testAccCheckNotificationRuleDisappears(context.Background(), &v),
 				),
 			},
-		},
-	})
-}
-
-func TestAccNotificationRuleResource_AllMembers(t *testing.T) {
-	var resourceName = "nios_notification_rule.test_all_members"
-	var v notification.NotificationRule
-	t.Skip("Additional config is required for test")
-	name := acctest.RandomNameWithPrefix("example-notification-rule")
-	selectedMembers := []string{"member/b25lLnZpcnR1YWxfbm9kZSQw:infoblox.localdomain"}
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNotificationRuleAllMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "true"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "all_members", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccNotificationRuleAllMembersUpdate(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "false", selectedMembers),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "all_members", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -772,37 +738,6 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 	})
 }
 
-func TestAccNotificationRuleResource_SelectedMembers(t *testing.T) {
-	t.Skip("Additional config is required for test")
-	var resourceName = "nios_notification_rule.test_selected_members"
-	var v notification.NotificationRule
-	name := acctest.RandomNameWithPrefix("example-notification-rule")
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNotificationRuleSelectedMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "SELECTED_MEMBERS_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "selected_members", "SELECTED_MEMBERS_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccNotificationRuleSelectedMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "SELECTED_MEMBERS_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "selected_members", "SELECTED_MEMBERS_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 	var resourceName = "nios_notification_rule.test_template_instance"
 	var v notification.NotificationRule
@@ -962,40 +897,6 @@ resource "nios_notification_rule" "test" {
     template_instance = %s
 }
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
-}
-
-func testAccNotificationRuleAllMembers(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, allMembers string) string {
-	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
-	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
-	return fmt.Sprintf(`
-resource "nios_notification_rule" "test_all_members" {
-    event_type = %q
-    expression_list = %s
-    name = %q
-    notification_action = %q
-    notification_target = %q
-    template_instance = %s
-    all_members = %q
-}
-`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, allMembers)
-}
-
-func testAccNotificationRuleAllMembersUpdate(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, allMembers string, selectedMembers []string) string {
-	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
-	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
-	selectedMembersHCL := utils.ConvertStringSliceToHCL(selectedMembers)
-	return fmt.Sprintf(`
-resource "nios_notification_rule" "test_all_members" {
-    event_type = %q
-    expression_list = %s
-    name = %q
-    notification_action = %q
-    notification_target = %q
-    template_instance = %s
-    all_members = %q
-	selected_members = %s
-}
-`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, allMembers, selectedMembersHCL)
 }
 
 func testAccNotificationRuleComment(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, comment string) string {
@@ -1222,20 +1123,6 @@ resource "nios_notification_rule" "test_scheduled_event" {
     scheduled_event = %q
 }
 `, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, scheduledEvent)
-}
-
-func testAccNotificationRuleSelectedMembers(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, selectedMembers string) string {
-	return fmt.Sprintf(`
-resource "nios_notification_rule" "test_selected_members" {
-    event_type = %q
-    expression_list = %q
-    name = %q
-    notification_action = %q
-    notification_target = %q
-    template_instance = %q
-    selected_members = %q
-}
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, selectedMembers)
 }
 
 func testAccNotificationRuleTemplateInstance(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
