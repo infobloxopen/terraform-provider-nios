@@ -2,7 +2,6 @@ package grid
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -14,7 +13,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -95,22 +93,8 @@ func (m *DistributionscheduleUpgradeGroupsModel) Expand(ctx context.Context, dia
 		UpgradeTime:                flex.ExpandInt64Pointer(m.UpgradeTime),
 	}
 
-	if !m.DistributionTime.IsNull() && !m.DistributionTime.IsUnknown() {
-		distributionTime, err := utils.ToUnixWithTimezone(m.DistributionTime.ValueString(), m.TimeZone.ValueString())
-		if err != nil {
-			diags.AddError(
-				"Invalid Distribution Time or Timezone",
-				fmt.Sprintf(
-					"Failed to parse distribution_time %q with timezone %q: %s",
-					m.DistributionTime.ValueString(),
-					m.TimeZone.ValueString(),
-					err.Error(),
-				),
-			)
-			return nil
-		}
-		to.DistributionTime = &distributionTime
-	}
+	to.DistributionTime = flex.ExpandTimeToUnix(m.DistributionTime, diags)
+
 	return to
 }
 
@@ -126,11 +110,6 @@ func FlattenDistributionscheduleUpgradeGroups(ctx context.Context, from *grid.Di
 }
 
 func (m *DistributionscheduleUpgradeGroupsModel) Flatten(ctx context.Context, from *grid.DistributionscheduleUpgradeGroups, diags *diag.Diagnostics) {
-	var (
-		distributionTime string
-		err              error
-	)
-
 	if from == nil {
 		return
 	}
@@ -138,26 +117,10 @@ func (m *DistributionscheduleUpgradeGroupsModel) Flatten(ctx context.Context, fr
 		*m = DistributionscheduleUpgradeGroupsModel{}
 	}
 
-	if from.DistributionTime != nil && from.TimeZone != nil {
-		distributionTime, err = utils.FromUnixWithTimezone(*from.DistributionTime, *from.TimeZone)
-		if err != nil {
-			diags.AddError(
-				"Invalid Distribution Time or Timezone",
-				fmt.Sprintf(
-					"Failed to format distribution_time %d (Unix) with timezone %q: %s",
-					*from.DistributionTime,
-					*from.TimeZone,
-					err,
-				),
-			)
-			return
-		}
-	}
-
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.DistributionDependentGroup = flex.FlattenStringPointer(from.DistributionDependentGroup)
 	m.UpgradeDependentGroup = flex.FlattenStringPointer(from.UpgradeDependentGroup)
-	m.DistributionTime = types.StringValue(distributionTime)
+	m.DistributionTime = flex.FlattenUnixTime(from.DistributionTime, diags)
 	m.UpgradeTime = flex.FlattenInt64Pointer(from.UpgradeTime)
 }

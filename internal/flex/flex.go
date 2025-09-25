@@ -631,16 +631,15 @@ func FlattenIPv6CIDR(ipv6addr *string) cidrtypes.IPv6Prefix {
 	}
 }
 
-func ExpandTimeToUnix(time, timezone types.String, diags *diag.Diagnostics) *int64 {
+func ExpandTimeToUnix(time types.String, diags *diag.Diagnostics) *int64 {
 	if !time.IsNull() && !time.IsUnknown() {
-		startTime, err := utils.ToUnixWithTimezone(time.ValueString(), timezone.ValueString())
+		startTime, err := utils.ToUnixWithTimezone(time.ValueString())
 		if err != nil {
 			diags.AddError(
 				"Invalid Time or Timezone",
 				fmt.Sprintf(
-					"Failed to parse ßtime %q with timezone %q: %s",
+					"Failed to parse time %q: %s",
 					time.ValueString(),
-					timezone.ValueString(),
 					err.Error(),
 				),
 			)
@@ -651,20 +650,19 @@ func ExpandTimeToUnix(time, timezone types.String, diags *diag.Diagnostics) *int
 	return nil
 }
 
-func FlattenUnixTime(timestamp *int64, timezone *string, diags *diag.Diagnostics) types.String {
+func FlattenUnixTime(timestamp *int64, diags *diag.Diagnostics) types.String {
 	var (
 		time string
 		err  error
 	)
-	if timestamp != nil && timezone != nil {
-		time, err = utils.FromUnixWithTimezone(*timestamp, *timezone)
+	if timestamp != nil {
+		time, err = utils.FromUnixWithTimezone(*timestamp)
 		if err != nil {
 			diags.AddError(
 				"Invalid Time or Timezone",
 				fmt.Sprintf(
-					"Failed to format time %d (Unix) with timezone %q: %s",
+					"Failed to format time %d (Unix): %s",
 					*timestamp,
-					*timezone,
 					err,
 				),
 			)

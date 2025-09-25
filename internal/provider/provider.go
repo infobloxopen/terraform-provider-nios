@@ -13,6 +13,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -144,6 +145,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		cloud.NewAwsuserResource,
 
 		security.NewAdminuserResource,
+		security.NewPermissionResource,
 		security.NewAdminroleResource,
 		security.NewSnmpuserResource,
 
@@ -158,6 +160,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewNatgroupResource,
 		grid.NewExtensibleattributedefResource,
 		grid.NewUpgradegroupResource,
+		grid.NewGridServicerestartGroupResource,
 		grid.NewDistributionscheduleResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
@@ -214,6 +217,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+		security.NewPermissionDataSource,
 		security.NewSnmpuserDataSource,
 
 		misc.NewRulesetDataSource,
@@ -227,6 +231,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewNatgroupDataSource,
 		grid.NewExtensibleattributedefDataSource,
 		grid.NewUpgradegroupDataSource,
+		grid.NewGridServicerestartGroupDataSource,
 		grid.NewDistributionscheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
