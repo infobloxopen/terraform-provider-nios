@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
@@ -65,25 +65,56 @@ func (r *ZoneAuthResource) Configure(ctx context.Context, req resource.Configure
 }
 
 func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var useGridZoneTimer types.Bool
-	req.Config.GetAttribute(ctx, path.Root("use_grid_zone_timer"), &useGridZoneTimer)
 
-	if useGridZoneTimer.IsNull() {
+	var data ZoneAuthModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if !useGridZoneTimer.ValueBool() {
-		var soaDefaultTTL, soaExpire, soaNegativeTTL, soaRefresh, soaRetry types.Int64
-		req.Config.GetAttribute(ctx, path.Root("soa_default_ttl"), &soaDefaultTTL)
-		req.Config.GetAttribute(ctx, path.Root("soa_expire"), &soaExpire)
-		req.Config.GetAttribute(ctx, path.Root("soa_negative_ttl"), &soaNegativeTTL)
-		req.Config.GetAttribute(ctx, path.Root("soa_refresh"), &soaRefresh)
-		req.Config.GetAttribute(ctx, path.Root("soa_retry"), &soaRetry)
-
-		if !soaDefaultTTL.IsNull() || !soaExpire.IsNull() || !soaNegativeTTL.IsNull() || !soaRefresh.IsNull() || !soaRetry.IsNull() {
+	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.ValueBool() {
+		if !data.SoaDefaultTtl.IsNull() || !data.SoaExpire.IsNull() || !data.SoaNegativeTtl.IsNull() || !data.SoaRefresh.IsNull() || !data.SoaRetry.IsNull() {
 			resp.Diagnostics.AddError(
 				"SOA Values Not Allowed",
 				"When grid_zone_timer is set to false, the SOA Values (soa_default_ttl, soa_expire, soa_negative_ttl, soa_refresh, soa_retry) will reset to their default values. And hence they should not be set in the configuration. Either remove these values or set use_grid_zone_timer = true.",
+			)
+		}
+	}
+
+	// Validation for mutually exclusive primary servers
+	specifiedPrimaries := []string{}
+
+	if !data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown() {
+		specifiedPrimaries = append(specifiedPrimaries, "grid_primary")
+	}
+
+	if !data.ExternalPrimaries.IsNull() && !data.ExternalPrimaries.IsUnknown() {
+		specifiedPrimaries = append(specifiedPrimaries, "external_primaries")
+	}
+
+	if !data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown() {
+		specifiedPrimaries = append(specifiedPrimaries, "ms_primaries")
+	}
+
+	// If more than one primary server is specified, raise an error
+	if len(specifiedPrimaries) > 1 {
+		resp.Diagnostics.AddError(
+			"Conflicting Primary Servers",
+			fmt.Sprintf(
+				"Only one of grid_primary, external_primaries, or ms_primaries can be specified. Found: %s.",
+				strings.Join(specifiedPrimaries, ", "),
+			),
+		)
+		return
+	}
+
+	if !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown() ||
+		!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown() ||
+		!data.MsSecondaries.IsNull() && !data.MsSecondaries.IsUnknown() {
+		if len(specifiedPrimaries) == 0 || len(specifiedPrimaries) > 1 {
+			resp.Diagnostics.AddError(
+				"Secondary Server Requires Exactly One Primary Server",
+				"When secondary servers (grid_secondaries, external_secondaries, or ms_secondaries) are specified, exactly one primary server (grid_primary, external_primaries, or ms_primaries) is required.",
 			)
 		}
 	}
