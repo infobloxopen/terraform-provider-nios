@@ -39,6 +39,7 @@ var NotificationRuleTemplateInstanceResourceSchemaAttributes = map[string]schema
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The notification REST template parameters.",
 	},
 }

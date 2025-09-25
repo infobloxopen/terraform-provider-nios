@@ -72,9 +72,7 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"all_members": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines whether the notification rule is applied on all members or not. When this is set to False, the notification rule is applied only on selected_members.",
 	},
 	"comment": schema.StringAttribute{
@@ -117,6 +115,7 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of fields that must be used in the notification rule for event deduplication.",
 	},
 	"event_deduplication_lookback_period": schema.Int64Attribute{
@@ -152,6 +151,7 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The notification rule expression list.",
 	},
 	"name": schema.StringAttribute{
@@ -175,6 +175,7 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 	"publish_settings": schema.SingleNestedAttribute{
 		Attributes: NotificationRulePublishSettingsResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_publish_settings")),
 		},
@@ -183,19 +184,18 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 	"scheduled_event": schema.SingleNestedAttribute{
 		Attributes:          NotificationRuleScheduledEventResourceSchemaAttributes,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Schedule setting that must be specified if event_type is SCHEDULE",
 	},
 	"selected_members": schema.ListAttribute{
-		ElementType: types.StringType,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
-		Optional:            true,
-		MarkdownDescription: "The list of the members on which the notification rule is applied.",
+		ElementType:         types.StringType,
+		Computed:            true,
+		MarkdownDescription: "The list of the members on which the notification rule is applied. This field is deprecated.",
 	},
 	"template_instance": schema.SingleNestedAttribute{
 		Attributes:          NotificationRuleTemplateInstanceResourceSchemaAttributes,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The notification REST template instance.",
 	},
 	"use_publish_settings": schema.BoolAttribute{
@@ -211,7 +211,6 @@ func (m *NotificationRuleModel) Expand(ctx context.Context, diags *diag.Diagnost
 		return nil
 	}
 	to := &notification.NotificationRule{
-		AllMembers:                       flex.ExpandBoolPointer(m.AllMembers),
 		Comment:                          flex.ExpandStringPointer(m.Comment),
 		Disable:                          flex.ExpandBoolPointer(m.Disable),
 		EnableEventDeduplication:         flex.ExpandBoolPointer(m.EnableEventDeduplication),
@@ -225,7 +224,6 @@ func (m *NotificationRuleModel) Expand(ctx context.Context, diags *diag.Diagnost
 		NotificationTarget:               flex.ExpandStringPointer(m.NotificationTarget),
 		PublishSettings:                  ExpandNotificationRulePublishSettings(ctx, m.PublishSettings, diags),
 		ScheduledEvent:                   ExpandNotificationRuleScheduledEvent(ctx, m.ScheduledEvent, diags),
-		SelectedMembers:                  flex.ExpandFrameworkListString(ctx, m.SelectedMembers, diags),
 		TemplateInstance:                 ExpandNotificationRuleTemplateInstance(ctx, m.TemplateInstance, diags),
 		UsePublishSettings:               flex.ExpandBoolPointer(m.UsePublishSettings),
 	}
