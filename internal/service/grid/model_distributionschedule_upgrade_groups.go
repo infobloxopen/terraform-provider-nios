@@ -93,7 +93,7 @@ func (m *DistributionscheduleUpgradeGroupsModel) Expand(ctx context.Context, dia
 		UpgradeTime:                flex.ExpandInt64Pointer(m.UpgradeTime),
 	}
 
-	to.DistributionTime = flex.ExpandTimeToUnix(m.DistributionTime, m.TimeZone, diags)
+	to.DistributionTime = flex.ExpandTimeToUnix(m.DistributionTime, diags)
 
 	return to
 }
@@ -122,5 +122,6 @@ func (m *DistributionscheduleUpgradeGroupsModel) Flatten(ctx context.Context, fr
 	m.DistributionDependentGroup = flex.FlattenStringPointer(from.DistributionDependentGroup)
 	m.DistributionTime = flex.FlattenUnixTime(from.DistributionTime, from.TimeZone, diags)
 	m.UpgradeDependentGroup = flex.FlattenStringPointer(from.UpgradeDependentGroup)
+	m.DistributionTime = flex.FlattenUnixTime(from.DistributionTime, diags)
 	m.UpgradeTime = flex.FlattenInt64Pointer(from.UpgradeTime)
 }
