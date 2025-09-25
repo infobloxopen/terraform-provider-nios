@@ -361,14 +361,12 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 		}
 
 		specialOptionsNum := map[int64]bool{
-			3: true,
-			//"router-templates":         true,
+			3:  true,
 			6:  true,
 			15: true,
 			28: true,
-			//"broadcast-address-offset": true,
 			51: true,
-			//"dhcp6.name-servers":       true,
+			23: true,
 		}
 
 		var options []RangetemplateOptionsModel
