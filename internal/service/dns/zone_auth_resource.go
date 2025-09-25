@@ -68,6 +68,9 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 
 	var data ZoneAuthModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.ValueBool() {
 		if !data.SoaDefaultTtl.IsNull() || !data.SoaExpire.IsNull() || !data.SoaNegativeTtl.IsNull() || !data.SoaRefresh.IsNull() || !data.SoaRetry.IsNull() {
