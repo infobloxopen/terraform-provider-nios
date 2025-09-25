@@ -71,15 +71,13 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
-		if data.DdnsServerAlwaysUpdates.ValueBool() {
-			// Check if ddns_use_option81 is set to true
-			if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ddns_server_always_updates"),
-					"Invalid Configuration",
-					"When ddns_server_always_updates is enabled, ddns_use_option81 must be set to true",
-				)
-			}
+		// Check if ddns_use_option81 is set to true
+		if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ddns_server_always_updates"),
+				"Invalid Configuration",
+				"ddns_use_option81 must be set to true to set ddns_server_always_updates",
+			)
 		}
 	}
 
@@ -292,6 +290,25 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
+		return
+	}
+	var stateNetworkView string
+	var planNetworkView string
+
+	// Get the current and planned values for the "name" field
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("network_view"), &stateNetworkView)...)
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("network_view"), &planNetworkView)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Restrict changes to the "name" field
+	if stateNetworkView != planNetworkView {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("network_view"),
+			"Field Update Not Allowed",
+			"The 'network_view' field cannot be updated after creation.",
+		)
 		return
 	}
 
