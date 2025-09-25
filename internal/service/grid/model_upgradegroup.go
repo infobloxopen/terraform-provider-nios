@@ -139,8 +139,8 @@ func (m *UpgradegroupModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		UpgradePolicy:              flex.ExpandStringPointer(m.UpgradePolicy),
 	}
 
-	to.DistributionTime = flex.ExpandTimeToUnix(m.DistributionTime, m.TimeZone, diags)
-	to.UpgradeTime = flex.ExpandTimeToUnix(m.UpgradeTime, m.TimeZone, diags)
+	to.DistributionTime = flex.ExpandTimeToUnix(m.DistributionTime, diags)
+	to.UpgradeTime = flex.ExpandTimeToUnix(m.UpgradeTime, diags)
 
 	return to
 }
@@ -167,11 +167,11 @@ func (m *UpgradegroupModel) Flatten(ctx context.Context, from *grid.Upgradegroup
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DistributionDependentGroup = flex.FlattenStringPointer(from.DistributionDependentGroup)
 	m.DistributionPolicy = flex.FlattenStringPointer(from.DistributionPolicy)
-	m.DistributionTime = flex.FlattenUnixTime(from.DistributionTime, from.TimeZone, diags)
+	m.DistributionTime = flex.FlattenUnixTime(from.DistributionTime, diags)
 	m.Members = flex.FlattenFrameworkListNestedBlock(ctx, from.Members, UpgradegroupMembersAttrTypes, diags, FlattenUpgradegroupMembers)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.UpgradeDependentGroup = flex.FlattenStringPointer(from.UpgradeDependentGroup)
 	m.UpgradePolicy = flex.FlattenStringPointer(from.UpgradePolicy)
-	m.UpgradeTime = flex.FlattenUnixTime(from.UpgradeTime, from.TimeZone, diags)
+	m.UpgradeTime = flex.FlattenUnixTime(from.UpgradeTime, diags)
 }
