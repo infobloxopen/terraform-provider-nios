@@ -49,11 +49,11 @@ Optional:
 - `comment` (String) The upgrade group descriptive comment.
 - `distribution_dependent_group` (String) The distribution dependent group name.
 - `distribution_policy` (String) The distribution scheduling policy.
-- `distribution_time` (Number) The time of the next scheduled distribution.
+- `distribution_time` (String) The time of the next scheduled distribution.
 - `members` (Attributes List) The upgrade group members. (see [below for nested schema](#nestedatt--result--members))
 - `upgrade_dependent_group` (String) The upgrade dependent group name.
 - `upgrade_policy` (String) The upgrade scheduling policy.
-- `upgrade_time` (Number) The time of the next scheduled upgrade.
+- `upgrade_time` (String) The time of the next scheduled upgrade.
 
 Read-Only:
 
