@@ -23,61 +23,62 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneRpModel struct {
-	Ref                              types.String      `tfsdk:"ref"`
-	Address                          iptypes.IPAddress `tfsdk:"address"`
-	Comment                          types.String      `tfsdk:"comment"`
-	Disable                          types.Bool        `tfsdk:"disable"`
-	DisplayDomain                    types.String      `tfsdk:"display_domain"`
-	DnsSoaEmail                      types.String      `tfsdk:"dns_soa_email"`
-	ExtAttrs                         types.Map         `tfsdk:"extattrs"`
-	ExtAttrsAll                      types.Map         `tfsdk:"extattrs_all"`
-	ExternalPrimaries                types.List        `tfsdk:"external_primaries"`
-	ExternalSecondaries              types.List        `tfsdk:"external_secondaries"`
-	FireeyeRuleMapping               types.Object      `tfsdk:"fireeye_rule_mapping"`
-	Fqdn                             types.String      `tfsdk:"fqdn"`
-	GridPrimary                      types.List        `tfsdk:"grid_primary"`
-	GridSecondaries                  types.List        `tfsdk:"grid_secondaries"`
-	Locked                           types.Bool        `tfsdk:"locked"`
-	LockedBy                         types.String      `tfsdk:"locked_by"`
-	LogRpz                           types.Bool        `tfsdk:"log_rpz"`
-	MaskPrefix                       types.String      `tfsdk:"mask_prefix"`
-	MemberSoaMnames                  types.List        `tfsdk:"member_soa_mnames"`
-	MemberSoaSerials                 types.List        `tfsdk:"member_soa_serials"`
-	NetworkView                      types.String      `tfsdk:"network_view"`
-	NsGroup                          types.String      `tfsdk:"ns_group"`
-	Parent                           types.String      `tfsdk:"parent"`
-	Prefix                           types.String      `tfsdk:"prefix"`
-	PrimaryType                      types.String      `tfsdk:"primary_type"`
-	RecordNamePolicy                 types.String      `tfsdk:"record_name_policy"`
-	RpzDropIpRuleEnabled             types.Bool        `tfsdk:"rpz_drop_ip_rule_enabled"`
-	RpzDropIpRuleMinPrefixLengthIpv4 types.Int64       `tfsdk:"rpz_drop_ip_rule_min_prefix_length_ipv4"`
-	RpzDropIpRuleMinPrefixLengthIpv6 types.Int64       `tfsdk:"rpz_drop_ip_rule_min_prefix_length_ipv6"`
-	RpzLastUpdatedTime               types.Int64       `tfsdk:"rpz_last_updated_time"`
-	RpzPolicy                        types.String      `tfsdk:"rpz_policy"`
-	RpzPriority                      types.Int64       `tfsdk:"rpz_priority"`
-	RpzPriorityEnd                   types.Int64       `tfsdk:"rpz_priority_end"`
-	RpzSeverity                      types.String      `tfsdk:"rpz_severity"`
-	RpzType                          types.String      `tfsdk:"rpz_type"`
-	SetSoaSerialNumber               types.Bool        `tfsdk:"set_soa_serial_number"`
-	SoaDefaultTtl                    types.Int64       `tfsdk:"soa_default_ttl"`
-	SoaEmail                         types.String      `tfsdk:"soa_email"`
-	SoaExpire                        types.Int64       `tfsdk:"soa_expire"`
-	SoaNegativeTtl                   types.Int64       `tfsdk:"soa_negative_ttl"`
-	SoaRefresh                       types.Int64       `tfsdk:"soa_refresh"`
-	SoaRetry                         types.Int64       `tfsdk:"soa_retry"`
-	//SoaSerialNumber                  types.Int64       `tfsdk:"soa_serial_number"`
-	SubstituteName      types.String `tfsdk:"substitute_name"`
-	UseExternalPrimary  types.Bool   `tfsdk:"use_external_primary"`
-	UseGridZoneTimer    types.Bool   `tfsdk:"use_grid_zone_timer"`
-	UseLogRpz           types.Bool   `tfsdk:"use_log_rpz"`
-	UseRecordNamePolicy types.Bool   `tfsdk:"use_record_name_policy"`
-	UseRpzDropIpRule    types.Bool   `tfsdk:"use_rpz_drop_ip_rule"`
-	UseSoaEmail         types.Bool   `tfsdk:"use_soa_email"`
-	View                types.String `tfsdk:"view"`
+	Ref                              types.String                             `tfsdk:"ref"`
+	Address                          iptypes.IPAddress                        `tfsdk:"address"`
+	Comment                          types.String                             `tfsdk:"comment"`
+	Disable                          types.Bool                               `tfsdk:"disable"`
+	DisplayDomain                    types.String                             `tfsdk:"display_domain"`
+	DnsSoaEmail                      types.String                             `tfsdk:"dns_soa_email"`
+	ExtAttrs                         types.Map                                `tfsdk:"extattrs"`
+	ExtAttrsAll                      types.Map                                `tfsdk:"extattrs_all"`
+	ExternalPrimaries                types.List                               `tfsdk:"external_primaries"`
+	ExternalSecondaries              types.List                               `tfsdk:"external_secondaries"`
+	FireeyeRuleMapping               types.Object                             `tfsdk:"fireeye_rule_mapping"`
+	Fqdn                             types.String                             `tfsdk:"fqdn"`
+	GridPrimary                      types.List                               `tfsdk:"grid_primary"`
+	GridSecondaries                  types.List                               `tfsdk:"grid_secondaries"`
+	Locked                           types.Bool                               `tfsdk:"locked"`
+	LockedBy                         types.String                             `tfsdk:"locked_by"`
+	LogRpz                           types.Bool                               `tfsdk:"log_rpz"`
+	MaskPrefix                       types.String                             `tfsdk:"mask_prefix"`
+	MemberSoaMnames                  types.List                               `tfsdk:"member_soa_mnames"`
+	MemberSoaSerials                 types.List                               `tfsdk:"member_soa_serials"`
+	NetworkView                      types.String                             `tfsdk:"network_view"`
+	NsGroup                          types.String                             `tfsdk:"ns_group"`
+	Parent                           types.String                             `tfsdk:"parent"`
+	Prefix                           internaltypes.CaseInsensitiveStringValue `tfsdk:"prefix"`
+	PrimaryType                      types.String                             `tfsdk:"primary_type"`
+	RecordNamePolicy                 types.String                             `tfsdk:"record_name_policy"`
+	RpzDropIpRuleEnabled             types.Bool                               `tfsdk:"rpz_drop_ip_rule_enabled"`
+	RpzDropIpRuleMinPrefixLengthIpv4 types.Int64                              `tfsdk:"rpz_drop_ip_rule_min_prefix_length_ipv4"`
+	RpzDropIpRuleMinPrefixLengthIpv6 types.Int64                              `tfsdk:"rpz_drop_ip_rule_min_prefix_length_ipv6"`
+	RpzLastUpdatedTime               types.Int64                              `tfsdk:"rpz_last_updated_time"`
+	RpzPolicy                        types.String                             `tfsdk:"rpz_policy"`
+	RpzPriority                      types.Int64                              `tfsdk:"rpz_priority"`
+	RpzPriorityEnd                   types.Int64                              `tfsdk:"rpz_priority_end"`
+	RpzSeverity                      types.String                             `tfsdk:"rpz_severity"`
+	RpzType                          types.String                             `tfsdk:"rpz_type"`
+	SetSoaSerialNumber               types.Bool                               `tfsdk:"set_soa_serial_number"`
+	SoaDefaultTtl                    types.Int64                              `tfsdk:"soa_default_ttl"`
+	SoaEmail                         types.String                             `tfsdk:"soa_email"`
+	SoaExpire                        types.Int64                              `tfsdk:"soa_expire"`
+	SoaNegativeTtl                   types.Int64                              `tfsdk:"soa_negative_ttl"`
+	SoaRefresh                       types.Int64                              `tfsdk:"soa_refresh"`
+	SoaRetry                         types.Int64                              `tfsdk:"soa_retry"`
+	SoaSerialNumber                  types.Int64                              `tfsdk:"soa_serial_number"`
+	SubstituteName                   types.String                             `tfsdk:"substitute_name"`
+	UseExternalPrimary               types.Bool                               `tfsdk:"use_external_primary"`
+	UseGridZoneTimer                 types.Bool                               `tfsdk:"use_grid_zone_timer"`
+	UseLogRpz                        types.Bool                               `tfsdk:"use_log_rpz"`
+	UseRecordNamePolicy              types.Bool                               `tfsdk:"use_record_name_policy"`
+	UseRpzDropIpRule                 types.Bool                               `tfsdk:"use_rpz_drop_ip_rule"`
+	UseSoaEmail                      types.Bool                               `tfsdk:"use_soa_email"`
+	View                             types.String                             `tfsdk:"view"`
 }
 
 var ZoneRpAttrTypes = map[string]attr.Type{
@@ -104,7 +105,7 @@ var ZoneRpAttrTypes = map[string]attr.Type{
 	"network_view":             types.StringType,
 	"ns_group":                 types.StringType,
 	"parent":                   types.StringType,
-	"prefix":                   types.StringType,
+	"prefix":                   internaltypes.CaseInsensitiveString{},
 	"primary_type":             types.StringType,
 	"record_name_policy":       types.StringType,
 	"rpz_drop_ip_rule_enabled": types.BoolType,
@@ -123,15 +124,15 @@ var ZoneRpAttrTypes = map[string]attr.Type{
 	"soa_negative_ttl":                        types.Int64Type,
 	"soa_refresh":                             types.Int64Type,
 	"soa_retry":                               types.Int64Type,
-	//"soa_serial_number":                       types.Int64Type,
-	"substitute_name":        types.StringType,
-	"use_external_primary":   types.BoolType,
-	"use_grid_zone_timer":    types.BoolType,
-	"use_log_rpz":            types.BoolType,
-	"use_record_name_policy": types.BoolType,
-	"use_rpz_drop_ip_rule":   types.BoolType,
-	"use_soa_email":          types.BoolType,
-	"view":                   types.StringType,
+	"soa_serial_number":                       types.Int64Type,
+	"substitute_name":                         types.StringType,
+	"use_external_primary":                    types.BoolType,
+	"use_grid_zone_timer":                     types.BoolType,
+	"use_log_rpz":                             types.BoolType,
+	"use_record_name_policy":                  types.BoolType,
+	"use_rpz_drop_ip_rule":                    types.BoolType,
+	"use_soa_email":                           types.BoolType,
+	"view":                                    types.StringType,
 }
 
 var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
@@ -316,8 +317,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The parent zone of this zone. Note that when searching for reverse zones, the \"in-addr.arpa\" notation should be used.",
 	},
 	"prefix": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -477,14 +479,14 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "This indicates how long a secondary server must wait before attempting to recontact the primary server after a connection failure between the two servers occurs.",
 	},
-	//"soa_serial_number": schema.Int64Attribute{
-	//	Optional: true,
-	//	Computed: true,
-	//	Validators: []validator.Int64{
-	//		int64validator.AlsoRequires(path.MatchRoot("set_soa_serial_number")),
-	//	},
-	//	MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
-	//},
+	"soa_serial_number": schema.Int64Attribute{
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("set_soa_serial_number")),
+		},
+		MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
+	},
 	"substitute_name": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -561,7 +563,7 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		LogRpz:                           flex.ExpandBoolPointer(m.LogRpz),
 		MemberSoaMnames:                  flex.ExpandFrameworkListNestedBlock(ctx, m.MemberSoaMnames, diags, ExpandZoneRpMemberSoaMnames),
 		NsGroup:                          flex.ExpandStringPointer(m.NsGroup),
-		Prefix:                           flex.ExpandStringPointer(m.Prefix),
+		Prefix:                           flex.ExpandStringPointer(m.Prefix.StringValue),
 		RecordNamePolicy:                 flex.ExpandStringPointer(m.RecordNamePolicy),
 		RpzDropIpRuleEnabled:             flex.ExpandBoolPointer(m.RpzDropIpRuleEnabled),
 		RpzDropIpRuleMinPrefixLengthIpv4: flex.ExpandInt64Pointer(m.RpzDropIpRuleMinPrefixLengthIpv4),
@@ -575,20 +577,21 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		SoaNegativeTtl:                   flex.ExpandInt64Pointer(m.SoaNegativeTtl),
 		SoaRefresh:                       flex.ExpandInt64Pointer(m.SoaRefresh),
 		SoaRetry:                         flex.ExpandInt64Pointer(m.SoaRetry),
-		//SoaSerialNumber:                  flex.ExpandInt64Pointer(m.SoaSerialNumber),
-		SubstituteName:      flex.ExpandStringPointer(m.SubstituteName),
-		UseExternalPrimary:  flex.ExpandBoolPointer(m.UseExternalPrimary),
-		UseGridZoneTimer:    flex.ExpandBoolPointer(m.UseGridZoneTimer),
-		UseLogRpz:           flex.ExpandBoolPointer(m.UseLogRpz),
-		UseRecordNamePolicy: flex.ExpandBoolPointer(m.UseRecordNamePolicy),
-		UseRpzDropIpRule:    flex.ExpandBoolPointer(m.UseRpzDropIpRule),
-		UseSoaEmail:         flex.ExpandBoolPointer(m.UseSoaEmail),
-		View:                flex.ExpandStringPointer(m.View),
+		SoaSerial:                        flex.ExpandInt64Pointer(m.SoaSerialNumber),
+		SubstituteName:                   flex.ExpandStringPointer(m.SubstituteName),
+		UseExternalPrimary:               flex.ExpandBoolPointer(m.UseExternalPrimary),
+		UseGridZoneTimer:                 flex.ExpandBoolPointer(m.UseGridZoneTimer),
+		UseLogRpz:                        flex.ExpandBoolPointer(m.UseLogRpz),
+		UseRecordNamePolicy:              flex.ExpandBoolPointer(m.UseRecordNamePolicy),
+		UseRpzDropIpRule:                 flex.ExpandBoolPointer(m.UseRpzDropIpRule),
+		UseSoaEmail:                      flex.ExpandBoolPointer(m.UseSoaEmail),
 	}
 
 	if isCreate {
 		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
 		to.RpzType = flex.ExpandStringPointer(m.RpzType)
+		// Zone cannot be moved across views
+		to.View = flex.ExpandStringPointer(m.View)
 	}
 
 	return to
@@ -635,7 +638,7 @@ func (m *ZoneRpModel) Flatten(ctx context.Context, from *dns.ZoneRp, diags *diag
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.NsGroup = flex.FlattenStringPointer(from.NsGroup)
 	m.Parent = flex.FlattenStringPointer(from.Parent)
-	m.Prefix = flex.FlattenStringPointer(from.Prefix)
+	m.Prefix.StringValue = flex.FlattenStringPointer(from.Prefix)
 	m.PrimaryType = flex.FlattenStringPointer(from.PrimaryType)
 	m.RecordNamePolicy = flex.FlattenStringPointer(from.RecordNamePolicy)
 	m.RpzDropIpRuleEnabled = types.BoolPointerValue(from.RpzDropIpRuleEnabled)
@@ -654,7 +657,7 @@ func (m *ZoneRpModel) Flatten(ctx context.Context, from *dns.ZoneRp, diags *diag
 	m.SoaNegativeTtl = flex.FlattenInt64Pointer(from.SoaNegativeTtl)
 	m.SoaRefresh = flex.FlattenInt64Pointer(from.SoaRefresh)
 	m.SoaRetry = flex.FlattenInt64Pointer(from.SoaRetry)
-	//m.SoaSerialNumber = flex.FlattenInt64Pointer(from.SoaSerialNumber)
+	m.SoaSerialNumber = flex.FlattenInt64Pointer(from.SoaSerial)
 	m.SubstituteName = flex.FlattenStringPointer(from.SubstituteName)
 	m.UseExternalPrimary = types.BoolPointerValue(from.UseExternalPrimary)
 	m.UseGridZoneTimer = types.BoolPointerValue(from.UseGridZoneTimer)

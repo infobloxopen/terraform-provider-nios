@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -21,6 +22,7 @@ var readableAttributesForZoneRp = "address,comment,disable,display_domain,dns_so
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ZoneRpResource{}
 var _ resource.ResourceWithImportState = &ZoneRpResource{}
+var _ resource.ResourceWithValidateConfig = &ZoneRpResource{}
 
 func NewZoneRpResource() resource.Resource {
 	return &ZoneRpResource{}
@@ -60,6 +62,57 @@ func (r *ZoneRpResource) Configure(ctx context.Context, req resource.ConfigureRe
 	}
 
 	r.client = client
+}
+
+func (r *ZoneRpResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+
+	var data ZoneRpModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.ValueBool() {
+		if !data.SoaDefaultTtl.IsNull() || !data.SoaExpire.IsNull() || !data.SoaNegativeTtl.IsNull() || !data.SoaRefresh.IsNull() || !data.SoaRetry.IsNull() {
+			resp.Diagnostics.AddError(
+				"SOA Values Not Allowed",
+				"When grid_zone_timer is set to false, the SOA Values (soa_default_ttl, soa_expire, soa_negative_ttl, soa_refresh, soa_retry) will reset to their default values. And hence they should not be set in the configuration. Either remove these values or set use_grid_zone_timer = true.",
+			)
+		}
+	}
+
+	// Validation for mutually exclusive primary servers
+	var specifiedPrimaries []string
+
+	if !data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown() {
+		specifiedPrimaries = append(specifiedPrimaries, "grid_primary")
+	}
+
+	if !data.ExternalPrimaries.IsNull() && !data.ExternalPrimaries.IsUnknown() {
+		specifiedPrimaries = append(specifiedPrimaries, "external_primaries")
+	}
+
+	// If more than one primary server is specified, raise an error
+	if len(specifiedPrimaries) > 1 {
+		resp.Diagnostics.AddError(
+			"Conflicting Primary Servers",
+			fmt.Sprintf(
+				"Only one of grid_primary or external_primaries can be specified. Found: %s.",
+				strings.Join(specifiedPrimaries, ", "),
+			),
+		)
+		return
+	}
+
+	if !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown() ||
+		!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown() {
+		if len(specifiedPrimaries) == 0 || len(specifiedPrimaries) > 1 {
+			resp.Diagnostics.AddError(
+				"Secondary Server Requires Exactly One Primary Server",
+				"When secondary servers (grid_secondaries or  external_secondaries) are specified, exactly one primary server (grid_primary or external_primaries) is required.",
+			)
+		}
+	}
 }
 
 func (r *ZoneRpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
