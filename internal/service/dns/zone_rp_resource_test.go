@@ -1426,15 +1426,6 @@ resource "nios_dns_zone_rp" "test_fireeye_rule_mapping" {
 `, zoneFqdn, view, fireeyeRuleMapping)
 }
 
-func testAccZoneRpFqdn(zoneFqdn, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test_fqdn" {
-	fqdn = %q
-	view = %q
-}
-`, zoneFqdn, view)
-}
-
 func testAccZoneRpGridPrimary(zoneFqdn, view string, gridPrimary []map[string]any) string {
 	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
