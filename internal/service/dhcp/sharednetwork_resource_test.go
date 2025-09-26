@@ -897,9 +897,8 @@ func TestAccSharednetworkResource_Options(t *testing.T) {
 	}
 	optionsUpdated := []map[string]any{
 		{
-			"name":  "domain-name",
-			"num":   "15",
-			"value": "cc.dd.com",
+			"name":  "time-offset",
+			"value": "50",
 		},
 		{
 			"name":  "dhcp-lease-time",
@@ -930,8 +929,8 @@ func TestAccSharednetworkResource_Options(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "cc.dd.com"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "50"),
 					resource.TestCheckResourceAttr(resourceName, "options.1.name", "dhcp-lease-time"),
 					resource.TestCheckResourceAttr(resourceName, "options.1.value", "82000"),
 				),
