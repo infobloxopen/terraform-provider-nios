@@ -567,8 +567,8 @@ func ReorderAndFilterNestedListResponse(
 
 	// Convert state list into a lookup by primary key
 	stateMap := make(map[string]attr.Value)
-	for _, v := range stateList.Elements() {
-		obj := v.(basetypes.ObjectValue)
+	for _, elem := range stateList.Elements() {
+		obj := elem.(basetypes.ObjectValue)
 		keyAttr, ok := obj.Attributes()[primaryKey]
 		if !ok {
 			diags.AddError("Missing Primary Key", fmt.Sprintf("State object missing primary key: %s", primaryKey))
@@ -578,13 +578,13 @@ func ReorderAndFilterNestedListResponse(
 			continue
 		}
 		key := keyAttr.(basetypes.StringValue).ValueString()
-		stateMap[key] = v
+		stateMap[key] = elem
 	}
 
 	// Rebuild state list in the same order as plan
 	var reordered []attr.Value
-	for _, v := range planList.Elements() {
-		obj := v.(basetypes.ObjectValue)
+	for _, elem := range planList.Elements() {
+		obj := elem.(basetypes.ObjectValue)
 		keyAttr := obj.Attributes()[primaryKey]
 		if keyAttr.IsNull() || keyAttr.IsUnknown() {
 			continue
@@ -595,7 +595,7 @@ func ReorderAndFilterNestedListResponse(
 		if stateObj, exists := stateMap[key]; exists {
 			reordered = append(reordered, stateObj)
 		} else {
-			reordered = append(reordered, v)
+			reordered = append(reordered, elem)
 		}
 	}
 
@@ -792,7 +792,7 @@ func ReorderAndFilterDHCPOptions(
 
 	var diags diag.Diagnostics
 	primaryKey := "name"
-	backupKey := "num"
+	secondaryKey := "num"
 
 	// Handle null/unknown gracefully
 	if planValue.IsNull() || planValue.IsUnknown() {
@@ -826,46 +826,46 @@ func ReorderAndFilterDHCPOptions(
 
 		// name -> basetypes.StringValue (per your note state has both keys)
 		if nameAttr, has := attrs[primaryKey]; has && nameAttr != nil && !nameAttr.IsNull() && !nameAttr.IsUnknown() {
-			if sv, ok := nameAttr.(basetypes.StringValue); ok {
-				nameToState[sv.ValueString()] = elem
+			if strVal, ok := nameAttr.(basetypes.StringValue); ok {
+				nameToState[strVal.ValueString()] = elem
 			}
 		}
 
 		// num -> basetypes.Int64Value (per your note state has both keys)
-		if numAttr, has := attrs[backupKey]; has && numAttr != nil && !numAttr.IsNull() && !numAttr.IsUnknown() {
-			if iv, ok := numAttr.(basetypes.Int64Value); ok {
-				numToState[iv.ValueInt64()] = elem
+		if numAttr, has := attrs[secondaryKey]; has && numAttr != nil && !numAttr.IsNull() && !numAttr.IsUnknown() {
+			if intVal, ok := numAttr.(basetypes.Int64Value); ok {
+				numToState[intVal.ValueInt64()] = elem
 			}
 		}
 	}
 
 	// Rebuild ordered slice based on plan order
 	var reordered []attr.Value
-	for _, pElem := range planList.Elements() {
-		pObj, ok := pElem.(basetypes.ObjectValue)
+	for _, planElem := range planList.Elements() {
+		planObj, ok := planElem.(basetypes.ObjectValue)
 		if !ok {
 			// if plan contains something else, append it as fallback
-			reordered = append(reordered, pElem)
+			reordered = append(reordered, planElem)
 			continue
 		}
-		pAttrs := pObj.Attributes()
+		planAttributes := planObj.Attributes()
 
 		var matchedState attr.Value
 
 		// Try primaryKey (name) first if present and valid
-		if pkAttr, has := pAttrs[primaryKey]; has && pkAttr != nil && !pkAttr.IsNull() && !pkAttr.IsUnknown() {
-			if psv, ok := pkAttr.(basetypes.StringValue); ok {
-				if s, exists := nameToState[psv.ValueString()]; exists {
+		if primaryKeyAttribute, has := planAttributes[primaryKey]; has && primaryKeyAttribute != nil && !primaryKeyAttribute.IsNull() && !primaryKeyAttribute.IsUnknown() {
+			if primaryKeyAttributeValue, ok := primaryKeyAttribute.(basetypes.StringValue); ok {
+				if s, exists := nameToState[primaryKeyAttributeValue.ValueString()]; exists {
 					matchedState = s
 				}
 			}
 		}
 
-		// If not matched by name, try backupKey (num)
+		// If not matched by name, try secondaryKey (num)
 		if matchedState == nil {
-			if bkAttr, has := pAttrs[backupKey]; has && bkAttr != nil && !bkAttr.IsNull() && !bkAttr.IsUnknown() {
-				if piv, ok := bkAttr.(basetypes.Int64Value); ok {
-					if s, exists := numToState[piv.ValueInt64()]; exists {
+			if secondaryKeyAttribute, has := planAttributes[secondaryKey]; has && secondaryKeyAttribute != nil && !secondaryKeyAttribute.IsNull() && !secondaryKeyAttribute.IsUnknown() {
+				if secondaryKeyAttributeValue, ok := secondaryKeyAttribute.(basetypes.Int64Value); ok {
+					if s, exists := numToState[secondaryKeyAttributeValue.ValueInt64()]; exists {
 						matchedState = s
 					}
 				}
@@ -876,7 +876,7 @@ func ReorderAndFilterDHCPOptions(
 		if matchedState != nil {
 			reordered = append(reordered, matchedState)
 		} else {
-			reordered = append(reordered, pElem)
+			reordered = append(reordered, planElem)
 		}
 	}
 
