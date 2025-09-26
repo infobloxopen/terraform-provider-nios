@@ -2,35 +2,19 @@ package ipam
 
 import (
 	"context"
-	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
-
-// specialDhcpOptions defines the list of special DHCP options that support use_option flag
-var specialDhcpOptions = []string{
-	"routers",
-	"router-templates",
-	"domain-name-servers",
-	"domain-name",
-	"broadcast-address",
-	"broadcast-address-offset",
-	"dhcp-lease-time",
-	"dhcp6.name-servers",
-}
-
-// isSpecialDhcpOption checks if the given option name is a special DHCP option
-func isSpecialDhcpOption(name string) bool {
-	return slices.Contains(specialDhcpOptions, name)
-}
 
 type NetworkcontainerOptionsModel struct {
 	Name        types.String `tfsdk:"name"`
@@ -50,21 +34,33 @@ var NetworkcontainerOptionsAttrTypes = map[string]attr.Type{
 
 var NetworkcontainerOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Required:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Name of the DHCP option.",
 	},
 	"num": schema.Int64Attribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The code of the DHCP option.",
 	},
 	"vendor_class": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 		Computed:            true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 	},
 	"value": schema.StringAttribute{
-		Required:            true,
-		MarkdownDescription: "Value of the DHCP option",
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
+		MarkdownDescription: "Value of the DHCP option. Required to be set for all options.",
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,
@@ -95,16 +91,7 @@ func (m *NetworkcontainerOptionsModel) Expand(ctx context.Context, diags *diag.D
 		Num:         flex.ExpandInt64Pointer(m.Num),
 		VendorClass: flex.ExpandStringPointer(m.VendorClass),
 		Value:       flex.ExpandStringPointer(m.Value),
-	}
-
-	// Only set UseOption for special DHCP options that support it
-	if !m.Name.IsNull() && !m.Name.IsUnknown() {
-		optionName := m.Name.ValueString()
-		if isSpecialDhcpOption(optionName) {
-			// For special options, include the use_option flag
-			to.UseOption = flex.ExpandBoolPointer(m.UseOption)
-		}
-		// For non-special options, don't include UseOption at all to avoid API errors
+		UseOption:   flex.ExpandBoolPointer(m.UseOption),
 	}
 
 	return to
@@ -132,14 +119,5 @@ func (m *NetworkcontainerOptionsModel) Flatten(ctx context.Context, from *ipam.N
 	m.Num = flex.FlattenInt64Pointer(from.Num)
 	m.VendorClass = flex.FlattenStringPointer(from.VendorClass)
 	m.Value = flex.FlattenStringPointer(from.Value)
-
-	// Handle use_option field based on option type to ensure state consistency
-	if from.Name != nil && isSpecialDhcpOption(*from.Name) {
-		// For special options, respect the API response
-		m.UseOption = types.BoolPointerValue(from.UseOption)
-	} else {
-		// For non-special options, always set to false since we don't send use_option to API
-		// This prevents state inconsistencies when transitioning between option types
-		m.UseOption = types.BoolValue(false)
-	}
+	m.UseOption = types.BoolPointerValue(from.UseOption)
 }

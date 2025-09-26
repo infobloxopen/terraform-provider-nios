@@ -9,11 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -94,8 +92,7 @@ func (r *DistributionscheduleResource) ValidateConfig(ctx context.Context, req r
 
 func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var (
-		data       DistributionscheduleModel
-		dataGroups []DistributionscheduleUpgradeGroupsModel
+		data DistributionscheduleModel
 	)
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -123,35 +120,6 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 
 	// Extract the singleton ref
 	listObj := list[0]
-
-	// Set timezone value from existing object
-	timezone := listObj.GetTimeZone()
-	data.TimeZone = flex.FlattenStringPointer(&timezone)
-
-	if len(data.UpgradeGroups.Elements()) > 0 {
-		// Set timezone value in each upgrade group
-		diags := data.UpgradeGroups.ElementsAs(ctx, &dataGroups, false)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-
-		upgradeGroups := listObj.GetUpgradeGroups()
-
-		for i := range dataGroups {
-			if i < len(upgradeGroups) {
-				timezone := upgradeGroups[i].GetTimeZone()
-				dataGroups[i].TimeZone = flex.FlattenStringPointer(&timezone)
-			}
-		}
-
-		newList, diag := types.ListValueFrom(ctx, data.UpgradeGroups.ElementType(ctx), dataGroups)
-		resp.Diagnostics.Append(diag...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		data.UpgradeGroups = newList
-	}
 
 	// Update it with desired plan
 	apiRes, _, err := r.client.GridAPI.
@@ -210,10 +178,8 @@ func (r *DistributionscheduleResource) Read(ctx context.Context, req resource.Re
 
 func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var (
-		diags       diag.Diagnostics
-		data        DistributionscheduleModel
-		stateGroups []DistributionscheduleUpgradeGroupsModel
-		planGroups  []DistributionscheduleUpgradeGroupsModel
+		diags diag.Diagnostics
+		data  DistributionscheduleModel
 	)
 
 	// Read Terraform plan data into the model
@@ -227,39 +193,6 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
-	}
-
-	diags = req.State.GetAttribute(ctx, path.Root("time_zone"), &data.TimeZone)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	if len(data.UpgradeGroups.Elements()) > 0 {
-		diags = req.State.GetAttribute(ctx, path.Root("upgrade_groups"), &stateGroups)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-
-		diags = data.UpgradeGroups.ElementsAs(ctx, &planGroups, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
-		for i := range planGroups {
-			if i < len(stateGroups) {
-				planGroups[i].TimeZone = stateGroups[i].TimeZone
-			}
-		}
-
-		newList, diag := types.ListValueFrom(ctx, data.UpgradeGroups.ElementType(ctx), planGroups)
-		resp.Diagnostics.Append(diag...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		data.UpgradeGroups = newList
 	}
 
 	apiRes, _, err := r.client.GridAPI.

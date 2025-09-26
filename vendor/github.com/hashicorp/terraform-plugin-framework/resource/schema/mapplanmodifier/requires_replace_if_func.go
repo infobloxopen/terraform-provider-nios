@@ -1,7 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-package boolplanmodifier
+package mapplanmodifier
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 
 // RequiresReplaceIfFunc is a conditional function used in the RequiresReplaceIf
 // plan modifier to determine whether the attribute requires replacement.
-type RequiresReplaceIfFunc func(context.Context, planmodifier.BoolRequest, *RequiresReplaceIfFuncResponse)
+type RequiresReplaceIfFunc func(context.Context, planmodifier.MapRequest, *RequiresReplaceIfFuncResponse)
 
 // RequiresReplaceIfFuncResponse is the response type for a RequiresReplaceIfFunc.
 type RequiresReplaceIfFuncResponse struct {

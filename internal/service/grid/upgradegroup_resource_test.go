@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -16,7 +17,7 @@ import (
 )
 
 // TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// Grid Members: infoblox.172_28_83_29, infoblox.172_28_82_115
+// Grid Members: infoblox.localhost, infoblox.localhost1
 // Distribution Dependent Groups: example_distribution_dependent_group1, example_distribution_dependent_group2
 // Upgrade Dependent Groups: example_upgrade_dependent_group1, example_upgrade_dependent_group2
 
@@ -171,24 +172,31 @@ func TestAccUpgradegroupResource_DistributionTime(t *testing.T) {
 
 	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
 
+	now := time.Now()
+	distributionTime := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	updatedDistributionTime := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	grid_member := []map[string]any{
+		{"member": "infoblox.localhost"},
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccUpgradegroupDistributionTime(name, 1724965800),
+				Config: testAccUpgradegroupDistributionTime(name, distributionTime, grid_member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "distribution_time", "1724965800"),
+					resource.TestCheckResourceAttr(resourceName, "distribution_time", distributionTime),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccUpgradegroupDistributionTime(name, 1724965800),
+				Config: testAccUpgradegroupDistributionTime(name, updatedDistributionTime, grid_member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "distribution_time", "1724965800"),
+					resource.TestCheckResourceAttr(resourceName, "distribution_time", updatedDistributionTime),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -202,10 +210,10 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 
 	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
 	member1 := []map[string]any{
-		{"member": "infoblox.172_28_83_29"},
+		{"member": "infoblox.localhost"},
 	}
 	member2 := []map[string]any{
-		{"member": "infoblox.172_28_82_115"},
+		{"member": "infoblox.localhost1"},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -217,7 +225,7 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 				Config: testAccUpgradegroupMembers(name, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.172_28_83_29"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.localhost"),
 				),
 			},
 			// // Update and Read
@@ -225,7 +233,7 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 				Config: testAccUpgradegroupMembers(name, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.172_28_82_115"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.localhost1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -333,24 +341,31 @@ func TestAccUpgradegroupResource_UpgradeTime(t *testing.T) {
 
 	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
 
+	now := time.Now()
+	upgradeTime := now.Add(30 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	updatedUpgradeTime := now.Add(54 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	grid_member := []map[string]any{
+		{"member": "infoblox.localhost"},
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccUpgradegroupUpgradeTime(name, 2724965800),
+				Config: testAccUpgradegroupUpgradeTime(name, upgradeTime, grid_member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_time", "2724965800"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_time", upgradeTime),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccUpgradegroupUpgradeTime(name, 2724965800),
+				Config: testAccUpgradegroupUpgradeTime(name, updatedUpgradeTime, grid_member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_time", "2724965800"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_time", updatedUpgradeTime),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -451,13 +466,16 @@ resource "nios_grid_upgradegroup" "test_distribution_policy" {
 `, name, distributionPolicy)
 }
 
-func testAccUpgradegroupDistributionTime(name string, distributionTime int64) string {
+func testAccUpgradegroupDistributionTime(name, distributionTime string, members []map[string]any) string {
+	membersHCL := utils.ConvertSliceOfMapsToHCL(members)
 	return fmt.Sprintf(`
 resource "nios_grid_upgradegroup" "test_distribution_time" {
 	name = %q
-    distribution_time = %d
+    distribution_time = %q
+	members = %s
+	
 }
-`, name, distributionTime)
+`, name, distributionTime, membersHCL)
 }
 
 func testAccUpgradegroupMembers(name string, members []map[string]any) string {
@@ -496,11 +514,13 @@ resource "nios_grid_upgradegroup" "test_upgrade_policy" {
 `, name, upgradePolicy)
 }
 
-func testAccUpgradegroupUpgradeTime(name string, upgradeTime int64) string {
+func testAccUpgradegroupUpgradeTime(name, upgradeTime string, members []map[string]any) string {
+	membersHCL := utils.ConvertSliceOfMapsToHCL(members)
 	return fmt.Sprintf(`
 resource "nios_grid_upgradegroup" "test_upgrade_time" {
 	name = %q
-    upgrade_time = %d
+    upgrade_time = %q
+    members = %s
 }
-`, name, upgradeTime)
+`, name, upgradeTime, membersHCL)
 }

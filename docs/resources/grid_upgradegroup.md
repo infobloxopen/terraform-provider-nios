@@ -24,15 +24,15 @@ resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
   comment = "This is a sample comment"
   members = [
     {
-      member = "infoblox.member"
+      member = "infoblox.localdomain"
     },
   ]
   distribution_dependent_group = "distribution-dependent-group-1"
   distribution_policy          = "SEQUENTIALLY"
   upgrade_dependent_group      = "upgrade-dependent-group-1"
   upgrade_policy               = "SIMULTANEOUSLY"
-  distribution_time            = 172834354
-  upgrade_time                 = 172834355
+  distribution_time            = "2026-09-10T02:00:00"
+  upgrade_time                 = "2026-09-10T12:00:00"
 }
 ```
 
@@ -48,11 +48,11 @@ resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
 - `comment` (String) The upgrade group descriptive comment.
 - `distribution_dependent_group` (String) The distribution dependent group name.
 - `distribution_policy` (String) The distribution scheduling policy.
-- `distribution_time` (Number) The time of the next scheduled distribution.
+- `distribution_time` (String) The time of the next scheduled distribution.
 - `members` (Attributes List) The upgrade group members. (see [below for nested schema](#nestedatt--members))
 - `upgrade_dependent_group` (String) The upgrade dependent group name.
 - `upgrade_policy` (String) The upgrade scheduling policy.
-- `upgrade_time` (Number) The time of the next scheduled upgrade.
+- `upgrade_time` (String) The time of the next scheduled upgrade.
 
 ### Read-Only
 

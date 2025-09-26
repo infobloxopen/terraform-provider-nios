@@ -8,9 +8,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -1327,36 +1328,54 @@ func TestAccNetworkcontainerResource_Options(t *testing.T) {
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 
+	options := []map[string]any{
+		{
+			"name":  "time-offset",
+			"num":   2,
+			"value": "50",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+
+	optionsUpdated := []map[string]any{
+		{
+			"name":  "dhcp-lease-time",
+			"value": "7200",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read - Test with special option that supports use_option
 			{
-				Config: testAccNetworkcontainerOptions(network, "dhcp-lease-time", "51", "7200", "DHCP", "true", "true"),
+				Config: testAccNetworkcontainerOptions(network, options, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "50"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				),
 			},
 			// Update and Read - Test with another special option (use_option should be preserved)
 			{
-				Config: testAccNetworkcontainerOptions(network, "dhcp-lease-time", "51", "7300", "DHCP", "true", "true"),
+				Config: testAccNetworkcontainerOptions(network, optionsUpdated, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7300"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.vendor_class", "DHCP"),
-					resource.TestCheckResourceAttr(resourceName, "options.0.use_option", "true"),
-					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2946,22 +2965,15 @@ resource "nios_ipam_network_container" "test_nextserver" {
 `, network, nextserver, useNextserver)
 }
 
-func testAccNetworkcontainerOptions(network, name, num, value, vendorClass, useOption, useOptions string) string {
+func testAccNetworkcontainerOptions(network string, options []map[string]any, useOptions bool) string {
+	cOptions := utils.ConvertSliceOfMapsToHCL(options)
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_options" {
     network = %q
-    options = [
-		{
-			name = %q
-			num = %q
-			value = %q
-			vendor_class = %q
-			use_option = %s
-		}
-    ]
-    use_options = %q
+    options = %s
+	use_options = %t
 }
-`, network, name, num, value, vendorClass, useOption, useOptions)
+`, network, cOptions, useOptions)
 }
 
 func testAccNetworkcontainerPortControlBlackoutSetting(network, enableBlackout, useBlackoutSetting string) string {

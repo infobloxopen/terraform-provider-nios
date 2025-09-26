@@ -95,7 +95,7 @@ func (m *DistributionscheduleModel) Expand(ctx context.Context, diags *diag.Diag
 		UpgradeGroups: groups,
 	}
 
-	to.StartTime = flex.ExpandTimeToUnix(m.StartTime, m.TimeZone, diags)
+	to.StartTime = flex.ExpandTimeToUnix(m.StartTime, diags)
 
 	return to
 }
@@ -121,7 +121,7 @@ func (m *DistributionscheduleModel) Flatten(ctx context.Context, from *grid.Dist
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Active = types.BoolPointerValue(from.Active)
-	m.StartTime = flex.FlattenUnixTime(from.StartTime, from.TimeZone, diags)
+	m.StartTime = flex.FlattenUnixTime(from.StartTime, diags)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.UpgradeGroups = flex.FlattenFrameworkListNestedBlock(ctx, from.UpgradeGroups, DistributionscheduleUpgradeGroupsAttrTypes, diags, FlattenDistributionscheduleUpgradeGroups)
 }

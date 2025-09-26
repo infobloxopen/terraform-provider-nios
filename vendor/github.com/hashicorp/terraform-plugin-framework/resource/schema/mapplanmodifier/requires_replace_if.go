@@ -1,7 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-package boolplanmodifier
+package mapplanmodifier
 
 import (
 	"context"
@@ -21,7 +21,7 @@ import (
 // changes. Use RequiresReplaceIfConfigured if the resource replacement should
 // occur on value changes, but only if there is a configuration value (ignore
 // unconfigured drift detection changes).
-func RequiresReplaceIf(f RequiresReplaceIfFunc, description, markdownDescription string) planmodifier.Bool {
+func RequiresReplaceIf(f RequiresReplaceIfFunc, description, markdownDescription string) planmodifier.Map {
 	return requiresReplaceIfModifier{
 		ifFunc:              f,
 		description:         description,
@@ -47,8 +47,8 @@ func (m requiresReplaceIfModifier) MarkdownDescription(_ context.Context) string
 	return m.markdownDescription
 }
 
-// PlanModifyBool implements the plan modification logic.
-func (m requiresReplaceIfModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
+// PlanModifyMap implements the plan modification logic.
+func (m requiresReplaceIfModifier) PlanModifyMap(ctx context.Context, req planmodifier.MapRequest, resp *planmodifier.MapResponse) {
 	// Do not replace on resource creation.
 	if req.State.Raw.IsNull() {
 		return

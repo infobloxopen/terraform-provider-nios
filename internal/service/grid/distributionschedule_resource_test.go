@@ -77,8 +77,8 @@ func TestAccDistributionscheduleResource_StartTime(t *testing.T) {
 	var resourceName = "nios_grid_distributionschedule.test_start_time"
 	var v grid.Distributionschedule
 	now := time.Now()
-	start_time := now.Add(1 * time.Hour).Format(utils.NaiveDatetimeLayout)
-	updated_start_time := now.Add(5 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	start_time := now.Add(6 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	updated_start_time := now.Add(10 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
