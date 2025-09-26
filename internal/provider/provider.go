@@ -123,6 +123,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewNsgroupForwardingmemberResource,
 		dns.NewNsgroupForwardstubserverResource,
 		dns.NewNsgroupStubmemberResource,
+		dns.NewIPAllocationResource,
+		dns.NewIPAssociationResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -144,7 +146,10 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		cloud.NewAwsuserResource,
 
 		security.NewAdminuserResource,
+		security.NewPermissionResource,
 		security.NewAdminroleResource,
+		security.NewFtpuserResource,
+		security.NewSnmpuserResource,
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
@@ -157,6 +162,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewNatgroupResource,
 		grid.NewExtensibleattributedefResource,
 		grid.NewUpgradegroupResource,
+		grid.NewGridServicerestartGroupResource,
 		grid.NewDistributionscheduleResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
@@ -192,6 +198,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewNsgroupForwardingmemberDataSource,
 		dns.NewNsgroupForwardstubserverDataSource,
 		dns.NewNsgroupStubmemberDataSource,
+		dns.NewRecordHostDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -213,6 +220,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+		security.NewFtpuserDataSource,
+		security.NewPermissionDataSource,
+		security.NewSnmpuserDataSource,
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
@@ -225,6 +235,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewNatgroupDataSource,
 		grid.NewExtensibleattributedefDataSource,
 		grid.NewUpgradegroupDataSource,
+		grid.NewGridServicerestartGroupDataSource,
 		grid.NewDistributionscheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
