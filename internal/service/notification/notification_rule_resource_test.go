@@ -23,6 +23,7 @@ import (
 // TODO
 // TestAccNotificationRuleResource_EventPriority
 // TestAccNotificationRuleResource_ScheduledEvent
+// TestAccNotificationRuleResource_NotificationAction
 
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
 
@@ -582,6 +583,7 @@ func TestAccNotificationRuleResource_Name(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
+	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_notification_action"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -599,13 +601,13 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 				),
 			},
 			// Update and Read
-			// {
-			// 	Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-			// 		resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_UPDATE_REPLACE_ME"),
-			// 	),
-			// },
+			{
+				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_UPDATE_REPLACE_ME"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})

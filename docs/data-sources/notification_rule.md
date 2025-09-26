@@ -42,9 +42,11 @@ data "nios_notification_rule" "get_all_notification_rules" {}
 
 Required:
 
+- `event_type` (String) The notification rule event type.
 - `name` (String) The notification rule name.
 - `notification_action` (String) The notification rule action is applied if expression list evaluates to True.
 - `notification_target` (String) The notification target.
+- `template_instance` (Attributes) The notification REST template instance. (see [below for nested schema](#nestedatt--result--template_instance))
 
 Optional:
 
@@ -55,11 +57,9 @@ Optional:
 - `event_deduplication_fields` (List of String) The list of fields that must be used in the notification rule for event deduplication.
 - `event_deduplication_lookback_period` (Number) The lookback period for the notification rule for event deduplication.
 - `event_priority` (String) Event priority.
-- `event_type` (String) The notification rule event type.
 - `expression_list` (Attributes List) The notification rule expression list. (see [below for nested schema](#nestedatt--result--expression_list))
 - `publish_settings` (Attributes) The CISCO ISE publish settings. (see [below for nested schema](#nestedatt--result--publish_settings))
 - `scheduled_event` (Attributes) Schedule setting that must be specified if event_type is SCHEDULE (see [below for nested schema](#nestedatt--result--scheduled_event))
-- `template_instance` (Attributes) The notification REST template instance. (see [below for nested schema](#nestedatt--result--template_instance))
 - `use_publish_settings` (Boolean) Use flag for: publish_settings
 
 Read-Only:
@@ -67,6 +67,35 @@ Read-Only:
 - `all_members` (Boolean) Determines whether the notification rule is applied on all members or not. When this is set to False, the notification rule is applied only on selected_members.
 - `ref` (String) The reference to the object.
 - `selected_members` (List of String) The list of the members on which the notification rule is applied. This field is deprecated.
+
+<a id="nestedatt--result--template_instance"></a>
+### Nested Schema for `result.template_instance`
+
+Required:
+
+- `template` (String) The name of the REST API template parameter.
+
+Optional:
+
+- `parameters` (Attributes List) The notification REST template parameters. (see [below for nested schema](#nestedatt--result--template_instance--parameters))
+
+<a id="nestedatt--result--template_instance--parameters"></a>
+### Nested Schema for `result.template_instance.parameters`
+
+Required:
+
+- `name` (String) The name of the REST API template parameter.
+
+Optional:
+
+- `syntax` (String) The syntax of the REST API template parameter.
+- `value` (String) The value of the REST API template parameter.
+
+Read-Only:
+
+- `default_value` (String) The default value of the REST API template parameter.
+
+
 
 <a id="nestedatt--result--expression_list"></a>
 ### Nested Schema for `result.expression_list`
@@ -111,31 +140,3 @@ Optional:
 Read-Only:
 
 - `recurring_time` (Number) The recurring time for the schedule in Epoch seconds format. This field is obsolete and is preserved only for backward compatibility purposes. Please use other applicable fields to define the recurring schedule. DO NOT use recurring_time together with these fields. If you use recurring_time with other fields to define the recurring schedule, recurring_time has priority over year, hour_of_day, and minutes_past_hour and will override the values of these fields, although it does not override month and day_of_month. In this case, the recurring time value might be different than the intended value that you define.
-
-
-<a id="nestedatt--result--template_instance"></a>
-### Nested Schema for `result.template_instance`
-
-Required:
-
-- `template` (String) The name of the REST API template parameter.
-
-Optional:
-
-- `parameters` (Attributes List) The notification REST template parameters. (see [below for nested schema](#nestedatt--result--template_instance--parameters))
-
-<a id="nestedatt--result--template_instance--parameters"></a>
-### Nested Schema for `result.template_instance.parameters`
-
-Required:
-
-- `name` (String) The name of the REST API template parameter.
-
-Optional:
-
-- `syntax` (String) The syntax of the REST API template parameter.
-- `value` (String) The value of the REST API template parameter.
-
-Read-Only:
-
-- `default_value` (String) The default value of the REST API template parameter.

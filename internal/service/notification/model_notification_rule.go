@@ -131,8 +131,7 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Event priority.",
 	},
 	"event_type": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf(
 				"ANALYTICS_DNS_TUNNEL", "DB_CHANGE_DHCP_FIXED_ADDRESS_IPV4", "DB_CHANGE_DHCP_FIXED_ADDRESS_IPV6", "DB_CHANGE_DHCP_NETWORK_IPV4",
@@ -194,8 +193,7 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"template_instance": schema.SingleNestedAttribute{
 		Attributes:          NotificationRuleTemplateInstanceResourceSchemaAttributes,
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The notification REST template instance.",
 	},
 	"use_publish_settings": schema.BoolAttribute{
