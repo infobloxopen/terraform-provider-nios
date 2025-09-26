@@ -122,6 +122,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewNsgroupForwardingmemberResource,
 		dns.NewNsgroupForwardstubserverResource,
 		dns.NewNsgroupStubmemberResource,
+		dns.NewIPAllocationResource,
+		dns.NewIPAssociationResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -146,6 +148,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdmingroupResource,
 		security.NewPermissionResource,
 		security.NewAdminroleResource,
+		security.NewFtpuserResource,
 		security.NewSnmpuserResource,
 
 		misc.NewRulesetResource,
@@ -194,6 +197,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewNsgroupForwardingmemberDataSource,
 		dns.NewNsgroupForwardstubserverDataSource,
 		dns.NewNsgroupStubmemberDataSource,
+		dns.NewRecordHostDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -216,6 +220,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
 		security.NewAdmingroupDataSource,
+		security.NewFtpuserDataSource,
 		security.NewPermissionDataSource,
 		security.NewSnmpuserDataSource,
 
