@@ -83,11 +83,11 @@ resource "nios_security_certificate_authservice" "certificate_authservice_with_a
 
 Required:
 
+- `certificate_file_path` (String) The file path to the certificate.
 - `fqdn_or_ip` (String) The FQDN (Fully Qualified Domain Name) or IP address of the server.
 
 Optional:
 
-- `certificate_file_path` (String) The file path to the certificate.
 - `comment` (String) The descriptive comment for the OCSP authentication responder.
 - `disabled` (Boolean) Determines if this OCSP authentication responder is disabled.
 - `port` (Number) The port used for connecting.
