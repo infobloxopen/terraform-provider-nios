@@ -48,7 +48,6 @@ resource "nios_grid_extensibleattributedef" "extensibleattributedef_with_additio
 - `allowed_object_types` (List of String) The object types this extensible attribute is allowed to associate with.
 - `comment` (String) Comment for the Extensible Attribute Definition; maximum 256 characters.
 - `default_value` (String) Default value used to pre-populate the attribute value in the GUI. For email, URL, and string types, the value is a string with a maximum of 256 characters. For an integer, the value is an integer from -2147483648 through 2147483647. For a date, the value is the number of seconds that have elapsed since January 1st, 1970 UTC.
-- `descendants_action` (Attributes) Action to take on descendants of the object when the object is deleted. (see [below for nested schema](#nestedatt--descendants_action))
 - `flags` (String) This field contains extensible attribute flags. Possible values: (A)udited, (C)loud API, Cloud (G)master, (I)nheritable, (L)isted, (M)andatory value, MGM (P)rivate, (R)ead Only, (S)ort enum values, Multiple (V)alues If there are two or more flags in the field, you must list them according to the order they are listed above. For example, 'CR' is a valid value for the 'flags' field because C = Cloud API is listed before R = Read only. However, the value 'RC' is invalid because the order for the 'flags' field is broken.
 - `list_values` (Attributes List) List of Values. Applicable if the extensible attribute type is ENUM. (see [below for nested schema](#nestedatt--list_values))
 - `max` (Number) Maximum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER.
@@ -56,18 +55,9 @@ resource "nios_grid_extensibleattributedef" "extensibleattributedef_with_additio
 
 ### Read-Only
 
+- `descendants_action` (Attributes) This option describes the action that must be taken on the extensible attribute by its descendant in case the ‘Inheritable’ flag is set. (see [below for nested schema](#nestedatt--descendants_action))
 - `namespace` (String) Namespace for the Extensible Attribute Definition.
 - `ref` (String) The reference to the object.
-
-<a id="nestedatt--descendants_action"></a>
-### Nested Schema for `descendants_action`
-
-Optional:
-
-- `option_delete_ea` (String) This option describes which action must be taken if the extensible attribute exists for the descendant, but is absent for the parent object: * RETAIN: retain the extensible attribute value for the descendant object. * REMOVE: remove this extensible attribute from the descendant object.
-- `option_with_ea` (String) This option describes which action must be taken if the extensible attribute exists for both the parent and descendant objects: * INHERIT: inherit the extensible attribute from the parent object. * RETAIN: retain the value of an extensible attribute that was set for the child object. * CONVERT: the value of the extensible attribute must be copied from the parent object.
-- `option_without_ea` (String) This option describes which action must be taken if the extensible attribute exists for the parent, but is absent from the descendant object: * INHERIT: inherit the extensible attribute from the parent object. * NOT_INHERIT: do nothing.
-
 
 <a id="nestedatt--list_values"></a>
 ### Nested Schema for `list_values`
@@ -75,3 +65,13 @@ Optional:
 Optional:
 
 - `value` (String) Enum value
+
+
+<a id="nestedatt--descendants_action"></a>
+### Nested Schema for `descendants_action`
+
+Read-Only:
+
+- `option_delete_ea` (String) This option describes which action must be taken if the extensible attribute exists for the descendant, but is absent for the parent object: * RETAIN: retain the extensible attribute value for the descendant object. * REMOVE: remove this extensible attribute from the descendant object.
+- `option_with_ea` (String) This option describes which action must be taken if the extensible attribute exists for both the parent and descendant objects: * INHERIT: inherit the extensible attribute from the parent object. * RETAIN: retain the value of an extensible attribute that was set for the child object. * CONVERT: the value of the extensible attribute must be copied from the parent object.
+- `option_without_ea` (String) This option describes which action must be taken if the extensible attribute exists for the parent, but is absent from the descendant object: * INHERIT: inherit the extensible attribute from the parent object. * NOT_INHERIT: do nothing.

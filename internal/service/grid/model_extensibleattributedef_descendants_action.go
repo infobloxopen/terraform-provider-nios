@@ -30,7 +30,6 @@ var ExtensibleattributedefDescendantsActionAttrTypes = map[string]attr.Type{
 
 var ExtensibleattributedefDescendantsActionResourceSchemaAttributes = map[string]schema.Attribute{
 	"option_with_ea": schema.StringAttribute{
-		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("CONVERT", "INHERIT", "RETAIN"),
@@ -38,7 +37,6 @@ var ExtensibleattributedefDescendantsActionResourceSchemaAttributes = map[string
 		MarkdownDescription: "This option describes which action must be taken if the extensible attribute exists for both the parent and descendant objects: * INHERIT: inherit the extensible attribute from the parent object. * RETAIN: retain the value of an extensible attribute that was set for the child object. * CONVERT: the value of the extensible attribute must be copied from the parent object.",
 	},
 	"option_without_ea": schema.StringAttribute{
-		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("INHERIT", "NOT_INHERIT"),
@@ -46,7 +44,6 @@ var ExtensibleattributedefDescendantsActionResourceSchemaAttributes = map[string
 		MarkdownDescription: "This option describes which action must be taken if the extensible attribute exists for the parent, but is absent from the descendant object: * INHERIT: inherit the extensible attribute from the parent object. * NOT_INHERIT: do nothing.",
 	},
 	"option_delete_ea": schema.StringAttribute{
-		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("REMOVE", "RETAIN"),
