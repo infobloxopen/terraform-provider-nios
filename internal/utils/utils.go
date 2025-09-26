@@ -504,36 +504,20 @@ func ConvertMapToHCL(data map[string]any) string {
 	return fmt.Sprintf("{\n%s\n}", strings.Join(keyValues, "\n"))
 }
 
-// ToUnixWithTimezone converts a naive datetime string (without offset) into a Unix timestamp using the given timezone.
-func ToUnixWithTimezone(datetimeStr, tz string) (int64, error) {
-	naive, err := time.Parse(NaiveDatetimeLayout, datetimeStr)
+// ToUnixWithTimezone converts a naive datetime string (without offset) into a Unix timestamp
+func ToUnixWithTimezone(datetimeStr string) (int64, error) {
+	tUTC, err := time.ParseInLocation(NaiveDatetimeLayout, datetimeStr, time.UTC)
 	if err != nil {
 		return 0, fmt.Errorf("invalid datetime %q: %w", datetimeStr, err)
 	}
 
-	loc, err := time.LoadLocation(tz)
-	if err != nil {
-		return 0, fmt.Errorf("invalid timezone %q: %w", tz, err)
-	}
-
-	localTime := time.Date(
-		naive.Year(), naive.Month(), naive.Day(),
-		naive.Hour(), naive.Minute(), naive.Second(),
-		0, loc,
-	)
-
-	return localTime.Unix(), nil
+	return tUTC.Unix(), nil
 }
 
-// FromUnixWithTimezone converts a Unix timestamp into a naive datetime string (without offset) using the given timezone.
-func FromUnixWithTimezone(ts int64, tz string) (string, error) {
-	loc, err := time.LoadLocation(tz)
-	if err != nil {
-		return "", fmt.Errorf("invalid timezone %q: %w", tz, err)
-	}
-
+// FromUnixWithTimezone converts a Unix timestamp into a naive datetime string (without offset)
+func FromUnixWithTimezone(ts int64) (string, error) {
+	loc := time.UTC
 	t := time.Unix(ts, 0).In(loc)
-
 	return t.Format(NaiveDatetimeLayout), nil
 }
 
