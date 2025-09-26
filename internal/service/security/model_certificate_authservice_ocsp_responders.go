@@ -92,6 +92,7 @@ func (m *CertificateAuthserviceOcspRespondersModel) Expand(ctx context.Context, 
 		Port:             flex.ExpandInt64Pointer(m.Port),
 		Comment:          flex.ExpandStringPointer(m.Comment),
 		Disabled:         flex.ExpandBoolPointer(m.Disabled),
+		CertificateToken: flex.ExpandStringPointer(m.CertificateToken),
 	}
 	return to
 }

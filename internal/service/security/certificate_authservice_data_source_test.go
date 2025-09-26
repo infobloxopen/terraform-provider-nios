@@ -27,11 +27,11 @@ func TestAccCertificateAuthserviceDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckCertificateAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateAuthserviceDataSourceConfigFilters(name , caCertificate),
+				Config: testAccCertificateAuthserviceDataSourceConfigFilters(name, caCertificate),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-						}, testAccCheckCertificateAuthserviceResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
+					}, testAccCheckCertificateAuthserviceResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -40,27 +40,27 @@ func TestAccCertificateAuthserviceDataSource_Filters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckCertificateAuthserviceResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "auto_populate_login", dataSourceName, "result.0.auto_populate_login"),
-        resource.TestCheckResourceAttrPair(resourceName, "ca_certificates", dataSourceName, "result.0.ca_certificates"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "disabled", dataSourceName, "result.0.disabled"),
-        resource.TestCheckResourceAttrPair(resourceName, "enable_password_request", dataSourceName, "result.0.enable_password_request"),
-        resource.TestCheckResourceAttrPair(resourceName, "enable_remote_lookup", dataSourceName, "result.0.enable_remote_lookup"),
-        resource.TestCheckResourceAttrPair(resourceName, "max_retries", dataSourceName, "result.0.max_retries"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-        resource.TestCheckResourceAttrPair(resourceName, "ocsp_check", dataSourceName, "result.0.ocsp_check"),
-        resource.TestCheckResourceAttrPair(resourceName, "ocsp_responders", dataSourceName, "result.0.ocsp_responders"),
-        resource.TestCheckResourceAttrPair(resourceName, "recovery_interval", dataSourceName, "result.0.recovery_interval"),
-        resource.TestCheckResourceAttrPair(resourceName, "remote_lookup_password", dataSourceName, "result.0.remote_lookup_password"),
-        resource.TestCheckResourceAttrPair(resourceName, "remote_lookup_service", dataSourceName, "result.0.remote_lookup_service"),
-        resource.TestCheckResourceAttrPair(resourceName, "remote_lookup_username", dataSourceName, "result.0.remote_lookup_username"),
-        resource.TestCheckResourceAttrPair(resourceName, "response_timeout", dataSourceName, "result.0.response_timeout"),
-        resource.TestCheckResourceAttrPair(resourceName, "trust_model", dataSourceName, "result.0.trust_model"),
-        resource.TestCheckResourceAttrPair(resourceName, "user_match_type", dataSourceName, "result.0.user_match_type"),
-    }
+func testAccCheckCertificateAuthserviceResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "auto_populate_login", dataSourceName, "result.0.auto_populate_login"),
+		resource.TestCheckResourceAttrPair(resourceName, "ca_certificates", dataSourceName, "result.0.ca_certificates"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "disabled", dataSourceName, "result.0.disabled"),
+		resource.TestCheckResourceAttrPair(resourceName, "enable_password_request", dataSourceName, "result.0.enable_password_request"),
+		resource.TestCheckResourceAttrPair(resourceName, "enable_remote_lookup", dataSourceName, "result.0.enable_remote_lookup"),
+		resource.TestCheckResourceAttrPair(resourceName, "max_retries", dataSourceName, "result.0.max_retries"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+		resource.TestCheckResourceAttrPair(resourceName, "ocsp_check", dataSourceName, "result.0.ocsp_check"),
+		resource.TestCheckResourceAttrPair(resourceName, "ocsp_responders", dataSourceName, "result.0.ocsp_responders"),
+		resource.TestCheckResourceAttrPair(resourceName, "recovery_interval", dataSourceName, "result.0.recovery_interval"),
+		resource.TestCheckResourceAttrPair(resourceName, "remote_lookup_password", dataSourceName, "result.0.remote_lookup_password"),
+		resource.TestCheckResourceAttrPair(resourceName, "remote_lookup_service", dataSourceName, "result.0.remote_lookup_service"),
+		resource.TestCheckResourceAttrPair(resourceName, "remote_lookup_username", dataSourceName, "result.0.remote_lookup_username"),
+		resource.TestCheckResourceAttrPair(resourceName, "response_timeout", dataSourceName, "result.0.response_timeout"),
+		resource.TestCheckResourceAttrPair(resourceName, "trust_model", dataSourceName, "result.0.trust_model"),
+		resource.TestCheckResourceAttrPair(resourceName, "user_match_type", dataSourceName, "result.0.user_match_type"),
+	}
 }
 
 func testAccCertificateAuthserviceDataSourceConfigFilters(name string, caCertificate []string) string {
@@ -78,4 +78,3 @@ data "nios_security_certificate_authservice" "test" {
 }
 `, name, caCertificateStr)
 }
-

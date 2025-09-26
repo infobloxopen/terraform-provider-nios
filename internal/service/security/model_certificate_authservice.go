@@ -131,6 +131,7 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	"ocsp_check": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString("MANUAL"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("AIA_AND_MANUAL", "AIA_ONLY", "DISABLED", "MANUAL"),
 		},
@@ -171,9 +172,9 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The username for the service account.",
 	},
 	"response_timeout": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1000),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(1000),
 		Validators: []validator.Int64{
 			int64validator.Between(1000, 60000),
 		},
@@ -198,7 +199,6 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "Specifies how to search for a user.",
 	},
 }
-
 
 func (m *CertificateAuthserviceModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.CertificateAuthservice {
 	if m == nil {
@@ -254,7 +254,7 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 	m.MaxRetries = flex.FlattenInt64Pointer(from.MaxRetries)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OcspCheck = flex.FlattenStringPointer(from.OcspCheck)
-	// Get flattened OCSP responders from API response and preserve certificate file paths 
+	// Get flattened OCSP responders from API response and preserve certificate file paths
 	flattenedResponders := flex.FlattenFrameworkListNestedBlock(ctx, from.OcspResponders, CertificateAuthserviceOcspRespondersAttrTypes, diags, FlattenCertificateAuthserviceOcspResponders)
 	m.OcspResponders = preserveResponderCertificatePaths(ctx, m.OcspResponders, flattenedResponders, diags)
 	m.RecoveryInterval = flex.FlattenInt64Pointer(from.RecoveryInterval)
