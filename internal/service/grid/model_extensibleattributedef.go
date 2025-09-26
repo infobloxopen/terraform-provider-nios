@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
@@ -20,18 +19,18 @@ import (
 )
 
 type ExtensibleattributedefModel struct {
-	Ref                types.String                             `tfsdk:"ref"`
-	AllowedObjectTypes types.List                               `tfsdk:"allowed_object_types"`
-	Comment            types.String                             `tfsdk:"comment"`
-	DefaultValue       types.String                             `tfsdk:"default_value"`
-	DescendantsAction  types.Object                             `tfsdk:"descendants_action"`
-	Flags              types.String                             `tfsdk:"flags"`
-	ListValues         types.List                               `tfsdk:"list_values"`
-	Max                types.Int64                              `tfsdk:"max"`
-	Min                types.Int64                              `tfsdk:"min"`
-	Name               types.String                             `tfsdk:"name"`
-	Namespace          types.String                             `tfsdk:"namespace"`
-	Type               internaltypes.CaseInsensitiveStringValue `tfsdk:"type"`
+	Ref                types.String `tfsdk:"ref"`
+	AllowedObjectTypes types.List   `tfsdk:"allowed_object_types"`
+	Comment            types.String `tfsdk:"comment"`
+	DefaultValue       types.String `tfsdk:"default_value"`
+	DescendantsAction  types.Object `tfsdk:"descendants_action"`
+	Flags              types.String `tfsdk:"flags"`
+	ListValues         types.List   `tfsdk:"list_values"`
+	Max                types.Int64  `tfsdk:"max"`
+	Min                types.Int64  `tfsdk:"min"`
+	Name               types.String `tfsdk:"name"`
+	Namespace          types.String `tfsdk:"namespace"`
+	Type               types.String `tfsdk:"type"`
 }
 
 var ExtensibleattributedefAttrTypes = map[string]attr.Type{
@@ -46,7 +45,7 @@ var ExtensibleattributedefAttrTypes = map[string]attr.Type{
 	"min":                  types.Int64Type,
 	"name":                 types.StringType,
 	"namespace":            types.StringType,
-	"type":                 internaltypes.CaseInsensitiveString{},
+	"type":                 types.StringType,
 }
 
 var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute{
@@ -65,12 +64,9 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The object types this extensible attribute is allowed to associate with.",
 	},
 	"comment": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString(""),
-		Validators: []validator.String{
-			stringvalidator.LengthBetween(0, 256),
-		},
+		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for the Extensible Attribute Definition; maximum 256 characters.",
 	},
 	"default_value": schema.StringAttribute{
@@ -96,6 +92,7 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
+		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: ExtensibleattributedefListValuesAttrTypes})),
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "List of Values. Applicable if the extensible attribute type is ENUM.",
@@ -119,10 +116,9 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "Namespace for the Extensible Attribute Definition.",
 	},
 	"type": schema.StringAttribute{
-		CustomType: internaltypes.CaseInsensitiveString{},
-		Required:   true,
+		Required: true,
 		Validators: []validator.String{
-			stringvalidator.OneOfCaseInsensitive("DATE", "EMAIL", "ENUM", "INTEGER", "STRING", "URL"),
+			stringvalidator.OneOf("DATE", "EMAIL", "ENUM", "INTEGER", "STRING", "URL"),
 		},
 		MarkdownDescription: "Type for the Extensible Attribute Definition.",
 	},
@@ -144,7 +140,7 @@ func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Di
 		Name:               flex.ExpandStringPointer(m.Name),
 	}
 	if isCreate {
-		to.Type = flex.ExpandStringPointer(m.Type.StringValue)
+		to.Type = flex.ExpandStringPointer(m.Type)
 	}
 	return to
 }
@@ -178,5 +174,5 @@ func (m *ExtensibleattributedefModel) Flatten(ctx context.Context, from *grid.Ex
 	m.Min = flex.FlattenInt64Pointer(from.Min)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Namespace = flex.FlattenStringPointer(from.Namespace)
-	m.Type.StringValue = flex.FlattenStringPointer(from.Type)
+	m.Type = flex.FlattenStringPointer(from.Type)
 }
