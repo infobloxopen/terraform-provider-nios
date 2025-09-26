@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -403,14 +404,13 @@ func TestAccAwsrte53taskgroupResource_SyncChildAccounts(t *testing.T) {
 }
 
 func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
-	t.Skip("skipping test as we cannot provide aws secret in environment variables")
 	var resourceName = "nios_cloud_aws_route53_task_group.test_task_list"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := "infoblox.localdomain"
-	task_list := []map[string]any{
+	taskList := []map[string]any{
 		{
-			"aws_user":           "awsuser/****:****",
+			"aws_user":           "${nios_cloud_aws_user.test.ref}",
 			"credentials_type":   "DIRECT",
 			"disabled":           false,
 			"filter":             "*",
@@ -421,7 +421,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 			"sync_public_zones":  true,
 		},
 		{
-			"aws_user":           "awsuser/****:****",
+			"aws_user":           "${nios_cloud_aws_user.test.ref}",
 			"credentials_type":   "DIRECT",
 			"disabled":           false,
 			"filter":             "*",
@@ -432,9 +432,9 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 			"sync_public_zones":  true,
 		},
 	}
-	task_list_update := []map[string]any{
+	taskListUpdate := []map[string]any{
 		{
-			"aws_user":           "awsuser/****:****",
+			"aws_user":           "${nios_cloud_aws_user.test.ref}",
 			"credentials_type":   "DIRECT",
 			"disabled":           false,
 			"filter":             "*",
@@ -452,7 +452,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember, task_list),
+				Config: testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember, taskList),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "task_list.#", "2"),
@@ -470,7 +470,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember, task_list_update),
+				Config: testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember, taskListUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "task_list.#", "1"),
@@ -705,14 +705,21 @@ resource "nios_cloud_aws_route53_task_group" "test_sync_child_accounts" {
 func testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember string, taskList []map[string]any) string {
 	taskListHCL := utils.ConvertSliceOfMapsToHCL(taskList)
 	return fmt.Sprintf(`
+resource "nios_cloud_aws_user" "test" {
+  access_key_id     = "AKIAEXAMPLE"
+  account_id        = "337773173961"
+  name              = "aws-user"
+  secret_access_key = "S1JGWfwcZWESkfpyhxigL9A/u96mY"
+}
+
 resource "nios_cloud_aws_route53_task_group" "test_task_list" {
     name                        = %q
     grid_member                 = %q    
 	task_list = %s
 	network_view_mapping_policy = "DIRECT"
 	network_view= "default"
-	consolidated_view = "default"
 	role_arn = "arn:aws:iam::123456789012:role/Role-name"
+	depends_on = [nios_cloud_aws_user.test]
 }
 `, taskGroupName, gridMember, taskListHCL)
 }
