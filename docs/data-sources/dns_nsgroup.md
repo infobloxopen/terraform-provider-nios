@@ -118,7 +118,7 @@ Required:
 
 - `name` (String) The grid member name.
 
-Optional:
+Read-Only:
 
 - `enable_preferred_primaries` (Boolean) This flag represents whether the preferred_primaries field values of this member are used.
 - `grid_replicate` (Boolean) The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.
@@ -155,7 +155,7 @@ Required:
 
 - `name` (String) The grid member name.
 
-Optional:
+Read-Only:
 
 - `enable_preferred_primaries` (Boolean) This flag represents whether the preferred_primaries field values of this member are used.
 - `grid_replicate` (Boolean) The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.
