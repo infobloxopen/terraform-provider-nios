@@ -2,6 +2,12 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -9,8 +15,6 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -54,20 +58,28 @@ var Ipv6rangetemplateAttrTypes = map[string]attr.Type{
 
 var Ipv6rangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"cloud_api_compatible": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines whether the IPv6 DHCP range template can be used to create network objects in a cloud-computing deployment.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The IPv6 DHCP range template descriptive comment.",
 	},
 	"delegated_member": schema.SingleNestedAttribute{
-		Attributes: Ipv6rangetemplateDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          Ipv6rangetemplateDelegatedMemberResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The vConnector member that the object should be delegated to when created from the IPv6 DHCP range template. The vConnector refers to VMware vConnector.",
 	},
 	"exclude": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -77,6 +89,7 @@ var Ipv6rangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "These are ranges of IPv6 addresses that the appliance does not use to assign to clients. You can use these excluded addresses as static IPv6 addresses. They contain the start and end addresses of the excluded range, and optionally, information about this excluded range.",
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
@@ -85,24 +98,30 @@ var Ipv6rangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
 		},
 		Optional:            true,
 		MarkdownDescription: "This field contains the logic filters to be applied on this IPv6 range. This list corresponds to the match rules that are written to the DHCPv6 configuration file.",
 	},
 	"member": schema.SingleNestedAttribute{
-		Attributes: Ipv6rangetemplateMemberResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          Ipv6rangetemplateMemberResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The member that will provide service for the IPv6 DHCP range. Set `server_association_type` to `MEMBER` if you want the server specified here to serve the range. For searching by this field, use an HTTP method that contains a body (POST or PUT) with MS DHCP server structure and the request should have option _method=GET.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Name of the IPv6 DHCP range template.",
 	},
 	"number_of_addresses": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The number of addresses for the IPv6 DHCP range.",
 	},
 	"offset": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The start address offset for the IPv6 DHCP range.",
 	},
 	"option_filter_rules": schema.ListNestedAttribute{
@@ -116,33 +135,35 @@ var Ipv6rangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the Option filters to be applied to this IPv6 range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease.",
 	},
 	"recycle_leases": schema.BoolAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_recycle_leases")),
+		},
 		MarkdownDescription: "Determines whether the leases are kept in Recycle Bin until one week after expiry. If this is set to False, the leases are permanently deleted.",
 	},
 	"server_association_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("NONE"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("FAILOVER", "MEMBER", "MS_FAILOVER", "MS_SERVER", "NONE"),
+		},
 		MarkdownDescription: "The type of server that is going to serve the IPv6 DHCP range.",
 	},
 	"use_logic_filter_rules": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: logic_filter_rules",
 	},
 	"use_recycle_leases": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: recycle_leases",
 	},
-}
-
-func ExpandIpv6rangetemplate(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dhcp.Ipv6rangetemplate {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m Ipv6rangetemplateModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *Ipv6rangetemplateModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Ipv6rangetemplate {

@@ -2,6 +2,8 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -26,11 +28,14 @@ var Ipv6rangetemplateOptionFilterRulesAttrTypes = map[string]attr.Type{
 
 var Ipv6rangetemplateOptionFilterRulesResourceSchemaAttributes = map[string]schema.Attribute{
 	"filter": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The name of the DHCP filter.",
 	},
 	"permission": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("Allow", "Deny"),
+		},
 		MarkdownDescription: "The permission to be applied.",
 	},
 }
@@ -64,7 +69,6 @@ func FlattenIpv6rangetemplateOptionFilterRules(ctx context.Context, from *dhcp.I
 	}
 	m := Ipv6rangetemplateOptionFilterRulesModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, Ipv6rangetemplateOptionFilterRulesAttrTypes, m)
 	diags.Append(d...)
 	return t

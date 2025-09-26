@@ -28,15 +28,16 @@ var Ipv6rangetemplateExcludeAttrTypes = map[string]attr.Type{
 
 var Ipv6rangetemplateExcludeResourceSchemaAttributes = map[string]schema.Attribute{
 	"offset": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The address offset of the DHCP exclusion range template.",
 	},
 	"number_of_addresses": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The number of addresses in the DHCP exclusion range template.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A descriptive comment of a DHCP exclusion range template.",
 	},
 }
@@ -71,7 +72,6 @@ func FlattenIpv6rangetemplateExclude(ctx context.Context, from *dhcp.Ipv6rangete
 	}
 	m := Ipv6rangetemplateExcludeModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, Ipv6rangetemplateExcludeAttrTypes, m)
 	diags.Append(d...)
 	return t

@@ -29,14 +29,17 @@ var Ipv6rangetemplateDelegatedMemberAttrTypes = map[string]attr.Type{
 var Ipv6rangetemplateDelegatedMemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
 	},
 	"ipv6addr": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The IPv6 Address of the Grid Member.",
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Grid member name",
 	},
 }
@@ -71,7 +74,6 @@ func FlattenIpv6rangetemplateDelegatedMember(ctx context.Context, from *dhcp.Ipv
 	}
 	m := Ipv6rangetemplateDelegatedMemberModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, Ipv6rangetemplateDelegatedMemberAttrTypes, m)
 	diags.Append(d...)
 	return t
