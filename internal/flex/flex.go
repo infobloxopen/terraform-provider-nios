@@ -463,6 +463,13 @@ func ExpandStringPointer(v types.String) *string {
 	return v.ValueStringPointer()
 }
 
+func ExpandStringPointerEmptyAsNil(v types.String) *string {
+	if v.IsNull() || v.IsUnknown() || v.ValueString() == "" {
+		return nil
+	}
+	return v.ValueStringPointer()
+}
+
 func ExpandInt32(v types.Int32) int32 {
 	return v.ValueInt32()
 }
