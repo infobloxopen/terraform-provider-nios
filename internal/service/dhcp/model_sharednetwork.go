@@ -360,7 +360,6 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the network view in which this shared network resides.",
 	},
 	"networks": schema.ListNestedAttribute{
-		// CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: SharednetworkNetworksResourceSchemaAttributes,
 		},
@@ -627,7 +626,6 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.MsAdUserData = FlattenSharednetworkMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	// m.Networks = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
 	planNetworks := m.Networks
 	reOrderedNetworks, diags := utils.ReorderAndFilterNestedListResponse(ctx, planNetworks, m.Networks, "ref")
 	if !diags.HasError() {
