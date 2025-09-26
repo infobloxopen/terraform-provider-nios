@@ -31,8 +31,8 @@ func TestAccAdmingroupResource_basic(t *testing.T) {
 				Config: testAccAdmingroupBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "name", name),
+					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "access_method.#", "4"),
 					resource.TestCheckResourceAttr(resourceName, "access_method.0", "GUI"),
 					resource.TestCheckResourceAttr(resourceName, "access_method.1", "API"),
@@ -51,11 +51,7 @@ func TestAccAdmingroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lockout_setting.failed_lockout_duration", "5"),
 					resource.TestCheckResourceAttr(resourceName, "lockout_setting.never_unlock_user", "false"),
 					resource.TestCheckResourceAttr(resourceName, "lockout_setting.sequential_attempts", "5"),
-					// Test password_setting default values
-					//resource.TestCheckResourceAttr(resourceName, "password_setting.expire_days", "30"),
-					//resource.TestCheckResourceAttr(resourceName, "password_setting.expire_enable", "false"),
-					//resource.TestCheckResourceAttr(resourceName, "password_setting.reminder_days", "15"),
-
+					// Test other default values
 					resource.TestCheckResourceAttr(resourceName, "superuser", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_account_inactivity_lockout_enable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_disable_concurrent_login", "false"),

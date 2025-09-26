@@ -1,5 +1,5 @@
 // Create an Admin Group with Basic Fields
-resource "nios_security_admin_group" "admin_group_basic_fields" {
+resource "nios_security_admin_group" "admin_group_with_basic_fields" {
   name    = "example_admin_group"
   comment = "Example Admin Group with basic fields"
   disable = true
@@ -9,7 +9,7 @@ resource "nios_security_admin_group" "admin_group_basic_fields" {
 }
 
 // Create an Admin Group with Additional Fields with user_access as IP address
-resource "nios_security_admin_group" "admin_group_additional_fields" {
+resource "nios_security_admin_group" "admin_group_with_additional_fields" {
   name          = "example_admin_group2"
   access_method = ["GUI", "API", "CLI", "TAXII"]
   admin_set_commands = {
@@ -88,7 +88,7 @@ resource "nios_security_admin_group" "admin_group_additional_fields" {
 }
 
 // Create an Admin Group with Additional Fields with user_access as Named ACL
-resource "nios_security_admin_group" "admin_group_additional_fields2" {
+resource "nios_security_admin_group" "admin_group_with_additional_fields2" {
   name = "example_admin_group3"
   cloud_show_commands = {
     show_cloud_services_portal = true

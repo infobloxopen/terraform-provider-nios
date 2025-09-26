@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -16,8 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -45,7 +44,7 @@ type AdmingroupModel struct {
 	DnsToplevelCommands               types.Object                     `tfsdk:"dns_toplevel_commands"`
 	DockerSetCommands                 types.Object                     `tfsdk:"docker_set_commands"`
 	DockerShowCommands                types.Object                     `tfsdk:"docker_show_commands"`
-	EmailAddresses                    types.List                       `tfsdk:"email_addresses"`
+	EmailAddresses                    internaltypes.UnorderedListValue `tfsdk:"email_addresses"`
 	EnableRestrictedUserAccess        types.Bool                       `tfsdk:"enable_restricted_user_access"`
 	ExtAttrs                          types.Map                        `tfsdk:"extattrs"`
 	ExtAttrsAll                       types.Map                        `tfsdk:"extattrs_all"`
@@ -93,7 +92,7 @@ var AdmingroupAttrTypes = map[string]attr.Type{
 	"dns_toplevel_commands":                 types.ObjectType{AttrTypes: AdmingroupDnsToplevelCommandsAttrTypes},
 	"docker_set_commands":                   types.ObjectType{AttrTypes: AdmingroupDockerSetCommandsAttrTypes},
 	"docker_show_commands":                  types.ObjectType{AttrTypes: AdmingroupDockerShowCommandsAttrTypes},
-	"email_addresses":                       types.ListType{ElemType: types.StringType},
+	"email_addresses":                       internaltypes.UnorderedListOfStringType,
 	"enable_restricted_user_access":         types.BoolType,
 	"extattrs":                              types.MapType{ElemType: types.StringType},
 	"extattrs_all":                          types.MapType{ElemType: types.StringType},
@@ -181,6 +180,7 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
 		},
 		MarkdownDescription: "Comment for the Admin Group; maximum 256 characters.",
 	},
@@ -251,8 +251,12 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Docker show commands for the docker command group.",
 	},
 	"email_addresses": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		MarkdownDescription: "The e-mail addresses for the Admin Group.",
 	},
 	"enable_restricted_user_access": schema.BoolAttribute{
@@ -308,9 +312,12 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Show commands for the licensing command group.",
 	},
 	"lockout_setting": schema.SingleNestedAttribute{
-		Attributes:          AdmingroupLockoutSettingResourceSchemaAttributes,
-		Optional:            true,
-		Computed:            true,
+		Attributes: AdmingroupLockoutSettingResourceSchemaAttributes,
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_lockout_setting")),
+		},
 		MarkdownDescription: "This struct specifies security policy settings in admin group.",
 	},
 	"machine_control_toplevel_commands": schema.SingleNestedAttribute{
@@ -419,18 +426,6 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandAdmingroup(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.Admingroup {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m AdmingroupModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *AdmingroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.Admingroup {
 	if m == nil {
 		return nil
@@ -455,7 +450,6 @@ func (m *AdmingroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		DockerSetCommands:                 ExpandAdmingroupDockerSetCommands(ctx, m.DockerSetCommands, diags),
 		DockerShowCommands:                ExpandAdmingroupDockerShowCommands(ctx, m.DockerShowCommands, diags),
 		EmailAddresses:                    flex.ExpandFrameworkListString(ctx, m.EmailAddresses, diags),
-		EnableRestrictedUserAccess:        flex.ExpandBoolPointer(m.EnableRestrictedUserAccess),
 		ExtAttrs:                          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		GridSetCommands:                   ExpandAdmingroupGridSetCommands(ctx, m.GridSetCommands, diags),
 		GridShowCommands:                  ExpandAdmingroupGridShowCommands(ctx, m.GridShowCommands, diags),
@@ -521,7 +515,7 @@ func (m *AdmingroupModel) Flatten(ctx context.Context, from *security.Admingroup
 	m.DnsToplevelCommands = FlattenAdmingroupDnsToplevelCommands(ctx, from.DnsToplevelCommands, diags)
 	m.DockerSetCommands = FlattenAdmingroupDockerSetCommands(ctx, from.DockerSetCommands, diags)
 	m.DockerShowCommands = FlattenAdmingroupDockerShowCommands(ctx, from.DockerShowCommands, diags)
-	m.EmailAddresses = flex.FlattenFrameworkListString(ctx, from.EmailAddresses, diags)
+	m.EmailAddresses = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.EmailAddresses, diags)
 	m.EnableRestrictedUserAccess = types.BoolPointerValue(from.EnableRestrictedUserAccess)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.GridSetCommands = FlattenAdmingroupGridSetCommands(ctx, from.GridSetCommands, diags)
