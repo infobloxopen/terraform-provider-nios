@@ -17,7 +17,7 @@ import (
 )
 
 // TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// Grid Members: infoblox.172_28_83_29, infoblox.172_28_82_115
+// Grid Members: infoblox.localhost, infoblox.localhost1
 // Distribution Dependent Groups: example_distribution_dependent_group1, example_distribution_dependent_group2
 // Upgrade Dependent Groups: example_upgrade_dependent_group1, example_upgrade_dependent_group2
 
@@ -176,7 +176,7 @@ func TestAccUpgradegroupResource_DistributionTime(t *testing.T) {
 	distributionTime := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	updatedDistributionTime := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	grid_member := []map[string]any{
-		{"member": "infoblox.172_28_83_29"},
+		{"member": "infoblox.localhost"},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -210,10 +210,10 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 
 	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
 	member1 := []map[string]any{
-		{"member": "infoblox.172_28_83_29"},
+		{"member": "infoblox.localhost"},
 	}
 	member2 := []map[string]any{
-		{"member": "infoblox.172_28_82_115"},
+		{"member": "infoblox.localhost1"},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -225,7 +225,7 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 				Config: testAccUpgradegroupMembers(name, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.172_28_83_29"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.localhost"),
 				),
 			},
 			// // Update and Read
@@ -233,7 +233,7 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 				Config: testAccUpgradegroupMembers(name, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.172_28_82_115"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.localhost1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -345,7 +345,7 @@ func TestAccUpgradegroupResource_UpgradeTime(t *testing.T) {
 	upgradeTime := now.Add(30 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	updatedUpgradeTime := now.Add(54 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	grid_member := []map[string]any{
-		{"member": "infoblox.172_28_83_29"},
+		{"member": "infoblox.localhost"},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{

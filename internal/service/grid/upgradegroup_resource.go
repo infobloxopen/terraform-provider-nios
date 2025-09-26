@@ -144,13 +144,6 @@ func (r *UpgradegroupResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	// Preserve timezone from state
-	diags = req.State.GetAttribute(ctx, path.Root("time_zone"), &data.TimeZone)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
 	apiRes, _, err := r.client.GridAPI.
 		UpgradegroupAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
