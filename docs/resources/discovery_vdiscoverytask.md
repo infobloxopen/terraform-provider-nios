@@ -17,7 +17,7 @@ Manages a Vdiscoverytask.
 resource "nios_discovery_vdiscoverytask" "aws_comprehensive" {
   name                                = "AWS-vdiscoverytask"
   driver_type                         = "AWS"
-  member                              = "infoblox.172_28_83_140"
+  member                              = "infoblox.localdomain"
   merge_data                          = true
   update_metadata                     = true
   auto_consolidate_cloud_ea           = true
@@ -51,7 +51,7 @@ resource "nios_discovery_vdiscoverytask" "aws_comprehensive" {
 resource "nios_discovery_vdiscoverytask" "azure_vdiscoverytask" {
   name                                = "AZURE-vdiscoverytask"
   driver_type                         = "AZURE"
-  member                              = "infoblox.172_28_83_29"
+  member                              = "infoblox.localdomain"
   username                            = "azure_client_id"
   password                            = "azure_client_secret"
   fqdn_or_ip                          = "tenant_id"
@@ -68,7 +68,7 @@ resource "nios_discovery_vdiscoverytask" "azure_vdiscoverytask" {
 resource "nios_discovery_vdiscoverytask" "vmware_vdiscoverytask" {
   name                                = "VMWARE-vdiscoverytask"
   driver_type                         = "VMWARE"
-  member                              = "infoblox.172_28_83_29"
+  member                              = "infoblox.localdomain"
   fqdn_or_ip                          = "10.0.0.0"
   username                            = "vc_admin"
   password                            = "vmware_password"
@@ -88,7 +88,7 @@ resource "nios_discovery_vdiscoverytask" "vmware_vdiscoverytask" {
 resource "nios_discovery_vdiscoverytask" "openstack_vdiscoverytask" {
   name                                = "OPENSTACK-vdiscoverytask"
   driver_type                         = "OPENSTACK"
-  member                              = "infoblox.172_28_83_29"
+  member                              = "infoblox.localdomain"
   fqdn_or_ip                          = "10.15.0.0"
   username                            = "openstack_user"
   password                            = "openstack_password"
@@ -109,9 +109,9 @@ resource "nios_discovery_vdiscoverytask" "openstack_vdiscoverytask" {
 resource "nios_discovery_vdiscoverytask" "gcp_vdiscoverytask" {
   name                                = "GCP-vdiscoverytask"
   driver_type                         = "GCP"
-  member                              = "infoblox.172_28_83_140"
-  service_account_file                = "/Users/travisuryavamshi/go/src/github.com/infobloxopen/terraform-provider-nios/internal/testdata/nios_discovery_vdiscoverytask/service_account_file1.json"
-  cdiscovery_file                     = "/Users/travisuryavamshi/go/src/github.com/infobloxopen/terraform-provider-nios/internal/testdata/nios_discovery_vdiscoverytask/cdiscoveryfile_gcp.csv"
+  member                              = "infoblox.localdomain"
+  service_account_file                = "</path/to/your/service_account_file.json>"
+  cdiscovery_file                     = "</path/to/your/cdiscovery_file.json>"
   multiple_accounts_sync_policy       = "UPLOAD"
   sync_child_accounts                 = true
   merge_data                          = false

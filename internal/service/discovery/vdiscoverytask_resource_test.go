@@ -750,7 +750,7 @@ func TestAccVdiscoverytaskResource_MultipleAccountsSyncPolicy(t *testing.T) {
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
 	testDataPath := getTestDataPath()
-	cdiscoveryFile := filepath.Join(testDataPath, "csvfile1_aws.csv")
+	cdiscoveryFile := filepath.Join(testDataPath, "cdiscoveryfile1_aws.csv")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
