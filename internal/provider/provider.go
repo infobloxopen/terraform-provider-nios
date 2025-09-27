@@ -165,6 +165,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewDistributionscheduleResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
+		discovery.NewVdiscoverytaskResource,
 	}
 }
 
@@ -237,6 +238,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewDistributionscheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
+		discovery.NewVdiscoverytaskDataSource,
 	}
 }
 
