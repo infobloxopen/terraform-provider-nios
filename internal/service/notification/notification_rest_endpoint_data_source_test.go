@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
