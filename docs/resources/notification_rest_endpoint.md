@@ -3,12 +3,12 @@
 page_title: "nios_notification_rest_endpoint Resource - nios"
 subcategory: "NOTIFICATION"
 description: |-
-  
+  Manages a Notification REST Endpoint.
 ---
 
 # nios_notification_rest_endpoint (Resource)
 
-
+Manages a Notification REST Endpoint.
 
 ## Example Usage
 

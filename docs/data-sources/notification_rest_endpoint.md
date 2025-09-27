@@ -3,12 +3,12 @@
 page_title: "nios_notification_rest_endpoint Data Source - nios"
 subcategory: "NOTIFICATION"
 description: |-
-  
+  Retrieves information about existing Notification REST Endpoints.
 ---
 
 # nios_notification_rest_endpoint (Data Source)
 
-
+Retrieves information about existing Notification REST Endpoints.
 
 ## Example Usage
 
