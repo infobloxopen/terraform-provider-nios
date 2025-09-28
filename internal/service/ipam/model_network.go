@@ -336,6 +336,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Comment for the network, maximum 256 characters.",
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -641,11 +642,11 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-	},
+		},
 		MarkdownDescription: "A list of MAC addresses the appliance will ignore.",
 	},
 	"ipam_email_addresses": schema.ListAttribute{
