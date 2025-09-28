@@ -1,5 +1,5 @@
 // Create IPV4 forward mapping zone with Basic Fields
-resource "nios_dns_zone_rp" "create_zone1" {
+resource "nios_dns_zone_rp" "zone_rp_basic_fields" {
   fqdn = "example1.com"
   view = "default"
   extattrs = {
@@ -7,28 +7,8 @@ resource "nios_dns_zone_rp" "create_zone1" {
   }
 }
 
-// Create IPV4 reverse mapping zone with Basic Fields
-resource "nios_dns_zone_rp" "create_zone2" {
-  fqdn        = "10.0.0.0/24"
-  view        = "default"
-  zone_format = "IPV4"
-  extattrs = {
-    Site = "location-1"
-  }
-}
-
-// Create IPV6 reverse mapping zone with Basic Fields
-resource "nios_dns_zone_rp" "create_zone4" {
-  fqdn        = "2002:1100::/64"
-  view        = "default"
-  zone_format = "IPV6"
-  extattrs = {
-    Site = "location-1"
-  }
-}
-
 // Create IPV4 forward mapping zone with Additional Fields
-resource "nios_dns_zone_rp" "create_zone5" {
+resource "nios_dns_zone_rp" "zone_rp_additional_fields" {
   // Basic Fields
   fqdn = "example2.com"
   view = "default"
@@ -36,10 +16,9 @@ resource "nios_dns_zone_rp" "create_zone5" {
   // Additional fields
   grid_primary = [
     {
-      name = "infoblox.10_0_0_1",
+      name = "infoblox.member",
     }
   ]
-  restart_if_needed = true
 
   soa_default_ttl     = 37000
   soa_expire          = 92000
@@ -48,17 +27,9 @@ resource "nios_dns_zone_rp" "create_zone5" {
   soa_retry           = 800
   use_grid_zone_timer = true
 
-  allow_query = [
-    {
-      struct     = "addressac"
-      address    = "10.0.0.0"
-      permission = "ALLOW"
-    }
-  ]
-  use_allow_query = true
 
-  comment = "IPV4 forward auth zone"
+  comment = "Comment for Zone RP"
   extattrs = {
-    Site = "location-1"
+    Site = "location-2"
   }
 }

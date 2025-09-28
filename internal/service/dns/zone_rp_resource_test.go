@@ -35,6 +35,18 @@ func TestAccZoneRpResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(resourceName, "log_rpz", "true"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv4", "29"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv6", "112"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_severity", "MAJOR"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_type", "LOCAL"),
+					resource.TestCheckResourceAttr(resourceName, "use_log_rpz", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "false"),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -142,7 +154,7 @@ func TestAccZoneRpResource_ExtAttrs(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
@@ -152,7 +164,7 @@ func TestAccZoneRpResource_ExtAttrs(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -264,24 +276,97 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
+	fireEyeRuleMapping := map[string]any{
+		"apt_override": "NODATA",
+		"fireeye_alert_mapping": []map[string]any{
+			{
+				"alert_type": "DOMAIN_MATCH",
+				"lifetime":   "5",
+				"rpz_rule":   "NODATA",
+			},
+		},
+	}
+	fireEyeRuleMappingUpdate1 := map[string]any{
+		"apt_override": "NOOVERRIDE",
+		"fireeye_alert_mapping": []map[string]any{
+			{
+				"alert_type": "INFECTION_MATCH",
+				"lifetime":   "0",
+				"rpz_rule":   "NONE",
+			},
+		},
+	}
+
+	fireEyeRuleMappingUpdate2 := map[string]any{
+		"apt_override": "NXDOMAIN",
+		"fireeye_alert_mapping": []map[string]any{
+			{
+				"alert_type": "MALWARE_CALLBACK",
+				"lifetime":   "500",
+				"rpz_rule":   "NXDOMAIN",
+			},
+		},
+	}
+	//fireEyeRuleMappingUpdate3 := map[string]any{
+	//	"apt_override": "PASSTHRU",
+	//	"fireeye_alert_mapping": []map[string]any{
+	//		{
+	//			"alert_type": "WEB_INFECTION",
+	//			"lifetime":   "500",
+	//			"rpz_rule":   "PASSTHRU",
+	//		},
+	//	},
+	//}
+	//fireEyeRuleMappingUpdate4 := map[string]any{
+	//	"apt_override": "SUBSTITUTE",
+	//	"fireeye_alert_mapping": []map[string]any{
+	//		{
+	//			"alert_type": "MALWARE_OBJECT",
+	//			"lifetime":   "500",
+	//			"rpz_rule":   "SUBSTITUTE",
+	//		},
+	//	},
+	//	"substituted_domain_name": "sub.example.com",
+	//}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpFireeyeRuleMapping(zoneFqdn, "default", "FIREEYE_RULE_MAPPING_REPLACE_ME"),
+				Config: testAccZoneRpFireeyeRuleMapping(zoneFqdn, "default", fireEyeRuleMapping),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping", "FIREEYE_RULE_MAPPING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.apt_override", "NODATA"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.alert_type", "DOMAIN_MATCH"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.lifetime", "5"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.rpz_rule", "NODATA"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpFireeyeRuleMapping(zoneFqdn, "default", "FIREEYE_RULE_MAPPING_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpFireeyeRuleMapping(zoneFqdn, "default", fireEyeRuleMappingUpdate1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping", "FIREEYE_RULE_MAPPING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.apt_override", "NOOVERRIDE"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.alert_type", "INFECTION_MATCH"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.lifetime", "0"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.rpz_rule", "NONE"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneRpFireeyeRuleMapping(zoneFqdn, "default", fireEyeRuleMappingUpdate2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.apt_override", "NXDOMAIN"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.alert_type", "MALWARE_CALLBACK"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.lifetime", "500"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.rpz_rule", "NXDOMAIN"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -464,7 +549,8 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 				Config: testAccZoneRpMemberSoaMnames(zoneFqdn, "default", gridPrimary, memberSoaMnames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames", "MEMBER_SOA_MNAMES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.grid_primary", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.mname", "example.com"),
 				),
 			},
 			// Update and Read
@@ -472,7 +558,7 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 				Config: testAccZoneRpMemberSoaMnames(zoneFqdn, "default", gridPrimary, updatedMemberSoaMnames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames", "MEMBER_SOA_MNAMES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.mname", "infoblox.localdomain"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -586,18 +672,18 @@ func TestAccZoneRpResource_RpzDropIpRuleEnabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleEnabled(zoneFqdn, "default", "RPZ_DROP_IP_RULE_ENABLED_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleEnabled(zoneFqdn, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_enabled", "RPZ_DROP_IP_RULE_ENABLED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_enabled", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleEnabled(zoneFqdn, "default", "RPZ_DROP_IP_RULE_ENABLED_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleEnabled(zoneFqdn, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_enabled", "RPZ_DROP_IP_RULE_ENABLED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_enabled", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -616,18 +702,18 @@ func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv4(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4(zoneFqdn, "default", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4(zoneFqdn, "default", "20"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv4", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv4", "20"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4(zoneFqdn, "default", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv4(zoneFqdn, "default", "30"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv4", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV4_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv4", "30"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -646,18 +732,18 @@ func TestAccZoneRpResource_RpzDropIpRuleMinPrefixLengthIpv6(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6(zoneFqdn, "default", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6(zoneFqdn, "default", "40"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv6", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv6", "40"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6(zoneFqdn, "default", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzDropIpRuleMinPrefixLengthIpv6(zoneFqdn, "default", "50"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv6", "RPZ_DROP_IP_RULE_MIN_PREFIX_LENGTH_IPV6_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_drop_ip_rule_min_prefix_length_ipv6", "50"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -676,18 +762,34 @@ func TestAccZoneRpResource_RpzPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "RPZ_POLICY_REPLACE_ME"),
+				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "DISABLED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "RPZ_POLICY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "DISABLED"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "RPZ_POLICY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "NODATA"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "RPZ_POLICY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "NODATA"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "PASSTHRU"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "PASSTHRU"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "SUBSTITUTE"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "SUBSTITUTE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -706,18 +808,26 @@ func TestAccZoneRpResource_RpzSeverity(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzSeverity(zoneFqdn, "default", "RPZ_SEVERITY_REPLACE_ME"),
+				Config: testAccZoneRpRpzSeverity(zoneFqdn, "default", "CRITICAL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_severity", "RPZ_SEVERITY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_severity", "CRITICAL"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzSeverity(zoneFqdn, "default", "RPZ_SEVERITY_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzSeverity(zoneFqdn, "default", "INFORMATIONAL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_severity", "RPZ_SEVERITY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_severity", "INFORMATIONAL"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneRpRpzSeverity(zoneFqdn, "default", "WARNING"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rpz_severity", "WARNING"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -729,6 +839,16 @@ func TestAccZoneRpResource_RpzType(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_rpz_type"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	fireEyeRuleMapping := map[string]any{
+		"apt_override": "NODATA",
+		"fireeye_alert_mapping": []map[string]any{
+			{
+				"alert_type": "DOMAIN_MATCH",
+				"lifetime":   "0",
+				"rpz_rule":   "NODATA",
+			},
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -736,18 +856,18 @@ func TestAccZoneRpResource_RpzType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzType(zoneFqdn, "default", "RPZ_TYPE_REPLACE_ME"),
+				Config: testAccZoneRpRpzType(zoneFqdn, "default", "FIREEYE", fireEyeRuleMapping),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_type", "RPZ_TYPE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_type", "FIREEYE"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRpzType(zoneFqdn, "default", "RPZ_TYPE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpRpzType(zoneFqdn, "default", "FEED", fireEyeRuleMapping),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_type", "RPZ_TYPE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rpz_type", "FEED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1087,7 +1207,7 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 				Config: testAccZoneRpUseExternalPrimary(zoneFqdn, "default", externalPrimaries, msSecondaries, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "USE_EXTERNAL_PRIMARY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "true"),
 				),
 			},
 			// Update and Read
@@ -1095,7 +1215,7 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 				Config: estAccZoneRpUseExternalPrimaryUpdate(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "USE_EXTERNAL_PRIMARY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1122,7 +1242,7 @@ func TestAccZoneRpResource_UseGridZoneTimer(t *testing.T) {
 				Config: testAccZoneRpUseGridZoneTimer(zoneFqdn, "default", gridPrimary, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "USE_GRID_ZONE_TIMER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "true"),
 				),
 			},
 			// Update and Read
@@ -1130,7 +1250,7 @@ func TestAccZoneRpResource_UseGridZoneTimer(t *testing.T) {
 				Config: testAccZoneRpUseGridZoneTimerUpdate(zoneFqdn, "default", gridPrimary, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "USE_GRID_ZONE_TIMER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_grid_zone_timer", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1149,18 +1269,18 @@ func TestAccZoneRpResource_UseLogRpz(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseLogRpz(zoneFqdn, "default", "USE_LOG_RPZ_REPLACE_ME"),
+				Config: testAccZoneRpUseLogRpz(zoneFqdn, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_log_rpz", "USE_LOG_RPZ_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_log_rpz", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseLogRpz(zoneFqdn, "default", "USE_LOG_RPZ_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpUseLogRpz(zoneFqdn, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_log_rpz", "USE_LOG_RPZ_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_log_rpz", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1209,18 +1329,18 @@ func TestAccZoneRpResource_UseRpzDropIpRule(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseRpzDropIpRule(zoneFqdn, "default", "USE_RPZ_DROP_IP_RULE_REPLACE_ME"),
+				Config: testAccZoneRpUseRpzDropIpRule(zoneFqdn, "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_rpz_drop_ip_rule", "USE_RPZ_DROP_IP_RULE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_rpz_drop_ip_rule", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseRpzDropIpRule(zoneFqdn, "default", "USE_RPZ_DROP_IP_RULE_UPDATE_REPLACE_ME"),
+				Config: testAccZoneRpUseRpzDropIpRule(zoneFqdn, "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_rpz_drop_ip_rule", "USE_RPZ_DROP_IP_RULE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_rpz_drop_ip_rule", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1416,14 +1536,15 @@ resource "nios_dns_zone_rp" "test_external_secondaries" {
 `, zoneFqdn, view, gridPrimaryHCL, externalSecondariesHCL)
 }
 
-func testAccZoneRpFireeyeRuleMapping(zoneFqdn, view, fireeyeRuleMapping string) string {
+func testAccZoneRpFireeyeRuleMapping(zoneFqdn, view string, fireeyeRuleMapping map[string]any) string {
+	fireeyeRuleMappingHCL := utils.ConvertMapToHCL(fireeyeRuleMapping)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_rp" "test_fireeye_rule_mapping" {
     fqdn = %q
     view = %q
-    fireeye_rule_mapping = %q
+    fireeye_rule_mapping = %s
 }
-`, zoneFqdn, view, fireeyeRuleMapping)
+`, zoneFqdn, view, fireeyeRuleMappingHCL)
 }
 
 func testAccZoneRpGridPrimary(zoneFqdn, view string, gridPrimary []map[string]any) string {
@@ -1526,6 +1647,7 @@ resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_enabled" {
     fqdn = %q
     view = %q
     rpz_drop_ip_rule_enabled = %q
+    use_rpz_drop_ip_rule = true
 }
 `, zoneFqdn, view, rpzDropIpRuleEnabled)
 }
@@ -1536,6 +1658,7 @@ resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_min_prefix_length_ipv4" {
     fqdn = %q
     view = %q
     rpz_drop_ip_rule_min_prefix_length_ipv4 = %q
+    use_rpz_drop_ip_rule = true
 }
 `, zoneFqdn, view, rpzDropIpRuleMinPrefixLengthIpv4)
 }
@@ -1546,6 +1669,7 @@ resource "nios_dns_zone_rp" "test_rpz_drop_ip_rule_min_prefix_length_ipv6" {
     fqdn = %q
     view = %q
     rpz_drop_ip_rule_min_prefix_length_ipv6 = %q
+    use_rpz_drop_ip_rule = true
 }
 `, zoneFqdn, view, rpzDropIpRuleMinPrefixLengthIpv6)
 }
@@ -1556,6 +1680,7 @@ resource "nios_dns_zone_rp" "test_rpz_policy" {
     fqdn = %q
     view = %q
     rpz_policy = %q
+    substitute_name = "substitute.fqdn"
 }
 `, zoneFqdn, view, rpzPolicy)
 }
@@ -1570,14 +1695,16 @@ resource "nios_dns_zone_rp" "test_rpz_severity" {
 `, zoneFqdn, view, rpzSeverity)
 }
 
-func testAccZoneRpRpzType(zoneFqdn, view, rpzType string) string {
+func testAccZoneRpRpzType(zoneFqdn, view, rpzType string, fireEyeRuleMapping map[string]any) string {
+	fireeyeRuleMappingHCL := utils.ConvertMapToHCL(fireEyeRuleMapping)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_rp" "test_rpz_type" {
     fqdn = %q
     view = %q
     rpz_type = %q
+    fireeye_rule_mapping = %s
 }
-`, zoneFqdn, view, rpzType)
+`, zoneFqdn, view, rpzType, fireeyeRuleMappingHCL)
 }
 
 func testAccZoneRpSetSoaSerialNumber(zoneFqdn, view string, setSoaSerialNumber bool) string {
@@ -1586,6 +1713,7 @@ resource "nios_dns_zone_rp" "test_set_soa_serial_number" {
     fqdn = %q
     view = %q
     set_soa_serial_number = %t
+    soa_serial_number = 10
 }
 `, zoneFqdn, view, setSoaSerialNumber)
 }
@@ -1778,6 +1906,7 @@ resource "nios_dns_zone_rp" "test_use_log_rpz" {
     fqdn = %q
     view = %q
     use_log_rpz = %q
+    log_rpz = true
 }
 `, zoneFqdn, view, useLogRpz)
 }
@@ -1799,6 +1928,7 @@ resource "nios_dns_zone_rp" "test_use_rpz_drop_ip_rule" {
     fqdn = %q
     view = %q
     use_rpz_drop_ip_rule = %q
+    rpz_drop_ip_rule_min_prefix_length_ipv4 = 20
 }
 `, zoneFqdn, view, useRpzDropIpRule)
 }

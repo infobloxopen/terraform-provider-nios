@@ -338,9 +338,12 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The hostname policy for records under this zone.",
 	},
 	"rpz_drop_ip_rule_enabled": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_rpz_drop_ip_rule")),
+		},
 		MarkdownDescription: "Enables the appliance to ignore RPZ-IP triggers with prefix lengths less than the specified minimum prefix length.",
 	},
 	"rpz_drop_ip_rule_min_prefix_length_ipv4": schema.Int64Attribute{
