@@ -21,10 +21,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -1285,9 +1287,30 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.AllowFixedRrsetOrder = types.BoolPointerValue(from.AllowFixedRrsetOrder)
 	m.AllowGssTsigForUnderscoreZone = types.BoolPointerValue(from.AllowGssTsigForUnderscoreZone)
 	m.AllowGssTsigZoneUpdates = types.BoolPointerValue(from.AllowGssTsigZoneUpdates)
+	planAllowQuery := m.AllowQuery
 	m.AllowQuery = flex.FlattenFrameworkListNestedBlock(ctx, from.AllowQuery, ZoneAuthAllowQueryAttrTypes, diags, FlattenZoneAuthAllowQuery)
+	if !planAllowQuery.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planAllowQuery, m.AllowQuery, "use_tsig_key_name")
+		if !diags.HasError() {
+			m.AllowQuery = result.(basetypes.ListValue)
+		}
+	}
+	planAllowTransfer := m.AllowTransfer
 	m.AllowTransfer = flex.FlattenFrameworkListNestedBlock(ctx, from.AllowTransfer, ZoneAuthAllowTransferAttrTypes, diags, FlattenZoneAuthAllowTransfer)
+	if !planAllowTransfer.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planAllowTransfer, m.AllowTransfer, "use_tsig_key_name")
+		if !diags.HasError() {
+			m.AllowTransfer = result.(basetypes.ListValue)
+		}
+	}
+	planAllowUpdate := m.AllowUpdate
 	m.AllowUpdate = flex.FlattenFrameworkListNestedBlock(ctx, from.AllowUpdate, ZoneAuthAllowUpdateAttrTypes, diags, FlattenZoneAuthAllowUpdate)
+	if !planAllowUpdate.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planAllowUpdate, m.AllowUpdate, "use_tsig_key_name")
+		if !diags.HasError() {
+			m.AllowUpdate = result.(basetypes.ListValue)
+		}
+	}
 	m.AllowUpdateForwarding = types.BoolPointerValue(from.AllowUpdateForwarding)
 	m.AwsRte53ZoneInfo = FlattenZoneAuthAwsRte53ZoneInfo(ctx, from.AwsRte53ZoneInfo, diags)
 	m.CloudInfo = FlattenZoneAuthCloudInfo(ctx, from.CloudInfo, diags)
@@ -1319,7 +1342,14 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.EffectiveRecordNamePolicy = flex.FlattenStringPointer(from.EffectiveRecordNamePolicy)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.ExternalPrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalPrimaries, ZoneAuthExternalPrimariesAttrTypes, diags, FlattenZoneAuthExternalPrimaries)
+	planExternalSecondaries := m.ExternalSecondaries
 	m.ExternalSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSecondaries, ZoneAuthExternalSecondariesAttrTypes, diags, FlattenZoneAuthExternalSecondaries)
+	if !planExternalSecondaries.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planExternalSecondaries, m.ExternalSecondaries, "tsig_key_name")
+		if !diags.HasError() {
+			m.ExternalSecondaries = result.(basetypes.ListValue)
+		}
+	}
 	m.Fqdn = flex.FlattenStringPointer(from.Fqdn)
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneAuthGridPrimaryAttrTypes, diags, FlattenZoneAuthGridPrimary)
 	m.GridPrimarySharedWithMsParentDelegation = types.BoolPointerValue(from.GridPrimarySharedWithMsParentDelegation)

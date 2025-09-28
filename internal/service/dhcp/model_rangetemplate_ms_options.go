@@ -41,7 +41,7 @@ var RangetemplateMsOptionsResourceSchemaAttributes = map[string]schema.Attribute
 	"value": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Value of the DHCP option.",
+		MarkdownDescription: "Value of the DHCP option. Required to be set for all options.",
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
