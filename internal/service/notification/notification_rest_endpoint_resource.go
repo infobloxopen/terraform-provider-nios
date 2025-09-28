@@ -21,6 +21,7 @@ var readableAttributesForNotificationRestEndpoint = "client_certificate_subject,
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &NotificationRestEndpointResource{}
 var _ resource.ResourceWithImportState = &NotificationRestEndpointResource{}
+var _ resource.ResourceWithValidateConfig = &NotificationRestEndpointResource{}
 
 func NewNotificationRestEndpointResource() resource.Resource {
 	return &NotificationRestEndpointResource{}
@@ -60,6 +61,34 @@ func (r *NotificationRestEndpointResource) Configure(ctx context.Context, req re
 	}
 
 	r.client = client
+}
+
+func (r *NotificationRestEndpointResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var diags diag.Diagnostics
+	var data NotificationRestEndpointModel
+
+	diags.Append(req.Config.Get(ctx, &data)...)
+
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	if data.OutboundMemberType.ValueString() == "MEMBER" {
+		if data.OutboundMembers.IsNull() || data.OutboundMembers.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("outbound_members"),
+				"Invalid Configuration",
+				"Attribute 'outbound_members' must be specified when 'outbound_member_type' is set to 'MEMBER'.",
+			)
+		}
+	} else if !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("outbound_members"),
+			"Invalid Configuration",
+			"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
+		)
+	}
 }
 
 func (r *NotificationRestEndpointResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
