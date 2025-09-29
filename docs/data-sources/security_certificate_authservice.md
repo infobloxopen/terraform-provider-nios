@@ -3,12 +3,12 @@
 page_title: "nios_security_certificate_authservice Data Source - nios"
 subcategory: "SECURITY"
 description: |-
-  Retrieves information about existing Certificate Authservice.
+  Retrieves information about existing Certificate Authservices.
 ---
 
 # nios_security_certificate_authservice (Data Source)
 
-Retrieves information about existing Certificate Authservice.
+Retrieves information about existing Certificate Authservices.
 
 ## Example Usage
 

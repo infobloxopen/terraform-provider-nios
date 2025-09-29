@@ -36,7 +36,7 @@ func (r *CertificateAuthserviceResource) Metadata(ctx context.Context, req resou
 
 func (r *CertificateAuthserviceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an Certificate Authservice.",
+		MarkdownDescription: "Manages a Certificate Authservice.",
 		Attributes:          CertificateAuthserviceResourceSchemaAttributes,
 	}
 }
