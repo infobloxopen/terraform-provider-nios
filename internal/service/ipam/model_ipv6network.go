@@ -750,7 +750,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use flag for: valid_lifetime",
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		//Default:             booldefault.StaticBool(false),
 	},
 	"use_zone_associations": schema.BoolAttribute{
 		Optional:            true,
