@@ -148,6 +148,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewAdminuserResource,
 		security.NewPermissionResource,
 		security.NewAdminroleResource,
+		security.NewFtpuserResource,
 		security.NewSnmpuserResource,
 
 		misc.NewRulesetResource,
@@ -220,6 +221,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+		security.NewFtpuserDataSource,
 		security.NewPermissionDataSource,
 		security.NewSnmpuserDataSource,
 
