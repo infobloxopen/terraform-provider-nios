@@ -461,6 +461,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 	// Check if allow_telnet is true, then cli_credentials must contain at least one element with credentials_type set to "TELNET"
 	if !data.AllowTelnet.IsUnknown() && !data.AllowTelnet.IsNull() && data.AllowTelnet.ValueBool() {
 		isTelnet := false
+		isSSH := false
 		if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
 			// Iterate through cli_credentials to check if an element has credentials_type set to "TELNET"
 			var cliCredentials []FixedaddressCliCredentialsModel
@@ -475,11 +476,21 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 					continue
 				}
 				credentialsType := credentials.CredentialType.ValueString()
+				if credentialsType == "SSH" {
+					isSSH = true
+				}
 				if credentialsType == "TELNET" {
 					isTelnet = true
 					break
 				}
 			}
+		}
+		if !isSSH {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("allow_telnet"),
+				"Invalid configuration",
+				"The 'cli_credentials' must contain credentials with 'credentials_type' set to 'SSH'.",
+			)
 		}
 		if !isTelnet {
 			resp.Diagnostics.AddAttributeError(
