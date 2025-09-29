@@ -2,6 +2,7 @@
 resource "nios_security_certificate_authservice" "certificate_authservice_with_basic_fields" {
   name            = "example_certificate_authservice2"
   ca_certificates = ["cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22"]
+  ocsp_check      = "DISABLED"
 }
 
 // Create Certificate Authservice with additional fields
