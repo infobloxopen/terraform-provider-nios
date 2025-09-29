@@ -6,13 +6,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type CertificateAuthserviceOcspRespondersModel struct {
@@ -38,6 +41,13 @@ var CertificateAuthserviceOcspRespondersAttrTypes = map[string]attr.Type{
 var CertificateAuthserviceOcspRespondersResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn_or_ip": schema.StringAttribute{
 		Required:            true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+			stringvalidator.Any(
+				customvalidator.IsValidFQDN(),
+				customvalidator.IsValidIPCIDR(),
+			   ),
+		},
 		MarkdownDescription: "The FQDN (Fully Qualified Domain Name) or IP address of the server.",
 	},
 	"port": schema.Int64Attribute{
@@ -49,12 +59,15 @@ var CertificateAuthserviceOcspRespondersResourceSchemaAttributes = map[string]sc
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default: 		   stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The descriptive comment for the OCSP authentication responder.",
 	},
 	"disabled": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if this OCSP authentication responder is disabled.",
 	},
 	"certificate": schema.StringAttribute{
