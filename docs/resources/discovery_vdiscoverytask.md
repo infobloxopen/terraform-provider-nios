@@ -138,6 +138,7 @@ resource "nios_discovery_vdiscoverytask" "gcp_vdiscoverytask" {
 - `name` (String) Name of this cloud discovery task. Uniquely identify a task.
 - `private_network_view_mapping_policy` (String) Mapping policy for the network view for private IPs in discovery data.
 - `public_network_view_mapping_policy` (String) Mapping policy for the network view for public IPs in discovery data.
+- `update_metadata` (Boolean) Whether to update metadata as a result of this network discovery.
 
 ### Optional
 
@@ -146,7 +147,6 @@ resource "nios_discovery_vdiscoverytask" "gcp_vdiscoverytask" {
 - `auto_create_dns_record` (Boolean) Control whether to create or update DNS record using discovered data.
 - `auto_create_dns_record_type` (String) Indicates the type of record to create if the auto create DNS record is enabled.
 - `cdiscovery_file` (String) The path to a file containing AWS account IDs or GCP Project IDs. when multiple_accounts_sync_policy is set to UPLOAD.
-- `cdiscovery_file_token` (String) The AWS account IDs or GCP Project IDs file's token.
 - `comment` (String) Comment on the task.
 - `credentials_type` (String) Credentials type used for connecting to the cloud management platform.
 - `dns_view_private_ip` (String) The DNS view name for private IPs.
@@ -173,13 +173,13 @@ resource "nios_discovery_vdiscoverytask" "gcp_vdiscoverytask" {
 - `sync_child_accounts` (Boolean) Synchronizing child accounts is enabled or disabled.
 - `update_dns_view_private_ip` (Boolean) If set to true, the appliance uses a specific DNS view for private IPs.
 - `update_dns_view_public_ip` (Boolean) If set to true, the appliance uses a specific DNS view for public IPs.
-- `update_metadata` (Boolean) Whether to update metadata as a result of this network discovery.
 - `use_identity` (Boolean) If set true, all keystone connection will use "/identity" endpoint and port value will be ignored.
 - `username` (String) Username used for connecting to the cloud management platform.
 
 ### Read-Only
 
 - `accounts_list` (List of String) The AWS Account IDs or GCP Project IDs list associated with this task.
+- `cdiscovery_file_token` (String) The AWS account IDs or GCP Project IDs file's token.
 - `last_run` (Number) Timestamp of last run.
 - `ref` (String) The reference to the object.
 - `state` (String) Current state of this task.

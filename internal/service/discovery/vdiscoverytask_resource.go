@@ -22,6 +22,7 @@ var readableAttributesForVdiscoverytask = "accounts_list,allow_unsecured_connect
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &VdiscoverytaskResource{}
 var _ resource.ResourceWithImportState = &VdiscoverytaskResource{}
+var _ resource.ResourceWithValidateConfig = &VdiscoverytaskResource{}
 
 func NewVdiscoverytaskResource() resource.Resource {
 	return &VdiscoverytaskResource{}
@@ -63,6 +64,139 @@ func (r *VdiscoverytaskResource) Configure(ctx context.Context, req resource.Con
 	r.client = client
 }
 
+func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data VdiscoverytaskModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	driverType := data.DriverType.ValueString()
+
+	// Validate cdiscovery_file requirement for UPLOAD policy
+	if !data.MultipleAccountsSyncPolicy.IsNull() && !data.MultipleAccountsSyncPolicy.IsUnknown() {
+		if data.MultipleAccountsSyncPolicy.ValueString() == "UPLOAD" {
+			if data.CdiscoveryFile.IsNull() || data.CdiscoveryFile.IsUnknown() || data.CdiscoveryFile.ValueString() == "" {
+				resp.Diagnostics.AddError(
+					"Missing CDDiscovery File",
+					"'cdiscovery_file' is required when 'multiple_accounts_sync_policy' is set to 'UPLOAD'.",
+				)
+			}
+		}
+	}
+
+	// Validate dns_view_private_ip requires update_dns_view_private_ip = true
+	if !data.DnsViewPrivateIp.IsNull() && !data.DnsViewPrivateIp.IsUnknown() && data.DnsViewPrivateIp.ValueString() != "" {
+		if data.UpdateDnsViewPrivateIp.IsNull() || data.UpdateDnsViewPrivateIp.IsUnknown() || !data.UpdateDnsViewPrivateIp.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Invalid DNS View Configuration",
+				"If you configure 'dns_view_private_ip', you must also set 'update_dns_view_private_ip' to true.",
+			)
+		}
+	}
+
+	// Validate dns_view_public_ip requires update_dns_view_public_ip = true
+	if !data.DnsViewPublicIp.IsNull() && !data.DnsViewPublicIp.IsUnknown() && data.DnsViewPublicIp.ValueString() != "" {
+		if data.UpdateDnsViewPublicIp.IsNull() || data.UpdateDnsViewPublicIp.IsUnknown() || !data.UpdateDnsViewPublicIp.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Invalid DNS View Configuration",
+				"If you configure 'dns_view_public_ip', you must also set 'update_dns_view_public_ip' to true.",
+			)
+		}
+	}
+
+	// Validate domain_name requirement for OPENSTACK with KEYSTONE_V3
+	if driverType == "OPENSTACK" {
+		if !data.IdentityVersion.IsNull() && !data.IdentityVersion.IsUnknown() {
+			if data.IdentityVersion.ValueString() == "KEYSTONE_V3" {
+				if data.DomainName.IsNull() || data.DomainName.IsUnknown() || data.DomainName.ValueString() == "" {
+					resp.Diagnostics.AddError(
+						"Missing Domain Name",
+						"'domain_name' is required when 'identity_version' is set to 'KEYSTONE_V3'.",
+					)
+				}
+			}
+		}
+
+		// Validate identity_version requirement for OPENSTACK
+		if data.IdentityVersion.IsNull() || data.IdentityVersion.IsUnknown() {
+			resp.Diagnostics.AddError(
+				"Missing Identity Version",
+				"'identity_version' is required when 'driver_type' is 'OPENSTACK'.",
+			)
+		}
+
+		// Validate use_identity requirement for OPENSTACK
+		if data.UseIdentity.IsNull() || data.UseIdentity.IsUnknown() {
+			resp.Diagnostics.AddError(
+				"Missing Use Identity",
+				"'use_identity' is required when 'driver_type' is 'OPENSTACK'.",
+			)
+		}
+	}
+
+	// Validate credentials_type DIRECT requirements
+	if !data.CredentialsType.IsNull() && !data.CredentialsType.IsUnknown() {
+		if data.CredentialsType.ValueString() == "DIRECT" {
+			// Password required for DIRECT credentials
+			if data.Password.IsNull() || data.Password.IsUnknown() || data.Password.ValueString() == "" {
+				resp.Diagnostics.AddError(
+					"Missing Password",
+					"'password' is required when 'credentials_type' is set to 'DIRECT'.",
+				)
+			}
+
+			// Username required for DIRECT credentials
+			if data.Username.IsNull() || data.Username.IsUnknown() || data.Username.ValueString() == "" {
+				resp.Diagnostics.AddError(
+					"Missing Username",
+					"'username' is required when 'credentials_type' is set to 'DIRECT'.",
+				)
+			}
+		}
+	}
+
+	// Validate selected_regions requirement for AWS
+	if driverType == "AWS" {
+		if data.SelectedRegions.IsNull() || data.SelectedRegions.IsUnknown() || data.SelectedRegions.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"Missing Selected Regions",
+				"'selected_regions' is required when 'driver_type' is 'AWS'.",
+			)
+		}
+	}
+
+	// Validate service_account_file requirement for GCP
+	if driverType == "GCP" {
+		if data.ServiceAccountFile.IsNull() || data.ServiceAccountFile.IsUnknown() || data.ServiceAccountFile.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"Missing Service Account File",
+				"'service_account_file' is required when 'driver_type' is 'GCP'.",
+			)
+		}
+	}
+
+	// Validate service_account_file is only for GCP
+	if !data.ServiceAccountFile.IsNull() && !data.ServiceAccountFile.IsUnknown() && data.ServiceAccountFile.ValueString() != "" {
+		if driverType != "GCP" {
+			resp.Diagnostics.AddError(
+				"Invalid Service Account File Configuration",
+				fmt.Sprintf("'service_account_file' is only supported for GCP driver type, but got '%s'.", driverType),
+			)
+		}
+	}
+
+	// Validate cdiscovery_file is only for AWS and GCP
+	if !data.CdiscoveryFile.IsNull() && !data.CdiscoveryFile.IsUnknown() && data.CdiscoveryFile.ValueString() != "" {
+		if driverType != "AWS" && driverType != "GCP" {
+			resp.Diagnostics.AddError(
+				"Invalid Cdiscovery File Configuration",
+				fmt.Sprintf("'cdiscovery_file' is only supported for AWS and GCP driver types, but got '%s'.", driverType),
+			)
+		}
+	}
+}
+
 func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data VdiscoverytaskModel
 
@@ -80,7 +214,7 @@ func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.Create
 		}
 	}
 
-	// Process CDiscovery file if multiple_accounts_sync_policy is UPLOAD
+	// Process Cdiscovery file if multiple_accounts_sync_policy is UPLOAD
 	if !data.MultipleAccountsSyncPolicy.IsNull() && data.MultipleAccountsSyncPolicy.ValueString() == "UPLOAD" {
 		if !r.processCDiscoveryFile(ctx, &data, &resp.Diagnostics) {
 			return
@@ -166,7 +300,7 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		}
 	}
 
-	// Process CDiscovery file if multiple_accounts_sync_policy is UPLOAD
+	// Process Cdiscovery file if multiple_accounts_sync_policy is UPLOAD
 	if !data.MultipleAccountsSyncPolicy.IsNull() && data.MultipleAccountsSyncPolicy.ValueString() == "UPLOAD" {
 		if !r.processCDiscoveryFile(ctx, &data, &resp.Diagnostics) {
 			return
@@ -227,11 +361,6 @@ func (r *VdiscoverytaskResource) processGCPServiceAccountFile(ctx context.Contex
 		return true // No file to process, continue
 	}
 
-	// // Skip if token is already provided (don't override existing token)
-	// if !data.ServiceAccountFileToken.IsNull() && !data.ServiceAccountFileToken.IsUnknown() {
-	// 	return true // Token already exists, continue
-	// }
-
 	// Get connection details from client configuration
 	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
 	username := r.client.SecurityAPI.Cfg.NIOSUsername
@@ -261,11 +390,6 @@ func (r *VdiscoverytaskResource) processCDiscoveryFile(ctx context.Context, data
 	if data.CdiscoveryFile.IsNull() || data.CdiscoveryFile.IsUnknown() {
 		return true // No file to process, continue
 	}
-
-	// Skip if token is already provided (don't override existing token)
-	// if !data.CdiscoveryFileToken.IsNull() && !data.CdiscoveryFileToken.IsUnknown() {
-	// 	return true // Token already exists, continue
-	// }
 
 	// Get connection details from client configuration
 	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
