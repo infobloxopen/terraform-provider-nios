@@ -108,10 +108,10 @@ func TestAccCertificateAuthserviceResource_AutoPopulateLogin(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccCertificateAuthserviceAutoPopulateLogin(name, caCertificate, "S_DN_CN", "DISABLED"),
+				Config: testAccCertificateAuthserviceAutoPopulateLogin(name, caCertificate, "SERIAL_NUMBER", "DISABLED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auto_populate_login", "S_DN_CN"),
+					resource.TestCheckResourceAttr(resourceName, "auto_populate_login", "SERIAL_NUMBER"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
