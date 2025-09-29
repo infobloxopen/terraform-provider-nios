@@ -17,6 +17,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO: OBJECTS TO BE PRESENT IN THE GRID FOR TESTS
+// Network views: custom_private_view, custom_public_view
+// DNS view : custom_dns_view
+
 var readableAttributesForVdiscoverytask = "accounts_list,allow_unsecured_connection,auto_consolidate_cloud_ea,auto_consolidate_managed_tenant,auto_consolidate_managed_vm,auto_create_dns_hostname_template,auto_create_dns_record,auto_create_dns_record_type,cdiscovery_file_token,comment,credentials_type,dns_view_private_ip,dns_view_public_ip,domain_name,driver_type,enable_filter,enabled,fqdn_or_ip,govcloud_enabled,identity_version,last_run,member,merge_data,multiple_accounts_sync_policy,name,network_filter,network_list,port,private_network_view,private_network_view_mapping_policy,protocol,public_network_view,public_network_view_mapping_policy,role_arn,scheduled_run,selected_regions,service_account_file,service_account_file_token,state,state_msg,sync_child_accounts,update_dns_view_private_ip,update_dns_view_public_ip,update_metadata,use_identity,username"
 
 func TestAccVdiscoverytaskResource_basic(t *testing.T) {
@@ -371,7 +375,7 @@ func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscoverytask.test_credentials_type"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("vdiscoverytask-creds-")
+	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -379,7 +383,7 @@ func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskCredentialsTypeIndirect(name, "INDIRECT", "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
+				Config: testAccVdiscoverytaskCredentialsTypeIndirect(name, "INDIRECT", "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, true, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "credentials_type", "INDIRECT"),
@@ -1721,7 +1725,7 @@ resource "nios_discovery_vdiscoverytask" "test_comment" {
 `, name, comment, driverType, member, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, mergeData, updateMetadata, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions, username, password)
 }
 
-func testAccVdiscoverytaskCredentialsTypeIndirect(name, credentialsType, roleArn, multipleAccountsSyncPolicy, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, syncChildAccounts bool, selectedRegions string) string {
+func testAccVdiscoverytaskCredentialsTypeIndirect(name, credentialsType, roleArn, multipleAccountsSyncPolicy, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, syncChildAccounts, update_metadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
 resource "nios_discovery_vdiscoverytask" "test_credentials_type" {
     name                                = %q
@@ -1737,10 +1741,10 @@ resource "nios_discovery_vdiscoverytask" "test_credentials_type" {
     public_network_view_mapping_policy  = %q
     merge_data                          = %t
     sync_child_accounts                 = %t
+	update_metadata                     = %t
     selected_regions                    = %q
-    update_metadata                     = false
 }
-`, name, credentialsType, roleArn, multipleAccountsSyncPolicy, member, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, mergeData, syncChildAccounts, selectedRegions)
+`, name, credentialsType, roleArn, multipleAccountsSyncPolicy, member, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, mergeData, syncChildAccounts, update_metadata, selectedRegions)
 }
 
 func testAccVdiscoverytaskCredentialsTypeDirect(name, credentialsType, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {

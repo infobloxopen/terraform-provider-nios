@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -159,8 +161,12 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Template string used to generate host name.",
 	},
 	"auto_create_dns_record": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires((path.MatchRoot("auto_create_dns_record_type"))),
+			boolvalidator.AlsoRequires((path.MatchRoot("auto_create_dns_hostname_template"))),
+		},
 		MarkdownDescription: "Control whether to create or update DNS record using discovered data.",
 	},
 	"auto_create_dns_record_type": schema.StringAttribute{
@@ -176,20 +182,22 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The path to a file containing AWS account IDs or GCP Project IDs. when multiple_accounts_sync_policy is set to UPLOAD.",
 	},
 	"cdiscovery_file_token": schema.StringAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The AWS account IDs or GCP Project IDs file's token.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Comment on the task.",
 	},
 	"credentials_type": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
+			stringvalidator.OneOf("DIRECT", "INDIRECT"),
 		},
 		MarkdownDescription: "Credentials type used for connecting to the cloud management platform.",
 	},
@@ -404,8 +412,7 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If set to true, the appliance uses a specific DNS view for public IPs.",
 	},
 	"update_metadata": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "Whether to update metadata as a result of this network discovery.",
 	},
 	"use_identity": schema.BoolAttribute{

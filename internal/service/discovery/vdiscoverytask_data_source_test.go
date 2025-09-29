@@ -24,21 +24,7 @@ func TestAccVdiscoverytaskDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckVdiscoverytaskDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVdiscoverytaskDataSourceConfigFilters(
-					name,
-					true,
-					true,
-					true,
-					"infoblox.172_28_83_29",
-					"AWS",
-					"AUTO_CREATE",
-					"AUTO_CREATE",
-					true,
-					false,
-					"us-east-1",
-					"aws_access_key",
-					"aws_secret_key",
-				),
+				Config: testAccVdiscoverytaskDataSourceConfigFilters(name, true, true, true, "infoblox.172_28_83_29", "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
@@ -81,7 +67,6 @@ func testAccCheckVdiscoverytaskResourceAttrPair(resourceName, dataSourceName str
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
 		resource.TestCheckResourceAttrPair(resourceName, "network_filter", dataSourceName, "result.0.network_filter"),
 		resource.TestCheckResourceAttrPair(resourceName, "network_list", dataSourceName, "result.0.network_list"),
-		//resource.TestCheckResourceAttrPair(resourceName, "password", dataSourceName, "result.0.password"),
 		resource.TestCheckResourceAttrPair(resourceName, "port", dataSourceName, "result.0.port"),
 		resource.TestCheckResourceAttrPair(resourceName, "private_network_view", dataSourceName, "result.0.private_network_view"),
 		resource.TestCheckResourceAttrPair(resourceName, "private_network_view_mapping_policy", dataSourceName, "result.0.private_network_view_mapping_policy"),
@@ -107,25 +92,25 @@ func testAccCheckVdiscoverytaskResourceAttrPair(resourceName, dataSourceName str
 func testAccVdiscoverytaskDataSourceConfigFilters(name string, auto_consolidate_cloud_ea, auto_consolidate_managed_tenant, auto_consolidate_managed_vm bool, member, driver_type, private_network_view_mapping_policy, public_network_view_mapping_policy string, merge_data, update_metadata bool, selected_regions, username, password string) string {
 	return fmt.Sprintf(`
 resource "nios_discovery_vdiscoverytask" "test" {
-    name = %q
-    auto_consolidate_cloud_ea = %t
-    auto_consolidate_managed_tenant = %t
-    auto_consolidate_managed_vm = %t
-    driver_type = %q
-    member = %q
-    merge_data = %t
+    name                                = %q
+    auto_consolidate_cloud_ea           = %t
+    auto_consolidate_managed_tenant     = %t
+    auto_consolidate_managed_vm         = %t
+    driver_type                         = %q
+    member                              = %q
+    merge_data                          = %t
     private_network_view_mapping_policy = %q
-    public_network_view_mapping_policy = %q
-    update_metadata = %t
-    selected_regions = %q
-    username = %q
-    password = %q
+    public_network_view_mapping_policy  = %q
+    update_metadata                     = %t
+    selected_regions                    = %q
+    username                            = %q
+	password                            = %q
 }
 
 data "nios_discovery_vdiscoverytask" "test" {
-  filters = {
-    name = nios_discovery_vdiscoverytask.test.name
-  }
+	filters = {
+    	name = nios_discovery_vdiscoverytask.test.name
+  	}
 }
 `, name, auto_consolidate_cloud_ea, auto_consolidate_managed_tenant, auto_consolidate_managed_vm, driver_type, member, merge_data, private_network_view_mapping_policy, public_network_view_mapping_policy, update_metadata, selected_regions, username, password)
 }
