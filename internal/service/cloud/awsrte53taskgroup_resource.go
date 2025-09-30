@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -69,6 +70,13 @@ func (r *Awsrte53taskgroupResource) Create(ctx context.Context, req resource.Cre
 
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	// Process AWS account IDs file if multiple_accounts_sync_policy is UPLOAD_CHILDREN
+	if !data.MultipleAccountsSyncPolicy.IsNull() && data.MultipleAccountsSyncPolicy.ValueString() == "UPLOAD_CHILDREN" {
+		if !r.processAwsAccountIdsFile(ctx, &data, &resp.Diagnostics) {
+			return
+		}
 	}
 
 	apiRes, _, err := r.client.CloudAPI.
@@ -138,6 +146,13 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	// Process AWS account IDs file if multiple_accounts_sync_policy is UPLOAD_CHILDREN
+	if !data.MultipleAccountsSyncPolicy.IsNull() && data.MultipleAccountsSyncPolicy.ValueString() == "UPLOAD_CHILDREN" {
+		if !r.processAwsAccountIdsFile(ctx, &data, &resp.Diagnostics) {
+			return
+		}
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -189,4 +204,34 @@ func (r *Awsrte53taskgroupResource) Delete(ctx context.Context, req resource.Del
 
 func (r *Awsrte53taskgroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// function that will process your AWS account IDs file and return the token
+func (r *Awsrte53taskgroupResource) processAwsAccountIdsFile(ctx context.Context, data *Awsrte53taskgroupModel, diags *diag.Diagnostics) bool {
+	// Check if aws_account_ids_file_path is provided
+	if data.AwsAccountIdsFilePath.IsNull() || data.AwsAccountIdsFilePath.IsUnknown() {
+		return true // No file to process, continue
+	}
+
+	// Get connection details from client configuration
+	baseUrl := r.client.CloudAPI.Cfg.NIOSHostURL
+	username := r.client.CloudAPI.Cfg.NIOSUsername
+	password := r.client.CloudAPI.Cfg.NIOSPassword
+
+	// Get the file path from the model
+	filePath := data.AwsAccountIdsFilePath.ValueString()
+
+	// Upload the AWS account IDs file and get the token
+	token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+	if err != nil {
+		diags.AddError(
+			"Client Error",
+			fmt.Sprintf("Unable to process AWS account IDs file %s, got error: %s", filePath, err),
+		)
+		return false
+	}
+
+	// Store the token in the aws_account_ids_file_token field
+	data.AwsAccountIdsFileToken = types.StringValue(token)
+	return true
 }

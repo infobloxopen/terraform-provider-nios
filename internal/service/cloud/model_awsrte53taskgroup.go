@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -26,6 +27,7 @@ type Awsrte53taskgroupModel struct {
 	AccountId                  types.String `tfsdk:"account_id"`
 	AccountsList               types.String `tfsdk:"accounts_list"`
 	AwsAccountIdsFileToken     types.String `tfsdk:"aws_account_ids_file_token"`
+	AwsAccountIdsFilePath      types.String `tfsdk:"aws_account_ids_file_path"`
 	Comment                    types.String `tfsdk:"comment"`
 	ConsolidateZones           types.Bool   `tfsdk:"consolidate_zones"`
 	ConsolidatedView           types.String `tfsdk:"consolidated_view"`
@@ -46,6 +48,7 @@ var Awsrte53taskgroupAttrTypes = map[string]attr.Type{
 	"account_id":                    types.StringType,
 	"accounts_list":                 types.StringType,
 	"aws_account_ids_file_token":    types.StringType,
+	"aws_account_ids_file_path":     types.StringType,
 	"comment":                       types.StringType,
 	"consolidate_zones":             types.BoolType,
 	"consolidated_view":             types.StringType,
@@ -75,9 +78,12 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The AWS Account IDs list associated with this task group.",
 	},
 	"aws_account_ids_file_token": schema.StringAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The AWS account IDs file's token.",
+	},
+	"aws_account_ids_file_path": schema.StringAttribute{
+		Optional:            true, // change this  based on validate config
+		MarkdownDescription: "The AWS account IDs file's path.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -242,4 +248,38 @@ func (m *Awsrte53taskgroupModel) Flatten(ctx context.Context, from *cloud.Awsrte
 			m.TaskList = reOrderedList.(basetypes.ListValue)
 		}
 	}
+}
+
+func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data Awsrte53taskgroupModel
+
+	// Get the config data
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	// Validation 2: aws_account_ids_file_path can only be used with UPLOAD_CHILDREN policy
+	if !data.AwsAccountIdsFilePath.IsNull() && data.AwsAccountIdsFilePath.ValueString() != "" {
+		// Check if multiple_accounts_sync_policy is set to UPLOAD_CHILDREN
+		if data.MultipleAccountsSyncPolicy.IsNull() || data.MultipleAccountsSyncPolicy.ValueString() != "UPLOAD_CHILDREN" {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"'aws_account_ids_file_path' can only be used when 'multiple_accounts_sync_policy' is set to 'UPLOAD_CHILDREN'. "+
+					"Current policy is '"+data.MultipleAccountsSyncPolicy.ValueString()+"'. "+
+					"Either remove 'aws_account_ids_file_path' or set 'multiple_accounts_sync_policy' to 'UPLOAD_CHILDREN'.",
+			)
+		}
+	}
+
+	// Validation 3: UPLOAD_CHILDREN policy requires aws_account_ids_file_path
+	if !data.MultipleAccountsSyncPolicy.IsNull() && data.MultipleAccountsSyncPolicy.ValueString() == "UPLOAD_CHILDREN" {
+		if data.AwsAccountIdsFilePath.IsNull() || data.AwsAccountIdsFilePath.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When 'multiple_accounts_sync_policy' is 'UPLOAD_CHILDREN', 'aws_account_ids_file_path' must be provided. "+
+					"Please specify the path to a file containing AWS account IDs.",
+			)
+		}
+	}
+
 }
