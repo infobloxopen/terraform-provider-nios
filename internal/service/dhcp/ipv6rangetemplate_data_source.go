@@ -31,7 +31,7 @@ type Ipv6rangetemplateDataSource struct {
 }
 
 func (d *Ipv6rangetemplateDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6rangetemplate"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6_range_template"
 }
 
 type Ipv6rangetemplateModelWithFilter struct {

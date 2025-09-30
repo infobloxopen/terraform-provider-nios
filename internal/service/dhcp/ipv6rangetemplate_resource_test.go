@@ -18,7 +18,7 @@ import (
 var readableAttributesForIpv6rangetemplate = "cloud_api_compatible,comment,delegated_member,exclude,logic_filter_rules,member,name,number_of_addresses,offset,option_filter_rules,recycle_leases,server_association_type,use_logic_filter_rules,use_recycle_leases"
 
 func TestAccIpv6rangetemplateResource_basic(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test"
+	var resourceName = "nios_dhcp_ipv6_range_template.test"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -40,7 +40,7 @@ func TestAccIpv6rangetemplateResource_basic(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_disappears(t *testing.T) {
-	resourceName := "nios_dhcp_ipv6rangetemplate.test"
+	resourceName := "nios_dhcp_ipv6_range_template.test"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -61,7 +61,7 @@ func TestAccIpv6rangetemplateResource_disappears(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_Ref(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_ref"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_ref"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -90,7 +90,7 @@ func TestAccIpv6rangetemplateResource_Ref(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_CloudApiCompatible(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_cloud_api_compatible"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_cloud_api_compatible"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -119,7 +119,7 @@ func TestAccIpv6rangetemplateResource_CloudApiCompatible(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_Comment(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_comment"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_comment"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -148,7 +148,7 @@ func TestAccIpv6rangetemplateResource_Comment(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_delegated_member"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_delegated_member"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -177,7 +177,7 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_Exclude(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_exclude"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_exclude"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -206,7 +206,7 @@ func TestAccIpv6rangetemplateResource_Exclude(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_LogicFilterRules(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_logic_filter_rules"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_logic_filter_rules"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -235,7 +235,7 @@ func TestAccIpv6rangetemplateResource_LogicFilterRules(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_member"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_member"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -264,7 +264,7 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_Name(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_name"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_name"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -293,7 +293,7 @@ func TestAccIpv6rangetemplateResource_Name(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_NumberOfAddresses(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_number_of_addresses"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_number_of_addresses"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -322,7 +322,7 @@ func TestAccIpv6rangetemplateResource_NumberOfAddresses(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_Offset(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_offset"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_offset"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -351,7 +351,7 @@ func TestAccIpv6rangetemplateResource_Offset(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_OptionFilterRules(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_option_filter_rules"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_option_filter_rules"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -380,7 +380,7 @@ func TestAccIpv6rangetemplateResource_OptionFilterRules(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_RecycleLeases(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_recycle_leases"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_recycle_leases"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -409,7 +409,7 @@ func TestAccIpv6rangetemplateResource_RecycleLeases(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_ServerAssociationType(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_server_association_type"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_server_association_type"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -438,7 +438,7 @@ func TestAccIpv6rangetemplateResource_ServerAssociationType(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_UseLogicFilterRules(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_use_logic_filter_rules"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_use_logic_filter_rules"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -467,7 +467,7 @@ func TestAccIpv6rangetemplateResource_UseLogicFilterRules(t *testing.T) {
 }
 
 func TestAccIpv6rangetemplateResource_UseRecycleLeases(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6rangetemplate.test_use_recycle_leases"
+	var resourceName = "nios_dhcp_ipv6_range_template.test_use_recycle_leases"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -556,14 +556,14 @@ func testAccCheckIpv6rangetemplateDisappears(ctx context.Context, v *dhcp.Ipv6ra
 func testAccIpv6rangetemplateBasicConfig(string) string {
 	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test" {
+resource "nios_dhcp_ipv6_range_template" "test" {
 }
 `)
 }
 
 func testAccIpv6rangetemplateRef(ref string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_ref" {
+resource "nios_dhcp_ipv6_range_template" "test_ref" {
     ref = %q
 }
 `, ref)
@@ -571,7 +571,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_ref" {
 
 func testAccIpv6rangetemplateCloudApiCompatible(cloudApiCompatible string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_cloud_api_compatible" {
+resource "nios_dhcp_ipv6_range_template" "test_cloud_api_compatible" {
     cloud_api_compatible = %q
 }
 `, cloudApiCompatible)
@@ -579,7 +579,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_cloud_api_compatible" {
 
 func testAccIpv6rangetemplateComment(comment string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_comment" {
+resource "nios_dhcp_ipv6_range_template" "test_comment" {
     comment = %q
 }
 `, comment)
@@ -587,7 +587,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_comment" {
 
 func testAccIpv6rangetemplateDelegatedMember(delegatedMember string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_delegated_member" {
+resource "nios_dhcp_ipv6_range_template" "test_delegated_member" {
     delegated_member = %q
 }
 `, delegatedMember)
@@ -595,7 +595,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_delegated_member" {
 
 func testAccIpv6rangetemplateExclude(exclude string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_exclude" {
+resource "nios_dhcp_ipv6_range_template" "test_exclude" {
     exclude = %q
 }
 `, exclude)
@@ -603,7 +603,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_exclude" {
 
 func testAccIpv6rangetemplateLogicFilterRules(logicFilterRules string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_logic_filter_rules" {
+resource "nios_dhcp_ipv6_range_template" "test_logic_filter_rules" {
     logic_filter_rules = %q
 }
 `, logicFilterRules)
@@ -611,7 +611,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_logic_filter_rules" {
 
 func testAccIpv6rangetemplateMember(member string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_member" {
+resource "nios_dhcp_ipv6_range_template" "test_member" {
     member = %q
 }
 `, member)
@@ -619,7 +619,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_member" {
 
 func testAccIpv6rangetemplateName(name string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_name" {
+resource "nios_dhcp_ipv6_range_template" "test_name" {
     name = %q
 }
 `, name)
@@ -627,7 +627,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_name" {
 
 func testAccIpv6rangetemplateNumberOfAddresses(numberOfAddresses string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_number_of_addresses" {
+resource "nios_dhcp_ipv6_range_template" "test_number_of_addresses" {
     number_of_addresses = %q
 }
 `, numberOfAddresses)
@@ -635,7 +635,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_number_of_addresses" {
 
 func testAccIpv6rangetemplateOffset(offset string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_offset" {
+resource "nios_dhcp_ipv6_range_template" "test_offset" {
     offset = %q
 }
 `, offset)
@@ -643,7 +643,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_offset" {
 
 func testAccIpv6rangetemplateOptionFilterRules(optionFilterRules string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_option_filter_rules" {
+resource "nios_dhcp_ipv6_range_template" "test_option_filter_rules" {
     option_filter_rules = %q
 }
 `, optionFilterRules)
@@ -651,7 +651,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_option_filter_rules" {
 
 func testAccIpv6rangetemplateRecycleLeases(recycleLeases string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_recycle_leases" {
+resource "nios_dhcp_ipv6_range_template" "test_recycle_leases" {
     recycle_leases = %q
 }
 `, recycleLeases)
@@ -659,7 +659,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_recycle_leases" {
 
 func testAccIpv6rangetemplateServerAssociationType(serverAssociationType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_server_association_type" {
+resource "nios_dhcp_ipv6_range_template" "test_server_association_type" {
     server_association_type = %q
 }
 `, serverAssociationType)
@@ -667,7 +667,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_server_association_type" {
 
 func testAccIpv6rangetemplateUseLogicFilterRules(useLogicFilterRules string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_use_logic_filter_rules" {
+resource "nios_dhcp_ipv6_range_template" "test_use_logic_filter_rules" {
     use_logic_filter_rules = %q
 }
 `, useLogicFilterRules)
@@ -675,7 +675,7 @@ resource "nios_dhcp_ipv6rangetemplate" "test_use_logic_filter_rules" {
 
 func testAccIpv6rangetemplateUseRecycleLeases(useRecycleLeases string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test_use_recycle_leases" {
+resource "nios_dhcp_ipv6_range_template" "test_use_recycle_leases" {
     use_recycle_leases = %q
 }
 `, useRecycleLeases)

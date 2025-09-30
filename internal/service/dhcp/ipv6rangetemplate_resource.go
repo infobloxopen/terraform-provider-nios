@@ -31,7 +31,7 @@ type Ipv6rangetemplateResource struct {
 }
 
 func (r *Ipv6rangetemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6rangetemplate"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6_range_template"
 }
 
 func (r *Ipv6rangetemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -108,7 +108,7 @@ func (r *Ipv6rangetemplateResource) Read(ctx context.Context, req resource.ReadR
 		ReturnAsObject(1).
 		Execute()
 
-		// Handle not found case
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state

@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccIpv6rangetemplateDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_ipv6rangetemplate.test"
-	resourceName := "nios_dhcp_ipv6rangetemplate.test"
+	dataSourceName := "data.nios_dhcp_ipv6_range_template.test"
+	resourceName := "nios_dhcp_ipv6_range_template.test"
 	var v dhcp.Ipv6rangetemplate
 
 	resource.Test(t, resource.TestCase{
@@ -57,12 +57,12 @@ func testAccCheckIpv6rangetemplateResourceAttrPair(resourceName, dataSourceName 
 
 func testAccIpv6rangetemplateDataSourceConfigFilters() string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6rangetemplate" "test" {
+resource "nios_dhcp_ipv6_range_template" "test" {
 }
 
-data "nios_dhcp_ipv6rangetemplate" "test" {
+data "nios_dhcp_ipv6_range_template" "test" {
   filters = {
-	 = nios_dhcp_ipv6rangetemplate.test.
+	 = nios_nios_dhcp_ipv6_range_template.test.
   }
 }
 `)
