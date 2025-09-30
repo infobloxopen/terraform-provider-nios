@@ -3,6 +3,7 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
@@ -215,9 +216,12 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines whether the Admin Group is disabled or not. When this is set to False, the Admin Group is enabled.",
 	},
 	"disable_concurrent_login": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_disable_concurrent_login")),
+		},
 		MarkdownDescription: "Disable concurrent login feature",
 	},
 	"dns_set_commands": schema.SingleNestedAttribute{

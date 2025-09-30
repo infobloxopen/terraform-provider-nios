@@ -1,11 +1,6 @@
 // Create an Admin Group with Basic Fields
 resource "nios_security_admin_group" "admin_group_with_basic_fields" {
-  name    = "example_admin_group"
-  comment = "Example Admin Group with basic fields"
-  disable = true
-  extattrs = {
-    Site = "location-1"
-  }
+  name = "example_admin_group"
 }
 
 // Create an Admin Group with Additional Fields with user_access as IP address
@@ -34,7 +29,6 @@ resource "nios_security_admin_group" "admin_group_with_additional_fields" {
   dhcp_set_commands = {
     set_overload_bootp = true
   }
-  disable_concurrent_login = false
   dns_show_commands = {
     show_dns       = true
     show_dns_accel = false
@@ -89,7 +83,12 @@ resource "nios_security_admin_group" "admin_group_with_additional_fields" {
 
 // Create an Admin Group with Additional Fields with user_access as Named ACL
 resource "nios_security_admin_group" "admin_group_with_additional_fields2" {
-  name = "example_admin_group3"
+  name    = "example_admin_group3"
+  comment = "Example Admin Group with additional fields"
+  disable = true
+  extattrs = {
+    Site = "location-1"
+  }
   cloud_show_commands = {
     show_cloud_services_portal = true
   }
@@ -143,10 +142,29 @@ resource "nios_security_admin_group" "admin_group_with_additional_fields2" {
     dig     = false
     ping    = true
   }
+  disable_concurrent_login     = false
   use_disable_concurrent_login = true
   user_access = [
     {
-      ref = "namedacl/b25lLmRlZmluZWRfYWNsJDAuYWNsMg:acl2"
+      ref = nios_acl_namedacl.namedacl_with_basic_fields.ref
+    }
+  ]
+  depends_on = [nios_acl_namedacl.namedacl_with_basic_fields]
+}
+
+// Create Named Access Control Lists (ACLs) with Basic Fields
+resource "nios_acl_namedacl" "namedacl_with_basic_fields" {
+  name = "example-named-acl"
+  access_list = [
+    {
+      struct     = "addressac"
+      address    = "10.0.0.1"
+      permission = "ALLOW"
+    },
+    {
+      struct     = "addressac"
+      address    = "10.0.0.2"
+      permission = "ALLOW"
     }
   ]
 }

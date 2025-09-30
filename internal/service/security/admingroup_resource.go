@@ -72,56 +72,69 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 		return
 	}
 
+	// Skip validation if UserAccess is not provided
 	if config.UserAccess.IsNull() || config.UserAccess.IsUnknown() {
 		return
 	}
 
 	refCount := 0
-	hasAddress := false
-	hasPermission := false
+	// Track if we have any entries with address and permission
+	hasAnyAddressWithPermission := false
 
+	// Validate each user access entry
 	for i, elem := range config.UserAccess.Elements() {
 		obj := elem.(types.Object)
 		attrMap := obj.Attributes()
 
-		hasAddress = !attrMap["address"].IsUnknown() && !attrMap["address"].IsNull() && !attrMap["address"].Equal(types.StringValue(""))
-		hasPermission = !attrMap["permission"].IsUnknown() && !attrMap["permission"].IsNull() && !attrMap["permission"].Equal(types.StringValue(""))
-		hasRef := !attrMap["ref"].IsUnknown() && !attrMap["ref"].IsNull()
+		// Check field presence
+		hasAddress := !attrMap["address"].IsUnknown() && !attrMap["address"].IsNull() && !attrMap["address"].Equal(types.StringValue(""))
+		hasPermission := !attrMap["permission"].IsUnknown() && !attrMap["permission"].IsNull() && !attrMap["permission"].Equal(types.StringValue(""))
+		hasRef := !attrMap["ref"].IsNull() && !attrMap["ref"].Equal(types.StringValue(""))
 
+		// Rule 1: Can't have both ref and (address or permission)
 		if hasRef && (hasAddress || hasPermission) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("user_access").AtListIndex(i),
 				"Invalid combination of fields",
-				"An entry cannot contain both ACL and ACEs",
+				"An entry cannot contain both ACL and ACEs. Address and Permission cannot be Set if ref for Named ACL is provided.",
 			)
 			continue
 		}
 
-		if hasRef {
-			refCount++
-		}
-
+		// Rule 2: Must have address if ref is not provided
 		if !hasRef && !hasAddress {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("user_access").AtListIndex(i),
-				"Incomplete entry",
+				"Invalid Configuration for User Access",
 				"An entry must contain 'address' if 'ref' is not provided.",
 			)
 			continue
 		}
+
+		// Track if we have an entry with both address and permission
+		if hasAddress && hasPermission {
+			hasAnyAddressWithPermission = true
+		}
+
+		// Count refs for collection-level validation
+		if hasRef {
+			refCount++
+		}
 	}
-	if refCount == 1 && (hasAddress && hasPermission) {
+
+	// Collection-level validations
+	if refCount > 0 && hasAnyAddressWithPermission {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("user_access"),
 			"Invalid combination of fields",
-			"Either only one ACL or a set of ACEs is allowed in user_access.",
+			"An element must contain either 'address' for an ACE or 'ref' of the Named ACL.",
 		)
 	}
 
 	if refCount > 1 {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("user_access"),
-			"Too many references",
+			"Too many references provided for Named ACL",
 			"Either only one ACL or a set of ACEs is allowed in user_access.",
 		)
 	}
