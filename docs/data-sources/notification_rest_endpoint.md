@@ -16,12 +16,12 @@ Retrieves information about existing Notification REST Endpoints.
 // Retrieve a specific Notification REST Endpoint by filters
 data "nios_notification_rest_endpoint" "get_notification_rest_endpoint_using_filter" {
   filters = {
-    name = nios_notification_rest_endpoint.test.name
+    name = "example-notification-rest-endpoint-1"
   }
 }
 
 // Retrieve specific Notification REST Endpoints using Extensible Attributes
-data "nios_notification_rest_endpoint" "get_notification_rest_endpoint_using_extattr_filter" {
+data "nios_notification_rest_endpoint" "get_notification_rest_endpoint_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }

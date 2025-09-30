@@ -84,6 +84,7 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"client_certificate_token": schema.StringAttribute{
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop for a notification REST endpoit client certificate.",
 	},
 	"client_certificate_valid_from": schema.Int64Attribute{
@@ -145,6 +146,7 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 		ElementType: types.StringType,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			listvalidator.SizeAtMost(1),
 		},
 		Optional:            true,
 		MarkdownDescription: "The list of members for outbound events.",
@@ -275,7 +277,6 @@ func (m *NotificationRestEndpointModel) Flatten(ctx context.Context, from *notif
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.ClientCertificateSubject = flex.FlattenStringPointer(from.ClientCertificateSubject)
-	m.ClientCertificateToken = flex.FlattenStringPointer(from.ClientCertificateToken)
 	m.ClientCertificateValidFrom = flex.FlattenInt64Pointer(from.ClientCertificateValidFrom)
 	m.ClientCertificateValidTo = flex.FlattenInt64Pointer(from.ClientCertificateValidTo)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

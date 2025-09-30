@@ -18,6 +18,7 @@ import (
 
 // OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // Notification Rest Template : "REST API Template", "REST_API_Session_Template_3"
+// Grid Master Candidate : "infoblox.grid_master_candidate1", "infoblox.grid_master_candidate2"
 
 var readableAttributesForNotificationRestEndpoint = "client_certificate_subject,client_certificate_valid_from,client_certificate_valid_to,comment,extattrs,log_level,name,outbound_member_type,outbound_members,server_cert_validation,sync_disabled,template_instance,timeout,uri,username,vendor_identifier,wapi_user_name"
 
@@ -44,6 +45,10 @@ func TestAccNotificationRestEndpointResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", outboundMemberType),
 					resource.TestCheckResourceAttr(resourceName, "uri", uri),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "log_level", "WARNING"),
+					resource.TestCheckResourceAttr(resourceName, "server_cert_validation", "CA_CERT"),
+					resource.TestCheckResourceAttr(resourceName, "sync_disabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "30"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -593,7 +598,6 @@ func testAccCheckNotificationRestEndpointDisappears(ctx context.Context, v *noti
 }
 
 func testAccNotificationRestEndpointBasicConfig(name, outboundMemberType, uri string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_notification_rest_endpoint" "test" {
     name = %q
