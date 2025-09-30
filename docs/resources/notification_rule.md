@@ -14,7 +14,7 @@ Manages a Notification Rule.
 
 ```terraform
 // Create a Notification Rule with Basic Fields (Event Type : DHCP_LEASES)
-resource "nios_notification_rule" "notification_rule_basic_fields" {
+resource "nios_notification_rule" "notification_rule_with_basic_fields" {
   name                = "example_notification_rule"
   notification_target = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:Rest_Api"
   event_type          = "DHCP_LEASES"
@@ -42,8 +42,8 @@ resource "nios_notification_rule" "notification_rule_basic_fields" {
 }
 
 // Create a Notification Rule with Additional Fields
-resource "nios_notification_rule" "notification_rule_basic_fields" {
-  name                = "example_notification_rule_1"
+resource "nios_notification_rule" "notification_rule_with_additional_fields" {
+  name                = "example_notification_rule-1"
   notification_target = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:Rest_Api"
   event_type          = "DHCP_LEASES"
   notification_action = "RESTAPI_TEMPLATE_INSTANCE"
@@ -74,7 +74,7 @@ resource "nios_notification_rule" "notification_rule_basic_fields" {
 }
 
 // Create a Notification Rule with Basic Fields (Event Type : DNS_RPZ)
-resource "nios_notification_rule" "example_1" {
+resource "nios_notification_rule" "notification_rule_with_dns_rpz" {
   name                = "example-notification-rule-2"
   notification_target = "syslog:endpoint/b25lLmVuZHBvaW50JDM:syslog"
   event_type          = "DNS_RPZ"
@@ -102,7 +102,7 @@ resource "nios_notification_rule" "example_1" {
 }
 
 // Create a Notification Rule with Basic Fields (Event Type : IPAM)
-resource "nios_notification_rule" "example_2" {
+resource "nios_notification_rule" "notification_rule_with_ipam_event_type" {
   name                = "example-notification-rule-3"
   notification_target = "pxgrid:endpoint/b25lLmVuZHBvaW50JDU:cisco"
   event_type          = "IPAM"
