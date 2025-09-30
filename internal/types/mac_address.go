@@ -126,6 +126,12 @@ func NewMACAddressValue(value string) MACAddressValue {
 	return MACAddressValue{StringValue: basetypes.NewStringValue(value)}
 }
 
+func NewMACAddressNull() MACAddressValue {
+	return MACAddressValue{
+		StringValue: basetypes.NewStringNull(),
+	}
+}
+
 // normalizeMAC normalizes MAC address to standard lowercase colon format
 func normalizeMAC(address string) (string, error) {
 	if address == "" {

@@ -320,7 +320,7 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 
 	// Update IPv4 DHCP settings
 	if len(updateReq.Ipv4addrs) > 0 {
-		updateReq.Ipv4addrs[0].Mac = flex.ExpandStringPointer(data.MacAddr.StringValue)
+		updateReq.Ipv4addrs[0].Mac = flex.ExpandMACAddr(data.MacAddr)
 		updateReq.Ipv4addrs[0].ConfigureForDhcp = flex.ExpandBoolPointer(data.ConfigureForDhcp)
 	}
 
@@ -331,10 +331,10 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 		match_client := data.MatchClient.ValueString()
 		switch match_client {
 		case "DUID":
-			ipv6.Duid = flex.ExpandStringPointer(data.Duid.StringValue)
+			ipv6.Duid = flex.ExpandDUID(data.Duid)
 			ipv6.Mac = nil
 		case "MAC_ADDRESS":
-			ipv6.Mac = flex.ExpandStringPointer(data.MacAddr.StringValue)
+			ipv6.Mac = flex.ExpandMACAddr(data.MacAddr)
 			ipv6.Duid = nil
 		}
 		if data.ConfigureForDhcp.ValueBool() && match_client != "" {
@@ -383,7 +383,7 @@ func (r *IPAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IP
 	if hostRec != nil && len(hostRec.Ipv4addrs) > 0 {
 		ipv4 := hostRec.Ipv4addrs[0]
 		if ipv4.Mac != nil {
-			data.MacAddr = internaltypes.NewMACAddressValue(*ipv4.Mac)
+			data.MacAddr = flex.FlattenMACAddr(ipv4.Mac)
 		}
 		if ipv4.ConfigureForDhcp != nil {
 			data.ConfigureForDhcp = types.BoolValue(*ipv4.ConfigureForDhcp)
@@ -397,7 +397,7 @@ func (r *IPAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IP
 	if hostRec != nil && len(hostRec.Ipv6addrs) > 0 {
 		ipv6 := hostRec.Ipv6addrs[0]
 		if ipv6.Duid != nil {
-			data.Duid = internaltypes.NewDUIDValue(*ipv6.Duid)
+			data.Duid = flex.FlattenDUID(ipv6.Duid)
 		}
 		if ipv6.ConfigureForDhcp != nil {
 			data.ConfigureForDhcp = types.BoolValue(*ipv6.ConfigureForDhcp)

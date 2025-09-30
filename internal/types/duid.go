@@ -126,6 +126,12 @@ func NewDUIDValue(value string) DUIDValue {
 	return DUIDValue{StringValue: basetypes.NewStringValue(value)}
 }
 
+func NewDUIDNull() DUIDValue {
+	return DUIDValue{
+		StringValue: basetypes.NewStringNull(),
+	}
+}
+
 // normalizeDUID normalizes DUID to standard lowercase colon format
 func normalizeDUID(address string) (string, error) {
 	if address == "" {
