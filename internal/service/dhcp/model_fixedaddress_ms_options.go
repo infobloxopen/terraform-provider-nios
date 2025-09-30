@@ -39,7 +39,7 @@ var FixedaddressMsOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"value": schema.StringAttribute{
 		Required:            true,
-		MarkdownDescription: "Value of the DHCP option.",
+		MarkdownDescription: "Value of the DHCP option. Required to be set for all options.",
 	},
 	"name": schema.StringAttribute{
 		Optional:            true,
