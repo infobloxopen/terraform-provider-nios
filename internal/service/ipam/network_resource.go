@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -95,7 +96,19 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Network, got error: %s", err))
+		if ((strings.Contains(err.Error(), "The search parameters") &&
+			strings.Contains(err.Error(), "for object network did not return any result")) ||
+			strings.Contains(err.Error(), "will overlap an existing network")) &&
+			r.isNetworkConvertedToContainer(ctx, &data) {
+			resp.Diagnostics.AddError(
+				"Unable to Create Network. Network Might Be Converted to Network Container",
+				fmt.Sprintf("Failed to create network. The parent network appears to have been converted to a network container. "+
+					"Manual intervention is needed to import it as a container. "+
+					"Got error: %s", err),
+			)
+		} else {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Network, got error: %s", err))
+		}
 		return
 	}
 
@@ -488,4 +501,17 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 			}
 		}
 	}
+}
+
+func (r *NetworkResource) isNetworkConvertedToContainer(ctx context.Context, data *NetworkModel) bool {
+	// Try to fetch as Network container
+	_, _, err := r.client.IPAMAPI.
+		NetworkcontainerAPI.
+		List(ctx).
+		Filters(map[string]interface{}{
+			"network": data.Network.ValueString(),
+		},
+		).
+		Execute()
+	return err == nil
 }
