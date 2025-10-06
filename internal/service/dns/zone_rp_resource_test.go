@@ -300,7 +300,7 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 		"fireeye_alert_mapping": []map[string]any{
 			{
 				"alert_type": "DOMAIN_MATCH",
-				"lifetime":   "5",
+				"lifetime":   "86400",
 				"rpz_rule":   "NODATA",
 			},
 		},
@@ -321,7 +321,7 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 		"fireeye_alert_mapping": []map[string]any{
 			{
 				"alert_type": "MALWARE_CALLBACK",
-				"lifetime":   "500",
+				"lifetime":   "172800",
 				"rpz_rule":   "NXDOMAIN",
 			},
 		},
@@ -955,7 +955,7 @@ func TestAccZoneRpResource_SoaEmail(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.cloudmem",
+			"name": "member.com",
 		},
 	}
 
@@ -1552,6 +1552,7 @@ resource "nios_dns_zone_rp" "test_fireeye_rule_mapping" {
     fqdn = %q
     view = %q
     fireeye_rule_mapping = %s
+	rpz_type = "FIREEYE"
 }
 `, zoneFqdn, view, fireeyeRuleMappingHCL)
 }
@@ -1872,7 +1873,7 @@ resource "nios_dns_zone_rp" "test_use_external_primary" {
 
 func estAccZoneRpUseExternalPrimaryUpdate(zoneFqdn, view string, useExternalPrimary bool) string {
 	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_use_external_primary" {
+resource "nios_dns_zone_rp" "test_use_external_primary" {
     fqdn = %q
     view = %q
     use_external_primary = %t
@@ -1900,7 +1901,7 @@ resource "nios_dns_zone_rp" "test_use_grid_zone_timer" {
 func testAccZoneRpUseGridZoneTimerUpdate(zoneFqdn, view string, gridPrimary []map[string]any, useGridZoneTimer bool) string {
 	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_use_grid_zone_timer" {
+resource "nios_dns_zone_rp" "test_use_grid_zone_timer" {
     fqdn = %q
     view = %q
     grid_primary = %s
