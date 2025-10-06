@@ -193,7 +193,6 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.ConflictsWith(
 				path.MatchRoot("ns_group"),
-				path.MatchRoot("grid_primary"),
 			),
 			listvalidator.SizeAtLeast(1),
 		},
@@ -399,9 +398,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The type of rpz zone.",
 	},
 	"set_soa_serial_number": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
 	},
 	"soa_default_ttl": schema.Int64Attribute{
@@ -672,7 +671,7 @@ func (m *ZoneRpModel) Flatten(ctx context.Context, from *dns.ZoneRp, diags *diag
 	m.RpzPriorityEnd = flex.FlattenInt64Pointer(from.RpzPriorityEnd)
 	m.RpzSeverity = flex.FlattenStringPointer(from.RpzSeverity)
 	m.RpzType = flex.FlattenStringPointer(from.RpzType)
-	m.SetSoaSerialNumber = types.BoolPointerValue(from.SetSoaSerialNumber)
+	//m.SetSoaSerialNumber = types.BoolPointerValue(from.SetSoaSerialNumber)
 	m.SoaDefaultTtl = flex.FlattenInt64Pointer(from.SoaDefaultTtl)
 	m.SoaEmail = flex.FlattenStringPointer(from.SoaEmail)
 	m.SoaExpire = flex.FlattenInt64Pointer(from.SoaExpire)
