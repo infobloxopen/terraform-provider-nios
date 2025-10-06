@@ -15,46 +15,9 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_additional_fields"
   offset              = 20
   // add `cloud_api_compatible = true` if Terraform Internal ID extensible attribute has cloud access
   cloud_api_compatible    = true
-  bootfile                = "bootfile.iso"
-  bootserver              = "boot_server1"
-  comment                 = "Example comment for range template"
-  email_list              = ["abc@example.com", "xyz@example.com"]
+  comment                 = "Example comment for ipv6 range template"
   failover_association    = "failover_association"
   server_association_type = "FAILOVER"
-  high_water_mark         = 100
-  high_water_mark_reset   = 20
-  low_water_mark          = 10
-  low_water_mark_reset    = 5
-  nextserver              = "next_server1"
-  use_nextserver          = true
-  use_options             = true
-  use_email_list          = true
-  use_bootserver          = true
-  use_bootfile            = true
-  options = [
-    {
-      name  = "domain-name-servers"
-      num   = "6"
-      value = "11.22.1.2"
-    },
-    {
-      name  = "time-offset"
-      num   = "2"
-      value = "1000"
-    },
-    {
-      name  = "domain-name"
-      num   = "15"
-      value = "aa.bb.com"
-    },
-  ]
-}
-
-// Create an IPV6 DHCP Range Template with filters and exclude fields
-resource "nios_dhcp_ipv6_range_template" "range_template_additional_fields2" {
-  name                = "example_range_template3"
-  number_of_addresses = 60
-  offset              = 70
   exclude = [
     {
       "number_of_addresses" = 10
@@ -62,29 +25,16 @@ resource "nios_dhcp_ipv6_range_template" "range_template_additional_fields2" {
       "comment"             = "Example comment for range template exclude"
     }
   ]
-  fingerprint_filter_rules = [
-    {
-      "filter"     = "finger_print_filter"
-      "permission" = "Allow"
-    }
-  ]
+  member = {
+    ipv6addr = "2403:8600:80cf:e10c:3a00::1192"
+    name     = "infoblox.localdomain"
+  }
+  delegated_member = []
   use_logic_filter_rules = true
   logic_filter_rules = [
     {
       "filter" = "option_filter"
       "type"   = "Option"
-    }
-  ]
-  mac_filter_rules = [
-    {
-      "filter"     = "mac_filter"
-      "permission" = "Deny"
-    }
-  ]
-  nac_filter_rules = [
-    {
-      "filter"     = "nac_filter"
-      "permission" = "Allow"
     }
   ]
   option_filter_rules = [
@@ -93,10 +43,6 @@ resource "nios_dhcp_ipv6_range_template" "range_template_additional_fields2" {
       "permission" = "Deny"
     }
   ]
-  relay_agent_filter_rules = [
-    {
-      "filter"     = "relay_agent_filter"
-      "permission" = "Allow"
-    }
-  ]
+  recycle_leases = false
+  use_recycle_leases = true
 }

@@ -15,6 +15,7 @@ func TestAccIpv6rangetemplateDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_ipv6_range_template.test"
 	resourceName := "nios_dhcp_ipv6_range_template.test"
 	var v dhcp.Ipv6rangetemplate
+	name := acctest.RandomNameWithPrefix("range-template")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +23,7 @@ func TestAccIpv6rangetemplateDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6rangetemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6rangetemplateDataSourceConfigFilters(),
+				Config: testAccIpv6rangetemplateDataSourceConfigFilters(name, 10, 50),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
@@ -55,15 +56,19 @@ func testAccCheckIpv6rangetemplateResourceAttrPair(resourceName, dataSourceName 
 	}
 }
 
-func testAccIpv6rangetemplateDataSourceConfigFilters() string {
+func testAccIpv6rangetemplateDataSourceConfigFilters(name string, numberOfAddresses, offset int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test" {
+	  name               = "%s"
+	  number_of_addresses = %d
+	  offset = %d
+      cloud_api_compatible = true
 }
 
 data "nios_dhcp_ipv6_range_template" "test" {
   filters = {
-	 = nios_nios_dhcp_ipv6_range_template.test.
+	 name = nios_nios_dhcp_ipv6_range_template.test.
   }
 }
-`)
+`, name, numberOfAddresses, offset)
 }

@@ -20,6 +20,9 @@ var readableAttributesForIpv6rangetemplate = "cloud_api_compatible,comment,deleg
 func TestAccIpv6rangetemplateResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test"
 	var v dhcp.Ipv6rangetemplate
+	name := acctest.RandomNameWithPrefix("ipv6-range-template")
+	numberOfAdresses := 100
+	offset := 50
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,7 +30,7 @@ func TestAccIpv6rangetemplateResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangetemplateBasicConfig(),
+				Config: testAccIpv6rangetemplateBasicConfig(name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
@@ -42,14 +45,16 @@ func TestAccIpv6rangetemplateResource_basic(t *testing.T) {
 func TestAccIpv6rangetemplateResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_ipv6_range_template.test"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("ipv6-range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckIpv6rangetemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6rangetemplateBasicConfig(),
+				Config: testAccIpv6rangetemplateBasicConfig(name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					testAccCheckIpv6rangetemplateDisappears(context.Background(), &v),
@@ -60,57 +65,34 @@ func TestAccIpv6rangetemplateResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccIpv6rangetemplateResource_Ref(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6_range_template.test_ref"
-	var v dhcp.Ipv6rangetemplate
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIpv6rangetemplateRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIpv6rangetemplateRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
+// The testcase will fail, as this is a known issue
+// If the user is a cloud-user, then they need Terraform internal ID with cloud permission and enable cloud delegation for the user to create a range template.
+// if the user is a non cloud-user, they need to have  Terraform internal ID without cloud permission.
 func TestAccIpv6rangetemplateResource_CloudApiCompatible(t *testing.T) {
+	t.Skip("Skipping this test as it is a known issue.")
 	var resourceName = "nios_dhcp_ipv6_range_template.test_cloud_api_compatible"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangetemplateCloudApiCompatible("CLOUD_API_COMPATIBLE_REPLACE_ME"),
+				Config: testAccIpv6rangetemplateCloudApiCompatible(name, numberOfAdresses, offset, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "CLOUD_API_COMPATIBLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangetemplateCloudApiCompatible("CLOUD_API_COMPATIBLE_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6rangetemplateCloudApiCompatible(name, numberOfAdresses, offset, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "CLOUD_API_COMPATIBLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,25 +103,27 @@ func TestAccIpv6rangetemplateResource_CloudApiCompatible(t *testing.T) {
 func TestAccIpv6rangetemplateResource_Comment(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_comment"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangetemplateComment("COMMENT_REPLACE_ME"),
+				Config: testAccIpv6rangetemplateComment(name, numberOfAdresses, offset, "example comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "example comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangetemplateComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6rangetemplateComment(name, numberOfAdresses, offset, "example comment updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "example comment updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -150,14 +134,16 @@ func TestAccIpv6rangetemplateResource_Comment(t *testing.T) {
 func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_delegated_member"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangetemplateDelegatedMember("DELEGATED_MEMBER_REPLACE_ME"),
+				Config: testAccIpv6rangetemplateDelegatedMember(name, numberOfAdresses, offset, "DELEGATED_MEMBER_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member", "DELEGATED_MEMBER_REPLACE_ME"),
@@ -165,7 +151,7 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangetemplateDelegatedMember("DELEGATED_MEMBER_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6rangetemplateDelegatedMember(name, numberOfAdresses, offset, "DELEGATED_MEMBER_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member", "DELEGATED_MEMBER_UPDATE_REPLACE_ME"),
@@ -179,14 +165,16 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 func TestAccIpv6rangetemplateResource_Exclude(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_exclude"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangetemplateExclude("EXCLUDE_REPLACE_ME"),
+				Config: testAccIpv6rangetemplateExclude(name, numberOfAdresses, offset, "EXCLUDE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "exclude", "EXCLUDE_REPLACE_ME"),
@@ -194,7 +182,7 @@ func TestAccIpv6rangetemplateResource_Exclude(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangetemplateExclude("EXCLUDE_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6rangetemplateExclude(name, numberOfAdresses, offset, "EXCLUDE_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "exclude", "EXCLUDE_UPDATE_REPLACE_ME"),
@@ -208,7 +196,9 @@ func TestAccIpv6rangetemplateResource_Exclude(t *testing.T) {
 func TestAccIpv6rangetemplateResource_LogicFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_logic_filter_rules"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -237,7 +227,9 @@ func TestAccIpv6rangetemplateResource_LogicFilterRules(t *testing.T) {
 func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_member"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -266,7 +258,9 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 func TestAccIpv6rangetemplateResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_name"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -295,7 +289,9 @@ func TestAccIpv6rangetemplateResource_Name(t *testing.T) {
 func TestAccIpv6rangetemplateResource_NumberOfAddresses(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_number_of_addresses"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -324,7 +320,9 @@ func TestAccIpv6rangetemplateResource_NumberOfAddresses(t *testing.T) {
 func TestAccIpv6rangetemplateResource_Offset(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_offset"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -353,7 +351,9 @@ func TestAccIpv6rangetemplateResource_Offset(t *testing.T) {
 func TestAccIpv6rangetemplateResource_OptionFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_option_filter_rules"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -382,7 +382,9 @@ func TestAccIpv6rangetemplateResource_OptionFilterRules(t *testing.T) {
 func TestAccIpv6rangetemplateResource_RecycleLeases(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_recycle_leases"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -411,7 +413,9 @@ func TestAccIpv6rangetemplateResource_RecycleLeases(t *testing.T) {
 func TestAccIpv6rangetemplateResource_ServerAssociationType(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_server_association_type"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -440,7 +444,9 @@ func TestAccIpv6rangetemplateResource_ServerAssociationType(t *testing.T) {
 func TestAccIpv6rangetemplateResource_UseLogicFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_use_logic_filter_rules"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -469,7 +475,9 @@ func TestAccIpv6rangetemplateResource_UseLogicFilterRules(t *testing.T) {
 func TestAccIpv6rangetemplateResource_UseRecycleLeases(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6_range_template.test_use_recycle_leases"
 	var v dhcp.Ipv6rangetemplate
-
+	name := acctest.RandomNameWithPrefix("range-template")
+	numberOfAdresses := 100
+	offset := 50
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -553,130 +561,177 @@ func testAccCheckIpv6rangetemplateDisappears(ctx context.Context, v *dhcp.Ipv6ra
 	}
 }
 
-func testAccIpv6rangetemplateBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccIpv6rangetemplateBasicConfig(name string, numberOfAddresses, offset int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test" {
+	name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
 }
-`)
-}
-
-func testAccIpv6rangetemplateRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6_range_template" "test_ref" {
-    ref = %q
-}
-`, ref)
+`, name, numberOfAddresses, offset)
 }
 
-func testAccIpv6rangetemplateCloudApiCompatible(cloudApiCompatible string) string {
+func testAccIpv6rangetemplateCloudApiCompatible(name string, numberOfAddresses, offset int, cloudApiCompatible string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_cloud_api_compatible" {
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
     cloud_api_compatible = %q
 }
-`, cloudApiCompatible)
+`, name, numberOfAddresses, offset, cloudApiCompatible)
 }
 
-func testAccIpv6rangetemplateComment(comment string) string {
+func testAccIpv6rangetemplateComment(name string, numberOfAddresses, offset int, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_comment" {
-    comment = %q
+	name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
+	comment = %q
 }
-`, comment)
+`, name, numberOfAddresses, offset, comment)
 }
 
-func testAccIpv6rangetemplateDelegatedMember(delegatedMember string) string {
+func testAccIpv6rangetemplateDelegatedMember(name string, numberOfAddresses, offset int, delegatedMember string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_delegated_member" {
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
     delegated_member = %q
 }
-`, delegatedMember)
+`, name, numberOfAddresses, offset, delegatedMember)
 }
 
-func testAccIpv6rangetemplateExclude(exclude string) string {
+func testAccIpv6rangetemplateExclude(name string, numberOfAddresses, offset int, exclude string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_exclude" {
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
     exclude = %q
 }
-`, exclude)
+`, name, numberOfAddresses, offset, exclude)
 }
 
-func testAccIpv6rangetemplateLogicFilterRules(logicFilterRules string) string {
+func testAccIpv6rangetemplateLogicFilterRules(name string, numberOfAddresses, offset int, logicFilterRules string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_logic_filter_rules" {
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
     logic_filter_rules = %q
 }
-`, logicFilterRules)
+`, name, numberOfAddresses, offset, logicFilterRules)
 }
 
-func testAccIpv6rangetemplateMember(member string) string {
+func testAccIpv6rangetemplateMember(name string, numberOfAddresses, offset int, member string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_member" {
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
     member = %q
 }
-`, member)
+`, name, numberOfAddresses, offset, member)
 }
 
-func testAccIpv6rangetemplateName(name string) string {
+func testAccIpv6rangetemplateName(name string, numberOfAddresses, offset int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_name" {
-    name = %q
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
 }
-`, name)
+`, name, numberOfAddresses, offset)
 }
 
-func testAccIpv6rangetemplateNumberOfAddresses(numberOfAddresses string) string {
+func testAccIpv6rangetemplateNumberOfAddresses(name string, numberOfAddresses, offset int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_number_of_addresses" {
-    number_of_addresses = %q
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
 }
-`, numberOfAddresses)
+`, name, numberOfAddresses, offset)
 }
 
-func testAccIpv6rangetemplateOffset(offset string) string {
+func testAccIpv6rangetemplateOffset(name string, numberOfAddresses, offset int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_offset" {
-    offset = %q
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
 }
-`, offset)
+`, name, numberOfAddresses, offset)
 }
 
-func testAccIpv6rangetemplateOptionFilterRules(optionFilterRules string) string {
+func testAccIpv6rangetemplateOptionFilterRules(name string, numberOfAddresses, offset int, optionFilterRules string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_option_filter_rules" {
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
     option_filter_rules = %q
 }
-`, optionFilterRules)
+`, name, numberOfAddresses, offset, optionFilterRules)
 }
 
-func testAccIpv6rangetemplateRecycleLeases(recycleLeases string) string {
+func testAccIpv6rangetemplateRecycleLeases(name string, numberOfAddresses, offset int, recycleLeases bool) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_recycle_leases" {
-    recycle_leases = %q
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
+    recycle_leases = %t
 }
-`, recycleLeases)
+`, name, numberOfAddresses, offset, recycleLeases)
 }
 
-func testAccIpv6rangetemplateServerAssociationType(serverAssociationType string) string {
+func testAccIpv6rangetemplateServerAssociationType(name string, numberOfAddresses, offset int, serverAssociationType string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_server_association_type" {
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
     server_association_type = %q
 }
-`, serverAssociationType)
+`, name, numberOfAddresses, offset, serverAssociationType)
 }
 
-func testAccIpv6rangetemplateUseLogicFilterRules(useLogicFilterRules string) string {
+func testAccIpv6rangetemplateUseLogicFilterRules(name string, numberOfAddresses, offset int, useLogicFilterRules bool) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_use_logic_filter_rules" {
-    use_logic_filter_rules = %q
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
+    use_logic_filter_rules = %t
 }
-`, useLogicFilterRules)
+`, name, numberOfAddresses, offset, useLogicFilterRules)
 }
 
-func testAccIpv6rangetemplateUseRecycleLeases(useRecycleLeases string) string {
+func testAccIpv6rangetemplateUseRecycleLeases(name string, numberOfAddresses, offset int, useRecycleLeases bool) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_use_recycle_leases" {
-    use_recycle_leases = %q
+    name               = %s
+	number_of_addresses = %d
+	offset = %d
+    cloud_api_compatible = true
+    use_recycle_leases = %t
 }
-`, useRecycleLeases)
+`, name, numberOfAddresses, offset, useRecycleLeases)
 }
