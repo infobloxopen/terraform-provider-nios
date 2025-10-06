@@ -255,11 +255,15 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 	ocspCheck := data.OcspCheck
 	ocspResponders := data.OcspResponders
 
-	if ocspCheck.IsNull() || ocspCheck.IsUnknown() || ocspCheck.ValueString() == "ENABLED" || ocspCheck.ValueString() == "AIA_AND_MANUAL" {
+	isOcspCheckValid := !ocspCheck.IsNull() && !ocspCheck.IsUnknown()
+	isManualCheck := ocspCheck.ValueString() == "MANUAL" || ocspCheck.ValueString() == "AIA_AND_MANUAL"
+
+	// Handle when ocsp_check is valid and set to MANUAL or AIA_AND_MANUAL
+	if (isOcspCheckValid && isManualCheck) || !isOcspCheckValid {
 		if ocspResponders.IsNull() || ocspResponders.IsUnknown() {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
-				"at least one `ocsp_responders` must be specified when `ocsp_check` is set to `ENABLED` or `AIA_AND_MANUAL`, else set the ocsp_check to 'DISABLED'.",
+				"At least one `ocsp_responders` must be specified when `ocsp_check` is set to `MANUAL` or `AIA_AND_MANUAL`, else set the ocsp_check to 'DISABLED'.",
 			)
 		}
 	}

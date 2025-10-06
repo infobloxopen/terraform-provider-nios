@@ -17,6 +17,7 @@ Manages a Certificate Authentication Service.
 resource "nios_security_certificate_authservice" "certificate_authservice_with_basic_fields" {
   name            = "example_certificate_authservice2"
   ca_certificates = ["cacertificate/id"]
+  ocsp_check      = "DISABLED"
 }
 
 // Create Certificate Authservice with additional fields
