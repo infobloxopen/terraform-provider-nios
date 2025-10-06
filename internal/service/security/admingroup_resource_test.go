@@ -1752,6 +1752,7 @@ func testAccAdmingroupLockoutSetting(name, lockoutSetting string) string {
 resource "nios_security_admin_group" "test_lockout_setting" {
 	name = %q
     lockout_setting = {%s}
+    use_lockout_setting = true
 }
 `, name, lockoutSetting)
 }

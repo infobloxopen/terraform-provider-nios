@@ -81,6 +81,23 @@ resource "nios_security_admin_group" "admin_group_with_additional_fields" {
   ]
 }
 
+// Create Named Access Control Lists (ACLs) ( required as parent )
+resource "nios_acl_namedacl" "namedacl_with_basic_fields" {
+  name = "example-named-acl"
+  access_list = [
+    {
+      struct     = "addressac"
+      address    = "10.0.0.1"
+      permission = "ALLOW"
+    },
+    {
+      struct     = "addressac"
+      address    = "10.0.0.2"
+      permission = "ALLOW"
+    }
+  ]
+}
+
 // Create an Admin Group with Additional Fields with user_access as Named ACL
 resource "nios_security_admin_group" "admin_group_with_additional_fields2" {
   name    = "example_admin_group3"
@@ -150,21 +167,4 @@ resource "nios_security_admin_group" "admin_group_with_additional_fields2" {
     }
   ]
   depends_on = [nios_acl_namedacl.namedacl_with_basic_fields]
-}
-
-// Create Named Access Control Lists (ACLs) with Basic Fields
-resource "nios_acl_namedacl" "namedacl_with_basic_fields" {
-  name = "example-named-acl"
-  access_list = [
-    {
-      struct     = "addressac"
-      address    = "10.0.0.1"
-      permission = "ALLOW"
-    },
-    {
-      struct     = "addressac"
-      address    = "10.0.0.2"
-      permission = "ALLOW"
-    }
-  ]
 }

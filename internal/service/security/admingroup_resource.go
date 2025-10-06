@@ -106,7 +106,7 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 			resp.Diagnostics.AddAttributeError(
 				path.Root("user_access").AtListIndex(i),
 				"Invalid Configuration for User Access",
-				"An entry must contain 'address' if 'ref' is not provided.",
+				"An element must contain either 'address' for an ACE or 'ref' of the Named ACL.",
 			)
 			continue
 		}
