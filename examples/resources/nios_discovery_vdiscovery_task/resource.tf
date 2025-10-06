@@ -1,4 +1,4 @@
-// Create an AWS Vdiscovery task
+// Create an AWS Vdiscovery Task
 resource "nios_discovery_vdiscovery_task" "aws_comprehensive" {
   name                                = "AWS-vdiscoverytask"
   driver_type                         = "AWS"
@@ -32,7 +32,7 @@ resource "nios_discovery_vdiscovery_task" "aws_comprehensive" {
   enabled                             = true
 }
 
-// Create an Azure Vdiscovery task
+// Create an Azure Vdiscovery Task
 resource "nios_discovery_vdiscovery_task" "azure_vdiscoverytask" {
   name                                = "AZURE-vdiscoverytask"
   driver_type                         = "AZURE"
@@ -49,7 +49,7 @@ resource "nios_discovery_vdiscovery_task" "azure_vdiscoverytask" {
   public_network_view_mapping_policy  = "AUTO_CREATE"
 }
 
-// Create a VMware Vdiscovery task
+// Create a VMware Vdiscovery Task
 resource "nios_discovery_vdiscovery_task" "vmware_vdiscoverytask" {
   name                                = "VMWARE-vdiscoverytask"
   driver_type                         = "VMWARE"
@@ -69,7 +69,7 @@ resource "nios_discovery_vdiscovery_task" "vmware_vdiscoverytask" {
   public_network_view_mapping_policy  = "AUTO_CREATE"
 }
 
-//Create an OpenStack Vdiscovery task
+//Create an OpenStack Vdiscovery Task
 resource "nios_discovery_vdiscovery_task" "openstack_vdiscoverytask" {
   name                                = "OPENSTACK-vdiscoverytask"
   driver_type                         = "OPENSTACK"
@@ -90,7 +90,7 @@ resource "nios_discovery_vdiscovery_task" "openstack_vdiscoverytask" {
   public_network_view_mapping_policy  = "AUTO_CREATE"
 }
 
-//Create a GCP Vdiscovery task
+//Create a GCP Vdiscovery Task
 resource "nios_discovery_vdiscovery_task" "gcp_vdiscoverytask" {
   name                                = "GCP-vdiscoverytask"
   driver_type                         = "GCP"
