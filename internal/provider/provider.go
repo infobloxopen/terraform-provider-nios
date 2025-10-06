@@ -4,16 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -43,6 +46,8 @@ type NIOSProviderModel struct {
 	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
 	NIOSUsername types.String `tfsdk:"nios_username"`
 	NIOSPassword types.String `tfsdk:"nios_password"`
+	ProxyURL     types.String `tfsdk:"proxy_url"`
+	ProxySearch  types.String `tfsdk:"proxy_search"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -63,6 +68,17 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			"nios_password": schema.StringAttribute{
 				Optional: true,
 			},
+			"proxy_url": schema.StringAttribute{
+				Description: "Proxy URL to connect to Infoblox NIOS.",
+				Optional:    true,
+			},
+			"proxy_search": schema.StringAttribute{
+				Optional:    true,
+				Description: "Proxy search mode. Allowed values: LOCAL (default), GM.",
+				Validators: []validator.String{
+					stringvalidator.OneOf("LOCAL", "GM"),
+				},
+			},
 		},
 	}
 }
@@ -82,7 +98,14 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithNIOSPassword(data.NIOSPassword.ValueString()),
 		option.WithNIOSHostUrl(data.NIOSHostURL.ValueString()),
 		option.WithDebug(true),
+		option.WithProxyURL(data.ProxyURL.ValueString()),
 	)
+
+	// Set ProxySearch configuration for use in resources and data sources
+	// TODO: ideally this should be passed to the data sources and resources via Configure method
+	// of each resource and data source, but that would require changes in configure method and struct of each resource and data source.
+	// For now, we are using a global variable to store the ProxySearch value.
+	config.SetProxySearch(data.ProxySearch.ValueString())
 
 	err := checkAndCreatePreRequisites(ctx, client)
 	if err != nil {
