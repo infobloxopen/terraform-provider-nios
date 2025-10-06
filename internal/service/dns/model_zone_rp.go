@@ -648,6 +648,14 @@ func (m *ZoneRpModel) Flatten(ctx context.Context, from *dns.ZoneRp, diags *diag
 	}
 	m.FireeyeRuleMapping = FlattenZoneRpFireeyeRuleMapping(ctx, from.FireeyeRuleMapping, diags)
 	m.Fqdn = flex.FlattenStringPointer(from.Fqdn)
+	planGridPrimary := m.GridPrimary
+	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneRpGridPrimaryAttrTypes, diags, FlattenZoneRpGridPrimary)
+	if !planGridPrimary.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planGridPrimary, m.GridPrimary, "name")
+		if !diags.HasError() {
+			m.GridPrimary = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneRpGridPrimaryAttrTypes, diags, FlattenZoneRpGridPrimary)
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, ZoneRpGridSecondariesAttrTypes, diags, FlattenZoneRpGridSecondaries)
 	m.Locked = types.BoolPointerValue(from.Locked)
@@ -671,7 +679,6 @@ func (m *ZoneRpModel) Flatten(ctx context.Context, from *dns.ZoneRp, diags *diag
 	m.RpzPriorityEnd = flex.FlattenInt64Pointer(from.RpzPriorityEnd)
 	m.RpzSeverity = flex.FlattenStringPointer(from.RpzSeverity)
 	m.RpzType = flex.FlattenStringPointer(from.RpzType)
-	//m.SetSoaSerialNumber = types.BoolPointerValue(from.SetSoaSerialNumber)
 	m.SoaDefaultTtl = flex.FlattenInt64Pointer(from.SoaDefaultTtl)
 	m.SoaEmail = flex.FlattenStringPointer(from.SoaEmail)
 	m.SoaExpire = flex.FlattenInt64Pointer(from.SoaExpire)

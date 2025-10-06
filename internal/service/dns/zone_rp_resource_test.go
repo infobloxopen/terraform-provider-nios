@@ -16,6 +16,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+//TODO : Objects to be created in the grid for testing
+// - Record Name Policy - example-policy , example-policy-update
+
 var readableAttributesForZoneRp = "address,comment,disable,display_domain,dns_soa_email,extattrs,external_primaries,external_secondaries,fireeye_rule_mapping,fqdn,grid_primary,grid_secondaries,locked,locked_by,log_rpz,mask_prefix,member_soa_mnames,member_soa_serials,network_view,ns_group,parent,prefix,primary_type,record_name_policy,rpz_drop_ip_rule_enabled,rpz_drop_ip_rule_min_prefix_length_ipv4,rpz_drop_ip_rule_min_prefix_length_ipv6,rpz_last_updated_time,rpz_policy,rpz_priority,rpz_priority_end,rpz_severity,rpz_type,soa_default_ttl,soa_email,soa_expire,soa_negative_ttl,soa_refresh,soa_retry,soa_serial_number,substitute_name,use_external_primary,use_grid_zone_timer,use_log_rpz,use_record_name_policy,use_rpz_drop_ip_rule,use_soa_email,view"
 
 func TestAccZoneRpResource_basic(t *testing.T) {
@@ -268,6 +271,9 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "external_secondaries.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.address", "10.0.0.0"),
 					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.name", "example.com"),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.use_tsig_key_name", "false"),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.tsig_key", "X4oRe92t54I+T98NdQpV2w=="),
+					resource.TestCheckResourceAttr(resourceName, "external_secondaries.0.tsig_key_alg", "HMAC-SHA256"),
 				),
 			},
 			// Update and Read
@@ -320,27 +326,6 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 			},
 		},
 	}
-	//fireEyeRuleMappingUpdate3 := map[string]any{
-	//	"apt_override": "PASSTHRU",
-	//	"fireeye_alert_mapping": []map[string]any{
-	//		{
-	//			"alert_type": "WEB_INFECTION",
-	//			"lifetime":   "500",
-	//			"rpz_rule":   "PASSTHRU",
-	//		},
-	//	},
-	//}
-	//fireEyeRuleMappingUpdate4 := map[string]any{
-	//	"apt_override": "SUBSTITUTE",
-	//	"fireeye_alert_mapping": []map[string]any{
-	//		{
-	//			"alert_type": "MALWARE_OBJECT",
-	//			"lifetime":   "500",
-	//			"rpz_rule":   "SUBSTITUTE",
-	//		},
-	//	},
-	//	"substituted_domain_name": "sub.example.com",
-	//}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -425,8 +410,12 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 				Config: testAccZoneRpGridPrimary(zoneFqdn, "default", gridPrimaryUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain")),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.stealth", "true"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.stealth", "false"),
+				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -439,7 +428,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain2",
+			"name": "infoblox.localdomain",
 		},
 	}
 	gridSecondary := []map[string]any{
@@ -449,7 +438,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	}
 	updatedGridSecondary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": "member.com",
 		},
 	}
 
@@ -508,6 +497,7 @@ func TestAccZoneRpResource_Locked(t *testing.T) {
 	})
 }
 
+// Logging RPZ requires enabling rpz logging on the GRID or member level
 func TestAccZoneRpResource_LogRpz(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_log_rpz"
 	var v dns.ZoneRp
@@ -519,7 +509,7 @@ func TestAccZoneRpResource_LogRpz(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpLogRpz(zoneFqdn, "default", false),
+				Config: testAccZoneRpLogRpz(zoneFqdn, "default", false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "log_rpz", "false"),
@@ -527,7 +517,7 @@ func TestAccZoneRpResource_LogRpz(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpLogRpz(zoneFqdn, "default", true),
+				Config: testAccZoneRpLogRpz(zoneFqdn, "default", true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "log_rpz", "true"),
@@ -550,7 +540,7 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 	memberSoaMnames := []map[string]any{
 		{
 			"grid_primary": "infoblox.localdomain",
-			"mname":        "infoblox.localdomain",
+			"mname":        "example.com",
 		},
 	}
 	updatedMemberSoaMnames := []map[string]any{
@@ -568,8 +558,8 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 				Config: testAccZoneRpMemberSoaMnames(zoneFqdn, "default", gridPrimary, memberSoaMnames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.grid_primary", "infoblox.localdomain"),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.mname", "example.com"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.grid_primary", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.mname", "example.com"),
 				),
 			},
 			// Update and Read
@@ -577,7 +567,7 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 				Config: testAccZoneRpMemberSoaMnames(zoneFqdn, "default", gridPrimary, updatedMemberSoaMnames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.mname", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.mname", "example.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -591,7 +581,7 @@ func TestAccZoneRpResource_NsGroup(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": "member.com",
 		},
 	}
 
@@ -1600,14 +1590,15 @@ resource "nios_dns_zone_rp" "test_locked" {
 `, zoneFqdn, view, locked)
 }
 
-func testAccZoneRpLogRpz(zoneFqdn, view string, logRpz bool) string {
+func testAccZoneRpLogRpz(zoneFqdn, view string, logRpz, useLogRpz bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_rp" "test_log_rpz" {
     fqdn = %q
     view = %q
     log_rpz = %t
+	use_log_rpz = %t
 }
-`, zoneFqdn, view, logRpz)
+`, zoneFqdn, view, logRpz, useLogRpz)
 }
 
 func testAccZoneRpMemberSoaMnames(zoneFqdn, view string, gridPrimary, memberSoaMnames []map[string]any) string {
@@ -1732,7 +1723,6 @@ resource "nios_dns_zone_rp" "test_set_soa_serial_number" {
     fqdn = %q
     view = %q
     set_soa_serial_number = %t
-    soa_serial_number = 10
 }
 `, zoneFqdn, view, setSoaSerialNumber)
 }
