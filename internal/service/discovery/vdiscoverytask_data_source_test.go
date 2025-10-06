@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccVdiscoverytaskDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_discovery_vdiscoverytask.test"
-	resourceName := "nios_discovery_vdiscoverytask.test"
+	dataSourceName := "data.nios_discovery_vdiscovery_task.test"
+	resourceName := "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("vdiscoverytask-")
@@ -91,7 +91,7 @@ func testAccCheckVdiscoverytaskResourceAttrPair(resourceName, dataSourceName str
 
 func testAccVdiscoverytaskDataSourceConfigFilters(name string, auto_consolidate_cloud_ea, auto_consolidate_managed_tenant, auto_consolidate_managed_vm bool, member, driver_type, private_network_view_mapping_policy, public_network_view_mapping_policy string, merge_data, update_metadata bool, selected_regions, username, password string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test" {
+resource "nios_discovery_vdiscovery_task" "test" {
     name                                = %q
     auto_consolidate_cloud_ea           = %t
     auto_consolidate_managed_tenant     = %t
@@ -107,9 +107,9 @@ resource "nios_discovery_vdiscoverytask" "test" {
 	password                            = %q
 }
 
-data "nios_discovery_vdiscoverytask" "test" {
+data "nios_discovery_vdiscovery_task" "test" {
 	filters = {
-    	name = nios_discovery_vdiscoverytask.test.name
+    	name = nios_discovery_vdiscovery_task.test.name
   	}
 }
 `, name, auto_consolidate_cloud_ea, auto_consolidate_managed_tenant, auto_consolidate_managed_vm, driver_type, member, merge_data, private_network_view_mapping_policy, public_network_view_mapping_policy, update_metadata, selected_regions, username, password)

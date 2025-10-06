@@ -31,7 +31,7 @@ type VdiscoverytaskDataSource struct {
 }
 
 func (d *VdiscoverytaskDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "discovery_vdiscoverytask"
+	resp.TypeName = req.ProviderTypeName + "_" + "discovery_vdiscovery_task"
 }
 
 type VdiscoverytaskModelWithFilter struct {
@@ -50,7 +50,7 @@ func (m *VdiscoverytaskModelWithFilter) FlattenResults(ctx context.Context, from
 
 func (d *VdiscoverytaskDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing Vdiscoverytasks.",
+		MarkdownDescription: "Retrieves information about existing Vdiscovery Tasks.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

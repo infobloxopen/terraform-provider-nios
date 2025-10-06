@@ -308,6 +308,7 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password": schema.StringAttribute{
 		Optional:            true,
+		Sensitive:           true,
 		MarkdownDescription: "Password used for connecting to the cloud management platform.",
 	},
 	"port": schema.Int64Attribute{
@@ -418,6 +419,7 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_identity": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set true, all keystone connection will use \"/identity\" endpoint and port value will be ignored.",
 	},
 	"username": schema.StringAttribute{

@@ -26,7 +26,7 @@ import (
 var readableAttributesForVdiscoverytask = "accounts_list,allow_unsecured_connection,auto_consolidate_cloud_ea,auto_consolidate_managed_tenant,auto_consolidate_managed_vm,auto_create_dns_hostname_template,auto_create_dns_record,auto_create_dns_record_type,cdiscovery_file_token,comment,credentials_type,dns_view_private_ip,dns_view_public_ip,domain_name,driver_type,enable_filter,enabled,fqdn_or_ip,govcloud_enabled,identity_version,last_run,member,merge_data,multiple_accounts_sync_policy,name,network_filter,network_list,port,private_network_view,private_network_view_mapping_policy,protocol,public_network_view,public_network_view_mapping_policy,role_arn,scheduled_run,selected_regions,service_account_file,service_account_file_token,state,state_msg,sync_child_accounts,update_dns_view_private_ip,update_dns_view_public_ip,update_metadata,use_identity,username"
 
 func TestAccVdiscoverytaskResource_basic(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test"
+	var resourceName = "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -70,7 +70,7 @@ func TestAccVdiscoverytaskResource_basic(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_disappears(t *testing.T) {
-	resourceName := "nios_discovery_vdiscoverytask.test"
+	resourceName := "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -93,7 +93,7 @@ func TestAccVdiscoverytaskResource_disappears(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_AllowUnsecuredConnection(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_allow_unsecured_connection"
+	var resourceName = "nios_discovery_vdiscovery_task.test_allow_unsecured_connection"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -124,7 +124,7 @@ func TestAccVdiscoverytaskResource_AllowUnsecuredConnection(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_AutoConsolidateCloudEa(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_auto_consolidate_cloud_ea"
+	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_cloud_ea"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -155,7 +155,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateCloudEa(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_AutoConsolidateManagedTenant(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_auto_consolidate_managed_tenant"
+	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_managed_tenant"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -186,7 +186,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedTenant(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_AutoConsolidateManagedVm(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_auto_consolidate_managed_vm"
+	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_managed_vm"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -216,7 +216,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedVm(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_AutoCreateDnsHostnameTemplate(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_auto_create_dns_hostname_template"
+	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_hostname_template"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -246,7 +246,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsHostnameTemplate(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_AutoCreateDnsRecord(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_auto_create_dns_record"
+	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_record"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -276,7 +276,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecord(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_AutoCreateDnsRecordType(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_auto_create_dns_record_type"
+	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_record_type"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -307,7 +307,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecordType(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_CdiscoveryFileToken(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_aws_cdiscovery_file"
+	var resourceName = "nios_discovery_vdiscovery_task.test_aws_cdiscovery_file"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -343,7 +343,7 @@ func TestAccVdiscoverytaskResource_CdiscoveryFileToken(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_Comment(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_comment"
+	var resourceName = "nios_discovery_vdiscovery_task.test_comment"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -374,7 +374,7 @@ func TestAccVdiscoverytaskResource_Comment(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_credentials_type"
+	var resourceName = "nios_discovery_vdiscovery_task.test_credentials_type"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -405,7 +405,7 @@ func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_DnsViewPrivateIp(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_dns_view_private_ip"
+	var resourceName = "nios_discovery_vdiscovery_task.test_dns_view_private_ip"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -436,7 +436,7 @@ func TestAccVdiscoverytaskResource_DnsViewPrivateIp(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_DnsViewPublicIp(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_dns_view_public_ip"
+	var resourceName = "nios_discovery_vdiscovery_task.test_dns_view_public_ip"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -467,7 +467,7 @@ func TestAccVdiscoverytaskResource_DnsViewPublicIp(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_DomainName(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_domain_name"
+	var resourceName = "nios_discovery_vdiscovery_task.test_domain_name"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -498,7 +498,7 @@ func TestAccVdiscoverytaskResource_DomainName(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_DriverType(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_driver_type"
+	var resourceName = "nios_discovery_vdiscovery_task.test_driver_type"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -532,7 +532,7 @@ func TestAccVdiscoverytaskResource_DriverType(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_EnableFilter(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_enable_filter"
+	var resourceName = "nios_discovery_vdiscovery_task.test_enable_filter"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -564,7 +564,7 @@ func TestAccVdiscoverytaskResource_EnableFilter(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_Enabled(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_enabled"
+	var resourceName = "nios_discovery_vdiscovery_task.test_enabled"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("vdiscoverytask-enabled")
@@ -595,7 +595,7 @@ func TestAccVdiscoverytaskResource_Enabled(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_fqdn_or_ip"
+	var resourceName = "nios_discovery_vdiscovery_task.test_fqdn_or_ip"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -635,7 +635,7 @@ func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
 
 // "Cannot change the job type(GovCloud) during update."
 func TestAccVdiscoverytaskResource_GovcloudEnabled(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_govcloud_enabled"
+	var resourceName = "nios_discovery_vdiscovery_task.test_govcloud_enabled"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -658,7 +658,7 @@ func TestAccVdiscoverytaskResource_GovcloudEnabled(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_IdentityVersion(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_identity_version"
+	var resourceName = "nios_discovery_vdiscovery_task.test_identity_version"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -689,7 +689,7 @@ func TestAccVdiscoverytaskResource_IdentityVersion(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_Member(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_member"
+	var resourceName = "nios_discovery_vdiscovery_task.test_member"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -720,7 +720,7 @@ func TestAccVdiscoverytaskResource_Member(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_MergeData(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_merge_data"
+	var resourceName = "nios_discovery_vdiscovery_task.test_merge_data"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -751,7 +751,7 @@ func TestAccVdiscoverytaskResource_MergeData(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_MultipleAccountsSyncPolicy(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_multiple_accounts_sync_policy"
+	var resourceName = "nios_discovery_vdiscovery_task.test_multiple_accounts_sync_policy"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -784,7 +784,7 @@ func TestAccVdiscoverytaskResource_MultipleAccountsSyncPolicy(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_Name(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_name"
+	var resourceName = "nios_discovery_vdiscovery_task.test_name"
 	var v discovery.Vdiscoverytask
 
 	name1 := acctest.RandomNameWithPrefix("vdiscoverytask-")
@@ -816,7 +816,7 @@ func TestAccVdiscoverytaskResource_Name(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_NetworkFilter(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_network_filter"
+	var resourceName = "nios_discovery_vdiscovery_task.test_network_filter"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -848,7 +848,7 @@ func TestAccVdiscoverytaskResource_NetworkFilter(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_NetworkList(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_network_list"
+	var resourceName = "nios_discovery_vdiscovery_task.test_network_list"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -886,7 +886,7 @@ func TestAccVdiscoverytaskResource_NetworkList(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_Password(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_password"
+	var resourceName = "nios_discovery_vdiscovery_task.test_password"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -919,7 +919,7 @@ func TestAccVdiscoverytaskResource_Password(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_Port(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_port"
+	var resourceName = "nios_discovery_vdiscovery_task.test_port"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -950,7 +950,7 @@ func TestAccVdiscoverytaskResource_Port(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_PrivateNetworkView(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_private_network_view"
+	var resourceName = "nios_discovery_vdiscovery_task.test_private_network_view"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -980,7 +980,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkView(t *testing.T) {
 	})
 }
 func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_private_network_view_mapping_policy"
+	var resourceName = "nios_discovery_vdiscovery_task.test_private_network_view_mapping_policy"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1011,7 +1011,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T)
 }
 
 func TestAccVdiscoverytaskResource_Protocol(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_protocol"
+	var resourceName = "nios_discovery_vdiscovery_task.test_protocol"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1042,7 +1042,7 @@ func TestAccVdiscoverytaskResource_Protocol(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_PublicNetworkView(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_public_network_view"
+	var resourceName = "nios_discovery_vdiscovery_task.test_public_network_view"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1073,7 +1073,7 @@ func TestAccVdiscoverytaskResource_PublicNetworkView(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_PublicNetworkViewMappingPolicy(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_public_network_view_mapping_policy"
+	var resourceName = "nios_discovery_vdiscovery_task.test_public_network_view_mapping_policy"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1104,7 +1104,7 @@ func TestAccVdiscoverytaskResource_PublicNetworkViewMappingPolicy(t *testing.T) 
 }
 
 func TestAccVdiscoverytaskResource_RoleArn(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_role_arn"
+	var resourceName = "nios_discovery_vdiscovery_task.test_role_arn"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1135,7 +1135,7 @@ func TestAccVdiscoverytaskResource_RoleArn(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_ScheduledRun(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_scheduled_run_block_azure"
+	var resourceName = "nios_discovery_vdiscovery_task.test_scheduled_run_block_azure"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("vdiscoverytask-azure-schedule")
@@ -1195,7 +1195,7 @@ func TestAccVdiscoverytaskResource_ScheduledRun(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_SelectedRegions(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_selected_regions"
+	var resourceName = "nios_discovery_vdiscovery_task.test_selected_regions"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1226,7 +1226,7 @@ func TestAccVdiscoverytaskResource_SelectedRegions(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_gcp_service_account_file"
+	var resourceName = "nios_discovery_vdiscovery_task.test_gcp_service_account_file"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1266,7 +1266,7 @@ func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
 	})
 }
 func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_sync_child_accounts"
+	var resourceName = "nios_discovery_vdiscovery_task.test_sync_child_accounts"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1297,7 +1297,7 @@ func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_UpdateDnsViewPrivateIp(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_update_dns_view_private_ip"
+	var resourceName = "nios_discovery_vdiscovery_task.test_update_dns_view_private_ip"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1326,7 +1326,7 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPrivateIp(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_UpdateDnsViewPublicIp(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_update_dns_view_public_ip"
+	var resourceName = "nios_discovery_vdiscovery_task.test_update_dns_view_public_ip"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-public")
@@ -1358,7 +1358,7 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPublicIp(t *testing.T) {
 }
 
 func TestAccVdiscoverytaskResource_UpdateMetadata(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_update_metadata"
+	var resourceName = "nios_discovery_vdiscovery_task.test_update_metadata"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1388,7 +1388,7 @@ func TestAccVdiscoverytaskResource_UpdateMetadata(t *testing.T) {
 	})
 }
 func TestAccVdiscoverytaskResource_UseIdentity(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_use_identity"
+	var resourceName = "nios_discovery_vdiscovery_task.test_use_identity"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1418,7 +1418,7 @@ func TestAccVdiscoverytaskResource_UseIdentity(t *testing.T) {
 	})
 }
 func TestAccVdiscoverytaskResource_Username(t *testing.T) {
-	var resourceName = "nios_discovery_vdiscoverytask.test_username"
+	var resourceName = "nios_discovery_vdiscovery_task.test_username"
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
@@ -1510,7 +1510,7 @@ func testAccCheckVdiscoverytaskDisappears(ctx context.Context, v *discovery.Vdis
 
 func testAccVdiscoverytaskBasicConfig(name string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, member, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions, username, password string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test" {
+resource "nios_discovery_vdiscovery_task" "test" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1530,7 +1530,7 @@ resource "nios_discovery_vdiscoverytask" "test" {
 
 func testAccVdiscoverytaskAllowUnsecuredConnection(name string, allowUnsecuredConnection bool, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, mergeData, updateMetadata bool, driverType, fqdnOrIp, member, password, privateNetworkViewMappingPolicy, protocol, publicNetworkViewMappingPolicy, selectedRegions, username string, port int) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_allow_unsecured_connection" {
+resource "nios_discovery_vdiscovery_task" "test_allow_unsecured_connection" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1554,7 +1554,7 @@ resource "nios_discovery_vdiscoverytask" "test_allow_unsecured_connection" {
 
 func testAccVdiscoverytaskAutoConsolidateCloudEa(name string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, mergeData, updateMetadata bool, driverType, member, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions, username, password string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_auto_consolidate_cloud_ea" {
+resource "nios_discovery_vdiscovery_task" "test_auto_consolidate_cloud_ea" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1574,7 +1574,7 @@ resource "nios_discovery_vdiscoverytask" "test_auto_consolidate_cloud_ea" {
 
 func testAccVdiscoverytaskAutoConsolidateManagedTenant(name string, autoConsolidateManagedTenant, autoConsolidateCloudEa, autoConsolidateManagedVm, mergeData, updateMetadata bool, driverType, member, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions, username, password string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_auto_consolidate_managed_tenant" {
+resource "nios_discovery_vdiscovery_task" "test_auto_consolidate_managed_tenant" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1594,7 +1594,7 @@ resource "nios_discovery_vdiscoverytask" "test_auto_consolidate_managed_tenant" 
 
 func testAccVdiscoverytaskAutoConsolidateManagedVm(name string, autoConsolidateManagedVm, autoConsolidateCloudEa, autoConsolidateManagedTenant, mergeData, updateMetadata bool, driverType, member, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions, username, password string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_auto_consolidate_managed_vm" {
+resource "nios_discovery_vdiscovery_task" "test_auto_consolidate_managed_vm" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1614,7 +1614,7 @@ resource "nios_discovery_vdiscoverytask" "test_auto_consolidate_managed_vm" {
 
 func testAccVdiscoverytaskAutoCreateDnsHostnameTemplate(name string, autoCreateDnsHostnameTemplate string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, autoCreateDnsRecord bool, autoCreateDnsRecordType, driverType, member, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions, username, password string, mergeData, updateMetadata bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_auto_create_dns_hostname_template" {
+resource "nios_discovery_vdiscovery_task" "test_auto_create_dns_hostname_template" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1637,7 +1637,7 @@ resource "nios_discovery_vdiscoverytask" "test_auto_create_dns_hostname_template
 
 func testAccVdiscoverytaskAutoCreateDnsRecord(name string, autoCreateDnsRecord bool, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, autoCreateDnsHostnameTemplate, autoCreateDnsRecordType, driverType, member, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions, username, password string, mergeData, updateMetadata bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_auto_create_dns_record" {
+resource "nios_discovery_vdiscovery_task" "test_auto_create_dns_record" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1660,7 +1660,7 @@ resource "nios_discovery_vdiscoverytask" "test_auto_create_dns_record" {
 
 func testAccVdiscoverytaskAutoCreateDnsRecordType(name string, autoCreateDnsRecordType string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, autoCreateDnsRecord bool, autoCreateDnsHostnameTemplate, driverType, member, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions, username, password string, mergeData, updateMetadata bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_auto_create_dns_record_type" {
+resource "nios_discovery_vdiscovery_task" "test_auto_create_dns_record_type" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1682,7 +1682,7 @@ resource "nios_discovery_vdiscoverytask" "test_auto_create_dns_record_type" {
 }
 func testAccVdiscoverytaskCdiscoveryFile(name, driverType, member, cdiscoveryFile, multipleAccountsSyncPolicy, username, password, roleArn string, syncChildAccounts, mergeData, updateMetadata, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, enabled bool, selectedRegions, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_aws_cdiscovery_file" {
+resource "nios_discovery_vdiscovery_task" "test_aws_cdiscovery_file" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -1708,7 +1708,7 @@ resource "nios_discovery_vdiscoverytask" "test_aws_cdiscovery_file" {
 
 func testAccVdiscoverytaskComment(name, comment string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, member, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions, username, password string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_comment" {
+resource "nios_discovery_vdiscovery_task" "test_comment" {
     name                                = %q
     comment                             = %q
     driver_type                         = %q
@@ -1729,7 +1729,7 @@ resource "nios_discovery_vdiscoverytask" "test_comment" {
 
 func testAccVdiscoverytaskCredentialsTypeIndirect(name, credentialsType, roleArn, multipleAccountsSyncPolicy, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, syncChildAccounts, update_metadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_credentials_type" {
+resource "nios_discovery_vdiscovery_task" "test_credentials_type" {
     name                                = %q
     credentials_type                    = %q
     role_arn                            = %q
@@ -1751,7 +1751,7 @@ resource "nios_discovery_vdiscoverytask" "test_credentials_type" {
 
 func testAccVdiscoverytaskCredentialsTypeDirect(name, credentialsType, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_credentials_type" {
+resource "nios_discovery_vdiscovery_task" "test_credentials_type" {
     name                                = %q
     credentials_type                    = %q
     username                            = %q
@@ -1771,7 +1771,7 @@ resource "nios_discovery_vdiscoverytask" "test_credentials_type" {
 }
 func testAccVdiscoverytaskDnsViewPrivateIp(name, dnsViewPrivateIp string, updateDnsViewPrivateIp bool, autoCreateDnsHostnameTemplate, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, privateNetworkView, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_dns_view_private_ip" {
+resource "nios_discovery_vdiscovery_task" "test_dns_view_private_ip" {
     name                                = %q
     dns_view_private_ip                 = %q
     update_dns_view_private_ip          = %t
@@ -1795,7 +1795,7 @@ resource "nios_discovery_vdiscoverytask" "test_dns_view_private_ip" {
 
 func testAccVdiscoverytaskDnsViewPublicIp(name, dnsViewPublicIp string, updateDnsViewPublicIp bool, autoCreateDnsHostnameTemplate, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, publicNetworkView string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_dns_view_public_ip" {
+resource "nios_discovery_vdiscovery_task" "test_dns_view_public_ip" {
     name                                = %q
     dns_view_public_ip                  = %q
     update_dns_view_public_ip           = %t
@@ -1819,7 +1819,7 @@ resource "nios_discovery_vdiscoverytask" "test_dns_view_public_ip" {
 
 func testAccVdiscoverytaskDomainName(name, domainName, fqdnOrIp, member, identityVersion, username, password string, useIdentity, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, port int, protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_domain_name" {
+resource "nios_discovery_vdiscovery_task" "test_domain_name" {
     name                                = %q
     domain_name                         = %q
     fqdn_or_ip                          = %q
@@ -1844,7 +1844,7 @@ resource "nios_discovery_vdiscoverytask" "test_domain_name" {
 
 func testAccVdiscoverytaskDriverTypeOpenstack(name, driverType, fqdnOrIp, member, identityVersion, username, password string, useIdentity, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, port int, protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_driver_type" {
+resource "nios_discovery_vdiscovery_task" "test_driver_type" {
     name                                = %q
     driver_type                         = %q
     fqdn_or_ip                          = %q
@@ -1868,7 +1868,7 @@ resource "nios_discovery_vdiscoverytask" "test_driver_type" {
 
 func testAccVdiscoverytaskDriverTypeVmware(name, driverType, fqdnOrIp, member, username, password string, useIdentity, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, port int, protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_driver_type" {
+resource "nios_discovery_vdiscovery_task" "test_driver_type" {
     name                                = %q
     driver_type                         = %q
     fqdn_or_ip                          = %q
@@ -1892,7 +1892,7 @@ resource "nios_discovery_vdiscoverytask" "test_driver_type" {
 func testAccVdiscoverytaskEnableFilter(name string, enableFilter bool, networkList []string, networkFilter, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	networkListHCL := utils.ConvertStringSliceToHCL(networkList)
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_enable_filter" {
+resource "nios_discovery_vdiscovery_task" "test_enable_filter" {
     name                                = %q
     enable_filter                       = %t
     network_list                        = %s
@@ -1915,7 +1915,7 @@ resource "nios_discovery_vdiscoverytask" "test_enable_filter" {
 
 func testAccVdiscoverytaskEnabled(name string, enabled bool, username, password, fqdnOrIp, member, driverType string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, privateMappingPolicy, publicMappingPolicy string, mergeData, updateMetadata bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_enabled" {
+resource "nios_discovery_vdiscovery_task" "test_enabled" {
     name                                = %q
     enabled                             = %t
     username                            = %q
@@ -1936,7 +1936,7 @@ resource "nios_discovery_vdiscoverytask" "test_enabled" {
 
 func testAccVdiscoverytaskFqdnOrIp(name, fqdnOrIp, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, mergeData, updateMetadata bool, driverType, privateNetworkViewMappingPolicy, protocol, publicNetworkViewMappingPolicy, selectedRegions string, port int) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_fqdn_or_ip" {
+resource "nios_discovery_vdiscovery_task" "test_fqdn_or_ip" {
     name                                = %q
     fqdn_or_ip                          = %q
     username                            = %q
@@ -1959,7 +1959,7 @@ resource "nios_discovery_vdiscoverytask" "test_fqdn_or_ip" {
 
 func testAccVdiscoverytaskGovcloudEnabled(name string, govcloudEnabled bool, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_govcloud_enabled" {
+resource "nios_discovery_vdiscovery_task" "test_govcloud_enabled" {
     name                                = %q
     govcloud_enabled                    = %t
     username                            = %q
@@ -1980,7 +1980,7 @@ resource "nios_discovery_vdiscoverytask" "test_govcloud_enabled" {
 
 func testAccVdiscoverytaskIdentityVersionV2(name, identityVersion, fqdnOrIp, member, username, password string, useIdentity, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, port int, protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_identity_version" {
+resource "nios_discovery_vdiscovery_task" "test_identity_version" {
     name                                = %q
     identity_version                    = %q
     fqdn_or_ip                          = %q
@@ -2004,7 +2004,7 @@ resource "nios_discovery_vdiscoverytask" "test_identity_version" {
 
 func testAccVdiscoverytaskIdentityVersionV3(name, identityVersion, domainName, fqdnOrIp, member, username, password string, useIdentity, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, port int, protocol string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_identity_version" {
+resource "nios_discovery_vdiscovery_task" "test_identity_version" {
     name                                = %q
     identity_version                    = %q
     domain_name                         = %q
@@ -2029,7 +2029,7 @@ resource "nios_discovery_vdiscoverytask" "test_identity_version" {
 
 func testAccVdiscoverytaskMember(name, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions, username, password string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_member" {
+resource "nios_discovery_vdiscovery_task" "test_member" {
     name                                = %q
     member                              = %q
     auto_consolidate_cloud_ea           = %t
@@ -2049,7 +2049,7 @@ resource "nios_discovery_vdiscoverytask" "test_member" {
 
 func testAccVdiscoverytaskMergeData(name string, mergeData bool, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions string, updateMetadata bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_merge_data" {
+resource "nios_discovery_vdiscovery_task" "test_merge_data" {
     name                                = %q
     merge_data                          = %t
     username                            = %q
@@ -2069,7 +2069,7 @@ resource "nios_discovery_vdiscoverytask" "test_merge_data" {
 
 func testAccVdiscoverytaskMultipleAccountsSyncPolicyDiscover(name, multipleAccountsSyncPolicy string, syncChildAccounts bool, roleArn, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_multiple_accounts_sync_policy" {
+resource "nios_discovery_vdiscovery_task" "test_multiple_accounts_sync_policy" {
     name                                = %q
     multiple_accounts_sync_policy       = %q
     sync_child_accounts                 = %t
@@ -2092,7 +2092,7 @@ resource "nios_discovery_vdiscoverytask" "test_multiple_accounts_sync_policy" {
 
 func testAccVdiscoverytaskMultipleAccountsSyncPolicyUpload(name, multipleAccountsSyncPolicy string, syncChildAccounts bool, cdiscoveryFile, roleArn, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_multiple_accounts_sync_policy" {
+resource "nios_discovery_vdiscovery_task" "test_multiple_accounts_sync_policy" {
     name                                = %q
     multiple_accounts_sync_policy       = %q
     sync_child_accounts                 = %t
@@ -2116,7 +2116,7 @@ resource "nios_discovery_vdiscoverytask" "test_multiple_accounts_sync_policy" {
 
 func testAccVdiscoverytaskName(name, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions, username, password string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_name" {
+resource "nios_discovery_vdiscovery_task" "test_name" {
     name                                = %q
     member                              = %q
     auto_consolidate_cloud_ea           = %t
@@ -2137,7 +2137,7 @@ resource "nios_discovery_vdiscoverytask" "test_name" {
 func testAccVdiscoverytaskNetworkFilter(name string, enableFilter bool, networkFilter string, networkList []string, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	networkListHCL := utils.ConvertStringSliceToHCL(networkList)
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_network_filter" {
+resource "nios_discovery_vdiscovery_task" "test_network_filter" {
     name                                = %q
     enable_filter                       = %t
     network_filter                      = %q
@@ -2161,7 +2161,7 @@ resource "nios_discovery_vdiscoverytask" "test_network_filter" {
 func testAccVdiscoverytaskNetworkList(name string, networkList []string, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	networkListHCL := utils.ConvertStringSliceToHCL(networkList)
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_network_list" {
+resource "nios_discovery_vdiscovery_task" "test_network_list" {
     name                                = %q
     network_list                        = %s
     username                            = %q
@@ -2182,7 +2182,7 @@ resource "nios_discovery_vdiscoverytask" "test_network_list" {
 
 func testAccVdiscoverytaskPassword(name, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_password" {
+resource "nios_discovery_vdiscovery_task" "test_password" {
     name                                = %q
     username                            = %q
     password                            = %q
@@ -2202,7 +2202,7 @@ resource "nios_discovery_vdiscoverytask" "test_password" {
 
 func testAccVdiscoverytaskPort(name string, port int, username, password, member, fqdnOrIp string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, mergeData, updateMetadata bool, driverType, privateNetworkViewMappingPolicy, protocol, publicNetworkViewMappingPolicy, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_port" {
+resource "nios_discovery_vdiscovery_task" "test_port" {
     name                                = %q
     port                                = %d
     username                            = %q
@@ -2225,7 +2225,7 @@ resource "nios_discovery_vdiscoverytask" "test_port" {
 
 func testAccVdiscoverytaskPrivateNetworkView(name, privateNetworkView, privateNetworkViewMappingPolicy, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_private_network_view" {
+resource "nios_discovery_vdiscovery_task" "test_private_network_view" {
     name                                = %q
     private_network_view                = %q
     private_network_view_mapping_policy = %q
@@ -2246,7 +2246,7 @@ resource "nios_discovery_vdiscoverytask" "test_private_network_view" {
 
 func testAccVdiscoverytaskPrivateNetworkViewMappingPolicyAutoCreate(name, privateNetworkViewMappingPolicy, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_private_network_view_mapping_policy" {
+resource "nios_discovery_vdiscovery_task" "test_private_network_view_mapping_policy" {
     name                                = %q
     private_network_view_mapping_policy = %q
     username                            = %q
@@ -2266,7 +2266,7 @@ resource "nios_discovery_vdiscoverytask" "test_private_network_view_mapping_poli
 
 func testAccVdiscoverytaskPrivateNetworkViewMappingPolicyDirect(name, privateNetworkViewMappingPolicy, privateNetworkView, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_private_network_view_mapping_policy" {
+resource "nios_discovery_vdiscovery_task" "test_private_network_view_mapping_policy" {
     name                                = %q
     private_network_view_mapping_policy = %q
     private_network_view                = %q
@@ -2287,7 +2287,7 @@ resource "nios_discovery_vdiscoverytask" "test_private_network_view_mapping_poli
 
 func testAccVdiscoverytaskProtocol(name, protocol, username, password, member, fqdnOrIp string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, mergeData, updateMetadata bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions string, port int) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_protocol" {
+resource "nios_discovery_vdiscovery_task" "test_protocol" {
     name                                = %q
     protocol                            = %q
     username                            = %q
@@ -2310,7 +2310,7 @@ resource "nios_discovery_vdiscoverytask" "test_protocol" {
 
 func testAccVdiscoverytaskPublicNetworkView(name, publicNetworkView, publicNetworkViewMappingPolicy, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_public_network_view" {
+resource "nios_discovery_vdiscovery_task" "test_public_network_view" {
     name                                = %q
     public_network_view                 = %q
     public_network_view_mapping_policy  = %q
@@ -2331,7 +2331,7 @@ resource "nios_discovery_vdiscoverytask" "test_public_network_view" {
 
 func testAccVdiscoverytaskPublicNetworkViewMappingPolicyAutoCreate(name, publicNetworkViewMappingPolicy, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_public_network_view_mapping_policy" {
+resource "nios_discovery_vdiscovery_task" "test_public_network_view_mapping_policy" {
     name                                = %q
     public_network_view_mapping_policy  = %q
     username                            = %q
@@ -2351,7 +2351,7 @@ resource "nios_discovery_vdiscoverytask" "test_public_network_view_mapping_polic
 
 func testAccVdiscoverytaskPublicNetworkViewMappingPolicyDirect(name, publicNetworkViewMappingPolicy, publicNetworkView, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_public_network_view_mapping_policy" {
+resource "nios_discovery_vdiscovery_task" "test_public_network_view_mapping_policy" {
     name                                = %q
     public_network_view_mapping_policy  = %q
     public_network_view                 = %q
@@ -2372,7 +2372,7 @@ resource "nios_discovery_vdiscoverytask" "test_public_network_view_mapping_polic
 
 func testAccVdiscoverytaskRoleArn(name, roleArn, multipleAccountsSyncPolicy string, syncChildAccounts bool, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_role_arn" {
+resource "nios_discovery_vdiscovery_task" "test_role_arn" {
     name                                = %q
     role_arn                            = %q
     multiple_accounts_sync_policy       = %q
@@ -2396,7 +2396,7 @@ resource "nios_discovery_vdiscoverytask" "test_role_arn" {
 func testAccVdiscoverytaskScheduledRun(name string, scheduledRun map[string]any, username, password, fqdnOrIp, member, driverType string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, privateMappingPolicy, publicMappingPolicy string, mergeData, updateMetadata bool) string {
 	scheduledRunHCL := utils.ConvertMapToHCL(scheduledRun)
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_scheduled_run_block_azure" {
+resource "nios_discovery_vdiscovery_task" "test_scheduled_run_block_azure" {
     name                                = %q
     scheduled_run                       = %s
     username                            = %q
@@ -2417,7 +2417,7 @@ resource "nios_discovery_vdiscoverytask" "test_scheduled_run_block_azure" {
 
 func testAccVdiscoverytaskSelectedRegions(name, selectedRegions, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_selected_regions" {
+resource "nios_discovery_vdiscovery_task" "test_selected_regions" {
     name                                = %q
     selected_regions                    = %q
     username                            = %q
@@ -2437,7 +2437,7 @@ resource "nios_discovery_vdiscoverytask" "test_selected_regions" {
 
 func testAccVdiscoverytaskServiceAccountFile(name, driverType, member, serviceAccountFile, cdiscoveryFile, multipleAccountsSyncPolicy string, mergeData, updateMetadata, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, enabled bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_gcp_service_account_file" {
+resource "nios_discovery_vdiscovery_task" "test_gcp_service_account_file" {
     name                                = %q
     driver_type                         = %q
     member                              = %q
@@ -2458,7 +2458,7 @@ resource "nios_discovery_vdiscoverytask" "test_gcp_service_account_file" {
 
 func testAccVdiscoverytaskSyncChildAccounts(name string, syncChildAccounts bool, roleArn, multipleAccountsSyncPolicy, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_sync_child_accounts" {
+resource "nios_discovery_vdiscovery_task" "test_sync_child_accounts" {
     name                                = %q
     sync_child_accounts                 = %t
     role_arn                            = %q
@@ -2481,7 +2481,7 @@ resource "nios_discovery_vdiscoverytask" "test_sync_child_accounts" {
 
 func testAccVdiscoverytaskUpdateDnsViewPrivateIpFalse(name string, updateDnsViewPrivateIp bool, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_update_dns_view_private_ip" {
+resource "nios_discovery_vdiscovery_task" "test_update_dns_view_private_ip" {
     name                                = %q
     update_dns_view_private_ip          = %t
     username                            = %q
@@ -2502,7 +2502,7 @@ resource "nios_discovery_vdiscoverytask" "test_update_dns_view_private_ip" {
 
 func testAccVdiscoverytaskUpdateDnsViewPrivateIpTrue(name string, updateDnsViewPrivateIp bool, dnsViewPrivateIp, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, privateNetworkView, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_update_dns_view_private_ip" {
+resource "nios_discovery_vdiscovery_task" "test_update_dns_view_private_ip" {
     name                                = %q
     update_dns_view_private_ip          = %t
     dns_view_private_ip                 = %q
@@ -2525,7 +2525,7 @@ resource "nios_discovery_vdiscoverytask" "test_update_dns_view_private_ip" {
 
 func testAccVdiscoverytaskUpdateDnsViewPublicIpFalse(name string, updateDnsViewPublicIp bool, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_update_dns_view_public_ip" {
+resource "nios_discovery_vdiscovery_task" "test_update_dns_view_public_ip" {
     name                                = %q
     update_dns_view_public_ip           = %t
     username                            = %q
@@ -2546,7 +2546,7 @@ resource "nios_discovery_vdiscoverytask" "test_update_dns_view_public_ip" {
 
 func testAccVdiscoverytaskUpdateDnsViewPublicIpTrue(name string, updateDnsViewPublicIp bool, dnsViewPublicIp, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, publicNetworkView string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_update_dns_view_public_ip" {
+resource "nios_discovery_vdiscovery_task" "test_update_dns_view_public_ip" {
     name                                = %q
     update_dns_view_public_ip           = %t
     dns_view_public_ip                  = %q
@@ -2569,7 +2569,7 @@ resource "nios_discovery_vdiscoverytask" "test_update_dns_view_public_ip" {
 
 func testAccVdiscoverytaskUpdateMetadata(name string, updateMetadata bool, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions string, mergeData bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_update_metadata" {
+resource "nios_discovery_vdiscovery_task" "test_update_metadata" {
     name                                = %q
     update_metadata                     = %t
     username                            = %q
@@ -2589,7 +2589,7 @@ resource "nios_discovery_vdiscoverytask" "test_update_metadata" {
 
 func testAccVdiscoverytaskUseIdentity(name string, useIdentity bool, fqdnOrIp string, port int, protocol, member, identityVersion, username, password string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_use_identity" {
+resource "nios_discovery_vdiscovery_task" "test_use_identity" {
     name                                = %q
     use_identity                        = %t
     fqdn_or_ip                          = %q
@@ -2613,7 +2613,7 @@ resource "nios_discovery_vdiscoverytask" "test_use_identity" {
 
 func testAccVdiscoverytaskUsername(name, username, password, member string, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, driverType, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, mergeData, updateMetadata bool, selectedRegions string) string {
 	return fmt.Sprintf(`
-resource "nios_discovery_vdiscoverytask" "test_username" {
+resource "nios_discovery_vdiscovery_task" "test_username" {
     name                                = %q
     username                            = %q
     password                            = %q
@@ -2635,5 +2635,5 @@ resource "nios_discovery_vdiscoverytask" "test_username" {
 func getTestDataPath() string {
 	_, filename, _, _ := runtime.Caller(0)
 	testDir := filepath.Dir(filename)
-	return filepath.Join(testDir, "..", "..", "testdata", "nios_discovery_vdiscoverytask")
+	return filepath.Join(testDir, "..", "..", "testdata", "nios_discovery_vdiscovery_task")
 }

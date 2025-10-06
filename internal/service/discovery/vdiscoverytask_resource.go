@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -34,12 +35,12 @@ type VdiscoverytaskResource struct {
 }
 
 func (r *VdiscoverytaskResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "discovery_vdiscoverytask"
+	resp.TypeName = req.ProviderTypeName + "_" + "discovery_vdiscovery_task"
 }
 
 func (r *VdiscoverytaskResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Vdiscoverytask.",
+		MarkdownDescription: "Manages a Vdiscovery Task.",
 		Attributes:          VdiscoverytaskResourceSchemaAttributes,
 	}
 }
@@ -90,7 +91,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		if data.UpdateDnsViewPrivateIp.IsNull() || data.UpdateDnsViewPrivateIp.IsUnknown() || !data.UpdateDnsViewPrivateIp.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Invalid DNS View Configuration",
-				"If you configure 'dns_view_private_ip', you must also set 'update_dns_view_private_ip' to true.",
+				"'update_dns_view_private_ip' must be set to true to use 'dns_view_private_ip'.",
 			)
 		}
 	}
@@ -100,7 +101,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		if data.UpdateDnsViewPublicIp.IsNull() || data.UpdateDnsViewPublicIp.IsUnknown() || !data.UpdateDnsViewPublicIp.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Invalid DNS View Configuration",
-				"If you configure 'dns_view_public_ip', you must also set 'update_dns_view_public_ip' to true.",
+				"'update_dns_view_public_ip' must be set to true to use 'dns_view_public_ip'.",
 			)
 		}
 	}
@@ -166,24 +167,21 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		}
 	}
 
-	// Validate service_account_file requirement for GCP
+	// Validate service_account_file configuration
+	serviceAccountFileProvided := !data.ServiceAccountFile.IsNull() && !data.ServiceAccountFile.IsUnknown() && data.ServiceAccountFile.ValueString() != ""
+
 	if driverType == "GCP" {
-		if data.ServiceAccountFile.IsNull() || data.ServiceAccountFile.IsUnknown() || data.ServiceAccountFile.ValueString() == "" {
+		if !serviceAccountFileProvided {
 			resp.Diagnostics.AddError(
 				"Missing Service Account File",
 				"'service_account_file' is required when 'driver_type' is 'GCP'.",
 			)
 		}
-	}
-
-	// Validate service_account_file is only for GCP
-	if !data.ServiceAccountFile.IsNull() && !data.ServiceAccountFile.IsUnknown() && data.ServiceAccountFile.ValueString() != "" {
-		if driverType != "GCP" {
-			resp.Diagnostics.AddError(
-				"Invalid Service Account File Configuration",
-				fmt.Sprintf("'service_account_file' is only supported for GCP driver type, but got '%s'.", driverType),
-			)
-		}
+	} else if serviceAccountFileProvided {
+		resp.Diagnostics.AddError(
+			"Invalid Service Account File Configuration",
+			fmt.Sprintf("'service_account_file' is only supported for GCP driver type, but got '%s'.", driverType),
+		)
 	}
 
 	// Validate cdiscovery_file is only for AWS and GCP
@@ -193,6 +191,68 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 				"Invalid Cdiscovery File Configuration",
 				fmt.Sprintf("'cdiscovery_file' is only supported for AWS and GCP driver types, but got '%s'.", driverType),
 			)
+		}
+	}
+
+	// Validate schedule configuration
+	if !data.ScheduledRun.IsNull() && !data.ScheduledRun.IsUnknown() {
+		var scheduledRun VdiscoverytaskScheduledRunModel
+		diags := data.ScheduledRun.As(ctx, &scheduledRun, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Validate recurring_time conflicts
+		if !scheduledRun.RecurringTime.IsNull() && !scheduledRun.RecurringTime.IsUnknown() {
+			if !scheduledRun.HourOfDay.IsNull() || !scheduledRun.Year.IsNull() || !scheduledRun.Month.IsNull() || !scheduledRun.DayOfMonth.IsNull() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("scheduled_run").AtName("recurring_time"),
+					"Invalid Configuration for Schedule",
+					"Cannot set recurring_time if any of hour_of_day, year, month, day_of_month is set",
+				)
+			}
+		}
+
+		// Validate repeat field logic
+		if !scheduledRun.Repeat.IsNull() && !scheduledRun.Repeat.IsUnknown() {
+			repeatValue := scheduledRun.Repeat.ValueString()
+
+			if repeatValue == "ONCE" {
+				// For ONCE: cannot set weekdays, frequency, every
+				if !scheduledRun.Weekdays.IsNull() || !scheduledRun.Frequency.IsNull() || !scheduledRun.Every.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("scheduled_run").AtName("repeat"),
+						"Invalid Configuration for Repeat",
+						"Cannot set frequency, weekdays and every if repeat is set to ONCE",
+					)
+				}
+				// For ONCE: must set month, day_of_month, hour_of_day, minutes_past_hour
+				if scheduledRun.Month.IsNull() || scheduledRun.DayOfMonth.IsNull() || scheduledRun.HourOfDay.IsNull() || scheduledRun.MinutesPastHour.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("scheduled_run").AtName("repeat"),
+						"Invalid Configuration for Schedule",
+						"If repeat is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
+					)
+				}
+			} else if repeatValue == "RECUR" {
+				// For RECUR: cannot set month, day_of_month, year
+				if !scheduledRun.Month.IsNull() || !scheduledRun.DayOfMonth.IsNull() || !scheduledRun.Year.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("scheduled_run").AtName("repeat"),
+						"Invalid Configuration for Repeat",
+						"Cannot set month, day_of_month and year if repeat is set to RECUR",
+					)
+				}
+				// For RECUR: must set weekdays, frequency, hour_of_day, minutes_past_hour
+				if scheduledRun.Weekdays.IsNull() || scheduledRun.Frequency.IsNull() || scheduledRun.MinutesPastHour.IsNull() || scheduledRun.HourOfDay.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("scheduled_run").AtName("repeat"),
+						"Invalid Configuration for Schedule",
+						"If repeat is set to RECUR, then weekdays, frequency, hour_of_day and minutes_past_hour must be set",
+					)
+				}
+			}
 		}
 	}
 }
