@@ -671,6 +671,38 @@ func FlattenUnixTime(timestamp *int64, diags *diag.Diagnostics) types.String {
 	return types.StringValue(time)
 }
 
+func ExpandMACAddr(mac internaltypes.MACAddressValue) *string {
+	if mac.IsNull() || mac.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(mac.StringValue)
+}
+
+func FlattenMACAddr(mac *string) internaltypes.MACAddressValue {
+	if mac == nil {
+		return internaltypes.NewMACAddressNull()
+	}
+	return internaltypes.MACAddressValue{
+		StringValue: FlattenStringPointer(mac),
+	}
+}
+
+func ExpandDUID(duid internaltypes.DUIDValue) *string {
+	if duid.IsNull() || duid.IsUnknown() {
+		return nil
+	}
+	return ExpandStringPointer(duid.StringValue)
+}
+
+func FlattenDUID(duid *string) internaltypes.DUIDValue {
+	if duid == nil {
+		return internaltypes.NewDUIDNull()
+	}
+	return internaltypes.DUIDValue{
+		StringValue: FlattenStringPointer(duid),
+	}
+}
+
 // FilterDHCPOptions is a generic function to filter DHCP options based on planned values
 func FilterDHCPOptions[T any](
 	ctx context.Context,
