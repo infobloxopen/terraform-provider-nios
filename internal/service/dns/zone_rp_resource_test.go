@@ -176,21 +176,26 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_external_primaries"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	tsigKeyName := acctest.RandomName()
 	externalPrimaries := []map[string]any{
 		{
-			"address": "10.0.0.0",
-			"name":    "example-server",
+			"address":           "10.0.0.0",
+			"name":              "example-server",
+			"tsig_key_alg":      "HMAC-SHA256",
+			"tsig_key":          "X4oRe92t54I+T98NdQpV2w==",
+			"use_tsig_key_name": true,
+			"tsig_key_name":     tsigKeyName,
 		},
 	}
 	updatedExternalPrimaries := []map[string]any{
 		{
 			"address": "10.0.0.2",
-			"name":    "example-server",
+			"name":    "example-updated-server",
 		},
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": "member.com",
 		},
 	}
 
@@ -206,6 +211,10 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "10.0.0.0"),
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "example-server"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.use_tsig_key_name", "true"),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.tsig_key_name", tsigKeyName),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.tsig_key", "X4oRe92t54I+T98NdQpV2w=="),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.tsig_key_alg", "HMAC-SHA256"),
 				),
 			},
 			// Update and Read
@@ -214,7 +223,7 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.address", "10.0.0.2"),
-					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "example-server")),
+					resource.TestCheckResourceAttr(resourceName, "external_primaries.0.name", "example-updated-server")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -227,13 +236,17 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	externalSecondaries := []map[string]any{
 		{
-			"address": "10.0.0.0",
-			"name":    "example.com",
+			"address":           "10.0.0.0",
+			"name":              "example.com",
+			"tsig_key_alg":      "HMAC-SHA256",
+			"tsig_key":          "X4oRe92t54I+T98NdQpV2w==",
+			"use_tsig_key_name": false,
+			"tsig_key_name":     acctest.RandomName(),
 		},
 	}
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": "member.com",
 		},
 	}
 	updatedExternalSecondaries := []map[string]any{
@@ -277,7 +290,7 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 
 	fireEyeRuleMapping := map[string]any{
-		"apt_override": "NODATA",
+		"apt_override": "PASSTHRU",
 		"fireeye_alert_mapping": []map[string]any{
 			{
 				"alert_type": "DOMAIN_MATCH",
@@ -380,12 +393,18 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name":    "member.com",
+			"stealth": false,
 		},
 	}
 	gridPrimaryUpdated := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name":    "infoblox.localdomain",
+			"stealth": true,
+		},
+		{
+			"name":    "member.com",
+			"stealth": false,
 		},
 	}
 
@@ -399,7 +418,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.member")),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "member.com")),
 			},
 			// Update and Read
 			{

@@ -1,17 +1,17 @@
-// Retrieve a specific Auth Zone using filters
-data "nios_dns_zone_rp" "get_auth_zone_using_filters" {
+// Retrieve a specific Zone RP using filters
+data "nios_dns_zone_rp" "get_zone_rp_using_filters" {
   filters = {
     view = "default"
     fqdn = "example1.com"
   }
 }
 
-// Retrieve Auth Zones using Extensible Attributes
+// Retrieve Zone RPs using Extensible Attributes
 data "nios_dns_zone_rp" "get_zones_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }
 }
 
-// Retrieve all Auth Zones
-data "nios_dns_zone_rp" "get_all_auth_zones" {}
+// Retrieve all Auth Zone RPs
+data "nios_dns_zone_rp" "get_all_zone_rp" {}

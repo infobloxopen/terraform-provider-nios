@@ -41,11 +41,8 @@ var ZoneRpMemberSoaMnamesResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The grid primary server for the zone. Only one of \"grid_primary\" or \"ms_server_primary\" should be set when modifying or creating the object.",
 	},
 	"ms_server_primary": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("grid_primary")),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The primary MS server for the zone. Only one of \"grid_primary\" or \"ms_server_primary\" should be set when modifying or creating the object.",
 	},
 	"mname": schema.StringAttribute{

@@ -41,7 +41,7 @@ var ZonerpfireeyerulemappingFireeyeAlertMappingResourceSchemaAttributes = map[st
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("NODATA", "NOOVERRIDE", "NXDOMAIN", "PASSTHRU", "SUBSTITUTE"),
+			stringvalidator.OneOf("NODATA", "NONE", "NXDOMAIN", "PASSTHRU", "SUBSTITUTE"),
 		},
 		MarkdownDescription: "The RPZ rule for the alert.",
 	},

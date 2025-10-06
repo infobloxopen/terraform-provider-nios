@@ -19,6 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
@@ -149,6 +151,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Comment for the zone; maximum 256 characters.",
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
 			customvalidator.ValidateTrimmedString(),
@@ -205,19 +208,16 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.ConflictsWith(path.MatchRoot("ns_group")),
-			listvalidator.Any(
-				listvalidator.AlsoRequires(path.MatchRoot("grid_primary")),
-				listvalidator.AlsoRequires(path.MatchRoot("external_primaries")),
-			),
 		},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The list of external secondary servers.",
 	},
 	"fireeye_rule_mapping": schema.SingleNestedAttribute{
-		Attributes: ZoneRpFireeyeRuleMappingResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          ZoneRpFireeyeRuleMappingResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Rules to map fireeye alerts",
 	},
 	"fqdn": schema.StringAttribute{
 		Required: true,
@@ -255,10 +255,6 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("ns_group"),
 			),
 			listvalidator.SizeAtLeast(1),
-			listvalidator.Any(
-				listvalidator.AlsoRequires(path.MatchRoot("grid_primary")),
-				listvalidator.AlsoRequires(path.MatchRoot("external_primaries")),
-			),
 		},
 		MarkdownDescription: "The list with Grid members that are secondary servers for this zone.",
 	},
@@ -273,9 +269,12 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of a superuser or the administrator who locked this zone.",
 	},
 	"log_rpz": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_log_rpz")),
+		},
 		MarkdownDescription: "Determines whether RPZ logging enabled or not at zone level. When this is set to False, the logging is disabled.",
 	},
 	"mask_prefix": schema.StringAttribute{
@@ -347,9 +346,12 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Enables the appliance to ignore RPZ-IP triggers with prefix lengths less than the specified minimum prefix length.",
 	},
 	"rpz_drop_ip_rule_min_prefix_length_ipv4": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(29),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(29),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 4294967295),
+		},
 		MarkdownDescription: "The minimum prefix length for IPv4 RPZ-IP triggers. The appliance ignores RPZ-IP triggers with prefix lengths less than the specified minimum IPv4 prefix length.",
 	},
 	"rpz_drop_ip_rule_min_prefix_length_ipv6": schema.Int64Attribute{
@@ -394,7 +396,6 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.OneOf("FEED", "FIREEYE", "LOCAL"),
 		},
-		Default:             stringdefault.StaticString("LOCAL"),
 		MarkdownDescription: "The type of rpz zone.",
 	},
 	"set_soa_serial_number": schema.BoolAttribute{
@@ -413,6 +414,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("soa_retry"),
 				path.MatchRoot("soa_negative_ttl"),
 				path.MatchRoot("grid_primary"),
+				path.MatchRoot("soa_refresh"),
 			),
 		},
 		MarkdownDescription: "The Time to Live (TTL) value of the SOA record of this zone. This value is the number of seconds that data is cached.",
@@ -436,6 +438,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("soa_retry"),
 				path.MatchRoot("soa_negative_ttl"),
 				path.MatchRoot("grid_primary"),
+				path.MatchRoot("soa_refresh"),
 			),
 		},
 		MarkdownDescription: "This setting defines the amount of time, in seconds, after which the secondary server stops giving out answers about the zone because the zone data is too old to be useful. The default is one week.",
@@ -450,12 +453,14 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("soa_expire"),
 				path.MatchRoot("soa_retry"),
 				path.MatchRoot("grid_primary"),
+				path.MatchRoot("soa_refresh"),
 			),
 		},
 		MarkdownDescription: "The negative Time to Live (TTL) value of the SOA of the zone indicates how long a secondary server can cache data for \"Does Not Respond\" responses.",
 	},
 	"soa_refresh": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(
 				path.MatchRoot("use_grid_zone_timer"),
@@ -478,6 +483,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("soa_expire"),
 				path.MatchRoot("soa_negative_ttl"),
 				path.MatchRoot("grid_primary"),
+				path.MatchRoot("soa_refresh"),
 			),
 		},
 		MarkdownDescription: "This indicates how long a secondary server must wait before attempting to recontact the primary server after a connection failure between the two servers occurs.",
@@ -553,7 +559,6 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		return nil
 	}
 	to := &dns.ZoneRp{
-		Ref:                              flex.ExpandStringPointer(m.Ref),
 		Comment:                          flex.ExpandStringPointer(m.Comment),
 		Disable:                          flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:                         ExpandExtAttrs(ctx, m.ExtAttrs, diags),
@@ -626,8 +631,22 @@ func (m *ZoneRpModel) Flatten(ctx context.Context, from *dns.ZoneRp, diags *diag
 	m.DisplayDomain = flex.FlattenStringPointer(from.DisplayDomain)
 	m.DnsSoaEmail = flex.FlattenStringPointer(from.DnsSoaEmail)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	planExternalPrimaries := m.ExternalPrimaries
 	m.ExternalPrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalPrimaries, ZoneRpExternalPrimariesAttrTypes, diags, FlattenZoneRpExternalPrimaries)
+	if !planExternalPrimaries.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planExternalPrimaries, m.ExternalPrimaries, "tsig_key_name")
+		if !diags.HasError() {
+			m.ExternalPrimaries = result.(basetypes.ListValue)
+		}
+	}
+	planExternalSecondaries := m.ExternalSecondaries
 	m.ExternalSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSecondaries, ZoneRpExternalSecondariesAttrTypes, diags, FlattenZoneRpExternalSecondaries)
+	if !planExternalSecondaries.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planExternalSecondaries, m.ExternalSecondaries, "tsig_key_name")
+		if !diags.HasError() {
+			m.ExternalSecondaries = result.(basetypes.ListValue)
+		}
+	}
 	m.FireeyeRuleMapping = FlattenZoneRpFireeyeRuleMapping(ctx, from.FireeyeRuleMapping, diags)
 	m.Fqdn = flex.FlattenStringPointer(from.Fqdn)
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneRpGridPrimaryAttrTypes, diags, FlattenZoneRpGridPrimary)

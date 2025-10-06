@@ -3,12 +3,10 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -35,6 +33,7 @@ var ZoneRpGridPrimaryAttrTypes = map[string]attr.Type{
 	"enable_preferred_primaries": types.BoolType,
 }
 
+// ZoneRpGridPrimaryResourceSchemaAttributes has certain fields set to Computed: true because these fields need to be set at the GRID Level and Cannot be set while Configuring Grid Primary
 var ZoneRpGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required:            true,
@@ -47,12 +46,10 @@ var ZoneRpGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.",
 	},
 	"grid_replicate": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.",
 	},
 	"lead": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "This flag controls whether the Grid lead secondary server performs zone transfers to non lead secondaries. This flag is ignored if the struct is specified as grid_member in an authoritative zone.",
 	},
@@ -60,15 +57,10 @@ var ZoneRpGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZonerpgridprimaryPreferredPrimariesResourceSchemaAttributes,
 		},
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The primary preference list with Grid member names and\\or External Server extserver structs for this member.",
 	},
 	"enable_preferred_primaries": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "This flag represents whether the preferred_primaries field values of this member are used.",
 	},
