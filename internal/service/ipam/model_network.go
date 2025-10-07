@@ -25,137 +25,138 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NetworkModel struct {
-	Ref                              types.String                     `tfsdk:"ref"`
-	Authority                        types.Bool                       `tfsdk:"authority"`
-	AutoCreateReversezone            types.Bool                       `tfsdk:"auto_create_reversezone"`
-	Bootfile                         types.String                     `tfsdk:"bootfile"`
-	Bootserver                       types.String                     `tfsdk:"bootserver"`
-	CloudInfo                        types.Object                     `tfsdk:"cloud_info"`
-	CloudShared                      types.Bool                       `tfsdk:"cloud_shared"`
-	Comment                          types.String                     `tfsdk:"comment"`
-	ConflictCount                    types.Int64                      `tfsdk:"conflict_count"`
-	DdnsDomainname                   types.String                     `tfsdk:"ddns_domainname"`
-	DdnsGenerateHostname             types.Bool                       `tfsdk:"ddns_generate_hostname"`
-	DdnsServerAlwaysUpdates          types.Bool                       `tfsdk:"ddns_server_always_updates"`
-	DdnsTtl                          types.Int64                      `tfsdk:"ddns_ttl"`
-	DdnsUpdateFixedAddresses         types.Bool                       `tfsdk:"ddns_update_fixed_addresses"`
-	DdnsUseOption81                  types.Bool                       `tfsdk:"ddns_use_option81"`
-	DeleteReason                     types.String                     `tfsdk:"delete_reason"`
-	DenyBootp                        types.Bool                       `tfsdk:"deny_bootp"`
-	DhcpUtilization                  types.Int64                      `tfsdk:"dhcp_utilization"`
-	DhcpUtilizationStatus            types.String                     `tfsdk:"dhcp_utilization_status"`
-	Disable                          types.Bool                       `tfsdk:"disable"`
-	DiscoverNowStatus                types.String                     `tfsdk:"discover_now_status"`
-	DiscoveredBgpAs                  types.String                     `tfsdk:"discovered_bgp_as"`
-	DiscoveredBridgeDomain           types.String                     `tfsdk:"discovered_bridge_domain"`
-	DiscoveredTenant                 types.String                     `tfsdk:"discovered_tenant"`
-	DiscoveredVlanId                 types.String                     `tfsdk:"discovered_vlan_id"`
-	DiscoveredVlanName               types.String                     `tfsdk:"discovered_vlan_name"`
-	DiscoveredVrfDescription         types.String                     `tfsdk:"discovered_vrf_description"`
-	DiscoveredVrfName                types.String                     `tfsdk:"discovered_vrf_name"`
-	DiscoveredVrfRd                  types.String                     `tfsdk:"discovered_vrf_rd"`
-	DiscoveryBasicPollSettings       types.Object                     `tfsdk:"discovery_basic_poll_settings"`
-	DiscoveryBlackoutSetting         types.Object                     `tfsdk:"discovery_blackout_setting"`
-	DiscoveryEngineType              types.String                     `tfsdk:"discovery_engine_type"`
-	DiscoveryMember                  types.String                     `tfsdk:"discovery_member"`
-	DynamicHosts                     types.Int64                      `tfsdk:"dynamic_hosts"`
-	EmailList                        types.List                       `tfsdk:"email_list"`
-	EnableDdns                       types.Bool                       `tfsdk:"enable_ddns"`
-	EnableDhcpThresholds             types.Bool                       `tfsdk:"enable_dhcp_thresholds"`
-	EnableDiscovery                  types.Bool                       `tfsdk:"enable_discovery"`
-	EnableEmailWarnings              types.Bool                       `tfsdk:"enable_email_warnings"`
-	EnableIfmapPublishing            types.Bool                       `tfsdk:"enable_ifmap_publishing"`
-	EnableImmediateDiscovery         types.Bool                       `tfsdk:"enable_immediate_discovery"`
-	EnablePxeLeaseTime               types.Bool                       `tfsdk:"enable_pxe_lease_time"`
-	EnableSnmpWarnings               types.Bool                       `tfsdk:"enable_snmp_warnings"`
-	EndpointSources                  types.List                       `tfsdk:"endpoint_sources"`
-	ExtAttrs                         types.Map                        `tfsdk:"extattrs"`
-	ExtAttrsAll                      types.Map                        `tfsdk:"extattrs_all"`
-	FederatedRealms                  types.List                       `tfsdk:"federated_realms"`
-	HighWaterMark                    types.Int64                      `tfsdk:"high_water_mark"`
-	HighWaterMarkReset               types.Int64                      `tfsdk:"high_water_mark_reset"`
-	IgnoreDhcpOptionListRequest      types.Bool                       `tfsdk:"ignore_dhcp_option_list_request"`
-	IgnoreId                         types.String                     `tfsdk:"ignore_id"`
-	IgnoreMacAddresses               types.List                       `tfsdk:"ignore_mac_addresses"`
-	IpamEmailAddresses               types.List                       `tfsdk:"ipam_email_addresses"`
-	IpamThresholdSettings            types.Object                     `tfsdk:"ipam_threshold_settings"`
-	IpamTrapSettings                 types.Object                     `tfsdk:"ipam_trap_settings"`
-	Ipv4addr                         iptypes.IPv4Address              `tfsdk:"ipv4addr"`
-	LastRirRegistrationUpdateSent    types.Int64                      `tfsdk:"last_rir_registration_update_sent"`
-	LastRirRegistrationUpdateStatus  types.String                     `tfsdk:"last_rir_registration_update_status"`
-	LeaseScavengeTime                types.Int64                      `tfsdk:"lease_scavenge_time"`
-	LogicFilterRules                 types.List                       `tfsdk:"logic_filter_rules"`
-	LowWaterMark                     types.Int64                      `tfsdk:"low_water_mark"`
-	LowWaterMarkReset                types.Int64                      `tfsdk:"low_water_mark_reset"`
-	Members                          types.List                       `tfsdk:"members"`
-	MgmPrivate                       types.Bool                       `tfsdk:"mgm_private"`
-	MgmPrivateOverridable            types.Bool                       `tfsdk:"mgm_private_overridable"`
-	MsAdUserData                     types.Object                     `tfsdk:"ms_ad_user_data"`
-	Netmask                          types.Int64                      `tfsdk:"netmask"`
-	Network                          cidrtypes.IPv4Prefix             `tfsdk:"network"`
-	FuncCall                         types.Object                     `tfsdk:"func_call"`
-	NetworkContainer                 types.String                     `tfsdk:"network_container"`
-	NetworkView                      types.String                     `tfsdk:"network_view"`
-	Nextserver                       types.String                     `tfsdk:"nextserver"`
-	Options                          internaltypes.UnorderedListValue `tfsdk:"options"`
-	PortControlBlackoutSetting       types.Object                     `tfsdk:"port_control_blackout_setting"`
-	PxeLeaseTime                     types.Int64                      `tfsdk:"pxe_lease_time"`
-	RecycleLeases                    types.Bool                       `tfsdk:"recycle_leases"`
-	RestartIfNeeded                  types.Bool                       `tfsdk:"restart_if_needed"`
-	Rir                              types.String                     `tfsdk:"rir"`
-	RirOrganization                  types.String                     `tfsdk:"rir_organization"`
-	RirRegistrationAction            types.String                     `tfsdk:"rir_registration_action"`
-	RirRegistrationStatus            types.String                     `tfsdk:"rir_registration_status"`
-	SamePortControlDiscoveryBlackout types.Bool                       `tfsdk:"same_port_control_discovery_blackout"`
-	SendRirRequest                   types.Bool                       `tfsdk:"send_rir_request"`
-	StaticHosts                      types.Int64                      `tfsdk:"static_hosts"`
-	SubscribeSettings                types.Object                     `tfsdk:"subscribe_settings"`
-	Template                         types.String                     `tfsdk:"template"`
-	TotalHosts                       types.Int64                      `tfsdk:"total_hosts"`
-	Unmanaged                        types.Bool                       `tfsdk:"unmanaged"`
-	UnmanagedCount                   types.Int64                      `tfsdk:"unmanaged_count"`
-	UpdateDnsOnLeaseRenewal          types.Bool                       `tfsdk:"update_dns_on_lease_renewal"`
-	UseAuthority                     types.Bool                       `tfsdk:"use_authority"`
-	UseBlackoutSetting               types.Bool                       `tfsdk:"use_blackout_setting"`
-	UseBootfile                      types.Bool                       `tfsdk:"use_bootfile"`
-	UseBootserver                    types.Bool                       `tfsdk:"use_bootserver"`
-	UseDdnsDomainname                types.Bool                       `tfsdk:"use_ddns_domainname"`
-	UseDdnsGenerateHostname          types.Bool                       `tfsdk:"use_ddns_generate_hostname"`
-	UseDdnsTtl                       types.Bool                       `tfsdk:"use_ddns_ttl"`
-	UseDdnsUpdateFixedAddresses      types.Bool                       `tfsdk:"use_ddns_update_fixed_addresses"`
-	UseDdnsUseOption81               types.Bool                       `tfsdk:"use_ddns_use_option81"`
-	UseDenyBootp                     types.Bool                       `tfsdk:"use_deny_bootp"`
-	UseDiscoveryBasicPollingSettings types.Bool                       `tfsdk:"use_discovery_basic_polling_settings"`
-	UseEmailList                     types.Bool                       `tfsdk:"use_email_list"`
-	UseEnableDdns                    types.Bool                       `tfsdk:"use_enable_ddns"`
-	UseEnableDhcpThresholds          types.Bool                       `tfsdk:"use_enable_dhcp_thresholds"`
-	UseEnableDiscovery               types.Bool                       `tfsdk:"use_enable_discovery"`
-	UseEnableIfmapPublishing         types.Bool                       `tfsdk:"use_enable_ifmap_publishing"`
-	UseIgnoreDhcpOptionListRequest   types.Bool                       `tfsdk:"use_ignore_dhcp_option_list_request"`
-	UseIgnoreId                      types.Bool                       `tfsdk:"use_ignore_id"`
-	UseIpamEmailAddresses            types.Bool                       `tfsdk:"use_ipam_email_addresses"`
-	UseIpamThresholdSettings         types.Bool                       `tfsdk:"use_ipam_threshold_settings"`
-	UseIpamTrapSettings              types.Bool                       `tfsdk:"use_ipam_trap_settings"`
-	UseLeaseScavengeTime             types.Bool                       `tfsdk:"use_lease_scavenge_time"`
-	UseLogicFilterRules              types.Bool                       `tfsdk:"use_logic_filter_rules"`
-	UseMgmPrivate                    types.Bool                       `tfsdk:"use_mgm_private"`
-	UseNextserver                    types.Bool                       `tfsdk:"use_nextserver"`
-	UseOptions                       types.Bool                       `tfsdk:"use_options"`
-	UsePxeLeaseTime                  types.Bool                       `tfsdk:"use_pxe_lease_time"`
-	UseRecycleLeases                 types.Bool                       `tfsdk:"use_recycle_leases"`
-	UseSubscribeSettings             types.Bool                       `tfsdk:"use_subscribe_settings"`
-	UseUpdateDnsOnLeaseRenewal       types.Bool                       `tfsdk:"use_update_dns_on_lease_renewal"`
-	UseZoneAssociations              types.Bool                       `tfsdk:"use_zone_associations"`
-	Utilization                      types.Int64                      `tfsdk:"utilization"`
-	UtilizationUpdate                types.Int64                      `tfsdk:"utilization_update"`
-	Vlans                            types.List                       `tfsdk:"vlans"`
-	ZoneAssociations                 types.List                       `tfsdk:"zone_associations"`
+	Ref                              types.String         `tfsdk:"ref"`
+	Authority                        types.Bool           `tfsdk:"authority"`
+	AutoCreateReversezone            types.Bool           `tfsdk:"auto_create_reversezone"`
+	Bootfile                         types.String         `tfsdk:"bootfile"`
+	Bootserver                       types.String         `tfsdk:"bootserver"`
+	CloudInfo                        types.Object         `tfsdk:"cloud_info"`
+	CloudShared                      types.Bool           `tfsdk:"cloud_shared"`
+	Comment                          types.String         `tfsdk:"comment"`
+	ConflictCount                    types.Int64          `tfsdk:"conflict_count"`
+	DdnsDomainname                   types.String         `tfsdk:"ddns_domainname"`
+	DdnsGenerateHostname             types.Bool           `tfsdk:"ddns_generate_hostname"`
+	DdnsServerAlwaysUpdates          types.Bool           `tfsdk:"ddns_server_always_updates"`
+	DdnsTtl                          types.Int64          `tfsdk:"ddns_ttl"`
+	DdnsUpdateFixedAddresses         types.Bool           `tfsdk:"ddns_update_fixed_addresses"`
+	DdnsUseOption81                  types.Bool           `tfsdk:"ddns_use_option81"`
+	DeleteReason                     types.String         `tfsdk:"delete_reason"`
+	DenyBootp                        types.Bool           `tfsdk:"deny_bootp"`
+	DhcpUtilization                  types.Int64          `tfsdk:"dhcp_utilization"`
+	DhcpUtilizationStatus            types.String         `tfsdk:"dhcp_utilization_status"`
+	Disable                          types.Bool           `tfsdk:"disable"`
+	DiscoverNowStatus                types.String         `tfsdk:"discover_now_status"`
+	DiscoveredBgpAs                  types.String         `tfsdk:"discovered_bgp_as"`
+	DiscoveredBridgeDomain           types.String         `tfsdk:"discovered_bridge_domain"`
+	DiscoveredTenant                 types.String         `tfsdk:"discovered_tenant"`
+	DiscoveredVlanId                 types.String         `tfsdk:"discovered_vlan_id"`
+	DiscoveredVlanName               types.String         `tfsdk:"discovered_vlan_name"`
+	DiscoveredVrfDescription         types.String         `tfsdk:"discovered_vrf_description"`
+	DiscoveredVrfName                types.String         `tfsdk:"discovered_vrf_name"`
+	DiscoveredVrfRd                  types.String         `tfsdk:"discovered_vrf_rd"`
+	DiscoveryBasicPollSettings       types.Object         `tfsdk:"discovery_basic_poll_settings"`
+	DiscoveryBlackoutSetting         types.Object         `tfsdk:"discovery_blackout_setting"`
+	DiscoveryEngineType              types.String         `tfsdk:"discovery_engine_type"`
+	DiscoveryMember                  types.String         `tfsdk:"discovery_member"`
+	DynamicHosts                     types.Int64          `tfsdk:"dynamic_hosts"`
+	EmailList                        types.List           `tfsdk:"email_list"`
+	EnableDdns                       types.Bool           `tfsdk:"enable_ddns"`
+	EnableDhcpThresholds             types.Bool           `tfsdk:"enable_dhcp_thresholds"`
+	EnableDiscovery                  types.Bool           `tfsdk:"enable_discovery"`
+	EnableEmailWarnings              types.Bool           `tfsdk:"enable_email_warnings"`
+	EnableIfmapPublishing            types.Bool           `tfsdk:"enable_ifmap_publishing"`
+	EnableImmediateDiscovery         types.Bool           `tfsdk:"enable_immediate_discovery"`
+	EnablePxeLeaseTime               types.Bool           `tfsdk:"enable_pxe_lease_time"`
+	EnableSnmpWarnings               types.Bool           `tfsdk:"enable_snmp_warnings"`
+	EndpointSources                  types.List           `tfsdk:"endpoint_sources"`
+	ExtAttrs                         types.Map            `tfsdk:"extattrs"`
+	ExtAttrsAll                      types.Map            `tfsdk:"extattrs_all"`
+	FederatedRealms                  types.List           `tfsdk:"federated_realms"`
+	HighWaterMark                    types.Int64          `tfsdk:"high_water_mark"`
+	HighWaterMarkReset               types.Int64          `tfsdk:"high_water_mark_reset"`
+	IgnoreDhcpOptionListRequest      types.Bool           `tfsdk:"ignore_dhcp_option_list_request"`
+	IgnoreId                         types.String         `tfsdk:"ignore_id"`
+	IgnoreMacAddresses               types.List           `tfsdk:"ignore_mac_addresses"`
+	IpamEmailAddresses               types.List           `tfsdk:"ipam_email_addresses"`
+	IpamThresholdSettings            types.Object         `tfsdk:"ipam_threshold_settings"`
+	IpamTrapSettings                 types.Object         `tfsdk:"ipam_trap_settings"`
+	Ipv4addr                         iptypes.IPv4Address  `tfsdk:"ipv4addr"`
+	LastRirRegistrationUpdateSent    types.Int64          `tfsdk:"last_rir_registration_update_sent"`
+	LastRirRegistrationUpdateStatus  types.String         `tfsdk:"last_rir_registration_update_status"`
+	LeaseScavengeTime                types.Int64          `tfsdk:"lease_scavenge_time"`
+	LogicFilterRules                 types.List           `tfsdk:"logic_filter_rules"`
+	LowWaterMark                     types.Int64          `tfsdk:"low_water_mark"`
+	LowWaterMarkReset                types.Int64          `tfsdk:"low_water_mark_reset"`
+	Members                          types.List           `tfsdk:"members"`
+	MgmPrivate                       types.Bool           `tfsdk:"mgm_private"`
+	MgmPrivateOverridable            types.Bool           `tfsdk:"mgm_private_overridable"`
+	MsAdUserData                     types.Object         `tfsdk:"ms_ad_user_data"`
+	Netmask                          types.Int64          `tfsdk:"netmask"`
+	Network                          cidrtypes.IPv4Prefix `tfsdk:"network"`
+	FuncCall                         types.Object         `tfsdk:"func_call"`
+	NetworkContainer                 types.String         `tfsdk:"network_container"`
+	NetworkView                      types.String         `tfsdk:"network_view"`
+	Nextserver                       types.String         `tfsdk:"nextserver"`
+	Options                          types.List           `tfsdk:"options"`
+	PortControlBlackoutSetting       types.Object         `tfsdk:"port_control_blackout_setting"`
+	PxeLeaseTime                     types.Int64          `tfsdk:"pxe_lease_time"`
+	RecycleLeases                    types.Bool           `tfsdk:"recycle_leases"`
+	RestartIfNeeded                  types.Bool           `tfsdk:"restart_if_needed"`
+	Rir                              types.String         `tfsdk:"rir"`
+	RirOrganization                  types.String         `tfsdk:"rir_organization"`
+	RirRegistrationAction            types.String         `tfsdk:"rir_registration_action"`
+	RirRegistrationStatus            types.String         `tfsdk:"rir_registration_status"`
+	SamePortControlDiscoveryBlackout types.Bool           `tfsdk:"same_port_control_discovery_blackout"`
+	SendRirRequest                   types.Bool           `tfsdk:"send_rir_request"`
+	StaticHosts                      types.Int64          `tfsdk:"static_hosts"`
+	SubscribeSettings                types.Object         `tfsdk:"subscribe_settings"`
+	Template                         types.String         `tfsdk:"template"`
+	TotalHosts                       types.Int64          `tfsdk:"total_hosts"`
+	Unmanaged                        types.Bool           `tfsdk:"unmanaged"`
+	UnmanagedCount                   types.Int64          `tfsdk:"unmanaged_count"`
+	UpdateDnsOnLeaseRenewal          types.Bool           `tfsdk:"update_dns_on_lease_renewal"`
+	UseAuthority                     types.Bool           `tfsdk:"use_authority"`
+	UseBlackoutSetting               types.Bool           `tfsdk:"use_blackout_setting"`
+	UseBootfile                      types.Bool           `tfsdk:"use_bootfile"`
+	UseBootserver                    types.Bool           `tfsdk:"use_bootserver"`
+	UseDdnsDomainname                types.Bool           `tfsdk:"use_ddns_domainname"`
+	UseDdnsGenerateHostname          types.Bool           `tfsdk:"use_ddns_generate_hostname"`
+	UseDdnsTtl                       types.Bool           `tfsdk:"use_ddns_ttl"`
+	UseDdnsUpdateFixedAddresses      types.Bool           `tfsdk:"use_ddns_update_fixed_addresses"`
+	UseDdnsUseOption81               types.Bool           `tfsdk:"use_ddns_use_option81"`
+	UseDenyBootp                     types.Bool           `tfsdk:"use_deny_bootp"`
+	UseDiscoveryBasicPollingSettings types.Bool           `tfsdk:"use_discovery_basic_polling_settings"`
+	UseEmailList                     types.Bool           `tfsdk:"use_email_list"`
+	UseEnableDdns                    types.Bool           `tfsdk:"use_enable_ddns"`
+	UseEnableDhcpThresholds          types.Bool           `tfsdk:"use_enable_dhcp_thresholds"`
+	UseEnableDiscovery               types.Bool           `tfsdk:"use_enable_discovery"`
+	UseEnableIfmapPublishing         types.Bool           `tfsdk:"use_enable_ifmap_publishing"`
+	UseIgnoreDhcpOptionListRequest   types.Bool           `tfsdk:"use_ignore_dhcp_option_list_request"`
+	UseIgnoreId                      types.Bool           `tfsdk:"use_ignore_id"`
+	UseIpamEmailAddresses            types.Bool           `tfsdk:"use_ipam_email_addresses"`
+	UseIpamThresholdSettings         types.Bool           `tfsdk:"use_ipam_threshold_settings"`
+	UseIpamTrapSettings              types.Bool           `tfsdk:"use_ipam_trap_settings"`
+	UseLeaseScavengeTime             types.Bool           `tfsdk:"use_lease_scavenge_time"`
+	UseLogicFilterRules              types.Bool           `tfsdk:"use_logic_filter_rules"`
+	UseMgmPrivate                    types.Bool           `tfsdk:"use_mgm_private"`
+	UseNextserver                    types.Bool           `tfsdk:"use_nextserver"`
+	UseOptions                       types.Bool           `tfsdk:"use_options"`
+	UsePxeLeaseTime                  types.Bool           `tfsdk:"use_pxe_lease_time"`
+	UseRecycleLeases                 types.Bool           `tfsdk:"use_recycle_leases"`
+	UseSubscribeSettings             types.Bool           `tfsdk:"use_subscribe_settings"`
+	UseUpdateDnsOnLeaseRenewal       types.Bool           `tfsdk:"use_update_dns_on_lease_renewal"`
+	UseZoneAssociations              types.Bool           `tfsdk:"use_zone_associations"`
+	Utilization                      types.Int64          `tfsdk:"utilization"`
+	UtilizationUpdate                types.Int64          `tfsdk:"utilization_update"`
+	Vlans                            types.List           `tfsdk:"vlans"`
+	ZoneAssociations                 types.List           `tfsdk:"zone_associations"`
 }
 
 var NetworkAttrTypes = map[string]attr.Type{
@@ -231,7 +232,7 @@ var NetworkAttrTypes = map[string]attr.Type{
 	"network_container":                    types.StringType,
 	"network_view":                         types.StringType,
 	"nextserver":                           types.StringType,
-	"options":                              internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: NetworkOptionsAttrTypes}}},
+	"options":                              types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkOptionsAttrTypes}},
 	"port_control_blackout_setting":        types.ObjectType{AttrTypes: NetworkPortControlBlackoutSettingAttrTypes},
 	"pxe_lease_time":                       types.Int64Type,
 	"recycle_leases":                       types.BoolType,
@@ -803,13 +804,18 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 	},
 	"options": schema.ListNestedAttribute{
-		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: NetworkOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NetworkOptionsResourceSchemaAttributes,
 		},
 		Optional:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 		Computed:            true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: NetworkOptionsAttrTypes},
+				[]attr.Value{},
+			),
+		),
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
 			listvalidator.SizeAtLeast(1),
@@ -1350,19 +1356,14 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	m.NetworkContainer = flex.FlattenStringPointer(from.NetworkContainer)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FilterDHCPOptions(
-		ctx,
-		diags,
-		from.Options,
-		m.Options,
-		NetworkOptionsAttrTypes,
-		func(ctx context.Context, opt *ipam.NetworkOptions, d *diag.Diagnostics) types.Object {
-			return FlattenNetworkOptions(ctx, opt, d)
-		},
-		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *ipam.NetworkOptions {
-			return ExpandNetworkOptions(ctx, obj, d)
-		},
-	)
+	planOptions := m.Options
+	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, NetworkcontainerOptionsAttrTypes, diags, FlattenNetworkOptions)
+	if !planOptions.IsUnknown() {
+		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
+		if !diags.HasError() {
+			m.Options = reOrderedOptions.(basetypes.ListValue)
+		}
+	}
 	m.PortControlBlackoutSetting = FlattenNetworkPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
