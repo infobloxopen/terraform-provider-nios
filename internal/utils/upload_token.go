@@ -11,9 +11,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	
+
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
+
 // UploadInitResponse struct represents the response from the NIOS uploadinit API call
 type UploadInitResponse struct {
 	Token string `json:"token"`
@@ -117,16 +118,16 @@ func UploadPEMFile(ctx context.Context, uploadURL, pemFilePath, username, passwo
 // UploadPEMFileWithToken handles the complete process of generating an upload token and uploading a PEM file
 // It returns the token from the successful upload or an error if any step fails
 func UploadPEMFileWithToken(ctx context.Context, baseUrl, filePath, username, password string) (string, error) {
-    // Generate the upload token
-    uploadInitResponse, err := GenerateUploadToken(ctx, baseUrl, username, password)
-    if err != nil {
-        return "", fmt.Errorf("unable to generate upload token: %w", err)
-    }
-    
-    // Upload the file using the token URL
-    if err = UploadPEMFile(ctx, uploadInitResponse.URL, filePath, username, password); err != nil {
-        return "", fmt.Errorf("unable to upload file: %w", err)
-    }
-    
-    return uploadInitResponse.Token, nil
+	// Generate the upload token
+	uploadInitResponse, err := GenerateUploadToken(ctx, baseUrl, username, password)
+	if err != nil {
+		return "", fmt.Errorf("unable to generate upload token: %w", err)
+	}
+
+	// Upload the file using the token URL
+	if err = UploadPEMFile(ctx, uploadInitResponse.URL, filePath, username, password); err != nil {
+		return "", fmt.Errorf("unable to upload file: %w", err)
+	}
+
+	return uploadInitResponse.Token, nil
 }
