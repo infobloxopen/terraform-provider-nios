@@ -76,7 +76,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ddns_server_always_updates"),
 				"Invalid Configuration",
-				"ddns_use_option81 must be set to true to set ddns_server_always_updates",
+				"ddns_use_option81 must be set to true if ddns_server_always_updates is configured.",
 			)
 		}
 	}
