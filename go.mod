@@ -1,8 +1,6 @@
 module github.com/infobloxopen/terraform-provider-nios
 
-go 1.24.4
-
-toolchain go1.24.5
+go 1.25.1
 
 require (
 	github.com/hashicorp/go-uuid v1.0.3
@@ -89,3 +87,5 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/infobloxopen/infoblox-nios-go-client => ../infoblox-nios-go-client
