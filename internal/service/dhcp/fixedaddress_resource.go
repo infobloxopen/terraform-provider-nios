@@ -481,7 +481,6 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 				}
 				if credentialsType == "TELNET" {
 					isTelnet = true
-					break
 				}
 			}
 		}
