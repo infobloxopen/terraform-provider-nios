@@ -504,36 +504,20 @@ func ConvertMapToHCL(data map[string]any) string {
 	return fmt.Sprintf("{\n%s\n}", strings.Join(keyValues, "\n"))
 }
 
-// ToUnixWithTimezone converts a naive datetime string (without offset) into a Unix timestamp using the given timezone.
-func ToUnixWithTimezone(datetimeStr, tz string) (int64, error) {
-	naive, err := time.Parse(NaiveDatetimeLayout, datetimeStr)
+// ToUnixWithTimezone converts a naive datetime string (without offset) into a Unix timestamp
+func ToUnixWithTimezone(datetimeStr string) (int64, error) {
+	tUTC, err := time.ParseInLocation(NaiveDatetimeLayout, datetimeStr, time.UTC)
 	if err != nil {
 		return 0, fmt.Errorf("invalid datetime %q: %w", datetimeStr, err)
 	}
 
-	loc, err := time.LoadLocation(tz)
-	if err != nil {
-		return 0, fmt.Errorf("invalid timezone %q: %w", tz, err)
-	}
-
-	localTime := time.Date(
-		naive.Year(), naive.Month(), naive.Day(),
-		naive.Hour(), naive.Minute(), naive.Second(),
-		0, loc,
-	)
-
-	return localTime.Unix(), nil
+	return tUTC.Unix(), nil
 }
 
-// FromUnixWithTimezone converts a Unix timestamp into a naive datetime string (without offset) using the given timezone.
-func FromUnixWithTimezone(ts int64, tz string) (string, error) {
-	loc, err := time.LoadLocation(tz)
-	if err != nil {
-		return "", fmt.Errorf("invalid timezone %q: %w", tz, err)
-	}
-
+// FromUnixWithTimezone converts a Unix timestamp into a naive datetime string (without offset)
+func FromUnixWithTimezone(ts int64) (string, error) {
+	loc := time.UTC
 	t := time.Unix(ts, 0).In(loc)
-
 	return t.Format(NaiveDatetimeLayout), nil
 }
 
@@ -567,8 +551,8 @@ func ReorderAndFilterNestedListResponse(
 
 	// Convert state list into a lookup by primary key
 	stateMap := make(map[string]attr.Value)
-	for _, v := range stateList.Elements() {
-		obj := v.(basetypes.ObjectValue)
+	for _, elem := range stateList.Elements() {
+		obj := elem.(basetypes.ObjectValue)
 		keyAttr, ok := obj.Attributes()[primaryKey]
 		if !ok {
 			diags.AddError("Missing Primary Key", fmt.Sprintf("State object missing primary key: %s", primaryKey))
@@ -578,13 +562,13 @@ func ReorderAndFilterNestedListResponse(
 			continue
 		}
 		key := keyAttr.(basetypes.StringValue).ValueString()
-		stateMap[key] = v
+		stateMap[key] = elem
 	}
 
 	// Rebuild state list in the same order as plan
 	var reordered []attr.Value
-	for _, v := range planList.Elements() {
-		obj := v.(basetypes.ObjectValue)
+	for _, elem := range planList.Elements() {
+		obj := elem.(basetypes.ObjectValue)
 		keyAttr := obj.Attributes()[primaryKey]
 		if keyAttr.IsNull() || keyAttr.IsUnknown() {
 			continue
@@ -595,7 +579,7 @@ func ReorderAndFilterNestedListResponse(
 		if stateObj, exists := stateMap[key]; exists {
 			reordered = append(reordered, stateObj)
 		} else {
-			reordered = append(reordered, v)
+			reordered = append(reordered, elem)
 		}
 	}
 
@@ -782,4 +766,107 @@ func CopyFieldFromPlanToRespObject(ctx context.Context, planValue, respValue att
 	}
 
 	return newObj, &diags
+}
+
+func ReorderAndFilterDHCPOptions(
+	ctx context.Context,
+	planValue attr.Value,
+	stateValue attr.Value,
+) (attr.Value, *diag.Diagnostics) {
+
+	var diags diag.Diagnostics
+	primaryKey := "name"
+	secondaryKey := "num"
+
+	// Handle null/unknown gracefully
+	if planValue.IsNull() || planValue.IsUnknown() {
+		return stateValue, &diags
+	}
+	if stateValue.IsNull() || stateValue.IsUnknown() {
+		return planValue, &diags
+	}
+
+	planList, ok := planValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "planValue must be a basetypes.ListValue")
+		return stateValue, &diags
+	}
+	stateList, ok := stateValue.(basetypes.ListValue)
+	if !ok {
+		diags.AddError("Type Error", "stateValue must be a basetypes.ListValue")
+		return planValue, &diags
+	}
+
+	// Build lookup maps from state: name->element and num->element
+	nameToState := make(map[string]attr.Value)
+	numToState := make(map[int64]attr.Value)
+
+	for _, elem := range stateList.Elements() {
+		obj, ok := elem.(basetypes.ObjectValue)
+		if !ok {
+			continue
+		}
+		attrs := obj.Attributes()
+
+		// name -> basetypes.StringValue (per your note state has both keys)
+		if nameAttr, has := attrs[primaryKey]; has && nameAttr != nil && !nameAttr.IsNull() && !nameAttr.IsUnknown() {
+			if strVal, ok := nameAttr.(basetypes.StringValue); ok {
+				nameToState[strVal.ValueString()] = elem
+			}
+		}
+
+		// num -> basetypes.Int64Value (per your note state has both keys)
+		if numAttr, has := attrs[secondaryKey]; has && numAttr != nil && !numAttr.IsNull() && !numAttr.IsUnknown() {
+			if intVal, ok := numAttr.(basetypes.Int64Value); ok {
+				numToState[intVal.ValueInt64()] = elem
+			}
+		}
+	}
+
+	// Rebuild ordered slice based on plan order
+	var reordered []attr.Value
+	for _, planElem := range planList.Elements() {
+		planObj, ok := planElem.(basetypes.ObjectValue)
+		if !ok {
+			// if plan contains something else, append it as fallback
+			reordered = append(reordered, planElem)
+			continue
+		}
+		planAttributes := planObj.Attributes()
+
+		var matchedState attr.Value
+
+		// Try primaryKey (name) first if present and valid
+		if primaryKeyAttribute, has := planAttributes[primaryKey]; has && primaryKeyAttribute != nil && !primaryKeyAttribute.IsNull() && !primaryKeyAttribute.IsUnknown() {
+			if primaryKeyAttributeValue, ok := primaryKeyAttribute.(basetypes.StringValue); ok {
+				if s, exists := nameToState[primaryKeyAttributeValue.ValueString()]; exists {
+					matchedState = s
+				}
+			}
+		}
+
+		// If not matched by name, try secondaryKey (num)
+		if matchedState == nil {
+			if secondaryKeyAttribute, has := planAttributes[secondaryKey]; has && secondaryKeyAttribute != nil && !secondaryKeyAttribute.IsNull() && !secondaryKeyAttribute.IsUnknown() {
+				if secondaryKeyAttributeValue, ok := secondaryKeyAttribute.(basetypes.Int64Value); ok {
+					if s, exists := numToState[secondaryKeyAttributeValue.ValueInt64()]; exists {
+						matchedState = s
+					}
+				}
+			}
+		}
+
+		// If matchedState found, use it; else fall back to plan element itself
+		if matchedState != nil {
+			reordered = append(reordered, matchedState)
+		} else {
+			reordered = append(reordered, planElem)
+		}
+	}
+
+	// Create new ListValue with same element type as plan list
+	newList, d := basetypes.NewListValue(planList.ElementType(ctx), reordered)
+	diags.Append(d...)
+
+	return newList, &diags
 }

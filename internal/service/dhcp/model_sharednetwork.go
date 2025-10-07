@@ -14,6 +14,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -62,7 +63,7 @@ type SharednetworkModel struct {
 	NetworkView                    types.String                     `tfsdk:"network_view"`
 	Networks                       types.List                       `tfsdk:"networks"`
 	Nextserver                     types.String                     `tfsdk:"nextserver"`
-	Options                        internaltypes.UnorderedListValue `tfsdk:"options"`
+	Options                        types.List                       `tfsdk:"options"`
 	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
 	StaticHosts                    types.Int64                      `tfsdk:"static_hosts"`
 	TotalHosts                     types.Int64                      `tfsdk:"total_hosts"`
@@ -118,7 +119,7 @@ var SharednetworkAttrTypes = map[string]attr.Type{
 	"network_view":                        types.StringType,
 	"networks":                            types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}},
 	"nextserver":                          types.StringType,
-	"options":                             internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}}},
+	"options":                             types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}},
 	"pxe_lease_time":                      types.Int64Type,
 	"static_hosts":                        types.Int64Type,
 	"total_hosts":                         types.Int64Type,
@@ -378,12 +379,17 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
-		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: SharednetworkOptionsResourceSchemaAttributes,
 		},
 		Optional: true,
 		Computed: true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes},
+				[]attr.Value{},
+			),
+		),
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
 			listvalidator.SizeAtLeast(1),
@@ -632,19 +638,14 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 		m.Networks = reOrderedNetworks.(basetypes.ListValue)
 	}
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FilterDHCPOptions(
-		ctx,
-		diags,
-		from.Options,
-		m.Options,
-		SharednetworkOptionsAttrTypes,
-		func(ctx context.Context, opt *dhcp.SharednetworkOptions, d *diag.Diagnostics) types.Object {
-			return FlattenSharednetworkOptions(ctx, opt, d)
-		},
-		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *dhcp.SharednetworkOptions {
-			return ExpandSharednetworkOptions(ctx, obj, d)
-		},
-	)
+	planOptions := m.Options
+	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, SharednetworkOptionsAttrTypes, diags, FlattenSharednetworkOptions)
+	if !planOptions.IsUnknown() {
+		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
+		if !diags.HasError() {
+			m.Options = reOrderedOptions.(basetypes.ListValue)
+		}
+	}
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.TotalHosts = flex.FlattenInt64Pointer(from.TotalHosts)

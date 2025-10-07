@@ -13,6 +13,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -121,6 +122,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewNsgroupForwardingmemberResource,
 		dns.NewNsgroupForwardstubserverResource,
 		dns.NewNsgroupStubmemberResource,
+		dns.NewIPAllocationResource,
+		dns.NewIPAssociationResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -142,9 +145,12 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		cloud.NewAwsuserResource,
 
 		security.NewAdminuserResource,
+		security.NewAdmingroupResource,
 		security.NewPermissionResource,
 		security.NewAdminroleResource,
+		security.NewFtpuserResource,
 		security.NewSnmpuserResource,
+		security.NewCertificateAuthserviceResource,
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
@@ -157,6 +163,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewNatgroupResource,
 		grid.NewExtensibleattributedefResource,
 		grid.NewUpgradegroupResource,
+		grid.NewGridServicerestartGroupResource,
 		grid.NewDistributionscheduleResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
@@ -191,6 +198,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewNsgroupForwardingmemberDataSource,
 		dns.NewNsgroupForwardstubserverDataSource,
 		dns.NewNsgroupStubmemberDataSource,
+		dns.NewRecordHostDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -212,8 +220,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		security.NewAdminroleDataSource,
 		security.NewAdminuserDataSource,
+		security.NewAdmingroupDataSource,
+		security.NewFtpuserDataSource,
 		security.NewPermissionDataSource,
 		security.NewSnmpuserDataSource,
+		security.NewCertificateAuthserviceDataSource,
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
@@ -226,6 +237,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewNatgroupDataSource,
 		grid.NewExtensibleattributedefDataSource,
 		grid.NewUpgradegroupDataSource,
+		grid.NewGridServicerestartGroupDataSource,
 		grid.NewDistributionscheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
