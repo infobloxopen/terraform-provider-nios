@@ -67,7 +67,7 @@ resource "nios_dhcp_ipv6_range_template" "test" {
 
 data "nios_dhcp_ipv6_range_template" "test" {
   filters = {
-	 name = nios_nios_dhcp_ipv6_range_template.test.
+	 name = nios_dhcp_ipv6_range_template.test.name
   }
 }
 `, name, numberOfAddresses, offset)

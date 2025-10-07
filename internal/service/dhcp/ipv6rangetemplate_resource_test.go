@@ -15,6 +15,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO : Required parents for the execution of tests and MS_SERVER setup for ms_server and ms_options testcases.
+// - logic_filter_rules, option_filter_rules
+// Grid Members : infoblox.172_28_83_213, infoblox.172_28_82.185
+// cloud_api_compatible is made true to pass all acceptance tests
+
 var readableAttributesForIpv6rangetemplate = "cloud_api_compatible,comment,delegated_member,exclude,logic_filter_rules,member,name,number_of_addresses,offset,option_filter_rules,recycle_leases,server_association_type,use_logic_filter_rules,use_recycle_leases"
 
 func TestAccIpv6rangetemplateResource_basic(t *testing.T) {
@@ -33,8 +38,14 @@ func TestAccIpv6rangetemplateResource_basic(t *testing.T) {
 				Config: testAccIpv6rangetemplateBasicConfig(name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					// Test fields with default value\
+					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "true"),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
+					resource.TestCheckResourceAttr(resourceName, "server_association_type", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_recycle_leases", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -155,7 +166,6 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6rangetemplateDelegatedMember(name, numberOfAdresses, offset, delegatedMember1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_213"),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.213"),
 				),
@@ -165,7 +175,6 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6rangetemplateDelegatedMember(name, numberOfAdresses, offset, delegatedMember2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_185"),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.185"),
 				),
@@ -232,13 +241,13 @@ func TestAccIpv6rangetemplateResource_LogicFilterRules(t *testing.T) {
 	offset := 50
 	logicFilterRules := []map[string]any{
 		{
-			"filter": "option_filter",
+			"filter": "ipv6_option_filter",
 			"type":   "Option",
 		},
 	}
 	logicFilterRulesUpdated := []map[string]any{
 		{
-			"filter": "option_logic_filter",
+			"filter": "ipv6_option_filter1",
 			"type":   "Option",
 		},
 	}
@@ -252,7 +261,7 @@ func TestAccIpv6rangetemplateResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -262,7 +271,7 @@ func TestAccIpv6rangetemplateResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_logic_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -294,7 +303,6 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 				Config: testAccIpv6rangetemplateMember(name, numberOfAdresses, offset, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_213"),
 					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.213"),
 				),
@@ -304,7 +312,6 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 				Config: testAccIpv6rangetemplateMember(name, numberOfAdresses, offset, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_185"),
 					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.185"),
 				),
@@ -414,13 +421,13 @@ func TestAccIpv6rangetemplateResource_OptionFilterRules(t *testing.T) {
 	offset := 50
 	optionFilterRules := []map[string]any{
 		{
-			"filter":     "option_filter",
+			"filter":     "ipv6_option_filter",
 			"permission": "Allow",
 		},
 	}
 	optionFilterRulesUpdated := []map[string]any{
 		{
-			"filter":     "option_filter",
+			"filter":     "ipv6_option_filter",
 			"permission": "Deny",
 		},
 	}
@@ -434,7 +441,7 @@ func TestAccIpv6rangetemplateResource_OptionFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "ipv6_option_filter"),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Allow"),
 				),
 			},
@@ -444,7 +451,7 @@ func TestAccIpv6rangetemplateResource_OptionFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "ipv6_option_filter"),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Deny"),
 				),
 			},
@@ -788,7 +795,7 @@ resource "nios_dhcp_ipv6_range_template" "test_recycle_leases" {
 func testAccIpv6rangetemplateServerAssociationType(name string, numberOfAddresses, offset int, serverAssociationType string, member map[string]any) string {
 	var extraConfig string
 	if member != nil {
-		extraConfig = fmt.Sprintf(`member = %q`, utils.ConvertMapToHCL(member))
+		extraConfig = fmt.Sprintf(`member = %s`, utils.ConvertMapToHCL(member))
 	}
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6_range_template" "test_server_association_type" {
