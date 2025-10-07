@@ -71,7 +71,6 @@ func FlattenIpv6rangetemplateMember(ctx context.Context, from *dhcp.Ipv6rangetem
 	}
 	m := Ipv6rangetemplateMemberModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, Ipv6rangetemplateMemberAttrTypes, m)
 	diags.Append(d...)
 	return t

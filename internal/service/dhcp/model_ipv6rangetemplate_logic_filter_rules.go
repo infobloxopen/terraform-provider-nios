@@ -64,7 +64,6 @@ func FlattenIpv6rangetemplateLogicFilterRules(ctx context.Context, from *dhcp.Ip
 	}
 	m := Ipv6rangetemplateLogicFilterRulesModel{}
 	m.Flatten(ctx, from, diags)
-	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, Ipv6rangetemplateLogicFilterRulesAttrTypes, m)
 	diags.Append(d...)
 	return t
