@@ -64,9 +64,12 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The object types this extensible attribute is allowed to associate with.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "Comment for the Extensible Attribute Definition; maximum 256 characters.",
 	},
 	"default_value": schema.StringAttribute{
