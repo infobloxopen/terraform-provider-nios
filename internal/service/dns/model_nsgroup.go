@@ -3,6 +3,7 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -18,6 +19,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -199,7 +201,14 @@ func (m *NsgroupModel) Flatten(ctx context.Context, from *dns.Nsgroup, diags *di
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	planExternalPrimaries := m.ExternalPrimaries
 	m.ExternalPrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalPrimaries, NsgroupExternalPrimariesAttrTypes, diags, FlattenNsgroupExternalPrimaries)
+	if !planExternalPrimaries.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planExternalPrimaries, m.ExternalPrimaries, "tsig_key_name")
+		if !diags.HasError() {
+			m.ExternalPrimaries = result.(basetypes.ListValue)
+		}
+	}
 	m.ExternalSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSecondaries, NsgroupExternalSecondariesAttrTypes, diags, FlattenNsgroupExternalSecondaries)
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, NsgroupGridPrimaryAttrTypes, diags, FlattenNsgroupGridPrimary)
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, NsgroupGridSecondariesAttrTypes, diags, FlattenNsgroupGridSecondaries)
