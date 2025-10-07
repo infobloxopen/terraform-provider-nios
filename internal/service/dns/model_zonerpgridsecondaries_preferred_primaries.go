@@ -79,7 +79,7 @@ var ZonerpgridsecondariesPreferredPrimariesResourceSchemaAttributes = map[string
 		Validators: []validator.String{
 			stringvalidator.OneOf("HMAC-MD5", "HMAC-SHA256"),
 		},
-		Default:             stringdefault.StaticString("HMAC-MD5.SIG-ALG.REG.INT"),
+		Default:             stringdefault.StaticString("HMAC-MD5"),
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{

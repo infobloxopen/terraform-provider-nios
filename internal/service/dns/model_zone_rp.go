@@ -350,13 +350,17 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  int64default.StaticInt64(29),
 		Validators: []validator.Int64{
 			int64validator.Between(0, 4294967295),
+			int64validator.AlsoRequires(path.MatchRoot("use_rpz_drop_ip_rule")),
 		},
 		MarkdownDescription: "The minimum prefix length for IPv4 RPZ-IP triggers. The appliance ignores RPZ-IP triggers with prefix lengths less than the specified minimum IPv4 prefix length.",
 	},
 	"rpz_drop_ip_rule_min_prefix_length_ipv6": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(112),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(112),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_rpz_drop_ip_rule")),
+		},
 		MarkdownDescription: "The minimum prefix length for IPv6 RPZ-IP triggers. The appliance ignores RPZ-IP triggers with prefix lengths less than the specified minimum IPv6 prefix length.",
 	},
 	"rpz_last_updated_time": schema.Int64Attribute{
@@ -656,8 +660,14 @@ func (m *ZoneRpModel) Flatten(ctx context.Context, from *dns.ZoneRp, diags *diag
 			m.GridPrimary = reOrderedList.(basetypes.ListValue)
 		}
 	}
-	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneRpGridPrimaryAttrTypes, diags, FlattenZoneRpGridPrimary)
+	planGridSecondary := m.GridSecondaries
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, ZoneRpGridSecondariesAttrTypes, diags, FlattenZoneRpGridSecondaries)
+	if !planGridSecondary.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planGridSecondary, m.GridSecondaries, "name")
+		if !diags.HasError() {
+			m.GridSecondaries = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.Locked = types.BoolPointerValue(from.Locked)
 	m.LockedBy = flex.FlattenStringPointer(from.LockedBy)
 	m.LogRpz = types.BoolPointerValue(from.LogRpz)

@@ -433,12 +433,21 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name":                       "member.com",
+			"stealth":                    false,
+			"grid_replicate":             true,
+			"lead":                       false,
+			"enable_preferred_primaries": false,
+		},
+	}
+	updatedgridPrimary := []map[string]any{
+		{
+			"name": "member.com",
 		},
 	}
 	updatedGridSecondary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -452,15 +461,20 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain")),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.stealth", "false"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.grid_replicate", "true"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.lead", "false"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.enable_preferred_primaries", "false"),
+				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpGridSecondaries(zoneFqdn, "default", gridPrimary, updatedGridSecondary),
+				Config: testAccZoneRpGridSecondaries(zoneFqdn, "default", updatedgridPrimary, updatedGridSecondary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.member")),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -1199,11 +1213,9 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 			"name":    "example-server",
 		},
 	}
-	msSecondaries := []map[string]any{
+	gridSecondaries := []map[string]any{
 		{
-			"address": "10.120.23.22",
-			"ns_name": "example-server",
-			"ns_ip":   "10.120.23.22",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -1213,7 +1225,7 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseExternalPrimary(zoneFqdn, "default", externalPrimaries, msSecondaries, true),
+				Config: testAccZoneRpUseExternalPrimary(zoneFqdn, "default", externalPrimaries, gridSecondaries, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_external_primary", "true"),
@@ -1857,15 +1869,15 @@ resource "nios_dns_zone_rp" "test_substitute_name" {
 `, zoneFqdn, view, substituteName, rpzPolicy)
 }
 
-func testAccZoneRpUseExternalPrimary(zoneFqdn, view string, externalPrimaries, msSecondaries []map[string]any, useExternalPrimary bool) string {
+func testAccZoneRpUseExternalPrimary(zoneFqdn, view string, externalPrimaries, gridSecondaries []map[string]any, useExternalPrimary bool) string {
 	externalPrimariesHCL := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
-	msSecondariesHCL := utils.ConvertSliceOfMapsToHCL(msSecondaries)
+	msSecondariesHCL := utils.ConvertSliceOfMapsToHCL(gridSecondaries)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_rp" "test_use_external_primary" {
     fqdn = %q
     view = %q
     external_primaries = %s
-    ms_secondaries = %s
+    grid_secondaries = %s
     use_external_primary = %t
 }
 `, zoneFqdn, view, externalPrimariesHCL, msSecondariesHCL, useExternalPrimary)

@@ -106,7 +106,7 @@ func (r *ZoneRpResource) ValidateConfig(ctx context.Context, req resource.Valida
 
 	if !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown() ||
 		!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown() {
-		if len(specifiedPrimaries) == 0 || len(specifiedPrimaries) > 1 {
+		if len(specifiedPrimaries) != 1 {
 			resp.Diagnostics.AddError(
 				"Secondary Server Requires Exactly One Primary Server",
 				"When secondary servers (grid_secondaries or  external_secondaries) are specified, exactly one primary server (grid_primary or external_primaries) is required.",
