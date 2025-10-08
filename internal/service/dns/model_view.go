@@ -112,6 +112,8 @@ type ViewModel struct {
 	UseRpzQnameWaitRecurse              types.Bool                       `tfsdk:"use_rpz_qname_wait_recurse"`
 	UseScavengingSettings               types.Bool                       `tfsdk:"use_scavenging_settings"`
 	UseSortlist                         types.Bool                       `tfsdk:"use_sortlist"`
+	RetryCount                          types.Int64                      `tfsdk:"retry_count"`
+	TimeInSeconds                       types.Int64                      `tfsdk:"time_in_seconds"`
 }
 
 var ViewAttrTypes = map[string]attr.Type{
@@ -873,6 +875,18 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: sortlist",
 	},
+	"retry_count": schema.Int64Attribute{
+		Optional:    true,
+		Computed:    true,
+		Default:     int64default.StaticInt64(1),
+		Description: "Maximum number of retry attempts for API operations",
+	},
+	"time_in_seconds": schema.Int64Attribute{
+		Optional:    true,
+		Computed:    true,
+		Default:     int64default.StaticInt64(5),
+		Description: "Time duration in seconds for API operations to complete",
+	},
 }
 
 func (m *ViewModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.View {
@@ -1002,7 +1016,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.DdnsRestrictStatic = types.BoolPointerValue(from.DdnsRestrictStatic)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Dns64Enabled = types.BoolPointerValue(from.Dns64Enabled)
-	m.Dns64Groups = flex.FlattenFrameworkUnorderedList(ctx, types.StringType,from.Dns64Groups, diags)
+	m.Dns64Groups = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Dns64Groups, diags)
 	m.DnssecEnabled = types.BoolPointerValue(from.DnssecEnabled)
 	m.DnssecExpiredSignaturesEnabled = types.BoolPointerValue(from.DnssecExpiredSignaturesEnabled)
 	m.DnssecNegativeTrustAnchors = flex.FlattenFrameworkListString(ctx, from.DnssecNegativeTrustAnchors, diags)

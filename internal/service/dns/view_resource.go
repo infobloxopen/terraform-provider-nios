@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
@@ -19,6 +21,45 @@ import (
 
 var readableAttributesForView = "blacklist_action,blacklist_log_query,blacklist_redirect_addresses,blacklist_redirect_ttl,blacklist_rulesets,cloud_info,comment,custom_root_name_servers,ddns_force_creation_timestamp_update,ddns_principal_group,ddns_principal_tracking,ddns_restrict_patterns,ddns_restrict_patterns_list,ddns_restrict_protected,ddns_restrict_secure,ddns_restrict_static,disable,dns64_enabled,dns64_groups,dnssec_enabled,dnssec_expired_signatures_enabled,dnssec_negative_trust_anchors,dnssec_trusted_keys,dnssec_validation_enabled,edns_udp_size,enable_blacklist,enable_fixed_rrset_order_fqdns,enable_match_recursive_only,extattrs,filter_aaaa,filter_aaaa_list,fixed_rrset_order_fqdns,forward_only,forwarders,is_default,last_queried_acl,match_clients,match_destinations,max_cache_ttl,max_ncache_ttl,max_udp_size,name,network_view,notify_delay,nxdomain_log_query,nxdomain_redirect,nxdomain_redirect_addresses,nxdomain_redirect_addresses_v6,nxdomain_redirect_ttl,nxdomain_rulesets,recursion,response_rate_limiting,root_name_server_type,rpz_drop_ip_rule_enabled,rpz_drop_ip_rule_min_prefix_length_ipv4,rpz_drop_ip_rule_min_prefix_length_ipv6,rpz_qname_wait_recurse,scavenging_settings,sortlist,use_blacklist,use_ddns_force_creation_timestamp_update,use_ddns_patterns_restriction,use_ddns_principal_security,use_ddns_restrict_protected,use_ddns_restrict_static,use_dns64,use_dnssec,use_edns_udp_size,use_filter_aaaa,use_fixed_rrset_order_fqdns,use_forwarders,use_max_cache_ttl,use_max_ncache_ttl,use_max_udp_size,use_nxdomain_redirect,use_recursion,use_response_rate_limiting,use_root_name_server,use_rpz_drop_ip_rule,use_rpz_qname_wait_recurse,use_scavenging_settings,use_sortlist"
 
+func (r *ViewResource) retryWithOnlyNonRetryableErrors(
+    ctx context.Context, 
+    timeout time.Duration, 
+    operation func() error,
+) error {
+    return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+        err := operation()
+        if err != nil {
+            return retry.NonRetryableError(err)
+        }
+        return nil
+    })
+}
+
+// func (r *ViewResource) retryWithOnlyNonRetryableErrorsRetries(
+//     ctx context.Context, 
+//     timeout time.Duration,
+// 	maxRetries int64, 
+//     operation func() error,
+// ) error {
+// 	var attempts int64
+//     return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+// 		attempts++
+//         err := operation()
+// 		//If operation succeeded, return nil (no error)
+//         if err == nil {
+//             return nil
+//         }
+        
+//         // // If we haven't exceeded maxRetries, return a RetryableError to try again
+//         if attempts <= maxRetries {
+//             // This will cause the operation to be retried
+//             return retry.RetryableError(err)
+//         }
+        
+//         // If we've exceeded maxRetries, return a NonRetryableError to stop retrying
+//         return retry.NonRetryableError(fmt.Errorf("exceeded maximum number of retries (%d): %w", maxRetries, err))
+//     })
+// }
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ViewResource{}
 var _ resource.ResourceWithImportState = &ViewResource{}
@@ -66,6 +107,8 @@ func (r *ViewResource) Configure(ctx context.Context, req resource.ConfigureRequ
 func (r *ViewResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data ViewModel
+	//var retryCount int64 
+	var timeout time.Duration  
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -80,13 +123,26 @@ func (r *ViewResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		ViewAPI.
-		Create(ctx).
-		View(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForView).
-		ReturnAsObject(1).
-		Execute()
+	// if !data.RetryCount.IsNull() && !data.RetryCount.IsUnknown() {
+    //     retryCount = data.RetryCount.ValueInt64()
+    // }
+    if !data.TimeInSeconds.IsNull() && !data.TimeInSeconds.IsUnknown() {
+        timeout = time.Duration(data.TimeInSeconds.ValueInt64()) * time.Second
+    }
+	var apiRes *dns.CreateViewResponse
+
+	err := r.retryWithOnlyNonRetryableErrors(ctx, timeout, func() error {
+        var err error
+        apiRes, _, err = r.client.DNSAPI.
+            ViewAPI.
+            Create(ctx).
+            View(*data.Expand(ctx, &resp.Diagnostics)).
+            ReturnFieldsPlus(readableAttributesForView).
+            ReturnAsObject(1).
+            Execute()
+        return err
+    })
+    
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create View, got error: %s", err))
 		return
