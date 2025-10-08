@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -25,6 +26,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customplanmodifier "github.com/infobloxopen/terraform-provider-nios/internal/planmodifier"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -308,6 +310,10 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("grid_primary")),
 		},
+		PlanModifiers: []planmodifier.String{
+			customplanmodifier.RequiresReplaceIfRemoved(),
+		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The name server group that serves DNS for this zone.",
 	},
 	"parent": schema.StringAttribute{
@@ -573,7 +579,7 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		Locked:                           flex.ExpandBoolPointer(m.Locked),
 		LogRpz:                           flex.ExpandBoolPointer(m.LogRpz),
 		MemberSoaMnames:                  flex.ExpandFrameworkListNestedBlock(ctx, m.MemberSoaMnames, diags, ExpandZoneRpMemberSoaMnames),
-		NsGroup:                          flex.ExpandStringPointer(m.NsGroup),
+		NsGroup:                          flex.ExpandStringPointerEmptyAsNil(m.NsGroup),
 		Prefix:                           flex.ExpandStringPointer(m.Prefix.StringValue),
 		RecordNamePolicy:                 flex.ExpandStringPointer(m.RecordNamePolicy),
 		RpzDropIpRuleEnabled:             flex.ExpandBoolPointer(m.RpzDropIpRuleEnabled),
