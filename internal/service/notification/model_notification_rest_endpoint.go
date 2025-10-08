@@ -84,7 +84,6 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"client_certificate_token": schema.StringAttribute{
 		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop for a notification REST endpoit client certificate.",
 	},
 	"client_certificate_valid_from": schema.Int64Attribute{
@@ -235,23 +234,22 @@ func (m *NotificationRestEndpointModel) Expand(ctx context.Context, diags *diag.
 		return nil
 	}
 	to := &notification.NotificationRestEndpoint{
-		ClientCertificateToken: flex.ExpandStringPointer(m.ClientCertificateToken),
-		Comment:                flex.ExpandStringPointer(m.Comment),
-		ExtAttrs:               ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		LogLevel:               flex.ExpandStringPointer(m.LogLevel),
-		Name:                   flex.ExpandStringPointer(m.Name),
-		OutboundMemberType:     flex.ExpandStringPointer(m.OutboundMemberType),
-		OutboundMembers:        flex.ExpandFrameworkListString(ctx, m.OutboundMembers, diags),
-		Password:               flex.ExpandStringPointer(m.Password),
-		ServerCertValidation:   flex.ExpandStringPointer(m.ServerCertValidation),
-		SyncDisabled:           flex.ExpandBoolPointer(m.SyncDisabled),
-		TemplateInstance:       ExpandNotificationRestEndpointTemplateInstance(ctx, m.TemplateInstance, diags),
-		Timeout:                flex.ExpandInt64Pointer(m.Timeout),
-		Uri:                    flex.ExpandStringPointer(m.Uri),
-		Username:               flex.ExpandStringPointer(m.Username),
-		VendorIdentifier:       flex.ExpandStringPointer(m.VendorIdentifier),
-		WapiUserName:           flex.ExpandStringPointer(m.WapiUserName),
-		WapiUserPassword:       flex.ExpandStringPointer(m.WapiUserPassword),
+		Comment:              flex.ExpandStringPointer(m.Comment),
+		ExtAttrs:             ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		LogLevel:             flex.ExpandStringPointer(m.LogLevel),
+		Name:                 flex.ExpandStringPointer(m.Name),
+		OutboundMemberType:   flex.ExpandStringPointer(m.OutboundMemberType),
+		OutboundMembers:      flex.ExpandFrameworkListString(ctx, m.OutboundMembers, diags),
+		Password:             flex.ExpandStringPointer(m.Password),
+		ServerCertValidation: flex.ExpandStringPointer(m.ServerCertValidation),
+		SyncDisabled:         flex.ExpandBoolPointer(m.SyncDisabled),
+		TemplateInstance:     ExpandNotificationRestEndpointTemplateInstance(ctx, m.TemplateInstance, diags),
+		Timeout:              flex.ExpandInt64Pointer(m.Timeout),
+		Uri:                  flex.ExpandStringPointer(m.Uri),
+		Username:             flex.ExpandStringPointer(m.Username),
+		VendorIdentifier:     flex.ExpandStringPointer(m.VendorIdentifier),
+		WapiUserName:         flex.ExpandStringPointer(m.WapiUserName),
+		WapiUserPassword:     flex.ExpandStringPointer(m.WapiUserPassword),
 	}
 	return to
 }
