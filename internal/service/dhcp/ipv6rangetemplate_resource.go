@@ -61,6 +61,29 @@ func (r *Ipv6rangetemplateResource) Configure(ctx context.Context, req resource.
 	r.client = client
 }
 
+func (r *Ipv6rangetemplateResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var config Ipv6rangetemplateModel
+
+	// Parse the configuration
+	diags := req.Config.Get(ctx, &config)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+
+	// Check if server_association_type is MEMBER
+	if config.ServerAssociationType.ValueString() == "MEMBER" {
+		// Ensure the member field is not empty
+		if config.Member.IsNull() || config.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+			)
+		}
+	}
+}
+
 func (r *Ipv6rangetemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data Ipv6rangetemplateModel
 

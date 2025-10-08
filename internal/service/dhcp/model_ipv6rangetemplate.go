@@ -148,7 +148,7 @@ var Ipv6rangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString("NONE"),
 		Validators: []validator.String{
-			stringvalidator.OneOf("FAILOVER", "MEMBER", "MS_FAILOVER", "MS_SERVER", "NONE"),
+			stringvalidator.OneOf("MEMBER", "NONE"),
 		},
 		MarkdownDescription: "The type of server that is going to serve the IPv6 DHCP range.",
 	},
