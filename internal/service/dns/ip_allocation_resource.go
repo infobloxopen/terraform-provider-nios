@@ -189,6 +189,12 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
+	// Save original IPv4 function call attributes
+	savedIPv4FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv4addrs)
+
+	// Save original IPv6 function call attributes
+	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
+
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -235,6 +241,16 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Restore original IPv4 function call attributes
+	if savedIPv4FuncCalls != nil {
+		data.Ipv4addrs = r.restoreNestedFuncCallAttrs(ctx, data.Ipv4addrs, savedIPv4FuncCalls)
+	}
+
+	// Restore original IPv6 function call attributes
+	if savedIPv6FuncCalls != nil {
+		data.Ipv6addrs = r.restoreNestedFuncCallAttrs(ctx, data.Ipv6addrs, savedIPv6FuncCalls)
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
