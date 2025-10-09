@@ -336,25 +336,6 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var stateNetworkView string
-	var planNetworkView string
-
-	// Get the current and planned values for the "name" field
-	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("network_view"), &stateNetworkView)...)
-	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("network_view"), &planNetworkView)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Restrict changes to the "name" field
-	if stateNetworkView != planNetworkView {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("network_view"),
-			"Field Update Not Allowed",
-			"The 'network_view' field cannot be updated after creation.",
-		)
-		return
-	}
 
 	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
