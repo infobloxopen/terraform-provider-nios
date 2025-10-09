@@ -27,10 +27,12 @@ var NetworksubscribesettingsMappedEaAttributesAttrTypes = map[string]attr.Type{
 var NetworksubscribesettingsMappedEaAttributesResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.",
 	},
 	"mapped_ea": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.",
 	},
 }

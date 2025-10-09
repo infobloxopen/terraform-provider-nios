@@ -31,6 +31,7 @@ var NetworkSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribu
 	"enabled_attributes": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
 		Validators: []validator.List{
 			customvalidator.StringsInSlice([]string{
