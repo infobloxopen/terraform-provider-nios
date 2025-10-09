@@ -128,7 +128,7 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"allow_telnet": schema.BoolAttribute{
-		Computed:            true,
+		Computed:            true, // Setting this as computed only as backend is not setting the value correctly, needs to be fixed in future(temporary workaround)
 		MarkdownDescription: "This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.",
 	},
 	"cli_credentials": schema.ListNestedAttribute{
