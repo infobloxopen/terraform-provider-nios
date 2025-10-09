@@ -1,5 +1,5 @@
 // Create a Notification Rest Endpoint with Basic Fields ( Required as parent for Notification Rule )
-resource "nios_notification_rest_endpoint" "notification_rest_parent {
+resource "nios_notification_rest_endpoint" "notification_rest_parent" {
   name                 = "example-notification-rest-endpoint-1"
   outbound_member_type = "GM"
   uri                  = "https://example.com"

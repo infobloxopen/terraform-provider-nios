@@ -14,7 +14,7 @@ Manages a Notification Rule.
 
 ```terraform
 // Create a Notification Rest Endpoint with Basic Fields ( Required as parent for Notification Rule )
-resource "nios_notification_rest_endpoint" "notification_rest_parent {
+resource "nios_notification_rest_endpoint" "notification_rest_parent" {
   name                 = "example-notification-rest-endpoint-1"
   outbound_member_type = "GM"
   uri                  = "https://example.com"
@@ -23,7 +23,7 @@ resource "nios_notification_rest_endpoint" "notification_rest_parent {
 // Create a Notification Rule with Basic Fields (Event Type : DHCP_LEASES)
 resource "nios_notification_rule" "notification_rule_with_basic_fields" {
   name                = "example_notification_rule"
-  notification_target = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:Rest_Api"
+  notification_target = nios_notification_rest_endpoint.notification_rest_parent.ref
   event_type          = "DHCP_LEASES"
   notification_action = "RESTAPI_TEMPLATE_INSTANCE"
 
@@ -51,7 +51,7 @@ resource "nios_notification_rule" "notification_rule_with_basic_fields" {
 // Create a Notification Rule with Additional Fields
 resource "nios_notification_rule" "notification_rule_with_additional_fields" {
   name                = "example_notification_rule-1"
-  notification_target = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:Rest_Api"
+  notification_target = nios_notification_rest_endpoint.notification_rest_parent.ref
   event_type          = "DHCP_LEASES"
   notification_action = "RESTAPI_TEMPLATE_INSTANCE"
 
