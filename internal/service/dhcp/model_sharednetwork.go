@@ -633,6 +633,7 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	planNetworks := m.Networks
+	m.Networks = flex.FlattenFrameworkListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
 	reOrderedNetworks, diags := utils.ReorderAndFilterNestedListResponse(ctx, planNetworks, m.Networks, "ref")
 	if !diags.HasError() {
 		m.Networks = reOrderedNetworks.(basetypes.ListValue)
