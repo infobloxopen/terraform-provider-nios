@@ -47,7 +47,7 @@ Required:
 
 Optional:
 
-- `aws_account_ids_file_token` (String) The AWS account IDs file's token.
+- `aws_account_ids_file_path` (String) The AWS account IDs file's path.
 - `comment` (String) Comment for the task group; maximum 256 characters.
 - `consolidate_zones` (Boolean) Indicates if all zones need to be saved into a single view.
 - `consolidated_view` (String) The name of the DNS view for consolidating zones.
@@ -63,6 +63,7 @@ Read-Only:
 
 - `account_id` (String) The AWS Account ID associated with this task group.
 - `accounts_list` (String) The AWS Account IDs list associated with this task group.
+- `aws_account_ids_file_token` (String) The AWS account IDs file's token.
 - `ref` (String) The reference to the object.
 - `sync_status` (String) Indicate the overall sync status of this task group.
 

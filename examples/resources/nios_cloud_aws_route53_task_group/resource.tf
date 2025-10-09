@@ -17,12 +17,17 @@ resource "nios_cloud_aws_route53_task_group" "awsrte53taskgroup_basic_fields" {
 
 // Create awsrte53taskgroup with Additional Fields
 resource "nios_cloud_aws_route53_task_group" "awsrte53taskgroup_additional_fields" {
-  name                        = "example_task_group_2"
-  grid_member                 = "infoblox.localdomain"
-  disabled                    = false
-  sync_child_accounts         = false
-  network_view_mapping_policy = "AUTO_CREATE"
-
+  name                          = "example_task_group_2"
+  grid_member                   = "infoblox.localdomain"
+  disabled                      = false
+  sync_child_accounts           = false
+  network_view_mapping_policy   = "DIRECT"
+  role_arn                      = "arn:aws:iam::523456789012:role/Role-name"
+  multiple_accounts_sync_policy = "UPLOAD_CHILDREN"
+  consolidate_zones             = true
+  consolidated_view             = "default"
+  network_view                  = "default"
+  aws_account_ids_file_path     = "<relative_path_to_file>/aws_account_ids.csv"
   task_list = [
     {
       name              = "example-task2"
