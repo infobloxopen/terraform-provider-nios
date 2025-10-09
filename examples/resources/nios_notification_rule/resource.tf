@@ -5,7 +5,6 @@ resource "nios_notification_rest_endpoint" "notification_rest_parent {
   uri                  = "https://example.com"
 }
 
-
 // Create a Notification Rule with Basic Fields (Event Type : DHCP_LEASES)
 resource "nios_notification_rule" "notification_rule_with_basic_fields" {
   name                = "example_notification_rule"

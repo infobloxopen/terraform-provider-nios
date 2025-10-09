@@ -13,6 +13,13 @@ Manages a Notification Rule.
 ## Example Usage
 
 ```terraform
+// Create a Notification Rest Endpoint with Basic Fields ( Required as parent for Notification Rule )
+resource "nios_notification_rest_endpoint" "notification_rest_parent {
+  name                 = "example-notification-rest-endpoint-1"
+  outbound_member_type = "GM"
+  uri                  = "https://example.com"
+}
+
 // Create a Notification Rule with Basic Fields (Event Type : DHCP_LEASES)
 resource "nios_notification_rule" "notification_rule_with_basic_fields" {
   name                = "example_notification_rule"
