@@ -110,6 +110,7 @@ func TestAccNotificationRuleResource_disappears(t *testing.T) {
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					testAccCheckNotificationRuleDisappears(context.Background(), &v),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -715,13 +716,31 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
 
+	scheduleEvent := map[string]any{
+		"weekdays":          []string{"TUESDAY", "WEDNESDAY", "MONDAY"},
+		"frequency":         "WEEKLY",
+		"every":             15,
+		"minutes_past_hour": 6,
+		"disable":           false,
+		"repeat":            "RECUR",
+		"hour_of_day":       20,
+	}
+	scheduleEventUpdated := map[string]any{
+		"minutes_past_hour": 6,
+		"repeat":            "ONCE",
+		"day_of_month":      30,
+		"month":             1,
+		"year":              2026,
+		"hour_of_day":       20,
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleScheduledEvent(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "SCHEDULED_EVENT_REPLACE_ME"),
+				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, templateInstance, scheduleEvent),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "scheduled_event", "SCHEDULED_EVENT_REPLACE_ME"),
@@ -729,7 +748,7 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleScheduledEvent(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "SCHEDULED_EVENT_UPDATE_REPLACE_ME"),
+				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, templateInstance, scheduleEventUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "scheduled_event", "SCHEDULED_EVENT_UPDATE_REPLACE_ME"),
@@ -1113,18 +1132,21 @@ resource "nios_notification_rule" "test_publish_settings" {
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, publishSettingsHCL, usePublishSettings)
 }
 
-func testAccNotificationRuleScheduledEvent(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, scheduledEvent string) string {
+func testAccNotificationRuleScheduledEvent(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance, scheduledEvent map[string]any) string {
+	scheduledEventHCL := utils.ConvertMapToHCL(scheduledEvent)
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_scheduled_event" {
     event_type = %q
-    expression_list = %q
+    expression_list = %s
     name = %q
     notification_action = %q
     notification_target = %q
-    template_instance = %q
-    scheduled_event = %q
+    template_instance = %s
+    scheduled_event = %s
 }
-`, eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, scheduledEvent)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, scheduledEventHCL)
 }
 
 func testAccNotificationRuleTemplateInstance(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {

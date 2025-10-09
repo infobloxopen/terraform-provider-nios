@@ -19,29 +19,30 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NotificationRuleModel struct {
-	Ref                              types.String `tfsdk:"ref"`
-	AllMembers                       types.Bool   `tfsdk:"all_members"`
-	Comment                          types.String `tfsdk:"comment"`
-	Disable                          types.Bool   `tfsdk:"disable"`
-	EnableEventDeduplication         types.Bool   `tfsdk:"enable_event_deduplication"`
-	EnableEventDeduplicationLog      types.Bool   `tfsdk:"enable_event_deduplication_log"`
-	EventDeduplicationFields         types.List   `tfsdk:"event_deduplication_fields"`
-	EventDeduplicationLookbackPeriod types.Int64  `tfsdk:"event_deduplication_lookback_period"`
-	EventPriority                    types.String `tfsdk:"event_priority"`
-	EventType                        types.String `tfsdk:"event_type"`
-	ExpressionList                   types.List   `tfsdk:"expression_list"`
-	Name                             types.String `tfsdk:"name"`
-	NotificationAction               types.String `tfsdk:"notification_action"`
-	NotificationTarget               types.String `tfsdk:"notification_target"`
-	PublishSettings                  types.Object `tfsdk:"publish_settings"`
-	ScheduledEvent                   types.Object `tfsdk:"scheduled_event"`
-	SelectedMembers                  types.List   `tfsdk:"selected_members"`
-	TemplateInstance                 types.Object `tfsdk:"template_instance"`
-	UsePublishSettings               types.Bool   `tfsdk:"use_publish_settings"`
+	Ref                              types.String                             `tfsdk:"ref"`
+	AllMembers                       types.Bool                               `tfsdk:"all_members"`
+	Comment                          types.String                             `tfsdk:"comment"`
+	Disable                          types.Bool                               `tfsdk:"disable"`
+	EnableEventDeduplication         types.Bool                               `tfsdk:"enable_event_deduplication"`
+	EnableEventDeduplicationLog      types.Bool                               `tfsdk:"enable_event_deduplication_log"`
+	EventDeduplicationFields         types.List                               `tfsdk:"event_deduplication_fields"`
+	EventDeduplicationLookbackPeriod types.Int64                              `tfsdk:"event_deduplication_lookback_period"`
+	EventPriority                    types.String                             `tfsdk:"event_priority"`
+	EventType                        types.String                             `tfsdk:"event_type"`
+	ExpressionList                   types.List                               `tfsdk:"expression_list"`
+	Name                             types.String                             `tfsdk:"name"`
+	NotificationAction               types.String                             `tfsdk:"notification_action"`
+	NotificationTarget               internaltypes.CaseInsensitiveStringValue `tfsdk:"notification_target"`
+	PublishSettings                  types.Object                             `tfsdk:"publish_settings"`
+	ScheduledEvent                   types.Object                             `tfsdk:"scheduled_event"`
+	SelectedMembers                  types.List                               `tfsdk:"selected_members"`
+	TemplateInstance                 types.Object                             `tfsdk:"template_instance"`
+	UsePublishSettings               types.Bool                               `tfsdk:"use_publish_settings"`
 }
 
 var NotificationRuleAttrTypes = map[string]attr.Type{
@@ -58,7 +59,7 @@ var NotificationRuleAttrTypes = map[string]attr.Type{
 	"expression_list":                     types.ListType{ElemType: types.ObjectType{AttrTypes: NotificationRuleExpressionListAttrTypes}},
 	"name":                                types.StringType,
 	"notification_action":                 types.StringType,
-	"notification_target":                 types.StringType,
+	"notification_target":                 internaltypes.CaseInsensitiveString{},
 	"publish_settings":                    types.ObjectType{AttrTypes: NotificationRulePublishSettingsAttrTypes},
 	"scheduled_event":                     types.ObjectType{AttrTypes: NotificationRuleScheduledEventAttrTypes},
 	"selected_members":                    types.ListType{ElemType: types.StringType},
@@ -168,6 +169,7 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The notification rule action is applied if expression list evaluates to True.",
 	},
 	"notification_target": schema.StringAttribute{
+		CustomType:          internaltypes.CaseInsensitiveString{},
 		Required:            true,
 		MarkdownDescription: "The notification target.",
 	},
@@ -219,7 +221,7 @@ func (m *NotificationRuleModel) Expand(ctx context.Context, diags *diag.Diagnost
 		EventType:                        flex.ExpandStringPointer(m.EventType),
 		ExpressionList:                   flex.ExpandFrameworkListNestedBlock(ctx, m.ExpressionList, diags, ExpandNotificationRuleExpressionList),
 		NotificationAction:               flex.ExpandStringPointer(m.NotificationAction),
-		NotificationTarget:               flex.ExpandStringPointer(m.NotificationTarget),
+		NotificationTarget:               flex.ExpandStringPointer(m.NotificationTarget.StringValue),
 		PublishSettings:                  ExpandNotificationRulePublishSettings(ctx, m.PublishSettings, diags),
 		ScheduledEvent:                   ExpandNotificationRuleScheduledEvent(ctx, m.ScheduledEvent, diags),
 		TemplateInstance:                 ExpandNotificationRuleTemplateInstance(ctx, m.TemplateInstance, diags),
@@ -262,7 +264,7 @@ func (m *NotificationRuleModel) Flatten(ctx context.Context, from *notification.
 	m.ExpressionList = flex.FlattenFrameworkListNestedBlock(ctx, from.ExpressionList, NotificationRuleExpressionListAttrTypes, diags, FlattenNotificationRuleExpressionList)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NotificationAction = flex.FlattenStringPointer(from.NotificationAction)
-	m.NotificationTarget = flex.FlattenStringPointer(from.NotificationTarget)
+	m.NotificationTarget.StringValue = flex.FlattenStringPointer(from.NotificationTarget)
 	m.PublishSettings = FlattenNotificationRulePublishSettings(ctx, from.PublishSettings, diags)
 	m.ScheduledEvent = FlattenNotificationRuleScheduledEvent(ctx, from.ScheduledEvent, diags)
 	m.SelectedMembers = flex.FlattenFrameworkListString(ctx, from.SelectedMembers, diags)
