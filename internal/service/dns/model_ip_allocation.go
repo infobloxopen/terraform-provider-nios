@@ -128,10 +128,8 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"allow_telnet": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.",
-		Default:             booldefault.StaticBool(false),
 	},
 	"cli_credentials": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
