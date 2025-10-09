@@ -12,6 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,6 +20,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -171,6 +173,9 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.AlsoRequires(path.MatchRoot("stub_from")),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"locked": schema.BoolAttribute{
 		Optional:            true,
@@ -307,6 +312,9 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the DNS view in which the zone resides. Example \"external\".",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"zone_format": schema.StringAttribute{
 		Optional: true,
@@ -316,6 +324,9 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.OneOf("FORWARD", "IPV4", "IPV6"),
 		},
 		MarkdownDescription: "Determines the format of this zone.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 }
 
