@@ -361,9 +361,11 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
+			customvalidator.IsValidAwsRoleArn(),
 			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthBetween(0, 128),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Role ARN for syncing child accounts; maximum 128 characters.",
 	},
 	"scheduled_run": schema.SingleNestedAttribute{
