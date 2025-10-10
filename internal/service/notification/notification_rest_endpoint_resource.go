@@ -13,6 +13,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -105,6 +106,10 @@ func (r *NotificationRestEndpointResource) Create(ctx context.Context, req resou
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		return
+	}
+
+	if !r.processClientCertificate(ctx, &data, &resp.Diagnostics) {
 		return
 	}
 
@@ -261,6 +266,9 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 		return
 	}
 
+	if !r.processClientCertificate(ctx, &data, &resp.Diagnostics) {
+		return
+	}
 	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
@@ -366,4 +374,31 @@ func (r *NotificationRestEndpointResource) ImportState(ctx context.Context, req 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *NotificationRestEndpointResource) processClientCertificate(
+	ctx context.Context,
+	data *NotificationRestEndpointModel,
+	diag *diag.Diagnostics,
+) bool {
+
+	if data.ClientCertificateFile.IsNull() || data.ClientCertificateFile.IsUnknown() {
+		return true
+	}
+
+	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
+	username := r.client.SecurityAPI.Cfg.NIOSUsername
+	password := r.client.SecurityAPI.Cfg.NIOSPassword
+
+	filePath := data.ClientCertificateFile.ValueString()
+	token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+	if err != nil {
+		diag.AddError(
+			"Client Error",
+			fmt.Sprintf("Unable to process certificate file %s, got error: %s", filePath, err),
+		)
+		return false
+	}
+	data.ClientCertificateToken = types.StringValue(token)
+	return true
 }

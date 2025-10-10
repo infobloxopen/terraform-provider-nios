@@ -27,6 +27,7 @@ type NotificationRestEndpointModel struct {
 	Ref                        types.String `tfsdk:"ref"`
 	ClientCertificateSubject   types.String `tfsdk:"client_certificate_subject"`
 	ClientCertificateToken     types.String `tfsdk:"client_certificate_token"`
+	ClientCertificateFile      types.String `tfsdk:"client_certificate_file"`
 	ClientCertificateValidFrom types.Int64  `tfsdk:"client_certificate_valid_from"`
 	ClientCertificateValidTo   types.Int64  `tfsdk:"client_certificate_valid_to"`
 	Comment                    types.String `tfsdk:"comment"`
@@ -52,6 +53,7 @@ var NotificationRestEndpointAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
 	"client_certificate_subject":    types.StringType,
 	"client_certificate_token":      types.StringType,
+	"client_certificate_file":       types.StringType,
 	"client_certificate_valid_from": types.Int64Type,
 	"client_certificate_valid_to":   types.Int64Type,
 	"comment":                       types.StringType,
@@ -84,6 +86,10 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"client_certificate_token": schema.StringAttribute{
 		Computed:            true,
+		MarkdownDescription: "The token returned by the uploadinit function call in object fileop for a notification REST endpoit client certificate.",
+	},
+	"client_certificate_file": schema.StringAttribute{
+		Optional:            true,
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop for a notification REST endpoit client certificate.",
 	},
 	"client_certificate_valid_from": schema.Int64Attribute{
@@ -275,6 +281,7 @@ func (m *NotificationRestEndpointModel) Flatten(ctx context.Context, from *notif
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.ClientCertificateSubject = flex.FlattenStringPointer(from.ClientCertificateSubject)
+	m.ClientCertificateToken = flex.FlattenStringPointer(from.ClientCertificateToken)
 	m.ClientCertificateValidFrom = flex.FlattenInt64Pointer(from.ClientCertificateValidFrom)
 	m.ClientCertificateValidTo = flex.FlattenInt64Pointer(from.ClientCertificateValidTo)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

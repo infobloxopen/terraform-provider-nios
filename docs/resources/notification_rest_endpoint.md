@@ -54,6 +54,7 @@ resource "nios_notification_rest_endpoint" "notification_rest_endpoint_with_addi
     ]
     template = "REST API Template"
   }
+  client_certificate_file = "<path-to-the-client-certificate-file>"
 }
 ```
 
@@ -68,6 +69,7 @@ resource "nios_notification_rest_endpoint" "notification_rest_endpoint_with_addi
 
 ### Optional
 
+- `client_certificate_file` (String) The token returned by the uploadinit function call in object fileop for a notification REST endpoit client certificate.
 - `comment` (String) The comment of a notification REST endpoint.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `log_level` (String) The log level for a notification REST endpoint.

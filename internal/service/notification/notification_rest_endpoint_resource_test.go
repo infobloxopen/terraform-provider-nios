@@ -14,6 +14,8 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+	"os"
+	"path/filepath"
 )
 
 // OBJECTS TO BE PRESENT IN GRID FOR TESTS
@@ -198,6 +200,37 @@ func TestAccNotificationRestEndpointResource_Name(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", updatedName),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRestEndpointResource_ClientCertificateFile(t *testing.T) {
+	var resourceName = "nios_notification_rest_endpoint.test_client_certificate_file"
+	var v notification.NotificationRestEndpoint
+	name := acctest.RandomNameWithPrefix("notification-rest-endpoint")
+	testDataPath := getTestDataPath()
+	clientCertificateFile := filepath.Join(testDataPath, "dummy-bundle.pem")
+	updatedClientCertificateFile := filepath.Join(testDataPath, "dummy-bundle2.pem")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRestEndpointClientCertificateFile(name, outboundMemberType, uri , clientCertificateFile),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRestEndpointClientCertificateFile(name, outboundMemberType, uri, updatedClientCertificateFile),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -657,6 +690,16 @@ resource "nios_notification_rest_endpoint" "test_name" {
 `, name, outboundMemberType, uri)
 }
 
+func testAccNotificationRestEndpointClientCertificateFile(name string, outboundMemberType string, uri string , clientCertificateFile string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rest_endpoint" "test_client_certificate_file" {
+    name = %q
+    outbound_member_type = %q
+    uri = %q
+    client_certificate_file = %q
+}
+`, name, outboundMemberType, uri, clientCertificateFile)
+}
 func testAccNotificationRestEndpointOutboundMemberType(name string, outboundMemberType string, uri string) string {
 	return fmt.Sprintf(`
 resource "nios_notification_rest_endpoint" "test_outbound_member_type" {
@@ -779,4 +822,12 @@ resource "nios_notification_rest_endpoint" "test_wapi_user_name" {
 	wapi_user_password = %q
 }
 `, name, outboundMemberType, uri, wapiUserName, wapiUserPassword)
+}
+
+func getTestDataPath() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "../../testdata/nios_notification_rest_endpoint"
+	}
+	return filepath.Join(wd, "../../testdata/nios_notification_rest_endpoint")
 }
