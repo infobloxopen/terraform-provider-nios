@@ -55,7 +55,6 @@ Required:
 Optional:
 
 - `aliases` (List of String) This is a list of aliases for the host. The aliases must be in FQDN format. This value can be in unicode format.
-- `allow_telnet` (Boolean) This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.
 - `cli_credentials` (Attributes List) The CLI credentials for the host record. (see [below for nested schema](#nestedatt--result--cli_credentials))
 - `comment` (String) Comment for the record; maximum 256 characters.
 - `configure_for_dns` (Boolean) When configure_for_dns is false, the host does not have parent zone information.
@@ -70,6 +69,7 @@ Optional:
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `ipv4addrs` (Attributes List) This is a list of IPv4 Addresses for the host. (see [below for nested schema](#nestedatt--result--ipv4addrs))
 - `ipv6addrs` (Attributes List) This is a list of IPv6 Addresses for the host. (see [below for nested schema](#nestedatt--result--ipv6addrs))
+- `network_view` (String) The name of the network view in which the host record resides.
 - `restart_if_needed` (Boolean) Restarts the member service.
 - `rrset_order` (String) The value of this field specifies the order in which resource record sets are returned. The possible values are "cyclic", "random" and "fixed".
 - `snmp3_credential` (Attributes) The SNMPv3 credential for this fixed address. (see [below for nested schema](#nestedatt--result--snmp3_credential))
@@ -84,6 +84,7 @@ Optional:
 
 Read-Only:
 
+- `allow_telnet` (Boolean) This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.
 - `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
 - `dns_aliases` (List of String) The list of aliases for the host in punycode format.
@@ -92,7 +93,6 @@ Read-Only:
 - `internal_id` (String) Internal ID of the object.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
-- `network_view` (String) The name of the network view in which the host record resides.
 - `ref` (String) The reference to the object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
