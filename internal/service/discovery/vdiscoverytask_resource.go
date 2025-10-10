@@ -218,7 +218,8 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		if !scheduledRun.Repeat.IsNull() && !scheduledRun.Repeat.IsUnknown() {
 			repeatValue := scheduledRun.Repeat.ValueString()
 
-			if repeatValue == "ONCE" {
+			switch repeatValue {
+			case "ONCE":
 				// For ONCE: cannot set weekdays, frequency, every
 				if !scheduledRun.Weekdays.IsNull() || !scheduledRun.Frequency.IsNull() || !scheduledRun.Every.IsNull() {
 					resp.Diagnostics.AddAttributeError(
@@ -235,7 +236,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 						"If repeat is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
 					)
 				}
-			} else if repeatValue == "RECUR" {
+			case "RECUR":
 				// For RECUR: cannot set month, day_of_month, year
 				if !scheduledRun.Month.IsNull() || !scheduledRun.DayOfMonth.IsNull() || !scheduledRun.Year.IsNull() {
 					resp.Diagnostics.AddAttributeError(
