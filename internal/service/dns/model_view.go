@@ -112,6 +112,8 @@ type ViewModel struct {
 	UseRpzQnameWaitRecurse              types.Bool                       `tfsdk:"use_rpz_qname_wait_recurse"`
 	UseScavengingSettings               types.Bool                       `tfsdk:"use_scavenging_settings"`
 	UseSortlist                         types.Bool                       `tfsdk:"use_sortlist"`
+	RetryCount                          types.Int64                      `tfsdk:"retry_count"`
+	TimeInSeconds                       types.Int64                      `tfsdk:"time_in_seconds"`
 }
 
 var ViewAttrTypes = map[string]attr.Type{
@@ -873,6 +875,18 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: sortlist",
+	},
+	"retry_count": schema.Int64Attribute{
+		Optional:    true,
+		Computed:    true,
+		Default:     int64default.StaticInt64(1),
+		Description: "Maximum number of retry attempts for API operations",
+	},
+	"time_in_seconds": schema.Int64Attribute{
+		Optional:    true,
+		Computed:    true,
+		Default:     int64default.StaticInt64(5),
+		Description: "Time duration in seconds for API operations to complete",
 	},
 }
 
