@@ -259,6 +259,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -1002,7 +1003,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.DdnsRestrictStatic = types.BoolPointerValue(from.DdnsRestrictStatic)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Dns64Enabled = types.BoolPointerValue(from.Dns64Enabled)
-	m.Dns64Groups = flex.FlattenFrameworkUnorderedList(ctx, types.StringType,from.Dns64Groups, diags)
+	m.Dns64Groups = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Dns64Groups, diags)
 	m.DnssecEnabled = types.BoolPointerValue(from.DnssecEnabled)
 	m.DnssecExpiredSignaturesEnabled = types.BoolPointerValue(from.DnssecExpiredSignaturesEnabled)
 	m.DnssecNegativeTrustAnchors = flex.FlattenFrameworkListString(ctx, from.DnssecNegativeTrustAnchors, diags)
