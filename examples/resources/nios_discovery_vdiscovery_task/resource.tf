@@ -107,4 +107,3 @@ resource "nios_discovery_vdiscovery_task" "gcp_vdiscoverytask" {
   private_network_view_mapping_policy = "AUTO_CREATE"
   public_network_view_mapping_policy  = "AUTO_CREATE"
 }
- 

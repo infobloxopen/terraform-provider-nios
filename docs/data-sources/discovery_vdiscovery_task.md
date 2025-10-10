@@ -79,7 +79,7 @@ Optional:
 - `protocol` (String) Connection protocol used for connecting to the cloud management platform.
 - `public_network_view` (String) Network view for public IPs.
 - `role_arn` (String) Role ARN for syncing child accounts; maximum 128 characters.
-- `scheduled_run` (Attributes) (see [below for nested schema](#nestedatt--result--scheduled_run))
+- `scheduled_run` (Attributes) Schedule setting for cloud discovery task. (see [below for nested schema](#nestedatt--result--scheduled_run))
 - `selected_regions` (String) String containing selected regions for discovery in comma separated format.
 - `service_account_file` (String) The service_account_file for GCP.
 - `service_account_file_token` (String) Service account file's token.

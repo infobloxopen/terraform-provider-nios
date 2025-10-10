@@ -191,6 +191,7 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment on the task.",
 	},
 	"credentials_type": schema.StringAttribute{
@@ -366,9 +367,10 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Role ARN for syncing child accounts; maximum 128 characters.",
 	},
 	"scheduled_run": schema.SingleNestedAttribute{
-		Attributes: VdiscoverytaskScheduledRunResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
+		Attributes:          VdiscoverytaskScheduledRunResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Schedule setting for cloud discovery task.",
 	},
 	"selected_regions": schema.StringAttribute{
 		Optional: true,
