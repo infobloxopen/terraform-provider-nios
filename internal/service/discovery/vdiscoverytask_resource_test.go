@@ -1233,8 +1233,8 @@ func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
 
 	// Get test data path
 	testDataPath := getTestDataPath()
-	serviceAccountFile1 := filepath.Join(testDataPath, "service_account_file1.json")
-	serviceAccountFile2 := filepath.Join(testDataPath, "service_account_file2.json")
+	serviceAccountFile1 := filepath.Join(testDataPath, "service_account_file1_example.json")
+	serviceAccountFile2 := filepath.Join(testDataPath, "service_account_file2_example.json")
 	cdiscoveryFile := filepath.Join(testDataPath, "cdiscoveryfile_gcp.csv")
 
 	resource.ParallelTest(t, resource.TestCase{
