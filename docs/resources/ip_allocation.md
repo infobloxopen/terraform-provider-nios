@@ -36,6 +36,7 @@ description: |-
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `ipv4addrs` (Attributes List) This is a list of IPv4 Addresses for the host. (see [below for nested schema](#nestedatt--ipv4addrs))
 - `ipv6addrs` (Attributes List) This is a list of IPv6 Addresses for the host. (see [below for nested schema](#nestedatt--ipv6addrs))
+- `network_view` (String) The name of the network view in which the host record resides.
 - `restart_if_needed` (Boolean) Restarts the member service.
 - `rrset_order` (String) The value of this field specifies the order in which resource record sets are returned. The possible values are "cyclic", "random" and "fixed".
 - `snmp3_credential` (Attributes) The SNMPv3 credential for this fixed address. (see [below for nested schema](#nestedatt--snmp3_credential))
@@ -59,7 +60,6 @@ description: |-
 - `internal_id` (String) Internal ID of the object.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
-- `network_view` (String) The name of the network view in which the host record resides.
 - `ref` (String) The reference to the object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 

@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +24,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -288,9 +290,13 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The host name in FQDN format This value can be in unicode format. Regular expression search is not supported for unicode values.",
 	},
 	"network_view": schema.StringAttribute{
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The name of the network view in which the host record resides.",
 		Default:             stringdefault.StaticString("default"),
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"restart_if_needed": schema.BoolAttribute{
 		Optional:            true,
@@ -414,6 +420,7 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		UseSnmp3Credential:       flex.ExpandBoolPointer(m.UseSnmp3Credential),
 		UseSnmpCredential:        flex.ExpandBoolPointer(m.UseSnmpCredential),
 		UseTtl:                   flex.ExpandBoolPointer(m.UseTtl),
+		NetworkView:              flex.ExpandStringPointer(m.NetworkView),
 	}
 
 	if m.ConfigureForDns.IsUnknown() || m.ConfigureForDns.IsNull() || m.ConfigureForDns.ValueBool() {

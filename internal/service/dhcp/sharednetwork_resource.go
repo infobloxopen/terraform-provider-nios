@@ -71,15 +71,13 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
-		if data.DdnsServerAlwaysUpdates.ValueBool() {
-			// Check if ddns_use_option81 is set to true
-			if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ddns_server_always_updates"),
-					"Invalid Configuration",
-					"When ddns_server_always_updates is enabled, ddns_use_option81 must be set to true",
-				)
-			}
+		// Check if ddns_use_option81 is set to false
+		if data.DdnsUseOption81.IsNull() && data.DdnsUseOption81.IsUnknown() && !data.DdnsUseOption81.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ddns_server_always_updates"),
+				"Invalid Configuration",
+				"ddns_use_option81 must be set to true if ddns_server_always_updates is configured.",
+			)
 		}
 	}
 
