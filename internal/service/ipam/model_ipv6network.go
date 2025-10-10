@@ -505,6 +505,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("func_call"),
 			),
 		},
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes:          FuncCallResourceSchemaAttributes,

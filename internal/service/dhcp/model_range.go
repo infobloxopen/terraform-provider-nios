@@ -747,6 +747,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RangeSplitMemberResourceSchemaAttributes,
 		Optional:            true,
 		MarkdownDescription: "This field contains the split member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network.",
+		PlanModifiers: []planmodifier.Object{
+			planmodifiers.ImmutableObject(),
+		},
 	},
 	"split_scope_exclusion_percent": schema.Int64Attribute{
 		Optional:            true,
