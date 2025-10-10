@@ -12,6 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,6 +20,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -160,6 +162,9 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The notification rule name.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"notification_action": schema.StringAttribute{
 		Required: true,

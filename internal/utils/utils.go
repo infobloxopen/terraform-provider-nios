@@ -671,6 +671,10 @@ func CopyFieldFromPlanToRespList(ctx context.Context, planValue, respValue attr.
 			)
 			return respValue, &diags
 		}
+		if planFieldValue.(basetypes.StringValue).ValueString() == "" {
+			modifiedElements[i] = respElement
+			continue
+		}
 
 		// Check if the field exists in the response object
 		if _, exists := respAttrs[fieldName]; !exists {
