@@ -34,6 +34,7 @@ var DiscoveryCredentialgroupResourceSchemaAttributes = map[string]schema.Attribu
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			customvalidator.StringNotEmpty(),
 		},
 		MarkdownDescription: "The name of the Credential group.",
 	},

@@ -420,12 +420,30 @@ func (r *GridServicerestartGroupResource) ValidateConfig(ctx context.Context, re
 					)
 				}
 
-				if schedule["weekdays"].IsNull() || schedule["weekdays"].IsUnknown() || schedule["frequency"].IsNull() || schedule["frequency"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() {
+				if schedule["frequency"].IsNull() || schedule["frequency"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("recurring_schedule").AtName("schedule").AtName("repeat"),
 						"Invalid Configuration for Schedule",
-						"If REPEAT is set to RECUR, then weekdays, frequency, hour_of_day and minutes_past_hour must be set",
+						"If REPEAT is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
 					)
+				}
+
+				if schedule["frequency"].String() == "\"WEEKLY\"" {
+					if schedule["weekdays"].IsNull() || schedule["weekdays"].IsUnknown() {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("recurring_schedule").AtName("schedule").AtName("weekdays"),
+							"Invalid Configuration for Weekdays",
+							"Weekdays must be set if Frequency is set to WEEKLY",
+						)
+					}
+				} else {
+					if !schedule["weekdays"].IsNull() && !schedule["weekdays"].IsUnknown() {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("recurring_schedule").AtName("schedule").AtName("weekdays"),
+							"Invalid Configuration for Weekdays",
+							"Weekdays can only be set if Frequency is set to WEEKLY",
+						)
+					}
 				}
 			}
 		}
