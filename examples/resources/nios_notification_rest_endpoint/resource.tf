@@ -39,4 +39,5 @@ resource "nios_notification_rest_endpoint" "notification_rest_endpoint_with_addi
     ]
     template = "REST API Template"
   }
+  client_certificate_file = "<path-to-the-client-certificate-file>"
 }
