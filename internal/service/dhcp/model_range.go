@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -27,6 +28,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -745,10 +747,16 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RangeSplitMemberResourceSchemaAttributes,
 		Optional:            true,
 		MarkdownDescription: "This field contains the split member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network.",
+		PlanModifiers: []planmodifier.Object{
+			planmodifiers.ImmutableObject(),
+		},
 	},
 	"split_scope_exclusion_percent": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "This field controls the percentage used when creating a split scope. Valid values are numbers between 1 and 99. If the value is 40, it means that the top 40% of the exclusion will be created on the DHCP range assigned to {next_available_ip:next_available_ip} and the lower 60% of the range will be assigned to DHCP range assigned to {next_available_ip:next_available_ip}",
+		PlanModifiers: []planmodifier.Int64{
+			planmodifiers.ImmutableInt64(),
+		},
 	},
 	"start_addr": schema.StringAttribute{
 		CustomType:          iptypes.IPv4AddressType{},
@@ -771,6 +779,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"template": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "If set on creation, the range will be created according to the values specified in the named template.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"total_hosts": schema.Int64Attribute{
 		Computed:            true,

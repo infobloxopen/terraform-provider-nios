@@ -9,13 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 )
 
 type ExtensibleattributedefModel struct {
@@ -124,6 +125,9 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 			stringvalidator.OneOf("DATE", "EMAIL", "ENUM", "INTEGER", "STRING", "URL"),
 		},
 		MarkdownDescription: "Type for the Extensible Attribute Definition.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 }
 
