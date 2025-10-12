@@ -158,9 +158,7 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
 		Sensitive: true,
-		Default:   stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("username")),
 		},
@@ -184,6 +182,7 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	"template_instance": schema.SingleNestedAttribute{
 		Attributes:          NotificationRestEndpointTemplateInstanceResourceSchemaAttributes,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The notification REST template instance.",
 	},
 	"timeout": schema.Int64Attribute{
@@ -217,7 +216,6 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	"wapi_user_name": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("wapi_user_password")),
 		},
@@ -225,9 +223,7 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"wapi_user_password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
 		Sensitive: true,
-		Default:   stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("wapi_user_name")),
 		},
