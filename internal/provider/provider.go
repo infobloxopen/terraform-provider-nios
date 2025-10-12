@@ -171,6 +171,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		discovery.NewDiscoveryCredentialgroupResource,
 
 		notification.NewNotificationRuleResource,
+		notification.NewNotificationRestEndpointResource,
 	}
 }
 
@@ -248,6 +249,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		discovery.NewDiscoveryCredentialgroupDataSource,
 
 		notification.NewNotificationRuleDataSource,
+
+		notification.NewNotificationRestEndpointDataSource,
 	}
 }
 
