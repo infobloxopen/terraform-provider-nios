@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,6 +25,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -61,7 +63,7 @@ type SharednetworkModel struct {
 	MsAdUserData                   types.Object                     `tfsdk:"ms_ad_user_data"`
 	Name                           types.String                     `tfsdk:"name"`
 	NetworkView                    types.String                     `tfsdk:"network_view"`
-	Networks                       internaltypes.UnorderedListValue `tfsdk:"networks"`
+	Networks                       types.List                       `tfsdk:"networks"`
 	Nextserver                     types.String                     `tfsdk:"nextserver"`
 	Options                        types.List                       `tfsdk:"options"`
 	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
@@ -117,7 +119,7 @@ var SharednetworkAttrTypes = map[string]attr.Type{
 	"ms_ad_user_data":                     types.ObjectType{AttrTypes: SharednetworkMsAdUserDataAttrTypes},
 	"name":                                types.StringType,
 	"network_view":                        types.StringType,
-	"networks":                            internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}}},
+	"networks":                            types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}},
 	"nextserver":                          types.StringType,
 	"options":                             types.ListType{ElemType: types.ObjectType{AttrTypes: SharednetworkOptionsAttrTypes}},
 	"pxe_lease_time":                      types.Int64Type,
@@ -359,9 +361,11 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the network view in which this shared network resides.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"networks": schema.ListNestedAttribute{
-		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: SharednetworkNetworksAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: SharednetworkNetworksResourceSchemaAttributes,
 		},
@@ -633,7 +637,12 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 	m.MsAdUserData = FlattenSharednetworkMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	m.Networks = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
+	planNetworks := m.Networks
+	m.Networks = flex.FlattenFrameworkListNestedBlock(ctx, from.Networks, SharednetworkNetworksAttrTypes, diags, FlattenSharednetworkNetworks)
+	reOrderedNetworks, diags := utils.ReorderAndFilterNestedListResponse(ctx, planNetworks, m.Networks, "ref")
+	if !diags.HasError() {
+		m.Networks = reOrderedNetworks.(basetypes.ListValue)
+	}
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
 	planOptions := m.Options
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, SharednetworkOptionsAttrTypes, diags, FlattenSharednetworkOptions)
