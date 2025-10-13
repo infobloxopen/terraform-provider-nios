@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_ipv6_range_template Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  
+  Retrieves information about existing IPV6 Range Templates.
 ---
 
 # nios_dhcp_ipv6_range_template (Data Source)
 
-
+Retrieves information about existing IPV6 Range Templates.
 
 ## Example Usage
 
@@ -90,7 +90,7 @@ Optional:
 <a id="nestedatt--result--logic_filter_rules"></a>
 ### Nested Schema for `result.logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -112,7 +112,4 @@ Optional:
 Required:
 
 - `filter` (String) The name of the DHCP filter.
-
-Optional:
-
 - `permission` (String) The permission to be applied.

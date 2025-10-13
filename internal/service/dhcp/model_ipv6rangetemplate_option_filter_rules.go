@@ -32,7 +32,7 @@ var Ipv6rangetemplateOptionFilterRulesResourceSchemaAttributes = map[string]sche
 		MarkdownDescription: "The name of the DHCP filter.",
 	},
 	"permission": schema.StringAttribute{
-		Optional: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("Allow", "Deny"),
 		},

@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_ipv6_range_template Resource - nios"
 subcategory: "DHCP"
 description: |-
-  
+  Manages an IPV6 Range Template.
 ---
 
 # nios_dhcp_ipv6_range_template (Resource)
 
-
+Manages an IPV6 Range Template.
 
 ## Example Usage
 
@@ -18,8 +18,7 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
-  // If Terraform Internal ID extensible attribute has cloud access, add `cloud_api_compatible = true`. Otherwise it would throw the below error:
-  // Cloud-incompatible template object example_range_template references extensible attribute Terraform Internal ID that is cloud-compatible.
+  // add `cloud_api_compatible = true` if Terraform Internal ID extensible attribute has cloud access
   cloud_api_compatible = false
 }
 
@@ -34,18 +33,18 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_additional_fields"
   server_association_type = "MEMBER"
   exclude = [
     {
-      "number_of_addresses" = 10
-      "offset"              = 20
-      "comment"             = "Example comment for range template exclude"
+      number_of_addresses = 10
+      offset              = 20
+      comment             = "Example comment for range template exclude"
     }
   ]
   member = {
     ipv4addr = "172.28.82.185"
-    name     = "infoblox.172_28_82_185"
+    name     = "infoblox.member"
   }
   delegated_member = {
     ipv4addr = "172.28.82.185"
-    name     = "infoblox.172_28_82_185"
+    name     = "infoblox.member"
   }
   use_logic_filter_rules = true
   logic_filter_rules = [
@@ -118,7 +117,7 @@ Optional:
 <a id="nestedatt--logic_filter_rules"></a>
 ### Nested Schema for `logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -140,7 +139,4 @@ Optional:
 Required:
 
 - `filter` (String) The name of the DHCP filter.
-
-Optional:
-
 - `permission` (String) The permission to be applied.

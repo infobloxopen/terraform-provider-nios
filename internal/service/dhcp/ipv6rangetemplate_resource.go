@@ -36,7 +36,7 @@ func (r *Ipv6rangetemplateResource) Metadata(ctx context.Context, req resource.M
 
 func (r *Ipv6rangetemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages an IPV6 Range Template.",
 		Attributes:          Ipv6rangetemplateResourceSchemaAttributes,
 	}
 }

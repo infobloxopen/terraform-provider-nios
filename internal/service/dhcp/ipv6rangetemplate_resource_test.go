@@ -15,8 +15,8 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO : Required parents for the execution of tests and MS_SERVER setup for ms_server and ms_options testcases.
-// - logic_filter_rules, option_filter_rules
+// TODO : Required parents for the execution of tests for member, delegated_member.
+// - logic_filter_rules(ipv6_option_filter, ipv6_option_filter1), option_filter_rules (ipv6_option_filter)
 // Grid Members : infoblox.172_28_83_213, infoblox.172_28_82.185
 // cloud_api_compatible is made true to pass all acceptance tests
 
