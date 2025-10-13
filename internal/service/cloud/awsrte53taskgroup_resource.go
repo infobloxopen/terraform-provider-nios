@@ -200,6 +200,22 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 		return
 	}
 
+	// Handle filter validation - warn users about empty string
+	if !data.TaskList.IsNull() && !data.TaskList.IsUnknown() {
+		var taskList []Awsrte53taskgroupTaskListModel
+		diags := data.TaskList.ElementsAs(ctx, &taskList, false)
+		if !diags.HasError() {
+			for i, task := range taskList {
+				if !task.Filter.IsNull() && task.Filter.ValueString() == "" {
+					resp.Diagnostics.AddError(
+						"Invalid Filter Configuration",
+						fmt.Sprintf("task_list[%d].filter cannot be empty string. Use '*' for wildcard or omit the filter attribute.", i),
+					)
+				}
+			}
+		}
+	}
+
 	syncChildAccounts := data.SyncChildAccounts
 	roleArn := data.RoleArn
 
@@ -216,22 +232,6 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 				"When 'sync_child_accounts' is enabled, 'role_arn' must be provided and cannot be empty. "+
 					"Please provide a valid AWS IAM role ARN for accessing child accounts.",
 			)
-		}
-	}
-
-	// Handle filter validation - warn users about empty string
-	if !data.TaskList.IsNull() && !data.TaskList.IsUnknown() {
-		var taskList []Awsrte53taskgroupTaskListModel
-		diags := data.TaskList.ElementsAs(ctx, &taskList, false)
-		if !diags.HasError() {
-			for i, task := range taskList {
-				if !task.Filter.IsNull() && task.Filter.ValueString() == "" {
-					resp.Diagnostics.AddError(
-						"Invalid Filter Configuration",
-						fmt.Sprintf("task_list[%d].filter cannot be empty string. Use '*' for wildcard or omit the filter attribute.", i),
-					)
-				}
-			}
 		}
 	}
 }
