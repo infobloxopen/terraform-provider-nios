@@ -71,15 +71,13 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
-		if data.DdnsServerAlwaysUpdates.ValueBool() {
-			// Check if ddns_use_option81 is set to true
-			if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ddns_server_always_updates"),
-					"Invalid Configuration",
-					"When ddns_server_always_updates is enabled, ddns_use_option81 must be set to true",
-				)
-			}
+		// Check if ddns_use_option81 is set to false
+		if data.DdnsUseOption81.IsNull() && data.DdnsUseOption81.IsUnknown() && !data.DdnsUseOption81.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ddns_server_always_updates"),
+				"Invalid Configuration",
+				"ddns_use_option81 must be set to true if ddns_server_always_updates is configured.",
+			)
 		}
 	}
 
@@ -96,6 +94,15 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 			"dhcp6.name-servers":       true,
 		}
 
+		specialOptionsNum := map[int64]bool{
+			3:  true,
+			6:  true,
+			15: true,
+			28: true,
+			51: true,
+			23: true,
+		}
+
 		var options []SharednetworkOptionsModel
 		diags := data.Options.ElementsAs(ctx, &options, false)
 		resp.Diagnostics.Append(diags...)
@@ -104,19 +111,54 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 		}
 
 		for i, option := range options {
-			if option.Name.IsNull() || option.Name.IsUnknown() {
+			isSpecialOption := false
+			optionName := ""
+			if option.Value.IsNull() || option.Value.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("value"),
+					"Invalid configuration for DHCP Option",
+					"The 'value' attribute is a required field and must be set for all DHCP Options.",
+				)
+			}
+			if !option.Name.IsNull() && !option.Name.IsUnknown() {
+				optionName = option.Name.ValueString()
+				isSpecialOption = specialOptions[optionName]
+			} else if !option.Num.IsNull() && !option.Num.IsUnknown() {
+				optionNum := option.Num.ValueInt64()
+				isSpecialOption = specialOptionsNum[optionNum]
+				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("name"),
+					"Invalid configuration for DHCP Option",
+					"Either the 'name' or 'num' attribute must be set for all DHCP Options. "+
+						"Missing both attributes for 'option' at index "+fmt.Sprint(i)+".",
+				)
 				continue
 			}
 
-			optionName := option.Name.ValueString()
-			isSpecialOption := specialOptions[optionName]
+			if option.Value.ValueString() == "" {
+				if !isSpecialOption {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
+					)
+				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
+					)
+				}
+			}
 
 			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("use_option"),
 					"Invalid configuration",
-					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Options '%s'. "+
-						"It is only applicable for special options: routers, router-templates, domain-name-servers, "+
+					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Option '%s'. "+
+						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
 						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
 						optionName),
 				)

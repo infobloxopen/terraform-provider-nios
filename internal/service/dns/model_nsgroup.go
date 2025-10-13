@@ -11,13 +11,17 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -140,6 +144,9 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Determines if the \"multiple DNS primaries\" feature is enabled for the group.",
+		PlanModifiers: []planmodifier.Bool{
+			planmodifiers.ImmutableBool(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -199,7 +206,14 @@ func (m *NsgroupModel) Flatten(ctx context.Context, from *dns.Nsgroup, diags *di
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	planExternalPrimaries := m.ExternalPrimaries
 	m.ExternalPrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalPrimaries, NsgroupExternalPrimariesAttrTypes, diags, FlattenNsgroupExternalPrimaries)
+	if !planExternalPrimaries.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planExternalPrimaries, m.ExternalPrimaries, "tsig_key_name")
+		if !diags.HasError() {
+			m.ExternalPrimaries = result.(basetypes.ListValue)
+		}
+	}
 	m.ExternalSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSecondaries, NsgroupExternalSecondariesAttrTypes, diags, FlattenNsgroupExternalSecondaries)
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, NsgroupGridPrimaryAttrTypes, diags, FlattenNsgroupGridPrimary)
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, NsgroupGridSecondariesAttrTypes, diags, FlattenNsgroupGridSecondaries)

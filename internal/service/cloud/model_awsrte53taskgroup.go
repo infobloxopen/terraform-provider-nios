@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -17,28 +18,29 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Awsrte53taskgroupModel struct {
-	Ref                        types.String                     `tfsdk:"ref"`
-	AccountId                  types.String                     `tfsdk:"account_id"`
-	AccountsList               types.String                     `tfsdk:"accounts_list"`
-	AwsAccountIdsFileToken     types.String                     `tfsdk:"aws_account_ids_file_token"`
-	Comment                    types.String                     `tfsdk:"comment"`
-	ConsolidateZones           types.Bool                       `tfsdk:"consolidate_zones"`
-	ConsolidatedView           types.String                     `tfsdk:"consolidated_view"`
-	Disabled                   types.Bool                       `tfsdk:"disabled"`
-	GridMember                 types.String                     `tfsdk:"grid_member"`
-	MultipleAccountsSyncPolicy types.String                     `tfsdk:"multiple_accounts_sync_policy"`
-	Name                       types.String                     `tfsdk:"name"`
-	NetworkView                types.String                     `tfsdk:"network_view"`
-	NetworkViewMappingPolicy   types.String                     `tfsdk:"network_view_mapping_policy"`
-	RoleArn                    types.String                     `tfsdk:"role_arn"`
-	SyncChildAccounts          types.Bool                       `tfsdk:"sync_child_accounts"`
-	SyncStatus                 types.String                     `tfsdk:"sync_status"`
-	TaskList                   internaltypes.UnorderedListValue `tfsdk:"task_list"`
+	Ref                        types.String `tfsdk:"ref"`
+	AccountId                  types.String `tfsdk:"account_id"`
+	AccountsList               types.String `tfsdk:"accounts_list"`
+	AwsAccountIdsFileToken     types.String `tfsdk:"aws_account_ids_file_token"`
+	Comment                    types.String `tfsdk:"comment"`
+	ConsolidateZones           types.Bool   `tfsdk:"consolidate_zones"`
+	ConsolidatedView           types.String `tfsdk:"consolidated_view"`
+	Disabled                   types.Bool   `tfsdk:"disabled"`
+	GridMember                 types.String `tfsdk:"grid_member"`
+	MultipleAccountsSyncPolicy types.String `tfsdk:"multiple_accounts_sync_policy"`
+	Name                       types.String `tfsdk:"name"`
+	NetworkView                types.String `tfsdk:"network_view"`
+	NetworkViewMappingPolicy   types.String `tfsdk:"network_view_mapping_policy"`
+	RoleArn                    types.String `tfsdk:"role_arn"`
+	SyncChildAccounts          types.Bool   `tfsdk:"sync_child_accounts"`
+	SyncStatus                 types.String `tfsdk:"sync_status"`
+	TaskList                   types.List   `tfsdk:"task_list"`
 }
 
 var Awsrte53taskgroupAttrTypes = map[string]attr.Type{
@@ -58,7 +60,7 @@ var Awsrte53taskgroupAttrTypes = map[string]attr.Type{
 	"role_arn":                      types.StringType,
 	"sync_child_accounts":           types.BoolType,
 	"sync_status":                   types.StringType,
-	"task_list":                     internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: Awsrte53taskgroupTaskListAttrTypes}}},
+	"task_list":                     types.ListType{ElemType: types.ObjectType{AttrTypes: Awsrte53taskgroupTaskListAttrTypes}},
 }
 
 var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
@@ -94,6 +96,9 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Indicates if all zones need to be saved into a single view.",
+		PlanModifiers: []planmodifier.Bool{
+			planmodifiers.ImmutableBool(),
+		},
 	},
 	"consolidated_view": schema.StringAttribute{
 		Optional: true,
@@ -103,6 +108,9 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the DNS view for consolidating zones.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"disabled": schema.BoolAttribute{
 		Optional:            true,
@@ -137,6 +145,9 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the tenant's network view.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"network_view_mapping_policy": schema.StringAttribute{
 		Optional: true,
@@ -146,6 +157,9 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.OneOf("AUTO_CREATE", "DIRECT"),
 		},
 		MarkdownDescription: "The network view mapping policy.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"role_arn": schema.StringAttribute{
 		Optional: true,
@@ -170,7 +184,6 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: Awsrte53taskgroupTaskListResourceSchemaAttributes,
 		},
-		CustomType:          internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: Awsrte53taskgroupTaskListAttrTypes}}},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "List of AWS Route53 tasks in this group.",
@@ -235,5 +248,12 @@ func (m *Awsrte53taskgroupModel) Flatten(ctx context.Context, from *cloud.Awsrte
 	m.RoleArn = flex.FlattenStringPointer(from.RoleArn)
 	m.SyncChildAccounts = types.BoolPointerValue(from.SyncChildAccounts)
 	m.SyncStatus = flex.FlattenStringPointer(from.SyncStatus)
-	m.TaskList = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.TaskList, Awsrte53taskgroupTaskListAttrTypes, diags, FlattenAwsrte53taskgroupTaskList)
+	planList := m.TaskList
+	m.TaskList = flex.FlattenFrameworkListNestedBlock(ctx, from.TaskList, Awsrte53taskgroupTaskListAttrTypes, diags, FlattenAwsrte53taskgroupTaskList)
+	if !planList.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planList, m.TaskList, "name")
+		if !diags.HasError() {
+			m.TaskList = reOrderedList.(basetypes.ListValue)
+		}
+	}
 }

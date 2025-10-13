@@ -16,7 +16,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -25,75 +27,75 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type FixedaddressModel struct {
-	Ref                            types.String                     `tfsdk:"ref"`
-	AgentCircuitId                 types.String                     `tfsdk:"agent_circuit_id"`
-	AgentRemoteId                  types.String                     `tfsdk:"agent_remote_id"`
-	AllowTelnet                    types.Bool                       `tfsdk:"allow_telnet"`
-	AlwaysUpdateDns                types.Bool                       `tfsdk:"always_update_dns"`
-	Bootfile                       types.String                     `tfsdk:"bootfile"`
-	Bootserver                     types.String                     `tfsdk:"bootserver"`
-	CliCredentials                 types.List                       `tfsdk:"cli_credentials"`
-	ClientIdentifierPrependZero    types.Bool                       `tfsdk:"client_identifier_prepend_zero"`
-	CloudInfo                      types.Object                     `tfsdk:"cloud_info"`
-	Comment                        types.String                     `tfsdk:"comment"`
-	DdnsDomainname                 types.String                     `tfsdk:"ddns_domainname"`
-	DdnsHostname                   types.String                     `tfsdk:"ddns_hostname"`
-	DenyBootp                      types.Bool                       `tfsdk:"deny_bootp"`
-	DeviceDescription              types.String                     `tfsdk:"device_description"`
-	DeviceLocation                 types.String                     `tfsdk:"device_location"`
-	DeviceType                     types.String                     `tfsdk:"device_type"`
-	DeviceVendor                   types.String                     `tfsdk:"device_vendor"`
-	DhcpClientIdentifier           types.String                     `tfsdk:"dhcp_client_identifier"`
-	Disable                        types.Bool                       `tfsdk:"disable"`
-	DisableDiscovery               types.Bool                       `tfsdk:"disable_discovery"`
-	DiscoverNowStatus              types.String                     `tfsdk:"discover_now_status"`
-	DiscoveredData                 types.Object                     `tfsdk:"discovered_data"`
-	EnableDdns                     types.Bool                       `tfsdk:"enable_ddns"`
-	EnableImmediateDiscovery       types.Bool                       `tfsdk:"enable_immediate_discovery"`
-	EnablePxeLeaseTime             types.Bool                       `tfsdk:"enable_pxe_lease_time"`
-	ExtAttrs                       types.Map                        `tfsdk:"extattrs"`
-	ExtAttrsAll                    types.Map                        `tfsdk:"extattrs_all"`
-	IgnoreDhcpOptionListRequest    types.Bool                       `tfsdk:"ignore_dhcp_option_list_request"`
-	Ipv4addr                       iptypes.IPv4Address              `tfsdk:"ipv4addr"`
-	FuncCall                       types.Object                     `tfsdk:"func_call"`
-	IsInvalidMac                   types.Bool                       `tfsdk:"is_invalid_mac"`
-	LogicFilterRules               types.List                       `tfsdk:"logic_filter_rules"`
-	Mac                            hwtypes.MACAddress               `tfsdk:"mac"`
-	MatchClient                    types.String                     `tfsdk:"match_client"`
-	MsAdUserData                   types.Object                     `tfsdk:"ms_ad_user_data"`
-	MsOptions                      types.List                       `tfsdk:"ms_options"`
-	MsServer                       types.Object                     `tfsdk:"ms_server"`
-	Name                           types.String                     `tfsdk:"name"`
-	Network                        types.String                     `tfsdk:"network"`
-	NetworkView                    types.String                     `tfsdk:"network_view"`
-	Nextserver                     types.String                     `tfsdk:"nextserver"`
-	Options                        internaltypes.UnorderedListValue `tfsdk:"options"`
-	PxeLeaseTime                   types.Int64                      `tfsdk:"pxe_lease_time"`
-	ReservedInterface              types.String                     `tfsdk:"reserved_interface"`
-	RestartIfNeeded                types.Bool                       `tfsdk:"restart_if_needed"`
-	Snmp3Credential                types.Object                     `tfsdk:"snmp3_credential"`
-	SnmpCredential                 types.Object                     `tfsdk:"snmp_credential"`
-	Template                       types.String                     `tfsdk:"template"`
-	UseBootfile                    types.Bool                       `tfsdk:"use_bootfile"`
-	UseBootserver                  types.Bool                       `tfsdk:"use_bootserver"`
-	UseCliCredentials              types.Bool                       `tfsdk:"use_cli_credentials"`
-	UseDdnsDomainname              types.Bool                       `tfsdk:"use_ddns_domainname"`
-	UseDenyBootp                   types.Bool                       `tfsdk:"use_deny_bootp"`
-	UseEnableDdns                  types.Bool                       `tfsdk:"use_enable_ddns"`
-	UseIgnoreDhcpOptionListRequest types.Bool                       `tfsdk:"use_ignore_dhcp_option_list_request"`
-	UseLogicFilterRules            types.Bool                       `tfsdk:"use_logic_filter_rules"`
-	UseMsOptions                   types.Bool                       `tfsdk:"use_ms_options"`
-	UseNextserver                  types.Bool                       `tfsdk:"use_nextserver"`
-	UseOptions                     types.Bool                       `tfsdk:"use_options"`
-	UsePxeLeaseTime                types.Bool                       `tfsdk:"use_pxe_lease_time"`
-	UseSnmp3Credential             types.Bool                       `tfsdk:"use_snmp3_credential"`
-	UseSnmpCredential              types.Bool                       `tfsdk:"use_snmp_credential"`
+	Ref                            types.String        `tfsdk:"ref"`
+	AgentCircuitId                 types.String        `tfsdk:"agent_circuit_id"`
+	AgentRemoteId                  types.String        `tfsdk:"agent_remote_id"`
+	AllowTelnet                    types.Bool          `tfsdk:"allow_telnet"`
+	AlwaysUpdateDns                types.Bool          `tfsdk:"always_update_dns"`
+	Bootfile                       types.String        `tfsdk:"bootfile"`
+	Bootserver                     types.String        `tfsdk:"bootserver"`
+	CliCredentials                 types.List          `tfsdk:"cli_credentials"`
+	ClientIdentifierPrependZero    types.Bool          `tfsdk:"client_identifier_prepend_zero"`
+	CloudInfo                      types.Object        `tfsdk:"cloud_info"`
+	Comment                        types.String        `tfsdk:"comment"`
+	DdnsDomainname                 types.String        `tfsdk:"ddns_domainname"`
+	DdnsHostname                   types.String        `tfsdk:"ddns_hostname"`
+	DenyBootp                      types.Bool          `tfsdk:"deny_bootp"`
+	DeviceDescription              types.String        `tfsdk:"device_description"`
+	DeviceLocation                 types.String        `tfsdk:"device_location"`
+	DeviceType                     types.String        `tfsdk:"device_type"`
+	DeviceVendor                   types.String        `tfsdk:"device_vendor"`
+	DhcpClientIdentifier           types.String        `tfsdk:"dhcp_client_identifier"`
+	Disable                        types.Bool          `tfsdk:"disable"`
+	DisableDiscovery               types.Bool          `tfsdk:"disable_discovery"`
+	DiscoverNowStatus              types.String        `tfsdk:"discover_now_status"`
+	DiscoveredData                 types.Object        `tfsdk:"discovered_data"`
+	EnableDdns                     types.Bool          `tfsdk:"enable_ddns"`
+	EnableImmediateDiscovery       types.Bool          `tfsdk:"enable_immediate_discovery"`
+	EnablePxeLeaseTime             types.Bool          `tfsdk:"enable_pxe_lease_time"`
+	ExtAttrs                       types.Map           `tfsdk:"extattrs"`
+	ExtAttrsAll                    types.Map           `tfsdk:"extattrs_all"`
+	IgnoreDhcpOptionListRequest    types.Bool          `tfsdk:"ignore_dhcp_option_list_request"`
+	Ipv4addr                       iptypes.IPv4Address `tfsdk:"ipv4addr"`
+	FuncCall                       types.Object        `tfsdk:"func_call"`
+	IsInvalidMac                   types.Bool          `tfsdk:"is_invalid_mac"`
+	LogicFilterRules               types.List          `tfsdk:"logic_filter_rules"`
+	Mac                            hwtypes.MACAddress  `tfsdk:"mac"`
+	MatchClient                    types.String        `tfsdk:"match_client"`
+	MsAdUserData                   types.Object        `tfsdk:"ms_ad_user_data"`
+	MsOptions                      types.List          `tfsdk:"ms_options"`
+	MsServer                       types.Object        `tfsdk:"ms_server"`
+	Name                           types.String        `tfsdk:"name"`
+	Network                        types.String        `tfsdk:"network"`
+	NetworkView                    types.String        `tfsdk:"network_view"`
+	Nextserver                     types.String        `tfsdk:"nextserver"`
+	Options                        types.List          `tfsdk:"options"`
+	PxeLeaseTime                   types.Int64         `tfsdk:"pxe_lease_time"`
+	ReservedInterface              types.String        `tfsdk:"reserved_interface"`
+	RestartIfNeeded                types.Bool          `tfsdk:"restart_if_needed"`
+	Snmp3Credential                types.Object        `tfsdk:"snmp3_credential"`
+	SnmpCredential                 types.Object        `tfsdk:"snmp_credential"`
+	Template                       types.String        `tfsdk:"template"`
+	UseBootfile                    types.Bool          `tfsdk:"use_bootfile"`
+	UseBootserver                  types.Bool          `tfsdk:"use_bootserver"`
+	UseCliCredentials              types.Bool          `tfsdk:"use_cli_credentials"`
+	UseDdnsDomainname              types.Bool          `tfsdk:"use_ddns_domainname"`
+	UseDenyBootp                   types.Bool          `tfsdk:"use_deny_bootp"`
+	UseEnableDdns                  types.Bool          `tfsdk:"use_enable_ddns"`
+	UseIgnoreDhcpOptionListRequest types.Bool          `tfsdk:"use_ignore_dhcp_option_list_request"`
+	UseLogicFilterRules            types.Bool          `tfsdk:"use_logic_filter_rules"`
+	UseMsOptions                   types.Bool          `tfsdk:"use_ms_options"`
+	UseNextserver                  types.Bool          `tfsdk:"use_nextserver"`
+	UseOptions                     types.Bool          `tfsdk:"use_options"`
+	UsePxeLeaseTime                types.Bool          `tfsdk:"use_pxe_lease_time"`
+	UseSnmp3Credential             types.Bool          `tfsdk:"use_snmp3_credential"`
+	UseSnmpCredential              types.Bool          `tfsdk:"use_snmp_credential"`
 }
 
 var FixedaddressAttrTypes = map[string]attr.Type{
@@ -139,7 +141,7 @@ var FixedaddressAttrTypes = map[string]attr.Type{
 	"network":                             types.StringType,
 	"network_view":                        types.StringType,
 	"nextserver":                          types.StringType,
-	"options":                             internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes}}},
+	"options":                             types.ListType{ElemType: types.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes}},
 	"pxe_lease_time":                      types.Int64Type,
 	"reserved_interface":                  types.StringType,
 	"restart_if_needed":                   types.BoolType,
@@ -475,12 +477,17 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.",
 	},
 	"options": schema.ListNestedAttribute{
-		CustomType: internaltypes.UnorderedList{ListType: basetypes.ListType{ElemType: basetypes.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes}}},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: FixedaddressOptionsResourceSchemaAttributes,
 		},
 		Optional: true,
 		Computed: true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes},
+				[]attr.Value{},
+			),
+		),
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
 			listvalidator.SizeAtLeast(1),
@@ -528,6 +535,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If set on creation, the fixed address will be created according to the values specified in the named template.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"use_bootfile": schema.BoolAttribute{
 		Optional:            true,
@@ -753,19 +763,14 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.Network = flex.FlattenStringPointer(from.Network)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
-	m.Options = flex.FilterDHCPOptions(
-		ctx,
-		diags,
-		from.Options,
-		m.Options,
-		FixedaddressOptionsAttrTypes,
-		func(ctx context.Context, opt *dhcp.FixedaddressOptions, d *diag.Diagnostics) types.Object {
-			return FlattenFixedaddressOptions(ctx, opt, d)
-		},
-		func(ctx context.Context, obj types.Object, d *diag.Diagnostics) *dhcp.FixedaddressOptions {
-			return ExpandFixedaddressOptions(ctx, obj, d)
-		},
-	)
+	planOptions := m.Options
+	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, FixedaddressOptionsAttrTypes, diags, FlattenFixedaddressOptions)
+	if !planOptions.IsUnknown() {
+		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
+		if !diags.HasError() {
+			m.Options = reOrderedOptions.(basetypes.ListValue)
+		}
+	}
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.ReservedInterface = flex.FlattenStringPointerNilAsNotEmpty(from.ReservedInterface)
 	planSnmp3Credential := m.Snmp3Credential

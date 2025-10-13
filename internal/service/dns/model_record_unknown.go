@@ -13,6 +13,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -149,6 +151,9 @@ var RecordUnknownResourceSchemaAttributes = map[string]schema.Attribute{
 	"record_type": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "Specifies type of unknown resource record.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"subfield_values": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
