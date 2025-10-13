@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -82,8 +83,11 @@ var ZoneAuthExternalPrimariesResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{

@@ -1342,7 +1342,14 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.EffectiveCheckNamesPolicy = flex.FlattenStringPointer(from.EffectiveCheckNamesPolicy)
 	m.EffectiveRecordNamePolicy = flex.FlattenStringPointer(from.EffectiveRecordNamePolicy)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	planExternalPrimaries := m.ExternalPrimaries
 	m.ExternalPrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalPrimaries, ZoneAuthExternalPrimariesAttrTypes, diags, FlattenZoneAuthExternalPrimaries)
+	if !planExternalPrimaries.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planExternalPrimaries, m.ExternalPrimaries, "tsig_key_name")
+		if !diags.HasError() {
+			m.ExternalPrimaries = result.(basetypes.ListValue)
+		}
+	}
 	planExternalSecondaries := m.ExternalSecondaries
 	m.ExternalSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSecondaries, ZoneAuthExternalSecondariesAttrTypes, diags, FlattenZoneAuthExternalSecondaries)
 	if !planExternalSecondaries.IsNull() {
@@ -1352,9 +1359,23 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 		}
 	}
 	m.Fqdn = flex.FlattenStringPointer(from.Fqdn)
+	planGridPrimary := m.GridPrimary
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneAuthGridPrimaryAttrTypes, diags, FlattenZoneAuthGridPrimary)
+	if !planGridPrimary.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planGridPrimary, m.GridPrimary, "name")
+		if !diags.HasError() {
+			m.GridPrimary = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.GridPrimarySharedWithMsParentDelegation = types.BoolPointerValue(from.GridPrimarySharedWithMsParentDelegation)
+	planGridSecondary := m.GridSecondaries
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, ZoneAuthGridSecondariesAttrTypes, diags, FlattenZoneAuthGridSecondaries)
+	if !planGridSecondary.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planGridSecondary, m.GridSecondaries, "name")
+		if !diags.HasError() {
+			m.GridSecondaries = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.ImportFrom = flex.FlattenIPAddress(from.ImportFrom)
 	m.IsDnssecEnabled = types.BoolPointerValue(from.IsDnssecEnabled)
 	m.IsDnssecSigned = types.BoolPointerValue(from.IsDnssecSigned)
