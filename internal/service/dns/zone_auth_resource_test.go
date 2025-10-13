@@ -1277,17 +1277,26 @@ func TestAccZoneAuthResource_GridSecondaries(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain2",
+			"name": "infoblox.localdomain",
 		},
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name":                       "infoblox.member",
+			"stealth":                    false,
+			"grid_replicate":             true,
+			"lead":                       false,
+			"enable_preferred_primaries": false,
+		},
+	}
+	updatedgridPrimary := []map[string]any{
+		{
+			"name": "infoblox.member",
 		},
 	}
 	updatedGridSecondary := []map[string]any{
 		{
-			"name": "infoblox.localdomain1",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -1301,16 +1310,20 @@ func TestAccZoneAuthResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.stealth", "false"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.grid_replicate", "true"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.lead", "false"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.enable_preferred_primaries", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthGridSecondaries(zoneFqdn, "default", gridPrimary, updatedGridSecondary),
+				Config: testAccZoneAuthGridSecondaries(zoneFqdn, "default", updatedgridPrimary, updatedGridSecondary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain1"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
