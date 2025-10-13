@@ -21,16 +21,7 @@ var ExtensibleattributedefDefaultValueAttrTypes = map[string]attr.Type{}
 var ExtensibleattributedefDefaultValueResourceSchemaAttributes = map[string]schema.Attribute{}
 
 func ExpandExtensibleattributedefDefaultValue(ctx context.Context, s types.String, diags *diag.Diagnostics) *grid.ExtensibleattributedefDefaultValue {
-	// 	if s.IsNull() || s.IsUnknown() {
-	// 		return nil
-	// 	}
-	// 	var m ExtensibleattributedefDefaultValueModel
-	// 	diags.Append(s.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	// 	if diags.HasError() {
-	// 		return nil
-	// 	}
-	// 	return m.Expand(ctx, diags)
-	// }
+
 	if s.IsNull() || s.IsUnknown() {
 		return nil
 	}
@@ -56,23 +47,16 @@ func (m *ExtensibleattributedefDefaultValueModel) Expand(ctx context.Context, di
 }
 
 func FlattenExtensibleattributedefDefaultValue(ctx context.Context, from *grid.ExtensibleattributedefDefaultValue, diags *diag.Diagnostics) types.String {
-	// if from == nil {
-	// 	return types.StringNull()
-	// }
-	// m := ExtensibleattributedefDefaultValueModel{}
-	// m.Flatten(ctx, from, diags)
-	// t, d := types.ObjectValueFrom(ctx, ExtensibleattributedefDefaultValueAttrTypes, m)
-	// diags.Append(d...)
-	// return t.String()
 	if from == nil {
 		return types.StringNull()
 	}
 
 	// Check which field is set and convert back to string
 	if from.String != nil {
-		return types.StringValue(*from.String)
+		return flex.FlattenStringPointer(from.String)
 	} else if from.Int32 != nil {
-		return types.StringValue(strconv.FormatInt(int64(*from.Int32), 10))
+		value := strconv.FormatInt(int64(*from.Int32), 10)
+		return flex.FlattenStringPointer(&value)
 	}
 
 	return types.StringNull()
