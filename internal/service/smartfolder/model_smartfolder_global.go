@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -64,10 +65,27 @@ var SmartfolderGlobalResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: SmartfolderGlobalQueryItemsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
-		Validators:          []validator.List{listvalidator.SizeAtLeast(1)},
-		MarkdownDescription: "The global Smart Folder filter queries.",
+		Optional: true,
+		Computed: true,
+		Default: listdefault.StaticValue(types.ListValueMust(
+			types.ObjectType{AttrTypes: SmartfolderGlobalQueryItemsAttrTypes},
+			[]attr.Value{
+				types.ObjectValueMust(SmartfolderGlobalQueryItemsAttrTypes, map[string]attr.Value{
+					"name":       types.StringValue("type"),
+					"field_type": types.StringValue("NORMAL"),
+					"operator":   types.StringValue("EQ"),
+					"op_match":   types.BoolValue(true),
+					"value_type": types.StringValue("ENUM"),
+					"value": types.ObjectValueMust(SmartfolderglobalqueryitemsValueAttrTypes, map[string]attr.Value{
+						"value_string":  types.StringValue("Network/Zone/Range/Member"),
+						"value_integer": types.Int64Null(),
+						"value_date":    types.StringNull(),
+						"value_boolean": types.BoolNull(),
+					}),
+				}),
+			},
+		)),
+		MarkdownDescription: "The Smart Folder query items.",
 	},
 }
 

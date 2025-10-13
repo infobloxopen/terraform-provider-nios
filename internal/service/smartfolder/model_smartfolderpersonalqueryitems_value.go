@@ -6,25 +6,27 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/smartfolder"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SmartfolderpersonalqueryitemsValueModel struct {
 	ValueInteger types.Int64  `tfsdk:"value_integer"`
 	ValueString  types.String `tfsdk:"value_string"`
-	ValueDate    types.Int64  `tfsdk:"value_date"`
+	ValueDate    types.String `tfsdk:"value_date"`
 	ValueBoolean types.Bool   `tfsdk:"value_boolean"`
 }
 
 var SmartfolderpersonalqueryitemsValueAttrTypes = map[string]attr.Type{
 	"value_integer": types.Int64Type,
 	"value_string":  types.StringType,
-	"value_date":    types.Int64Type,
+	"value_date":    types.StringType,
 	"value_boolean": types.BoolType,
 }
 
@@ -35,11 +37,13 @@ var SmartfolderpersonalqueryitemsValueResourceSchemaAttributes = map[string]sche
 	},
 	"value_string": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The string value of the Smart Folder query.",
 	},
-	"value_date": schema.Int64Attribute{
-		Optional:            true,
+	"value_date": schema.StringAttribute{
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTimeFormat(),
+		},
 		MarkdownDescription: "The timestamp value of the Smart Folder query.",
 	},
 	"value_boolean": schema.BoolAttribute{
@@ -67,9 +71,9 @@ func (m *SmartfolderpersonalqueryitemsValueModel) Expand(ctx context.Context, di
 	to := &smartfolder.SmartfolderpersonalqueryitemsValue{
 		ValueInteger: flex.ExpandInt64Pointer(m.ValueInteger),
 		ValueString:  flex.ExpandStringPointer(m.ValueString),
-		ValueDate:    flex.ExpandInt64Pointer(m.ValueDate),
 		ValueBoolean: flex.ExpandBoolPointer(m.ValueBoolean),
 	}
+	to.ValueDate = flex.ExpandTimeToUnix(m.ValueDate, diags)
 	return to
 }
 
@@ -92,7 +96,16 @@ func (m *SmartfolderpersonalqueryitemsValueModel) Flatten(ctx context.Context, f
 		*m = SmartfolderpersonalqueryitemsValueModel{}
 	}
 	m.ValueInteger = flex.FlattenInt64Pointer(from.ValueInteger)
-	m.ValueString = flex.FlattenStringPointer(from.ValueString)
-	m.ValueDate = flex.FlattenInt64Pointer(from.ValueDate)
+	m.ValueDate = flex.FlattenUnixTime(from.ValueDate, diags)
 	m.ValueBoolean = types.BoolPointerValue(from.ValueBoolean)
+	if from.ValueString != nil {
+		m.ValueString = flex.FlattenStringPointer(from.ValueString)
+	} else {
+		m.ValueString = types.StringNull()
+	}
+	if from.ValueDate != nil {
+		m.ValueDate = flex.FlattenUnixTime(from.ValueDate, diags)
+	} else {
+		m.ValueDate = types.StringNull()
+	}
 }
