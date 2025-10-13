@@ -29,7 +29,7 @@ func TestAccVdiscoverytaskResource_basic(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -73,7 +73,7 @@ func TestAccVdiscoverytaskResource_disappears(t *testing.T) {
 	resourceName := "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -96,7 +96,7 @@ func TestAccVdiscoverytaskResource_AllowUnsecuredConnection(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_allow_unsecured_connection"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -127,7 +127,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateCloudEa(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_cloud_ea"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -158,7 +158,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedTenant(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_managed_tenant"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -189,7 +189,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedVm(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_managed_vm"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -219,7 +219,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsHostnameTemplate(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_hostname_template"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -249,7 +249,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecord(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_record"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -279,7 +279,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecordType(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_record_type"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -310,7 +310,7 @@ func TestAccVdiscoverytaskResource_CdiscoveryFileToken(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_aws_cdiscovery_file"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	// Get test data path
 	testDataPath := getTestDataPath()
@@ -346,7 +346,7 @@ func TestAccVdiscoverytaskResource_Comment(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_comment"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -377,7 +377,7 @@ func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_credentials_type"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -408,7 +408,7 @@ func TestAccVdiscoverytaskResource_DnsViewPrivateIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_dns_view_private_ip"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -439,7 +439,7 @@ func TestAccVdiscoverytaskResource_DnsViewPublicIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_dns_view_public_ip"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -470,7 +470,7 @@ func TestAccVdiscoverytaskResource_DomainName(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_domain_name"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -501,7 +501,7 @@ func TestAccVdiscoverytaskResource_DriverType(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_driver_type"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -535,7 +535,7 @@ func TestAccVdiscoverytaskResource_EnableFilter(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_enable_filter"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	networklist := []string{"10.0.0.0/8", "20.0.0.0/16"}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -598,7 +598,7 @@ func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_fqdn_or_ip"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -638,7 +638,7 @@ func TestAccVdiscoverytaskResource_GovcloudEnabled(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_govcloud_enabled"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -661,7 +661,7 @@ func TestAccVdiscoverytaskResource_IdentityVersion(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_identity_version"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -692,7 +692,7 @@ func TestAccVdiscoverytaskResource_Member(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_member"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -723,7 +723,7 @@ func TestAccVdiscoverytaskResource_MergeData(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_merge_data"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -754,7 +754,7 @@ func TestAccVdiscoverytaskResource_MultipleAccountsSyncPolicy(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_multiple_accounts_sync_policy"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	testDataPath := getTestDataPath()
 	cdiscoveryFile := filepath.Join(testDataPath, "cdiscoveryfile1_aws.csv")
 
@@ -819,7 +819,7 @@ func TestAccVdiscoverytaskResource_NetworkFilter(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_network_filter"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	networkList := []string{"10.0.0.0/8", "25.0.0.0/16"}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -851,7 +851,7 @@ func TestAccVdiscoverytaskResource_NetworkList(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_network_list"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	networkList1 := []string{"10.0.0.0/8", "192.168.0.0/16"}
 	networkList2 := []string{"172.16.0.0/12", "203.0.113.0/24", "198.51.100.0/24"}
 
@@ -889,7 +889,7 @@ func TestAccVdiscoverytaskResource_Password(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_password"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	password1 := "aws_secret_key1"
 	password2 := "aws_secret_key2"
 
@@ -922,7 +922,7 @@ func TestAccVdiscoverytaskResource_Port(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_port"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -953,7 +953,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkView(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_private_network_view"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -983,7 +983,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T)
 	var resourceName = "nios_discovery_vdiscovery_task.test_private_network_view_mapping_policy"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1014,7 +1014,7 @@ func TestAccVdiscoverytaskResource_Protocol(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_protocol"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1045,7 +1045,7 @@ func TestAccVdiscoverytaskResource_PublicNetworkView(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_public_network_view"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1076,7 +1076,7 @@ func TestAccVdiscoverytaskResource_PublicNetworkViewMappingPolicy(t *testing.T) 
 	var resourceName = "nios_discovery_vdiscovery_task.test_public_network_view_mapping_policy"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1107,7 +1107,7 @@ func TestAccVdiscoverytaskResource_RoleArn(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_role_arn"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1198,7 +1198,7 @@ func TestAccVdiscoverytaskResource_SelectedRegions(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_selected_regions"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1229,7 +1229,7 @@ func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_gcp_service_account_file"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	// Get test data path
 	testDataPath := getTestDataPath()
@@ -1269,7 +1269,7 @@ func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_sync_child_accounts"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1300,7 +1300,7 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPrivateIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_update_dns_view_private_ip"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1329,7 +1329,7 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPublicIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_update_dns_view_public_ip"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-public")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-public")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1361,7 +1361,7 @@ func TestAccVdiscoverytaskResource_UpdateMetadata(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_update_metadata"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1391,7 +1391,7 @@ func TestAccVdiscoverytaskResource_UseIdentity(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_use_identity"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1421,7 +1421,7 @@ func TestAccVdiscoverytaskResource_Username(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_username"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("example-vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	username1 := "User1"
 	username2 := "User2"
 

@@ -3,19 +3,39 @@
 page_title: "nios_discovery_vdiscovery_task Resource - nios"
 subcategory: "DISCOVERY"
 description: |-
-  Manages a Vdiscovery Task.
+  Manages a vDiscovery Task.
 ---
 
 # nios_discovery_vdiscovery_task (Resource)
 
-Manages a Vdiscovery Task.
+Manages a vDiscovery Task.
 
 ## Example Usage
 
 ```terraform
-// Create an AWS Vdiscovery Task
+// Create a VMware vDiscovery Task with Basic Fields
+resource "nios_discovery_vdiscovery_task" "vmware_vdiscoverytask" {
+  name                                = "VMWARE-vDiscovery-task"
+  driver_type                         = "VMWARE"
+  member                              = "infoblox.localdomain"
+  fqdn_or_ip                          = "10.0.0.0"
+  username                            = "vc_admin"
+  password                            = "vmware_password"
+  protocol                            = "HTTPS"
+  port                                = 443
+  allow_unsecured_connection          = true
+  auto_consolidate_cloud_ea           = true
+  auto_consolidate_managed_tenant     = true
+  auto_consolidate_managed_vm         = true
+  merge_data                          = true
+  update_metadata                     = false
+  private_network_view_mapping_policy = "AUTO_CREATE"
+  public_network_view_mapping_policy  = "AUTO_CREATE"
+}
+
+// Create an AWS vDiscovery Task
 resource "nios_discovery_vdiscovery_task" "aws_comprehensive" {
-  name                                = "AWS-vdiscoverytask"
+  name                                = "AWS-vDiscovery-task"
   driver_type                         = "AWS"
   member                              = "infoblox.localdomain"
   merge_data                          = true
@@ -47,9 +67,9 @@ resource "nios_discovery_vdiscovery_task" "aws_comprehensive" {
   enabled                             = true
 }
 
-// Create an Azure Vdiscovery Task
+// Create an Azure vDiscovery Task
 resource "nios_discovery_vdiscovery_task" "azure_vdiscoverytask" {
-  name                                = "AZURE-vdiscoverytask"
+  name                                = "AZURE-vDiscovery-task"
   driver_type                         = "AZURE"
   member                              = "infoblox.localdomain"
   username                            = "azure_client_id"
@@ -64,29 +84,9 @@ resource "nios_discovery_vdiscovery_task" "azure_vdiscoverytask" {
   public_network_view_mapping_policy  = "AUTO_CREATE"
 }
 
-// Create a VMware Vdiscovery Task
-resource "nios_discovery_vdiscovery_task" "vmware_vdiscoverytask" {
-  name                                = "VMWARE-vdiscoverytask"
-  driver_type                         = "VMWARE"
-  member                              = "infoblox.localdomain"
-  fqdn_or_ip                          = "10.0.0.0"
-  username                            = "vc_admin"
-  password                            = "vmware_password"
-  protocol                            = "HTTPS"
-  port                                = 443
-  allow_unsecured_connection          = true
-  auto_consolidate_cloud_ea           = true
-  auto_consolidate_managed_tenant     = true
-  auto_consolidate_managed_vm         = true
-  merge_data                          = true
-  update_metadata                     = false
-  private_network_view_mapping_policy = "AUTO_CREATE"
-  public_network_view_mapping_policy  = "AUTO_CREATE"
-}
-
-//Create an OpenStack Vdiscovery Task
+// Create an OpenStack vDiscovery Task
 resource "nios_discovery_vdiscovery_task" "openstack_vdiscoverytask" {
-  name                                = "OPENSTACK-vdiscoverytask"
+  name                                = "OPENSTACK-vDiscovery-task"
   driver_type                         = "OPENSTACK"
   member                              = "infoblox.localdomain"
   fqdn_or_ip                          = "10.15.0.0"
@@ -105,13 +105,13 @@ resource "nios_discovery_vdiscovery_task" "openstack_vdiscoverytask" {
   public_network_view_mapping_policy  = "AUTO_CREATE"
 }
 
-//Create a GCP Vdiscovery Task
+// Create a GCP vDiscovery Task
 resource "nios_discovery_vdiscovery_task" "gcp_vdiscoverytask" {
-  name                                = "GCP-vdiscoverytask"
+  name                                = "GCP-vDiscovery-task"
   driver_type                         = "GCP"
   member                              = "infoblox.localdomain"
   service_account_file                = "</path/to/your/service_account_file.json>"
-  cdiscovery_file                     = "</path/to/your/cdiscovery_file.json>"
+  cdiscovery_file                     = "</path/to/your/cdiscovery_file.csv>"
   multiple_accounts_sync_policy       = "UPLOAD"
   sync_child_accounts                 = true
   merge_data                          = false

@@ -40,7 +40,7 @@ func (r *VdiscoverytaskResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *VdiscoverytaskResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Vdiscovery Task.",
+		MarkdownDescription: "Manages a vDiscovery Task.",
 		Attributes:          VdiscoverytaskResourceSchemaAttributes,
 	}
 }
@@ -431,7 +431,7 @@ func (r *VdiscoverytaskResource) processGCPServiceAccountFile(ctx context.Contex
 	filePath := data.ServiceAccountFile.ValueString()
 
 	// Upload the GCP service account file and get the token
-	token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+	token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
 	if err != nil {
 		diags.AddError(
 			"Client Error",
@@ -461,7 +461,7 @@ func (r *VdiscoverytaskResource) processCDiscoveryFile(ctx context.Context, data
 	filePath := data.CdiscoveryFile.ValueString()
 
 	// Upload the CDiscovery file and get the token
-	token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+	token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
 	if err != nil {
 		diags.AddError(
 			"Client Error",

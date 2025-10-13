@@ -16,7 +16,7 @@ func TestAccVdiscoverytaskDataSource_Filters(t *testing.T) {
 	resourceName := "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
 
-	name := acctest.RandomNameWithPrefix("vdiscoverytask-")
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

@@ -1,9 +1,9 @@
-// Retrieve a specific Vdiscovery Task by filters
+// Retrieve a specific vDiscovery Task by filters
 data "nios_discovery_vdiscovery_task" "get_vdiscoverytask_using_filters" {
   filters = {
-    name = "AWS-Vdiscoverytask"
+    name = "AWS-vDiscovery-task"
   }
 }
 
-// Retrieve all Vdiscovery Tasks
+// Retrieve all vDiscovery Tasks
 data "nios_discovery_vdiscovery_task" "get_all_vdiscoverytasks" {}

@@ -3,24 +3,24 @@
 page_title: "nios_discovery_vdiscovery_task Data Source - nios"
 subcategory: "DISCOVERY"
 description: |-
-  Retrieves information about existing Vdiscovery Tasks.
+  Retrieves information about existing vDiscovery Tasks.
 ---
 
 # nios_discovery_vdiscovery_task (Data Source)
 
-Retrieves information about existing Vdiscovery Tasks.
+Retrieves information about existing vDiscovery Tasks.
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific Vdiscovery Task by filters
+// Retrieve a specific vDiscovery Task by filters
 data "nios_discovery_vdiscovery_task" "get_vdiscoverytask_using_filters" {
   filters = {
-    name = "AWS-Vdiscoverytask"
+    name = "AWS-vDiscovery-task"
   }
 }
 
-// Retrieve all Vdiscovery Tasks
+// Retrieve all vDiscovery Tasks
 data "nios_discovery_vdiscovery_task" "get_all_vdiscoverytasks" {}
 ```
 
