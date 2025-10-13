@@ -225,7 +225,7 @@ func (r *CertificateAuthserviceResource) processOcspResponders(
 	for i, ocspResponder := range ocspResponders {
 		if !ocspResponder.CertificateFilePath.IsNull() && !ocspResponder.CertificateFilePath.IsUnknown() {
 			filePath := ocspResponder.CertificateFilePath.ValueString()
-			token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+			token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
 			if err != nil {
 				diag.AddError(
 					"Client Error",
