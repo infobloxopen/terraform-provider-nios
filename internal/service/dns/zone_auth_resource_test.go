@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -2789,37 +2790,6 @@ func TestAccZoneAuthResource_UseGridZoneTimer(t *testing.T) {
 	})
 }
 
-func TestAccZoneAuthResource_UseImportFrom(t *testing.T) {
-	t.Skip("Skipping test")
-	var resourceName = "nios_dns_zone_auth.test_use_import_from"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthUseImportFrom(zoneFqdn, "default", true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_import_from", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneAuthUseImportFrom(zoneFqdn, "default", false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_import_from", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneAuthResource_UseNotifyDelay(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_notify_delay"
 	var v dns.ZoneAuth
@@ -4008,16 +3978,6 @@ resource "nios_dns_zone_auth" "test_use_grid_zone_timer" {
 `, zoneFqdn, view, gridPrimaryHCL, useGridZoneTimer)
 }
 
-func testAccZoneAuthUseImportFrom(zoneFqdn, view string, useImportFrom bool) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_use_import_from" {
-    fqdn = %q
-    view = %q
-	do_host_abstraction = true
-	import_from = "255.255.255.255"
-    use_import_from = %t
-}`, zoneFqdn, view, useImportFrom)
-}
 func testAccZoneAuthUseNotifyDelay(zoneFqdn, view string, notifyDelay int64, useNotifyDelay bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_notify_delay" {

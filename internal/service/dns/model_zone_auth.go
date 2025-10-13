@@ -25,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
@@ -667,12 +668,8 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list with Grid members that are secondary servers for this zone.",
 	},
 	"import_from": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Optional:   true,
-		Computed:   true,
-		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_import_from")),
-		},
+		CustomType:          iptypes.IPAddressType{},
+		Computed:            true,
 		MarkdownDescription: "The IP address of the Infoblox appliance from which zone data is imported. Setting this address to '255.255.255.255' and do_host_abstraction to 'true' will create Host records from A records in this zone without importing zone data.",
 	},
 	"is_dnssec_enabled": schema.BoolAttribute{
@@ -1111,9 +1108,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: soa_default_ttl , soa_expire, soa_negative_ttl, soa_refresh, soa_retry",
 	},
 	"use_import_from": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: import_from",
 	},
 	"use_notify_delay": schema.BoolAttribute{
@@ -1211,7 +1206,6 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		ExternalSecondaries:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneAuthExternalSecondaries),
 		GridPrimary:                         flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneAuthGridPrimary),
 		GridSecondaries:                     flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneAuthGridSecondaries),
-		ImportFrom:                          flex.ExpandIPAddress(m.ImportFrom),
 		LastQueriedAcl:                      flex.ExpandFrameworkListNestedBlock(ctx, m.LastQueriedAcl, diags, ExpandZoneAuthLastQueriedAcl),
 		Locked:                              flex.ExpandBoolPointer(m.Locked),
 		MemberSoaMnames:                     flex.ExpandFrameworkListNestedBlock(ctx, m.MemberSoaMnames, diags, ExpandZoneAuthMemberSoaMnames),
@@ -1255,7 +1249,6 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		UseDnssecKeyParams:                  flex.ExpandBoolPointer(m.UseDnssecKeyParams),
 		UseExternalPrimary:                  flex.ExpandBoolPointer(m.UseExternalPrimary),
 		UseGridZoneTimer:                    flex.ExpandBoolPointer(m.UseGridZoneTimer),
-		UseImportFrom:                       flex.ExpandBoolPointer(m.UseImportFrom),
 		UseNotifyDelay:                      flex.ExpandBoolPointer(m.UseNotifyDelay),
 		UseRecordNamePolicy:                 flex.ExpandBoolPointer(m.UseRecordNamePolicy),
 		UseScavengingSettings:               flex.ExpandBoolPointer(m.UseScavengingSettings),
