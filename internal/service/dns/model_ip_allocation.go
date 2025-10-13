@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,54 +24,56 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type IPAllocationModel struct {
-	Ref                      types.String `tfsdk:"ref"`
-	Aliases                  types.List   `tfsdk:"aliases"`
-	AllowTelnet              types.Bool   `tfsdk:"allow_telnet"`
-	CliCredentials           types.List   `tfsdk:"cli_credentials"`
-	CloudInfo                types.Object `tfsdk:"cloud_info"`
-	Comment                  types.String `tfsdk:"comment"`
-	ConfigureForDns          types.Bool   `tfsdk:"configure_for_dns"`
-	CreationTime             types.Int64  `tfsdk:"creation_time"`
-	DdnsProtected            types.Bool   `tfsdk:"ddns_protected"`
-	DeviceDescription        types.String `tfsdk:"device_description"`
-	DeviceLocation           types.String `tfsdk:"device_location"`
-	DeviceType               types.String `tfsdk:"device_type"`
-	DeviceVendor             types.String `tfsdk:"device_vendor"`
-	Disable                  types.Bool   `tfsdk:"disable"`
-	DisableDiscovery         types.Bool   `tfsdk:"disable_discovery"`
-	DnsAliases               types.List   `tfsdk:"dns_aliases"`
-	DnsName                  types.String `tfsdk:"dns_name"`
-	EnableImmediateDiscovery types.Bool   `tfsdk:"enable_immediate_discovery"`
-	ExtAttrs                 types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll              types.Map    `tfsdk:"extattrs_all"`
-	InternalID               types.String `tfsdk:"internal_id"`
-	Ipv4addrs                types.List   `tfsdk:"ipv4addrs"`
-	Ipv6addrs                types.List   `tfsdk:"ipv6addrs"`
-	LastQueried              types.Int64  `tfsdk:"last_queried"`
-	MsAdUserData             types.Object `tfsdk:"ms_ad_user_data"`
-	Name                     types.String `tfsdk:"name"`
-	NetworkView              types.String `tfsdk:"network_view"`
-	RestartIfNeeded          types.Bool   `tfsdk:"restart_if_needed"`
-	RrsetOrder               types.String `tfsdk:"rrset_order"`
-	Snmp3Credential          types.Object `tfsdk:"snmp3_credential"`
-	SnmpCredential           types.Object `tfsdk:"snmp_credential"`
-	Ttl                      types.Int64  `tfsdk:"ttl"`
-	UseCliCredentials        types.Bool   `tfsdk:"use_cli_credentials"`
-	UseDnsEaInheritance      types.Bool   `tfsdk:"use_dns_ea_inheritance"`
-	UseSnmp3Credential       types.Bool   `tfsdk:"use_snmp3_credential"`
-	UseSnmpCredential        types.Bool   `tfsdk:"use_snmp_credential"`
-	UseTtl                   types.Bool   `tfsdk:"use_ttl"`
-	View                     types.String `tfsdk:"view"`
-	Zone                     types.String `tfsdk:"zone"`
+	Ref                      types.String                     `tfsdk:"ref"`
+	Aliases                  internaltypes.UnorderedListValue `tfsdk:"aliases"`
+	AllowTelnet              types.Bool                       `tfsdk:"allow_telnet"`
+	CliCredentials           types.List                       `tfsdk:"cli_credentials"`
+	CloudInfo                types.Object                     `tfsdk:"cloud_info"`
+	Comment                  types.String                     `tfsdk:"comment"`
+	ConfigureForDns          types.Bool                       `tfsdk:"configure_for_dns"`
+	CreationTime             types.Int64                      `tfsdk:"creation_time"`
+	DdnsProtected            types.Bool                       `tfsdk:"ddns_protected"`
+	DeviceDescription        types.String                     `tfsdk:"device_description"`
+	DeviceLocation           types.String                     `tfsdk:"device_location"`
+	DeviceType               types.String                     `tfsdk:"device_type"`
+	DeviceVendor             types.String                     `tfsdk:"device_vendor"`
+	Disable                  types.Bool                       `tfsdk:"disable"`
+	DisableDiscovery         types.Bool                       `tfsdk:"disable_discovery"`
+	DnsAliases               types.List                       `tfsdk:"dns_aliases"`
+	DnsName                  types.String                     `tfsdk:"dns_name"`
+	EnableImmediateDiscovery types.Bool                       `tfsdk:"enable_immediate_discovery"`
+	ExtAttrs                 types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll              types.Map                        `tfsdk:"extattrs_all"`
+	InternalID               types.String                     `tfsdk:"internal_id"`
+	Ipv4addrs                types.List                       `tfsdk:"ipv4addrs"`
+	Ipv6addrs                types.List                       `tfsdk:"ipv6addrs"`
+	LastQueried              types.Int64                      `tfsdk:"last_queried"`
+	MsAdUserData             types.Object                     `tfsdk:"ms_ad_user_data"`
+	Name                     types.String                     `tfsdk:"name"`
+	NetworkView              types.String                     `tfsdk:"network_view"`
+	RestartIfNeeded          types.Bool                       `tfsdk:"restart_if_needed"`
+	RrsetOrder               types.String                     `tfsdk:"rrset_order"`
+	Snmp3Credential          types.Object                     `tfsdk:"snmp3_credential"`
+	SnmpCredential           types.Object                     `tfsdk:"snmp_credential"`
+	Ttl                      types.Int64                      `tfsdk:"ttl"`
+	UseCliCredentials        types.Bool                       `tfsdk:"use_cli_credentials"`
+	UseDnsEaInheritance      types.Bool                       `tfsdk:"use_dns_ea_inheritance"`
+	UseSnmp3Credential       types.Bool                       `tfsdk:"use_snmp3_credential"`
+	UseSnmpCredential        types.Bool                       `tfsdk:"use_snmp_credential"`
+	UseTtl                   types.Bool                       `tfsdk:"use_ttl"`
+	View                     types.String                     `tfsdk:"view"`
+	Zone                     types.String                     `tfsdk:"zone"`
 }
 
 var IPAllocationAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
-	"aliases":                    types.ListType{ElemType: types.StringType},
+	"aliases":                    internaltypes.UnorderedListOfStringType,
 	"allow_telnet":               types.BoolType,
 	"cli_credentials":            types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostCliCredentialsAttrTypes}},
 	"cloud_info":                 types.ObjectType{AttrTypes: RecordHostCloudInfoAttrTypes},
@@ -116,6 +119,7 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"aliases": schema.ListAttribute{
+		CustomType:          internaltypes.UnorderedListOfStringType,
 		ElementType:         types.StringType,
 		Optional:            true,
 		Computed:            true,
@@ -126,10 +130,8 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"allow_telnet": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
+		Computed:            true, // Setting this as computed only as backend is not setting the value correctly, needs to be fixed in future(temporary workaround)
 		MarkdownDescription: "This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.",
-		Default:             booldefault.StaticBool(false),
 	},
 	"cli_credentials": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -288,9 +290,13 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The host name in FQDN format This value can be in unicode format. Regular expression search is not supported for unicode values.",
 	},
 	"network_view": schema.StringAttribute{
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The name of the network view in which the host record resides.",
 		Default:             stringdefault.StaticString("default"),
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"restart_if_needed": schema.BoolAttribute{
 		Optional:            true,
@@ -414,6 +420,7 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		UseSnmp3Credential:       flex.ExpandBoolPointer(m.UseSnmp3Credential),
 		UseSnmpCredential:        flex.ExpandBoolPointer(m.UseSnmpCredential),
 		UseTtl:                   flex.ExpandBoolPointer(m.UseTtl),
+		NetworkView:              flex.ExpandStringPointer(m.NetworkView),
 	}
 
 	if m.ConfigureForDns.IsUnknown() || m.ConfigureForDns.IsNull() || m.ConfigureForDns.ValueBool() {
@@ -443,7 +450,7 @@ func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, d
 		*m = IPAllocationModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.Aliases = flex.FlattenFrameworkListString(ctx, from.Aliases, diags)
+	m.Aliases = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Aliases, diags)
 	m.AllowTelnet = types.BoolPointerValue(from.AllowTelnet)
 	m.CliCredentials = flex.FlattenFrameworkListNestedBlock(ctx, from.CliCredentials, RecordHostCliCredentialsAttrTypes, diags, FlattenRecordHostCliCredentials)
 	m.CloudInfo = FlattenRecordHostCloudInfo(ctx, from.CloudInfo, diags)
