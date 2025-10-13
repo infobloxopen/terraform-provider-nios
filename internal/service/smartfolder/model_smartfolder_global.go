@@ -85,7 +85,8 @@ var SmartfolderGlobalResourceSchemaAttributes = map[string]schema.Attribute{
 				}),
 			},
 		)),
-		MarkdownDescription: "The Smart Folder query items.",
+		Validators:          []validator.List{listvalidator.SizeAtLeast(1)},
+		MarkdownDescription: "The global Smart Folder filter queries.",
 	},
 }
 

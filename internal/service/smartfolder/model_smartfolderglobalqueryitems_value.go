@@ -32,13 +32,11 @@ var SmartfolderglobalqueryitemsValueAttrTypes = map[string]attr.Type{
 
 var SmartfolderglobalqueryitemsValueResourceSchemaAttributes = map[string]schema.Attribute{
 	"value_integer": schema.Int64Attribute{
-		Optional: true,
-		//Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The integer value of the Smart Folder query.",
 	},
 	"value_string": schema.StringAttribute{
-		Optional: true,
-		//Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The string value of the Smart Folder query.",
 	},
 	"value_date": schema.StringAttribute{
@@ -46,12 +44,10 @@ var SmartfolderglobalqueryitemsValueResourceSchemaAttributes = map[string]schema
 		Validators: []validator.String{
 			customvalidator.ValidateTimeFormat(),
 		},
-		//Computed:            true,
 		MarkdownDescription: "The timestamp value of the Smart Folder query.",
 	},
 	"value_boolean": schema.BoolAttribute{
-		Optional: true,
-		//Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The boolean value of the Smart Folder query.",
 	},
 }
@@ -100,8 +96,6 @@ func (m *SmartfolderglobalqueryitemsValueModel) Flatten(ctx context.Context, fro
 		*m = SmartfolderglobalqueryitemsValueModel{}
 	}
 	m.ValueInteger = flex.FlattenInt64Pointer(from.ValueInteger)
-	// m.ValueString = flex.FlattenStringPointer(from.ValueString)
-	// m.ValueDate = flex.FlattenUnixTime(from.ValueDate, diags)
 	if from.ValueString != nil {
 		m.ValueString = flex.FlattenStringPointer(from.ValueString)
 	} else {

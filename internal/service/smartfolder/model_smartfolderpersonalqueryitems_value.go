@@ -96,8 +96,6 @@ func (m *SmartfolderpersonalqueryitemsValueModel) Flatten(ctx context.Context, f
 		*m = SmartfolderpersonalqueryitemsValueModel{}
 	}
 	m.ValueInteger = flex.FlattenInt64Pointer(from.ValueInteger)
-	m.ValueDate = flex.FlattenUnixTime(from.ValueDate, diags)
-	m.ValueBoolean = types.BoolPointerValue(from.ValueBoolean)
 	if from.ValueString != nil {
 		m.ValueString = flex.FlattenStringPointer(from.ValueString)
 	} else {
@@ -108,4 +106,6 @@ func (m *SmartfolderpersonalqueryitemsValueModel) Flatten(ctx context.Context, f
 	} else {
 		m.ValueDate = types.StringNull()
 	}
+	m.ValueBoolean = types.BoolPointerValue(from.ValueBoolean)
+
 }
