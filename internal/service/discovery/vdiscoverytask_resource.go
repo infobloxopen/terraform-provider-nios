@@ -245,13 +245,39 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 						"Cannot set month, day_of_month and year if repeat is set to RECUR",
 					)
 				}
-				// For RECUR: must set weekdays, frequency, hour_of_day, minutes_past_hour
-				if scheduledRun.Weekdays.IsNull() || scheduledRun.Frequency.IsNull() || scheduledRun.MinutesPastHour.IsNull() || scheduledRun.HourOfDay.IsNull() {
+
+				// For RECUR: must set frequency, hour_of_day, minutes_past_hour
+				if scheduledRun.Frequency.IsNull() || scheduledRun.HourOfDay.IsNull() || scheduledRun.MinutesPastHour.IsNull() {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("scheduled_run").AtName("repeat"),
 						"Invalid Configuration for Schedule",
-						"If repeat is set to RECUR, then weekdays, frequency, hour_of_day and minutes_past_hour must be set",
+						"If repeat is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
 					)
+				}
+
+				// Handle weekdays validation based on frequency for RECUR only
+				if !scheduledRun.Frequency.IsNull() && !scheduledRun.Frequency.IsUnknown() {
+					frequencyValue := scheduledRun.Frequency.ValueString()
+
+					if frequencyValue == "WEEKLY" {
+						// WEEKLY requires weekdays
+						if scheduledRun.Weekdays.IsNull() || scheduledRun.Weekdays.IsUnknown() {
+							resp.Diagnostics.AddAttributeError(
+								path.Root("scheduled_run").AtName("weekdays"),
+								"Invalid Configuration for Weekdays",
+								"Weekdays must be set if Frequency is set to WEEKLY",
+							)
+						}
+					} else {
+						// Non-WEEKLY cannot have weekdays
+						if !scheduledRun.Weekdays.IsNull() && !scheduledRun.Weekdays.IsUnknown() {
+							resp.Diagnostics.AddAttributeError(
+								path.Root("scheduled_run").AtName("weekdays"),
+								"Invalid Configuration for Weekdays",
+								"Weekdays can only be set if Frequency is set to WEEKLY",
+							)
+						}
+					}
 				}
 			}
 		}
