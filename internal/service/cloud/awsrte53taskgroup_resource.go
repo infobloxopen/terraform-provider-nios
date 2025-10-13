@@ -222,7 +222,7 @@ func (r *Awsrte53taskgroupResource) processAwsAccountIdsFile(ctx context.Context
 	filePath := data.AwsAccountIdsFilePath.ValueString()
 
 	// Upload the AWS account IDs file and get the token
-	token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+	token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
 	if err != nil {
 		diags.AddError(
 			"Client Error",
