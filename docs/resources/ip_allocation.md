@@ -22,7 +22,6 @@ description: |-
 ### Optional
 
 - `aliases` (List of String) This is a list of aliases for the host. The aliases must be in FQDN format. This value can be in unicode format.
-- `allow_telnet` (Boolean) This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.
 - `cli_credentials` (Attributes List) The CLI credentials for the host record. (see [below for nested schema](#nestedatt--cli_credentials))
 - `comment` (String) Comment for the record; maximum 256 characters.
 - `configure_for_dns` (Boolean) When configure_for_dns is false, the host does not have parent zone information.
@@ -37,6 +36,7 @@ description: |-
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `ipv4addrs` (Attributes List) This is a list of IPv4 Addresses for the host. (see [below for nested schema](#nestedatt--ipv4addrs))
 - `ipv6addrs` (Attributes List) This is a list of IPv6 Addresses for the host. (see [below for nested schema](#nestedatt--ipv6addrs))
+- `network_view` (String) The name of the network view in which the host record resides.
 - `restart_if_needed` (Boolean) Restarts the member service.
 - `rrset_order` (String) The value of this field specifies the order in which resource record sets are returned. The possible values are "cyclic", "random" and "fixed".
 - `snmp3_credential` (Attributes) The SNMPv3 credential for this fixed address. (see [below for nested schema](#nestedatt--snmp3_credential))
@@ -51,6 +51,7 @@ description: |-
 
 ### Read-Only
 
+- `allow_telnet` (Boolean) This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.
 - `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
 - `dns_aliases` (List of String) The list of aliases for the host in punycode format.
@@ -59,7 +60,6 @@ description: |-
 - `internal_id` (String) Internal ID of the object.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
-- `network_view` (String) The name of the network view in which the host record resides.
 - `ref` (String) The reference to the object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
@@ -87,7 +87,6 @@ Optional:
 - `bootfile` (String) The name of the boot file the client must download.
 - `bootserver` (String) The IP address or hostname of the boot file server where the boot file is stored.
 - `deny_bootp` (Boolean) Set this to True to disable the BOOTP settings and deny BOOTP boot requests.
-- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--ipv4addrs--discovered_data))
 - `enable_pxe_lease_time` (Boolean) Set this to True if you want the DHCP server to use a different lease time for PXE clients. You can specify the duration of time it takes a host to connect to a boot server, such as a TFTP server, and download the file it needs to boot. For example, set a longer lease time if the client downloads an OS (operating system) or configuration file, or set a shorter lease time if the client downloads only configuration changes. Enter the lease time for the preboot execution environment for hosts to boot remotely from a server.
 - `func_call` (Attributes) Function call to be executed for Fixed Address (see [below for nested schema](#nestedatt--ipv4addrs--func_call))
 - `ignore_client_requested_options` (Boolean) If this field is set to false, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.
@@ -113,6 +112,7 @@ Read-Only:
 
 - `configure_for_dhcp` (Boolean) Set this to True to enable the DHCP configuration for this host address.
 - `discover_now_status` (String) The discovery status of this Host Address.
+- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--ipv4addrs--discovered_data))
 - `host` (String) The host to which the host address belongs, in FQDN format. It is only present when the host address object is not returned as part of a host.
 - `is_invalid_mac` (Boolean) This flag reflects whether the MAC address for this host address is invalid.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
@@ -120,6 +120,51 @@ Read-Only:
 - `network` (String) The network of the host address, in FQDN/CIDR format.
 - `network_view` (String) The name of the network view in which the host address resides.
 - `ref` (String) The reference to the object.
+
+<a id="nestedatt--ipv4addrs--func_call"></a>
+### Nested Schema for `ipv4addrs.func_call`
+
+Required:
+
+- `attribute_name` (String) The attribute to be called.
+
+Optional:
+
+- `object` (String) The object to be called.
+- `object_function` (String) The function to be called.
+- `object_parameters` (Map of String) The parameters for the object.
+- `parameters` (Map of String) The parameters for the function.
+- `result_field` (String) The result field of the function.
+
+
+<a id="nestedatt--ipv4addrs--logic_filter_rules"></a>
+### Nested Schema for `ipv4addrs.logic_filter_rules`
+
+Optional:
+
+- `filter` (String) The filter name.
+- `type` (String) The filter type. Valid values are: * MAC * NAC * Option
+
+
+<a id="nestedatt--ipv4addrs--ms_ad_user_data"></a>
+### Nested Schema for `ipv4addrs.ms_ad_user_data`
+
+Read-Only:
+
+- `active_users_count` (Number) The number of active users.
+
+
+<a id="nestedatt--ipv4addrs--options"></a>
+### Nested Schema for `ipv4addrs.options`
+
+Optional:
+
+- `name` (String) Name of the DHCP option.
+- `num` (Number) The code of the DHCP option.
+- `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
+- `value` (String) Value of the DHCP option
+- `vendor_class` (String) The name of the space this DHCP option is associated to.
+
 
 <a id="nestedatt--ipv4addrs--discovered_data"></a>
 ### Nested Schema for `ipv4addrs.discovered_data`
@@ -224,51 +269,6 @@ Read-Only:
 - `vswitch_type` (String) Type of the virtual switch: standard or distributed.
 
 
-<a id="nestedatt--ipv4addrs--func_call"></a>
-### Nested Schema for `ipv4addrs.func_call`
-
-Required:
-
-- `attribute_name` (String) The attribute to be called.
-
-Optional:
-
-- `object` (String) The object to be called.
-- `object_function` (String) The function to be called.
-- `object_parameters` (Map of String) The parameters for the object.
-- `parameters` (Map of String) The parameters for the function.
-- `result_field` (String) The result field of the function.
-
-
-<a id="nestedatt--ipv4addrs--logic_filter_rules"></a>
-### Nested Schema for `ipv4addrs.logic_filter_rules`
-
-Optional:
-
-- `filter` (String) The filter name.
-- `type` (String) The filter type. Valid values are: * MAC * NAC * Option
-
-
-<a id="nestedatt--ipv4addrs--ms_ad_user_data"></a>
-### Nested Schema for `ipv4addrs.ms_ad_user_data`
-
-Read-Only:
-
-- `active_users_count` (Number) The number of active users.
-
-
-<a id="nestedatt--ipv4addrs--options"></a>
-### Nested Schema for `ipv4addrs.options`
-
-Optional:
-
-- `name` (String) Name of the DHCP option.
-- `num` (Number) The code of the DHCP option.
-- `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
-- `value` (String) Value of the DHCP option
-- `vendor_class` (String) The name of the space this DHCP option is associated to.
-
-
 
 <a id="nestedatt--ipv6addrs"></a>
 ### Nested Schema for `ipv6addrs`
@@ -276,7 +276,6 @@ Optional:
 Optional:
 
 - `address_type` (String) Type of the DHCP IPv6 Host Address object.
-- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--ipv6addrs--discovered_data))
 - `domain_name` (String) Use this method to set or retrieve the domain_name value of the DHCP IPv6 Host Address object.
 - `domain_name_servers` (List of String) The IPv6 addresses of DNS recursive name servers to which the DHCP client can send name resolution requests. The DHCP server includes this information in the DNS Recursive Name Server option in Advertise, Rebind, Information-Request, and Reply messages.
 - `func_call` (Attributes) Function call to be executed for Fixed Address (see [below for nested schema](#nestedatt--ipv6addrs--func_call))
@@ -301,6 +300,7 @@ Read-Only:
 
 - `configure_for_dhcp` (Boolean) Set this to True to enable the DHCP configuration for this IPv6 host address.
 - `discover_now_status` (String) The discovery status of this IPv6 Host Address.
+- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--ipv6addrs--discovered_data))
 - `duid` (String) DHCPv6 Unique Identifier (DUID) of the address object.
 - `host` (String) The host to which the IPv6 host address belongs, in FQDN format. It is only present when the host address object is not returned as part of a host.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
@@ -309,6 +309,51 @@ Read-Only:
 - `network` (String) The network of the host address, in FQDN/CIDR format.
 - `network_view` (String) The name of the network view in which the host address resides.
 - `ref` (String) The reference to the object.
+
+<a id="nestedatt--ipv6addrs--func_call"></a>
+### Nested Schema for `ipv6addrs.func_call`
+
+Required:
+
+- `attribute_name` (String) The attribute to be called.
+
+Optional:
+
+- `object` (String) The object to be called.
+- `object_function` (String) The function to be called.
+- `object_parameters` (Map of String) The parameters for the object.
+- `parameters` (Map of String) The parameters for the function.
+- `result_field` (String) The result field of the function.
+
+
+<a id="nestedatt--ipv6addrs--logic_filter_rules"></a>
+### Nested Schema for `ipv6addrs.logic_filter_rules`
+
+Optional:
+
+- `filter` (String) The filter name.
+- `type` (String) The filter type. Valid values are: * MAC * NAC * Option
+
+
+<a id="nestedatt--ipv6addrs--ms_ad_user_data"></a>
+### Nested Schema for `ipv6addrs.ms_ad_user_data`
+
+Read-Only:
+
+- `active_users_count` (Number) The number of active users.
+
+
+<a id="nestedatt--ipv6addrs--options"></a>
+### Nested Schema for `ipv6addrs.options`
+
+Optional:
+
+- `name` (String) Name of the DHCP option.
+- `num` (Number) The code of the DHCP option.
+- `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
+- `value` (String) Value of the DHCP option
+- `vendor_class` (String) The name of the space this DHCP option is associated to.
+
 
 <a id="nestedatt--ipv6addrs--discovered_data"></a>
 ### Nested Schema for `ipv6addrs.discovered_data`
@@ -411,51 +456,6 @@ Read-Only:
 - `vswitch_tep_type` (String) Type of virtual tunnel endpoint (VTEP) in the virtual switch.
 - `vswitch_tep_vlan` (String) VLAN of the virtual tunnel endpoint (VTEP) in the virtual switch.
 - `vswitch_type` (String) Type of the virtual switch: standard or distributed.
-
-
-<a id="nestedatt--ipv6addrs--func_call"></a>
-### Nested Schema for `ipv6addrs.func_call`
-
-Required:
-
-- `attribute_name` (String) The attribute to be called.
-
-Optional:
-
-- `object` (String) The object to be called.
-- `object_function` (String) The function to be called.
-- `object_parameters` (Map of String) The parameters for the object.
-- `parameters` (Map of String) The parameters for the function.
-- `result_field` (String) The result field of the function.
-
-
-<a id="nestedatt--ipv6addrs--logic_filter_rules"></a>
-### Nested Schema for `ipv6addrs.logic_filter_rules`
-
-Optional:
-
-- `filter` (String) The filter name.
-- `type` (String) The filter type. Valid values are: * MAC * NAC * Option
-
-
-<a id="nestedatt--ipv6addrs--ms_ad_user_data"></a>
-### Nested Schema for `ipv6addrs.ms_ad_user_data`
-
-Read-Only:
-
-- `active_users_count` (Number) The number of active users.
-
-
-<a id="nestedatt--ipv6addrs--options"></a>
-### Nested Schema for `ipv6addrs.options`
-
-Optional:
-
-- `name` (String) Name of the DHCP option.
-- `num` (Number) The code of the DHCP option.
-- `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
-- `value` (String) Value of the DHCP option
-- `vendor_class` (String) The name of the space this DHCP option is associated to.
 
 
 

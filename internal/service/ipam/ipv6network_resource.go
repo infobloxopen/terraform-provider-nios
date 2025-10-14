@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -94,7 +95,20 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6network, got error: %s", err))
+		errVal := err.Error()
+		if ((strings.Contains(errVal, "The search parameters") &&
+			strings.Contains(errVal, "for object ipv6network did not return any result")) ||
+			strings.Contains(errVal, "will overlap an existing network")) &&
+			r.isIpv6NetworkConvertedToContainer(ctx, &data) {
+			resp.Diagnostics.AddError(
+				"Unable to Create Ipv6network. Ipv6network Might Be Converted to Ipv6network Container",
+				fmt.Sprintf("Failed to create Ipv6network. The parent Ipv6network appears to have been converted to a Ipv6network container. "+
+					"Manual intervention is needed to import it as a container. "+
+					"Got error: %s", err),
+			)
+		} else {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6network, got error: %s", err))
+		}
 		return
 	}
 
@@ -498,4 +512,17 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			"You cannot set 'ddns_server_always_updates' to false when 'ddns_enable_option_fqdn' is false.",
 		)
 	}
+}
+
+func (r *Ipv6networkResource) isIpv6NetworkConvertedToContainer(ctx context.Context, data *Ipv6networkModel) bool {
+	// Try to fetch as Ipv6network container
+	_, _, err := r.client.IPAMAPI.
+		Ipv6networkcontainerAPI.
+		List(ctx).
+		Filters(map[string]interface{}{
+			"network": data.Network.ValueString(),
+		},
+		).
+		Execute()
+	return err == nil
 }
