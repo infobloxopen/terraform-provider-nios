@@ -3,7 +3,7 @@ resource "nios_dhcp_range_template" "range_template_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
-  // add `cloud_api_compatible = true` if Terraform Internal ID extensible attribute has cloud access
+  // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
   cloud_api_compatible = false
 }
 
@@ -12,7 +12,7 @@ resource "nios_dhcp_range_template" "range_template_additional_fields" {
   name                = "example_range_template_additional_fields"
   number_of_addresses = 10
   offset              = 20
-  // add `cloud_api_compatible = true` if Terraform Internal ID extensible attribute has cloud access
+  // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
   cloud_api_compatible    = true
   bootfile                = "bootfile.iso"
   bootserver              = "boot_server1"

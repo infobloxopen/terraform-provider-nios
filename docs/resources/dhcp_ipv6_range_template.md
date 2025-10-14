@@ -18,7 +18,7 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_required_fields" {
   name                = "example_range_template"
   number_of_addresses = 10
   offset              = 20
-  // add `cloud_api_compatible = true` if Terraform Internal ID extensible attribute has cloud access
+  // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
   cloud_api_compatible = false
 }
 
@@ -27,7 +27,7 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_additional_fields"
   name                = "example_range_template_additional_fields"
   number_of_addresses = 100
   offset              = 200
-  // add `cloud_api_compatible = true` if Terraform Internal ID extensible attribute has cloud access
+  // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
   cloud_api_compatible    = true
   comment                 = "Example comment for ipv6 range template"
   server_association_type = "MEMBER"
@@ -39,11 +39,11 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_additional_fields"
     }
   ]
   member = {
-    ipv4addr = "172.28.82.185"
+    ipv4addr = "10.0.0.0"
     name     = "infoblox.member"
   }
   delegated_member = {
-    ipv4addr = "172.28.82.185"
+    ipv4addr = "10.0.0.0"
     name     = "infoblox.member"
   }
   use_logic_filter_rules = true
@@ -75,7 +75,7 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_additional_fields"
 
 ### Optional
 
-- `cloud_api_compatible` (Boolean) Determines whether the IPv6 DHCP range template can be used to create network objects in a cloud-computing deployment.
+- `cloud_api_compatible` (Boolean) Determines whether the IPv6 DHCP range template can be used to create network objects in a cloud-computing deployment. The cloud_api_compatible attribute must be set to true if any extensible attributes, such as the Terraform Internal ID, require cloud access; otherwise, it must be set to false.
 - `comment` (String) The IPv6 DHCP range template descriptive comment.
 - `delegated_member` (Attributes) The vConnector member that the object should be delegated to when created from the IPv6 DHCP range template. The vConnector refers to VMware vConnector. (see [below for nested schema](#nestedatt--delegated_member))
 - `exclude` (Attributes List) These are ranges of IPv6 addresses that the appliance does not use to assign to clients. You can use these excluded addresses as static IPv6 addresses. They contain the start and end addresses of the excluded range, and optionally, information about this excluded range. (see [below for nested schema](#nestedatt--exclude))
@@ -83,7 +83,7 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_additional_fields"
 - `member` (Attributes) The member that will provide service for the IPv6 DHCP range. Set `server_association_type` to `MEMBER` if you want the server specified here to serve the range. For searching by this field, use an HTTP method that contains a body (POST or PUT) with MS DHCP server structure and the request should have option _method=GET. (see [below for nested schema](#nestedatt--member))
 - `option_filter_rules` (Attributes List) This field contains the Option filters to be applied to this IPv6 range. The appliance uses the matching rules of these filters to select the address range from which it assigns a lease. (see [below for nested schema](#nestedatt--option_filter_rules))
 - `recycle_leases` (Boolean) Determines whether the leases are kept in Recycle Bin until one week after expiry. If this is set to False, the leases are permanently deleted.
-- `server_association_type` (String) The type of server that is going to serve the IPv6 DHCP range.
+- `server_association_type` (String) The type of server that is going to serve the IPv6 DHCP range. Valid values are `MEMBER` and `NONE`.
 - `use_logic_filter_rules` (Boolean) Use flag for: logic_filter_rules
 - `use_recycle_leases` (Boolean) Use flag for: recycle_leases
 
