@@ -11,9 +11,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	
+
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
+
 // UploadInitResponse struct represents the response from the NIOS uploadinit API call
 type UploadInitResponse struct {
 	Token string `json:"token"`
@@ -45,7 +46,7 @@ func GenerateUploadToken(ctx context.Context, baseURL, username, password string
 	if err != nil {
 		return &uploadInitResponse, fmt.Errorf("error making uploadinit request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)
@@ -60,24 +61,24 @@ func GenerateUploadToken(ctx context.Context, baseURL, username, password string
 	return &uploadInitResponse, nil
 }
 
-// UploadPEMFile uploads a PEM file to the Infoblox NIOS server using the provided upload URL.
-func UploadPEMFile(ctx context.Context, uploadURL, pemFilePath, username, password string) error {
+// UploadFile uploads a file to the Infoblox NIOS server using the provided upload URL.
+func UploadFile(ctx context.Context, uploadURL, filePath, username, password string) error {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	}
-	file, err := os.Open(pemFilePath)
+	file, err := os.Open(filePath)
 	if err != nil {
-		return fmt.Errorf("error opening PEM file: %w", err)
+		return fmt.Errorf("error opening the file: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	// Create a buffer for the multipart form
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 
 	// Create the form file field
-	part, err := writer.CreateFormFile("file", filepath.Base(pemFilePath))
+	part, err := writer.CreateFormFile("file", filepath.Base(filePath))
 	if err != nil {
 		return fmt.Errorf("error creating form file: %w", err)
 	}
@@ -99,34 +100,34 @@ func UploadPEMFile(ctx context.Context, uploadURL, pemFilePath, username, passwo
 	uploadReq.Header.Set("Content-Type", writer.FormDataContentType())
 	uploadReq.SetBasicAuth(username, password)
 
-	tflog.Debug(ctx, fmt.Sprintf("Uploading PEM file to: %s", uploadURL))
+	tflog.Debug(ctx, fmt.Sprintf("Uploading the file to: %s", uploadURL))
 	uploadResp, err := httpClient.Do(uploadReq)
 	if err != nil {
-		return fmt.Errorf("error uploading PEM file: %w", err)
+		return fmt.Errorf("error uploading the file: %w", err)
 	}
-	defer uploadResp.Body.Close()
+	defer func() { _ = uploadResp.Body.Close() }()
 	if uploadResp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(uploadResp.Body)
 		return fmt.Errorf("file upload failed with status %d: %s", uploadResp.StatusCode, string(bodyBytes))
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("PEM file %s uploaded successfully", pemFilePath))
+	tflog.Info(ctx, fmt.Sprintf("file %s uploaded successfully", filePath))
 	return nil
 }
 
-// UploadPEMFileWithToken handles the complete process of generating an upload token and uploading a PEM file
+// UploadFileWithToken handles the complete process of generating an upload token and uploading a file
 // It returns the token from the successful upload or an error if any step fails
-func UploadPEMFileWithToken(ctx context.Context, baseUrl, filePath, username, password string) (string, error) {
-    // Generate the upload token
-    uploadInitResponse, err := GenerateUploadToken(ctx, baseUrl, username, password)
-    if err != nil {
-        return "", fmt.Errorf("unable to generate upload token: %w", err)
-    }
-    
-    // Upload the file using the token URL
-    if err = UploadPEMFile(ctx, uploadInitResponse.URL, filePath, username, password); err != nil {
-        return "", fmt.Errorf("unable to upload file: %w", err)
-    }
-    
-    return uploadInitResponse.Token, nil
+func UploadFileWithToken(ctx context.Context, baseUrl, filePath, username, password string) (string, error) {
+	// Generate the upload token
+	uploadInitResponse, err := GenerateUploadToken(ctx, baseUrl, username, password)
+	if err != nil {
+		return "", fmt.Errorf("unable to generate upload token: %w", err)
+	}
+
+	// Upload the file using the token URL
+	if err = UploadFile(ctx, uploadInitResponse.URL, filePath, username, password); err != nil {
+		return "", fmt.Errorf("unable to upload file: %w", err)
+	}
+
+	return uploadInitResponse.Token, nil
 }

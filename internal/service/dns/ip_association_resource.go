@@ -347,6 +347,7 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 	// Clear out read-only fields that should not be sent in update
 	updateReq.CloudInfo = nil
 	updateReq.CreationTime = nil
+	updateReq.DnsAliases = nil
 	updateReq.DnsName = nil
 	updateReq.LastQueried = nil
 	updateReq.NetworkView = nil

@@ -116,6 +116,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewZoneForwardResource,
 		dns.NewZoneDelegatedResource,
 		dns.NewZoneAuthResource,
+		dns.NewZoneRpResource,
 		dns.NewViewResource,
 		dns.NewZoneStubResource,
 		dns.NewNsgroupResource,
@@ -168,8 +169,10 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewDistributionscheduleResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
+		discovery.NewVdiscoverytaskResource,
 
 		notification.NewNotificationRuleResource,
+		notification.NewNotificationRestEndpointResource,
 	}
 }
 
@@ -194,6 +197,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewZoneForwardDataSource,
 		dns.NewZoneDelegatedDataSource,
 		dns.NewZoneAuthDataSource,
+		dns.NewZoneRpDataSource,
 		dns.NewViewDataSource,
 		dns.NewZoneStubDataSource,
 		dns.NewNsgroupDataSource,
@@ -244,8 +248,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewDistributionscheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
+		discovery.NewVdiscoverytaskDataSource,
 
 		notification.NewNotificationRuleDataSource,
+
+		notification.NewNotificationRestEndpointDataSource,
 	}
 }
 

@@ -55,7 +55,6 @@ Required:
 Optional:
 
 - `aliases` (List of String) This is a list of aliases for the host. The aliases must be in FQDN format. This value can be in unicode format.
-- `allow_telnet` (Boolean) This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.
 - `cli_credentials` (Attributes List) The CLI credentials for the host record. (see [below for nested schema](#nestedatt--result--cli_credentials))
 - `comment` (String) Comment for the record; maximum 256 characters.
 - `configure_for_dns` (Boolean) When configure_for_dns is false, the host does not have parent zone information.
@@ -85,6 +84,7 @@ Optional:
 
 Read-Only:
 
+- `allow_telnet` (Boolean) This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.
 - `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `creation_time` (Number) The time of the record creation in Epoch seconds format.
 - `dns_aliases` (List of String) The list of aliases for the host in punycode format.

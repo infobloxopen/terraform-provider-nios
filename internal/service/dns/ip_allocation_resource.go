@@ -86,6 +86,20 @@ func (r *IPAllocationResource) ValidateConfig(ctx context.Context, req resource.
 		)
 	}
 
+	if len(data.Ipv4addrs.Elements()) > 1 {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"'ipv4addrs' can contain at most one element.",
+		)
+	}
+
+	if len(data.Ipv6addrs.Elements()) > 1 {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"'ipv6addrs' can contain at most one element.",
+		)
+	}
+
 	// Validate FQDN if configure_for_dns is true
 	if data.ConfigureForDns.ValueBool() {
 		name := data.Name.ValueString()

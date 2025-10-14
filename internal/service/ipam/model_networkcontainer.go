@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -26,6 +27,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -618,6 +620,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address of the record.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Computed:            true,
@@ -628,12 +633,18 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"network_container": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network container to which this network belongs, if any.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"network_view": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The name of the network view in which this network resides.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("default"),
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"nextserver": schema.StringAttribute{
 		Optional:            true,

@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -26,6 +27,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -180,6 +182,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This flag controls whether reverse zones are automatically created when the network is added.",
 		Default:             booldefault.StaticBool(false),
 		Computed:            true,
+		PlanModifiers: []planmodifier.Bool{
+			planmodifiers.ImmutableBool(),
+		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          Ipv6networkcontainerCloudInfoResourceSchemaAttributes,
@@ -380,6 +385,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Computed:            true,
@@ -390,12 +398,18 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"network_container": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network container to which this network belongs, if any.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"network_view": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The name of the network view in which this network resides.",
 		Computed:            true,
 		Default:             stringdefault.StaticString("default"),
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
