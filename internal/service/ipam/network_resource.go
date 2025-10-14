@@ -96,9 +96,10 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		if ((strings.Contains(err.Error(), "The search parameters") &&
-			strings.Contains(err.Error(), "for object network did not return any result")) ||
-			strings.Contains(err.Error(), "will overlap an existing network")) &&
+		errVal := err.Error()
+		if ((strings.Contains(errVal, "The search parameters") &&
+			strings.Contains(errVal, "for object network did not return any result")) ||
+			strings.Contains(errVal, "will overlap an existing network")) &&
 			r.isNetworkConvertedToContainer(ctx, &data) {
 			resp.Diagnostics.AddError(
 				"Unable to Create Network. Network Might Be Converted to Network Container",

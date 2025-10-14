@@ -95,9 +95,10 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		if ((strings.Contains(err.Error(), "The search parameters") &&
-			strings.Contains(err.Error(), "for object ipv6network did not return any result")) ||
-			strings.Contains(err.Error(), "will overlap an existing network")) &&
+		errVal := err.Error()
+		if ((strings.Contains(errVal, "The search parameters") &&
+			strings.Contains(errVal, "for object ipv6network did not return any result")) ||
+			strings.Contains(errVal, "will overlap an existing network")) &&
 			r.isIpv6NetworkConvertedToContainer(ctx, &data) {
 			resp.Diagnostics.AddError(
 				"Unable to Create Ipv6network. Ipv6network Might Be Converted to Ipv6network Container",
