@@ -8,13 +8,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 )
 
 type ExtensibleattributedefModel struct {
@@ -56,6 +58,7 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		ElementType: types.StringType,
 		Optional:    true,
 		Computed:    true,
+		Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -77,13 +80,13 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"descendants_action": schema.SingleNestedAttribute{
 		Attributes:          ExtensibleattributedefDescendantsActionResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Action to take on descendants of the object when the object is deleted.",
+		MarkdownDescription: "This option describes the action that must be taken on the extensible attribute by its descendant in case the ‘Inheritable’ flag is set.",
 	},
 	"flags": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "This field contains extensible attribute flags. Possible values: (A)udited, (C)loud API, Cloud (G)master, (I)nheritable, (L)isted, (M)andatory value, MGM (P)rivate, (R)ead Only, (S)ort enum values, Multiple (V)alues If there are two or more flags in the field, you must list them according to the order they are listed above. For example, 'CR' is a valid value for the 'flags' field because C = Cloud API is listed before R = Read only. However, the value 'RC' is invalid because the order for the 'flags' field is broken.",
 	},
 	"list_values": schema.ListNestedAttribute{
@@ -93,6 +96,7 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
+		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: ExtensibleattributedefListValuesAttrTypes})),
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "List of Values. Applicable if the extensible attribute type is ENUM.",
@@ -121,6 +125,9 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 			stringvalidator.OneOf("DATE", "EMAIL", "ENUM", "INTEGER", "STRING", "URL"),
 		},
 		MarkdownDescription: "Type for the Extensible Attribute Definition.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 }
 
