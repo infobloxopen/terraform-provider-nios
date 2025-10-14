@@ -206,7 +206,8 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 		diags := data.TaskList.ElementsAs(ctx, &taskList, false)
 		if !diags.HasError() {
 			for i, task := range taskList {
-				if !task.Filter.IsNull() && task.Filter.ValueString() == "" {
+				// Check if filter is known and not null before checking if it's empty
+				if !task.Filter.IsUnknown() && !task.Filter.IsNull() && task.Filter.ValueString() == "" {
 					resp.Diagnostics.AddError(
 						"Invalid Filter Configuration",
 						fmt.Sprintf("task_list[%d].filter cannot be empty string. Use '*' for wildcard or omit the filter attribute.", i),
@@ -220,13 +221,13 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 	roleArn := data.RoleArn
 
 	// Skip validation if values are unknown (during planning)
-	if syncChildAccounts.IsUnknown() || roleArn.IsUnknown() {
+	if syncChildAccounts.IsUnknown() {
 		return
 	}
 
 	// If sync_child_accounts is true, role_arn must be provided and non-empty
 	if !syncChildAccounts.IsNull() && syncChildAccounts.ValueBool() {
-		if roleArn.IsNull() || roleArn.ValueString() == "" {
+		if roleArn.IsUnknown() || roleArn.IsNull() || roleArn.ValueString() == "" {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"When 'sync_child_accounts' is enabled, 'role_arn' must be provided and cannot be empty. "+
