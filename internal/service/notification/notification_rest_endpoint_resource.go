@@ -391,7 +391,7 @@ func (r *NotificationRestEndpointResource) processClientCertificate(
 	password := r.client.SecurityAPI.Cfg.NIOSPassword
 
 	filePath := data.ClientCertificateFile.ValueString()
-	token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+	token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
 	if err != nil {
 		diag.AddError(
 			"Client Error",
