@@ -106,7 +106,7 @@ var RecordHostIpv6addrResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"discovered_data": schema.SingleNestedAttribute{
 		Attributes: RecordHostIpv6addrDiscoveredDataResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"domain_name": schema.StringAttribute{
 		Optional:            true,
