@@ -49,14 +49,14 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_additional_fields"
   use_logic_filter_rules = true
   logic_filter_rules = [
     {
-      "filter" = "ipv6_option_filter"
-      "type"   = "Option"
+      filter = "ipv6_option_filter"
+      type   = "Option"
     }
   ]
   option_filter_rules = [
     {
-      "filter"     = "ipv6_option_filter1"
-      "permission" = "Deny"
+      filter     = "ipv6_option_filter1"
+      permission = "Deny"
     }
   ]
   recycle_leases     = false
