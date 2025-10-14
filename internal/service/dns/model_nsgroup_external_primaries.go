@@ -79,7 +79,6 @@ var NsgroupExternalPrimariesResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
@@ -115,7 +114,6 @@ func (m *NsgroupExternalPrimariesModel) Expand(ctx context.Context, diags *diag.
 		Stealth:        flex.ExpandBoolPointer(m.Stealth),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
 		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
-		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
 		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
 	}
 	return to
