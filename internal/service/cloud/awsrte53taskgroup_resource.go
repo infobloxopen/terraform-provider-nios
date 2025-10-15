@@ -245,7 +245,7 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 		return
 	}
 
-	// Handle filter validation - warn users about empty string
+	// Validation 1: Handle filter validation
 	if !data.TaskList.IsNull() && !data.TaskList.IsUnknown() {
 		var taskList []Awsrte53taskgroupTaskListModel
 		diags := data.TaskList.ElementsAs(ctx, &taskList, false)
@@ -262,22 +262,44 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 		}
 	}
 
-	syncChildAccounts := data.SyncChildAccounts
-	roleArn := data.RoleArn
-
-	// Skip validation if values are unknown (during planning)
-	if syncChildAccounts.IsUnknown() {
-		return
-	}
-
-	// If sync_child_accounts is true, role_arn must be provided and non-empty
-	if !syncChildAccounts.IsNull() && syncChildAccounts.ValueBool() {
-		if roleArn.IsUnknown() || roleArn.IsNull() || roleArn.ValueString() == "" {
+	// Validation 2: aws_account_ids_file_path can only be used with UPLOAD_CHILDREN policy
+	if !data.AwsAccountIdsFilePath.IsNull() && !data.AwsAccountIdsFilePath.IsUnknown() && data.AwsAccountIdsFilePath.ValueString() != "" {
+		if data.MultipleAccountsSyncPolicy.IsNull() || data.MultipleAccountsSyncPolicy.IsUnknown() || data.MultipleAccountsSyncPolicy.ValueString() != "UPLOAD_CHILDREN" {
+			policyValue := "null"
+			if !data.MultipleAccountsSyncPolicy.IsNull() && !data.MultipleAccountsSyncPolicy.IsUnknown() {
+				policyValue = data.MultipleAccountsSyncPolicy.ValueString()
+			}
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
-				"When 'sync_child_accounts' is enabled, 'role_arn' must be provided and cannot be empty. "+
-					"Please provide a valid AWS IAM role ARN for accessing child accounts.",
+				"'aws_account_ids_file_path' can only be used when 'multiple_accounts_sync_policy' is set to 'UPLOAD_CHILDREN'. "+
+					"Current policy is '"+policyValue+"'. "+
+					"Either remove 'aws_account_ids_file_path' or set 'multiple_accounts_sync_policy' to 'UPLOAD_CHILDREN'.",
 			)
+		}
+	}
+
+	// Validation 3: UPLOAD_CHILDREN policy requires aws_account_ids_file_path
+	if !data.MultipleAccountsSyncPolicy.IsNull() && !data.MultipleAccountsSyncPolicy.IsUnknown() && data.MultipleAccountsSyncPolicy.ValueString() == "UPLOAD_CHILDREN" {
+		if data.AwsAccountIdsFilePath.IsNull() || data.AwsAccountIdsFilePath.IsUnknown() || data.AwsAccountIdsFilePath.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When 'multiple_accounts_sync_policy' is 'UPLOAD_CHILDREN', 'aws_account_ids_file_path' must be provided. "+
+					"Please specify the path to a file containing AWS account IDs.",
+			)
+		}
+	}
+
+	// Validation 4: sync_child_accounts and role_arn relationship
+	// Only validate if sync_child_accounts is known (not unknown)
+	if !data.SyncChildAccounts.IsUnknown() {
+		if !data.SyncChildAccounts.IsNull() && data.SyncChildAccounts.ValueBool() {
+			if data.RoleArn.IsUnknown() || data.RoleArn.IsNull() || data.RoleArn.ValueString() == "" {
+				resp.Diagnostics.AddError(
+					"Invalid Configuration",
+					"When 'sync_child_accounts' is enabled, 'role_arn' must be provided and cannot be empty. "+
+						"Please provide a valid AWS IAM role ARN for accessing child accounts.",
+				)
+			}
 		}
 	}
 }
