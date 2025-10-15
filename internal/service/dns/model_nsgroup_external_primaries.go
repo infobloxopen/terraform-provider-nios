@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
@@ -83,6 +84,7 @@ var NsgroupExternalPrimariesResourceSchemaAttributes = map[string]schema.Attribu
 		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_tsig_key_name")),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},
@@ -115,6 +117,7 @@ func (m *NsgroupExternalPrimariesModel) Expand(ctx context.Context, diags *diag.
 		Stealth:        flex.ExpandBoolPointer(m.Stealth),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
 		TsigKeyAlg:     flex.ExpandStringPointer(m.TsigKeyAlg),
+		TsigKeyName:    flex.ExpandStringPointer(m.TsigKeyName),
 		UseTsigKeyName: flex.ExpandBoolPointer(m.UseTsigKeyName),
 	}
 	return to
