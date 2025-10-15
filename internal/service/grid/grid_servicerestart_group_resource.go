@@ -14,6 +14,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -123,6 +124,7 @@ func (r *GridServicerestartGroupResource) Read(ctx context.Context, req resource
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForGridServicerestartGroup).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes

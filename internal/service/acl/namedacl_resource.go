@@ -13,6 +13,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/acl"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -120,6 +121,7 @@ func (r *NamedaclResource) Read(ctx context.Context, req resource.ReadRequest, r
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForNamedacl).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
