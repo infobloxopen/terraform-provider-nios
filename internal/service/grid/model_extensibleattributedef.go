@@ -2,6 +2,8 @@ package grid
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -138,7 +140,7 @@ func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Di
 	to := &grid.Extensibleattributedef{
 		AllowedObjectTypes: flex.ExpandFrameworkListString(ctx, m.AllowedObjectTypes, diags),
 		Comment:            flex.ExpandStringPointer(m.Comment),
-		DefaultValue:       ExpandExtensibleattributedefDefaultValue(ctx, m.DefaultValue, diags),
+		DefaultValue:       ExpandExtensibleattributedefDefaultValue(ctx, m.DefaultValue, m.Type, diags),
 		DescendantsAction:  ExpandExtensibleattributedefDescendantsAction(ctx, m.DescendantsAction, diags),
 		Flags:              flex.ExpandStringPointer(m.Flags),
 		ListValues:         flex.ExpandFrameworkListNestedBlock(ctx, m.ListValues, diags, ExpandExtensibleattributedefListValues),
@@ -182,4 +184,56 @@ func (m *ExtensibleattributedefModel) Flatten(ctx context.Context, from *grid.Ex
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Namespace = flex.FlattenStringPointer(from.Namespace)
 	m.Type = flex.FlattenStringPointer(from.Type)
+}
+
+func ExpandExtensibleattributedefDefaultValue(ctx context.Context, defaultValue types.String, eaType types.String, diags *diag.Diagnostics) *grid.ExtensibleattributedefDefaultValue {
+	if defaultValue.IsNull() || defaultValue.IsUnknown() {
+		return &grid.ExtensibleattributedefDefaultValue{}
+	}
+
+	value := defaultValue.ValueString()
+	if value == "" {
+		return &grid.ExtensibleattributedefDefaultValue{}
+	}
+
+	// Check the type to determine if we should send as integer or string
+	if !eaType.IsNull() && !eaType.IsUnknown() && eaType.ValueString() == "INTEGER" {
+		// Convert string to integer for INTEGER type
+		if intVal, err := strconv.ParseInt(value, 10, 32); err == nil {
+			int32Val := int32(intVal)
+			return &grid.ExtensibleattributedefDefaultValue{
+				Int32: &int32Val,
+			}
+		} else {
+			diags.AddError(
+				"Invalid Integer Default Value",
+				fmt.Sprintf("Cannot convert default_value '%s' to integer: %v", value, err),
+			)
+			return &grid.ExtensibleattributedefDefaultValue{}
+		}
+	}
+
+	// For all other types (STRING, EMAIL, URL, DATE, ENUM), send as string
+	return &grid.ExtensibleattributedefDefaultValue{
+		String: &value,
+	}
+}
+
+func FlattenExtensibleattributedefDefaultValue(ctx context.Context, from *grid.ExtensibleattributedefDefaultValue, diags *diag.Diagnostics) types.String {
+	if from == nil {
+		return types.StringNull()
+	}
+
+	if from.Int32 != nil {
+		// Convert int32 to string for Terraform
+		return types.StringValue(strconv.FormatInt(int64(*from.Int32), 10))
+	}
+
+	// Check if string value is set
+	if from.String != nil {
+		return types.StringValue(*from.String)
+	}
+
+	// No value set
+	return types.StringNull()
 }
