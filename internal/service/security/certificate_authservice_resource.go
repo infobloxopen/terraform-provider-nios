@@ -269,7 +269,7 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 	}
 
 	// Check if remote lookup is enabled and validate required fields
-	isRemoteLookupEnabled := !(data.EnableRemoteLookup.IsNull() || data.EnableRemoteLookup.IsUnknown()) && data.EnableRemoteLookup.ValueBool()
+	isRemoteLookupEnabled := !data.EnableRemoteLookup.IsNull() && !data.EnableRemoteLookup.IsUnknown() && data.EnableRemoteLookup.ValueBool()
 	missingService := data.RemoteLookupService.IsNull() || data.RemoteLookupService.IsUnknown()
 	missingUsername := data.RemoteLookupUsername.IsNull() || data.RemoteLookupUsername.IsUnknown()
 	missingPassword := data.RemoteLookupPassword.IsNull() || data.RemoteLookupPassword.IsUnknown()
