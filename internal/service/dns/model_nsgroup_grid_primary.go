@@ -38,6 +38,7 @@ var NsgroupGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"stealth": schema.BoolAttribute{
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.",
 	},
 	"grid_replicate": schema.BoolAttribute{
@@ -78,7 +79,8 @@ func (m *NsgroupGridPrimaryModel) Expand(ctx context.Context, diags *diag.Diagno
 		return nil
 	}
 	to := &dns.NsgroupGridPrimary{
-		Name:                     flex.ExpandStringPointer(m.Name),
+		Name: flex.ExpandStringPointer(m.Name),
+		Stealth: flex.ExpandBoolPointer(m.Stealth),
 	}
 	return to
 }
