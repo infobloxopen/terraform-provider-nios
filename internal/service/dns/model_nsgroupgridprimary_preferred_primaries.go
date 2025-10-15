@@ -39,12 +39,12 @@ var NsgroupgridprimaryPreferredPrimariesAttrTypes = map[string]attr.Type{
 
 var NsgroupgridprimaryPreferredPrimariesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Computed:   true,
+		CustomType:          iptypes.IPAddressType{},
+		Computed:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the server.",
 	},
 	"name": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "A resolvable domain name for the external DNS server.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
@@ -56,15 +56,15 @@ var NsgroupgridprimaryPreferredPrimariesResourceSchemaAttributes = map[string]sc
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{

@@ -79,7 +79,7 @@ func (m *NsgroupGridPrimaryModel) Expand(ctx context.Context, diags *diag.Diagno
 		return nil
 	}
 	to := &dns.NsgroupGridPrimary{
-		Name: flex.ExpandStringPointer(m.Name),
+		Name:    flex.ExpandStringPointer(m.Name),
 		Stealth: flex.ExpandBoolPointer(m.Stealth),
 	}
 	return to

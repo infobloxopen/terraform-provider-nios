@@ -65,15 +65,15 @@ var NsgroupgridsecondariesPreferredPrimariesResourceSchemaAttributes = map[strin
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
@@ -99,9 +99,9 @@ func (m *NsgroupgridsecondariesPreferredPrimariesModel) Expand(ctx context.Conte
 		return nil
 	}
 	to := &dns.NsgroupgridsecondariesPreferredPrimaries{
-		Address:        flex.ExpandIPAddress(m.Address),
-		Name:           flex.ExpandStringPointer(m.Name),
-		Stealth:        flex.ExpandBoolPointer(m.Stealth),
+		Address: flex.ExpandIPAddress(m.Address),
+		Name:    flex.ExpandStringPointer(m.Name),
+		Stealth: flex.ExpandBoolPointer(m.Stealth),
 	}
 	return to
 }

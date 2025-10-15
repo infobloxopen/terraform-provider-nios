@@ -83,11 +83,11 @@ func (m *NsgroupGridSecondariesModel) Expand(ctx context.Context, diags *diag.Di
 		return nil
 	}
 	to := &dns.NsgroupGridSecondaries{
-		Name: flex.ExpandStringPointer(m.Name),
-		Stealth: flex.ExpandBoolPointer(m.Stealth),
-		GridReplicate: flex.ExpandBoolPointer(m.GridReplicate),
-		Lead: flex.ExpandBoolPointer(m.Lead),
-		PreferredPrimaries: flex.ExpandFrameworkListNestedBlock(ctx, m.PreferredPrimaries, diags, ExpandNsgroupgridsecondariesPreferredPrimaries),
+		Name:                     flex.ExpandStringPointer(m.Name),
+		Stealth:                  flex.ExpandBoolPointer(m.Stealth),
+		GridReplicate:            flex.ExpandBoolPointer(m.GridReplicate),
+		Lead:                     flex.ExpandBoolPointer(m.Lead),
+		PreferredPrimaries:       flex.ExpandFrameworkListNestedBlock(ctx, m.PreferredPrimaries, diags, ExpandNsgroupgridsecondariesPreferredPrimaries),
 		EnablePreferredPrimaries: flex.ExpandBoolPointer(m.EnablePreferredPrimaries),
 	}
 	return to
