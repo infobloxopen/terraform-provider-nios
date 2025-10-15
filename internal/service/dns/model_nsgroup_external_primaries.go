@@ -79,6 +79,7 @@ var NsgroupExternalPrimariesResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
+		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
