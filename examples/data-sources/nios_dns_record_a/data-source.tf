@@ -13,4 +13,4 @@ data "nios_dns_record_a" "get_record_using_extensible_attributes" {
 }
 
 // Retrieve all A records
-data "nios_dns_record_a" "get_all_records_in_default_view" {}
+data "nios_dns_record_a" "get_all_a_records" {}

@@ -12,5 +12,5 @@ data "nios_dns_record_naptr" "get_record_with_extattr_filter" {
   }
 }
 
-// Retrieve all NAPTR records in the default view
-data "nios_dns_record_naptr" "get_all_records_in_default_view" {}
+// Retrieve all NAPTR records 
+data "nios_dns_record_naptr" "get_all_naptr_records" {}

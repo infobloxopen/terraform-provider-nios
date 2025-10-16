@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -83,6 +84,7 @@ var NsgroupExternalPrimariesResourceSchemaAttributes = map[string]schema.Attribu
 		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_tsig_key_name")),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},
