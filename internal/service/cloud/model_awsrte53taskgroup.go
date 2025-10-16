@@ -83,7 +83,7 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The AWS account IDs file's token.",
 	},
 	"aws_account_ids_file_path": schema.StringAttribute{
-		Optional:            true, // change this  based on validate config
+		Optional:            true, 
 		MarkdownDescription: "The AWS account IDs file's path.",
 	},
 	"comment": schema.StringAttribute{
