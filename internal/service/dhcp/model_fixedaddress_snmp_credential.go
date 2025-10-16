@@ -40,7 +40,6 @@ var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attri
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},

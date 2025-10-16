@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -64,7 +63,6 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
