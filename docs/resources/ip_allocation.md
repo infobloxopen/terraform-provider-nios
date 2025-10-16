@@ -39,8 +39,8 @@ description: |-
 - `network_view` (String) The name of the network view in which the host record resides.
 - `restart_if_needed` (Boolean) Restarts the member service.
 - `rrset_order` (String) The value of this field specifies the order in which resource record sets are returned. The possible values are "cyclic", "random" and "fixed".
-- `snmp3_credential` (Attributes) The SNMPv3 credential for this fixed address. (see [below for nested schema](#nestedatt--snmp3_credential))
-- `snmp_credential` (Attributes) The SNMP credential for this fixed address. If set to true, the SNMP credential will override member-level settings. (see [below for nested schema](#nestedatt--snmp_credential))
+- `snmp3_credential` (Attributes) The SNMPv3 credential for this host record. (see [below for nested schema](#nestedatt--snmp3_credential))
+- `snmp_credential` (Attributes) The SNMP credential for this host record. If set to true, the SNMP credential will override member-level settings. (see [below for nested schema](#nestedatt--snmp_credential))
 - `ttl` (Number) The Time To Live (TTL) value for record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_cli_credentials` (Boolean) If set to true, the CLI credential will override member-level settings.
 - `use_dns_ea_inheritance` (Boolean) When use_dns_ea_inheritance is True, the EA is inherited from associated zone.

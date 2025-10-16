@@ -129,7 +129,7 @@ func (r *IPAssociationResource) Read(ctx context.Context, req resource.ReadReque
 
 	hostRecord, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record. Please ensure the allocation exists. If you are importing resources, import the allocation first. Original error: %s", err))
 		return
 	}
 

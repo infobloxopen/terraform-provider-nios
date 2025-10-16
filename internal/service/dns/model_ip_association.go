@@ -41,7 +41,7 @@ var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Set this to True to enable the DHCP configuration for the IP association.",
-		Default:             booldefault.StaticBool(true),
+		Default:             booldefault.StaticBool(false),
 	},
 	"duid": schema.StringAttribute{
 		CustomType:          internaltypes.DUIDType{},
