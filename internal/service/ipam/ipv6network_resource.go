@@ -443,6 +443,16 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 				continue
 			}
 
+			// dhcp-lease-time (or num = 51) cannot be used with valid_lifetime
+			if optionName == "dhcp-lease-time" || optionName == "with num = 51" {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options"),
+					"Invalid configuration for DHCP Option",
+					"The Custom option 'dhcp-lease-time' cannot be set for Ipv6 Network. "+
+						"Remove the 'dhcp-lease-time' option and set 'valid_lifetime' instead.",
+				)
+			}
+
 			if option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(

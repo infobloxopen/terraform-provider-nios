@@ -110,7 +110,7 @@ resource "nios_ipam_ipv6network_container" "example_func_call" {
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
 - `network` (String) The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'.
 - `network_view` (String) The name of the network view in which this network resides.
-- `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--options))
+- `options` (Attributes List) An array of DHCP option structs that lists the DHCP options associated with the object. The option `dhcp-lease-time` cannot be configured for this object and instead 'valid_lifetime' attribute should be used. (see [below for nested schema](#nestedatt--options))
 - `port_control_blackout_setting` (Attributes) (see [below for nested schema](#nestedatt--port_control_blackout_setting))
 - `preferred_lifetime` (Number) Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network Container object.
 - `remove_subnets` (Boolean) Remove subnets delete option. Determines whether all child objects should be removed alongside with the IPv6 network container or child objects should be assigned to another parental container. By default child objects are deleted with this network container.
