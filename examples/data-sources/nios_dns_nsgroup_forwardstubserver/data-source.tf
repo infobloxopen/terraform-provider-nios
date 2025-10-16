@@ -13,5 +13,5 @@ data "nios_dns_nsgroup_forwardstubserver" "get_nsgroup_forward_stub_server_using
 }
 
 // Retrieve all NS Groups Forward Stub Servers
-data "nios_dns_nsgroup_forwardstubserver" "get_all_nsgroup_forward_stub_servers_in_default_view" {
+data "nios_dns_nsgroup_forwardstubserver" "get_all_nsgroup_forward_stub_servers" {
 }
