@@ -13,4 +13,4 @@ data "nios_dns_record_srv" "get_record_using_extensible_attributes" {
 }
 
 // Retrieve all SRV records
-data "nios_dns_record_srv" "get_all_records" {}
+data "nios_dns_record_srv" "get_all_srv_records" {}

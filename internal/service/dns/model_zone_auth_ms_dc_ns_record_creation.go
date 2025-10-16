@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -38,6 +39,7 @@ var ZoneAuthMsDcNsRecordCreationResourceSchemaAttributes = map[string]schema.Att
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Optional user comment.",
 	},
 }
