@@ -179,7 +179,7 @@ func TestAccUpgradegroupResource_DistributionTime(t *testing.T) {
 		{"member": "infoblox.localhost"},
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -348,7 +348,7 @@ func TestAccUpgradegroupResource_UpgradeTime(t *testing.T) {
 		{"member": "infoblox.localhost"},
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{

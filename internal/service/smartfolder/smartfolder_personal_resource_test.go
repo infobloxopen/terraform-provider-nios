@@ -223,7 +223,7 @@ func TestAccSmartfolderPersonalResource_QueryItems(t *testing.T) {
 			"op_match":   true,
 			"operator":   "EQ",
 			"value": map[string]any{
-				"value_date": 4123567,
+				"value_date": "2025-09-10T02:00:00",
 			},
 			"value_type": "DATE",
 		},
@@ -257,7 +257,7 @@ func TestAccSmartfolderPersonalResource_QueryItems(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "query_items.0.name", "last_discovered_timestamp"),
 					resource.TestCheckResourceAttr(resourceName, "query_items.0.op_match", "true"),
 					resource.TestCheckResourceAttr(resourceName, "query_items.0.operator", "EQ"),
-					resource.TestCheckResourceAttr(resourceName, "query_items.0.value.value_date", "4123567"),
+					resource.TestCheckResourceAttr(resourceName, "query_items.0.value.value_date", "2025-09-10T02:00:00"),
 					resource.TestCheckResourceAttr(resourceName, "query_items.0.value_type", "DATE"),
 				),
 			},

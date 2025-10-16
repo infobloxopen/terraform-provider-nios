@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -77,6 +78,24 @@ var SmartfolderPersonalResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
+		Default: listdefault.StaticValue(types.ListValueMust(
+			types.ObjectType{AttrTypes: SmartfolderPersonalQueryItemsAttrTypes},
+			[]attr.Value{
+				types.ObjectValueMust(SmartfolderPersonalQueryItemsAttrTypes, map[string]attr.Value{
+					"name":       types.StringValue("type"),
+					"field_type": types.StringValue("NORMAL"),
+					"operator":   types.StringValue("EQ"),
+					"op_match":   types.BoolValue(true),
+					"value_type": types.StringValue("ENUM"),
+					"value": types.ObjectValueMust(SmartfolderpersonalqueryitemsValueAttrTypes, map[string]attr.Value{
+						"value_string":  types.StringValue("Network/Zone/Range/Member"),
+						"value_integer": types.Int64Null(),
+						"value_date":    types.StringNull(),
+						"value_boolean": types.BoolNull(),
+					}),
+				}),
+			},
+		)),
 		MarkdownDescription: "The personal Smart Folder filter queries.",
 	},
 }

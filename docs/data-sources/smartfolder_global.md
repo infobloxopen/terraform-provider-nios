@@ -76,7 +76,7 @@ Optional:
 - `name` (String) The Smart Folder query name.
 - `op_match` (Boolean) Determines whether the query operator should match.
 - `operator` (String) The Smart Folder operator used in query.
-- `value` (Attributes) (see [below for nested schema](#nestedatt--result--query_items--value))
+- `value` (Attributes) The Smart Folder query value. (see [below for nested schema](#nestedatt--result--query_items--value))
 - `value_type` (String) The Smart Folder query value type.
 
 <a id="nestedatt--result--query_items--value"></a>
@@ -85,6 +85,6 @@ Optional:
 Optional:
 
 - `value_boolean` (Boolean) The boolean value of the Smart Folder query.
-- `value_date` (Number) The timestamp value of the Smart Folder query.
+- `value_date` (String) The timestamp value of the Smart Folder query.
 - `value_integer` (Number) The integer value of the Smart Folder query.
 - `value_string` (String) The string value of the Smart Folder query.

@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -110,6 +112,16 @@ var SmartfolderGlobalQueryItemsResourceSchemaAttributes = map[string]schema.Attr
 		Attributes: SmartfolderglobalqueryitemsValueResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		Default: objectdefault.StaticValue(types.ObjectValueMust(
+			SmartfolderglobalqueryitemsValueAttrTypes,
+			map[string]attr.Value{
+				"value_string":  types.StringValue("Network/Zone/Range/Member"),
+				"value_integer": types.Int64Null(),
+				"value_date":    types.StringNull(),
+				"value_boolean": types.BoolNull(),
+			},
+		)),
+		MarkdownDescription: "The Smart Folder query value.",
 	},
 }
 
