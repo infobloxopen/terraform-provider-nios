@@ -13,11 +13,11 @@ import (
 type ArpaIPv6Validator struct{}
 
 func (v ArpaIPv6Validator) Description(ctx context.Context) string {
-	return "String must be a valid ARPA IPv6 address in the format 'x.x.x...x.ip6.arpa' with 1–32 hex nibbles"
+	return "String must be a valid ARPA IPv6 address in the format 'x.x.x...x.ip6.arpa' with exactly 32 hex nibbles"
 }
 
 func (v ArpaIPv6Validator) MarkdownDescription(ctx context.Context) string {
-	return "String must be a valid ARPA IPv6 address in the format `x.x.x...x.ip6.arpa` with 1–32 hex nibbles"
+	return "String must be a valid ARPA IPv6 address in the format `x.x.x...x.ip6.arpa` with exactly 32 hex nibbles"
 }
 
 func (v ArpaIPv6Validator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
@@ -26,9 +26,9 @@ func (v ArpaIPv6Validator) ValidateString(ctx context.Context, req validator.Str
 	}
 
 	value := req.ConfigValue.ValueString()
+	normalized := strings.TrimSuffix(value, ".")
 
-	// Must end with .ip6.arpa
-	if !strings.HasSuffix(value, ".ip6.arpa") {
+	if !strings.HasSuffix(normalized, ".ip6.arpa") {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Invalid IPv6 ARPA Format",
@@ -37,22 +37,19 @@ func (v ArpaIPv6Validator) ValidateString(ctx context.Context, req validator.Str
 		return
 	}
 
-	// Strip suffix and split nibbles
-	nibbles := strings.Split(strings.TrimSuffix(value, ".ip6.arpa"), ".")
-
-	// Must be between 1 and 32 nibbles
-	if len(nibbles) < 1 || len(nibbles) > 32 {
+	nibbles := strings.Split(strings.TrimSuffix(normalized, ".ip6.arpa"), ".")
+	if len(nibbles) != 32 {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Invalid IPv6 ARPA Format",
-			fmt.Sprintf("The value '%s' must contain between 1 and 32 hexadecimal nibbles before '.ip6.arpa'", value),
+			fmt.Sprintf("The value '%s' must contain exactly 32 hexadecimal nibbles before '.ip6.arpa'", value),
 		)
 		return
 	}
 
-	// Validate each nibble
+	hexNibble := regexp.MustCompile(`^[0-9a-fA-F]$`)
 	for _, nibble := range nibbles {
-		if !regexp.MustCompile(`^[0-9a-fA-F]$`).MatchString(nibble) {
+		if !hexNibble.MatchString(nibble) {
 			resp.Diagnostics.AddAttributeError(
 				req.Path,
 				"Invalid IPv6 ARPA Format",
