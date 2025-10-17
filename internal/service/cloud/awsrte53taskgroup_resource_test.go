@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -489,6 +490,63 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 	})
 }
 
+func TestAccAwsrte53taskgroupResource_AwsAccountIdsFilePath(t *testing.T) {
+	var resourceName = "nios_cloud_aws_route53_task_group.test_aws_account_ids_file_path"
+	var v cloud.Awsrte53taskgroup
+
+	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup-")
+	gridMember := "infoblox.localdomain"
+	disabled := false
+	syncChildAccounts := true
+	networkViewMappingPolicy := "DIRECT"
+	roleArn := "arn:aws:iam::523456789012:role/Role-name"
+	multipleAccountsSyncPolicy := "UPLOAD_CHILDREN"
+	consolidateZones := true
+	consolidatedView := "default"
+	networkView := "default"
+
+	// Get test data path
+	testDataPath := getTestDataPath()
+	awsAccountFile1 := filepath.Join(testDataPath, "awsrte53file1_acc.csv")
+	awsAccountFile2 := filepath.Join(testDataPath, "awsrte53file2_aws.csv")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccAwsrte53taskgroupAwsAccountIdsFilePath(taskGroupName, gridMember, disabled, syncChildAccounts, networkViewMappingPolicy, roleArn, multipleAccountsSyncPolicy, consolidateZones, consolidatedView, networkView, awsAccountFile1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "name", taskGroupName),
+					resource.TestCheckResourceAttr(resourceName, "grid_member", gridMember),
+					resource.TestCheckResourceAttr(resourceName, "disabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "sync_child_accounts", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network_view_mapping_policy", "DIRECT"),
+					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::523456789012:role/Role-name"),
+					resource.TestCheckResourceAttr(resourceName, "multiple_accounts_sync_policy", "UPLOAD_CHILDREN"),
+					resource.TestCheckResourceAttr(resourceName, "consolidate_zones", "true"),
+					resource.TestCheckResourceAttr(resourceName, "consolidated_view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "network_view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "aws_account_ids_file_path", awsAccountFile1),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccAwsrte53taskgroupAwsAccountIdsFilePath(taskGroupName, gridMember, disabled, syncChildAccounts, networkViewMappingPolicy, roleArn, multipleAccountsSyncPolicy, consolidateZones, consolidatedView, networkView, awsAccountFile2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "aws_account_ids_file_path", awsAccountFile2),
+					resource.TestCheckResourceAttr(resourceName, "multiple_accounts_sync_policy", "UPLOAD_CHILDREN"),
+					resource.TestCheckResourceAttr(resourceName, "sync_child_accounts", "true"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckAwsrte53taskgroupExists(ctx context.Context, resourceName string, v *cloud.Awsrte53taskgroup) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -545,6 +603,24 @@ func testAccCheckAwsrte53taskgroupDisappears(ctx context.Context, v *cloud.Awsrt
 		}
 		return nil
 	}
+}
+
+func testAccAwsrte53taskgroupAwsAccountIdsFilePath(taskGroupName, gridMember string, disabled, syncChildAccounts bool, networkViewMappingPolicy, roleArn, multipleAccountsSyncPolicy string, consolidateZones bool, consolidatedView, networkView, awsAccountIdsFilePath string) string {
+	return fmt.Sprintf(`
+resource "nios_cloud_aws_route53_task_group" "test_aws_account_ids_file_path" {
+    name                          = %q
+    grid_member                   = %q
+    disabled                      = %t
+    sync_child_accounts           = %t
+    network_view_mapping_policy   = %q
+    role_arn                      = %q
+    multiple_accounts_sync_policy = %q
+    consolidate_zones             = %t
+    consolidated_view             = %q
+    network_view                  = %q
+    aws_account_ids_file_path     = %q
+}
+`, taskGroupName, gridMember, disabled, syncChildAccounts, networkViewMappingPolicy, roleArn, multipleAccountsSyncPolicy, consolidateZones, consolidatedView, networkView, awsAccountIdsFilePath)
 }
 
 func testAccAwsrte53taskgroupBasicConfig(name, gridMember string) string {
@@ -722,4 +798,10 @@ resource "nios_cloud_aws_route53_task_group" "test_task_list" {
 	depends_on = [nios_cloud_aws_user.test]
 }
 `, taskGroupName, gridMember, taskListHCL)
+}
+
+func getTestDataPath() string {
+	// Get the path to the testdata directory
+	testDataPath := filepath.Join("..", "..", "testdata", "nios_awsrte53taskgroup")
+	return testDataPath
 }
