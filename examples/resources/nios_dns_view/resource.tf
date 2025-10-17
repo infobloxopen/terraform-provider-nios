@@ -1,4 +1,6 @@
 // Create DNS View with Basic Fields
+resource "nios_dns_view" "create_view" {
+  name = "example_view"
 }
 
 // Create DNS View with additional fields
