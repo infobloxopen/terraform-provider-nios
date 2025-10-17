@@ -917,7 +917,7 @@ resource "nios_security_certificate_authservice" "test_response_timeout" {
 `, ocspCheck, responseTimeout, name, caCertificateStr)
 }
 
-func testAccCertificateAuthserviceTrustModel(name string, caCertificate []string, trustModel , ocspCheck string) string {
+func testAccCertificateAuthserviceTrustModel(name string, caCertificate []string, trustModel, ocspCheck string) string {
 	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_trust_model" {
@@ -929,7 +929,7 @@ resource "nios_security_certificate_authservice" "test_trust_model" {
 `, ocspCheck, name, caCertificateStr, trustModel)
 }
 
-func testAccCertificateAuthserviceUserMatchType(name string, caCertificate []string, userMatchType ,ocspCheck string) string {
+func testAccCertificateAuthserviceUserMatchType(name string, caCertificate []string, userMatchType, ocspCheck string) string {
 	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test_user_match_type" {
