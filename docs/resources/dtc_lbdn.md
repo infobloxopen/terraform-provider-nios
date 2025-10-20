@@ -66,7 +66,6 @@ resource "nios_dtc_pool" "dtc_pool3" {
 // Create DTC LBDN with additional fields
 resource "nios_dtc_lbdn" "lbdn_additional_fields" {
   name = "example_lbdn_2"
-  // Reference both parent zones using their resource references
   auth_zones = [nios_dns_zone_auth.parent_zone.ref,
     nios_dns_zone_auth.parent_zone2.ref
   ]
@@ -74,8 +73,10 @@ resource "nios_dtc_lbdn" "lbdn_additional_fields" {
   extattrs = {
     Site = "location-1"
   }
-  lb_method = "ROUND_ROBIN"
-  patterns  = ["*wapi.com", "info.com*"]
+  lb_method = "TOPOLOGY"
+  //The topology used here must have any one of the pools configured in its topology members
+  topology = "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"
+  patterns = ["*wapi.com", "info.com*"]
   pools = [
     {
       pool  = nios_dtc_pool.dtc_pool1.ref
