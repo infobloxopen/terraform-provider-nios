@@ -194,7 +194,7 @@ func findLabelLength(s string) int {
 			if err != nil || num > 255 {
 				return -1
 			}
-			skipChars += 2 // [\nnn] counts as one char, skip 2 extra
+			skipChars += 3 // [\nnn] counts as one char, skip 3 extra
 		} else if group != "\"" && group != "." && group != "\\" {
 			// Only \", \., and \\ are allowed as single char escapes
 			return -1
