@@ -119,33 +119,30 @@ Required:
 
 - `name` (String) The grid member name.
 
+Optional:
+
+- `stealth` (Boolean) This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.
+
 Read-Only:
 
 - `enable_preferred_primaries` (Boolean) This flag represents whether the preferred_primaries field values of this member are used.
 - `grid_replicate` (Boolean) The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.
 - `lead` (Boolean) This flag controls whether the Grid lead secondary server performs zone transfers to non lead secondaries. This flag is ignored if the struct is specified as grid_member in an authoritative zone.
 - `preferred_primaries` (Attributes List) The primary preference list with Grid member names and\or External Server extserver structs for this member. (see [below for nested schema](#nestedatt--grid_primary--preferred_primaries))
-- `stealth` (Boolean) This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.
 
 <a id="nestedatt--grid_primary--preferred_primaries"></a>
 ### Nested Schema for `grid_primary.preferred_primaries`
 
-Required:
+Read-Only:
 
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
-
-Optional:
-
+- `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The TSIG key name.
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
-
-Read-Only:
-
-- `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
 
 
 
@@ -156,7 +153,7 @@ Required:
 
 - `name` (String) The grid member name.
 
-Read-Only:
+Optional:
 
 - `enable_preferred_primaries` (Boolean) This flag represents whether the preferred_primaries field values of this member are used.
 - `grid_replicate` (Boolean) The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.
@@ -175,11 +172,11 @@ Required:
 Optional:
 
 - `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
-- `tsig_key` (String) A generated TSIG key.
-- `tsig_key_alg` (String) The TSIG key algorithm.
-- `tsig_key_name` (String) The TSIG key name.
-- `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
 
 Read-Only:
 
 - `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
+- `tsig_key` (String) A generated TSIG key.
+- `tsig_key_alg` (String) The TSIG key algorithm.
+- `tsig_key_name` (String) The TSIG key name.
+- `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name

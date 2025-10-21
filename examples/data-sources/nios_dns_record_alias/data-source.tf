@@ -13,4 +13,4 @@ data "nios_dns_record_alias" "get_record_with_extattr_filter" {
 }
 
 // Retrieve all alias records
-data "nios_dns_record_alias" "get_all_records_in_default_view" {}
+data "nios_dns_record_alias" "get_all_alias_records" {}

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -1080,10 +1081,15 @@ func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_external_primaries"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	tsigKeyName := acctest.RandomName()
 	externalPrimaries := []map[string]any{
 		{
-			"address": "10.0.0.0",
-			"name":    "example-server",
+			"address":           "10.0.0.0",
+			"name":              "example-server",
+			"tsig_key_alg":      "HMAC-SHA256",
+			"tsig_key":          "X4oRe92t54I+T98NdQpV2w==",
+			"use_tsig_key_name": true,
+			"tsig_key_name":     tsigKeyName,
 		},
 	}
 	updatedExternalPrimaries := []map[string]any{
@@ -1134,13 +1140,17 @@ func TestAccZoneAuthResource_ExternalSecondaries(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	externalSecondaries := []map[string]any{
 		{
-			"address": "10.0.0.0",
-			"name":    "example.com",
+			"address":           "10.0.0.0",
+			"name":              "example.com",
+			"tsig_key_alg":      "HMAC-SHA256",
+			"tsig_key":          "X4oRe92t54I+T98NdQpV2w==",
+			"use_tsig_key_name": false,
+			"tsig_key_name":     acctest.RandomName(),
 		},
 	}
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain2",
+			"name": "infoblox.localdomain",
 		},
 	}
 	updatedExternalSecondaries := []map[string]any{
@@ -1215,12 +1225,18 @@ func TestAccZoneAuthResource_GridPrimary(t *testing.T) {
 	zoneAuth := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain2",
+			"name":    "infoblox.member",
+			"stealth": false,
 		},
 	}
 	gridPrimaryUpdated := []map[string]any{
 		{
-			"name": "infoblox.localdomain1",
+			"name":    "infoblox.localdomain",
+			"stealth": true,
+		},
+		{
+			"name":    "infoblox.member",
+			"stealth": false,
 		},
 	}
 
@@ -1234,7 +1250,8 @@ func TestAccZoneAuthResource_GridPrimary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain2"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.stealth", "false"),
 				),
 			},
 			// Update and Read
@@ -1242,8 +1259,11 @@ func TestAccZoneAuthResource_GridPrimary(t *testing.T) {
 				Config: testAccZoneAuthGridPrimary(zoneAuth, "default", gridPrimaryUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain1"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.stealth", "true"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.stealth", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1257,17 +1277,26 @@ func TestAccZoneAuthResource_GridSecondaries(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain2",
+			"name": "infoblox.localdomain",
 		},
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name":                       "infoblox.member",
+			"stealth":                    false,
+			"grid_replicate":             true,
+			"lead":                       false,
+			"enable_preferred_primaries": false,
+		},
+	}
+	updatedgridPrimary := []map[string]any{
+		{
+			"name": "infoblox.member",
 		},
 	}
 	updatedGridSecondary := []map[string]any{
 		{
-			"name": "infoblox.localdomain1",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -1281,16 +1310,20 @@ func TestAccZoneAuthResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.stealth", "false"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.grid_replicate", "true"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.lead", "false"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.enable_preferred_primaries", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneAuthGridSecondaries(zoneFqdn, "default", gridPrimary, updatedGridSecondary),
+				Config: testAccZoneAuthGridSecondaries(zoneFqdn, "default", updatedgridPrimary, updatedGridSecondary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain1"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2789,37 +2822,6 @@ func TestAccZoneAuthResource_UseGridZoneTimer(t *testing.T) {
 	})
 }
 
-func TestAccZoneAuthResource_UseImportFrom(t *testing.T) {
-	t.Skip("Skipping test")
-	var resourceName = "nios_dns_zone_auth.test_use_import_from"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthUseImportFrom(zoneFqdn, "default", true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_import_from", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneAuthUseImportFrom(zoneFqdn, "default", false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_import_from", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneAuthResource_UseNotifyDelay(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_use_notify_delay"
 	var v dns.ZoneAuth
@@ -4008,16 +4010,6 @@ resource "nios_dns_zone_auth" "test_use_grid_zone_timer" {
 `, zoneFqdn, view, gridPrimaryHCL, useGridZoneTimer)
 }
 
-func testAccZoneAuthUseImportFrom(zoneFqdn, view string, useImportFrom bool) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_use_import_from" {
-    fqdn = %q
-    view = %q
-	do_host_abstraction = true
-	import_from = "255.255.255.255"
-    use_import_from = %t
-}`, zoneFqdn, view, useImportFrom)
-}
 func testAccZoneAuthUseNotifyDelay(zoneFqdn, view string, notifyDelay int64, useNotifyDelay bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_use_notify_delay" {

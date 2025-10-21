@@ -12,5 +12,5 @@ data "nios_dns_record_mx" "get_record_with_extattr_filter" {
   }
 }
 
-// Retrieve MX records by view
-data "nios_dns_record_mx" "get_all_records_in_default_view" {}
+// Retrieve MX records 
+data "nios_dns_record_mx" "get_all_mx_records" {}

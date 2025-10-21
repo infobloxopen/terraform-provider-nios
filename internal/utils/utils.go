@@ -671,7 +671,7 @@ func CopyFieldFromPlanToRespList(ctx context.Context, planValue, respValue attr.
 			)
 			return respValue, &diags
 		}
-		if planFieldValue.(basetypes.StringValue).ValueString() == "" {
+		if planFieldValue.IsUnknown() || planFieldValue.IsNull() || (planFieldValue.Type(ctx) == types.StringType && planFieldValue.(basetypes.StringValue).ValueString() == "") {
 			modifiedElements[i] = respElement
 			continue
 		}
