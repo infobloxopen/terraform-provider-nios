@@ -3,18 +3,16 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type ZoneAuthGridPrimaryModel struct {
@@ -47,12 +45,10 @@ var ZoneAuthGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.",
 	},
 	"grid_replicate": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.",
 	},
 	"lead": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "This flag controls whether the Grid lead secondary server performs zone transfers to non lead secondaries. This flag is ignored if the struct is specified as grid_member in an authoritative zone.",
 	},
@@ -60,15 +56,10 @@ var ZoneAuthGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneauthgridprimaryPreferredPrimariesResourceSchemaAttributes,
 		},
-		Optional:            true,
 		Computed:            true,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
 		MarkdownDescription: "The primary preference list with Grid member names and\\or External Server extserver structs for this member.",
 	},
 	"enable_preferred_primaries": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "This flag represents whether the preferred_primaries field values of this member are used.",
 	},
@@ -91,12 +82,8 @@ func (m *ZoneAuthGridPrimaryModel) Expand(ctx context.Context, diags *diag.Diagn
 		return nil
 	}
 	to := &dns.ZoneAuthGridPrimary{
-		Name:                     flex.ExpandStringPointer(m.Name),
-		Stealth:                  flex.ExpandBoolPointer(m.Stealth),
-		GridReplicate:            flex.ExpandBoolPointer(m.GridReplicate),
-		Lead:                     flex.ExpandBoolPointer(m.Lead),
-		PreferredPrimaries:       flex.ExpandFrameworkListNestedBlock(ctx, m.PreferredPrimaries, diags, ExpandZoneauthgridprimaryPreferredPrimaries),
-		EnablePreferredPrimaries: flex.ExpandBoolPointer(m.EnablePreferredPrimaries),
+		Name:    flex.ExpandStringPointer(m.Name),
+		Stealth: flex.ExpandBoolPointer(m.Stealth),
 	}
 	return to
 }

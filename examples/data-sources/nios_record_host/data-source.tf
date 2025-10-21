@@ -13,4 +13,4 @@ data "nios_record_host" "get_record_using_extensible_attributes" {
 }
 
 // Retrieve all Host records
-data "nios_record_host" "get_all_records_in_default_view" {}
+data "nios_record_host" "get_all_records" {}

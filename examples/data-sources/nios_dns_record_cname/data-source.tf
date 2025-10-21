@@ -13,4 +13,4 @@ data "nios_dns_record_cname" "get_record_using_extensible_attributes" {
 }
 
 // Retrieve all CNAME records
-data "nios_dns_record_cname" "get_all_records_in_default_view" {}
+data "nios_dns_record_cname" "get_all_cname_records" {}
