@@ -13,11 +13,11 @@ import (
 type ArpaIPv6Validator struct{}
 
 func (v ArpaIPv6Validator) Description(ctx context.Context) string {
-	return "Validator to check if string is in the correct IPv6 ARPA format 'x.x.x...x.ip6.arpa' with exactly 32 hex nibbles"
+	return "Validator to check if string is in the correct IPv6 ARPA format 'x.x.x...x.ip6.arpa' with exactly 32 hex nibbles."
 }
 
 func (v ArpaIPv6Validator) MarkdownDescription(ctx context.Context) string {
-	return "String must be a valid ARPA IPv6 address in the format `x.x.x...x.ip6.arpa` with exactly 32 hex nibbles"
+	return "Validator to check if string is in the correct IPv6 ARPA format 'x.x.x...x.ip6.arpa' with exactly 32 hex nibbles."
 }
 
 func (v ArpaIPv6Validator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
