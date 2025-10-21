@@ -290,5 +290,12 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 				"When `enable_remote_lookup` is set to `true`, `enable_password_request` must be set to `false`.",
 			)
 		}
+
+		if !data.UserMatchType.IsNull() && !data.UserMatchType.IsUnknown() && data.UserMatchType.ValueString() != "AUTO_MATCH" {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"`user_match_type` must be set to \"AUTO_MATCH\" to use remote lookup services.",
+			)
+		}
 	}
 }
