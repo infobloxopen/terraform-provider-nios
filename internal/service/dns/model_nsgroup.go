@@ -214,7 +214,14 @@ func (m *NsgroupModel) Flatten(ctx context.Context, from *dns.Nsgroup, diags *di
 			m.ExternalPrimaries = result.(basetypes.ListValue)
 		}
 	}
+	planExternalSecondaries := m.ExternalSecondaries
 	m.ExternalSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSecondaries, NsgroupExternalSecondariesAttrTypes, diags, FlattenNsgroupExternalSecondaries)
+	if !planExternalSecondaries.IsNull() {
+		result, copyDiags := utils.CopyFieldFromPlanToRespList(ctx, planExternalSecondaries, m.ExternalSecondaries, "tsig_key_name")
+		if !copyDiags.HasError() {
+			m.ExternalSecondaries = result.(basetypes.ListValue)
+		}
+	}
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, NsgroupGridPrimaryAttrTypes, diags, FlattenNsgroupGridPrimary)
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, NsgroupGridSecondariesAttrTypes, diags, FlattenNsgroupGridSecondaries)
 	m.IsGridDefault = types.BoolPointerValue(from.IsGridDefault)
