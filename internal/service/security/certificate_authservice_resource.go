@@ -274,16 +274,16 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 	missingUsername := data.RemoteLookupUsername.IsNull() || data.RemoteLookupUsername.IsUnknown()
 	missingPassword := data.RemoteLookupPassword.IsNull() || data.RemoteLookupPassword.IsUnknown()
 
-	// Remote lookup validation: if remote lookup is enabled, all related fields must be provided
-	if isRemoteLookupEnabled && (missingService || missingUsername || missingPassword) {
-		resp.Diagnostics.AddError(
-			"Invalid Configuration",
-			"When `enable_remote_lookup` is set to `true`, all fields `remote_lookup_service`, `remote_lookup_username`, and `remote_lookup_password` must be provided.",
-		)
-	}
-
-	// Password request validation: if remote lookup is enabled, enable_password_request must be false
 	if isRemoteLookupEnabled {
+		// Validate required fields for remote lookup
+		if missingService || missingUsername || missingPassword {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When `enable_remote_lookup` is set to `true`, all fields `remote_lookup_service`, `remote_lookup_username`, and `remote_lookup_password` must be provided.",
+			)
+		}
+		
+		// Validate enable_password_request setting
 		if data.EnablePasswordRequest.IsNull() || data.EnablePasswordRequest.IsUnknown() || data.EnablePasswordRequest.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
