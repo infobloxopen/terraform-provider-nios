@@ -77,9 +77,9 @@ func (r *IPAssociationResource) ValidateConfig(ctx context.Context, req resource
 	// Check if both mac and duid are null or empty and dhcp is enabled
 	macEmpty := data.MacAddr.IsNull() || data.MacAddr.ValueString() == ""
 	duidEmpty := data.Duid.IsNull() || data.Duid.ValueString() == ""
-	configur_for_dhcp := data.ConfigureForDhcp.ValueBool()
+	configure_for_dhcp := data.ConfigureForDhcp.ValueBool()
 
-	if configur_for_dhcp && macEmpty && duidEmpty {
+	if configure_for_dhcp && macEmpty && duidEmpty {
 		resp.Diagnostics.AddError(
 			"Invalid Configuration",
 			"At least one of 'mac' or 'duid' must be configured.",
