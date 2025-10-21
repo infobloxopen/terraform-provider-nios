@@ -29,7 +29,7 @@ var _ resource.ResourceWithImportState = &ExtensibleattributedefResource{}
 const (
 	MinIntegerValue  = -2147483648
 	MaxIntegerValue  = 2147483647
-	MinStringLength  = 0
+	MinStringLength  = 1
 	MaxStringLength  = 256
 	MinEnumLength    = 1
 	MaxEnumLength    = 256
@@ -39,6 +39,12 @@ const (
 	MaxEmailLength   = 256
 	MinDateTimeValue = 0
 	MaxDateTimeValue = 2147483647 // Unix max time Jan 1, 2038
+)
+
+// Pre-compiled regular expressions for email validation for better performance
+var (
+	emailRegex1 = regexp.MustCompile(`^[a-zA-Z0-9!#$%&'*+/=?^_` + "`" + `{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_` + "`" + `{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$`)
+	emailRegex2 = regexp.MustCompile(`^[a-zA-Z0-9+_\-.]+@[0-9a-zA-Z][.\-0-9a-zA-Z]*\.[a-zA-Z]+$`)
 )
 
 func NewExtensibleattributedefResource() resource.Resource {
@@ -325,10 +331,6 @@ func (r *ExtensibleattributedefResource) validateEmailDefaultValue(value string,
 		return
 	}
 
-	// Use the email regex patterns from Python code
-	emailRegex1 := regexp.MustCompile(`^[a-zA-Z0-9!#$%&'*+/=?^_` + "`" + `{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_` + "`" + `{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$`)
-	emailRegex2 := regexp.MustCompile(`^[a-zA-Z0-9+_\-.]+@[0-9a-zA-Z][.\-0-9a-zA-Z]*\.[a-zA-Z]+$`)
-
 	if !emailRegex1.MatchString(value) && !emailRegex2.MatchString(value) {
 		resp.Diagnostics.AddError(
 			"Invalid Email Default Value",
@@ -409,14 +411,6 @@ func (r *ExtensibleattributedefResource) validateStringDefaultValue(value string
 				fmt.Sprintf("The default_value length '%d' is outside the specified range. Must be between %d and %d characters.", valueLen, min, max),
 			)
 		}
-	}
-
-	// Empty string validation
-	if len(value) == 0 {
-		resp.Diagnostics.AddError(
-			"Missing Default Value",
-			"The default_value for string type cannot be empty. Please provide a valid string value.",
-		)
 	}
 }
 
