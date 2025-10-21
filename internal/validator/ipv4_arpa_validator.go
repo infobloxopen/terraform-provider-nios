@@ -12,7 +12,7 @@ import (
 type ArpaIPv4Validator struct{}
 
 func (v ArpaIPv4Validator) Description(ctx context.Context) string {
-	return "String must be a valid ARPA IPv4 address in the format 'x.x.x.x.in-addr.arpa'"
+	return "Validator to check if string is in the correct IPv4 ARPA format 'x.x.x.x.in-addr.arpa'"
 }
 
 func (v ArpaIPv4Validator) MarkdownDescription(ctx context.Context) string {
