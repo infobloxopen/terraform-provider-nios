@@ -140,7 +140,7 @@ func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Di
 	to := &grid.Extensibleattributedef{
 		AllowedObjectTypes: flex.ExpandFrameworkListString(ctx, m.AllowedObjectTypes, diags),
 		Comment:            flex.ExpandStringPointer(m.Comment),
-		DefaultValue:       ExpandExtensibleattributedefDefaultValue(ctx, m.DefaultValue, m.Type, diags),
+		DefaultValue:       ExpandExtensibleAttributeDefDefaultValue(ctx, m.DefaultValue, m.Type, diags),
 		DescendantsAction:  ExpandExtensibleattributedefDescendantsAction(ctx, m.DescendantsAction, diags),
 		Flags:              flex.ExpandStringPointer(m.Flags),
 		ListValues:         flex.ExpandFrameworkListNestedBlock(ctx, m.ListValues, diags, ExpandExtensibleattributedefListValues),
@@ -175,7 +175,7 @@ func (m *ExtensibleattributedefModel) Flatten(ctx context.Context, from *grid.Ex
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.AllowedObjectTypes = flex.FlattenFrameworkListString(ctx, from.AllowedObjectTypes, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-	m.DefaultValue = FlattenExtensibleattributedefDefaultValue(ctx, from.DefaultValue, diags)
+	m.DefaultValue = FlattenExtensibleAttributeDefDefaultValue(ctx, from.DefaultValue, diags)
 	m.DescendantsAction = FlattenExtensibleattributedefDescendantsAction(ctx, from.DescendantsAction, diags)
 	m.Flags = flex.FlattenStringPointer(from.Flags)
 	m.ListValues = flex.FlattenFrameworkListNestedBlock(ctx, from.ListValues, ExtensibleattributedefListValuesAttrTypes, diags, FlattenExtensibleattributedefListValues)
@@ -186,7 +186,7 @@ func (m *ExtensibleattributedefModel) Flatten(ctx context.Context, from *grid.Ex
 	m.Type = flex.FlattenStringPointer(from.Type)
 }
 
-func ExpandExtensibleattributedefDefaultValue(ctx context.Context, defaultValue types.String, eaType types.String, diags *diag.Diagnostics) *grid.ExtensibleattributedefDefaultValue {
+func ExpandExtensibleAttributeDefDefaultValue(ctx context.Context, defaultValue types.String, eaType types.String, diags *diag.Diagnostics) *grid.ExtensibleattributedefDefaultValue {
 	if defaultValue.IsNull() || defaultValue.IsUnknown() {
 		return &grid.ExtensibleattributedefDefaultValue{}
 	}
@@ -219,7 +219,7 @@ func ExpandExtensibleattributedefDefaultValue(ctx context.Context, defaultValue 
 	}
 }
 
-func FlattenExtensibleattributedefDefaultValue(ctx context.Context, from *grid.ExtensibleattributedefDefaultValue, diags *diag.Diagnostics) types.String {
+func FlattenExtensibleAttributeDefDefaultValue(ctx context.Context, from *grid.ExtensibleattributedefDefaultValue, diags *diag.Diagnostics) types.String {
 	if from == nil {
 		return types.StringNull()
 	}
