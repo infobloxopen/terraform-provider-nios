@@ -1,9 +1,9 @@
-// Create an Auth Zone (Required as Parent for forward records)
+// Create an Auth Zone (Required as parent for forward records)
 resource "nios_dns_zone_auth" "parent_zone" {
   fqdn = "example.com"
 }
 
-// Create IPv4 Reverse Zones (Required for PTR records)
+// Create an IPv4 Reverse Mapping Zones (Required as parent for PTR records)
 resource "nios_dns_zone_auth" "reverse_zone_10_20_1" {
   fqdn        = "10.20.1.0/24"
   view        = "default"
@@ -18,7 +18,7 @@ resource "nios_dns_zone_auth" "reverse_zone_22_0_0" {
   comment     = "Reverse zone for 22.0.0.0/24 network"
 }
 
-// Create IPv6 Reverse Zone (Required for IPv6 PTR records)
+// Create an IPv6 Reverse Mapping Zone (Required as parent for IPv6 PTR records)
 resource "nios_dns_zone_auth" "reverse_zone_ipv6" {
   fqdn        = "2001::/64"
   view        = "default"
@@ -26,7 +26,7 @@ resource "nios_dns_zone_auth" "reverse_zone_ipv6" {
   comment     = "Reverse zone for 2001::/64 network"
 }
 
-// Create IPv4 Reverse Zone for function call network (Required for function call PTR)
+// Create an IPv4 Reverse MappingZone for function call network (Required for function call PTR)
 resource "nios_dns_zone_auth" "reverse_zone_85_85" {
   fqdn        = "85.85.0.0/16"
   view        = "default"
