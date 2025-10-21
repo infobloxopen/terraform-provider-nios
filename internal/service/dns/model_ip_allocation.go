@@ -312,7 +312,7 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"snmp3_credential": schema.SingleNestedAttribute{
 		Attributes:          RecordHostSnmp3CredentialResourceSchemaAttributes,
 		Optional:            true,
-		MarkdownDescription: "The SNMPv3 credential for this fixed address.",
+		MarkdownDescription: "The SNMPv3 credential for this host record.",
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
 		},
@@ -320,7 +320,7 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"snmp_credential": schema.SingleNestedAttribute{
 		Attributes:          RecordHostSnmpCredentialResourceSchemaAttributes,
 		Optional:            true,
-		MarkdownDescription: "The SNMP credential for this fixed address. If set to true, the SNMP credential will override member-level settings.",
+		MarkdownDescription: "The SNMP credential for this host record. If set to true, the SNMP credential will override member-level settings.",
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp_credential")),
 		},

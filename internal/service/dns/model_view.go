@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -723,6 +724,20 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_scavenging_settings")),
 		},
+		Default: objectdefault.StaticValue(types.ObjectValueMust(
+			ViewScavengingSettingsAttrTypes,
+			map[string]attr.Value{
+				"ea_expression_list":          types.ListNull(types.ObjectType{AttrTypes: ViewscavengingsettingsEaExpressionListAttrTypes}),
+				"enable_auto_reclamation":     types.BoolValue(false),
+				"enable_recurrent_scavenging": types.BoolValue(false),
+				"enable_rr_last_queried":      types.BoolValue(false),
+				"enable_scavenging":           types.BoolValue(false),
+				"enable_zone_last_queried":    types.BoolValue(false),
+				"expression_list":             types.ListNull(types.ObjectType{AttrTypes: ViewscavengingsettingsExpressionListAttrTypes}),
+				"reclaim_associated_records":  types.BoolValue(false),
+				"scavenging_schedule":         types.ObjectNull(ViewscavengingsettingsScavengingScheduleAttrTypes),
+			},
+		)),
 		MarkdownDescription: "Scavenging settings for the DNS view",
 	},
 	"sortlist": schema.ListNestedAttribute{
