@@ -140,7 +140,7 @@ func (d *RecordNsDataSource) Read(ctx context.Context, req datasource.ReadReques
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordNs by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordNs, got error: %s", err))
 				return nil, "", err
 			}
 
