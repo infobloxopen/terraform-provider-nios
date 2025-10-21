@@ -125,12 +125,7 @@ func isDomainName(s string, allowMultiLabel bool, checkPrintableChars bool) erro
 		}
 
 		// Reconstruct the label from captured groups
-		labelPart := match[1]
-		if labelPart == "" {
-			labelPart = match[2]
-		} else if match[2] != "" {
-			labelPart += match[2]
-		}
+		labelPart := match[1] + match[2]
 
 		labelLen := findLabelLength(labelPart)
 		if labelLen > labelMaxLength {
