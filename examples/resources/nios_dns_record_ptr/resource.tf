@@ -113,4 +113,5 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_func_call" {
     nios_dns_zone_auth.reverse_zone_85_85
   ]
 }
+
  
