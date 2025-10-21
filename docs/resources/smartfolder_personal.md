@@ -91,6 +91,6 @@ Optional:
 Optional:
 
 - `value_boolean` (Boolean) The boolean value of the Smart Folder query.
-- `value_date` (Number) The timestamp value of the Smart Folder query.
+- `value_date` (String) The timestamp value of the Smart Folder query.
 - `value_integer` (Number) The integer value of the Smart Folder query.
 - `value_string` (String) The string value of the Smart Folder query.

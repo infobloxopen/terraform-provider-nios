@@ -536,7 +536,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: Ipv6networkOptionsResourceSchemaAttributes,
 		},
 		Optional:            true,
-		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
+		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. The option `dhcp-lease-time` cannot be configured for this object and instead 'valid_lifetime' attribute should be used.",
 		Computed:            true,
 		Default: listdefault.StaticValue(
 			types.ListValueMust(
@@ -776,6 +776,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the valid lifetime value of a DHCP IPv6 Network object.",
 		Computed:            true,
+		Default:             int64default.StaticInt64(43200),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},

@@ -28,6 +28,7 @@ type Awsrte53taskgroupModel struct {
 	AccountId                  types.String `tfsdk:"account_id"`
 	AccountsList               types.String `tfsdk:"accounts_list"`
 	AwsAccountIdsFileToken     types.String `tfsdk:"aws_account_ids_file_token"`
+	AwsAccountIdsFilePath      types.String `tfsdk:"aws_account_ids_file_path"`
 	Comment                    types.String `tfsdk:"comment"`
 	ConsolidateZones           types.Bool   `tfsdk:"consolidate_zones"`
 	ConsolidatedView           types.String `tfsdk:"consolidated_view"`
@@ -48,6 +49,7 @@ var Awsrte53taskgroupAttrTypes = map[string]attr.Type{
 	"account_id":                    types.StringType,
 	"accounts_list":                 types.StringType,
 	"aws_account_ids_file_token":    types.StringType,
+	"aws_account_ids_file_path":     types.StringType,
 	"comment":                       types.StringType,
 	"consolidate_zones":             types.BoolType,
 	"consolidated_view":             types.StringType,
@@ -77,9 +79,12 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The AWS Account IDs list associated with this task group.",
 	},
 	"aws_account_ids_file_token": schema.StringAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The AWS account IDs file's token.",
+	},
+	"aws_account_ids_file_path": schema.StringAttribute{
+		Optional:            true, 
+		MarkdownDescription: "The AWS account IDs file's path.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,

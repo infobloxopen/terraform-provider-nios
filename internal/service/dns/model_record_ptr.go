@@ -105,6 +105,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -213,7 +214,11 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			stringvalidator.Any(
+				customvalidator.IsValidFQDN(),
+				customvalidator.IsValidArpaIPv4(),
+				customvalidator.IsValidArpaIPv6(),
+			),
 		},
 		MarkdownDescription: "The name of the DNS PTR record in FQDN format.",
 	},

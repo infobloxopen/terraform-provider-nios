@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -48,7 +49,7 @@ var ZoneAuthGridSecondariesResourceSchemaAttributes = map[string]schema.Attribut
 	"grid_replicate": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.",
 	},
 	"lead": schema.BoolAttribute{
@@ -61,8 +62,8 @@ var ZoneAuthGridSecondariesResourceSchemaAttributes = map[string]schema.Attribut
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneauthgridsecondariesPreferredPrimariesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},

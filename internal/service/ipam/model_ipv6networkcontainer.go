@@ -416,7 +416,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: Ipv6networkcontainerOptionsResourceSchemaAttributes,
 		},
 		Optional:            true,
-		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
+		MarkdownDescription: "An array of DHCP option structs that lists the DHCP options associated with the object. The option `dhcp-lease-time` cannot be configured for this object and instead 'valid_lifetime' attribute should be used.",
 		Computed:            true,
 		Default: listdefault.StaticValue(
 			types.ListValueMust(

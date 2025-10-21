@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -190,7 +189,7 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(true),
-		MarkdownDescription: "This flag controls whether this template can be used to create network objects in a cloud-computing deployment.",
+		MarkdownDescription: "Determines whether the IPv6 DHCP range template can be used to create network objects in a cloud-computing deployment. The cloud_api_compatible attribute must be set to true if any extensible attributes, such as the Terraform Internal ID, require cloud access; otherwise, it must be set to false.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,

@@ -225,7 +225,7 @@ func (r *CertificateAuthserviceResource) processOcspResponders(
 	for i, ocspResponder := range ocspResponders {
 		if !ocspResponder.CertificateFilePath.IsNull() && !ocspResponder.CertificateFilePath.IsUnknown() {
 			filePath := ocspResponder.CertificateFilePath.ValueString()
-			token, err := utils.UploadPEMFileWithToken(ctx, baseUrl, filePath, username, password)
+			token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
 			if err != nil {
 				diag.AddError(
 					"Client Error",
@@ -268,4 +268,27 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 		}
 	}
 
+	// Check if remote lookup is enabled and validate required fields
+	isRemoteLookupEnabled := !data.EnableRemoteLookup.IsNull() && !data.EnableRemoteLookup.IsUnknown() && data.EnableRemoteLookup.ValueBool()
+	missingService := data.RemoteLookupService.IsNull() || data.RemoteLookupService.IsUnknown()
+	missingUsername := data.RemoteLookupUsername.IsNull() || data.RemoteLookupUsername.IsUnknown()
+	missingPassword := data.RemoteLookupPassword.IsNull() || data.RemoteLookupPassword.IsUnknown()
+
+	if isRemoteLookupEnabled {
+		// Validate required fields for remote lookup
+		if missingService || missingUsername || missingPassword {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When `enable_remote_lookup` is set to `true`, all fields `remote_lookup_service`, `remote_lookup_username`, and `remote_lookup_password` must be provided.",
+			)
+		}
+		
+		// Validate enable_password_request setting
+		if data.EnablePasswordRequest.IsNull() || data.EnablePasswordRequest.IsUnknown() || data.EnablePasswordRequest.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When `enable_remote_lookup` is set to `true`, `enable_password_request` must be set to `false`.",
+			)
+		}
+	}
 }

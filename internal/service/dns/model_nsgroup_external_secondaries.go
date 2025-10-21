@@ -84,7 +84,7 @@ var NsgroupExternalSecondariesResourceSchemaAttributes = map[string]schema.Attri
 		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
-			stringvalidator.AlsoRequires(path.MatchRoot("use_tsig_key_name")),
+			stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_tsig_key_name")),
 		},
 		MarkdownDescription: "The TSIG key name.",
 	},

@@ -134,7 +134,6 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"discovered_data": schema.SingleNestedAttribute{
 		Attributes: RecordHostIpv4addrDiscoveredDataResourceSchemaAttributes,
-		Optional:   true,
 		Computed:   true,
 	},
 	"enable_pxe_lease_time": schema.BoolAttribute{

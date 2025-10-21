@@ -90,7 +90,6 @@ Optional:
 - `external_secondaries` (Attributes List) The list of external secondary servers. (see [below for nested schema](#nestedatt--result--external_secondaries))
 - `grid_primary` (Attributes List) The grid primary servers for this zone. (see [below for nested schema](#nestedatt--result--grid_primary))
 - `grid_secondaries` (Attributes List) The list with Grid members that are secondary servers for this zone. (see [below for nested schema](#nestedatt--result--grid_secondaries))
-- `import_from` (String) The IP address of the Infoblox appliance from which zone data is imported. Setting this address to '255.255.255.255' and do_host_abstraction to 'true' will create Host records from A records in this zone without importing zone data.
 - `last_queried_acl` (Attributes List) Determines last queried ACL for the specified IPv4 or IPv6 addresses and networks in scavenging settings. (see [below for nested schema](#nestedatt--result--last_queried_acl))
 - `locked` (Boolean) If you enable this flag, other administrators cannot make conflicting changes. This is for administration purposes only. The zone will continue to serve DNS data even when it is locked.
 - `member_soa_mnames` (Attributes List) The list of per-member SOA MNAME information. (see [below for nested schema](#nestedatt--result--member_soa_mnames))
@@ -134,7 +133,6 @@ Optional:
 - `use_dnssec_key_params` (Boolean) Use flag for: dnssec_key_params
 - `use_external_primary` (Boolean) This flag controls whether the zone is using an external primary.
 - `use_grid_zone_timer` (Boolean) Use flag for: soa_default_ttl , soa_expire, soa_negative_ttl, soa_refresh, soa_retry
-- `use_import_from` (Boolean) Use flag for: import_from
 - `use_notify_delay` (Boolean) Use flag for: notify_delay
 - `use_record_name_policy` (Boolean) Use flag for: record_name_policy
 - `use_scavenging_settings` (Boolean) Use flag for: scavenging_settings , last_queried_acl
@@ -156,6 +154,7 @@ Read-Only:
 - `effective_record_name_policy` (String) The selected hostname policy for records under this zone.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `grid_primary_shared_with_ms_parent_delegation` (Boolean) Determines if the server is duplicated with parent delegation.
+- `import_from` (String) The IP address of the Infoblox appliance from which zone data is imported. Setting this address to '255.255.255.255' and do_host_abstraction to 'true' will create Host records from A records in this zone without importing zone data.
 - `is_dnssec_enabled` (Boolean) This flag is set to True if DNSSEC is enabled for the zone.
 - `is_dnssec_signed` (Boolean) Determines if the zone is DNSSEC signed.
 - `is_multimaster` (Boolean) Determines if multi-master DNS is enabled for the zone.
@@ -173,6 +172,7 @@ Read-Only:
 - `records_monitored` (Boolean) Determines if this zone is also monitoring resource records.
 - `ref` (String) The reference to the object.
 - `rr_not_queried_enabled_time` (Number) The time data collection for Not Queried Resource Record was enabled for this zone.
+- `use_import_from` (Boolean) Use flag for: import_from
 - `using_srg_associations` (Boolean) This is true if the zone is associated with a shared record group.
 - `zone_not_queried_enabled_time` (Number) The time when "DNS Zones Last Queried" was turned on for this zone.
 
@@ -330,11 +330,14 @@ Required:
 
 Optional:
 
+- `stealth` (Boolean) This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.
+
+Read-Only:
+
 - `enable_preferred_primaries` (Boolean) This flag represents whether the preferred_primaries field values of this member are used.
 - `grid_replicate` (Boolean) The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.
 - `lead` (Boolean) This flag controls whether the Grid lead secondary server performs zone transfers to non lead secondaries. This flag is ignored if the struct is specified as grid_member in an authoritative zone.
 - `preferred_primaries` (Attributes List) The primary preference list with Grid member names and\or External Server extserver structs for this member. (see [below for nested schema](#nestedatt--result--grid_primary--preferred_primaries))
-- `stealth` (Boolean) This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.
 
 <a id="nestedatt--result--grid_primary--preferred_primaries"></a>
 ### Nested Schema for `result.grid_primary.preferred_primaries`

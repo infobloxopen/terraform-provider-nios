@@ -58,7 +58,7 @@ Optional:
 
 - `bootfile` (String) The bootfile name for the range. You can configure the DHCP server to support clients that use the boot file name option in their DHCPREQUEST messages.
 - `bootserver` (String) The bootserver address for the range. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.
-- `cloud_api_compatible` (Boolean) This flag controls whether this template can be used to create network objects in a cloud-computing deployment.
+- `cloud_api_compatible` (Boolean) Determines whether the IPv6 DHCP range template can be used to create network objects in a cloud-computing deployment. The cloud_api_compatible attribute must be set to true if any extensible attributes, such as the Terraform Internal ID, require cloud access; otherwise, it must be set to false.
 - `comment` (String) A descriptive comment of a range template object.
 - `ddns_domainname` (String) The dynamic DNS domain name the appliance uses specifically for DDNS updates for this range.
 - `ddns_generate_hostname` (Boolean) If this field is set to True, the DHCP server generates a hostname and updates DNS with it when the DHCP client request does not contain a hostname.
