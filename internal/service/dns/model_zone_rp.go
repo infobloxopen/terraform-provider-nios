@@ -16,10 +16,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
@@ -227,6 +229,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 			customvalidator.IsNotArpa(),
 		},
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of this DNS zone in FQDN format.",
 	},
 	"grid_primary": schema.ListNestedAttribute{
@@ -372,7 +377,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("DISABLED", "GIVEN", "NODATA", "PASSTHRU", "SUBSTITUTE"),
+			stringvalidator.OneOf("DISABLED", "GIVEN", "NODATA", "PASSTHRU", "SUBSTITUTE", "NXDOMAIN"),
 		},
 		Default:             stringdefault.StaticString("GIVEN"),
 		MarkdownDescription: "The response policy zone override policy.",
@@ -399,6 +404,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("FEED", "FIREEYE", "LOCAL"),
+		},
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
 		},
 		MarkdownDescription: "The type of rpz zone.",
 	},
