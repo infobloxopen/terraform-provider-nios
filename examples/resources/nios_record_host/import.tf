@@ -19,8 +19,5 @@ import {
 }
 
 resource "nios_ip_association" "association1" {
-  ref                = nios_ip_allocation.allocation1.ref
-  mac                = "12:00:43:fe:9a:8c"
-  configure_for_dhcp = false
-  internal_id        = nios_ip_allocation.allocation1.internal_id
+  ref = nios_ip_allocation.allocation1.ref
 }

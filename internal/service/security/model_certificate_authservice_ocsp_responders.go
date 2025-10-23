@@ -3,10 +3,10 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -40,13 +40,13 @@ var CertificateAuthserviceOcspRespondersAttrTypes = map[string]attr.Type{
 
 var CertificateAuthserviceOcspRespondersResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn_or_ip": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 			stringvalidator.Any(
 				customvalidator.IsValidFQDN(),
 				customvalidator.IsValidIPCIDR(),
-			   ),
+			),
 		},
 		MarkdownDescription: "The FQDN (Fully Qualified Domain Name) or IP address of the server.",
 	},
@@ -57,9 +57,9 @@ var CertificateAuthserviceOcspRespondersResourceSchemaAttributes = map[string]sc
 		MarkdownDescription: "The port used for connecting.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default: 		   stringdefault.StaticString(""),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},

@@ -268,4 +268,34 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 		}
 	}
 
+	// Check if remote lookup is enabled and validate required fields
+	isRemoteLookupEnabled := !data.EnableRemoteLookup.IsNull() && !data.EnableRemoteLookup.IsUnknown() && data.EnableRemoteLookup.ValueBool()
+	missingService := data.RemoteLookupService.IsNull() || data.RemoteLookupService.IsUnknown()
+	missingUsername := data.RemoteLookupUsername.IsNull() || data.RemoteLookupUsername.IsUnknown()
+	missingPassword := data.RemoteLookupPassword.IsNull() || data.RemoteLookupPassword.IsUnknown()
+
+	if isRemoteLookupEnabled {
+		// Validate required fields for remote lookup
+		if missingService || missingUsername || missingPassword {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When `enable_remote_lookup` is set to `true`, all fields `remote_lookup_service`, `remote_lookup_username`, and `remote_lookup_password` must be provided.",
+			)
+		}
+		
+		// Validate enable_password_request setting
+		if data.EnablePasswordRequest.IsNull() || data.EnablePasswordRequest.IsUnknown() || data.EnablePasswordRequest.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When `enable_remote_lookup` is set to `true`, `enable_password_request` must be set to `false`.",
+			)
+		}
+
+		if !data.UserMatchType.IsNull() && !data.UserMatchType.IsUnknown() && data.UserMatchType.ValueString() != "AUTO_MATCH" {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"`user_match_type` must be set to \"AUTO_MATCH\" to use remote lookup services.",
+			)
+		}
+	}
 }

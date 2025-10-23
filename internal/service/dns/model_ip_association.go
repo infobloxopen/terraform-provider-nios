@@ -33,8 +33,7 @@ var IPAssociationAttrTypes = map[string]attr.Type{
 
 var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"configure_for_dhcp": schema.BoolAttribute{
@@ -54,7 +53,6 @@ var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"internal_id": schema.StringAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Internal ID of the IP association.",
 	},
