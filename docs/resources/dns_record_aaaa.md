@@ -15,7 +15,7 @@ Manages a AAAA Record.
 ```terraform
 // Create parent authoritative zone first (required as parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
-  fqdn        = "example1.com"
+  fqdn        = "example.com"
   zone_format = "FORWARD"
   view        = "default"
   comment     = "Parent zone for AAAA records"
