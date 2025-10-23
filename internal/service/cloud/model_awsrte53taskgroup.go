@@ -83,7 +83,7 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The AWS account IDs file's token.",
 	},
 	"aws_account_ids_file_path": schema.StringAttribute{
-		Optional:            true, 
+		Optional:            true,
 		MarkdownDescription: "The AWS account IDs file's path.",
 	},
 	"comment": schema.StringAttribute{
@@ -195,27 +195,24 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *Awsrte53taskgroupModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *cloud.Awsrte53taskgroup {
+func (m *Awsrte53taskgroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *cloud.Awsrte53taskgroup {
 	if m == nil {
 		return nil
 	}
 	to := &cloud.Awsrte53taskgroup{
 		AwsAccountIdsFileToken:     flex.ExpandStringPointer(m.AwsAccountIdsFileToken),
 		Comment:                    flex.ExpandStringPointer(m.Comment),
+		ConsolidatedView:           flex.ExpandStringPointer(m.ConsolidatedView),
+		ConsolidateZones:           flex.ExpandBoolPointer(m.ConsolidateZones),
 		Disabled:                   flex.ExpandBoolPointer(m.Disabled),
 		GridMember:                 flex.ExpandStringPointer(m.GridMember),
 		MultipleAccountsSyncPolicy: flex.ExpandStringPointer(m.MultipleAccountsSyncPolicy),
 		Name:                       flex.ExpandStringPointer(m.Name),
+		NetworkView:                flex.ExpandStringPointer(m.NetworkView),
+		NetworkViewMappingPolicy:   flex.ExpandStringPointer(m.NetworkViewMappingPolicy),
 		RoleArn:                    flex.ExpandStringPointer(m.RoleArn),
 		SyncChildAccounts:          flex.ExpandBoolPointer(m.SyncChildAccounts),
-		TaskList:                   flex.ExpandFrameworkListNestedBlock(ctx, m.TaskList, diags, ExpandAwsrte53taskgroupTaskList),
-	}
-	if isCreate {
-		to.ConsolidateZones = flex.ExpandBoolPointer(m.ConsolidateZones)
-		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
-		to.ConsolidatedView = flex.ExpandStringPointer(m.ConsolidatedView)
-		to.NetworkViewMappingPolicy = flex.ExpandStringPointer(m.NetworkViewMappingPolicy)
-	}
+		TaskList:                   flex.ExpandFrameworkListNestedBlock(ctx, m.TaskList, diags, ExpandAwsrte53taskgroupTaskList)}
 	return to
 }
 

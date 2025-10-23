@@ -82,7 +82,7 @@ func (r *ZoneStubResource) Create(ctx context.Context, req resource.CreateReques
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneStubAPI.
 		Create(ctx).
-		ZoneStub(*data.Expand(ctx, &resp.Diagnostics, true)).
+		ZoneStub(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForZoneStub).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *ZoneStubResource) Update(ctx context.Context, req resource.UpdateReques
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneStubAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ZoneStub(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ZoneStub(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForZoneStub).
 		ReturnAsObject(1).
 		Execute()

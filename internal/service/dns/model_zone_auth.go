@@ -400,13 +400,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"create_ptr_for_bulk_hosts": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
 	},
 	"create_ptr_for_hosts": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
@@ -564,7 +562,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The rollover date for the Zone Signing Key.",
 	},
 	"do_host_abstraction": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if hosts and bulk hosts are automatically created when the zone data is imported. This field is meaningful only when import_from is set.",
@@ -1165,7 +1162,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.ZoneAuth {
+func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneAuth {
 	if m == nil {
 		return nil
 	}
@@ -1204,6 +1201,7 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		ExtAttrs:                            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ExternalPrimaries:                   flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalPrimaries, diags, ExpandZoneAuthExternalPrimaries),
 		ExternalSecondaries:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneAuthExternalSecondaries),
+		Fqdn:                                flex.ExpandStringPointer(m.Fqdn),
 		GridPrimary:                         flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneAuthGridPrimary),
 		GridSecondaries:                     flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneAuthGridSecondaries),
 		LastQueriedAcl:                      flex.ExpandFrameworkListNestedBlock(ctx, m.LastQueriedAcl, diags, ExpandZoneAuthLastQueriedAcl),
@@ -1254,12 +1252,8 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		UseScavengingSettings:               flex.ExpandBoolPointer(m.UseScavengingSettings),
 		UseSoaEmail:                         flex.ExpandBoolPointer(m.UseSoaEmail),
 		View:                                flex.ExpandStringPointer(m.View),
+		ZoneFormat:                          flex.ExpandStringPointer(m.ZoneFormat),
 	}
-	if isCreate {
-		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
-		to.ZoneFormat = flex.ExpandStringPointer(m.ZoneFormat)
-	}
-
 	return to
 }
 

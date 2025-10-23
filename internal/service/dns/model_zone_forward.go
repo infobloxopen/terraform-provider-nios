@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
@@ -286,19 +285,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandZoneForward(ctx context.Context, o types.Object, diags *diag.Diagnostics, isCreate bool) *dns.ZoneForward {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m ZoneForwardModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags, isCreate)
-}
-
-func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.ZoneForward {
+func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneForward {
 	if m == nil {
 		return nil
 	}
@@ -311,16 +298,14 @@ func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		ForwardTo:           flex.ExpandFrameworkListNestedBlock(ctx, m.ForwardTo, diags, ExpandZoneForwardForwardTo),
 		ForwardersOnly:      flex.ExpandBoolPointer(m.ForwardersOnly),
 		ForwardingServers:   flex.ExpandFrameworkListNestedBlock(ctx, m.ForwardingServers, diags, ExpandZoneForwardForwardingServers),
+		Fqdn:                flex.ExpandStringPointer(m.Fqdn),
 		Locked:              flex.ExpandBoolPointer(m.Locked),
 		MsAdIntegrated:      flex.ExpandBoolPointer(m.MsAdIntegrated),
 		MsDdnsMode:          flex.ExpandStringPointer(m.MsDdnsMode),
 		NsGroup:             flex.ExpandStringPointer(m.NsGroup),
 		Prefix:              flex.ExpandStringPointer(m.Prefix),
-	}
-	if isCreate {
-		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
-		to.View = flex.ExpandStringPointer(m.View)
-		to.ZoneFormat = flex.ExpandStringPointer(m.ZoneFormat)
+		View:                flex.ExpandStringPointer(m.View),
+		ZoneFormat:          flex.ExpandStringPointer(m.ZoneFormat),
 	}
 	return to
 }

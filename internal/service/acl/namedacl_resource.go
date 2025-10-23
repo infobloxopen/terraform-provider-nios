@@ -82,7 +82,7 @@ func (r *NamedaclResource) Create(ctx context.Context, req resource.CreateReques
 	apiRes, _, err := r.client.ACLAPI.
 		NamedaclAPI.
 		Create(ctx).
-		Namedacl(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Namedacl(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNamedacl).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *NamedaclResource) Update(ctx context.Context, req resource.UpdateReques
 	apiRes, _, err := r.client.ACLAPI.
 		NamedaclAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Namedacl(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Namedacl(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNamedacl).
 		ReturnAsObject(1).
 		Execute()

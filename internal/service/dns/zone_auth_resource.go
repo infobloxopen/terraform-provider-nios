@@ -140,7 +140,7 @@ func (r *ZoneAuthResource) Create(ctx context.Context, req resource.CreateReques
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneAuthAPI.
 		Create(ctx).
-		ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, true)).
+		ZoneAuth(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForZoneAuth).
 		ReturnAsObject(1).
 		Execute()
@@ -313,7 +313,7 @@ func (r *ZoneAuthResource) Update(ctx context.Context, req resource.UpdateReques
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneAuthAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ZoneAuth(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForZoneAuth).
 		ReturnAsObject(1).
 		Execute()

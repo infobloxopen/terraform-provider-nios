@@ -122,7 +122,7 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordNsModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordNs {
+func (m *RecordNsModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordNs {
 	if m == nil {
 		return nil
 	}
@@ -130,10 +130,8 @@ func (m *RecordNsModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		Addresses:        flex.ExpandFrameworkListNestedBlock(ctx, m.Addresses, diags, ExpandRecordNsAddresses),
 		MsDelegationName: flex.ExpandStringPointer(m.MsDelegationName),
 		Nameserver:       flex.ExpandStringPointer(m.Nameserver),
-	}
-	if isCreate {
-		to.Name = flex.ExpandStringPointer(m.Name)
-		to.View = flex.ExpandStringPointer(m.View)
+		Name:             flex.ExpandStringPointer(m.Name),
+		View:             flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

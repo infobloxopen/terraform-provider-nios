@@ -82,7 +82,7 @@ func (r *Awsrte53taskgroupResource) Create(ctx context.Context, req resource.Cre
 	apiRes, _, err := r.client.CloudAPI.
 		Awsrte53taskgroupAPI.
 		Create(ctx).
-		Awsrte53taskgroup(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Awsrte53taskgroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForAwsrte53taskgroup).
 		ReturnAsObject(1).
 		Execute()
@@ -162,7 +162,7 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 	apiRes, _, err := r.client.CloudAPI.
 		Awsrte53taskgroupAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Awsrte53taskgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Awsrte53taskgroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForAwsrte53taskgroup).
 		ReturnAsObject(1).
 		Execute()

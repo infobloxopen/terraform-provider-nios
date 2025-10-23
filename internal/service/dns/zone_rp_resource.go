@@ -135,7 +135,7 @@ func (r *ZoneRpResource) Create(ctx context.Context, req resource.CreateRequest,
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneRpAPI.
 		Create(ctx).
-		ZoneRp(*data.Expand(ctx, &resp.Diagnostics, true)).
+		ZoneRp(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForZoneRp).
 		ReturnAsObject(1).
 		Execute()
@@ -308,7 +308,7 @@ func (r *ZoneRpResource) Update(ctx context.Context, req resource.UpdateRequest,
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneRpAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ZoneRp(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ZoneRp(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForZoneRp).
 		ReturnAsObject(1).
 		Execute()

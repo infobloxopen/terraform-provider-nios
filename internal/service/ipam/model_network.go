@@ -1170,7 +1170,7 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Network {
+func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Network {
 	if m == nil {
 		return nil
 	}
@@ -1224,6 +1224,9 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		MgmPrivate:                       flex.ExpandBoolPointer(m.MgmPrivate),
 		MsAdUserData:                     ExpandNetworkMsAdUserData(ctx, m.MsAdUserData, diags),
 		Netmask:                          flex.ExpandInt64Pointer(m.Netmask),
+		Network:                          ExpandNetworkNetwork(m.Network),
+		NetworkContainer:                 flex.ExpandStringPointer(m.NetworkContainer),
+		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
 		FuncCall:                         ExpandFuncCall(ctx, m.FuncCall, diags),
 		Nextserver:                       flex.ExpandStringPointer(m.Nextserver),
 		Options:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandNetworkOptions),
@@ -1237,6 +1240,7 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		SamePortControlDiscoveryBlackout: flex.ExpandBoolPointer(m.SamePortControlDiscoveryBlackout),
 		SendRirRequest:                   flex.ExpandBoolPointer(m.SendRirRequest),
 		SubscribeSettings:                ExpandNetworkSubscribeSettings(ctx, m.SubscribeSettings, diags),
+		Template:                         flex.ExpandStringPointer(m.Template),
 		Unmanaged:                        flex.ExpandBoolPointer(m.Unmanaged),
 		UpdateDnsOnLeaseRenewal:          flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
 		UseAuthority:                     flex.ExpandBoolPointer(m.UseAuthority),
@@ -1272,13 +1276,6 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		UseZoneAssociations:              flex.ExpandBoolPointer(m.UseZoneAssociations),
 		Vlans:                            flex.ExpandFrameworkListNestedBlock(ctx, m.Vlans, diags, ExpandNetworkVlans),
 		ZoneAssociations:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZoneAssociations, diags, ExpandNetworkZoneAssociations),
-	}
-	if isCreate {
-		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
-		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
-		to.Network = ExpandNetworkNetwork(m.Network)
-		to.Template = flex.ExpandStringPointer(m.Template)
-		to.AutoCreateReversezone = flex.ExpandBoolPointer(m.AutoCreateReversezone)
 	}
 	return to
 }

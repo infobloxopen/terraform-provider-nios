@@ -82,7 +82,7 @@ func (r *RecordUnknownResource) Create(ctx context.Context, req resource.CreateR
 	apiRes, _, err := r.client.DNSAPI.
 		RecordUnknownAPI.
 		Create(ctx).
-		RecordUnknown(*data.Expand(ctx, &resp.Diagnostics, true)).
+		RecordUnknown(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordUnknown).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *RecordUnknownResource) Update(ctx context.Context, req resource.UpdateR
 	apiRes, _, err := r.client.DNSAPI.
 		RecordUnknownAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordUnknown(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordUnknown(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordUnknown).
 		ReturnAsObject(1).
 		Execute()

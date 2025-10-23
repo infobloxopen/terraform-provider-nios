@@ -806,11 +806,12 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Ipv6network {
+func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Ipv6network {
 	if m == nil {
 		return nil
 	}
 	to := &ipam.Ipv6network{
+		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		CloudInfo:                        ExpandIpv6networkCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:                          flex.ExpandStringPointer(m.Comment),
 		DdnsDomainname:                   flex.ExpandStringPointer(m.DdnsDomainname),
@@ -838,8 +839,9 @@ func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		MgmPrivate:                       flex.ExpandBoolPointer(m.MgmPrivate),
 		MsAdUserData:                     ExpandIpv6networkMsAdUserData(ctx, m.MsAdUserData, diags),
 		Network:                          ExpandIpv6NetworkNetwork(m.Network),
-		FuncCall:                         ExpandFuncCall(ctx, m.FuncCall, diags),
+		NetworkContainer:                 flex.ExpandStringPointer(m.NetworkContainer),
 		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
+		FuncCall:                         ExpandFuncCall(ctx, m.FuncCall, diags),
 		Options:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6networkOptions),
 		PortControlBlackoutSetting:       ExpandIpv6networkPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
 		PreferredLifetime:                flex.ExpandInt64Pointer(m.PreferredLifetime),
@@ -877,12 +879,6 @@ func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		ValidLifetime:                    flex.ExpandInt64Pointer(m.ValidLifetime),
 		Vlans:                            flex.ExpandFrameworkListNestedBlock(ctx, m.Vlans, diags, ExpandIpv6networkVlans),
 		ZoneAssociations:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZoneAssociations, diags, ExpandIpv6networkZoneAssociations),
-	}
-	if isCreate {
-		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
-		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
-		to.Network = ExpandIpv6NetworkNetwork(m.Network)
-		to.AutoCreateReversezone = flex.ExpandBoolPointer(m.AutoCreateReversezone)
 	}
 	return to
 }

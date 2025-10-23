@@ -265,7 +265,7 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *ZoneDelegatedModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.ZoneDelegated {
+func (m *ZoneDelegatedModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneDelegated {
 	if m == nil {
 		return nil
 	}
@@ -276,17 +276,15 @@ func (m *ZoneDelegatedModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		Disable:                flex.ExpandBoolPointer(m.Disable),
 		EnableRfc2317Exclusion: flex.ExpandBoolPointer(m.EnableRfc2317Exclusion),
 		ExtAttrs:               ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		Fqdn:                   flex.ExpandStringPointer(m.Fqdn),
 		Locked:                 flex.ExpandBoolPointer(m.Locked),
 		MsAdIntegrated:         flex.ExpandBoolPointer(m.MsAdIntegrated),
 		MsDdnsMode:             flex.ExpandStringPointer(m.MsDdnsMode),
 		NsGroup:                flex.ExpandStringPointer(m.NsGroup),
 		Prefix:                 flex.ExpandStringPointer(m.Prefix),
 		UseDelegatedTtl:        flex.ExpandBoolPointer(m.UseDelegatedTtl),
-	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
-		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
-		to.ZoneFormat = flex.ExpandStringPointer(m.ZoneFormat)
+		View:                   flex.ExpandStringPointer(m.View),
+		ZoneFormat:             flex.ExpandStringPointer(m.ZoneFormat),
 	}
 	return to
 }

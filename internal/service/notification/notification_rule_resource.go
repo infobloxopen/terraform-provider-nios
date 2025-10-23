@@ -74,7 +74,7 @@ func (r *NotificationRuleResource) Create(ctx context.Context, req resource.Crea
 	apiRes, _, err := r.client.NotificationAPI.
 		NotificationRuleAPI.
 		Create(ctx).
-		NotificationRule(*data.Expand(ctx, &resp.Diagnostics, true)).
+		NotificationRule(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNotificationRule).
 		ReturnAsObject(1).
 		Execute()
@@ -147,7 +147,7 @@ func (r *NotificationRuleResource) Update(ctx context.Context, req resource.Upda
 	apiRes, _, err := r.client.NotificationAPI.
 		NotificationRuleAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		NotificationRule(*data.Expand(ctx, &resp.Diagnostics, false)).
+		NotificationRule(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNotificationRule).
 		ReturnAsObject(1).
 		Execute()

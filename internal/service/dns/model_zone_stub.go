@@ -330,7 +330,7 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *ZoneStubModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.ZoneStub {
+func (m *ZoneStubModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneStub {
 	if m == nil {
 		return nil
 	}
@@ -340,6 +340,7 @@ func (m *ZoneStubModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		DisableForwarding: flex.ExpandBoolPointer(m.DisableForwarding),
 		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ExternalNsGroup:   flex.ExpandStringPointer(m.ExternalNsGroup),
+		Fqdn:              flex.ExpandStringPointer(m.Fqdn),
 		Locked:            flex.ExpandBoolPointer(m.Locked),
 		MsAdIntegrated:    flex.ExpandBoolPointer(m.MsAdIntegrated),
 		MsDdnsMode:        flex.ExpandStringPointer(m.MsDdnsMode),
@@ -348,14 +349,9 @@ func (m *ZoneStubModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		StubFrom:          flex.ExpandFrameworkListNestedBlock(ctx, m.StubFrom, diags, ExpandZoneStubStubFrom),
 		StubMembers:       flex.ExpandFrameworkListNestedBlock(ctx, m.StubMembers, diags, ExpandZoneStubStubMembers),
 		StubMsservers:     flex.ExpandFrameworkListNestedBlock(ctx, m.StubMsservers, diags, ExpandZoneStubStubMsservers),
+		View:              flex.ExpandStringPointer(m.View),
+		ZoneFormat:        flex.ExpandStringPointer(m.ZoneFormat),
 	}
-
-	if isCreate {
-		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
-		to.ZoneFormat = flex.ExpandStringPointer(m.ZoneFormat)
-		to.View = flex.ExpandStringPointer(m.View)
-	}
-
 	return to
 }
 

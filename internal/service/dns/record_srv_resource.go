@@ -82,7 +82,7 @@ func (r *RecordSrvResource) Create(ctx context.Context, req resource.CreateReque
 	apiRes, _, err := r.client.DNSAPI.
 		RecordSrvAPI.
 		Create(ctx).
-		RecordSrv(*data.Expand(ctx, &resp.Diagnostics, true)).
+		RecordSrv(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordSrv).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *RecordSrvResource) Update(ctx context.Context, req resource.UpdateReque
 	apiRes, _, err := r.client.DNSAPI.
 		RecordSrvAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordSrv(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordSrv(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordSrv).
 		ReturnAsObject(1).
 		Execute()

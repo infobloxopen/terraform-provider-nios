@@ -82,7 +82,7 @@ func (r *ZoneForwardResource) Create(ctx context.Context, req resource.CreateReq
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneForwardAPI.
 		Create(ctx).
-		ZoneForward(*data.Expand(ctx, &resp.Diagnostics, true)).
+		ZoneForward(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForZoneForward).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *ZoneForwardResource) Update(ctx context.Context, req resource.UpdateReq
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneForwardAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ZoneForward(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ZoneForward(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForZoneForward).
 		ReturnAsObject(1).
 		Execute()

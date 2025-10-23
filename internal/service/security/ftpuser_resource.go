@@ -82,7 +82,7 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 	apiRes, _, err := r.client.SecurityAPI.
 		FtpuserAPI.
 		Create(ctx).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Ftpuser(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 	apiRes, _, err := r.client.SecurityAPI.
 		FtpuserAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Ftpuser(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
 		ReturnAsObject(1).
 		Execute()

@@ -90,7 +90,7 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 	apiRes, _, err := r.client.IPAMAPI.
 		Ipv6networkAPI.
 		Create(ctx).
-		Ipv6network(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Ipv6network(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6network).
 		ReturnAsObject(1).
 		Execute()
@@ -281,7 +281,7 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 	apiRes, _, err := r.client.IPAMAPI.
 		Ipv6networkAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ipv6network(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Ipv6network(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6network).
 		ReturnAsObject(1).
 		Execute()

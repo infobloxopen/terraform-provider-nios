@@ -558,7 +558,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.ZoneRp {
+func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.ZoneRp {
 	if m == nil {
 		return nil
 	}
@@ -569,6 +569,7 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		ExternalPrimaries:                flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalPrimaries, diags, ExpandZoneRpExternalPrimaries),
 		ExternalSecondaries:              flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneRpExternalSecondaries),
 		FireeyeRuleMapping:               ExpandZoneRpFireeyeRuleMapping(ctx, m.FireeyeRuleMapping, diags),
+		Fqdn:                             flex.ExpandStringPointer(m.Fqdn),
 		GridPrimary:                      flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneRpGridPrimary),
 		GridSecondaries:                  flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneRpGridSecondaries),
 		Locked:                           flex.ExpandBoolPointer(m.Locked),
@@ -582,6 +583,7 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		RpzDropIpRuleMinPrefixLengthIpv6: flex.ExpandInt64Pointer(m.RpzDropIpRuleMinPrefixLengthIpv6),
 		RpzPolicy:                        flex.ExpandStringPointer(m.RpzPolicy),
 		RpzSeverity:                      flex.ExpandStringPointer(m.RpzSeverity),
+		RpzType:                          flex.ExpandStringPointer(m.RpzType),
 		SetSoaSerialNumber:               flex.ExpandBoolPointer(m.SetSoaSerialNumber),
 		SoaDefaultTtl:                    flex.ExpandInt64Pointer(m.SoaDefaultTtl),
 		SoaEmail:                         flex.ExpandStringPointer(m.SoaEmail),
@@ -597,15 +599,9 @@ func (m *ZoneRpModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		UseRecordNamePolicy:              flex.ExpandBoolPointer(m.UseRecordNamePolicy),
 		UseRpzDropIpRule:                 flex.ExpandBoolPointer(m.UseRpzDropIpRule),
 		UseSoaEmail:                      flex.ExpandBoolPointer(m.UseSoaEmail),
-	}
-
-	if isCreate {
-		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
-		to.RpzType = flex.ExpandStringPointer(m.RpzType)
 		// Zone cannot be moved across views
-		to.View = flex.ExpandStringPointer(m.View)
+		View: flex.ExpandStringPointer(m.View),
 	}
-
 	return to
 }
 

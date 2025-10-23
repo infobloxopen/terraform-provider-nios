@@ -89,7 +89,7 @@ func (r *RecordAResource) Create(ctx context.Context, req resource.CreateRequest
 	apiRes, _, err := r.client.DNSAPI.
 		RecordAAPI.
 		Create(ctx).
-		RecordA(*data.Expand(ctx, &resp.Diagnostics, true)).
+		RecordA(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordA).
 		ReturnAsObject(1).
 		Execute()
@@ -267,7 +267,7 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 	apiRes, _, err := r.client.DNSAPI.
 		RecordAAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordA(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordA(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordA).
 		ReturnAsObject(1).
 		Execute()

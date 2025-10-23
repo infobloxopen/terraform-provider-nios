@@ -629,7 +629,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Fixedaddress {
+func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Fixedaddress {
 	if m == nil {
 		return nil
 	}
@@ -676,6 +676,7 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		RestartIfNeeded:                flex.ExpandBoolPointer(m.RestartIfNeeded),
 		Snmp3Credential:                ExpandFixedaddressSnmp3Credential(ctx, m.Snmp3Credential, diags),
 		SnmpCredential:                 ExpandFixedaddressSnmpCredential(ctx, m.SnmpCredential, diags),
+		Template:                       flex.ExpandStringPointer(m.Template),
 		UseBootfile:                    flex.ExpandBoolPointer(m.UseBootfile),
 		UseBootserver:                  flex.ExpandBoolPointer(m.UseBootserver),
 		UseCliCredentials:              flex.ExpandBoolPointer(m.UseCliCredentials),
@@ -690,9 +691,6 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		UsePxeLeaseTime:                flex.ExpandBoolPointer(m.UsePxeLeaseTime),
 		UseSnmp3Credential:             flex.ExpandBoolPointer(m.UseSnmp3Credential),
 		UseSnmpCredential:              flex.ExpandBoolPointer(m.UseSnmpCredential),
-	}
-	if isCreate {
-		to.Template = flex.ExpandStringPointer(m.Template)
 	}
 	return to
 }

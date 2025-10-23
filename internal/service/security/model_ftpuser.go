@@ -107,19 +107,17 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *FtpuserModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *security.Ftpuser {
+func (m *FtpuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.Ftpuser {
 	if m == nil {
 		return nil
 	}
 	to := &security.Ftpuser{
-		ExtAttrs:   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Permission: flex.ExpandStringPointer(m.Permission),
-		Password:   flex.ExpandStringPointer(m.Password),
-	}
-	if isCreate {
-		to.CreateHomeDir = flex.ExpandBoolPointer(m.CreateHomeDir)
-		to.HomeDir = flex.ExpandStringPointer(m.HomeDir)
-		to.Username = flex.ExpandStringPointer(m.Username)
+		CreateHomeDir: flex.ExpandBoolPointer(m.CreateHomeDir),
+		ExtAttrs:      ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		HomeDir:       flex.ExpandStringPointer(m.HomeDir),
+		Permission:    flex.ExpandStringPointer(m.Permission),
+		Password:      flex.ExpandStringPointer(m.Password),
+		Username:      flex.ExpandStringPointer(m.Username),
 	}
 	return to
 }

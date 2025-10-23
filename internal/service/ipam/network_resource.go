@@ -91,7 +91,7 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 	apiRes, _, err := r.client.IPAMAPI.
 		NetworkAPI.
 		Create(ctx).
-		Network(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Network(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNetwork).
 		ReturnAsObject(1).
 		Execute()
@@ -282,7 +282,7 @@ func (r *NetworkResource) Update(ctx context.Context, req resource.UpdateRequest
 	apiRes, _, err := r.client.IPAMAPI.
 		NetworkAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Network(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Network(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNetwork).
 		ReturnAsObject(1).
 		Execute()

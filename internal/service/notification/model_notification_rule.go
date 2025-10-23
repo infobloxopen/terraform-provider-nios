@@ -211,7 +211,7 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *NotificationRuleModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *notification.NotificationRule {
+func (m *NotificationRuleModel) Expand(ctx context.Context, diags *diag.Diagnostics) *notification.NotificationRule {
 	if m == nil {
 		return nil
 	}
@@ -225,15 +225,13 @@ func (m *NotificationRuleModel) Expand(ctx context.Context, diags *diag.Diagnost
 		EventPriority:                    flex.ExpandStringPointer(m.EventPriority),
 		EventType:                        flex.ExpandStringPointer(m.EventType),
 		ExpressionList:                   flex.ExpandFrameworkListNestedBlock(ctx, m.ExpressionList, diags, ExpandNotificationRuleExpressionList),
+		Name:                             flex.ExpandStringPointer(m.Name),
 		NotificationAction:               flex.ExpandStringPointer(m.NotificationAction),
 		NotificationTarget:               flex.ExpandStringPointer(m.NotificationTarget.StringValue),
 		PublishSettings:                  ExpandNotificationRulePublishSettings(ctx, m.PublishSettings, diags),
 		ScheduledEvent:                   ExpandNotificationRuleScheduledEvent(ctx, m.ScheduledEvent, diags),
 		TemplateInstance:                 ExpandNotificationRuleTemplateInstance(ctx, m.TemplateInstance, diags),
 		UsePublishSettings:               flex.ExpandBoolPointer(m.UsePublishSettings),
-	}
-	if isCreate {
-		to.Name = flex.ExpandStringPointer(m.Name)
 	}
 	return to
 }

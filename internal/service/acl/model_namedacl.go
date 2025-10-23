@@ -100,7 +100,7 @@ var NamedaclResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *NamedaclModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *acl.Namedacl {
+func (m *NamedaclModel) Expand(ctx context.Context, diags *diag.Diagnostics) *acl.Namedacl {
 	if m == nil {
 		return nil
 	}

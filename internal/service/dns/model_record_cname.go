@@ -212,7 +212,7 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordCname {
+func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordCname {
 	if m == nil {
 		return nil
 	}
@@ -228,9 +228,7 @@ func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		Name:              flex.ExpandStringPointer(m.Name),
 		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
-	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
+		View:              flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

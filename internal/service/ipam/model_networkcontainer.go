@@ -965,7 +965,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Networkcontainer {
+func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Networkcontainer {
 	if m == nil {
 		return nil
 	}
@@ -1011,8 +1011,10 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 		LowWaterMarkReset:                flex.ExpandInt64Pointer(m.LowWaterMarkReset),
 		MgmPrivate:                       flex.ExpandBoolPointer(m.MgmPrivate),
 		MsAdUserData:                     ExpandNetworkcontainerMsAdUserData(ctx, m.MsAdUserData, diags),
-		Network:                          ExpandNetworkcontainerNetwork(m.Network),
 		FuncCall:                         ExpandFuncCall(ctx, m.FuncCall, diags),
+		Network:                          ExpandNetworkcontainerNetwork(m.Network),
+		NetworkContainer:                 flex.ExpandStringPointer(m.NetworkContainer),
+		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
 		Nextserver:                       flex.ExpandStringPointer(m.Nextserver),
 		Options:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandNetworkcontainerOptions),
 		PortControlBlackoutSetting:       ExpandNetworkcontainerPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
@@ -1059,11 +1061,6 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 		UseUpdateDnsOnLeaseRenewal:       flex.ExpandBoolPointer(m.UseUpdateDnsOnLeaseRenewal),
 		UseZoneAssociations:              flex.ExpandBoolPointer(m.UseZoneAssociations),
 		ZoneAssociations:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ZoneAssociations, diags, ExpandNetworkcontainerZoneAssociations),
-	}
-	if isCreate {
-		to.NetworkContainer = flex.ExpandStringPointer(m.NetworkContainer)
-		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
-		to.Network = ExpandNetworkcontainerNetwork(m.Network)
 	}
 	return to
 }

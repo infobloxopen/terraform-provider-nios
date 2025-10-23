@@ -133,7 +133,7 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 	},
 }
 
-func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *grid.Extensibleattributedef {
+func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.Extensibleattributedef {
 	if m == nil {
 		return nil
 	}
@@ -147,9 +147,7 @@ func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Di
 		Max:                flex.ExpandInt64Pointer(m.Max),
 		Min:                flex.ExpandInt64Pointer(m.Min),
 		Name:               flex.ExpandStringPointer(m.Name),
-	}
-	if isCreate {
-		to.Type = flex.ExpandStringPointer(m.Type)
+		Type:               flex.ExpandStringPointer(m.Type),
 	}
 	return to
 }

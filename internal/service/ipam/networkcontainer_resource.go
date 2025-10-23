@@ -89,7 +89,7 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	apiRes, _, err := r.client.IPAMAPI.
 		NetworkcontainerAPI.
 		Create(ctx).
-		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 		ReturnAsObject(1).
 		Execute()
@@ -267,7 +267,7 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 	apiRes, _, err := r.client.IPAMAPI.
 		NetworkcontainerAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Networkcontainer(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 		ReturnAsObject(1).
 		Execute()

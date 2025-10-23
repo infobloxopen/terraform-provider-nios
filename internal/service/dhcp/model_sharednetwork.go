@@ -535,7 +535,7 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Sharednetwork {
+func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Sharednetwork {
 	if m == nil {
 		return nil
 	}
@@ -564,6 +564,7 @@ func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		Name:                           flex.ExpandStringPointer(m.Name),
 		Networks:                       flex.ExpandFrameworkListNestedBlock(ctx, m.Networks, diags, ExpandSharednetworkNetworks),
 		Nextserver:                     flex.ExpandStringPointer(m.Nextserver),
+		NetworkView:                    flex.ExpandStringPointer(m.NetworkView),
 		Options:                        flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandSharednetworkOptions),
 		PxeLeaseTime:                   flex.ExpandInt64Pointer(m.PxeLeaseTime),
 		UpdateDnsOnLeaseRenewal:        flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
@@ -585,9 +586,6 @@ func (m *SharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		UseOptions:                     flex.ExpandBoolPointer(m.UseOptions),
 		UsePxeLeaseTime:                flex.ExpandBoolPointer(m.UsePxeLeaseTime),
 		UseUpdateDnsOnLeaseRenewal:     flex.ExpandBoolPointer(m.UseUpdateDnsOnLeaseRenewal),
-	}
-	if isCreate {
-		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
 	}
 	return to
 }

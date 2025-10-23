@@ -268,7 +268,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordPtrModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordPtr {
+func (m *RecordPtrModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordPtr {
 	if m == nil {
 		return nil
 	}
@@ -285,9 +285,7 @@ func (m *RecordPtrModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 		Ptrdname:          flex.ExpandStringPointer(m.Ptrdname),
 		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
-	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
+		View:              flex.ExpandStringPointer(m.View),
 	}
 	if !m.Ipv4addr.IsUnknown() {
 		if m.Ipv4addr.ValueString() != "" {

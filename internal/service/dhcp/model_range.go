@@ -957,7 +957,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Range {
+func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Range {
 	if m == nil {
 		return nil
 	}
@@ -1018,8 +1018,11 @@ func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCrea
 		RestartIfNeeded:                  flex.ExpandBoolPointer(m.RestartIfNeeded),
 		SamePortControlDiscoveryBlackout: flex.ExpandBoolPointer(m.SamePortControlDiscoveryBlackout),
 		ServerAssociationType:            flex.ExpandStringPointer(m.ServerAssociationType),
+		SplitMember:                      ExpandRangeSplitMember(ctx, m.SplitMember, diags),
+		SplitScopeExclusionPercent:       flex.ExpandInt64Pointer(m.SplitScopeExclusionPercent),
 		StartAddr:                        flex.ExpandIPv4Address(m.StartAddr),
 		SubscribeSettings:                ExpandRangeSubscribeSettings(ctx, m.SubscribeSettings, diags),
+		Template:                         flex.ExpandStringPointer(m.Template),
 		UnknownClients:                   flex.ExpandStringPointer(m.UnknownClients),
 		UpdateDnsOnLeaseRenewal:          flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
 		UseBlackoutSetting:               flex.ExpandBoolPointer(m.UseBlackoutSetting),
@@ -1047,11 +1050,6 @@ func (m *RangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCrea
 		UseSubscribeSettings:             flex.ExpandBoolPointer(m.UseSubscribeSettings),
 		UseUnknownClients:                flex.ExpandBoolPointer(m.UseUnknownClients),
 		UseUpdateDnsOnLeaseRenewal:       flex.ExpandBoolPointer(m.UseUpdateDnsOnLeaseRenewal),
-	}
-	if isCreate {
-		to.SplitMember = ExpandRangeSplitMember(ctx, m.SplitMember, diags)
-		to.SplitScopeExclusionPercent = flex.ExpandInt64Pointer(m.SplitScopeExclusionPercent)
-		to.Template = flex.ExpandStringPointer(m.Template)
 	}
 	return to
 }

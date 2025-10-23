@@ -244,7 +244,7 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordSrv {
+func (m *RecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordSrv {
 	if m == nil {
 		return nil
 	}
@@ -263,9 +263,7 @@ func (m *RecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
 		Weight:            flex.ExpandInt64Pointer(m.Weight),
-	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
+		View:              flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

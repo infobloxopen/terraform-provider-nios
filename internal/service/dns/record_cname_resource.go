@@ -82,7 +82,7 @@ func (r *RecordCnameResource) Create(ctx context.Context, req resource.CreateReq
 	apiRes, _, err := r.client.DNSAPI.
 		RecordCnameAPI.
 		Create(ctx).
-		RecordCname(*data.Expand(ctx, &resp.Diagnostics, true)).
+		RecordCname(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordCname).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *RecordCnameResource) Update(ctx context.Context, req resource.UpdateReq
 	apiRes, _, err := r.client.DNSAPI.
 		RecordCnameAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordCname(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordCname(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordCname).
 		ReturnAsObject(1).
 		Execute()

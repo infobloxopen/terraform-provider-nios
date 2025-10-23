@@ -236,7 +236,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordA {
+func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordA {
 	if m == nil {
 		return nil
 	}
@@ -254,9 +254,7 @@ func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		RemoveAssociatedPtr: flex.ExpandBoolPointer(m.RemoveAssociatedPtr),
 		Ttl:                 flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:              flex.ExpandBoolPointer(m.UseTtl),
-	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
+		View:                flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

@@ -194,7 +194,7 @@ var RecordUnknownResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordUnknownModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordUnknown {
+func (m *RecordUnknownModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordUnknown {
 	if m == nil {
 		return nil
 	}
@@ -205,13 +205,11 @@ func (m *RecordUnknownModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		EnableHostNamePolicy: flex.ExpandBoolPointer(m.EnableHostNamePolicy),
 		ExtAttrs:             ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                 flex.ExpandStringPointer(m.Name),
+		RecordType:           flex.ExpandStringPointer(m.RecordType),
 		SubfieldValues:       flex.ExpandFrameworkListNestedBlock(ctx, m.SubfieldValues, diags, ExpandRecordUnknownSubfieldValues),
 		Ttl:                  flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:               flex.ExpandBoolPointer(m.UseTtl),
 		View:                 flex.ExpandStringPointer(m.View),
-	}
-	if isCreate {
-		to.RecordType = flex.ExpandStringPointer(m.RecordType)
 	}
 	return to
 }
