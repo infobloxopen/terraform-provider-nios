@@ -362,5 +362,6 @@ func (r *RecordAaaaResource) ImportState(ctx context.Context, req resource.Impor
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
 }

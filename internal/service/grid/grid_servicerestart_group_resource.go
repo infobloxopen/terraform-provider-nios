@@ -485,5 +485,6 @@ func (r *GridServicerestartGroupResource) ImportState(ctx context.Context, req r
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
 }
