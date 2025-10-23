@@ -13,21 +13,50 @@ Manages a DHCP Shared Network.
 ## Example Usage
 
 ```terraform
+// Create required networks for shared networks
+resource "nios_ipam_network" "network_21_21_14" {
+  network      = "21.21.14.0/24"
+  network_view = "default"
+  comment      = "Parent network for shared network 1"
+}
+
+resource "nios_ipam_network" "network_21_21_13" {
+  network      = "21.21.13.0/24"
+  network_view = "default"
+  comment      = "Parent network for shared network 1"
+}
+
+resource "nios_ipam_network" "network_15_14_1" {
+  network      = "15.14.1.0/24"
+  network_view = "default"
+  comment      = "Parent network for shared network 2"
+}
+
+resource "nios_ipam_network" "network_16_0_0" {
+  network      = "16.0.0.0/24"
+  network_view = "default"
+  comment      = "Parent network for shared network 2"
+}
+
 // Create Shared Network with Basic Fields
 resource "nios_dhcp_shared_network" "shared_network_basic_fields" {
   name = "example_shared_network1"
   networks = [
     {
-      ref = "network/ZG5zLm5ldHdvcmskMjEuMjEuMTQuMC8yNC8w:21.21.14.0/24/default"
+      ref = nios_ipam_network.network_21_21_14.ref
     },
     {
-      ref = "network/ZG5zLm5ldHdvcmskMjEuMjEuMTMuMC8yNC8w:21.21.13.0/24/default"
+      ref = nios_ipam_network.network_21_21_13.ref
     }
   ]
   network_view = "default"
   extattrs = {
     Site = "location-1"
   }
+  depends_on = [
+    nios_ipam_network.network_21_21_14,
+    nios_ipam_network.network_21_21_13
+  ]
 }
 
 // Create Shared Network with Additional Fields
@@ -35,10 +64,10 @@ resource "nios_dhcp_shared_network" "shared_network_additional_fields" {
   name = "example_shared_network2"
   networks = [
     {
-      ref = "network/ZG5zLm5ldHdvcmskMTUuMTQuMS4wLzI0LzA:15.14.1.0/24/default"
+      ref = nios_ipam_network.network_15_14_1.ref
     },
     {
-      ref = "network/ZG5zLm5ldHdvcmskMTYuMC4wLjAvMjQvMA:16.0.0.0/24/default"
+      ref = nios_ipam_network.network_16_0_0.ref
     }
   ]
   ignore_mac_addresses = ["66:77:88:99:aa:bb", "00:11:22:33:44:55"]
@@ -60,17 +89,14 @@ resource "nios_dhcp_shared_network" "shared_network_additional_fields" {
       value = "aa.bb.com"
     },
   ]
-  use_logic_filter_rules = true
-  logic_filter_rules = [
-    {
-      filter = "option_filter"
-      type   = "Option"
-    }
-  ]
   comment                    = "Shared network with additional fields"
   ddns_server_always_updates = true
   ddns_use_option81          = true
   use_ddns_use_option81      = true
+  depends_on = [
+    nios_ipam_network.network_15_14_1,
+    nios_ipam_network.network_16_0_0
+  ]
 }
 ```
 
