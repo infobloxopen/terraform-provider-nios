@@ -815,6 +815,14 @@ func TestAccZoneRpResource_RpzPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "SUBSTITUTE"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccZoneRpRpzPolicy(zoneFqdn, "default", "NXDOMAIN"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rpz_policy", "NXDOMAIN"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
