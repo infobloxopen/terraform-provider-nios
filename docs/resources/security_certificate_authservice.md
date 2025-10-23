@@ -25,7 +25,7 @@ resource "nios_security_certificate_authservice" "certificate_authservice_with_a
   name            = "example_certificate_authservice3"
   ca_certificates = ["cacertificate/id"]
 
-  //additonal fields
+  //additional fields
   comment                 = "Example Certificate Authservice with additional fields"
   auto_populate_login     = "SERIAL_NUMBER"
   remote_lookup_service   = "ad_auth_service/id"
