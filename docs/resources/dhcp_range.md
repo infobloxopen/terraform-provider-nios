@@ -13,7 +13,7 @@ Manages a DHCP Range.
 ## Example Usage
 
 ```terraform
-// Create parent network for DHCP ranges
+// Create Ipv4 network (required as parent )
 resource "nios_ipam_network" "range_parent_network" {
   network      = "10.0.0.0/24"
   network_view = "default"

@@ -1,4 +1,4 @@
-// Create an Auth Zone (Required as Parent)
+// Create Authoritative zone (required as parent)
 resource "nios_dns_zone_auth" "parent_zone" {
   fqdn = "example.com"
 }

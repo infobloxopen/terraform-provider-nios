@@ -1,4 +1,4 @@
-//Create an NS Group forward stub server (Required as parent for forward zones)
+//Create an NS Group forward stub server (required as parent)
 resource "nios_dns_nsgroup_forwardstubserver" "nsgroup_forward_stub" {
   name = "example_ns_group_forward_stub_server"
   external_servers = [

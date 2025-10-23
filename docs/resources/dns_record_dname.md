@@ -13,7 +13,7 @@ Manages a DNAME record.
 ## Example Usage
 
 ```terraform
-// Create an Auth Zone (Required as Parent)
+// Create Authoritative zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_zone_1" {
   fqdn = "example.com"
 }

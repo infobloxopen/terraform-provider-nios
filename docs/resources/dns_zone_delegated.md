@@ -13,7 +13,7 @@ Manages a DNS Delegated Zone.
 ## Example Usage
 
 ```terraform
-// Create a Authoritative DNS Zone ( required as parent )
+// Create Authoritative Zone ( required as parent )
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn = "example_auth.com"
   view = "default"

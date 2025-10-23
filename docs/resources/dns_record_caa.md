@@ -13,7 +13,7 @@ Manages a DNS CAA record.
 ## Example Usage
 
 ```terraform
-// Create an Auth Zone (Required as Parent)
+// Create Authoritative Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_zone" {
   fqdn = "example.com"
 }
