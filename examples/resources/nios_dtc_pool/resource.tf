@@ -53,7 +53,7 @@ resource "nios_dtc_pool" "dtc_pool2" {
   use_ttl                    = true
 }
 
-//  Create a DTC pool with consolidated monitors 
+// Create a DTC pool with consolidated monitors 
 // Steps:
 // Create a DTC pool without consolidated monitors 
 // Associate the DTC pool with a DTC LBDN that has a zone with infoblox.localdomain member 
