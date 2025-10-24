@@ -400,13 +400,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"create_ptr_for_bulk_hosts": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
 	},
 	"create_ptr_for_hosts": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
@@ -564,7 +562,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The rollover date for the Zone Signing Key.",
 	},
 	"do_host_abstraction": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if hosts and bulk hosts are automatically created when the zone data is imported. This field is meaningful only when import_from is set.",
