@@ -63,7 +63,6 @@ Optional:
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
 - `func_call` (Attributes) Function call to be executed. (see [below for nested schema](#nestedatt--result--func_call))
 - `ipv4addr` (String) The IPv4 Address of the record.
-- `remove_associated_ptr` (Boolean) Whether to remove associated PTR records while deleting the A record.
 - `ttl` (Number) Time-to-live value of the record, in seconds.
 - `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the A record.
 - `view` (String) View that this record is part of.
