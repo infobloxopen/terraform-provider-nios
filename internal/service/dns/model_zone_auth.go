@@ -428,7 +428,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_principal_group": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The DDNS Principal cluster group name.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
@@ -841,7 +840,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ns_group": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("grid_primary")),
 		},
@@ -1319,7 +1317,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.CopyXferToNotify = types.BoolPointerValue(from.CopyXferToNotify)
 	m.CreateUnderscoreZones = types.BoolPointerValue(from.CreateUnderscoreZones)
 	m.DdnsForceCreationTimestampUpdate = types.BoolPointerValue(from.DdnsForceCreationTimestampUpdate)
-	m.DdnsPrincipalGroup = flex.FlattenStringPointer(from.DdnsPrincipalGroup)
+	m.DdnsPrincipalGroup = flex.FlattenStringPointerNilAsNotEmpty(from.DdnsPrincipalGroup)
 	m.DdnsPrincipalTracking = types.BoolPointerValue(from.DdnsPrincipalTracking)
 	m.DdnsRestrictPatterns = types.BoolPointerValue(from.DdnsRestrictPatterns)
 	m.DdnsRestrictPatternsList = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.DdnsRestrictPatternsList, diags)
@@ -1401,7 +1399,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.NetworkAssociations = flex.FlattenFrameworkListString(ctx, from.NetworkAssociations, diags)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.NotifyDelay = flex.FlattenInt64Pointer(from.NotifyDelay)
-	m.NsGroup = flex.FlattenStringPointer(from.NsGroup)
+	m.NsGroup = flex.FlattenStringPointerNilAsNotEmpty(from.NsGroup)
 	m.Parent = flex.FlattenStringPointer(from.Parent)
 	m.Prefix = flex.FlattenStringPointer(from.Prefix)
 	m.PrimaryType = flex.FlattenStringPointer(from.PrimaryType)
