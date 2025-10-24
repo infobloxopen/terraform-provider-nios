@@ -13,7 +13,7 @@ Manages a DHCP Shared Network.
 ## Example Usage
 
 ```terraform
-// Create IPV4 Networks (required as parents)
+// Create IPV4 Networks (Required as Parents)
 resource "nios_ipam_network" "parent_network1" {
   network      = "21.21.14.0/24"
   network_view = "default"

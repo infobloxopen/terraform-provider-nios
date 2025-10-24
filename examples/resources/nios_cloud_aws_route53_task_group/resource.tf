@@ -1,4 +1,4 @@
-// Create AWS User ( required as a parent )
+// Create an AWS User (Required as Parent)
 resource "nios_cloud_aws_user" "aws_user_basic_fields" {
   access_key_id     = "AKIAexample1"
   account_id        = "337773173961"

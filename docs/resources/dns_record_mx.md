@@ -13,7 +13,7 @@ Manages a DNS MX record.
 ## Example Usage
 
 ```terraform
-// Create Authoritative zone (required as parent)
+// Create an Auth zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example.com"
   zone_format = "FORWARD"

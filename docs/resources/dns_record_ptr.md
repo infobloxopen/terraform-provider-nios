@@ -13,12 +13,12 @@ Manages a DNS PTR Record.
 ## Example Usage
 
 ```terraform
-// Create Authoritative zone (required as parent)
+// Create an Auth zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_zone" {
   fqdn = "example.com"
 }
 
-// Create an IPv4 Reverse Mapping Zones (required as parent)
+// Create IPv4 Reverse Mapping Zones (Required as Parent)
 resource "nios_dns_zone_auth" "reverse_zone1" {
   fqdn        = "10.20.1.0/24"
   view        = "default"
@@ -33,7 +33,7 @@ resource "nios_dns_zone_auth" "reverse_zone2" {
   comment     = "Reverse zone for 22.0.0.0/24 network"
 }
 
-// Create an IPv6 Reverse Mapping Zone (required as parent )
+// Create an IPv6 Reverse Mapping Zone (Required as Parent)
 resource "nios_dns_zone_auth" "reverse_zone_ipv6" {
   fqdn        = "2001::/64"
   view        = "default"

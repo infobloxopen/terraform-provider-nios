@@ -1,4 +1,4 @@
-// Create Ipv4 network (required as parent )
+// Create an IPV4 network (Required as Parent)
 resource "nios_ipam_network" "parent_network" {
   network      = "16.0.0.0/24"
   network_view = "default"

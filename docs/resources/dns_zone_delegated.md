@@ -13,13 +13,13 @@ Manages a DNS Delegated Zone.
 ## Example Usage
 
 ```terraform
-// Create Authoritative Zone ( required as parent )
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn = "example_auth.com"
   view = "default"
 }
 
-// Create a Reverse Mapping IPv4 DNS Zone ( required as parent )
+// Create a Reverse Mapping IPV4 DNS Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_reverse_zone" {
   fqdn        = "111.0.0.0/24"
   view        = "default"

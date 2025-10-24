@@ -13,15 +13,15 @@ Manages a DNAME record.
 ## Example Usage
 
 ```terraform
-// Create Authoritative zone (Required as Parent)
-resource "nios_dns_zone_auth" "parent_zone_1" {
+// Create an Auth zone (Required as Parent)
+resource "nios_dns_zone_auth" "reverse_zone1" {
   fqdn = "example.com"
 }
 
 // Create a DNAME record with Basic Fields
 resource "nios_dns_record_dname" "create_record_dname_with_basic_fields" {
   target = "example-dname-1.com"
-  name   = nios_dns_zone_auth.parent_zone_1.fqdn
+  name   = nios_dns_zone_auth.reverse_zone1.fqdn
 }
 
 // Create an Auth Zone (Required as Parent)

@@ -13,7 +13,7 @@ Manages a AAAA Record.
 ## Example Usage
 
 ```terraform
-// Create Authoritative zone (required as parent)
+// Create an Auth zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example.com"
   zone_format = "FORWARD"
@@ -21,7 +21,7 @@ resource "nios_dns_zone_auth" "parent_auth_zone" {
   comment     = "Parent zone for AAAA records"
 }
 
-// Create IPv6 network for function call (required as parent)
+// Create an IPV6 network for function call (Required as Parent)
 resource "nios_ipam_ipv6network" "example_ipv6_network" {
   network      = "2001:db8:abcd:12::/64"
   network_view = "default"
