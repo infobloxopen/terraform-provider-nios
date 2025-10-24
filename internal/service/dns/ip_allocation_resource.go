@@ -525,10 +525,6 @@ func (r *IPAllocationResource) ImportState(ctx context.Context, req resource.Imp
 		return
 	}
 
-	// # defined context variablectx
-	// ctx.myImporContext = True
-	// Generate = asdsad
-
 	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
 	data.ExtAttrsAll = extattrs
 
