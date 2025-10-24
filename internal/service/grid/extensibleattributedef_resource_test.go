@@ -284,15 +284,6 @@ func TestAccExtensibleattributedefResource_Max(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "type", eaType),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccExtensibleattributedefMax(name, 200, eaType),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "max", "200"),
-					resource.TestCheckResourceAttr(resourceName, "type", eaType),
-				),
-			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})

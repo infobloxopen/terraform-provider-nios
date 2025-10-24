@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -214,6 +215,21 @@ func (r *ExtensibleattributedefResource) ValidateConfig(ctx context.Context, req
 			"Invalid Min/Max Configuration",
 			fmt.Sprintf("The 'min' and 'max' attributes are only valid for INTEGER and STRING extensible attribute types, but type is %q. Remove min and max attributes or change the type to INTEGER or STRING.", typeValue),
 		)
+	}
+
+	// Check if type is INTEGER, then default_value should be a valid integer
+	if !data.DefaultValue.IsNull() && !data.DefaultValue.IsUnknown() {
+		if typeValue == "INTEGER" {
+			defaultValue := data.DefaultValue.ValueString()
+			_, err := strconv.ParseInt(defaultValue, 10, 32)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Invalid Integer Default Value",
+					fmt.Sprintf("The default_value '%s' is not a valid integer.", defaultValue),
+				)
+				return
+			}
+		}
 	}
 }
 
