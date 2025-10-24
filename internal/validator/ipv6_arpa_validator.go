@@ -27,11 +27,8 @@ func (v ArpaIPv6Validator) ValidateString(ctx context.Context, request validator
 
 	value := request.ConfigValue.ValueString()
 
-	// Trim leading/trailing whitespace
-	trimmed := strings.TrimSpace(value)
-
 	// Reject if whitespace was present
-	if trimmed != value {
+	if strings.TrimSpace(value) != value {
 		response.Diagnostics.AddAttributeError(
 			request.Path,
 			"Invalid Whitespace",
@@ -40,12 +37,12 @@ func (v ArpaIPv6Validator) ValidateString(ctx context.Context, request validator
 		return
 	}
 
-	// Reject if trailing dot is present
+	// Check for trailing dot
 	if strings.HasSuffix(value, ".") {
 		response.Diagnostics.AddAttributeError(
 			request.Path,
 			"Trailing Dot Not Allowed",
-			"The value must not end with a trailing dot.",
+			"The value must not end with a dot.",
 		)
 		return
 	}

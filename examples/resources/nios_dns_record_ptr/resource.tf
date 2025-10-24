@@ -114,7 +114,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_func_call" {
   ]
 }
 
-// Create an IPv4 parent zone-auth
+// Create an IPV4 reverse mapping zone (Required as Parent)
 resource "nios_dns_zone_auth" "create_zone1" {
   fqdn        = "60.0.0.0/24"
   view        = "default"
@@ -131,7 +131,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4_arpa" {
   }
 }
 
-// Create an IPv6 parent zone-auth
+// Create an IPV6 reverse mapping zone (Required as Parent)
 resource "nios_dns_zone_auth" "create_zone2" {
   fqdn        = "2002:1100::/64"
   view        = "default"
