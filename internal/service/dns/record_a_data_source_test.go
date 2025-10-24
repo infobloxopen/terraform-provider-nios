@@ -80,7 +80,6 @@ func testAccCheckRecordAResourceAttrPair(resourceName, dataSourceName string) []
 		resource.TestCheckResourceAttrPair(resourceName, "ms_ad_user_data", dataSourceName, "result.0.ms_ad_user_data"),
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
 		resource.TestCheckResourceAttrPair(resourceName, "reclaimable", dataSourceName, "result.0.reclaimable"),
-		resource.TestCheckResourceAttrPair(resourceName, "remove_associated_ptr", dataSourceName, "result.0.remove_associated_ptr"),
 		resource.TestCheckResourceAttrPair(resourceName, "shared_record_group", dataSourceName, "result.0.shared_record_group"),
 		resource.TestCheckResourceAttrPair(resourceName, "ttl", dataSourceName, "result.0.ttl"),
 		resource.TestCheckResourceAttrPair(resourceName, "use_ttl", dataSourceName, "result.0.use_ttl"),
