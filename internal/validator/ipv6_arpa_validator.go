@@ -27,7 +27,7 @@ func (v ArpaIPv6Validator) ValidateString(ctx context.Context, request validator
 
 	value := request.ConfigValue.ValueString()
 
-	// Reject if whitespace was present
+	// Check for whitespace
 	if strings.TrimSpace(value) != value {
 		response.Diagnostics.AddAttributeError(
 			request.Path,
