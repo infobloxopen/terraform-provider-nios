@@ -129,25 +129,40 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_func_call" {
   ]
 }
 
-// TODO: create parent zone_auth 2.1.0.0.d.c.b.a.8.b.d.0.1.0.0.2.ip6.arpa
 // Create an IPv6 PTR record by name with arpa notation
 resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6_arpa" {
   ptrdname = "example_record.example.com"
-  name     = "6.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.d.c.b.a.8.b.d.0.1.0.0.2.ip6.arpa"
+  name     = "7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.${nios_dns_zone_auth.create_zone2.display_domain}"
   view     = "default"
   extattrs = {
     Site = "location-2"
   }
 }
 
-// TODO: create parent zone_auth 0.0.80.in-addr.arpa
 // Create an IPv4 PTR record by name with arpa notation
 resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4_arpa" {
-  name     = "5.0.0.80.in-addr.arpa"
+  name     = "5.${nios_dns_zone_auth.create_zone1.display_domain}"
   ptrdname = "0.0.192.in-addr"
   view     = "default"
   extattrs = {
     Site = "location-3"
+  }
+}
+
+// Create an IPv4 parent zone-auth
+resource "nios_dns_zone_auth" "create_zone1" {
+  fqdn        = "60.0.0.0/24"
+  view        = "default"
+  zone_format = "IPV4"
+}
+
+// Create an IPv6 parent zone-auth
+resource "nios_dns_zone_auth" "create_zone2" {
+  fqdn        = "2002:1100::/64"
+  view        = "default"
+  zone_format = "IPV6"
+  extattrs = {
+    Site = "location-1"
   }
 }
 ```
