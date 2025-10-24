@@ -13,50 +13,52 @@ import (
 type ArpaIPv6Validator struct{}
 
 func (v ArpaIPv6Validator) Description(ctx context.Context) string {
-	return "Validator to check if string is in the correct IPv6 ARPA format 'x.x.x...x.ip6.arpa' with exactly 32 hex nibbles."
+	return "Validator to check if string is in the correct IPv6 ARPA format 'x.x.x.x...x.ip6.arpa' with exactly 32 hex nibbles."
 }
 
 func (v ArpaIPv6Validator) MarkdownDescription(ctx context.Context) string {
-	return "Validator to check if string is in the correct IPv6 ARPA format 'x.x.x...x.ip6.arpa' with exactly 32 hex nibbles."
+	return "Validator to check if string is in the correct IPv6 ARPA format 'x.x.x.x...x.ip6.arpa' with exactly 32 hex nibbles."
 }
 
-func (v ArpaIPv6Validator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
-	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+func (v ArpaIPv6Validator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
+	if request.ConfigValue.IsNull() || request.ConfigValue.IsUnknown() {
 		return
 	}
 
-	value := req.ConfigValue.ValueString()
-	normalized := strings.TrimSuffix(value, ".")
+	value := request.ConfigValue.ValueString()
 
-	if !strings.HasSuffix(normalized, ".ip6.arpa") {
-		resp.Diagnostics.AddAttributeError(
-			req.Path,
-			"Invalid IPv6 ARPA Format",
-			fmt.Sprintf("The value '%s' must end with '.ip6.arpa'", value),
+	// Trim leading/trailing whitespace
+	trimmed := strings.TrimSpace(value)
+
+	// Reject if whitespace was present
+	if trimmed != value {
+		response.Diagnostics.AddAttributeError(
+			request.Path,
+			"Invalid Whitespace",
+			"The value must not contain leading or trailing whitespace.",
 		)
 		return
 	}
 
-	nibbles := strings.Split(strings.TrimSuffix(normalized, ".ip6.arpa"), ".")
-	if len(nibbles) != 32 {
-		resp.Diagnostics.AddAttributeError(
-			req.Path,
-			"Invalid IPv6 ARPA Format",
-			fmt.Sprintf("The value '%s' must contain exactly 32 hexadecimal nibbles before '.ip6.arpa'", value),
+	// Reject if trailing dot is present
+	if strings.HasSuffix(value, ".") {
+		response.Diagnostics.AddAttributeError(
+			request.Path,
+			"Trailing Dot Not Allowed",
+			"The value must not end with a trailing dot.",
 		)
 		return
 	}
 
-	hexNibble := regexp.MustCompile(`^[0-9a-fA-F]$`)
-	for _, nibble := range nibbles {
-		if !hexNibble.MatchString(nibble) {
-			resp.Diagnostics.AddAttributeError(
-				req.Path,
-				"Invalid IPv6 ARPA Format",
-				fmt.Sprintf("Nibble '%s' in '%s' is not a valid hexadecimal digit", nibble, value),
-			)
-			return
-		}
+	// Define the ARPA IPv6 regex
+	re := regexp.MustCompile(`^([0-9a-f]\.){31}[0-9a-f]\.ip6\.arpa$`)
+
+	if !re.MatchString(value) {
+		response.Diagnostics.AddAttributeError(
+			request.Path,
+			"Invalid ARPA IPv6 Format",
+			fmt.Sprintf("The value '%s' is not a valid ARPA IPv6 address. Expected format: 'x.x.x.x...x.ip6.arpa' with exactly 32 hex nibbles.", value),
+		)
 	}
 }
 
