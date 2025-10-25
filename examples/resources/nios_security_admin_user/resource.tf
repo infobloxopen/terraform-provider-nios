@@ -5,7 +5,7 @@ resource "nios_security_admin_user" "admin_user_basic_fields" {
   admin_groups = ["admin-group"]
 }
 
-// TODO: Retrieve references based on the provided distinguished name of the object: cacertificate
+// Retrieve references based on the provided distinguished name of the object: cacertificate
 // Create an Admin User with Additional Fields
 resource "nios_security_admin_user" "admin_user_additional_fields" {
   name         = "example_admin_user2"
@@ -21,7 +21,7 @@ resource "nios_security_admin_user" "admin_user_additional_fields" {
   }
   time_zone                         = "Asia/Kolkata"
   use_time_zone                     = true
-  ca_certificate_issuer             = "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22"
+  ca_certificate_issuer             = "cacertificate/id"
   client_certificate_serial_number  = "4e7c675cd972ecd2e5b895ad6cb4e38e6d77b4b4"
   enable_certificate_authentication = true
   ssh_keys = [

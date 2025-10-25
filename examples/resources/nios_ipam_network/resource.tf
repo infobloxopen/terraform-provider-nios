@@ -3,15 +3,6 @@ resource "nios_ipam_network" "example_network" {
   network      = "10.0.0.0/24"
   network_view = "default"
   comment      = "Created by Terraform"
-  options = [
-    {
-      name         = "dhcp-lease-time",
-      num          = 51,
-      value        = "3600",
-      vendor_class = "DHCP"
-    }
-  ]
-  use_options = true
   extattrs = {
     Site = "location-1"
   }
@@ -20,18 +11,18 @@ resource "nios_ipam_network" "example_network" {
 // Create an IPAM Network with Additional Fields
 resource "nios_ipam_network" "complete_example" {
   // Required attributes
-  network = "11.0.0.0/24"
+  network = "111.0.0.0/24"
 
   // Basic configuration
   network_view = "default"
   comment      = "Complete network container example with all possible writable attributes"
 
-  # auto_create_reversezone = false
-  bootfile       = "pxelinux.0"
-  bootserver     = "192.168.1.10"
-  use_authority  = true
-  use_bootfile   = true
-  use_bootserver = true
+  auto_create_reversezone = false
+  bootfile                = "pxelinux.0"
+  bootserver              = "192.168.1.10"
+  use_authority           = true
+  use_bootfile            = true
+  use_bootserver          = true
 
   // DDNS settings
   enable_ddns                     = true
@@ -71,7 +62,7 @@ resource "nios_ipam_network" "example_func_call" {
     result_field    = "networks"
     object          = "network"
     object_parameters = {
-      network      = "10.0.0.0/24"
+      network      = "${nios_ipam_network.example_network.network}"
       network_view = "default"
     }
     parameters = {

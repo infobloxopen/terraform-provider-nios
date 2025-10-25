@@ -13,13 +13,13 @@ Manages a ruleset
 ## Example Usage
 
 ```terraform
-//Create a Ruleset with Basic Fields
+// Create a Ruleset with Basic Fields
 resource "nios_misc_ruleset" "ruleset_basic" {
   name = "example_ruleset_1"
   type = "BLACKLIST"
 }
 
-//Create a Ruleset with Additional Fields
+// Create a Ruleset with Additional Fields
 resource "nios_misc_ruleset" "ruleset_with_additional_fields" {
   name     = "example_ruleset_2"
   type     = "NXDOMAIN"
