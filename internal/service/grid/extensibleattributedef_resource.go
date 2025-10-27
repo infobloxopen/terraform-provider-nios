@@ -213,7 +213,7 @@ func (r *ExtensibleattributedefResource) ValidateConfig(ctx context.Context, req
 	if (!minValue.IsNull() || !maxValue.IsNull()) && typeValue != "INTEGER" && typeValue != "STRING" {
 		resp.Diagnostics.AddError(
 			"Invalid Min/Max Configuration",
-			fmt.Sprintf("The 'min' and 'max' attributes are only valid for INTEGER and STRING extensible attribute types, but type is %q. Remove min and max attributes or change the type to INTEGER or STRING.", typeValue),
+			fmt.Sprintf("The 'min' and 'max' attributes are only valid for INTEGER and STRING extensible attribute types, but type is %q.", typeValue),
 		)
 	}
 

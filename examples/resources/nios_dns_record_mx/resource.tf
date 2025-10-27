@@ -1,4 +1,4 @@
-// Create parent authoritative zone first (required as parent)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example.com"
   zone_format = "FORWARD"
@@ -15,7 +15,7 @@ resource "nios_dns_record_mx" "record1" {
   depends_on     = [nios_dns_zone_auth.parent_auth_zone]
 }
 
-// Create MX Record with additional fields
+// Create MX Record with Additional Fields
 resource "nios_dns_record_mx" "record2" {
   name           = nios_dns_zone_auth.parent_auth_zone.fqdn
   mail_exchanger = "mail1.${nios_dns_zone_auth.parent_auth_zone.fqdn}"

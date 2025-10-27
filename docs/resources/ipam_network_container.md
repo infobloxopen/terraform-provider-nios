@@ -13,25 +13,18 @@ Manages a Network Container
 ## Example Usage
 
 ```terraform
+// Create an IPV4 Network Container with Basic Fields
 resource "nios_ipam_network_container" "example_container" {
   network      = "10.0.0.0/24"
   network_view = "default"
   comment      = "Created by Terraform"
-  options = [
-    {
-      name         = "dhcp-lease-time",
-      num          = 51,
-      value        = "3600",
-      vendor_class = "DHCP"
-    },
-  ]
-  use_options = true
   // Optional: Configure extensible attributes
   extattrs = {
     "Site" = "location-1"
   }
 }
 
+// Create an IPV4 Network Container with Additional Fields
 resource "nios_ipam_network_container" "complete_example" {
   // Required attributes
   network = "11.0.0.0/24"
