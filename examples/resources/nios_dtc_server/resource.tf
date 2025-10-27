@@ -4,7 +4,7 @@ resource "nios_dtc_server" "create_dtc_server" {
   host = "2.3.3.4"
 }
 
-// Create a DTC Server with Additional Fields. 
+// Create a DTC Server with Additional Fields
 resource "nios_dtc_server" "create_with_additional_fields" {
   name                    = "example-dtc-server"
   host                    = "2.3.1.2"
