@@ -72,7 +72,7 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 		return
 	}
 
-	// Check if disable_concurrent_login is set and use_disable_concurrent_login is not true
+	// Check if disable_concurrent_login is set and use_disable_concurrent_login is false
 	if !config.DisableConcurrentLogin.IsNull() && !config.DisableConcurrentLogin.IsUnknown() && !config.UseDisableConcurrentLogin.ValueBool() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("disable_concurrent_login"),
