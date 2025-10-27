@@ -19,7 +19,7 @@ resource "nios_dns_zone_auth" "parent_auth_zone" {
   view = "default"
 }
 
-// Create a Reverse Mapping IPV4 DNS Zone (Required as Parent)
+// Create an IPV4 Reverse Mapping Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_reverse_zone" {
   fqdn        = "111.0.0.0/24"
   view        = "default"
