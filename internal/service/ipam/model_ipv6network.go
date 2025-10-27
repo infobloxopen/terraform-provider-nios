@@ -630,7 +630,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The DHCP IPv6 Network Cisco ISE subscribe settings.",
 	},
 	"template": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set on creation, the network is created according to the values specified in the selected template.",
 	},
 	"unmanaged": schema.BoolAttribute{
