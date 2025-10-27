@@ -140,7 +140,6 @@ resource "nios_ipam_ipv6network" "example_func_call" {
 - `same_port_control_discovery_blackout` (Boolean) If the field is set to True, the discovery blackout setting will be used for port control blackout setting.
 - `send_rir_request` (Boolean) Determines whether to send the RIR registration request.
 - `subscribe_settings` (Attributes) The DHCP IPv6 Network Cisco ISE subscribe settings. (see [below for nested schema](#nestedatt--subscribe_settings))
-- `template` (String) If set on creation, the network is created according to the values specified in the selected template.
 - `unmanaged` (Boolean) Determines whether the DHCP IPv6 Network is unmanaged or not.
 - `update_dns_on_lease_renewal` (Boolean) This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.
 - `use_blackout_setting` (Boolean) Use flag for: discovery_blackout_setting , port_control_blackout_setting, same_port_control_discovery_blackout
@@ -186,6 +185,7 @@ resource "nios_ipam_ipv6network" "example_func_call" {
 - `network_container` (String) The network container to which this network belongs, if any.
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the IPv6 network address space.
+- `template` (String) If set on creation, the network is created according to the values specified in the selected template.
 - `unmanaged_count` (Number) The number of unmanaged IP addresses as discovered by network discovery.
 
 <a id="nestedatt--cloud_info"></a>
