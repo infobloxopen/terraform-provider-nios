@@ -1176,7 +1176,6 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 	}
 	to := &ipam.Network{
 		Authority:                        flex.ExpandBoolPointer(m.Authority),
-		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		Bootfile:                         flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                       flex.ExpandStringPointer(m.Bootserver),
 		CloudInfo:                        ExpandNetworkCloudInfo(ctx, m.CloudInfo, diags),
