@@ -47,12 +47,10 @@ var AdmingroupLicensingSetCommandsResourceSchemaAttributes = map[string]schema.A
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then disable all fields",
 	},
