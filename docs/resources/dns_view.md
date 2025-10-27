@@ -18,7 +18,7 @@ resource "nios_dns_view" "create_view" {
   name = "example_view"
 }
 
-// Create DNS View with additional fields
+// Create DNS View with Additional Fields
 resource "nios_dns_view" "create_view_with_additional_fields" {
   name         = "example_custom_view"
   comment      = "DNS View"

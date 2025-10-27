@@ -13,27 +13,27 @@ Manages a DNS PTR Record.
 ## Example Usage
 
 ```terraform
-// Create an Auth Zone (Required as parent for forward records)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_zone" {
   fqdn = "example.com"
 }
 
-// Create an IPv4 Reverse Mapping Zones (Required as parent for PTR records)
-resource "nios_dns_zone_auth" "reverse_zone_10_20_1" {
+// Create IPv4 Reverse Mapping Zones (Required as Parent)
+resource "nios_dns_zone_auth" "reverse_zone1" {
   fqdn        = "10.20.1.0/24"
   view        = "default"
   zone_format = "IPV4"
   comment     = "Reverse zone for 10.20.1.0/24 network"
 }
 
-resource "nios_dns_zone_auth" "reverse_zone_22_0_0" {
+resource "nios_dns_zone_auth" "reverse_zone2" {
   fqdn        = "22.0.0.0/24"
   view        = "default"
   zone_format = "IPV4"
   comment     = "Reverse zone for 22.0.0.0/24 network"
 }
 
-// Create an IPv6 Reverse Mapping Zone (Required as parent for IPv6 PTR records)
+// Create an IPv6 Reverse Mapping Zone (Required as Parent)
 resource "nios_dns_zone_auth" "reverse_zone_ipv6" {
   fqdn        = "2001::/64"
   view        = "default"
@@ -42,7 +42,7 @@ resource "nios_dns_zone_auth" "reverse_zone_ipv6" {
 }
 
 // Create an IPv4 Reverse MappingZone for function call network (Required for function call PTR)
-resource "nios_dns_zone_auth" "reverse_zone_85_85" {
+resource "nios_dns_zone_auth" "reverse_zone3" {
   fqdn        = "85.85.0.0/16"
   view        = "default"
   zone_format = "IPV4"
@@ -56,7 +56,7 @@ resource "nios_ipam_network" "func_call_network" {
   comment      = "Network for PTR record function call"
 }
 
-// Create an IPv4 PTR record with Basic fields
+// Create an IPv4 PTR record with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4addr" {
   ptrdname = "example_record1.${nios_dns_zone_auth.parent_zone.fqdn}"
   ipv4addr = "10.20.1.2"
@@ -64,10 +64,10 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4addr" {
   extattrs = {
     Site = "location-1"
   }
-  depends_on = [nios_dns_zone_auth.reverse_zone_10_20_1]
+  depends_on = [nios_dns_zone_auth.reverse_zone1]
 }
 
-// Create an IPv6 PTR record with Basic fields
+// Create an IPv6 PTR record with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6addr" {
   ptrdname = "example_record2.${nios_dns_zone_auth.parent_zone.fqdn}"
   ipv6addr = "2001::123"
@@ -78,7 +78,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6addr" {
   depends_on = [nios_dns_zone_auth.reverse_zone_ipv6]
 }
 
-// Create an IPv4 PTR record by name with Basic fields
+// Create an IPv4 PTR record by name with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_name" {
   ptrdname = "example_record3.${nios_dns_zone_auth.parent_zone.fqdn}"
   name     = "11.0.0.22.in-addr.arpa"
@@ -86,10 +86,10 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_name" {
   extattrs = {
     Site = "location-3"
   }
-  depends_on = [nios_dns_zone_auth.reverse_zone_22_0_0]
+  depends_on = [nios_dns_zone_auth.reverse_zone2]
 }
 
-// Create an IPv4 PTR record by name with Additional fields
+// Create an IPv4 PTR record by name with Additional Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_additional_fields" {
   ptrdname = "example_record4.${nios_dns_zone_auth.parent_zone.fqdn}"
   name     = "12.0.0.22.in-addr.arpa"
@@ -105,7 +105,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_additional_fields" {
   extattrs = {
     Site = "location-4"
   }
-  depends_on = [nios_dns_zone_auth.reverse_zone_22_0_0]
+  depends_on = [nios_dns_zone_auth.reverse_zone2]
 }
 
 // Create an PTR record using function call to retrieve ipv4addr
@@ -125,7 +125,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_func_call" {
   comment = "Updated comment"
   depends_on = [
     nios_ipam_network.func_call_network,
-    nios_dns_zone_auth.reverse_zone_85_85
+    nios_dns_zone_auth.reverse_zone3
   ]
 }
 
