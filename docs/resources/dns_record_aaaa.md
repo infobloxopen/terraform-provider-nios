@@ -90,7 +90,6 @@ resource "nios_dns_record_aaaa" "create_record_aaaa_with_func_call" {
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
 - `func_call` (Attributes) Function call to be executed. (see [below for nested schema](#nestedatt--func_call))
 - `ipv6addr` (String) The IPv6 Address of the record.
-- `remove_associated_ptr` (Boolean) Delete option that indicates whether the associated PTR records should be removed while deleting the specified A record.
 - `ttl` (Number) The Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the AAAA record.
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".
