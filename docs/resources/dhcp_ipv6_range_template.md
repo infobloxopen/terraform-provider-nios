@@ -22,7 +22,7 @@ resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_required_fields" {
   cloud_api_compatible = false
 }
 
-// Create an IPV6 DHCP Range Template with additional Fields
+// Create an IPV6 DHCP Range Template with Additional Fields
 resource "nios_dhcp_ipv6_range_template" "ipv6_range_template_additional_fields" {
   name                = "example_range_template_additional_fields"
   number_of_addresses = 100

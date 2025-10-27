@@ -3,10 +3,10 @@ resource "nios_ipam_network_view" "create_network_view" {
   name = "example_network_view"
 }
 
-// Create Network View with additional fields
+// Create Network View with Additional Fields
 resource "nios_ipam_network_view" "create_network_view_with_additional_fields" {
   name    = "example-network-view2"
-  comment = "Example Network View with additional fields"
+  comment = "Example Network View with Additional Fields"
 
   remote_reverse_zones = [
     {

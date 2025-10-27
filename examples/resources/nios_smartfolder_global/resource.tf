@@ -1,4 +1,3 @@
-
 // Create a Global Smartfolder with Basic Fields
 resource "nios_smartfolder_global" "smartfolder_global_basic_fields" {
   name = "example-global-smartfolder"

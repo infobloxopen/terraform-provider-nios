@@ -48,7 +48,7 @@ resource "nios_dns_zone_auth" "create_zone5" {
   fqdn = "example2.com"
   view = "default"
 
-  // Additional fields
+  // Additional Fields
   grid_primary = [
     {
       name = "infoblox.10_0_0_1",
