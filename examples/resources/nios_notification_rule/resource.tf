@@ -1,4 +1,4 @@
-// Create a Notification Rest Endpoint ( Required as parent)
+// Create a Notification Rest Endpoint (Required as Parent)
 resource "nios_notification_rest_endpoint" "notification_rest_parent" {
   name                 = "example-notification-rest-endpoint-1"
   outbound_member_type = "GM"
