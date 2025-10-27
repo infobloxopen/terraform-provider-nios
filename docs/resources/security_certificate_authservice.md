@@ -13,20 +13,20 @@ Manages a Certificate Authentication Service.
 ## Example Usage
 
 ```terraform
-// Create Certificate Authservice with basic fields
+// Create Certificate Authservice with Basic Fields
 resource "nios_security_certificate_authservice" "certificate_authservice_with_basic_fields" {
   name            = "example_certificate_authservice2"
   ca_certificates = ["cacertificate/id"]
   ocsp_check      = "DISABLED"
 }
 
-// Create Certificate Authservice with additional fields
+// Create Certificate Authservice with Additional Fields
 resource "nios_security_certificate_authservice" "certificate_authservice_with_additional_fields" {
   name            = "example_certificate_authservice3"
   ca_certificates = ["cacertificate/id"]
 
-  // Additional fields
-  comment                 = "Example Certificate Authservice with additional fields"
+  // Additional Fields
+  comment                 = "Example Certificate Authservice with Additional Fields"
   auto_populate_login     = "SERIAL_NUMBER"
   remote_lookup_service   = "ad_auth_service/id"
   enable_remote_lookup    = true

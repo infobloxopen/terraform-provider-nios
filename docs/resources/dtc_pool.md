@@ -13,7 +13,7 @@ Manages a DTC Pool
 ## Example Usage
 
 ```terraform
-// Create a DTC pool with basic fields 
+// Create a DTC pool with Basic Fields 
 resource "nios_dtc_pool" "dtc_pool1" {
   name                = "dtc_pool"
   lb_preferred_method = "ROUND_ROBIN"
@@ -30,7 +30,7 @@ resource "nios_dtc_server" "dtc_server_2" {
   host = "2.3.3.4"
 }
 
-// Create a DTC pool with additional fields
+// Create a DTC pool with Additional Fields
 resource "nios_dtc_pool" "dtc_pool2" {
   name                = "dtc_pool2"
   lb_preferred_method = "TOPOLOGY"

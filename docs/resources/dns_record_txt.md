@@ -13,7 +13,7 @@ Manages a TXT Record.
 ## Example Usage
 
 ```terraform
-// Create an Auth zone (Required as Parent)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example.com"
   zone_format = "FORWARD"
@@ -32,7 +32,7 @@ resource "nios_dns_record_txt" "create_record" {
   }
 }
 
-// Create Record TXT with additional fields
+// Create Record TXT with Additional Fields
 resource "nios_dns_record_txt" "create_with_additional_config" {
   name = "example-txt-record-with-config.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   text = "Example TXT Record with Additional Config"

@@ -1,4 +1,4 @@
-// Create an Auth zone (Required as Parent)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_zone" {
   fqdn = "example.com"
 }
@@ -41,7 +41,7 @@ resource "nios_ipam_network" "func_call_network" {
   comment      = "Network for PTR record function call"
 }
 
-// Create an IPv4 PTR record with Basic fields
+// Create an IPv4 PTR record with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4addr" {
   ptrdname = "example_record1.${nios_dns_zone_auth.parent_zone.fqdn}"
   ipv4addr = "10.20.1.2"
@@ -52,7 +52,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4addr" {
   depends_on = [nios_dns_zone_auth.reverse_zone1]
 }
 
-// Create an IPv6 PTR record with Basic fields
+// Create an IPv6 PTR record with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6addr" {
   ptrdname = "example_record2.${nios_dns_zone_auth.parent_zone.fqdn}"
   ipv6addr = "2001::123"
@@ -63,7 +63,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6addr" {
   depends_on = [nios_dns_zone_auth.reverse_zone_ipv6]
 }
 
-// Create an IPv4 PTR record by name with Basic fields
+// Create an IPv4 PTR record by name with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_name" {
   ptrdname = "example_record3.${nios_dns_zone_auth.parent_zone.fqdn}"
   name     = "11.0.0.22.in-addr.arpa"
@@ -74,7 +74,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_name" {
   depends_on = [nios_dns_zone_auth.reverse_zone2]
 }
 
-// Create an IPv4 PTR record by name with Additional fields
+// Create an IPv4 PTR record by name with Additional Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_additional_fields" {
   ptrdname = "example_record4.${nios_dns_zone_auth.parent_zone.fqdn}"
   name     = "12.0.0.22.in-addr.arpa"
