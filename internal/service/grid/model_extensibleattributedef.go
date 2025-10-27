@@ -150,12 +150,12 @@ func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Di
 		DescendantsAction:  ExpandExtensibleattributedefDescendantsAction(ctx, m.DescendantsAction, diags),
 		Flags:              flex.ExpandStringPointer(m.Flags),
 		ListValues:         flex.ExpandFrameworkListNestedBlock(ctx, m.ListValues, diags, ExpandExtensibleattributedefListValues),
-		Max:                flex.ExpandInt64Pointer(m.Max),
-		Min:                flex.ExpandInt64Pointer(m.Min),
 		Name:               flex.ExpandStringPointer(m.Name),
 	}
 	if isCreate {
 		to.Type = flex.ExpandStringPointer(m.Type)
+		to.Max = flex.ExpandInt64Pointer(m.Max)
+		to.Min = flex.ExpandInt64Pointer(m.Min)
 	}
 	return to
 }
