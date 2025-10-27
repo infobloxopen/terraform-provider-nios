@@ -61,7 +61,6 @@ var NotificationRuleScheduledEventResourceSchemaAttributes = map[string]schema.A
 				stringvalidator.OneOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"),
 			),
 			listvalidator.SizeAtLeast(1),
-			listvalidator.ValueStringsAre(stringvalidator.OneOf("SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY")),
 		},
 		Optional:            true,
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
