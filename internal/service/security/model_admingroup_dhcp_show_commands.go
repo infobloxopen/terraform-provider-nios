@@ -92,8 +92,6 @@ func (m *AdmingroupDhcpShowCommandsModel) Expand(ctx context.Context, diags *dia
 		ShowDhcpdRecvSockBufSize: flex.ExpandBoolPointer(m.ShowDhcpdRecvSockBufSize),
 		ShowOverloadBootp:        flex.ExpandBoolPointer(m.ShowOverloadBootp),
 		ShowLogTxnId:             flex.ExpandBoolPointer(m.ShowLogTxnId),
-		EnableAll:                flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:               flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

@@ -140,8 +140,6 @@ func (m *AdmingroupTroubleShootingToplevelCommandsModel) Expand(ctx context.Cont
 		Snmpget:        flex.ExpandBoolPointer(m.Snmpget),
 		Console:        flex.ExpandBoolPointer(m.Console),
 		Tracepath:      flex.ExpandBoolPointer(m.Tracepath),
-		EnableAll:      flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:     flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

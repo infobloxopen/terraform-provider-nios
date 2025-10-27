@@ -196,8 +196,6 @@ func (m *AdmingroupSecuritySetCommandsModel) Expand(ctx context.Context, diags *
 		SetAdpDebug:                     flex.ExpandBoolPointer(m.SetAdpDebug),
 		SetSupportTimeout:               flex.ExpandBoolPointer(m.SetSupportTimeout),
 		SetUpdateRabbitmqPassword:       flex.ExpandBoolPointer(m.SetUpdateRabbitmqPassword),
-		EnableAll:                       flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                      flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

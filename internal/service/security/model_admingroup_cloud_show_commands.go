@@ -60,8 +60,6 @@ func (m *AdmingroupCloudShowCommandsModel) Expand(ctx context.Context, diags *di
 	}
 	to := &security.AdmingroupCloudShowCommands{
 		ShowCloudServicesPortal: flex.ExpandBoolPointer(m.ShowCloudServicesPortal),
-		EnableAll:               flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:              flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

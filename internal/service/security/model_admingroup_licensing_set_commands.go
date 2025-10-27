@@ -76,8 +76,6 @@ func (m *AdmingroupLicensingSetCommandsModel) Expand(ctx context.Context, diags 
 		SetLicense:               flex.ExpandBoolPointer(m.SetLicense),
 		SetReportingResetLicense: flex.ExpandBoolPointer(m.SetReportingResetLicense),
 		SetTempLicense:           flex.ExpandBoolPointer(m.SetTempLicense),
-		EnableAll:                flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:               flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

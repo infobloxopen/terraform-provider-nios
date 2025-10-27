@@ -164,8 +164,6 @@ func (m *AdmingroupSecurityShowCommandsModel) Expand(ctx context.Context, diags 
 		ShowAdp:                     flex.ExpandBoolPointer(m.ShowAdp),
 		ShowAdpDebug:                flex.ExpandBoolPointer(m.ShowAdpDebug),
 		ShowSupportTimeout:          flex.ExpandBoolPointer(m.ShowSupportTimeout),
-		EnableAll:                   flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                  flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

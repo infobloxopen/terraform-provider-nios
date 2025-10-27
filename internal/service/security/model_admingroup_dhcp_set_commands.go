@@ -84,8 +84,6 @@ func (m *AdmingroupDhcpSetCommandsModel) Expand(ctx context.Context, diags *diag
 		SetLogTxnId:                  flex.ExpandBoolPointer(m.SetLogTxnId),
 		SetOverloadBootp:             flex.ExpandBoolPointer(m.SetOverloadBootp),
 		SetRegenerateDhcpUpdaterKeys: flex.ExpandBoolPointer(m.SetRegenerateDhcpUpdaterKeys),
-		EnableAll:                    flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                   flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

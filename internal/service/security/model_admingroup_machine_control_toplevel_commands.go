@@ -80,12 +80,10 @@ func (m *AdmingroupMachineControlToplevelCommandsModel) Expand(ctx context.Conte
 		return nil
 	}
 	to := &security.AdmingroupMachineControlToplevelCommands{
-		Reboot:     flex.ExpandBoolPointer(m.Reboot),
-		Reset:      flex.ExpandBoolPointer(m.Reset),
-		Shutdown:   flex.ExpandBoolPointer(m.Shutdown),
-		Restart:    flex.ExpandBoolPointer(m.Restart),
-		EnableAll:  flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll: flex.ExpandBoolPointer(m.DisableAll),
+		Reboot:   flex.ExpandBoolPointer(m.Reboot),
+		Reset:    flex.ExpandBoolPointer(m.Reset),
+		Shutdown: flex.ExpandBoolPointer(m.Shutdown),
+		Restart:  flex.ExpandBoolPointer(m.Restart),
 	}
 	return to
 }

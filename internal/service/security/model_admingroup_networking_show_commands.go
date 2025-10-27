@@ -276,8 +276,6 @@ func (m *AdmingroupNetworkingShowCommandsModel) Expand(ctx context.Context, diag
 		ShowNetworkConnectivity:  flex.ExpandBoolPointer(m.ShowNetworkConnectivity),
 		ShowTrafficfiles:         flex.ExpandBoolPointer(m.ShowTrafficfiles),
 		ShowInterfaceStats:       flex.ExpandBoolPointer(m.ShowInterfaceStats),
-		EnableAll:                flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:               flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

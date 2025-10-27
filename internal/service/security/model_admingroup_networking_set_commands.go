@@ -212,8 +212,6 @@ func (m *AdmingroupNetworkingSetCommandsModel) Expand(ctx context.Context, diags
 		SetTcpTimestamps:        flex.ExpandBoolPointer(m.SetTcpTimestamps),
 		SetTrafficCapture:       flex.ExpandBoolPointer(m.SetTrafficCapture),
 		SetWinsForwarding:       flex.ExpandBoolPointer(m.SetWinsForwarding),
-		EnableAll:               flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:              flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

@@ -75,8 +75,6 @@ func (m *AdmingroupGridShowCommandsModel) Expand(ctx context.Context, diags *dia
 	to := &security.AdmingroupGridShowCommands{
 		ShowTestPromoteMaster: flex.ExpandBoolPointer(m.ShowTestPromoteMaster),
 		ShowToken:             flex.ExpandBoolPointer(m.ShowToken),
-		EnableAll:             flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:            flex.ExpandBoolPointer(m.DisableAll),
 		ShowDscp:              flex.ExpandBoolPointer(m.ShowDscp),
 	}
 	return to

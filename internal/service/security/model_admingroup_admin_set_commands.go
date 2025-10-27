@@ -388,8 +388,6 @@ func (m *AdmingroupAdminSetCommandsModel) Expand(ctx context.Context, diags *dia
 		SetNtpStratum:                flex.ExpandBoolPointer(m.SetNtpStratum),
 		SetPcDomain:                  flex.ExpandBoolPointer(m.SetPcDomain),
 		SetReportFrequency:           flex.ExpandBoolPointer(m.SetReportFrequency),
-		EnableAll:                    flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                   flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

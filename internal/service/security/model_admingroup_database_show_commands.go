@@ -108,8 +108,6 @@ func (m *AdmingroupDatabaseShowCommandsModel) Expand(ctx context.Context, diags 
 		ShowDbPh:                   flex.ExpandBoolPointer(m.ShowDbPh),
 		ShowDbsize:                 flex.ExpandBoolPointer(m.ShowDbsize),
 		ShowIbdbstat:               flex.ExpandBoolPointer(m.ShowIbdbstat),
-		EnableAll:                  flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                 flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

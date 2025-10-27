@@ -124,8 +124,6 @@ func (m *AdmingroupGridSetCommandsModel) Expand(ctx context.Context, diags *diag
 		SetRevertGrid:          flex.ExpandBoolPointer(m.SetRevertGrid),
 		SetToken:               flex.ExpandBoolPointer(m.SetToken),
 		SetTestPromoteMaster:   flex.ExpandBoolPointer(m.SetTestPromoteMaster),
-		EnableAll:              flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:             flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

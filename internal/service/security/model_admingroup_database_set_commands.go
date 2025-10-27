@@ -116,8 +116,6 @@ func (m *AdmingroupDatabaseSetCommandsModel) Expand(ctx context.Context, diags *
 		SetDbsize:              flex.ExpandBoolPointer(m.SetDbsize),
 		SetDebugTools:          flex.ExpandBoolPointer(m.SetDebugTools),
 		SetCircTxnTrace:        flex.ExpandBoolPointer(m.SetCircTxnTrace),
-		EnableAll:              flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:             flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

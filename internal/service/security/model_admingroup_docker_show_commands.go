@@ -60,8 +60,6 @@ func (m *AdmingroupDockerShowCommandsModel) Expand(ctx context.Context, diags *d
 	}
 	to := &security.AdmingroupDockerShowCommands{
 		ShowDockerBridge: flex.ExpandBoolPointer(m.ShowDockerBridge),
-		EnableAll:        flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:       flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

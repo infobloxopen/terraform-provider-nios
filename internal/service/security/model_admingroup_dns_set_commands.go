@@ -188,8 +188,6 @@ func (m *AdmingroupDnsSetCommandsModel) Expand(ctx context.Context, diags *diag.
 		SetDnsAccelDebug:                flex.ExpandBoolPointer(m.SetDnsAccelDebug),
 		SetDnsAutoGen:                   flex.ExpandBoolPointer(m.SetDnsAutoGen),
 		SetAllowQueryDomain:             flex.ExpandBoolPointer(m.SetAllowQueryDomain),
-		EnableAll:                       flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                      flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

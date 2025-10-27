@@ -68,8 +68,6 @@ func (m *AdmingroupCloudSetCommandsModel) Expand(ctx context.Context, diags *dia
 	to := &security.AdmingroupCloudSetCommands{
 		SetCloudServicesPortalForceRefresh: flex.ExpandBoolPointer(m.SetCloudServicesPortalForceRefresh),
 		SetCloudServicesPortal:             flex.ExpandBoolPointer(m.SetCloudServicesPortal),
-		EnableAll:                          flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                         flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

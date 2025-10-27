@@ -84,8 +84,6 @@ func (m *AdmingroupDnsToplevelCommandsModel) Expand(ctx context.Context, diags *
 		DdnsDelete:       flex.ExpandBoolPointer(m.DdnsDelete),
 		Delete:           flex.ExpandBoolPointer(m.Delete),
 		DnsARecordDelete: flex.ExpandBoolPointer(m.DnsARecordDelete),
-		EnableAll:        flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:       flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

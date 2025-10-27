@@ -148,8 +148,6 @@ func (m *AdmingroupAdminToplevelCommandsModel) Expand(ctx context.Context, diags
 		Scrape:         flex.ExpandBoolPointer(m.Scrape),
 		SamlRestart:    flex.ExpandBoolPointer(m.SamlRestart),
 		Synctime:       flex.ExpandBoolPointer(m.Synctime),
-		EnableAll:      flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:     flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }
