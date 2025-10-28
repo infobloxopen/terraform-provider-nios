@@ -623,6 +623,12 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("network"),
+				path.MatchRoot("func_call"),
+			),
+		},
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Computed:            true,
