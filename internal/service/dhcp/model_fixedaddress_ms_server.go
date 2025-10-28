@@ -2,11 +2,13 @@ package dhcp
 
 import (
 	"context"
+	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -16,17 +18,22 @@ import (
 )
 
 type FixedaddressMsServerModel struct {
-	Ipv4addr iptypes.IPAddress `tfsdk:"ipv4addr"`
+	Ipv4addr types.String `tfsdk:"ipv4addr"`
 }
 
 var FixedaddressMsServerAttrTypes = map[string]attr.Type{
-	"ipv4addr": iptypes.IPAddressType{},
+	"ipv4addr": types.StringType,
 }
 
 var FixedaddressMsServerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
-		CustomType:          iptypes.IPAddressType{},
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$|^[a-z]+(\.[a-z]+)*$`),
+				"Must be valid IPv4 address or FQDN with lowercase letters, no trailing dot or spaces",
+			),
+		},
 		MarkdownDescription: "The IPv4 Address or FQDN of the Microsoft server.",
 	},
 }
@@ -48,7 +55,7 @@ func (m *FixedaddressMsServerModel) Expand(ctx context.Context, diags *diag.Diag
 		return nil
 	}
 	to := &dhcp.FixedaddressMsServer{
-		Ipv4addr: flex.ExpandIPAddress(m.Ipv4addr),
+		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
 	}
 	return to
 }
@@ -71,5 +78,5 @@ func (m *FixedaddressMsServerModel) Flatten(ctx context.Context, from *dhcp.Fixe
 	if m == nil {
 		*m = FixedaddressMsServerModel{}
 	}
-	m.Ipv4addr = flex.FlattenIPAddress(from.Ipv4addr)
+	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 }
