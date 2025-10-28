@@ -45,7 +45,7 @@ var NetworkMembersResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
-				regexp.MustCompile(`^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$|^[a-z]+(\.[a-z]+)*$`),
+				regexp.MustCompile(`^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$|^[0-9a-z]+(\.[a-z]+)*$`),
 				"Must be valid IPv4 address or FQDN with lowercase letters, no trailing dot or spaces",
 			),
 		},
