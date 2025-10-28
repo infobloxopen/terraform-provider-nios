@@ -94,14 +94,16 @@ func (r *NotificationRestEndpointResource) ValidateConfig(ctx context.Context, r
 	}
 
 	// URI Validation
-	uri := data.Uri.ValueString()
-	_, err := url.ParseRequestURI(uri)
-	if err != nil {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("uri"),
-			"Invalid URI",
-			"URI must contain a valid value.",
-		)
+	if !data.Uri.IsNull() && !data.Uri.IsUnknown() {
+		uri := data.Uri.ValueString()
+		_, err := url.ParseRequestURI(uri)
+		if err != nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("uri"),
+				"Invalid URI",
+				"URI must contain a valid value.",
+			)
+		}
 	}
 
 	// Template Instance Parameters Validation

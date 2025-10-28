@@ -630,7 +630,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The DHCP IPv6 Network Cisco ISE subscribe settings.",
 	},
 	"template": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set on creation, the network is created according to the values specified in the selected template.",
 	},
 	"unmanaged": schema.BoolAttribute{
@@ -851,7 +851,6 @@ func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		SamePortControlDiscoveryBlackout: flex.ExpandBoolPointer(m.SamePortControlDiscoveryBlackout),
 		SendRirRequest:                   flex.ExpandBoolPointer(m.SendRirRequest),
 		SubscribeSettings:                ExpandIpv6networkSubscribeSettings(ctx, m.SubscribeSettings, diags),
-		Template:                         flex.ExpandStringPointer(m.Template),
 		Unmanaged:                        flex.ExpandBoolPointer(m.Unmanaged),
 		UpdateDnsOnLeaseRenewal:          flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
 		UseBlackoutSetting:               flex.ExpandBoolPointer(m.UseBlackoutSetting),
@@ -967,6 +966,7 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.SubscribeSettings = FlattenIpv6networkSubscribeSettings(ctx, from.SubscribeSettings, diags)
+	m.Template = flex.FlattenStringPointer(from.Template)
 	m.Unmanaged = types.BoolPointerValue(from.Unmanaged)
 	m.UnmanagedCount = flex.FlattenInt64Pointer(from.UnmanagedCount)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)

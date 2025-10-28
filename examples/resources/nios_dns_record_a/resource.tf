@@ -1,4 +1,4 @@
-// Create parent authoritative zone first (required as parent)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example_auth.com"
   zone_format = "FORWARD"
@@ -23,7 +23,7 @@ resource "nios_dns_record_a" "create_record_a" {
   }
 }
 
-// Create Record A with additional fields
+// Create Record A with Additional Fields
 resource "nios_dns_record_a" "create_record_a_with_additional_fields" {
   name     = "name.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   ipv4addr = "10.20.1.3"
