@@ -168,7 +168,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"func_call": schema.SingleNestedAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Function call to be executed.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Record A.",
 		Attributes:          FuncCallResourceSchemaAttributes,
 	},
 	"ipv4addr": schema.StringAttribute{
@@ -181,7 +181,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("func_call"),
 			),
 		},
-		MarkdownDescription: "The IPv4 Address of the record.",
+		MarkdownDescription: "The IPv4 address for the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.",
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,

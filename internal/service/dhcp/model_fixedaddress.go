@@ -386,13 +386,13 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("func_call"),
 			),
 		},
-		MarkdownDescription: "The IPv4 Address of the record.",
+		MarkdownDescription: "The IPv4 address for the Fixed Address. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.",
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Function call to be executed for Fixed Address",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Fixed Address.",
 	},
 	"is_invalid_mac": schema.BoolAttribute{
 		Computed:            true,

@@ -618,7 +618,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"network": schema.StringAttribute{
 		CustomType:          cidrtypes.IPv4PrefixType{},
 		Optional:            true,
-		MarkdownDescription: "The IPv4 Address of the record.",
+		MarkdownDescription: "The IPv4 Address of the record. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.",
 		Computed:            true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
@@ -634,7 +634,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
-		MarkdownDescription: "Function call to be executed.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_network` function is supported for Network Container.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,

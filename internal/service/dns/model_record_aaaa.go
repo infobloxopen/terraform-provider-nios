@@ -175,13 +175,13 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("func_call"),
 			),
 		},
-		MarkdownDescription: "The IPv6 Address of the record.",
+		MarkdownDescription: "The IPv6 Address of the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.",
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Function call to be executed.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Record AAAA.",
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,

@@ -498,7 +498,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType:          cidrtypes.IPv6PrefixType{},
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The IPv6 network address in CIDR notation. The network address must be unique within the network view.",
+		MarkdownDescription: "The IPv6 network address in CIDR notation. The network address must be unique within the network view. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.",
 		Validators: []validator.String{
 			stringvalidator.ExactlyOneOf(
 				path.MatchRoot("network"),
@@ -513,7 +513,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "A function call to be executed on the object.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_network` function is supported for IPv6 Network.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,
