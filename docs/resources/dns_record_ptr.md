@@ -183,10 +183,10 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6_arpa" {
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `func_call` (Attributes) Function call to be executed. (see [below for nested schema](#nestedatt--func_call))
-- `ipv4addr` (String) The IPv4 Address of the record.
-- `ipv6addr` (String) The IPv6 Address of the record.
-- `name` (String) The name of the DNS PTR record in FQDN format.
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for Record PTR. (see [below for nested schema](#nestedatt--func_call))
+- `ipv4addr` (String) The IPv4 Address of the record. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.
+- `ipv6addr` (String) The IPv6 Address of the record. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.
+- `name` (String) The name of the DNS PTR record in FQDN format. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.
 - `ttl` (Number) Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, that the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the A record.
 - `view` (String) Name of the DNS View in which the record resides, for example "external".

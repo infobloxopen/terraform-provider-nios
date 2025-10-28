@@ -123,11 +123,11 @@ resource "nios_ipam_ipv6network" "example_func_call" {
 - `enable_immediate_discovery` (Boolean) Determines if the discovery for the network should be immediately enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `federated_realms` (Attributes List) This field contains the federated realms associated to this network (see [below for nested schema](#nestedatt--federated_realms))
-- `func_call` (Attributes) A function call to be executed on the object. (see [below for nested schema](#nestedatt--func_call))
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_network` function is supported for IPv6 Network. (see [below for nested schema](#nestedatt--func_call))
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on this IPv6 network. This list corresponds to the match rules that are written to the DHCPv6 configuration file. (see [below for nested schema](#nestedatt--logic_filter_rules))
 - `members` (Attributes List) A list of members servers that serve DHCP for the network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the "_struct" member to the struct type. (see [below for nested schema](#nestedatt--members))
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
-- `network` (String) The IPv6 network address in CIDR notation. The network address must be unique within the network view.
+- `network` (String) The IPv6 network address in CIDR notation. The network address must be unique within the network view. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.
 - `network_view` (String) The name of the network view in which this network resides.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. The option `dhcp-lease-time` cannot be configured for this object and instead 'valid_lifetime' attribute should be used. (see [below for nested schema](#nestedatt--options))
 - `port_control_blackout_setting` (Attributes) The port control blackout setting for this network. (see [below for nested schema](#nestedatt--port_control_blackout_setting))
