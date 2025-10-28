@@ -100,7 +100,6 @@ func (m *NsgroupgridsecondariesPreferredPrimariesModel) Expand(ctx context.Conte
 	to := &dns.NsgroupgridsecondariesPreferredPrimaries{
 		Address: flex.ExpandIPAddress(m.Address),
 		Name:    flex.ExpandStringPointer(m.Name),
-		Stealth: flex.ExpandBoolPointer(m.Stealth),
 	}
 	return to
 }
