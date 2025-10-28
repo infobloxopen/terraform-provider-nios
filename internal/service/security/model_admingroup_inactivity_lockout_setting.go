@@ -3,11 +3,13 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -40,15 +42,21 @@ var AdmingroupInactivityLockoutSettingResourceSchemaAttributes = map[string]sche
 		MarkdownDescription: "Enable/disable the account inactivity lockout.",
 	},
 	"inactive_days": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(30),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(30),
+		Validators: []validator.Int64{
+			int64validator.Between(2, 9999),
+		},
 		MarkdownDescription: "Number of days after which account gets locked out if user does not login.",
 	},
 	"reminder_days": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(15),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(15),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 30),
+		},
 		MarkdownDescription: "The number of days before the account lockout date when the appliance sends a reminder.",
 	},
 	"reactivate_via_serial_console_enable": schema.BoolAttribute{

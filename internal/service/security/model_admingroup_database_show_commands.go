@@ -75,12 +75,10 @@ var AdmingroupDatabaseShowCommandsResourceSchemaAttributes = map[string]schema.A
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then disable all fields",
 	},
@@ -110,8 +108,6 @@ func (m *AdmingroupDatabaseShowCommandsModel) Expand(ctx context.Context, diags 
 		ShowDbPh:                   flex.ExpandBoolPointer(m.ShowDbPh),
 		ShowDbsize:                 flex.ExpandBoolPointer(m.ShowDbsize),
 		ShowIbdbstat:               flex.ExpandBoolPointer(m.ShowIbdbstat),
-		EnableAll:                  flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                 flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

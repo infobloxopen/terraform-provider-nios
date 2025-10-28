@@ -47,12 +47,10 @@ var AdmingroupLicensingSetCommandsResourceSchemaAttributes = map[string]schema.A
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then disable all fields",
 	},
@@ -78,8 +76,6 @@ func (m *AdmingroupLicensingSetCommandsModel) Expand(ctx context.Context, diags 
 		SetLicense:               flex.ExpandBoolPointer(m.SetLicense),
 		SetReportingResetLicense: flex.ExpandBoolPointer(m.SetReportingResetLicense),
 		SetTempLicense:           flex.ExpandBoolPointer(m.SetTempLicense),
-		EnableAll:                flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:               flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

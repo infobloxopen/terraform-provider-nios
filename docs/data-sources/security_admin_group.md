@@ -107,8 +107,6 @@ Read-Only:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `et_bfd` (Boolean) If True then CLI user has permission to run the command
 - `set_admin_group_acl` (Boolean) If True then CLI user has permission to run the command
 - `set_analytics_database_dump` (Boolean) If True then CLI user has permission to run the command
@@ -152,14 +150,17 @@ Optional:
 - `set_transfer_supportbundle` (Boolean) If True then CLI user has permission to run the command
 - `set_wred` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--admin_show_commands"></a>
 ### Nested Schema for `result.admin_show_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `show_admin_group_acl` (Boolean) If True then CLI user has permission to run the command
 - `show_analytics_database_dumps` (Boolean) If True then CLI user has permission to run the command
 - `show_analytics_parameter` (Boolean) If True then CLI user has permission to run the command
@@ -210,14 +211,17 @@ Optional:
 - `show_wred_stats` (Boolean) If True then CLI user has permission to run the command
 - `show_wred_status` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--admin_toplevel_commands"></a>
 ### Nested Schema for `result.admin_toplevel_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `iostat` (Boolean) If True then CLI user has permission to run the command
 - `netstat` (Boolean) If True then CLI user has permission to run the command
 - `ps` (Boolean) If True then CLI user has permission to run the command
@@ -231,16 +235,24 @@ Optional:
 - `tcpdump` (Boolean) If True then CLI user has permission to run the command
 - `vmstat` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--cloud_set_commands"></a>
 ### Nested Schema for `result.cloud_set_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `set_cloud_services_portal` (Boolean) If True then CLI user has permission to run the command
 - `set_cloud_services_portal_forcerefresh` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
 
 
 <a id="nestedatt--result--cloud_show_commands"></a>
@@ -248,9 +260,12 @@ Optional:
 
 Optional:
 
+- `show_cloud_services_portal` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
 - `disable_all` (Boolean) If True then disable all fields
 - `enable_all` (Boolean) If True then enable all fields
-- `show_cloud_services_portal` (Boolean) If True then CLI user has permission to run the command
 
 
 <a id="nestedatt--result--database_set_commands"></a>
@@ -258,8 +273,6 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `set_circ_txn_trace` (Boolean) If True then CLI user has permission to run the command
 - `set_database_transfer` (Boolean) If True then CLI user has permission to run the command
 - `set_db_rollover` (Boolean) If True then CLI user has permission to run the command
@@ -269,14 +282,17 @@ Optional:
 - `set_named_max_journal_size` (Boolean) If True then CLI user has permission to run the command
 - `set_txn_trace` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--database_show_commands"></a>
 ### Nested Schema for `result.database_show_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `show_backup` (Boolean) If True then CLI user has permission to run the command
 - `show_database_transfer_status` (Boolean) If True then CLI user has permission to run the command
 - `show_db_ph` (Boolean) If True then CLI user has permission to run the command
@@ -285,18 +301,26 @@ Optional:
 - `show_named_max_journal_size` (Boolean) If True then CLI user has permission to run the command
 - `show_txn_trace` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--dhcp_set_commands"></a>
 ### Nested Schema for `result.dhcp_set_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `set_dhcpd_recv_sock_buf_size` (Boolean) If True then CLI user has permission to run the command
 - `set_log_txn_id` (Boolean) If True then CLI user has permission to run the command
 - `set_overload_bootp` (Boolean) If True then CLI user has permission to run the command
 - `set_regenerate_dhcp_updater_keys` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
 
 
 <a id="nestedatt--result--dhcp_show_commands"></a>
@@ -304,13 +328,16 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `show_dhcp_gss_tsig` (Boolean) If True then CLI user has permission to run the command
 - `show_dhcpd_recv_sock_buf_size` (Boolean) If True then CLI user has permission to run the command
 - `show_dhcpv6_gss_tsig` (Boolean) If True then CLI user has permission to run the command
 - `show_log_txn_id` (Boolean) If True then CLI user has permission to run the command
 - `show_overload_bootp` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
 
 
 <a id="nestedatt--result--dns_set_commands"></a>
@@ -318,8 +345,6 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `set_allow_query_domain` (Boolean) If True then CLI user has permission to run the command
 - `set_dns` (Boolean) If True then CLI user has permission to run the command
 - `set_dns_accel` (Boolean) If True then CLI user has permission to run the command
@@ -338,14 +363,17 @@ Optional:
 - `set_restart_anycast_with_dns_restart` (Boolean) If True then CLI user has permission to run the command
 - `set_rpz_add_soa` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--dns_show_commands"></a>
 ### Nested Schema for `result.dns_show_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `show_allow_query_domain` (Boolean) If True then CLI user has permission to run the command
 - `show_allow_query_domain_views` (Boolean) If True then CLI user has permission to run the command
 - `show_dns` (Boolean) If True then CLI user has permission to run the command
@@ -374,6 +402,11 @@ Optional:
 - `show_restart_anycast_with_dns_restart` (Boolean) If True then CLI user has permission to run the command
 - `show_rpz_add_soa` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--dns_toplevel_commands"></a>
 ### Nested Schema for `result.dns_toplevel_commands`
@@ -383,8 +416,11 @@ Optional:
 - `ddns_add` (Boolean) If True then CLI user has permission to run the command
 - `ddns_delete` (Boolean) If True then CLI user has permission to run the command
 - `delete` (Boolean) If True then CLI user has permission to run the command
-- `disable_all` (Boolean) If True then disable all fields
 - `dns_a_record_delete` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
 - `enable_all` (Boolean) If True then enable all fields
 
 
@@ -393,9 +429,12 @@ Optional:
 
 Optional:
 
+- `set_docker_bridge` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
 - `disable_all` (Boolean) If True then disable all fields
 - `enable_all` (Boolean) If True then enable all fields
-- `set_docker_bridge` (Boolean) If True then CLI user has permission to run the command
 
 
 <a id="nestedatt--result--docker_show_commands"></a>
@@ -403,9 +442,12 @@ Optional:
 
 Optional:
 
+- `show_docker_bridge` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
 - `disable_all` (Boolean) If True then disable all fields
 - `enable_all` (Boolean) If True then enable all fields
-- `show_docker_bridge` (Boolean) If True then CLI user has permission to run the command
 
 
 <a id="nestedatt--result--grid_set_commands"></a>
@@ -413,8 +455,6 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `set_default_revert_window` (Boolean) If True then CLI user has permission to run the command
 - `set_dscp` (Boolean) If True then CLI user has permission to run the command
 - `set_membership` (Boolean) If True then CLI user has permission to run the command
@@ -425,17 +465,25 @@ Optional:
 - `set_test_promote_master` (Boolean) If True then CLI user has permission to run the command
 - `set_token` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--grid_show_commands"></a>
 ### Nested Schema for `result.grid_show_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `show_dscp` (Boolean) If True then CLI user has permission to run the command
 - `show_test_promote_master` (Boolean) If True then CLI user has permission to run the command
 - `show_token` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
 
 
 <a id="nestedatt--result--inactivity_lockout_setting"></a>
@@ -455,11 +503,14 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `set_license` (Boolean) If True then CLI user has permission to run the command
 - `set_reporting_reset_license` (Boolean) If True then CLI user has permission to run the command
 - `set_temp_license` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
 
 
 <a id="nestedatt--result--licensing_show_commands"></a>
@@ -467,11 +518,14 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `show_license` (Boolean) If True then CLI user has permission to run the command
 - `show_license_pool_container` (Boolean) If True then CLI user has permission to run the command
 - `show_license_uid` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
 
 
 <a id="nestedatt--result--lockout_setting"></a>
@@ -490,12 +544,15 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `reboot` (Boolean) If True then CLI user has permission to run the command
 - `reset` (Boolean) If True then CLI user has permission to run the command
 - `restart` (Boolean) If True then CLI user has permission to run the command
 - `shutdown` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
 
 
 <a id="nestedatt--result--networking_set_commands"></a>
@@ -503,8 +560,6 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `set_connection_limit` (Boolean) If True then CLI user has permission to run the command
 - `set_default_route` (Boolean) If True then CLI user has permission to run the command
 - `set_interface` (Boolean) If True then CLI user has permission to run the command
@@ -526,14 +581,17 @@ Optional:
 - `set_traffic_capture` (Boolean) If True then CLI user has permission to run the command
 - `set_wins_forwarding` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--networking_show_commands"></a>
 ### Nested Schema for `result.networking_show_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `show_connection_limit` (Boolean) If True then CLI user has permission to run the command
 - `show_connections` (Boolean) If True then CLI user has permission to run the command
 - `show_default_route` (Boolean) If True then CLI user has permission to run the command
@@ -563,6 +621,11 @@ Optional:
 - `show_trafficfiles` (Boolean) If True then CLI user has permission to run the command
 - `show_wins_forwarding` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--password_setting"></a>
 ### Nested Schema for `result.password_setting`
@@ -588,8 +651,6 @@ Optional:
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `set_adp` (Boolean) If True then CLI user has permission to run the command
 - `set_adp_debug` (Boolean) If True then CLI user has permission to run the command
 - `set_apache_https_cert` (Boolean) If True then CLI user has permission to run the command
@@ -609,14 +670,17 @@ Optional:
 - `set_support_timeout` (Boolean) If True then CLI user has permission to run the command
 - `set_update_rabbitmq_password` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--security_show_commands"></a>
 ### Nested Schema for `result.security_show_commands`
 
 Optional:
 
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `show_adp` (Boolean) If True then CLI user has permission to run the command
 - `show_adp_debug` (Boolean) If True then CLI user has permission to run the command
 - `show_cc_mode` (Boolean) If True then CLI user has permission to run the command
@@ -632,6 +696,11 @@ Optional:
 - `show_support_timeout` (Boolean) If True then CLI user has permission to run the command
 - `show_vpn_cert_dates` (Boolean) If True then CLI user has permission to run the command
 
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
+
 
 <a id="nestedatt--result--trouble_shooting_toplevel_commands"></a>
 ### Nested Schema for `result.trouble_shooting_toplevel_commands`
@@ -640,8 +709,6 @@ Optional:
 
 - `console` (Boolean) If True then CLI user has permission to run the command
 - `dig` (Boolean) If True then CLI user has permission to run the command
-- `disable_all` (Boolean) If True then disable all fields
-- `enable_all` (Boolean) If True then enable all fields
 - `ping` (Boolean) If True then CLI user has permission to run the command
 - `ping6` (Boolean) If True then CLI user has permission to run the command
 - `rotate` (Boolean) If True then CLI user has permission to run the command
@@ -651,6 +718,11 @@ Optional:
 - `tracepath` (Boolean) If True then CLI user has permission to run the command
 - `traceroute` (Boolean) If True then CLI user has permission to run the command
 - `traffic_capture` (Boolean) If True then CLI user has permission to run the command
+
+Read-Only:
+
+- `disable_all` (Boolean) If True then disable all fields
+- `enable_all` (Boolean) If True then enable all fields
 
 
 <a id="nestedatt--result--user_access"></a>
