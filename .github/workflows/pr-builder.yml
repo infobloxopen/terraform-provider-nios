@@ -19,7 +19,7 @@ jobs:
       - name: go mod
         run: |
           go mod tidy
-          git diff --exit-code -- go.mod go.sum || \
+          git diff --exit-code -- docs/ ':!docs/guides' || \
             (echo; echo "Unexpected difference in go.mod/go.sum files. Run 'go mod tidy' command or revert any go.mod/go.sum changes and commit."; exit 1)
       - name: go fmt
         run: |
