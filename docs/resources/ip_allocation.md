@@ -3,12 +3,12 @@
 page_title: "nios_ip_allocation Resource - nios"
 subcategory: ""
 description: |-
-  
+  Manages an IP Allocation.
 ---
 
 # nios_ip_allocation (Resource)
 
-
+Manages an IP Allocation.
 
 
 

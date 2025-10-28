@@ -3,12 +3,12 @@
 page_title: "nios_ip_association Resource - nios"
 subcategory: ""
 description: |-
-  
+  Manages an IP Association.
 ---
 
 # nios_ip_association (Resource)
 
-
+Manages an IP Association.
 
 
 
