@@ -289,7 +289,6 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_principal_group": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
 		},
@@ -1009,7 +1008,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CustomRootNameServers = flex.FlattenFrameworkListNestedBlock(ctx, from.CustomRootNameServers, ViewCustomRootNameServersAttrTypes, diags, FlattenViewCustomRootNameServers)
 	m.DdnsForceCreationTimestampUpdate = types.BoolPointerValue(from.DdnsForceCreationTimestampUpdate)
-	m.DdnsPrincipalGroup = flex.FlattenStringPointer(from.DdnsPrincipalGroup)
+	m.DdnsPrincipalGroup = flex.FlattenStringPointerNilAsNotEmpty(from.DdnsPrincipalGroup)
 	m.DdnsPrincipalTracking = types.BoolPointerValue(from.DdnsPrincipalTracking)
 	m.DdnsRestrictPatterns = types.BoolPointerValue(from.DdnsRestrictPatterns)
 	m.DdnsRestrictPatternsList = flex.FlattenFrameworkListString(ctx, from.DdnsRestrictPatternsList, diags)
