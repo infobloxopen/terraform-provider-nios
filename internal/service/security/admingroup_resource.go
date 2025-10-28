@@ -72,6 +72,15 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 		return
 	}
 
+	// Check if disable_concurrent_login is set and use_disable_concurrent_login is false
+	if !config.DisableConcurrentLogin.IsNull() && !config.DisableConcurrentLogin.IsUnknown() && !config.UseDisableConcurrentLogin.ValueBool() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("disable_concurrent_login"),
+			"Invalid Configuration",
+			"`use_disable_concurrent_login` must be set to true when `disable_concurrent_login` is used.",
+		)
+	}
+
 	// Skip validation if UserAccess is not provided
 	if config.UserAccess.IsNull() || config.UserAccess.IsUnknown() {
 		return
@@ -414,5 +423,7 @@ func (r *AdmingroupResource) ImportState(ctx context.Context, req resource.Impor
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs"), data.ExtAttrs)...)
 }

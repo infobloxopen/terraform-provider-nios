@@ -1,4 +1,4 @@
-// Create parent authoritative zone first (required as parent)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example.com"
   zone_format = "FORWARD"
@@ -21,7 +21,7 @@ resource "nios_dns_record_srv" "create_record" {
   depends_on = [nios_dns_zone_auth.parent_auth_zone]
 }
 
-// Create Record SRV with additional fields
+// Create Record SRV with Additional Fields
 resource "nios_dns_record_srv" "create_with_additional_config" {
   name     = "example-srv-record-with-config.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   target   = "example_updated.target.${nios_dns_zone_auth.parent_auth_zone.fqdn}"

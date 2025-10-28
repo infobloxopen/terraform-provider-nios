@@ -215,12 +215,10 @@ var AdmingroupDnsShowCommandsResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then disable all fields",
 	},
@@ -270,8 +268,6 @@ func (m *AdmingroupDnsShowCommandsModel) Expand(ctx context.Context, diags *diag
 		ShowDnsAccelDebug:                flex.ExpandBoolPointer(m.ShowDnsAccelDebug),
 		ShowAllowQueryDomain:             flex.ExpandBoolPointer(m.ShowAllowQueryDomain),
 		ShowAllowQueryDomainViews:        flex.ExpandBoolPointer(m.ShowAllowQueryDomainViews),
-		EnableAll:                        flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:                       flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

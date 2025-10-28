@@ -780,18 +780,23 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"network": schema.StringAttribute{
 		CustomType:          cidrtypes.IPv4PrefixType{},
 		Optional:            true,
-		MarkdownDescription: "The IPv4 Address of the record.",
+		MarkdownDescription: "The IPv4 Address of the record. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.",
 		Computed:            true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("network"),
+				path.MatchRoot("func_call"),
+			),
+		},
 	},
 	"func_call": schema.SingleNestedAttribute{
-
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "A function call to be executed on the object.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_network` function is supported for Network.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,
@@ -1176,7 +1181,6 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 	}
 	to := &ipam.Network{
 		Authority:                        flex.ExpandBoolPointer(m.Authority),
-		AutoCreateReversezone:            flex.ExpandBoolPointer(m.AutoCreateReversezone),
 		Bootfile:                         flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                       flex.ExpandStringPointer(m.Bootserver),
 		CloudInfo:                        ExpandNetworkCloudInfo(ctx, m.CloudInfo, diags),

@@ -25,32 +25,31 @@ import (
 )
 
 type RecordAModel struct {
-	Ref                 types.String        `tfsdk:"ref"`
-	AwsRte53RecordInfo  types.Object        `tfsdk:"aws_rte53_record_info"`
-	CloudInfo           types.Object        `tfsdk:"cloud_info"`
-	Comment             types.String        `tfsdk:"comment"`
-	CreationTime        types.Int64         `tfsdk:"creation_time"`
-	Creator             types.String        `tfsdk:"creator"`
-	DdnsPrincipal       types.String        `tfsdk:"ddns_principal"`
-	DdnsProtected       types.Bool          `tfsdk:"ddns_protected"`
-	Disable             types.Bool          `tfsdk:"disable"`
-	DiscoveredData      types.Object        `tfsdk:"discovered_data"`
-	DnsName             types.String        `tfsdk:"dns_name"`
-	ExtAttrs            types.Map           `tfsdk:"extattrs"`
-	ExtAttrsAll         types.Map           `tfsdk:"extattrs_all"`
-	ForbidReclamation   types.Bool          `tfsdk:"forbid_reclamation"`
-	FuncCall            types.Object        `tfsdk:"func_call"`
-	Ipv4addr            iptypes.IPv4Address `tfsdk:"ipv4addr"`
-	LastQueried         types.Int64         `tfsdk:"last_queried"`
-	MsAdUserData        types.Object        `tfsdk:"ms_ad_user_data"`
-	Name                types.String        `tfsdk:"name"`
-	Reclaimable         types.Bool          `tfsdk:"reclaimable"`
-	RemoveAssociatedPtr types.Bool          `tfsdk:"remove_associated_ptr"`
-	SharedRecordGroup   types.String        `tfsdk:"shared_record_group"`
-	Ttl                 types.Int64         `tfsdk:"ttl"`
-	UseTtl              types.Bool          `tfsdk:"use_ttl"`
-	View                types.String        `tfsdk:"view"`
-	Zone                types.String        `tfsdk:"zone"`
+	Ref                types.String        `tfsdk:"ref"`
+	AwsRte53RecordInfo types.Object        `tfsdk:"aws_rte53_record_info"`
+	CloudInfo          types.Object        `tfsdk:"cloud_info"`
+	Comment            types.String        `tfsdk:"comment"`
+	CreationTime       types.Int64         `tfsdk:"creation_time"`
+	Creator            types.String        `tfsdk:"creator"`
+	DdnsPrincipal      types.String        `tfsdk:"ddns_principal"`
+	DdnsProtected      types.Bool          `tfsdk:"ddns_protected"`
+	Disable            types.Bool          `tfsdk:"disable"`
+	DiscoveredData     types.Object        `tfsdk:"discovered_data"`
+	DnsName            types.String        `tfsdk:"dns_name"`
+	ExtAttrs           types.Map           `tfsdk:"extattrs"`
+	ExtAttrsAll        types.Map           `tfsdk:"extattrs_all"`
+	ForbidReclamation  types.Bool          `tfsdk:"forbid_reclamation"`
+	FuncCall           types.Object        `tfsdk:"func_call"`
+	Ipv4addr           iptypes.IPv4Address `tfsdk:"ipv4addr"`
+	LastQueried        types.Int64         `tfsdk:"last_queried"`
+	MsAdUserData       types.Object        `tfsdk:"ms_ad_user_data"`
+	Name               types.String        `tfsdk:"name"`
+	Reclaimable        types.Bool          `tfsdk:"reclaimable"`
+	SharedRecordGroup  types.String        `tfsdk:"shared_record_group"`
+	Ttl                types.Int64         `tfsdk:"ttl"`
+	UseTtl             types.Bool          `tfsdk:"use_ttl"`
+	View               types.String        `tfsdk:"view"`
+	Zone               types.String        `tfsdk:"zone"`
 }
 
 var RecordAAttrTypes = map[string]attr.Type{
@@ -74,7 +73,6 @@ var RecordAAttrTypes = map[string]attr.Type{
 	"ms_ad_user_data":       types.ObjectType{AttrTypes: RecordAMsAdUserDataAttrTypes},
 	"name":                  types.StringType,
 	"reclaimable":           types.BoolType,
-	"remove_associated_ptr": types.BoolType,
 	"shared_record_group":   types.StringType,
 	"ttl":                   types.Int64Type,
 	"use_ttl":               types.BoolType,
@@ -170,14 +168,20 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"func_call": schema.SingleNestedAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Function call to be executed.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Record A.",
 		Attributes:          FuncCallResourceSchemaAttributes,
 	},
 	"ipv4addr": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The IPv4 Address of the record.",
+		CustomType: iptypes.IPv4AddressType{},
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv4addr"),
+				path.MatchRoot("func_call"),
+			),
+		},
+		MarkdownDescription: "The IPv4 address for the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.",
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
@@ -198,11 +202,6 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"reclaimable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines if the record is reclaimable or not.",
-	},
-	"remove_associated_ptr": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "Whether to remove associated PTR records while deleting the A record.",
 	},
 	"shared_record_group": schema.StringAttribute{
 		Computed:            true,
@@ -241,19 +240,18 @@ func (m *RecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		return nil
 	}
 	to := &dns.RecordA{
-		Comment:             flex.ExpandStringPointer(m.Comment),
-		Creator:             flex.ExpandStringPointer(m.Creator),
-		DdnsPrincipal:       flex.ExpandStringPointer(m.DdnsPrincipal),
-		DdnsProtected:       flex.ExpandBoolPointer(m.DdnsProtected),
-		Disable:             flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		ForbidReclamation:   flex.ExpandBoolPointer(m.ForbidReclamation),
-		FuncCall:            ExpandFuncCall(ctx, m.FuncCall, diags),
-		Ipv4addr:            ExpandRecordAIpv4addr(m.Ipv4addr),
-		Name:                flex.ExpandStringPointer(m.Name),
-		RemoveAssociatedPtr: flex.ExpandBoolPointer(m.RemoveAssociatedPtr),
-		Ttl:                 flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:              flex.ExpandBoolPointer(m.UseTtl),
+		Comment:           flex.ExpandStringPointer(m.Comment),
+		Creator:           flex.ExpandStringPointer(m.Creator),
+		DdnsPrincipal:     flex.ExpandStringPointer(m.DdnsPrincipal),
+		DdnsProtected:     flex.ExpandBoolPointer(m.DdnsProtected),
+		Disable:           flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		ForbidReclamation: flex.ExpandBoolPointer(m.ForbidReclamation),
+		FuncCall:          ExpandFuncCall(ctx, m.FuncCall, diags),
+		Ipv4addr:          ExpandRecordAIpv4addr(m.Ipv4addr),
+		Name:              flex.ExpandStringPointer(m.Name),
+		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
 	}
 	if isCreate {
 		to.View = flex.ExpandStringPointer(m.View)
@@ -298,7 +296,6 @@ func (m *RecordAModel) Flatten(ctx context.Context, from *dns.RecordA, diags *di
 	m.MsAdUserData = FlattenRecordAMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Reclaimable = types.BoolPointerValue(from.Reclaimable)
-	m.RemoveAssociatedPtr = types.BoolPointerValue(from.RemoveAssociatedPtr)
 	m.SharedRecordGroup = flex.FlattenStringPointer(from.SharedRecordGroup)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)

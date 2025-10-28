@@ -1,4 +1,4 @@
-// Create DTC LBDN with basic fields
+// Create DTC LBDN with Basic Fields
 resource "nios_dtc_lbdn" "lbdn_basic_fields" {
   name      = "example_lbdn_1"
   lb_method = "SOURCE_IP_HASH"
@@ -48,7 +48,7 @@ resource "nios_dtc_pool" "dtc_pool3" {
   lb_preferred_method = "ROUND_ROBIN"
 }
 
-// Create DTC LBDN with additional fields
+// Create DTC LBDN with Additional Fields
 resource "nios_dtc_lbdn" "lbdn_additional_fields" {
   name = "example_lbdn_2"
   auth_zones = [nios_dns_zone_auth.parent_zone.ref,

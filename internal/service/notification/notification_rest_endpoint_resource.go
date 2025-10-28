@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
@@ -65,16 +68,15 @@ func (r *NotificationRestEndpointResource) Configure(ctx context.Context, req re
 }
 
 func (r *NotificationRestEndpointResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var diags diag.Diagnostics
 	var data NotificationRestEndpointModel
 
-	diags.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	// Outbound Members Validation
 	if data.OutboundMemberType.ValueString() == "MEMBER" {
 		if data.OutboundMembers.IsNull() || data.OutboundMembers.IsUnknown() {
 			resp.Diagnostics.AddAttributeError(
@@ -89,6 +91,65 @@ func (r *NotificationRestEndpointResource) ValidateConfig(ctx context.Context, r
 			"Invalid Configuration",
 			"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
 		)
+	}
+
+	// URI Validation
+	if !data.Uri.IsNull() && !data.Uri.IsUnknown() {
+		uri := data.Uri.ValueString()
+		_, err := url.ParseRequestURI(uri)
+		if err != nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("uri"),
+				"Invalid URI",
+				"URI must contain a valid value.",
+			)
+		}
+	}
+
+	// Template Instance Parameters Validation
+	if !data.TemplateInstance.IsNull() && !data.TemplateInstance.IsUnknown() {
+		var templateInstanceModel NotificationRestEndpointTemplateInstanceModel
+
+		resp.Diagnostics.Append(data.TemplateInstance.As(ctx, &templateInstanceModel, basetypes.ObjectAsOptions{})...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		var templateInstanceParametersModel []NotificationrestendpointtemplateinstanceParametersModel
+
+		resp.Diagnostics.Append(templateInstanceModel.Parameters.ElementsAs(ctx, &templateInstanceParametersModel, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		for i, param := range templateInstanceParametersModel {
+			// Skip the validation if syntax or value is Null or Unknown
+			if param.Syntax.IsNull() || param.Syntax.IsUnknown() ||
+				param.Value.IsNull() || param.Value.IsUnknown() {
+				continue
+			}
+
+			syntax := param.Syntax.ValueString()
+			value := param.Value.ValueString()
+
+			if syntax == "INT" {
+				if _, err := strconv.Atoi(value); err != nil {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("template_instance").AtName("parameters").AtListIndex(i).AtName("value"),
+						"Invalid Value for INT Syntax",
+						fmt.Sprintf("The value of the parameter definition '%s' is incorrect. The value type should be %s. Got: %s", param.Name.ValueString(), syntax, value),
+					)
+				}
+			}
+			if syntax == "BOOL" {
+				if value != "True" && value != "False" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("template_instance").AtName("parameters").AtListIndex(i).AtName("value"),
+						"Invalid Value for BOOL Syntax",
+						fmt.Sprintf("The value of the parameter definition '%s' is incorrect. The value type should be %s, either True/False (Case Sensitive). Got: %s", param.Name.ValueString(), syntax, value),
+					)
+				}
+			}
+		}
 	}
 }
 
@@ -373,7 +434,9 @@ func (r *NotificationRestEndpointResource) ImportState(ctx context.Context, req 
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs"), data.ExtAttrs)...)
 }
 
 func (r *NotificationRestEndpointResource) processClientCertificate(

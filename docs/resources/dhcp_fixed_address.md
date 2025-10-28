@@ -13,7 +13,7 @@ Manages a Fixed Address.
 ## Example Usage
 
 ```terraform
-// Create parent network first (required as parent for fixed addresses)
+// Create an IPV4 Network (Required as Parent)
 resource "nios_ipam_network" "parent_network" {
   network      = "16.0.0.0/24"
   network_view = "default"
@@ -122,9 +122,9 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_with_func_call" {
 - `enable_immediate_discovery` (Boolean) Determines if the discovery for the fixed address should be immediately enabled.
 - `enable_pxe_lease_time` (Boolean) Set this to True if you want the DHCP server to use a different lease time for PXE clients.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
-- `func_call` (Attributes) Function call to be executed for Fixed Address (see [below for nested schema](#nestedatt--func_call))
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for Fixed Address. (see [below for nested schema](#nestedatt--func_call))
 - `ignore_dhcp_option_list_request` (Boolean) If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.
-- `ipv4addr` (String) The IPv4 Address of the record.
+- `ipv4addr` (String) The IPv4 address for the Fixed Address. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file. (see [below for nested schema](#nestedatt--logic_filter_rules))
 - `mac` (String) The MAC address value for this fixed address.
 - `match_client` (String) The match_client value for this fixed address. Valid values are: "MAC_ADDRESS": The fixed IP address is leased to the matching MAC address. "CLIENT_ID": The fixed IP address is leased to the matching DHCP client identifier. "RESERVED": The fixed IP address is reserved for later use with a MAC address that only has zeros. "CIRCUIT_ID": The fixed IP address is leased to the DHCP client with a matching circuit ID. Note that the "agent_circuit_id" field must be set in this case. "REMOTE_ID": The fixed IP address is leased to the DHCP client with a matching remote ID. Note that the "agent_remote_id" field must be set in this case.

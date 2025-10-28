@@ -13,7 +13,7 @@ Manages a Notification Rule.
 ## Example Usage
 
 ```terraform
-// Create a Notification Rest Endpoint with Basic Fields ( Required as parent for Notification Rule )
+// Create a Notification Rest Endpoint (Required as Parent)
 resource "nios_notification_rest_endpoint" "notification_rest_parent" {
   name                 = "example-notification-rest-endpoint-1"
   outbound_member_type = "GM"

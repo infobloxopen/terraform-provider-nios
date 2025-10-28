@@ -48,7 +48,7 @@ resource "nios_dns_zone_auth" "create_zone5" {
   fqdn = "example2.com"
   view = "default"
 
-  // Additional fields
+  // Additional Fields
   grid_primary = [
     {
       name = "infoblox.10_0_0_1",
@@ -98,8 +98,6 @@ resource "nios_dns_zone_auth" "create_zone5" {
 - `allow_update_forwarding` (Boolean) The list with IP addresses, networks or TSIG keys for clients, from which forwarded dynamic updates are allowed.
 - `comment` (String) Comment for the zone; maximum 256 characters.
 - `copy_xfer_to_notify` (Boolean) If this flag is set to True then copy allowed IPs from Allow Transfer to Also Notify.
-- `create_ptr_for_bulk_hosts` (Boolean) Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.
-- `create_ptr_for_hosts` (Boolean) Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.
 - `create_underscore_zones` (Boolean) Determines whether automatic creation of subzones is enabled or not.
 - `ddns_force_creation_timestamp_update` (Boolean) Defines whether creation timestamp of RR should be updated ' when DDNS update happens even if there is no change to ' the RR.
 - `ddns_principal_group` (String) The DDNS Principal cluster group name.
@@ -116,7 +114,6 @@ resource "nios_dns_zone_auth" "create_zone5" {
 - `dns_integrity_member` (String) The Grid member that performs DNS integrity checks for this zone.
 - `dns_integrity_verbose_logging` (Boolean) If this is set to True, more information is logged for DNS integrity checks for this zone.
 - `dnssec_key_params` (Attributes) The DNSSEC key parameters for the zone. (see [below for nested schema](#nestedatt--dnssec_key_params))
-- `do_host_abstraction` (Boolean) Determines if hosts and bulk hosts are automatically created when the zone data is imported. This field is meaningful only when import_from is set.
 - `effective_check_names_policy` (String) The value of the check names policy, which indicates the action the appliance takes when it encounters host names that do not comply with the Strict Hostname Checking policy. This value applies only if the host name restriction policy is set to "Strict Hostname Checking".
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `external_primaries` (Attributes List) The list of external primary servers. (see [below for nested schema](#nestedatt--external_primaries))
@@ -178,12 +175,15 @@ resource "nios_dns_zone_auth" "create_zone5" {
 - `address` (String) The IP address of the server that is serving this zone.
 - `aws_rte53_zone_info` (Attributes) The AWS Route 53 zone information associated with the zone. (see [below for nested schema](#nestedatt--aws_rte53_zone_info))
 - `cloud_info` (Attributes) The cloud information associated with the zone. (see [below for nested schema](#nestedatt--cloud_info))
+- `create_ptr_for_bulk_hosts` (Boolean) Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.
+- `create_ptr_for_hosts` (Boolean) Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.
 - `display_domain` (String) The displayed name of the DNS zone.
 - `dns_fqdn` (String) The name of this DNS zone in punycode format. For a reverse zone, this is in "address/cidr" format. For other zones, this is in FQDN format in punycode format.
 - `dns_soa_email` (String) The SOA email for the zone in punycode format.
 - `dnssec_keys` (Attributes List) A list of DNSSEC keys for the zone. (see [below for nested schema](#nestedatt--dnssec_keys))
 - `dnssec_ksk_rollover_date` (Number) The rollover date for the Key Signing Key.
 - `dnssec_zsk_rollover_date` (Number) The rollover date for the Zone Signing Key.
+- `do_host_abstraction` (Boolean) Determines if hosts and bulk hosts are automatically created when the zone data is imported. This field is meaningful only when import_from is set.
 - `effective_record_name_policy` (String) The selected hostname policy for records under this zone.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `grid_primary_shared_with_ms_parent_delegation` (Boolean) Determines if the server is duplicated with parent delegation.

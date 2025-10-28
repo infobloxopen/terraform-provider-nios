@@ -13,7 +13,7 @@ Manages a AAAA Record.
 ## Example Usage
 
 ```terraform
-// Create parent authoritative zone first (required as parent)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example.com"
   zone_format = "FORWARD"
@@ -21,7 +21,7 @@ resource "nios_dns_zone_auth" "parent_auth_zone" {
   comment     = "Parent zone for AAAA records"
 }
 
-// Create IPv6 network for function call (required as parent)
+// Create an IPV6 network for function call (Required as Parent)
 resource "nios_ipam_ipv6network" "example_ipv6_network" {
   network      = "2001:db8:abcd:12::/64"
   network_view = "default"
@@ -36,7 +36,7 @@ resource "nios_dns_record_aaaa" "create_record_aaaa_with_basic_fields" {
   depends_on = [nios_dns_zone_auth.parent_auth_zone]
 }
 
-// Create Record AAAA with additional fields
+// Create Record AAAA with Additional Fields
 resource "nios_dns_record_aaaa" "create_record_aaaa_with_additional_fields" {
   name     = "example_record_with_ttl.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   ipv6addr = "2002:1111::1401"
@@ -88,9 +88,8 @@ resource "nios_dns_record_aaaa" "create_record_aaaa_with_func_call" {
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `func_call` (Attributes) Function call to be executed. (see [below for nested schema](#nestedatt--func_call))
-- `ipv6addr` (String) The IPv6 Address of the record.
-- `remove_associated_ptr` (Boolean) Delete option that indicates whether the associated PTR records should be removed while deleting the specified A record.
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for Record AAAA. (see [below for nested schema](#nestedatt--func_call))
+- `ipv6addr` (String) The IPv6 Address of the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.
 - `ttl` (Number) The Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the AAAA record.
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".
