@@ -19,6 +19,14 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
   - [DNS](#dns)
   - [DTC](#dtc)
   - [IPAM](#ipam)
+  - [CLOUD](#cloud)
+  - [SECURITY](#security)
+  - [MISC](#misc)
+  - [SMARTFOLDER](#smartfolder)
+  - [ACL](#acl)
+  - [GRID](#grid)
+  - [DISCOVERY](#discovery)
+  - [NOTIFICATION](#notification)
 - [Importing Existing Resources](#importing-existing-resources)
 - [Documentation](#documentation)
 - [Debugging](#debugging)
@@ -31,6 +39,7 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 ## Requirements
 
 - [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin) (recommended version is 1.24.4 or later)
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.8.0
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.0.6 or higher)
 
 ## Installation
@@ -129,54 +138,7 @@ Please refer to these examples for detailed usage patterns and configurations.
 
 ## Available Resources and DataSources
 
-The tables below list all available resources and data sources
-
-### DHCP
-
-| Name | Resource Description                         | Data Source Description |
-|----------|----------------------------------------------|------------|
-| `nios_dhcp_fixed_address` | Manages DHCP fixed address (IPv4) resources  | Retrieves information about existing DHCP fixed addresses |
-| `nios_dhcp_range` | Manages DHCP range (IPv4) resources          | Retrieves information about existing DHCP ranges |
-| `nios_dhcp_range_template` | Manages DHCP range template (IPv4) resources | Retrieves information about existing DHCP range templates |
-| `nios_dhcp_shared_network` | Manages DHCP shared network (IPv4) resources | Retrieves information about existing DHCP shared networks |
-
-### DNS
-
-| Name | Resource Description | Data Source Description |
-|----------|-------------|------------|
-| `nios_dns_view` | Manages DNS views | Retrieves information about existing DNS views |
-| `nios_dns_zone_auth` | Manages authoritative DNS zones | Retrieves information about existing authoritative DNS zones |
-| `nios_dns_zone_delegated` | Manages delegated DNS zones | Retrieves information about existing delegated DNS zones |
-| `nios_dns_zone_forward` | Manages forwarding DNS zones | Retrieves information about existing forwarding DNS zones |
-| `nios_dns_record_a` | Manages DNS A records | Retrieves information about existing DNS A records |
-| `nios_dns_record_aaaa` | Manages DNS AAAA records | Retrieves information about existing DNS AAAA records |
-| `nios_dns_record_alias` | Manages DNS ALIAS records | Retrieves information about existing DNS ALIAS records |
-| `nios_dns_record_cname` | Manages DNS CNAME records | Retrieves information about existing DNS CNAME records |
-| `nios_dns_record_mx` | Manages DNS MX records | Retrieves information about existing DNS MX records |
-| `nios_dns_record_ns` | Manages DNS NS records | Retrieves information about existing DNS NS records |
-| `nios_dns_record_ptr` | Manages DNS PTR records | Retrieves information about existing DNS PTR records |
-| `nios_dns_record_srv` | Manages DNS SRV records | Retrieves information about existing DNS SRV records |
-| `nios_dns_record_txt` | Manages DNS TXT records | Retrieves information about existing DNS TXT records |
-
-### DTC
-
-| Name | Resource Description | Data Source Description |
-|----------|-------------|------------|
-| `nios_dtc_lbdn` | Manages DTC LBDN resources | Retrieves information about existing DTC LBDNs |
-| `nios_dtc_pool` | Manages DTC pool resources | Retrieves information about existing DTC pools |
-| `nios_dtc_server` | Manages DTC server resources | Retrieves information about existing DTC servers |
-
-### IPAM
-
-| Name | Resource Description | Data Source Description |
-|----------|-------------|------------|
-| `nios_ipam_network_view` | Manages IPAM network views | Retrieves information about existing IPAM network views |
-| `nios_ipam_network` | Manages IPAM networks | Retrieves information about existing IPAM networks |
-| `nios_ipam_network_container` | Manages IPAM network containers | Retrieves information about existing IPAM network containers |
-| `nios_ipam_ipv6network` | Manages IPAM IPv6 networks | Retrieves information about existing IPAM IPv6 networks |
-| `nios_ipam_ipv6network_container` | Manages IPAM IPv6 network containers | Retrieves information about existing IPAM IPv6 network containers |
-
-
+For a detailed list of available resources and data sources, refer to the [Resources and Data Sources](resources_and_data_sources.md) page.
 
 ## Importing Existing Resources
 
