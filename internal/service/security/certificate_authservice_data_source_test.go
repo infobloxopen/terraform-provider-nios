@@ -27,7 +27,7 @@ func TestAccCertificateAuthserviceDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckCertificateAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateAuthserviceDataSourceConfigFilters(name, caCertificate),
+				Config: testAccCertificateAuthserviceDataSourceConfigFilters(name, caCertificate, "DISABLED"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
@@ -63,12 +63,13 @@ func testAccCheckCertificateAuthserviceResourceAttrPair(resourceName, dataSource
 	}
 }
 
-func testAccCertificateAuthserviceDataSourceConfigFilters(name string, caCertificate []string) string {
+func testAccCertificateAuthserviceDataSourceConfigFilters(name string, caCertificate []string, ocspCheck string) string {
 	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
 	return fmt.Sprintf(`
 resource "nios_security_certificate_authservice" "test" {
   name            = %q
   ca_certificates = %s
+  ocsp_check     = %q
 }
 
 data "nios_security_certificate_authservice" "test" {
@@ -76,5 +77,5 @@ data "nios_security_certificate_authservice" "test" {
     name = nios_security_certificate_authservice.test.name
   }
 }
-`, name, caCertificateStr)
+`, name, caCertificateStr, ocspCheck)
 }
