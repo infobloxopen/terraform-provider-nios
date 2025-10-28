@@ -128,7 +128,7 @@ resource "nios_ipam_network" "example_func_call" {
 - `enable_snmp_warnings` (Boolean) Determines if DHCP threshold warnings are send through SNMP.
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `federated_realms` (Attributes List) This field contains the federated realms associated to this network (see [below for nested schema](#nestedatt--federated_realms))
-- `func_call` (Attributes) A function call to be executed on the object. (see [below for nested schema](#nestedatt--func_call))
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_network` function is supported for Network. (see [below for nested schema](#nestedatt--func_call))
 - `high_water_mark` (Number) The percentage of DHCP network usage threshold above which network usage is not expected and may warrant your attention. When the high watermark is reached, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.
 - `high_water_mark_reset` (Number) The percentage of DHCP network usage below which the corresponding SNMP trap is reset. A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The high watermark reset value must be lower than the high watermark value.
 - `ignore_dhcp_option_list_request` (Boolean) If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.
@@ -145,7 +145,7 @@ resource "nios_ipam_network" "example_func_call" {
 - `members` (Attributes List) A list of members or Microsoft (r) servers that serve DHCP for this network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the "_struct" member to the struct type. (see [below for nested schema](#nestedatt--members))
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
 - `netmask` (Number) The netmask of the network in CIDR format.
-- `network` (String) The IPv4 Address of the record.
+- `network` (String) The IPv4 Address of the record. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.
 - `network_view` (String) The name of the network view in which this network resides.
 - `nextserver` (String) The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--options))
