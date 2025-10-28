@@ -172,9 +172,15 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 	},
 	"ipv4addr": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
-		Optional:            true,
-		Computed:            true,
+		CustomType: iptypes.IPv4AddressType{},
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv4addr"),
+				path.MatchRoot("func_call"),
+			),
+		},
 		MarkdownDescription: "The IPv4 Address of the record.",
 	},
 	"last_queried": schema.Int64Attribute{

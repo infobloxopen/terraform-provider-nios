@@ -166,9 +166,15 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the reclamation is allowed for the record or not.",
 	},
 	"ipv6addr": schema.StringAttribute{
-		CustomType:          iptypes.IPv6AddressType{},
-		Optional:            true,
-		Computed:            true,
+		CustomType: iptypes.IPv6AddressType{},
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv6addr"),
+				path.MatchRoot("func_call"),
+			),
+		},
 		MarkdownDescription: "The IPv6 Address of the record.",
 	},
 	"func_call": schema.SingleNestedAttribute{
