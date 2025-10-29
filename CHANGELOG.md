@@ -75,7 +75,7 @@
 
 ## Version 0.0.1
 
-### Newly Supported Resources and Datasources
+### Supported Resources and Datasources
 
 #### DNS
 
