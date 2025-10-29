@@ -780,18 +780,23 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"network": schema.StringAttribute{
 		CustomType:          cidrtypes.IPv4PrefixType{},
 		Optional:            true,
-		MarkdownDescription: "The IPv4 Address of the record.",
+		MarkdownDescription: "The IPv4 Address of the record. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.",
 		Computed:            true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("network"),
+				path.MatchRoot("func_call"),
+			),
+		},
 	},
 	"func_call": schema.SingleNestedAttribute{
-
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "A function call to be executed on the object.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_network` function is supported for Network.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,

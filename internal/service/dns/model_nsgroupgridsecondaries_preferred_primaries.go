@@ -60,7 +60,6 @@ var NsgroupgridsecondariesPreferredPrimariesResourceSchemaAttributes = map[strin
 		MarkdownDescription: "This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.",
 	},
 	"stealth": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
@@ -101,7 +100,6 @@ func (m *NsgroupgridsecondariesPreferredPrimariesModel) Expand(ctx context.Conte
 	to := &dns.NsgroupgridsecondariesPreferredPrimaries{
 		Address: flex.ExpandIPAddress(m.Address),
 		Name:    flex.ExpandStringPointer(m.Name),
-		Stealth: flex.ExpandBoolPointer(m.Stealth),
 	}
 	return to
 }
