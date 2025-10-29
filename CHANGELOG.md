@@ -16,7 +16,7 @@
 #### Discovery
 
 - `nios_discovery_credentialgroup` : Manage discovery credential groups and retrieve existing credential group data. ([#144](https://github.com/infobloxopen/terraform-provider-nios/pull/144))
-- `nios_discovery_vdiscovery_task` : Manage vdiscovery tasks and retrieve existing vdiscovery task configurations. ([#169](https://github.com/infobloxopen/terraform-provider-nios/pull/169))
+- `nios_discovery_vdiscovery_task` : Manage vDiscovery tasks and retrieve existing vDiscovery task configurations. ([#169](https://github.com/infobloxopen/terraform-provider-nios/pull/169))
 
 #### DNS
 
@@ -32,9 +32,9 @@
 - `nios_dns_record_unknown` : Manage DNS unknown type records and retrieve existing unknown record data. ([#134](https://github.com/infobloxopen/terraform-provider-nios/pull/134))
 - `nios_dns_zone_stub` : Manage DNS stub zones and retrieve existing stub zone data. ([#103](https://github.com/infobloxopen/terraform-provider-nios/pull/103))
 - `nios_dns_zone_rp` : Manage DNS reverse proxy zones and retrieve existing RP zone data. ([#164](https://github.com/infobloxopen/terraform-provider-nios/pull/164))
-- `nios_ip_allocation` : Manage Allocation and deallocation of an IP address from a network. ([#143](https://github.com/infobloxopen/terraform-provider-nios/pull/143))
-- `nios_ip_association` : Manage Association and disassociation of an IP address with a VM. ([#143](https://github.com/infobloxopen/terraform-provider-nios/pull/143))
-- `nios_record_host` : Retrieves exisiting host record data. ([#143](https://github.com/infobloxopen/terraform-provider-nios/pull/143))
+- `nios_ip_allocation` : Manage allocation and deallocation of an IP address from a network. ([#143](https://github.com/infobloxopen/terraform-provider-nios/pull/143))
+- `nios_ip_association` : Manage association and disassociation of an IP address with a VM. ([#143](https://github.com/infobloxopen/terraform-provider-nios/pull/143))
+- `nios_record_host` : Retrieves existing host record data. ([#143](https://github.com/infobloxopen/terraform-provider-nios/pull/143))
 
 #### Grid
 
