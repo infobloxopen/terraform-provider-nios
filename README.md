@@ -16,18 +16,6 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
   - [Provider Arguments](#provider-arguments)
 - [Usage Examples](#usage-examples)
 - [Available Resources and DataSources](#available-resources-and-datasources)
-  - [DHCP](#dhcp)
-  - [DNS](#dns)
-  - [DTC](#dtc)
-  - [IPAM](#ipam)
-  - [CLOUD](#cloud)
-  - [SECURITY](#security)
-  - [MISC](#misc)
-  - [SMARTFOLDER](#smartfolder)
-  - [ACL](#acl)
-  - [GRID](#grid)
-  - [DISCOVERY](#discovery)
-  - [NOTIFICATION](#notification)
 - [Host Record Management](#host-record-management)
 - [Importing Existing Resources](#importing-existing-resources)
 - [Documentation](#documentation)
@@ -148,6 +136,20 @@ For example:
 Please refer to these examples for detailed usage patterns and configurations.
 
 ## Available Resources and DataSources
+
+The object groups available in this provider are categorized as follows:
+  - DHCP
+  - DNS
+  - DTC
+  - IPAM
+  - CLOUD
+  - SECURITY
+  - MISC
+  - SMARTFOLDER
+  - ACL
+  - GRID
+  - DISCOVERY
+  - NOTIFICATION
 
 For a detailed list of available resources and data sources, refer to the [Resources and Data Sources](guides/resources_datasources.md) page.
 
