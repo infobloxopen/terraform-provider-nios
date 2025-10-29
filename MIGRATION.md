@@ -2,7 +2,7 @@
 
 This guide covers the changes introduced in the NIOS Terraform provider and outlines the steps you may need to take to upgrade your configuration.
 
-The NIOS Terraform provider the [Infoblox provider](https://registry.terraform.io/providers/infobloxopen/infoblox/latest) and is not backwards compatible. This means you will need to update your configuration to use the new provider.
+The NIOS Terraform provider replaces the [Infoblox provider](https://registry.terraform.io/providers/infobloxopen/infoblox/latest) and is not backwards compatible. This means you will need to update your configuration to use the new provider.
 
 ## Prerequisites
 
