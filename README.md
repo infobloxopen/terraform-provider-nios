@@ -183,9 +183,3 @@ For detailed information, refer to the Logging and Debugging page in the docs: [
 For detailed information about limitations, refer to the [Terraform Limitations / Anomalies and Known Issues](guides/limitations.md) page.
 
 For details information about known issues, refer to the [Terraform Known Issues](guides/known_issues.md) page.
-
-## Contributing
-
-Contributions are welcome!
-
-Details on how to contribute can be found in the [Contributing Guide](guides/contributing.md).
