@@ -2,22 +2,24 @@
 
 This guide covers the changes introduced in the NIOS Terraform provider and outlines the steps you may need to take to upgrade your configuration.
 
-The NIOS Terraform provider replaces the [Infoblox provider](https://registry.terraform.io/providers/infobloxopen/infoblox/latest) and is not backwards compatible. This means you will need to update your configuration to use the new provider.
+The NIOS Terraform provider replaces the [Infoblox provider](https://registry.terraform.io/providers/infobloxopen/infoblox/latest) and is not backward compatible. This means you will need to update your configuration to use the new provider.
 
 ## Prerequisites
 
-- Terraform v1.5.0 or later
-- Infoblox NIOS ( version 9.0.6 or higher )
+- Terraform v1.8.0 or later
+- Infoblox NIOS (version 9.0.6 or higher)
 - Backup of your current Terraform state files
 
 
 ## Backup Your State Files
 
-Before making changes to your state, it's a good idea to back up your state file. Any state modification commands made using the CLI will automatically create a backup. If you prefer to manually back up your state file, you can use the following command:
+Before making changes to your state, it's a good idea to back up your state file. Any state modification commands made using the CLI will automatically create a backup. 
 
 ```
 cp terraform.tfstate terraform.tfstate.backup
 ```
+
+If you prefer to manually back up your state file, you can copy your `terraform.tfstate` file to a backup location.
 
 Having a backup ensures that you have a snapshot of your infrastructure's state at a specific moment, allowing you to revert or refer to it if necessary.
 
@@ -109,8 +111,6 @@ resource "nios_dns_record_a" "example" {
   }
 }
 ```
-
-Some common naming changes include:
 
 #### Key Attribute Changes:
 - `fqdn` → `name`
