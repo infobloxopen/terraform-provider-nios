@@ -143,7 +143,6 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"external_ns_group": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("forward_to")),
 			customvalidator.ValidateTrimmedString(),

@@ -68,10 +68,10 @@ Optional:
 - `enable_immediate_discovery` (Boolean) Determines if the discovery for the network container should be immediately enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `federated_realms` (Attributes List) This field contains the federated realms associated to this network container. (see [below for nested schema](#nestedatt--result--federated_realms))
-- `func_call` (Attributes) The function call to be executed on the object. (see [below for nested schema](#nestedatt--result--func_call))
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_network` function is supported for IPv6 Network Container. (see [below for nested schema](#nestedatt--result--func_call))
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on the this network container. This list corresponds to the match rules that are written to the dhcpd configuration file. (see [below for nested schema](#nestedatt--result--logic_filter_rules))
 - `mgm_private` (Boolean) This field controls whether this object is synchronized with the Multi-Grid Master. If this field is set to True, objects are not synchronized.
-- `network` (String) The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'.
+- `network` (String) The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.
 - `network_view` (String) The name of the network view in which this network resides.
 - `options` (Attributes List) An array of DHCP option structs that lists the DHCP options associated with the object. The option `dhcp-lease-time` cannot be configured for this object and instead 'valid_lifetime' attribute should be used. (see [below for nested schema](#nestedatt--result--options))
 - `port_control_blackout_setting` (Attributes) (see [below for nested schema](#nestedatt--result--port_control_blackout_setting))
