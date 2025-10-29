@@ -11,6 +11,8 @@ This guide provides step-by-step instructions for using the NIOS Terraform Provi
 
 ## Configuring the Provider
 
+Before getting started, ensure you have completed the [prerequisites](../README.md#prerequisites).
+
 The provider needs to be configured with a `NIOSHostURL`, `NIOSUsername` and `NIOSPassword`.
 
 Create a directory for the Terraform configuration and create a file named `main.tf` with the following content:
@@ -23,13 +25,13 @@ terraform {
       version = ">= 0.0.1"
     }
   }
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.8.0"
 }
 
 provider "nios" {
-  nios_host_url = "<NIOS Grid IP>"
-  nios_username = "<NIOS Grid username>"
-  nios_password = "<NIOS Grid password>"
+  nios_host_url = "<NIOS_HOST_URL>"
+  nios_username = "<NIOS_USERNAME>"
+  nios_password = "<NIOS_PASSWORD>"
 }
 ````
 
