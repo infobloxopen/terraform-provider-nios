@@ -1,6 +1,6 @@
 # Management of Plug-In Operations with Terraform Internal ID
 
-Infoblox IPAM Plug-In for Terraform uses Terraform Internal ID, an extensible attribute created in NIOS to manage operations performed on resource objects supported by the plug-in.
+Infoblox IPAM Plug-In for Terraform uses **Terraform Internal ID**, an extensible attribute created in NIOS to manage operations performed on resource objects supported by the plug-in.
 
 As a prerequisite to set up the plug-in, you must create an extensible attribute definition for Terraform Internal ID in NIOS. The extensible attribute is used to associate a unique ID to each Terraform resource to prevent any sort of drifts which may occur when external updates happen and the WAPI reference gets changed. For methods that you can use to create the extensible attribute, see [Creating the Terraform Internal ID Extensible Attribute](#creating-the-terraform-internal-id-extensible-attribute).
 

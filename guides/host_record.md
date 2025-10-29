@@ -1,6 +1,6 @@
 # Host Record Management
 
-The `nios_ip_allocation` resource allocates a new IP address from an existing NIOS network and manages the corresponding DNS-related settings. It creates a Host Record in NIOS with either an IPv4 address, an IPv6 address, or both. The IP can be allocated statically (by specifying the address) or dynamically (as the next available address from a network). Once allocated, the address is marked as *used* in NIOS.
+The `nios_ip_allocation` resource allocates a new IP address from an existing NIOS network and manages the corresponding DNS-related settings. It creates a Host Record in NIOS with either an IPv4 address, an IPv6 address, or both. The IP can be allocated statically (by specifying the address) or dynamically (as the next available address from a network). Once allocated, the address is marked as **used** in NIOS.
 
 The `nios_ip_association` resource manages DHCP-related properties of the Host Record created by `nios_ip_allocation`. It attaches instance network identifiers (MAC for IPv4, DUID for IPv6) and DHCP configuration so the allocated IP can be associated with a VM or instance.
 
@@ -19,16 +19,14 @@ Host Record serves as the backend for the following operations:
 - Each allocation supports **at most one IPv4 and one IPv6** address. You may have one of each (dual-stack), but multiple addresses of the same family are not supported.
 - Use `nios_ip_association` to attach instance identifiers (MAC / DUID) and DHCP flags only; allocation handles DNS and address allocation.
 
-```
-# Recommended workflow
+### Recommended workflow
 1. Create `nios_ip_allocation` (allocates IP + manages DNS).
 2. Create `nios_ip_association` referencing allocation (`ref = nios_ip_allocation.<name>.ref`) to attach MAC/DUID and DHCP settings.
 
-# Destroy order
+### Destroy order
 - To remove a Host Record and its DHCP association:
   - Destroy `nios_ip_allocation` (this will remove the Host Record and the association).
   - Do NOT destroy the `nios_ip_association` first.
-```
 
 ---
 
@@ -38,7 +36,7 @@ Host Record serves as the backend for the following operations:
 
 ```terraform
 # Allocate a static IPv4 address with DNS configuration
-resource "nios_ip_allocation" "allocation1" {
+resource "nios_ip_allocation" "allocation_static" {
   name              = "host1.example.com"
   view              = "default"
   configure_for_dns = true
@@ -53,8 +51,8 @@ resource "nios_ip_allocation" "allocation1" {
 }
 
 # Associate MAC address without enabling DHCP
-resource "nios_ip_association" "association1" {
-  ref                = nios_ip_allocation.allocation1.ref
+resource "nios_ip_association" "association_static" {
+  ref                = nios_ip_allocation.allocation_static.ref
   mac                = "12:00:43:fe:9a:8c"
   configure_for_dhcp = false
 }
@@ -64,7 +62,7 @@ resource "nios_ip_association" "association1" {
 
 ```hcl
 # Allocate both IPv4 and IPv6 addresses
-resource "nios_ip_allocation" "allocation2" {
+resource "nios_ip_allocation" "allocation_dual_stack" {
   name              = "host2.example.com"
   view              = "default"
   configure_for_dns = true
@@ -84,8 +82,8 @@ resource "nios_ip_allocation" "allocation2" {
 }
 
 # Associate MAC and DUID with DHCP enabled
-resource "nios_ip_association" "association2" {
-  ref                = nios_ip_allocation.allocation2.ref
+resource "nios_ip_association" "association2_dual_stack" {
+  ref                = nios_ip_allocation.allocation_dual_stack.ref
   mac                = "12:43:fd:ba:9c:c9"
   duid               = "00:01:5f:3a:1b:2c:12:34:56:78:9a:bc"
   match_client       = "DUID"
@@ -97,7 +95,7 @@ resource "nios_ip_association" "association2" {
 
 ```hcl
 # Dynamically allocate next available IP from network
-resource "nios_ip_allocation" "allocation3" {
+resource "nios_ip_allocation" "allocation_dynamic" {
   name              = "host3.example.com"
   view              = "default"
   configure_for_dns = true
@@ -124,8 +122,8 @@ resource "nios_ip_allocation" "allocation3" {
 }
 
 # Associate MAC address without enabling DHCP
-resource "nios_ip_association" "association3" {
-  ref                = nios_ip_allocation.allocation3.ref
+resource "nios_ip_association" "association_dynamic" {
+  ref                = nios_ip_allocation.allocation_dynamic.ref
   mac                = "12:00:43:fe:9a:8d"
   configure_for_dhcp = false
 }
