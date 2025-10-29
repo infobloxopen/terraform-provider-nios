@@ -107,7 +107,7 @@ This configuration allows Terraform to use your local provider instead of the on
 
 - A resource can manage its drift state by using the extensible attribute `Terraform Internal ID` when its Reference ID is changed by any manual intervention.
 - To use the NIOS Terraform Plugin, you must either define the extensible attribute `Terraform Internal ID`
-  in NIOS or use `super user` to execute the below cmd. It will create the read only extensible attribute `Terraform Internal ID`. For more details refer to the prerequisites in (docs/guides/tf_internal_id) page.
+  in NIOS or use `super user` to execute the below cmd. It will create the read only extensible attribute `Terraform Internal ID`. For more details refer to the prerequisites in [Terraform Internal ID](guides/tf_internal_id) page.
   ```shell
   curl -k -u <SUPERUSER>:<PASSWORD> -H "Content-Type: application/json" -X POST https://<NIOS_GRID_IP>/wapi/<WAPI_VERSION>/extensibleattributedef -d '{"name": "Terraform Internal ID", "flags": "CR", "type": "STRING", "comment": "Internal ID for Terraform Resource"}'
   ```
@@ -149,7 +149,7 @@ Please refer to these examples for detailed usage patterns and configurations.
 
 ## Available Resources and DataSources
 
-For a detailed list of available resources and data sources, refer to the [Resources and Data Sources](docs/guides/resources_datasources.md) page.
+For a detailed list of available resources and data sources, refer to the [Resources and Data Sources](guides/resources_datasources.md) page.
 
 ## Host Record Management
 
@@ -162,30 +162,30 @@ For a detailed list of available resources and data sources, refer to the [Resou
 - Do not destroy the `ip_association` resource directly; destroying the `ip_allocation` will automatically remove the associated record.
 - Each allocation supports at most one IPv4 and one IPv6 address. Multiple addresses of the same family are not supported.
 
-Detailed documentation for these resources can be found in [Documentation](docs/guides/host_record.md) page.
+Detailed documentation for these resources can be found in [Documentation](guides/host_record.md) page.
 
 ## Importing Existing Resources
 
 Resources can be imported using their reference ID:
 
-For detailed information, refer to the [Importing Existing Resources](docs/guides/importing_resources.md) page.
+For detailed information, refer to the [Importing Existing Resources](guides/importing_resources.md) page.
 
 ## Documentation
 
-For detailed documentation, refer to the [Documentation](docs/guides/documentation.md) page.
+For detailed documentation, refer to the [Documentation](guides/documentation.md) page.
 
 ## Logging and Debugging
 
-For detailed information, refer to the Logging and Debugging page in the docs: [docs/guides/debugging.md](docs/guides/logging_debugging.md)
+For detailed information, refer to the Logging and Debugging page in the docs: [Debugging](guides/logging_debugging.md)
 
 ##  Terraform Limitations / Anomalies and Known Issues
 
-For detailed information about limitations, refer to the [Terraform Limitations / Anomalies and Known Issues](docs/guides/limitations.md) page.
+For detailed information about limitations, refer to the [Terraform Limitations / Anomalies and Known Issues](guides/limitations.md) page.
 
-For details information about known issues, refer to the [Terraform Known Issues](docs/guides/known_issues.md) page.
+For details information about known issues, refer to the [Terraform Known Issues](guides/known_issues.md) page.
 
 ## Contributing
 
 Contributions are welcome!
 
-Details on how to contribute can be found in the [Contributing Guide](docs/guides/contributing.md).
+Details on how to contribute can be found in the [Contributing Guide](guides/contributing.md).
