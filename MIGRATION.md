@@ -7,17 +7,21 @@ The NIOS Terraform provider replaces the [Infoblox provider](https://registry.te
 ## Prerequisites
 
 - Terraform v1.5.0 or later
-- Access to your Infoblox NIOS appliance
+- Infoblox NIOS ( version 9.0.6 or higher )
 - Backup of your current Terraform state files
 
 
-### Backup Your State Files
+## Backup Your State Files
 
-Before making changes to your state, it's a good idea to back up your state file. Any state modification commands made using the CLI will automatically create a backup. If you prefer to manually back up your state file, you can copy your `terraform.tfstate` file to a backup location.
+Before making changes to your state, it's a good idea to back up your state file. Any state modification commands made using the CLI will automatically create a backup. If you prefer to manually back up your state file, you can use the following command:
+
+```
+cp terraform.tfstate terraform.tfstate.backup
+```
 
 Having a backup ensures that you have a snapshot of your infrastructure's state at a specific moment, allowing you to revert or refer to it if necessary.
 
-### Add the New Provider
+## Add the New Provider
 
 You will need to add the new NIOS provider to your configuration. Update your `terraform` block:
 
@@ -32,19 +36,19 @@ terraform {
 }
 
 provider "nios" {
-  nios_host_url = "<grid_master_ip>"
-  nios_username = "<user_name>"
-  nios_password = "<password>"
+  nios_host_url = "<NIOS_HOST_URL>"
+  nios_username = "<NIOS_USERNAME>"
+  nios_password = "<NIOS_PASSWORD>"
 }
 ```
 
 Run `terraform init` to download the new provider.
 
-### Resource and Data Source Mapping
+## Resource and Data Source Mapping
 
-The resource and data source names have changed in the new provider. The following table shows the mapping from legacy to new names:
+The resource and data source names have changed in the new provider. The following table shows the old and new resource types.
 
-| Legacy Provider | New NIOS Provider |
+| Infoblox Provider | NIOS Terraform Provider |
 |----------------|-------------------|
 | `infoblox_network_view` | `nios_ipam_network_view` |
 | `infoblox_ipv4_network_container` | `nios_ipam_network_container` |
@@ -75,10 +79,8 @@ The resource and data source names have changed in the new provider. The followi
 | `infoblox_ip_association` | `nios_ip_association` |
 | `infoblox_host_record` | `nios_dns_record_host` |
 
-
-### Attribute Name Changes
-
-The new NIOS Terraform provider uses attribute names that are in parity with the NIOS WAPI field names. This means many attribute names have changed. Some common changes include:
+## Attribute Naming Changes
+The new NIOS Terraform provider uses attribute names that are in parity with the NIOS WAPI field names.
 
 **Legacy Provider:**
 ```hcl
@@ -91,7 +93,6 @@ resource "infoblox_a_record" "example" {
   ext_attrs = jsonencode({
     "Site" = "location-1"
   })
-
 }
 ```
 
@@ -109,9 +110,22 @@ resource "nios_dns_record_a" "example" {
 }
 ```
 
-### Replace Resources in State
+Some common naming changes include:
 
-#### Get Resource IDs
+#### Key Attribute Changes:
+- `fqdn` → `name`
+- `ip_addr` → `ipv4addr`
+- `dns_view` → `view`
+- `ext_attrs` → `extattrs`
+
+#### Extensible Attributes Structure Change
+
+In the new NIOS Terrform provider, `extattrs` uses a map structure (e.g., `extattrs = { key = "value" }`) instead of requiring JSON encoding as in the legacy provider.
+
+
+## Replace Resources in State
+
+### Get Resource IDs
 
 First, get the IDs of all existing resources:
 
@@ -119,7 +133,7 @@ First, get the IDs of all existing resources:
 terraform show -json | jq -c '.values.root_module.resources[] | {"resource":.address, "id":.values.id}'
 ```
 
-#### Remove Old Resource from State
+### Remove Old Resource from State
 
 Remove the old resource from state:
 
@@ -127,7 +141,7 @@ Remove the old resource from state:
 terraform state rm infoblox_a_record.example
 ```
 
-#### Import New Resource into State
+### Import New Resource into State
 
 Import the new resource using the same ID:
 
@@ -161,11 +175,12 @@ This approach will:
 1. Generate the appropriate resource configuration automatically
 2. Import the resources into your state
 
-### Unsupported block type
+## Unsupported Block Type
 
-Configuration written as blocks will have to be rewritten as values. For example, if you have a block like this:
+Configuration written as blocks will have to be rewritten as values. This is particularly relevant for resources where nested blocks were used in the legacy provider.
 
-```terraform
+**Legacy Provider (infoblox_dtc_lbdn):**
+```hcl
   auth_zones {
     fqdn = "info.com"
     dns_view = "default.view2"
@@ -176,17 +191,19 @@ Configuration written as blocks will have to be rewritten as values. For example
   }
 ```
 
-you will have to rewrite it with an equal sign :
-```terraform
+**New NIOS Provider (nios_dtc_lbdn):**
+```hcl
   auth_zones = [
     nios_dns_zone_auth.parent_zone.ref,
     nios_dns_zone_auth.parent_zone2.ref
   ]
 ```
 
-## ⚠️ Critical Warning
+## Important Note
 
-**IMPORTANT**: The new NIOS provider uses a unique identifier called "Terraform Internal ID" under extensible attributes (`extattrs_all`) that is updated during the Terraform plan phase. If you generate a plan for import and it fails, this unique identifier will be updated and you will **NOT** be able to use the legacy Infoblox provider anymore for those resources.
+> The new NIOS provider uses a unique identifier called **"Terraform Internal ID"** under extensible attributes (`extattrs_all`) that is updated during the Terraform plan phase.  
+>  
+> If you generate a plan for import and it fails, this unique identifier will be updated, and you will **NOT** be able to use the legacy Infoblox provider anymore for those resources.
 
 **Migration Complexity**: If you want to replace existing resource names and field mappings, the migration can become complicated because:
 - The Terraform Internal ID structure has changed
