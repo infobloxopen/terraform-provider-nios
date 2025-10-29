@@ -2,7 +2,8 @@
 
 This guide covers the changes introduced in the NIOS Terraform provider and outlines the steps you may need to take to upgrade your configuration.
 
-The NIOS Terraform provider replaces the [Infoblox provider](https://registry.terraform.io/providers/infobloxopen/infoblox/latest) and is not backward compatible. This means you will need to update your configuration to use the new provider.
+> The NIOS Terraform provider replaces the [Infoblox Provider](https://registry.terraform.io/providers/infobloxopen/infoblox/latest) and is not backward compatible. 
+>This means you will need to update your configuration to use the new provider.
 
 ## Prerequisites
 
@@ -81,17 +82,19 @@ The resource and data source names have changed in the new provider. The followi
 | `infoblox_ip_association` | `nios_ip_association` |
 | `infoblox_host_record` | `nios_dns_record_host` |
 
+For a detailed list of supported resources and data sources, refer to the [Resources and Data Sources](guides/resources_datasources.md) page.
+
 ## Attribute Naming Changes
 The new NIOS Terraform provider uses attribute names that are in parity with the NIOS WAPI field names.
 
 **Legacy Provider:**
 ```hcl
 resource "infoblox_a_record" "example" {
-  fqdn         = "test.example.com"
+  fqdn         = "a-record.example.com"
   ip_addr      = "10.0.0.1"
   ttl          = 300
   dns_view     = "default"
-  comment      = "Test record"
+  comment      = "A record created by Terraform"
   ext_attrs = jsonencode({
     "Site" = "location-1"
   })
@@ -101,11 +104,11 @@ resource "infoblox_a_record" "example" {
 **New NIOS Provider:**
 ```hcl
 resource "nios_dns_record_a" "example" {
-  name     = "test.example.com"
+  name     = "a-record.example.com"
   ipv4addr = "10.0.0.1"
   ttl      = 300
   view     = "default"
-  comment  = "Test record"
+  comment  = "A record created by Terraform"
   extattrs = {
     Site = "location-1"
   }
@@ -146,7 +149,7 @@ terraform state rm infoblox_a_record.example
 Import the new resource using the same ID:
 
 ```bash
-terraform import nios_dns_record_a.example "record:a/ZG5zLmEkLl9kZWZhdWx0LmNvbS5pbmZvYmxveC50ZXN0:test.example.com/default"
+terraform import nios_dns_record_a.example "record:a/ZG5zLmEkLl9kZWZhdWx0LmNvbS5pbmZvYmxveC50ZXN0:a-record.example.com/default"
 ```
 
 **Recommended Approach**: If you are using Terraform v1.5.0 or later, use the import block with configuration generation:
@@ -154,20 +157,23 @@ terraform import nios_dns_record_a.example "record:a/ZG5zLmEkLl9kZWZhdWx0LmNvbS5
 ```hcl
 import {
   to = nios_dns_record_a.example
-  id = "record:a/ZG5zLmEkLl9kZWZhdWx0LmNvbS5pbmZvYmxveC50ZXN0:test.example.com/default"
+  id = "record:a/ZG5zLmEkLl9kZWZhdWx0LmNvbS5pbmZvYmxveC50ZXN0:a-record.example.com/default"
 }
 ```
 
 You can use Terraform's configuration generation feature along with import blocks:
 
+Generate configuration from existing resources
+
 ```bash
-# Generate configuration from existing resources
 terraform plan -generate-config-out=generated.tf
+```
 
-# Review the generated configuration
-cat generated.tf
+For more information on generating configuration, refer to the [Generating Configuration documentation](https://developer.hashicorp.com/terraform/language/import/generating-configuration)
 
-# Apply the import
+Apply the import
+
+```bash
 terraform apply
 ```
 
@@ -177,16 +183,16 @@ This approach will:
 
 ## Unsupported Block Type
 
-Configuration written as blocks will have to be rewritten as values. This is particularly relevant for resources where nested blocks were used in the legacy provider.
+Some Configuration written as dict will have to be rewritten as list values. This is particularly relevant for resources where nested blocks were used in the legacy provider.
 
 **Legacy Provider (infoblox_dtc_lbdn):**
 ```hcl
   auth_zones {
-    fqdn = "info.com"
+    fqdn = "example.com"
     dns_view = "default.view2"
   }
   auth_zones {
-    fqdn = "test.com"
+    fqdn = "example1.com"
     dns_view = "default"
   }
 ```
@@ -201,7 +207,7 @@ Configuration written as blocks will have to be rewritten as values. This is par
 
 ## Important Note
 
-> The new NIOS provider uses a unique identifier called **"Terraform Internal ID"** under extensible attributes (`extattrs_all`) that is updated during the Terraform plan phase.  
+> The new NIOS provider uses a unique identifier called **"Terraform Internal ID"** under extensible attributes (`extattrs_all`) that is updated during the Terraform plan phase of a Terraform import.  
 >  
 > If you generate a plan for import and it fails, this unique identifier will be updated, and you will **NOT** be able to use the legacy Infoblox provider anymore for those resources.
 
