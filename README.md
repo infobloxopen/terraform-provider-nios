@@ -2,12 +2,13 @@
 
 The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS resources such as DNS records, networks, fixed addresses, and more using Terraform. This provider uses the [infoblox-nios-go-client](https://github.com/infobloxopen/infoblox-nios-go-client) for all API calls to interact with the Infoblox NIOS WAPI.
 
->This release is intended for Early Access Program(EAP) to test in your lab and provide feedback prior to General Availability (GA)
 
 ## Table of Contents
 
 - [Requirements](#requirements)
 - [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+    - [Terraform Internal ID](#terraform-internal-id)
   - [Terraform RC Configuration for local usage](#terraform-rc-configuration-for-local-usage)
   - [Using Pre-built Binaries from Github Releases](#using-pre-built-binaries-from-github-releases)
   - [Build the Provider from Source](#build-the-provider-from-source)
@@ -15,25 +16,41 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
   - [Provider Arguments](#provider-arguments)
 - [Usage Examples](#usage-examples)
 - [Available Resources and DataSources](#available-resources-and-datasources)
-  - [DHCP](#dhcp)
-  - [DNS](#dns)
-  - [DTC](#dtc)
-  - [IPAM](#ipam)
+- [Host Record Management](#host-record-management)
 - [Importing Existing Resources](#importing-existing-resources)
 - [Documentation](#documentation)
 - [Debugging](#debugging)
   - [Terraform Logging](#terraform-logging)
   - [Provider-Specific Debugging](#provider-specific-debugging)
 - [Terraform Limitations / Anomalies and Known Issues](#terraform-limitations--anomalies-and-known-issues)
-- [Contributing](#contributing)
 - [Support](#support)
 
 ## Requirements
 
 - [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin) (recommended version is 1.24.4 or later)
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.8.0
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.0.6 or higher)
 
 ## Installation
+
+### Prerequisites
+
+#### Terraform Internal ID
+
+- A resource can manage its drift state by using the extensible attribute `Terraform Internal ID` when its Reference ID is changed by any manual intervention.
+- To use the Terraform Provider for Infoblox NIOS, you must either define the following extensible attributes in NIOS or 
+  install the Cloud Network Automation license in the NIOS Grid, which adds the extensible attributes by default:
+  * `Tenant ID`: String Type 
+  * `CMP Type`: String Type 
+  * `Cloud API Owned`: List Type (Values: True, False)
+- To use the NIOS Terraform Plugin, you must either define the extensible attribute `Terraform Internal ID`
+  in NIOS or use `super user` to execute the below cmd. It will create the read only extensible attribute `Terraform Internal ID`.
+
+  ```shell
+  curl -k -u <SUPERUSER>:<PASSWORD> -H "Content-Type: application/json" -X POST https://<NIOS_GRID_IP>/wapi/<WAPI_VERSION>/extensibleattributedef -d '{"name": "Terraform Internal ID", "flags": "CR", "type": "STRING", "comment": "Internal ID for Terraform Resource"}'
+  ``` 
+
+  For more details refer to the prerequisites in [Terraform Internal ID](guides/tf_internal_id) page.
 
 ### Using Pre-built Binaries from Github Releases
 
@@ -91,6 +108,7 @@ xattr -d com.apple.quarantine ~/.terraform.d/plugins/registry.terraform.io/infob
 
 
 This configuration allows Terraform to use your local provider instead of the one from the Terraform registry, which is particularly useful during development and testing.
+ 
 
 ## Example Provider Configuration
 
@@ -122,167 +140,61 @@ provider "nios" {
 Detailed examples for each resource and data source are available in the `examples` directory of the repository. Each resource and data source has its own directory with sample configurations.
 
 For example:
-- Resources examples: `examples/resources/nios_*`
-- Data sources examples: `examples/data-sources/nios_*`
+- Resources examples: [`examples/resources/nios_*`](examples/resources/)
+- Data sources examples: [`examples/data-sources/nios_*`](examples/data-sources/)
 
-Please refer to these examples for detailed usage patterns and configurations.
+Please refer to these examples for detailed usage patterns and configurations. 
 
 ## Available Resources and DataSources
 
-The tables below list all available resources and data sources
+The object groups available in this provider are categorized as follows:
+  - [DHCP](guides/resources_datasources.md#dhcp)
+  - [DNS](guides/resources_datasources.md#dns)
+  - [DTC](guides/resources_datasources.md#dtc)
+  - [IPAM](guides/resources_datasources.md#ipam)
+  - [CLOUD](guides/resources_datasources.md#cloud)
+  - [SECURITY](guides/resources_datasources.md#security)
+  - [MISC](guides/resources_datasources.md#misc)
+  - [SMARTFOLDER](guides/resources_datasources.md#smartfolder)
+  - [ACL](guides/resources_datasources.md#acl)
+  - [GRID](guides/resources_datasources.md#grid)
+  - [DISCOVERY](guides/resources_datasources.md#discovery)
+  - [NOTIFICATION](guides/resources_datasources.md#notification)
 
-### DHCP
+For a detailed list of available resources and data sources, refer to the [Resources and Data Sources](guides/resources_datasources.md) page.
 
-| Name | Resource Description                         | Data Source Description |
-|----------|----------------------------------------------|------------|
-| `nios_dhcp_fixed_address` | Manages DHCP fixed address (IPv4) resources  | Retrieves information about existing DHCP fixed addresses |
-| `nios_dhcp_range` | Manages DHCP range (IPv4) resources          | Retrieves information about existing DHCP ranges |
-| `nios_dhcp_range_template` | Manages DHCP range template (IPv4) resources | Retrieves information about existing DHCP range templates |
-| `nios_dhcp_shared_network` | Manages DHCP shared network (IPv4) resources | Retrieves information about existing DHCP shared networks |
+## Host Record Management
 
-### DNS
+- The `ip_allocation` resource allocates a new IP address from an existing NIOS network and manages the corresponding DNS-related settings. It creates a Host Record in NIOS with either an IPv4 address, an IPv6 address, or both. The IP can be allocated statically (by specifying the address) or dynamically (as the next available address from a network). Once allocated, the address is marked as used in NIOS.
 
-| Name | Resource Description | Data Source Description |
-|----------|-------------|------------|
-| `nios_dns_view` | Manages DNS views | Retrieves information about existing DNS views |
-| `nios_dns_zone_auth` | Manages authoritative DNS zones | Retrieves information about existing authoritative DNS zones |
-| `nios_dns_zone_delegated` | Manages delegated DNS zones | Retrieves information about existing delegated DNS zones |
-| `nios_dns_zone_forward` | Manages forwarding DNS zones | Retrieves information about existing forwarding DNS zones |
-| `nios_dns_record_a` | Manages DNS A records | Retrieves information about existing DNS A records |
-| `nios_dns_record_aaaa` | Manages DNS AAAA records | Retrieves information about existing DNS AAAA records |
-| `nios_dns_record_alias` | Manages DNS ALIAS records | Retrieves information about existing DNS ALIAS records |
-| `nios_dns_record_cname` | Manages DNS CNAME records | Retrieves information about existing DNS CNAME records |
-| `nios_dns_record_mx` | Manages DNS MX records | Retrieves information about existing DNS MX records |
-| `nios_dns_record_ns` | Manages DNS NS records | Retrieves information about existing DNS NS records |
-| `nios_dns_record_ptr` | Manages DNS PTR records | Retrieves information about existing DNS PTR records |
-| `nios_dns_record_srv` | Manages DNS SRV records | Retrieves information about existing DNS SRV records |
-| `nios_dns_record_txt` | Manages DNS TXT records | Retrieves information about existing DNS TXT records |
+- The `ip_association` resource manages DHCP-related settings of the Host Record created via ip_allocation. It updates the record with VM-specific details such as the MAC address for IPv4 and the DUID for IPv6, enabling full integration with cloud or virtualized environments.
 
-### DTC
+**Note:**
 
-| Name | Resource Description | Data Source Description |
-|----------|-------------|------------|
-| `nios_dtc_lbdn` | Manages DTC LBDN resources | Retrieves information about existing DTC LBDNs |
-| `nios_dtc_pool` | Manages DTC pool resources | Retrieves information about existing DTC pools |
-| `nios_dtc_server` | Manages DTC server resources | Retrieves information about existing DTC servers |
+- Do not destroy the `ip_association` resource directly; destroying the `ip_allocation` will automatically remove the associated record.
+- Each allocation supports at most one IPv4 and one IPv6 address. Multiple addresses of the same family are not supported.
 
-### IPAM
-
-| Name | Resource Description | Data Source Description |
-|----------|-------------|------------|
-| `nios_ipam_network_view` | Manages IPAM network views | Retrieves information about existing IPAM network views |
-| `nios_ipam_network` | Manages IPAM networks | Retrieves information about existing IPAM networks |
-| `nios_ipam_network_container` | Manages IPAM network containers | Retrieves information about existing IPAM network containers |
-| `nios_ipam_ipv6network` | Manages IPAM IPv6 networks | Retrieves information about existing IPAM IPv6 networks |
-| `nios_ipam_ipv6network_container` | Manages IPAM IPv6 network containers | Retrieves information about existing IPAM IPv6 network containers |
-
-
+Detailed documentation for these resources can be found in [Host Record Documentation](guides/host_record.md) page.
 
 ## Importing Existing Resources
 
 Resources can be imported using their reference ID:
 
-```bash
-terraform import nios_dns_record_a.example record:a/ZG5zLmJpbmRfYSQuX2RlZmF1bHQuY29tLmV4YW1wbGUsc2FtcGxlLDE5Mi4xNjguMS4xMA:example.mydomain.com/default
-```
-
-Alternatively, you can use Terraform's import blocks (available in Terraform 1.5.0 and later) to declaratively import resources:
-
-```hcl
-import {
-  to = nios_dns_record_a.example
-  id = "record:a/ZG5zLmJpbmRfYSQuX2RlZmF1bHQuY29tLmV4YW1wbGUsc2FtcGxlLDE5Mi4xNjguMS4xMA:example.mydomain.com/default"
-}
-
-resource "nios_dns_record_a" "example" {
-  # Configuration will be imported from the ID
-  # After import, update the configuration as needed
-}
-```
-
-After running `terraform plan` and `terraform apply`, the resource will be imported and you can then update the configuration as needed.
+For detailed information, refer to the [Importing Existing Resources](guides/importing_resources.md) page.
 
 ## Documentation
 
-Detailed documentation for each resource and data source, including all supported attributes and their descriptions, is available in the `docs` directory of this repository:
+For detailed documentation, refer to the [Documentation](guides/documentation.md) page.
 
-- Resource documentation: `docs/resources/`
-- Data source documentation: `docs/data-sources/`
+## Logging and Debugging
 
-Each documentation file contains comprehensive information about:
-- Required and optional attributes
-- Computed attributes returned by the API
-- Examples of usage
-
-We recommend referring to these documentation files for the most up-to-date and detailed information about working with specific NIOS objects.
-You can also refer to the [Infoblox NIOS WAPI documentation](https://docs.infoblox.com/space/NIOS/35400616/NIOS) for more information on the API endpoints and their usage.
-
-Alternatively, you can also refer to the [Infoblox NIOS Swagger](https://infobloxopen.github.io/nios-swagger/) to view the API endpoints and their parameters.
-
-## Debugging
-
-### Terraform Logging
-
-Terraform has detailed logs that can help debug provider issues. To enable them, set the `TF_LOG` environment variable to one of the log levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, or `ERROR`:
-
-```bash
-# For Linux/macOS
-export TF_LOG=DEBUG
-terraform plan
-
-# For Windows PowerShell
-$env:TF_LOG="DEBUG"
-terraform plan
-```
-
-The `TRACE` level is the most verbose and will include all API calls made by the provider to the Infoblox NIOS WAPI.
-
-### Provider-Specific Debugging
-
-For debugging specific issues with the NIOS provider:
-
-1. Use `DEBUG` or `TRACE` log levels to see the API requests and responses
-2. Check the request body and response status codes for API errors
-3. Verify the WAPI version compatibility with your NIOS Grid Manager
-4. Ensure correct credentials and permissions in the NIOS system
-
-For more information on debugging Terraform providers, refer to the [Terraform debugging documentation](https://developer.hashicorp.com/terraform/internals/debugging).
+For detailed information, refer to the Logging and Debugging page in the docs: [Debugging](guides/logging_debugging.md)
 
 ##  Terraform Limitations / Anomalies and Known Issues
 
-- DHCP Options:
-  - DHCP Options:
-    - Both `name` and `num` fields are required when configuring DHCP options
-    - For IPv6 (Network / Network Container): When setting `dhcp-lease-time` during initial creation or updation operations does not take effect
-    - When `use_options = true` is set and all options are subsequently removed, no change is detected
-    - If `use_options` is set to `false`, changes are detected but may not reflect properly in the UI
-- Cloud platform configuration must be nullified before modification or removal
-- Cannot specify reverse mapping notation for Zone FQDNs (Auth, Forward, Delegated)
-- Forward Zones lack TSIG support
-- IPv6 PTR records lack function call support.
-- Range templates have `cloud_api_compatible` set to `true` by default, as Terraform's internal ID structure requires cloud compatibility. Setting this to `false` causes errors when adding the Terraform Internal ID extensible attribute.
-- DHCP Range Configuration:
-  - `cloud_info` cannot be configured via Terraform because `delegated_member` is a computed field
-  - `use_ignore_id` parameter requires explicit setting to `false` to unset it after initial configuration
-- DTC Pool Configuration:
-  - When setting `availability` to `quorum`, you must explicitly define the `quorum` field or the operation will fail.
-  - Once the `quorum` field is added to the Terraform configuration, it cannot be removed.
-- Data Source provides no value for `extattrs_all` since this is for internal use only. Users should only work with the `extattrs` field.
-- Extensible Attributes (EA):
-  - CLI Import doesn't segregate EA into `extattrs` and `extattrs_all`
-  - Requires another apply operation
-  - Import block works as expected, contrary to CLI import
-- String Field unsetting issues explicitly require to pass empty string to unset.
-- `ignore_id` & `ignore_client_identifier` field usage:
-  - For shared networks in WAPI 1.8 or higher, use `ignore_id` instead of `ignore_client_identifier`
-  - Using the wrong field based on WAPI version will cause configuration errors.
-- When setting `use_ttl=false` or removing the field, the provider fails to unset TTL properly. Users must remove both `ttl` and `use_ttl` fields to successfully unset TTL.
-- NS Record type lacks Extensible Attribute support, preventing effective state drift detection via Terraform Internal ID.
-- Function call next_available_network for IPv4/IPv6 networks fails during subsequent terraform apply operations with "overlap an existing network" error.
+For detailed information about limitations, refer to the [Terraform Limitations / Anomalies and Known Issues](guides/limitations.md) page.
 
-## Contributing
-
-Contributions are welcome!
+For details information about known issues, refer to the [Terraform Known Issues](guides/known_issues.md) page.
 
 ### Terraform RC Configuration for local usage
 
@@ -304,14 +216,11 @@ provider_installation {
 ```
 Using this configuration allows Terraform to use the local provider instead of the one from the Terraform registry, which is particularly useful during development and testing.
 
-### How to Contribute a New Feature
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## Support
 
-For issues, feature requests, or questions, please [open an issue](https://github.com/infobloxopen/terraform-provider-nios/issues) on GitHub.
+If you have any questions or issues, you can reach out to us using the following channels:
+
+- Github Issues:
+  - Submit your issues or requests for enhancements on the [Github Issues Page](https://github.com/infobloxopen/terraform-provider-nios/issues)
+- Infoblox Support:
+  - For any questions or issues, please contact [Infoblox Support](https://info.infoblox.com/contact-form/).
