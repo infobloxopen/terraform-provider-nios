@@ -94,7 +94,7 @@ For detailed information, refer to the [Importing Existing Resources](guides/imp
 
 ## Documentation
 
-For detailed documentation, refer to the [Documentation](guides/documentation.md) page.
+For detailed documentation, refer to the [Documentation](guides/documentation_details.md) page.
 
 ## Logging and Debugging
 
