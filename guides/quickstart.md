@@ -1,10 +1,3 @@
----
-page_title: "Managing DDI services with the NIOS Terraform Provider"
-subcategory: "Guides"
-description: |-
-  This guide provides step-by-step instructions for using the NIOS Terraform Provider to manage DDI resources.
----
-
 # Managing DDI services with the NIOS Terraform Provider
 
 This guide provides step-by-step instructions for using the NIOS Terraform Provider to manage DDI resources.
@@ -49,6 +42,8 @@ terraform init
 
 
 ### Using Pre-built Binaries from Github Releases
+
+Alternatively, you can manually install the provider using pre-built binaries from the GitHub releases page.
 
 1. Download the latest release from the [releases page](https://github.com/infobloxopen/terraform-provider-nios/releases).
 2. Extract the binary and move it to the Terraform plugins directory (`~/.terraform.d/plugins/`) . Use the following command to create the necessary directory structure:
