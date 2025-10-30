@@ -100,12 +100,6 @@ For detailed documentation, refer to the [Documentation](guides/documentation_de
 
 For detailed information, refer to the Logging and Debugging page in the docs: [Debugging](guides/logging_debugging.md)
 
-##  Terraform Limitations / Anomalies and Known Issues
-
-For detailed information about limitations, refer to the [Terraform Limitations / Anomalies and Known Issues](guides/limitations.md) page.
-
-For details information about known issues, refer to the [Terraform Known Issues](guides/known_issues.md) page.
-
 ## Support
 
 If you have any questions or issues, you can reach out to us using the following channels:
