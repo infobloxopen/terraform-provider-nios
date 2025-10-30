@@ -6,23 +6,16 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 ## Table of Contents
 
 - [Requirements](#requirements)
-- [Installation](#installation)
+- [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-    - [Terraform Internal ID](#terraform-internal-id)
-  - [Terraform RC Configuration for local usage](#terraform-rc-configuration-for-local-usage)
-  - [Using Pre-built Binaries from Github Releases](#using-pre-built-binaries-from-github-releases)
-  - [Build the Provider from Source](#build-the-provider-from-source)
-- [Example Provider Configuration](#example-provider-configuration)
-  - [Provider Arguments](#provider-arguments)
+    - [Setting Up Terraform Internal ID](#setting-up-terraform-internal-id)
+    - [Installation](#installation)
 - [Usage Examples](#usage-examples)
 - [Available Resources and DataSources](#available-resources-and-datasources)
 - [Host Record Management](#host-record-management)
 - [Importing Existing Resources](#importing-existing-resources)
 - [Documentation](#documentation)
-- [Debugging](#debugging)
-  - [Terraform Logging](#terraform-logging)
-  - [Provider-Specific Debugging](#provider-specific-debugging)
-- [Terraform Limitations / Anomalies and Known Issues](#terraform-limitations--anomalies-and-known-issues)
+- [Debugging](#logging-and-debugging)
 - [Support](#support)
 
 ## Requirements
@@ -31,11 +24,11 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.8.0
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.0.6 or higher)
 
-## Installation
+## Getting Started
 
 ### Prerequisites
 
-#### Terraform Internal ID
+#### Setting Up Terraform Internal ID
 
 - A resource can manage its drift state by using the extensible attribute `Terraform Internal ID` when its Reference ID is changed by any manual intervention.
 - To use the Terraform Provider for Infoblox NIOS, you must either define the following extensible attributes in NIOS or 
@@ -50,90 +43,11 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
   curl -k -u <SUPERUSER>:<PASSWORD> -H "Content-Type: application/json" -X POST https://<NIOS_GRID_IP>/wapi/<WAPI_VERSION>/extensibleattributedef -d '{"name": "Terraform Internal ID", "flags": "CR", "type": "STRING", "comment": "Internal ID for Terraform Resource"}'
   ``` 
 
-  For more details refer to the prerequisites in [Terraform Internal ID](guides/tf_internal_id) page.
+  For more details refer to the prerequisites in [Terraform Internal ID](guides/tf_internal_id_management.md) page.
 
-### Using Pre-built Binaries from Github Releases
+### Installation
 
-1. Download the latest release from the [releases page](https://github.com/infobloxopen/terraform-provider-nios/releases).
-2. Extract the binary and move it to the Terraform plugins directory (`~/.terraform.d/plugins/`) . Use the following command to create the necessary directory structure:
-```bash
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>(linux_amd64, darwin_amd64, windows_amd64)
-mv terraform-provider-nios ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>
-```
-3. Additional Step for macOS Users:
-   On Apple devices, you must authorize the binary to run by executing the following command once:
-```bash
-xattr -d com.apple.quarantine ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>/terraform-provider-nios
-```
-
-### Build the Provider from Source
-
-Instead of using pre-built binaries, you can build the provider from source. This is useful for development and testing purposes and to build the latest changes pushed to the repository.
-
-1. Clone the repository:
-```bash
-git clone https://github.com/infobloxopen/terraform-provider-nios.git
-```
-
-2. Change to the repository directory:
-```bash
-cd <path-to-provider>/terraform-provider-nios
-```
-
-3. Ensure you have the necessary dependencies installed. You can use `go mod tidy` to ensure all dependencies are fetched:
-```bash
-go mod tidy
-go mod vendor
-```
-
-3. Build and install the provider:
-```bash
-make build
-make install
-```
-
-OR instead of `make install`, you can manually move the built binary to the Terraform plugins directory:
-
-```bash
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>(linux_amd64, darwin_amd64, windows_amd64)
-mv terraform-provider-nios ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>
-```
-
-4. Additional Step for macOS Users:
-   On Apple devices, you must authorize the binary to run by executing the following command once:
-```bash
-xattr -d com.apple.quarantine ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>/terraform-provider-nios
-```
-
-
-
-This configuration allows Terraform to use your local provider instead of the one from the Terraform registry, which is particularly useful during development and testing.
- 
-
-## Example Provider Configuration
-
-```hcl
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "0.0.1"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "<NIOS_HOST_URL>"
-  nios_username = "<NIOS_USERNAME>"
-  nios_password = "<NIOS_PASSWORD>"
-}
-```
-
-### Provider Arguments
-
-- `nios_host_url` - (Required) The full URL of your NIOS Grid Manager (e.g., "https://gridmaster.example.com").
-- `nios_username` - (Required) The username to access the NIOS Grid Manager.
-- `nios_password` - (Required) The password to access the NIOS Grid Manager.
+For detailed installation instructions, please refer to the [Quickstart Guide](guides/quickstart.md).
 
 ## Usage Examples
 
@@ -169,12 +83,7 @@ For a detailed list of available resources and data sources, refer to the [Resou
 
 - The `ip_association` resource manages DHCP-related settings of the Host Record created via ip_allocation. It updates the record with VM-specific details such as the MAC address for IPv4 and the DUID for IPv6, enabling full integration with cloud or virtualized environments.
 
-**Note:**
-
-- Do not destroy the `ip_association` resource directly; destroying the `ip_allocation` will automatically remove the associated record.
-- Each allocation supports at most one IPv4 and one IPv6 address. Multiple addresses of the same family are not supported.
-
-Detailed documentation for these resources can be found in [Host Record Documentation](guides/host_record.md) page.
+Detailed documentation for these resources can be found in [Host Record Documentation](guides/host_record_management.md) page.
 
 ## Importing Existing Resources
 
@@ -184,37 +93,11 @@ For detailed information, refer to the [Importing Existing Resources](guides/imp
 
 ## Documentation
 
-For detailed documentation, refer to the [Documentation](guides/documentation.md) page.
+For detailed documentation, refer to the [Documentation](guides/documentation_details.md) page.
 
 ## Logging and Debugging
 
 For detailed information, refer to the Logging and Debugging page in the docs: [Debugging](guides/logging_debugging.md)
-
-##  Terraform Limitations / Anomalies and Known Issues
-
-For detailed information about limitations, refer to the [Terraform Limitations / Anomalies and Known Issues](guides/limitations.md) page.
-
-For details information about known issues, refer to the [Terraform Known Issues](guides/known_issues.md) page.
-
-### Terraform RC Configuration for local usage
-
-As the Provider isn't available on registry , to develop the provider locally , you need to set up the `.terraformrc` file in your home directory to point to the `terraform-provider-nios` repository.
-
-```bash
-provider_installation {
-  dev_overrides {
-    "infobloxopen/nios" = "/Users/<user-name>/<path-to-provider>/terraform-provider-nios"
-  }
-  filesystem_mirror {
-    path    = "/Users/<user-name>/.terraform.d/plugins/"
-    include = ["infobloxopen/nios"]
-  }
-  direct {
-    exclude = ["infobloxopen/nios"]
-  }
-}
-```
-Using this configuration allows Terraform to use the local provider instead of the one from the Terraform registry, which is particularly useful during development and testing.
 
 ## Support
 
