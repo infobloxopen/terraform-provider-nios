@@ -84,7 +84,7 @@ For a detailed list of available resources and data sources, refer to the [Resou
 
 - The `ip_association` resource manages DHCP-related settings of the Host Record created via ip_allocation. It updates the record with VM-specific details such as the MAC address for IPv4 and the DUID for IPv6, enabling full integration with cloud or virtualized environments.
 
-Detailed documentation for these resources can be found in [Host Record Documentation](guides/host_record.md) page.
+Detailed documentation for these resources can be found in [Host Record Documentation](guides/host_record_management.md) page.
 
 ## Importing Existing Resources
 
