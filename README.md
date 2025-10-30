@@ -16,7 +16,6 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 - [Importing Existing Resources](#importing-existing-resources)
 - [Documentation](#documentation)
 - [Debugging](#logging-and-debugging)
-- [Terraform Limitations / Anomalies and Known Issues](#terraform-limitations--anomalies-and-known-issues)
 - [Support](#support)
 
 ## Requirements
