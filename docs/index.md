@@ -10,6 +10,8 @@ description: |-
 
 The NIOS provider is used to interact with the resources supported by Infoblox NIOS WAPI.
 
+>For more guides and detailed documentation, see the [NIOS Terraform Provider Guides](https://github.com/infobloxopen/terraform-provider-nios/tree/main/guides).
+
 ## Example Usage
 
 ```terraform
