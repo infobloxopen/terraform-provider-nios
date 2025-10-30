@@ -24,7 +24,7 @@ terraform {
   required_providers {
     nios = {
       source  = "infobloxopen/nios"
-      version = ">= 0.0.1"
+      version = ">= 1.0.0"
     }
   }
   required_version = ">= 1.8.0"
@@ -59,7 +59,7 @@ mv terraform-provider-nios ~/.terraform.d/plugins/registry.terraform.io/infoblox
 3. Additional Step for macOS Users:
    On Apple devices, you must authorize the binary to run by executing the following command once:
 ```bash
-xattr -d com.apple.quarantine ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>/terraform-provider-nios
+xattr -d com.apple.quarantine ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/1.0.0/<OS_ARCH>/terraform-provider-nios
 ```
 4. Initialize the provider by running the following command.
 ```shell
@@ -192,8 +192,10 @@ Datasources allow you to retrieve existing NIOS objects. Here's a simple example
 ````terraform
 // Get an existing DNS zone
 data "nios_dns_zone_auth" "get_auth_zone" {
-  fqdn = "exampledomain.com"
-  view = "default"
+  filters = {
+    view = "default"
+    fqdn = "example1.com"
+  }
 }
 
 // Output the zone information

@@ -44,7 +44,7 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
   curl -k -u <SUPERUSER>:<PASSWORD> -H "Content-Type: application/json" -X POST https://<NIOS_GRID_IP>/wapi/<WAPI_VERSION>/extensibleattributedef -d '{"name": "Terraform Internal ID", "flags": "CR", "type": "STRING", "comment": "Internal ID for Terraform Resource"}'
   ``` 
 
-  For more details refer to the prerequisites in [Terraform Internal ID](guides/tf_internal_id) page.
+  For more details refer to the prerequisites in [Terraform Internal ID](guides/tf_internal_id_management.md) page.
 
 ### Installation
 
