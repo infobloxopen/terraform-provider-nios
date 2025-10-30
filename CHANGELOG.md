@@ -79,37 +79,37 @@
 
 #### DNS
 
-- `nios_dns_view` : Manage DNS views and retrieve existing view configurations. ([#67](https://github.com/infobloxopen/terraform-provider-bloxone/pull/67))
-- `nios_dns_zone_auth` : Manage authoritative DNS zones and retrieve existing zone data. ([#57](https://github.com/infobloxopen/terraform-provider-bloxone/pull/57))
-- `nios_dns_zone_delegated` : Manage delegated DNS zones and retrieve existing delegation data. ([#62](https://github.com/infobloxopen/terraform-provider-bloxone/pull/62))
-- `nios_dns_zone_forward` : Manage forwarding DNS zones and retrieve existing forward zone data. ([#33](https://github.com/infobloxopen/terraform-provider-bloxone/pull/33))
-- `nios_dns_record_a` : Manage DNS A records and retrieve existing A record data. ([#1](https://github.com/infobloxopen/terraform-provider-bloxone/pull/1))
-- `nios_dns_record_aaaa` : Manage DNS AAAA records and retrieve existing AAAA record data. ([#23](https://github.com/infobloxopen/terraform-provider-bloxone/pull/23))
-- `nios_dns_record_alias` : Manage DNS ALIAS records and retrieve existing ALIAS record data. ([#46](https://github.com/infobloxopen/terraform-provider-bloxone/pull/46))
-- `nios_dns_record_cname` : Manage DNS CNAME records and retrieve existing CNAME record data. ([#50](https://github.com/infobloxopen/terraform-provider-bloxone/pull/50))
-- `nios_dns_record_mx` : Manage DNS MX records and retrieve existing MX record data. ([#61](https://github.com/infobloxopen/terraform-provider-bloxone/pull/61))
-- `nios_dns_record_ns` : Manage DNS NS records and retrieve existing NS record data. ([#55](https://github.com/infobloxopen/terraform-provider-bloxone/pull/55))
-- `nios_dns_record_ptr` : Manage DNS PTR records and retrieve existing PTR record data. ([#45](https://github.com/infobloxopen/terraform-provider-bloxone/pull/45))
-- `nios_dns_record_srv` : Manage DNS SRV records and retrieve existing SRV record data. ([#53](https://github.com/infobloxopen/terraform-provider-bloxone/pull/53))
-- `nios_dns_record_txt` : Manage DNS TXT records and retrieve existing TXT record data. ([#53](https://github.com/infobloxopen/terraform-provider-bloxone/pull/53))
+- `nios_dns_view` : Manage DNS views and retrieve existing view configurations. ([#67](https://github.com/infobloxopen/terraform-provider-nios/pull/67))
+- `nios_dns_zone_auth` : Manage authoritative DNS zones and retrieve existing zone data. ([#57](https://github.com/infobloxopen/terraform-provider-nios/pull/57))
+- `nios_dns_zone_delegated` : Manage delegated DNS zones and retrieve existing delegation data. ([#62](https://github.com/infobloxopen/terraform-provider-nios/pull/62))
+- `nios_dns_zone_forward` : Manage forwarding DNS zones and retrieve existing forward zone data. ([#33](https://github.com/infobloxopen/terraform-provider-nios/pull/33))
+- `nios_dns_record_a` : Manage DNS A records and retrieve existing A record data. ([#1](https://github.com/infobloxopen/terraform-provider-nios/pull/1))
+- `nios_dns_record_aaaa` : Manage DNS AAAA records and retrieve existing AAAA record data. ([#23](https://github.com/infobloxopen/terraform-provider-nios/pull/23))
+- `nios_dns_record_alias` : Manage DNS ALIAS records and retrieve existing ALIAS record data. ([#46](https://github.com/infobloxopen/terraform-provider-nios/pull/46))
+- `nios_dns_record_cname` : Manage DNS CNAME records and retrieve existing CNAME record data. ([#50](https://github.com/infobloxopen/terraform-provider-nios/pull/50))
+- `nios_dns_record_mx` : Manage DNS MX records and retrieve existing MX record data. ([#61](https://github.com/infobloxopen/terraform-provider-nios/pull/61))
+- `nios_dns_record_ns` : Manage DNS NS records and retrieve existing NS record data. ([#55](https://github.com/infobloxopen/terraform-provider-nios/pull/55))
+- `nios_dns_record_ptr` : Manage DNS PTR records and retrieve existing PTR record data. ([#45](https://github.com/infobloxopen/terraform-provider-nios/pull/45))
+- `nios_dns_record_srv` : Manage DNS SRV records and retrieve existing SRV record data. ([#53](https://github.com/infobloxopen/terraform-provider-nios/pull/53))
+- `nios_dns_record_txt` : Manage DNS TXT records and retrieve existing TXT record data. ([#53](https://github.com/infobloxopen/terraform-provider-nios/pull/53))
 
 #### DHCP
 
-- `nios_dhcp_fixed_address` : Manage DHCP fixed address resources and retrieve existing fixed address data. ([#51](https://github.com/infobloxopen/terraform-provider-bloxone/pull/51))
-- `nios_dhcp_range` : Manage DHCP range resources and retrieve existing DHCP range data. ([#63](https://github.com/infobloxopen/terraform-provider-bloxone/pull/63))
-- `nios_dhcp_range_template` : Manage DHCP range templates and retrieve existing template data. ([#52](https://github.com/infobloxopen/terraform-provider-bloxone/pull/52))
-- `nios_dhcp_shared_network` : Manage DHCP shared networks and retrieve existing shared network data. ([#64](https://github.com/infobloxopen/terraform-provider-bloxone/pull/64))
+- `nios_dhcp_fixed_address` : Manage DHCP fixed address resources and retrieve existing fixed address data. ([#51](https://github.com/infobloxopen/terraform-provider-nios/pull/51))
+- `nios_dhcp_range` : Manage DHCP range resources and retrieve existing DHCP range data. ([#63](https://github.com/infobloxopen/terraform-provider-nios/pull/63))
+- `nios_dhcp_range_template` : Manage DHCP range templates and retrieve existing template data. ([#52](https://github.com/infobloxopen/terraform-provider-nios/pull/52))
+- `nios_dhcp_shared_network` : Manage DHCP shared networks and retrieve existing shared network data. ([#64](https://github.com/infobloxopen/terraform-provider-nios/pull/64))
 
 #### IPAM
 
-- `nios_ipam_network_view` : Manage IPAM network views and retrieve existing view data. ([#68](https://github.com/infobloxopen/terraform-provider-bloxone/pull/68))
-- `nios_ipam_network` : Manage IPAM networks and retrieve existing network data. ([#44](https://github.com/infobloxopen/terraform-provider-bloxone/pull/44))
-- `nios_ipam_network_container` : Manage IPAM network containers and retrieve existing container data. ([#38](https://github.com/infobloxopen/terraform-provider-bloxone/pull/38))
-- `nios_ipam_ipv6network` : Manage IPAM IPv6 networks and retrieve existing IPv6 network data. ([#69](https://github.com/infobloxopen/terraform-provider-bloxone/pull/69))
-- `nios_ipam_ipv6network_container` : Manage IPAM IPv6 network containers and retrieve existing IPv6 container data. ([#56](https://github.com/infobloxopen/terraform-provider-bloxone/pull/56))
+- `nios_ipam_network_view` : Manage IPAM network views and retrieve existing view data. ([#68](https://github.com/infobloxopen/terraform-provider-nios/pull/68))
+- `nios_ipam_network` : Manage IPAM networks and retrieve existing network data. ([#44](https://github.com/infobloxopen/terraform-provider-nios/pull/44))
+- `nios_ipam_network_container` : Manage IPAM network containers and retrieve existing container data. ([#38](https://github.com/infobloxopen/terraform-provider-nios/pull/38))
+- `nios_ipam_ipv6network` : Manage IPAM IPv6 networks and retrieve existing IPv6 network data. ([#69](https://github.com/infobloxopen/terraform-provider-nios/pull/69))
+- `nios_ipam_ipv6network_container` : Manage IPAM IPv6 network containers and retrieve existing IPv6 container data. ([#56](https://github.com/infobloxopen/terraform-provider-nios/pull/56))
 
 #### DTC
 
-- `nios_dtc_lbdn` : Manage DTC LBDN resources and retrieve existing LBDN configurations. ([#27](https://github.com/infobloxopen/terraform-provider-bloxone/pull/27))
-- `nios_dtc_pool` : Manage DTC pools and retrieve existing pool data. ([#28](https://github.com/infobloxopen/terraform-provider-bloxone/pull/28))
-- `nios_dtc_server` : Manage DTC servers and retrieve existing server data. ([#32](https://github.com/infobloxopen/terraform-provider-bloxone/pull/32))
+- `nios_dtc_lbdn` : Manage DTC LBDN resources and retrieve existing LBDN configurations. ([#27](https://github.com/infobloxopen/terraform-provider-nios/pull/27))
+- `nios_dtc_pool` : Manage DTC pools and retrieve existing pool data. ([#28](https://github.com/infobloxopen/terraform-provider-nios/pull/28))
+- `nios_dtc_server` : Manage DTC servers and retrieve existing server data. ([#32](https://github.com/infobloxopen/terraform-provider-nios/pull/32))
