@@ -87,7 +87,7 @@ The tables below list all available resources and data sources
 | Name                    | Resource Description  | Data Source Description                            |
 |-------------------------|-----------------------|----------------------------------------------------|
 | `nios_misc_ruleset`     | Manages Rule Sets     | Retrieves information about existing Rule Sets     |
-| `nios_misc_bfdtemplate` | Manages BFD Templates | Retrieves information about existing DFD Templates |
+| `nios_misc_bfdtemplate` | Manages BFD Templates | Retrieves information about existing BFD Templates |
 
 ### SMARTFOLDER
 
