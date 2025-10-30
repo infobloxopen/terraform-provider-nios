@@ -35,4 +35,4 @@ Refer the terraform link [here](https://developer.hashicorp.com/terraform/langua
 
 
 > **Note**:
-When using the import block, terraform plan triggers an update call to reconcile the resource state. During this update, Terraform adds the Extensible Attribute Terraform Internal ID to the resource.
+When using the import block, terraform plan triggers an update call that modifies the Terraform internal ID configuration on the backend either by adding or updating the Terraform Internal ID to the resource.

@@ -200,10 +200,7 @@ data "nios_dns_zone_auth" "get_auth_zone" {
 
 // Output the zone information
 output "zone_info" {
-  value = {
-    zone_name = data.nios_dns_zone_auth.get_auth_zone.fqdn
-    zone_view = data.nios_dns_zone_auth.get_auth_zone.view
-  }
+  value = data.nios_dns_zone_auth.get_auth_zone
 }
 ````
 
