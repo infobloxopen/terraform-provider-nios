@@ -11,9 +11,11 @@ This guide provides step-by-step instructions for using the NIOS Terraform Provi
 
 ## Configuring the Provider
 
+### Using the Registry
+
 Before getting started, ensure you have completed the [prerequisites](../README.md#prerequisites).
 
-The provider needs to be configured with a `NIOSHostURL`, `NIOSUsername` and `NIOSPassword`.
+The provider needs to be configured with a `nios_host_url`, `nios_username` and `nios_password`.
 
 Create a directory for the Terraform configuration and create a file named `main.tf` with the following content:
 
@@ -41,7 +43,25 @@ You can also use the following environment variables to configure the provider: 
 
 Initialize the provider by running the following command. This will download the provider and initialize the working directory.
 
+```shell
+terraform init
+```
 
+
+### Using Pre-built Binaries from Github Releases
+
+1. Download the latest release from the [releases page](https://github.com/infobloxopen/terraform-provider-nios/releases).
+2. Extract the binary and move it to the Terraform plugins directory (`~/.terraform.d/plugins/`) . Use the following command to create the necessary directory structure:
+```bash
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>(linux_amd64, darwin_amd64, windows_amd64)
+mv terraform-provider-nios ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>
+```
+3. Additional Step for macOS Users:
+   On Apple devices, you must authorize the binary to run by executing the following command once:
+```bash
+xattr -d com.apple.quarantine ~/.terraform.d/plugins/registry.terraform.io/infobloxopen/nios/0.0.1/<OS_ARCH>/terraform-provider-nios
+```
+4. Initialize the provider by running the following command.
 ```shell
 terraform init
 ```
