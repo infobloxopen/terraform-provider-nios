@@ -3,16 +3,17 @@ package security
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"reflect"
+
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
-	"net/http"
-	"reflect"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
