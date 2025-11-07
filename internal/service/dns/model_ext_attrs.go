@@ -88,11 +88,6 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 	extAttrsAllRespMap := make(map[string]dns.ExtAttrs)
 	var extAttrAll types.Map
 
-	// if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
-	// 	extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &respExtAttrs, &diags)
-	// 	return nil, extAttrAll, nil
-	// }
-
 	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
 		planMap = make(map[string]dns.ExtAttrs)
 	} else {
