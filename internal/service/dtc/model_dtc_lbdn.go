@@ -71,10 +71,10 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"auth_zones": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
-		Computed:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -132,9 +132,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The display name of the DTC LBDN, not DNS related.",
 	},
 	"patterns": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -150,8 +150,8 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcLbdnPoolsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},

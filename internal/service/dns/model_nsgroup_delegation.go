@@ -46,7 +46,7 @@ var NsgroupDelegationResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
-		Default : stringdefault.StaticString(""),
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The comment for the delegated NS group.",
 	},
 	"delegate_to": schema.ListNestedAttribute{
@@ -76,7 +76,6 @@ var NsgroupDelegationResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the delegated NS group.",
 	},
 }
-
 
 func (m *NsgroupDelegationModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.NsgroupDelegation {
 	if m == nil {

@@ -101,8 +101,8 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcPoolConsolidatedMonitorsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -173,9 +173,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The preferred topology for load balancing.",
 	},
 	"monitors": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -196,7 +196,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcPoolServersResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -286,8 +286,8 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 }
 
 func FlattenQuorumBasedOnAvailability(availability *string, quorum *int64) types.Int64 {
-    if availability == nil || *availability != "QUORUM" {
-        return types.Int64Null()
-    }
-    return flex.FlattenInt64Pointer(quorum)
+	if availability == nil || *availability != "QUORUM" {
+		return types.Int64Null()
+	}
+	return flex.FlattenInt64Pointer(quorum)
 }
