@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
@@ -51,10 +52,10 @@ func testAccCheckIpv6dhcpoptiondefinitionResourceAttrPair(resourceName, dataSour
 func testAccIpv6dhcpoptiondefinitionDataSourceConfigFilters(optionSpace, code, name, optionType string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6dhcpoptiondefinition" "test" {
-  code = %q
-  name = %q
-  type = %q
-  space = nios_dhcp_ipv6dhcpoptionspace.test.name
+	code = %q
+	name = %q
+	type = %q
+	space = nios_dhcp_ipv6dhcpoptionspace.test.name
 }
 
 data "nios_dhcp_ipv6dhcpoptiondefinition" "test" {

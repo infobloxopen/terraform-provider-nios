@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -35,6 +36,7 @@ func TestAccIpv6dhcpoptionspaceResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enterprise_number", "5896"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -249,7 +251,6 @@ func testAccCheckIpv6dhcpoptionspaceDisappears(ctx context.Context, v *dhcp.Ipv6
 }
 
 func testAccIpv6dhcpoptionspaceBasicConfig(enterpriseNumber, name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6dhcpoptionspace" "test" {
     enterprise_number = %q
