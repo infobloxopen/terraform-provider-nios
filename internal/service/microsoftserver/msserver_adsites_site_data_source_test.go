@@ -2,7 +2,6 @@ package microsoftserver_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -45,7 +44,7 @@ func testAccCheckMsserverAdsitesSiteResourceAttrPair(resourceName, dataSourceNam
 }
 
 func testAccMsserverAdsitesSiteDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_msserver_adsites_site" "test" {
 }
 
@@ -54,5 +53,5 @@ data "nios_microsoftserver_msserver_adsites_site" "test" {
 	 = nios_microsoftserver_msserver_adsites_site.test.
   }
 }
-`)
+`
 }

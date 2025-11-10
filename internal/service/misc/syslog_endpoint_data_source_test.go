@@ -75,7 +75,7 @@ func testAccCheckSyslogEndpointResourceAttrPair(resourceName, dataSourceName str
 }
 
 func testAccSyslogEndpointDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_misc_syslog_endpoint" "test" {
 }
 
@@ -84,7 +84,7 @@ data "nios_misc_syslog_endpoint" "test" {
 	 = nios_misc_syslog_endpoint.test.
   }
 }
-`)
+`
 }
 
 func testAccSyslogEndpointDataSourceConfigExtAttrFilters(extAttrsValue string) string {

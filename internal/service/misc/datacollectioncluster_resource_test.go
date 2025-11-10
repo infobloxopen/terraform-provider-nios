@@ -178,10 +178,10 @@ func testAccCheckDatacollectionclusterDisappears(ctx context.Context, v *misc.Da
 
 func testAccDatacollectionclusterBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_misc_datacollectioncluster" "test" {
 }
-`)
+`
 }
 
 func testAccDatacollectionclusterRef(ref string) string {

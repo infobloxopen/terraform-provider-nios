@@ -352,10 +352,10 @@ func testAccCheckMsserverDhcpDisappears(ctx context.Context, v *microsoftserver.
 
 func testAccMsserverDhcpBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_msserver_dhcp" "test" {
 }
-`)
+`
 }
 
 func testAccMsserverDhcpRef(ref string) string {

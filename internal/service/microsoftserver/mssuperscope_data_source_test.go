@@ -1,4 +1,3 @@
-
 package microsoftserver_test
 
 import (
@@ -26,8 +25,8 @@ func TestAccMssuperscopeDataSource_Filters(t *testing.T) {
 				Config: testAccMssuperscopeDataSourceConfigFilters(),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckMssuperscopeExists(context.Background(), resourceName, &v),
-						}, testAccCheckMssuperscopeResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckMssuperscopeExists(context.Background(), resourceName, &v),
+					}, testAccCheckMssuperscopeResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -44,11 +43,11 @@ func TestAccMssuperscopeDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckMssuperscopeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMssuperscopeDataSourceConfigExtAttrFilters( acctest.RandomName()),
+				Config: testAccMssuperscopeDataSourceConfigExtAttrFilters(acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckMssuperscopeExists(context.Background(), resourceName, &v),
-						}, testAccCheckMssuperscopeResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckMssuperscopeExists(context.Background(), resourceName, &v),
+					}, testAccCheckMssuperscopeResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -57,29 +56,29 @@ func TestAccMssuperscopeDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckMssuperscopeResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "dhcp_utilization", dataSourceName, "result.0.dhcp_utilization"),
-        resource.TestCheckResourceAttrPair(resourceName, "dhcp_utilization_status", dataSourceName, "result.0.dhcp_utilization_status"),
-        resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),
-        resource.TestCheckResourceAttrPair(resourceName, "dynamic_hosts", dataSourceName, "result.0.dynamic_hosts"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "high_water_mark", dataSourceName, "result.0.high_water_mark"),
-        resource.TestCheckResourceAttrPair(resourceName, "high_water_mark_reset", dataSourceName, "result.0.high_water_mark_reset"),
-        resource.TestCheckResourceAttrPair(resourceName, "low_water_mark", dataSourceName, "result.0.low_water_mark"),
-        resource.TestCheckResourceAttrPair(resourceName, "low_water_mark_reset", dataSourceName, "result.0.low_water_mark_reset"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-        resource.TestCheckResourceAttrPair(resourceName, "network_view", dataSourceName, "result.0.network_view"),
-        resource.TestCheckResourceAttrPair(resourceName, "ranges", dataSourceName, "result.0.ranges"),
-        resource.TestCheckResourceAttrPair(resourceName, "static_hosts", dataSourceName, "result.0.static_hosts"),
-        resource.TestCheckResourceAttrPair(resourceName, "total_hosts", dataSourceName, "result.0.total_hosts"),
-    }
+func testAccCheckMssuperscopeResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "dhcp_utilization", dataSourceName, "result.0.dhcp_utilization"),
+		resource.TestCheckResourceAttrPair(resourceName, "dhcp_utilization_status", dataSourceName, "result.0.dhcp_utilization_status"),
+		resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),
+		resource.TestCheckResourceAttrPair(resourceName, "dynamic_hosts", dataSourceName, "result.0.dynamic_hosts"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "high_water_mark", dataSourceName, "result.0.high_water_mark"),
+		resource.TestCheckResourceAttrPair(resourceName, "high_water_mark_reset", dataSourceName, "result.0.high_water_mark_reset"),
+		resource.TestCheckResourceAttrPair(resourceName, "low_water_mark", dataSourceName, "result.0.low_water_mark"),
+		resource.TestCheckResourceAttrPair(resourceName, "low_water_mark_reset", dataSourceName, "result.0.low_water_mark_reset"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+		resource.TestCheckResourceAttrPair(resourceName, "network_view", dataSourceName, "result.0.network_view"),
+		resource.TestCheckResourceAttrPair(resourceName, "ranges", dataSourceName, "result.0.ranges"),
+		resource.TestCheckResourceAttrPair(resourceName, "static_hosts", dataSourceName, "result.0.static_hosts"),
+		resource.TestCheckResourceAttrPair(resourceName, "total_hosts", dataSourceName, "result.0.total_hosts"),
+	}
 }
 
 func testAccMssuperscopeDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_mssuperscope" "test" {
 }
 
@@ -88,7 +87,7 @@ data "nios_microsoftserver_mssuperscope" "test" {
 	 = nios_microsoftserver_mssuperscope.test.
   }
 }
-`)
+`
 }
 
 func testAccMssuperscopeDataSourceConfigExtAttrFilters(extAttrsValue string) string {
@@ -104,6 +103,5 @@ data "nios_microsoftserver_mssuperscope" "test" {
 	Site = nios_microsoftserver_mssuperscope.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, extAttrsValue)
 }
-

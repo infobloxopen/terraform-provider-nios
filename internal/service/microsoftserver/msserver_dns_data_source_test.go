@@ -2,7 +2,6 @@ package microsoftserver_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -50,7 +49,7 @@ func testAccCheckMsserverDnsResourceAttrPair(resourceName, dataSourceName string
 }
 
 func testAccMsserverDnsDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_msserver_dns" "test" {
 }
 
@@ -59,5 +58,5 @@ data "nios_microsoftserver_msserver_dns" "test" {
 	 = nios_microsoftserver_msserver_dns.test.
   }
 }
-`)
+`
 }

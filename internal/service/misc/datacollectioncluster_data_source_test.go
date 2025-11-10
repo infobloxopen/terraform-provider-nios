@@ -2,7 +2,6 @@ package misc_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -44,7 +43,7 @@ func testAccCheckDatacollectionclusterResourceAttrPair(resourceName, dataSourceN
 }
 
 func testAccDatacollectionclusterDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_misc_datacollectioncluster" "test" {
 }
 
@@ -53,5 +52,5 @@ data "nios_misc_datacollectioncluster" "test" {
 	 = nios_misc_datacollectioncluster.test.
   }
 }
-`)
+`
 }

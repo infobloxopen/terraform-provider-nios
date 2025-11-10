@@ -352,10 +352,10 @@ func testAccCheckMsserverDnsDisappears(ctx context.Context, v *microsoftserver.M
 
 func testAccMsserverDnsBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_msserver_dns" "test" {
 }
-`)
+`
 }
 
 func testAccMsserverDnsRef(ref string) string {

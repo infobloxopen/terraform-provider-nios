@@ -642,10 +642,10 @@ func testAccCheckPxgridEndpointDisappears(ctx context.Context, v *misc.PxgridEnd
 
 func testAccPxgridEndpointBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_misc_pxgrid_endpoint" "test" {
 }
-`)
+`
 }
 
 func testAccPxgridEndpointRef(ref string) string {

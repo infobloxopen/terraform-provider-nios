@@ -2,7 +2,6 @@ package grid_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -43,7 +42,7 @@ func testAccCheckGridServicerestartGroupOrderResourceAttrPair(resourceName, data
 }
 
 func testAccGridServicerestartGroupOrderDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_grid_servicerestart_group_order" "test" {
 }
 
@@ -52,5 +51,5 @@ data "nios_grid_servicerestart_group_order" "test" {
 	 = nios_grid_servicerestart_group_order.test.
   }
 }
-`)
+`
 }

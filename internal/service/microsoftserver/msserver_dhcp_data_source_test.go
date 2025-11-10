@@ -2,7 +2,6 @@ package microsoftserver_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -63,7 +62,7 @@ func testAccCheckMsserverDhcpResourceAttrPair(resourceName, dataSourceName strin
 }
 
 func testAccMsserverDhcpDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_msserver_dhcp" "test" {
 }
 
@@ -72,5 +71,5 @@ data "nios_microsoftserver_msserver_dhcp" "test" {
 	 = nios_microsoftserver_msserver_dhcp.test.
   }
 }
-`)
+`
 }

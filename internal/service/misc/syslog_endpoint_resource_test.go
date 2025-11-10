@@ -468,10 +468,10 @@ func testAccCheckSyslogEndpointDisappears(ctx context.Context, v *misc.SyslogEnd
 
 func testAccSyslogEndpointBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_misc_syslog_endpoint" "test" {
 }
-`)
+`
 }
 
 func testAccSyslogEndpointRef(ref string) string {

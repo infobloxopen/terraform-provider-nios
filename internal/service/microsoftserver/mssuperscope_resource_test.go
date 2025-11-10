@@ -323,10 +323,10 @@ func testAccCheckMssuperscopeDisappears(ctx context.Context, v *microsoftserver.
 
 func testAccMssuperscopeBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_mssuperscope" "test" {
 }
-`)
+`
 }
 
 func testAccMssuperscopeRef(ref string) string {

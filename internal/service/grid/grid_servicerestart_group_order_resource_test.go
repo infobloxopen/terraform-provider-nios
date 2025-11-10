@@ -164,10 +164,10 @@ func testAccCheckGridServicerestartGroupOrderDestroy(ctx context.Context, v *gri
 
 func testAccGridServicerestartGroupOrderBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_grid_servicerestart_group_order" "test" {
 }
-`)
+`
 }
 
 func testAccGridServicerestartGroupOrderRef(ref string) string {

@@ -2,7 +2,6 @@ package misc_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -48,7 +47,7 @@ func testAccCheckTftpfiledirResourceAttrPair(resourceName, dataSourceName string
 }
 
 func testAccTftpfiledirDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_misc_tftpfiledir" "test" {
 }
 
@@ -57,5 +56,5 @@ data "nios_misc_tftpfiledir" "test" {
 	 = nios_misc_tftpfiledir.test.
   }
 }
-`)
+`
 }

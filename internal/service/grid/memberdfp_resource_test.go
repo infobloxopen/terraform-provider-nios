@@ -236,10 +236,10 @@ func testAccCheckMemberdfpDisappears(ctx context.Context, v *grid.Memberdfp) res
 
 func testAccMemberdfpBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_grid_memberdfp" "test" {
 }
-`)
+`
 }
 
 func testAccMemberdfpRef(ref string) string {

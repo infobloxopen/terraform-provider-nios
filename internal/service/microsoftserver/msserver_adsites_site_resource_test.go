@@ -236,10 +236,10 @@ func testAccCheckMsserverAdsitesSiteDisappears(ctx context.Context, v *microsoft
 
 func testAccMsserverAdsitesSiteBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_msserver_adsites_site" "test" {
 }
-`)
+`
 }
 
 func testAccMsserverAdsitesSiteRef(ref string) string {

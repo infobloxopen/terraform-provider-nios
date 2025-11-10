@@ -613,10 +613,10 @@ func testAccCheckDxlEndpointDisappears(ctx context.Context, v *misc.DxlEndpoint)
 
 func testAccDxlEndpointBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_misc_dxl_endpoint" "test" {
 }
-`)
+`
 }
 
 func testAccDxlEndpointRef(ref string) string {

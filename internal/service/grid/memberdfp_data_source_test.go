@@ -1,4 +1,3 @@
-
 package grid_test
 
 import (
@@ -26,8 +25,8 @@ func TestAccMemberdfpDataSource_Filters(t *testing.T) {
 				Config: testAccMemberdfpDataSourceConfigFilters(),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckMemberdfpExists(context.Background(), resourceName, &v),
-						}, testAccCheckMemberdfpResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckMemberdfpExists(context.Background(), resourceName, &v),
+					}, testAccCheckMemberdfpResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -44,11 +43,11 @@ func TestAccMemberdfpDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckMemberdfpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemberdfpDataSourceConfigExtAttrFilters( acctest.RandomName()),
+				Config: testAccMemberdfpDataSourceConfigExtAttrFilters(acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckMemberdfpExists(context.Background(), resourceName, &v),
-						}, testAccCheckMemberdfpResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckMemberdfpExists(context.Background(), resourceName, &v),
+					}, testAccCheckMemberdfpResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -57,18 +56,18 @@ func TestAccMemberdfpDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckMemberdfpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "dfp_forward_first", dataSourceName, "result.0.dfp_forward_first"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "host_name", dataSourceName, "result.0.host_name"),
-        resource.TestCheckResourceAttrPair(resourceName, "is_dfp_override", dataSourceName, "result.0.is_dfp_override"),
-    }
+func testAccCheckMemberdfpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "dfp_forward_first", dataSourceName, "result.0.dfp_forward_first"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "host_name", dataSourceName, "result.0.host_name"),
+		resource.TestCheckResourceAttrPair(resourceName, "is_dfp_override", dataSourceName, "result.0.is_dfp_override"),
+	}
 }
 
 func testAccMemberdfpDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_grid_memberdfp" "test" {
 }
 
@@ -77,7 +76,7 @@ data "nios_grid_memberdfp" "test" {
 	 = nios_grid_memberdfp.test.
   }
 }
-`)
+`
 }
 
 func testAccMemberdfpDataSourceConfigExtAttrFilters(extAttrsValue string) string {
@@ -93,6 +92,5 @@ data "nios_grid_memberdfp" "test" {
 	Site = nios_grid_memberdfp.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, extAttrsValue)
 }
-

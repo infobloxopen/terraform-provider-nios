@@ -787,10 +787,10 @@ func testAccCheckMsserverDisappears(ctx context.Context, v *microsoftserver.Msse
 
 func testAccMsserverBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_microsoftserver_msserver" "test" {
 }
-`)
+`
 }
 
 func testAccMsserverRef(ref string) string {

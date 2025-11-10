@@ -265,10 +265,10 @@ func testAccCheckTftpfiledirDisappears(ctx context.Context, v *misc.Tftpfiledir)
 
 func testAccTftpfiledirBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_misc_tftpfiledir" "test" {
 }
-`)
+`
 }
 
 func testAccTftpfiledirRef(ref string) string {
