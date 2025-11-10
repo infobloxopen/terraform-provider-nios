@@ -497,10 +497,10 @@ func testAccCheckRadiusAuthserviceDisappears(ctx context.Context, v *security.Ra
 
 func testAccRadiusAuthserviceBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_radius_authservice" "test" {
 }
-`)
+`
 }
 
 func testAccRadiusAuthserviceRef(ref string) string {

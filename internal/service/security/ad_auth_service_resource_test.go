@@ -352,10 +352,10 @@ func testAccCheckAdAuthServiceDisappears(ctx context.Context, v *security.AdAuth
 
 func testAccAdAuthServiceBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_ad_auth_service" "test" {
 }
-`)
+`
 }
 
 func testAccAdAuthServiceRef(ref string) string {

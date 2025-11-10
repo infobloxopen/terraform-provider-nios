@@ -84,7 +84,7 @@ func testAccCheckApprovalworkflowResourceAttrPair(resourceName, dataSourceName s
 }
 
 func testAccApprovalworkflowDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_approvalworkflow" "test" {
 }
 
@@ -93,7 +93,7 @@ data "nios_security_approvalworkflow" "test" {
 	 = nios_security_approvalworkflow.test.
   }
 }
-`)
+`
 }
 
 func testAccApprovalworkflowDataSourceConfigExtAttrFilters(extAttrsValue string) string {

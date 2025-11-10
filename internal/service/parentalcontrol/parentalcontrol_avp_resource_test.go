@@ -381,10 +381,10 @@ func testAccCheckParentalcontrolAvpDisappears(ctx context.Context, v *parentalco
 
 func testAccParentalcontrolAvpBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_parentalcontrol_avp" "test" {
 }
-`)
+`
 }
 
 func testAccParentalcontrolAvpRef(ref string) string {

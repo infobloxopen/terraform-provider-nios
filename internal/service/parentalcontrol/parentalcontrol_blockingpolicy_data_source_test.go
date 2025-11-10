@@ -2,7 +2,6 @@ package parentalcontrol_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -44,7 +43,7 @@ func testAccCheckParentalcontrolBlockingpolicyResourceAttrPair(resourceName, dat
 }
 
 func testAccParentalcontrolBlockingpolicyDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_parentalcontrol_blockingpolicy" "test" {
 }
 
@@ -53,5 +52,5 @@ data "nios_parentalcontrol_blockingpolicy" "test" {
 	 = nios_parentalcontrol_blockingpolicy.test.
   }
 }
-`)
+`
 }

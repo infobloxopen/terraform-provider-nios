@@ -2,7 +2,6 @@ package threatprotection_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -54,7 +53,7 @@ func testAccCheckThreatprotectionGridRuleResourceAttrPair(resourceName, dataSour
 }
 
 func testAccThreatprotectionGridRuleDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_threatprotection_grid_rule" "test" {
 }
 
@@ -63,5 +62,5 @@ data "nios_threatprotection_grid_rule" "test" {
 	 = nios_threatprotection_grid_rule.test.
   }
 }
-`)
+`
 }

@@ -2,7 +2,6 @@ package security_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -51,7 +50,7 @@ func testAccCheckHsmEntrustnshieldgroupResourceAttrPair(resourceName, dataSource
 }
 
 func testAccHsmEntrustnshieldgroupDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_hsm_entrustnshieldgroup" "test" {
 }
 
@@ -60,5 +59,5 @@ data "nios_security_hsm_entrustnshieldgroup" "test" {
 	 = nios_security_hsm_entrustnshieldgroup.test.
   }
 }
-`)
+`
 }

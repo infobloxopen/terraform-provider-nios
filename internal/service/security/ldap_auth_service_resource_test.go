@@ -526,10 +526,10 @@ func testAccCheckLdapAuthServiceDisappears(ctx context.Context, v *security.Ldap
 
 func testAccLdapAuthServiceBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_ldap_auth_service" "test" {
 }
-`)
+`
 }
 
 func testAccLdapAuthServiceRef(ref string) string {

@@ -265,10 +265,10 @@ func testAccCheckSamlAuthserviceDisappears(ctx context.Context, v *security.Saml
 
 func testAccSamlAuthserviceBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_saml_authservice" "test" {
 }
-`)
+`
 }
 
 func testAccSamlAuthserviceRef(ref string) string {

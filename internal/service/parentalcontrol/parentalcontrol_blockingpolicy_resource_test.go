@@ -207,10 +207,10 @@ func testAccCheckParentalcontrolBlockingpolicyDisappears(ctx context.Context, v 
 
 func testAccParentalcontrolBlockingpolicyBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_parentalcontrol_blockingpolicy" "test" {
 }
-`)
+`
 }
 
 func testAccParentalcontrolBlockingpolicyRef(ref string) string {

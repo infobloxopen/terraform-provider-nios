@@ -352,10 +352,10 @@ func testAccCheckRirOrganizationDisappears(ctx context.Context, v *rir.RirOrgani
 
 func testAccRirOrganizationBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_rir_organization" "test" {
 }
-`)
+`
 }
 
 func testAccRirOrganizationRef(ref string) string {

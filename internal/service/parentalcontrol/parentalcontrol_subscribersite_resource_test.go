@@ -903,10 +903,10 @@ func testAccCheckParentalcontrolSubscribersiteDisappears(ctx context.Context, v 
 
 func testAccParentalcontrolSubscribersiteBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_parentalcontrol_subscribersite" "test" {
 }
-`)
+`
 }
 
 func testAccParentalcontrolSubscribersiteRef(ref string) string {

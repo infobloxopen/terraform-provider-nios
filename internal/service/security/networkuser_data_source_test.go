@@ -2,7 +2,6 @@ package security_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -57,7 +56,7 @@ func testAccCheckNetworkuserResourceAttrPair(resourceName, dataSourceName string
 }
 
 func testAccNetworkuserDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_networkuser" "test" {
 }
 
@@ -66,5 +65,5 @@ data "nios_security_networkuser" "test" {
 	 = nios_security_networkuser.test.
   }
 }
-`)
+`
 }

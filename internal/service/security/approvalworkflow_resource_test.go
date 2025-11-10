@@ -729,10 +729,10 @@ func testAccCheckApprovalworkflowDisappears(ctx context.Context, v *security.App
 
 func testAccApprovalworkflowBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_approvalworkflow" "test" {
 }
-`)
+`
 }
 
 func testAccApprovalworkflowRef(ref string) string {

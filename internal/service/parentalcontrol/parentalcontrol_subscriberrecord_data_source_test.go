@@ -2,7 +2,6 @@ package parentalcontrol_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -67,7 +66,7 @@ func testAccCheckParentalcontrolSubscriberrecordResourceAttrPair(resourceName, d
 }
 
 func testAccParentalcontrolSubscriberrecordDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return`
 resource "nios_parentalcontrol_subscriberrecord" "test" {
 }
 
@@ -76,5 +75,5 @@ data "nios_parentalcontrol_subscriberrecord" "test" {
 	 = nios_parentalcontrol_subscriberrecord.test.
   }
 }
-`)
+`
 }

@@ -2,7 +2,6 @@ package threatinsight_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -46,7 +45,7 @@ func testAccCheckThreatinsightAllowlistResourceAttrPair(resourceName, dataSource
 }
 
 func testAccThreatinsightAllowlistDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_threatinsight_allowlist" "test" {
 }
 
@@ -55,5 +54,5 @@ data "nios_threatinsight_allowlist" "test" {
 	 = nios_threatinsight_allowlist.test.
   }
 }
-`)
+`
 }

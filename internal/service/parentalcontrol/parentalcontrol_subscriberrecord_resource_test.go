@@ -874,10 +874,10 @@ func testAccCheckParentalcontrolSubscriberrecordDisappears(ctx context.Context, 
 
 func testAccParentalcontrolSubscriberrecordBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_parentalcontrol_subscriberrecord" "test" {
 }
-`)
+`
 }
 
 func testAccParentalcontrolSubscriberrecordRef(ref string) string {

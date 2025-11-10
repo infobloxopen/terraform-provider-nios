@@ -2,7 +2,6 @@ package security_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -55,7 +54,7 @@ func testAccCheckLdapAuthServiceResourceAttrPair(resourceName, dataSourceName st
 }
 
 func testAccLdapAuthServiceDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_ldap_auth_service" "test" {
 }
 
@@ -64,5 +63,5 @@ data "nios_security_ldap_auth_service" "test" {
 	 = nios_security_ldap_auth_service.test.
   }
 }
-`)
+`
 }

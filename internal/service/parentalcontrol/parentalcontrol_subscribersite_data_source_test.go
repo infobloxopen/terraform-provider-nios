@@ -91,7 +91,7 @@ func testAccCheckParentalcontrolSubscribersiteResourceAttrPair(resourceName, dat
 }
 
 func testAccParentalcontrolSubscribersiteDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_parentalcontrol_subscribersite" "test" {
 }
 
@@ -100,7 +100,7 @@ data "nios_parentalcontrol_subscribersite" "test" {
 	 = nios_parentalcontrol_subscribersite.test.
   }
 }
-`)
+`
 }
 
 func testAccParentalcontrolSubscribersiteDataSourceConfigExtAttrFilters(extAttrsValue string) string {

@@ -381,10 +381,10 @@ func testAccCheckTacacsplusAuthserviceDisappears(ctx context.Context, v *securit
 
 func testAccTacacsplusAuthserviceBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_tacacsplus_authservice" "test" {
 }
-`)
+`
 }
 
 func testAccTacacsplusAuthserviceRef(ref string) string {

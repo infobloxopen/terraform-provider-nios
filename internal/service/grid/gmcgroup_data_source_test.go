@@ -2,7 +2,6 @@ package grid_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -48,7 +47,7 @@ func testAccCheckGmcgroupResourceAttrPair(resourceName, dataSourceName string) [
 }
 
 func testAccGmcgroupDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_grid_gmcgroup" "test" {
 }
 
@@ -57,5 +56,5 @@ data "nios_grid_gmcgroup" "test" {
 	 = nios_grid_gmcgroup.test.
   }
 }
-`)
+`
 }

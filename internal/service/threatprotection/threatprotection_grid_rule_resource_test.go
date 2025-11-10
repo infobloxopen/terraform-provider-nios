@@ -265,10 +265,10 @@ func testAccCheckThreatprotectionGridRuleDisappears(ctx context.Context, v *thre
 
 func testAccThreatprotectionGridRuleBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_threatprotection_grid_rule" "test" {
 }
-`)
+`
 }
 
 func testAccThreatprotectionGridRuleRef(ref string) string {

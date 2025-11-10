@@ -236,10 +236,10 @@ func testAccCheckThreatinsightAllowlistDisappears(ctx context.Context, v *threat
 
 func testAccThreatinsightAllowlistBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_threatinsight_allowlist" "test" {
 }
-`)
+`
 }
 
 func testAccThreatinsightAllowlistRef(ref string) string {

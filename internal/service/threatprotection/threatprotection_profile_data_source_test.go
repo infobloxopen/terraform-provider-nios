@@ -76,7 +76,7 @@ func testAccCheckThreatprotectionProfileResourceAttrPair(resourceName, dataSourc
 }
 
 func testAccThreatprotectionProfileDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_threatprotection_profile" "test" {
 }
 
@@ -85,7 +85,7 @@ data "nios_threatprotection_profile" "test" {
 	 = nios_threatprotection_profile.test.
   }
 }
-`)
+`
 }
 
 func testAccThreatprotectionProfileDataSourceConfigExtAttrFilters(extAttrsValue string) string {

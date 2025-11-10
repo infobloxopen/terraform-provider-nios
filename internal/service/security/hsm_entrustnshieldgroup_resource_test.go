@@ -381,10 +381,10 @@ func testAccCheckHsmEntrustnshieldgroupDisappears(ctx context.Context, v *securi
 
 func testAccHsmEntrustnshieldgroupBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_hsm_entrustnshieldgroup" "test" {
 }
-`)
+`
 }
 
 func testAccHsmEntrustnshieldgroupRef(ref string) string {

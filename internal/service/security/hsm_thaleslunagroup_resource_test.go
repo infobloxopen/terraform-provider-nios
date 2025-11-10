@@ -294,10 +294,10 @@ func testAccCheckHsmThaleslunagroupDisappears(ctx context.Context, v *security.H
 
 func testAccHsmThaleslunagroupBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_hsm_thaleslunagroup" "test" {
 }
-`)
+`
 }
 
 func testAccHsmThaleslunagroupRef(ref string) string {

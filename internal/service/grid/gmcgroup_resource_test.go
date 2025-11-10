@@ -294,10 +294,10 @@ func testAccCheckGmcgroupDisappears(ctx context.Context, v *grid.Gmcgroup) resou
 
 func testAccGmcgroupBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_grid_gmcgroup" "test" {
 }
-`)
+`
 }
 
 func testAccGmcgroupRef(ref string) string {

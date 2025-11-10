@@ -439,10 +439,10 @@ func testAccCheckNetworkuserDisappears(ctx context.Context, v *security.Networku
 
 func testAccNetworkuserBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_security_networkuser" "test" {
 }
-`)
+`
 }
 
 func testAccNetworkuserRef(ref string) string {

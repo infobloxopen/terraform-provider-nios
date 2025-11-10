@@ -497,10 +497,10 @@ func testAccCheckThreatprotectionProfileDisappears(ctx context.Context, v *threa
 
 func testAccThreatprotectionProfileBasicConfig(string) string {
 	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
+	return `
 resource "nios_threatprotection_profile" "test" {
 }
-`)
+`
 }
 
 func testAccThreatprotectionProfileRef(ref string) string {

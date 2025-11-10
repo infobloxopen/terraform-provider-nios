@@ -71,7 +71,7 @@ func testAccCheckRirOrganizationResourceAttrPair(resourceName, dataSourceName st
 }
 
 func testAccRirOrganizationDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+	return `
 resource "nios_rir_organization" "test" {
 }
 
@@ -80,7 +80,7 @@ data "nios_rir_organization" "test" {
 	 = nios_rir_organization.test.
   }
 }
-`)
+`
 }
 
 func testAccRirOrganizationDataSourceConfigExtAttrFilters(extAttrsValue string) string {
