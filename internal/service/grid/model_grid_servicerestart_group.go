@@ -86,7 +86,7 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 		PlanModifiers: []planmodifier.Map{
-			importmod.AssociateInternalId(),
+			importmod.MarkUnknownIfPrivateSet(),
 		},
 	},
 	"is_default": schema.BoolAttribute{

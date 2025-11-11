@@ -431,7 +431,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 			mapvalidator.SizeAtLeast(1),
 		},
 		PlanModifiers: []planmodifier.Map{
-			importmod.AssociateInternalId(),
+			importmod.MarkUnknownIfPrivateSet(),
 		},
 	},
 	"extattrs_all": schema.MapAttribute{

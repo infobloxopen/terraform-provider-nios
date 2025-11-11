@@ -368,7 +368,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 		PlanModifiers: []planmodifier.Map{
-			importmod.AssociateInternalId(),
+			importmod.MarkUnknownIfPrivateSet(),
 		},
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{

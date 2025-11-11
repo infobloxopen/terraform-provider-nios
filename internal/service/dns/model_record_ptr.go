@@ -170,7 +170,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		PlanModifiers: []planmodifier.Map{
-			importmod.AssociateInternalId(),
+			importmod.MarkUnknownIfPrivateSet(),
 		},
 	},
 	"forbid_reclamation": schema.BoolAttribute{

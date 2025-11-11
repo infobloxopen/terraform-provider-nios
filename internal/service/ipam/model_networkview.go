@@ -130,7 +130,7 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
 		PlanModifiers: []planmodifier.Map{
-			importmod.AssociateInternalId(),
+			importmod.MarkUnknownIfPrivateSet(),
 		},
 	},
 	"federated_realms": schema.ListNestedAttribute{
