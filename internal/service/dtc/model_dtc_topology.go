@@ -160,25 +160,7 @@ func FlattenDtcTopologyRulesWithPlan(ctx context.Context, from []dtc.DtcTopology
 		if i < len(planList) && !planList[i].IsNull() {
 			diags.Append(planList[i].As(ctx, &m, basetypes.ObjectAsOptions{})...)
 		}
-
-		// Flatten will preserve plan values when ref is returned
-		// Pass the address of v since Flatten expects a pointer
 		m.Flatten(ctx, &v, diags)
-
-		// Ensure no unknown values remain after flattening
-		// Convert any unknown values to null with proper types
-		if m.Sources.IsUnknown() {
-			m.Sources = types.ListNull(types.ObjectType{AttrTypes: DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes})
-		}
-		if m.DestType.IsUnknown() {
-			m.DestType = types.StringNull()
-		}
-		if m.DestinationLink.IsUnknown() {
-			m.DestinationLink = types.StringNull()
-		}
-		if m.ReturnType.IsUnknown() {
-			m.ReturnType = types.StringNull()
-		}
 
 		to = append(to, m)
 	}
