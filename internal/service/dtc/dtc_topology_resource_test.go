@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -20,6 +21,7 @@ var readableAttributesForDtcTopology = "comment,extattrs,name,rules"
 func TestAccDtcTopologyResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_topology.test"
 	var v dtc.DtcTopology
+	name := acctest.RandomNameWithPrefix("dtc-topology")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +29,12 @@ func TestAccDtcTopologyResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcTopologyBasicConfig(""),
+				Config: testAccDtcTopologyBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +45,7 @@ func TestAccDtcTopologyResource_basic(t *testing.T) {
 func TestAccDtcTopologyResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_topology.test"
 	var v dtc.DtcTopology
+	name := acctest.RandomNameWithPrefix("dtc-topology")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +53,7 @@ func TestAccDtcTopologyResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcTopologyDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcTopologyBasicConfig(""),
+				Config: testAccDtcTopologyBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
 					testAccCheckDtcTopologyDisappears(context.Background(), &v),
@@ -60,38 +64,10 @@ func TestAccDtcTopologyResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccDtcTopologyResource_Ref(t *testing.T) {
-	var resourceName = "nios_dtc_topology.test_ref"
-	var v dtc.DtcTopology
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccDtcTopologyRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccDtcTopologyRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccDtcTopologyResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_topology.test_comment"
 	var v dtc.DtcTopology
+	name := acctest.RandomNameWithPrefix("dtc-topology")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +75,18 @@ func TestAccDtcTopologyResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcTopologyComment("COMMENT_REPLACE_ME"),
+				Config: testAccDtcTopologyComment(name, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcTopologyComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcTopologyComment(name, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +97,9 @@ func TestAccDtcTopologyResource_Comment(t *testing.T) {
 func TestAccDtcTopologyResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dtc_topology.test_extattrs"
 	var v dtc.DtcTopology
+	name := acctest.RandomNameWithPrefix("dtc-topology")
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,18 +107,22 @@ func TestAccDtcTopologyResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcTopologyExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccDtcTopologyExtAttrs(name, map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcTopologyExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccDtcTopologyExtAttrs(name, map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -150,6 +133,8 @@ func TestAccDtcTopologyResource_ExtAttrs(t *testing.T) {
 func TestAccDtcTopologyResource_Name(t *testing.T) {
 	var resourceName = "nios_dtc_topology.test_name"
 	var v dtc.DtcTopology
+	name := acctest.RandomNameWithPrefix("dtc-topology")
+	nameUpdate := acctest.RandomNameWithPrefix("dtc-topology")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,18 +142,18 @@ func TestAccDtcTopologyResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcTopologyName("NAME_REPLACE_ME"),
+				Config: testAccDtcTopologyName(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcTopologyName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccDtcTopologyName(nameUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -179,6 +164,21 @@ func TestAccDtcTopologyResource_Name(t *testing.T) {
 func TestAccDtcTopologyResource_Rules(t *testing.T) {
 	var resourceName = "nios_dtc_topology.test_rules"
 	var v dtc.DtcTopology
+	name := acctest.RandomNameWithPrefix("dtc-topology")
+	rules1 := []map[string]interface{}{
+		{
+			"dest_type": "SERVER",
+			"name":      "example-server1",
+			"host":      "2.2.2.2",
+		},
+	}
+	rules2 := []map[string]interface{}{
+		{
+			"dest_type": "SERVER",
+			"name":      "example-server1",
+			"host":      "2.2.2.2",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,18 +186,18 @@ func TestAccDtcTopologyResource_Rules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcTopologyRules("RULES_REPLACE_ME"),
+				Config: testAccDtcTopologyRules(name, rules1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rules", "RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcTopologyRules("RULES_UPDATE_REPLACE_ME"),
+				Config: testAccDtcTopologyRules(name, rules2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rules", "RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -263,36 +263,37 @@ func testAccCheckDtcTopologyDisappears(ctx context.Context, v *dtc.DtcTopology) 
 	}
 }
 
-func testAccDtcTopologyBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccDtcTopologyBasicConfig(name string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_topology" "test" {
+	name = "%s"
 }
-`)
-}
-
-func testAccDtcTopologyRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_topology" "test_ref" {
-    ref = %q
-}
-`, ref)
+`, name)
 }
 
-func testAccDtcTopologyComment(comment string) string {
+func testAccDtcTopologyComment(name, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_topology" "test_comment" {
+	name = %q
     comment = %q
 }
-`, comment)
+`, name, comment)
 }
 
-func testAccDtcTopologyExtAttrs(extAttrs string) string {
+func testAccDtcTopologyExtAttrs(name string, extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
+	}
+	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_dtc_topology" "test_extattrs" {
-    extattrs = %q
+	name = %q
+    extattrs = %s
 }
-`, extAttrs)
+`, name, extattrsStr)
 }
 
 func testAccDtcTopologyName(name string) string {
@@ -303,10 +304,61 @@ resource "nios_dtc_topology" "test_name" {
 `, name)
 }
 
-func testAccDtcTopologyRules(rules string) string {
+// func testAccDtcTopologyRules(name string , rules []map[string]any) string {
+// 	return fmt.Sprintf(`
+// resource "nios_dtc_topology" "test_rules" {
+//     rules = %q
+// }
+// `, rules)
+// }
+
+func testAccDtcServer(resourceName, name, host string) string {
 	return fmt.Sprintf(`
-resource "nios_dtc_topology" "test_rules" {
-    rules = %q
+resource "nios_dtc_server" "%s" {
+    name = "%s"
+    host = "%s"
 }
-`, rules)
+`, resourceName, name, host)
+}
+
+func testAccDtcTopologyRules(topologyName string, rules []map[string]interface{}) string {
+	var serverConfigs []string
+	var ruleConfigs []string
+
+	// First, create all the server resources
+	for i, rule := range rules {
+		if rule["dest_type"] == "SERVER" {
+			serverResourceName := fmt.Sprintf("server_%d", i)
+			serverName := rule["name"].(string)
+			serverHost := rule["host"].(string)
+
+			// Add server configuration - now passing serverName correctly
+			serverConfigs = append(serverConfigs, testAccDtcServer(serverResourceName, serverName, serverHost))
+
+			// Build rule configuration with reference to the server
+			ruleConfig := fmt.Sprintf(`
+        {
+            dest_type = "SERVER"
+            destination_link = nios_dtc_server.server_%d.ref
+        }`, i)
+			ruleConfigs = append(ruleConfigs, ruleConfig)
+		}
+	}
+
+	// Join all server configs
+	serversConfig := strings.Join(serverConfigs, "\n")
+
+	// Join all rule configs
+	rulesConfig := strings.Join(ruleConfigs, ",")
+
+	// Build the complete configuration
+	return fmt.Sprintf(`
+%s
+
+resource "nios_dtc_topology" "test_rules" {
+    name = "%s"
+    rules = [%s
+    ]
+}
+`, serversConfig, topologyName, rulesConfig)
 }

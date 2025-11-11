@@ -29,14 +29,17 @@ var DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes = map[string]attr.Type{
 var DtcTopologyRulesInnerOneOf1SourcesInnerResourceSchemaAttributes = map[string]schema.Attribute{
 	"source_op": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Operation for matching the source.",
 	},
 	"source_type": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Type of the source.",
 	},
 	"source_value": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Value of the source.",
 	},
 }

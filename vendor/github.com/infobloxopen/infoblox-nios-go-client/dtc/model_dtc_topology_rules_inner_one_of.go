@@ -20,11 +20,8 @@ var _ MappedNullable = &DtcTopologyRulesInnerOneOf{}
 // DtcTopologyRulesInnerOneOf struct for DtcTopologyRulesInnerOneOf
 type DtcTopologyRulesInnerOneOf struct {
 	// Reference to the topology rule
-	Ref                  *string `json:"_ref,omitempty"`
-	AdditionalProperties map[string]interface{}
+	Ref *string `json:"_ref,omitempty"`
 }
-
-type _DtcTopologyRulesInnerOneOf DtcTopologyRulesInnerOneOf
 
 // NewDtcTopologyRulesInnerOneOf instantiates a new DtcTopologyRulesInnerOneOf object
 // This constructor will assign default values to properties that have it defined,
@@ -88,33 +85,7 @@ func (o DtcTopologyRulesInnerOneOf) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Ref) {
 		toSerialize["_ref"] = o.Ref
 	}
-
-	for key, value := range o.AdditionalProperties {
-		toSerialize[key] = value
-	}
-
 	return toSerialize, nil
-}
-
-func (o *DtcTopologyRulesInnerOneOf) UnmarshalJSON(data []byte) (err error) {
-	varDtcTopologyRulesInnerOneOf := _DtcTopologyRulesInnerOneOf{}
-
-	err = json.Unmarshal(data, &varDtcTopologyRulesInnerOneOf)
-
-	if err != nil {
-		return err
-	}
-
-	*o = DtcTopologyRulesInnerOneOf(varDtcTopologyRulesInnerOneOf)
-
-	additionalProperties := make(map[string]interface{})
-
-	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "_ref")
-		o.AdditionalProperties = additionalProperties
-	}
-
-	return err
 }
 
 type NullableDtcTopologyRulesInnerOneOf struct {

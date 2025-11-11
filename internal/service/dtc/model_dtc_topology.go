@@ -15,7 +15,10 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcTopologyModel struct {
@@ -38,11 +41,17 @@ var DtcTopologyAttrTypes = map[string]attr.Type{
 
 var DtcTopologyResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The comment for the DTC TOPOLOGY monitor object; maximum 256 characters.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -61,7 +70,10 @@ var DtcTopologyResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "Display name of the DTC Topology.",
 	},
 	"rules": schema.ListNestedAttribute{
@@ -72,6 +84,7 @@ var DtcTopologyResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Topology rules.",
 	},
 }
@@ -108,6 +121,7 @@ func FlattenDtcTopology(ctx context.Context, from *dtc.DtcTopology, diags *diag.
 	}
 	m := DtcTopologyModel{}
 	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
 	t, d := types.ObjectValueFrom(ctx, DtcTopologyAttrTypes, m)
 	diags.Append(d...)
 	return t
@@ -124,5 +138,52 @@ func (m *DtcTopologyModel) Flatten(ctx context.Context, from *dtc.DtcTopology, d
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Rules = flex.FlattenFrameworkListNestedBlock(ctx, from.Rules, DtcTopologyRulesInnerAttrTypes, diags, FlattenDtcTopologyRulesInner)
+	m.Rules = FlattenDtcTopologyRulesWithPlan(ctx, from.Rules, m.Rules, DtcTopologyRulesInnerAttrTypes, diags)
+}
+
+func FlattenDtcTopologyRulesWithPlan(ctx context.Context, from []dtc.DtcTopologyRulesInner, planRules types.List, attrTypes map[string]attr.Type, diags *diag.Diagnostics) types.List {
+	if from == nil {
+		return types.ListNull(types.ObjectType{AttrTypes: attrTypes})
+	}
+
+	// Extract plan values if available
+	var planList []types.Object
+	if !planRules.IsNull() && !planRules.IsUnknown() {
+		diags.Append(planRules.ElementsAs(ctx, &planList, false)...)
+	}
+
+	to := make([]DtcTopologyRulesInnerModel, 0, len(from))
+	for i, v := range from {
+		var m DtcTopologyRulesInnerModel
+
+		// Pre-populate with plan values if available
+		if i < len(planList) && !planList[i].IsNull() {
+			diags.Append(planList[i].As(ctx, &m, basetypes.ObjectAsOptions{})...)
+		}
+
+		// Flatten will preserve plan values when ref is returned
+		// Pass the address of v since Flatten expects a pointer
+		m.Flatten(ctx, &v, diags)
+
+		// Ensure no unknown values remain after flattening
+		// Convert any unknown values to null with proper types
+		if m.Sources.IsUnknown() {
+			m.Sources = types.ListNull(types.ObjectType{AttrTypes: DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes})
+		}
+		if m.DestType.IsUnknown() {
+			m.DestType = types.StringNull()
+		}
+		if m.DestinationLink.IsUnknown() {
+			m.DestinationLink = types.StringNull()
+		}
+		if m.ReturnType.IsUnknown() {
+			m.ReturnType = types.StringNull()
+		}
+
+		to = append(to, m)
+	}
+
+	t, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: attrTypes}, to)
+	diags.Append(d...)
+	return t
 }

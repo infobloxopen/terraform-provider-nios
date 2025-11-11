@@ -26,11 +26,8 @@ type DtcTopologyRulesInnerOneOf1 struct {
 	// The type of the return value for this source.
 	ReturnType *string `json:"return_type,omitempty"`
 	// Conditions for matching sources.
-	Sources              []DtcTopologyRulesInnerOneOf1SourcesInner `json:"sources,omitempty"`
-	AdditionalProperties map[string]interface{}
+	Sources []DtcTopologyRulesInnerOneOf1SourcesInner `json:"sources,omitempty"`
 }
-
-type _DtcTopologyRulesInnerOneOf1 DtcTopologyRulesInnerOneOf1
 
 // NewDtcTopologyRulesInnerOneOf1 instantiates a new DtcTopologyRulesInnerOneOf1 object
 // This constructor will assign default values to properties that have it defined,
@@ -199,36 +196,7 @@ func (o DtcTopologyRulesInnerOneOf1) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Sources) {
 		toSerialize["sources"] = o.Sources
 	}
-
-	for key, value := range o.AdditionalProperties {
-		toSerialize[key] = value
-	}
-
 	return toSerialize, nil
-}
-
-func (o *DtcTopologyRulesInnerOneOf1) UnmarshalJSON(data []byte) (err error) {
-	varDtcTopologyRulesInnerOneOf1 := _DtcTopologyRulesInnerOneOf1{}
-
-	err = json.Unmarshal(data, &varDtcTopologyRulesInnerOneOf1)
-
-	if err != nil {
-		return err
-	}
-
-	*o = DtcTopologyRulesInnerOneOf1(varDtcTopologyRulesInnerOneOf1)
-
-	additionalProperties := make(map[string]interface{})
-
-	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "dest_type")
-		delete(additionalProperties, "destination_link")
-		delete(additionalProperties, "return_type")
-		delete(additionalProperties, "sources")
-		o.AdditionalProperties = additionalProperties
-	}
-
-	return err
 }
 
 type NullableDtcTopologyRulesInnerOneOf1 struct {

@@ -51,6 +51,7 @@ var DtcTopologyRulesInnerResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Conditions for matching sources.",
 	},
 }
@@ -100,8 +101,22 @@ func (m *DtcTopologyRulesInnerModel) Flatten(ctx context.Context, from *dtc.DtcT
 	if m == nil {
 		*m = DtcTopologyRulesInnerModel{}
 	}
-	m.DestType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestType)
-	m.DestinationLink = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestinationLink)
-	m.ReturnType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.ReturnType)
-	m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, from.DtcTopologyRulesInnerOneOf1.Sources, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
+
+	// Check which OneOf variant is populated
+	if from.DtcTopologyRulesInnerOneOf != nil && from.DtcTopologyRulesInnerOneOf.Ref != nil {
+		// OneOf case: has ref - preserve plan values in state
+		// Do nothing, keep the existing model values from plan
+		if m.Sources.IsNull() {
+			m.Sources = types.ListNull(types.ObjectType{AttrTypes: DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes})
+		}
+		return
+	}
+
+	// OneOf1 case: has DestType, DestinationLink, ReturnType, Sources
+	if from.DtcTopologyRulesInnerOneOf1 != nil {
+		m.DestType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestType)
+		m.DestinationLink = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestinationLink)
+		m.ReturnType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.ReturnType)
+		m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, from.DtcTopologyRulesInnerOneOf1.Sources, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
+	}
 }
