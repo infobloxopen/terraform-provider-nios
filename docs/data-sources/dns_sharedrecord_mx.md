@@ -3,31 +3,31 @@
 page_title: "nios_dns_sharedrecord_mx Data Source - nios"
 subcategory: "DNS"
 description: |-
-  Retrieves information about existing DNS Shared MX Records.
+  Retrieves information about existing DNS MX Shared Records.
 ---
 
 # nios_dns_sharedrecord_mx (Data Source)
 
-Retrieves information about existing DNS Shared MX Records.
+Retrieves information about existing DNS MX Shared Records.
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific Shared MX record by filters
+// Retrieve a specific MX Shared Record by filters
 data "nios_dns_sharedrecord_mx" "get_record_with_filter" {
   filters = {
     name = "sharedmx_record"
   }
 }
 
-// Retrieve specific Shared MX records using Extensible Attributes
+// Retrieve specific MX Shared Records using Extensible Attributes
 data "nios_dns_sharedrecord_mx" "get_record_with_extattr_filter" {
   extattrfilters = {
     Site = "location-1"
   }
 }
 
-// Retrieve Shared MX records
+// Retrieve all MX Shared Records
 data "nios_dns_sharedrecord_mx" "get_all_sharedmx_records" {}
 ```
 

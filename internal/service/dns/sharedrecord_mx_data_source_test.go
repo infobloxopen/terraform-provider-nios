@@ -107,13 +107,13 @@ resource "nios_dns_sharedrecord_mx" "test" {
     shared_record_group = %q
   	extattrs = {
     	Site = %q
-  } 
+  	} 
 }
 
 data "nios_dns_sharedrecord_mx" "test" {
-  extattrfilters = {
-	Site = nios_dns_sharedrecord_mx.test.extattrs.Site
-  }
+    extattrfilters = {
+		Site = nios_dns_sharedrecord_mx.test.extattrs.Site
+  	}
 }
 `, mailExchanger, name, preference, sharedRecordGroup, extAttrsValue)
 }

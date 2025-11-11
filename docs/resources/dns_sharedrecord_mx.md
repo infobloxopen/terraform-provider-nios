@@ -3,17 +3,17 @@
 page_title: "nios_dns_sharedrecord_mx Resource - nios"
 subcategory: "DNS"
 description: |-
-  Manages a DNS MX shared record.
+  Manages a DNS MX Shared Record.
 ---
 
 # nios_dns_sharedrecord_mx (Resource)
 
-Manages a DNS MX shared record.
+Manages a DNS MX Shared Record.
 
 ## Example Usage
 
 ```terraform
-// Create a Shared MX Record with Basic Fields
+// Create a MX Shared Record with Basic Fields
 resource "nios_dns_sharedrecord_mx" "sharedrecord_mx_basic_fields" {
   mail_exchanger      = "mail.example.com"
   name                = "sharedmx_record"
@@ -21,13 +21,13 @@ resource "nios_dns_sharedrecord_mx" "sharedrecord_mx_basic_fields" {
   shared_record_group = "example-sharedrecordgroup"
 }
 
-// Create a Shared MX Record with Additional Fields
+// Create a MX Shared Record with Additional Fields
 resource "nios_dns_sharedrecord_mx" "sharedrecord_mx_additional_fields" {
   mail_exchanger      = "mail.example.com"
   name                = "sharedmx_record_additional_fields"
   preference          = 20
   shared_record_group = "example-sharedrecordgroup"
-  comment             = "Example Shared MX Record"
+  comment             = "Example MX Shared Record"
   disable             = true
   extattrs = {
     Site = "location-1"

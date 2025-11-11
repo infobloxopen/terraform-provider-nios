@@ -263,36 +263,6 @@ func TestAccSharedrecordMxResource_Preference(t *testing.T) {
 	})
 }
 
-// func TestAccSharedrecordMxResource_SharedRecordGroup(t *testing.T) {
-// 	var resourceName = "nios_dns_sharedrecord_mx.test_shared_record_group"
-// 	var v dns.SharedrecordMx
-// 	updatedSharedRecordGroup := "example-sharedrecordgroup-updated"
-
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccSharedrecordMxSharedRecordGroup("mail.example.com", "example.com", 10, sharedRecordGroup),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckSharedrecordMxExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "shared_record_group", sharedRecordGroup),
-// 				),
-// 			},
-// 			// Update and Read
-// 			{
-// 				Config: testAccSharedrecordMxSharedRecordGroup("mail.example.com", "example.com", 10, updatedSharedRecordGroup),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckSharedrecordMxExists(context.Background(), resourceName, &v),
-// 					resource.TestCheckResourceAttr(resourceName, "shared_record_group", updatedSharedRecordGroup),
-// 				),
-// 			},
-// 			// Delete testing automatically occurs in TestCase
-// 		},
-// 	})
-// }
-
 func TestAccSharedrecordMxResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_mx.test_ttl"
 	var v dns.SharedrecordMx
@@ -498,17 +468,6 @@ resource "nios_dns_sharedrecord_mx" "test_preference" {
 }
 `, mailExchanger, name, preference, sharedRecordGroup)
 }
-
-// func testAccSharedrecordMxSharedRecordGroup(mailExchanger, name string, preference int, sharedRecordGroup string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_dns_sharedrecord_mx" "test_shared_record_group" {
-//     mail_exchanger = %q
-//     name = %q
-//     preference = %d
-//     shared_record_group = %q
-// }
-// `, mailExchanger, name, preference, sharedRecordGroup)
-// }
 
 func testAccSharedrecordMxTtl(mailExchanger, name string, preference int, sharedRecordGroup string, ttl int, useTtl string) string {
 	return fmt.Sprintf(`
