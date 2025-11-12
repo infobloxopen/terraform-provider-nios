@@ -175,11 +175,13 @@ func TestAccIpv6fixedaddresstemplateResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddresstemplate.test_extattrs"
 	var v dhcp.Ipv6fixedaddresstemplate
 	name := acctest.RandomNameWithPrefix("ipv6-fixedaddress-template")
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 	extAttrs := map[string]any{
-		"Site": "location-1",
+		"Site": extAttrValue1,
 	}
 	updatedExtAttrs := map[string]any{
-		"Site": "location-2",
+		"Site": extAttrValue2,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -191,7 +193,7 @@ func TestAccIpv6fixedaddresstemplateResource_ExtAttrs(t *testing.T) {
 				Config: testAccIpv6fixedaddresstemplateExtAttrs(name, extAttrs),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddresstemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", "location-1"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
@@ -199,7 +201,7 @@ func TestAccIpv6fixedaddresstemplateResource_ExtAttrs(t *testing.T) {
 				Config: testAccIpv6fixedaddresstemplateExtAttrs(name, updatedExtAttrs),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddresstemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", "location-2"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -707,7 +709,6 @@ func testAccCheckIpv6fixedaddresstemplateDisappears(ctx context.Context, v *dhcp
 }
 
 func testAccIpv6fixedaddresstemplateBasicConfig(name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddresstemplate" "test" {
     name = %q
