@@ -3,12 +3,12 @@
 page_title: "nios_dtc_topology Data Source - nios"
 subcategory: "DTC"
 description: |-
-  
+  Retrieves information about existing DTC Topologies.
 ---
 
 # nios_dtc_topology (Data Source)
 
-
+Retrieves information about existing DTC Topologies.
 
 ## Example Usage
 
@@ -67,9 +67,12 @@ Read-Only:
 <a id="nestedatt--result--rules"></a>
 ### Nested Schema for `result.rules`
 
-Optional:
+Required:
 
 - `dest_type` (String) The type of the destination for this rule.
+
+Optional:
+
 - `destination_link` (String) The reference to the destination object.
 - `return_type` (String) The type of the return value for this source.
 - `sources` (Attributes List) Conditions for matching sources. (see [below for nested schema](#nestedatt--result--rules--sources))
@@ -77,8 +80,11 @@ Optional:
 <a id="nestedatt--result--rules--sources"></a>
 ### Nested Schema for `result.rules.sources`
 
+Required:
+
+- `source_type` (String) Type of the source.
+- `source_value` (String) Value of the source.
+
 Optional:
 
 - `source_op` (String) Operation for matching the source.
-- `source_type` (String) Type of the source.
-- `source_value` (String) Value of the source.

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,7 +33,10 @@ var DtcTopologyRulesInnerAttrTypes = map[string]attr.Type{
 
 var DtcTopologyRulesInnerResourceSchemaAttributes = map[string]schema.Attribute{
 	"dest_type": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("POOL","SERVER"),
+		},
 		MarkdownDescription: "The type of the destination for this rule.",
 	},
 	"destination_link": schema.StringAttribute{

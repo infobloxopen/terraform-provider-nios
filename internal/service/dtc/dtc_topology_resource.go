@@ -37,7 +37,7 @@ func (r *DtcTopologyResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *DtcTopologyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages DTC Topology",
 		Attributes:          DtcTopologyResourceSchemaAttributes,
 	}
 }

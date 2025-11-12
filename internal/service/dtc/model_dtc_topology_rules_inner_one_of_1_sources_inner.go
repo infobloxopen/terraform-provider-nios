@@ -3,9 +3,11 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -28,18 +30,22 @@ var DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes = map[string]attr.Type{
 
 var DtcTopologyRulesInnerOneOf1SourcesInnerResourceSchemaAttributes = map[string]schema.Attribute{
 	"source_op": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("IS", "IS_NOT"),
+		},
 		MarkdownDescription: "Operation for matching the source.",
 	},
 	"source_type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CITY", "CONTINENT", "COUNTRY", "EA0", "EA1", "EA2", "EA3", "SUBDIVISION", "SUBNET"),
+		},
 		MarkdownDescription: "Type of the source.",
 	},
 	"source_value": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "Value of the source.",
 	},
 }
