@@ -14,11 +14,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -71,10 +73,10 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"auth_zones": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
-		Computed:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -111,6 +113,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		ElementType:         types.StringType,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"health": schema.SingleNestedAttribute{
 		Attributes:          DtcLbdnHealthResourceSchemaAttributes,
@@ -132,9 +137,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The display name of the DTC LBDN, not DNS related.",
 	},
 	"patterns": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -150,8 +155,8 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcLbdnPoolsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
