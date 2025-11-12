@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -119,7 +118,7 @@ func (r *Ipv6fixedaddresstemplateResource) Read(ctx context.Context, req resourc
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound { //&& r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -320,7 +319,8 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// When dhcp option 'domain-name' is set, domain_name attribute must contain the same value as option value
+
+	// domain_name attribute must match the value of option 'domain-name'
 	if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
 		for i, option := range options {
 			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "domain-name" {
@@ -328,8 +328,8 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 					option.Value.ValueString() != data.DomainName.ValueString() {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for DHCP Option 'domain-name'",
-						"The 'value' attribute for DHCP Option 'domain-name' must match the 'domain_name' attribute value.",
+						"Invalid configuration for Domain Name",
+						"domain_name attribute must match the 'value' attribute for DHCP Option 'domain-name'.",
 					)
 				}
 			}
@@ -344,8 +344,8 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 					option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for DHCP Option 'dhcp-lease-time'",
-						"The 'value' attribute for DHCP Option 'dhcp-lease-time' must match the 'valid_lifetime' attribute value.",
+						"Invalid configuration for Valid Lifetime",
+						"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
 					)
 				}
 			}
@@ -354,41 +354,5 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 }
 
 func (r *Ipv6fixedaddresstemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data Ipv6fixedaddresstemplateModel
-	var goClientData dhcp.Ipv6fixedaddresstemplate
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.DHCPAPI.
-		Ipv6fixedaddresstemplateAPI.
-		Update(ctx, resourceRef).
-		Ipv6fixedaddresstemplate(goClientData).
-		ReturnFieldsPlus(readableAttributesForIpv6fixedaddresstemplate).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Ipv6fixedaddresstemplate for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateIpv6fixedaddresstemplateResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Ipv6fixedaddresstemplate due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs"), data.ExtAttrs)...)
 }
