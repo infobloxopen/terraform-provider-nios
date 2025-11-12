@@ -25,6 +25,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -251,6 +252,9 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"internal_id": schema.StringAttribute{
 		Computed:            true,
