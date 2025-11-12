@@ -1,4 +1,3 @@
-
 package dtc_test
 
 import (
@@ -26,8 +25,8 @@ func TestAccDtcMonitorSnmpDataSource_Filters(t *testing.T) {
 				Config: testAccDtcMonitorSnmpDataSourceConfigFilters(),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-						}, testAccCheckDtcMonitorSnmpResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
+					}, testAccCheckDtcMonitorSnmpResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -44,11 +43,11 @@ func TestAccDtcMonitorSnmpDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcMonitorSnmpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcMonitorSnmpDataSourceConfigExtAttrFilters( acctest.RandomName()),
+				Config: testAccDtcMonitorSnmpDataSourceConfigExtAttrFilters(acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-						}, testAccCheckDtcMonitorSnmpResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
+					}, testAccCheckDtcMonitorSnmpResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -57,24 +56,24 @@ func TestAccDtcMonitorSnmpDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckDtcMonitorSnmpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "community", dataSourceName, "result.0.community"),
-        resource.TestCheckResourceAttrPair(resourceName, "context", dataSourceName, "result.0.context"),
-        resource.TestCheckResourceAttrPair(resourceName, "engine_id", dataSourceName, "result.0.engine_id"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "interval", dataSourceName, "result.0.interval"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-        resource.TestCheckResourceAttrPair(resourceName, "oids", dataSourceName, "result.0.oids"),
-        resource.TestCheckResourceAttrPair(resourceName, "port", dataSourceName, "result.0.port"),
-        resource.TestCheckResourceAttrPair(resourceName, "retry_down", dataSourceName, "result.0.retry_down"),
-        resource.TestCheckResourceAttrPair(resourceName, "retry_up", dataSourceName, "result.0.retry_up"),
-        resource.TestCheckResourceAttrPair(resourceName, "timeout", dataSourceName, "result.0.timeout"),
-        resource.TestCheckResourceAttrPair(resourceName, "user", dataSourceName, "result.0.user"),
-        resource.TestCheckResourceAttrPair(resourceName, "version", dataSourceName, "result.0.version"),
-    }
+func testAccCheckDtcMonitorSnmpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "community", dataSourceName, "result.0.community"),
+		resource.TestCheckResourceAttrPair(resourceName, "context", dataSourceName, "result.0.context"),
+		resource.TestCheckResourceAttrPair(resourceName, "engine_id", dataSourceName, "result.0.engine_id"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "interval", dataSourceName, "result.0.interval"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+		resource.TestCheckResourceAttrPair(resourceName, "oids", dataSourceName, "result.0.oids"),
+		resource.TestCheckResourceAttrPair(resourceName, "port", dataSourceName, "result.0.port"),
+		resource.TestCheckResourceAttrPair(resourceName, "retry_down", dataSourceName, "result.0.retry_down"),
+		resource.TestCheckResourceAttrPair(resourceName, "retry_up", dataSourceName, "result.0.retry_up"),
+		resource.TestCheckResourceAttrPair(resourceName, "timeout", dataSourceName, "result.0.timeout"),
+		resource.TestCheckResourceAttrPair(resourceName, "user", dataSourceName, "result.0.user"),
+		resource.TestCheckResourceAttrPair(resourceName, "version", dataSourceName, "result.0.version"),
+	}
 }
 
 func testAccDtcMonitorSnmpDataSourceConfigFilters() string {
@@ -103,6 +102,5 @@ data "nios_dtc_monitor_snmp" "test" {
 	Site = nios_dtc_monitor_snmp.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, extAttrsValue)
 }
-

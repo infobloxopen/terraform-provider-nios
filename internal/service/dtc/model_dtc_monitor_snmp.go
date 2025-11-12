@@ -8,14 +8,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcMonitorSnmpModel struct {
@@ -62,19 +66,34 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Comment for this DTC monitor; maximum 256 characters.",
 	},
 	"community": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString("public"),
 		MarkdownDescription: "The SNMP community string for SNMP authentication.",
 	},
 	"context": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The SNMPv3 context.",
 	},
 	"engine_id": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The SNMPv3 engine identifier.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -94,10 +113,15 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"interval": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(5),
 		MarkdownDescription: "The interval for TCP health check.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The display name for this DTC monitor.",
 	},
 	"oids": schema.ListNestedAttribute{
@@ -112,26 +136,40 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"port": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(161),
 		MarkdownDescription: "The port value for SNMP requests.",
 	},
 	"retry_down": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The value of how many times the server should appear as down to be treated as dead after it was alive.",
 	},
 	"retry_up": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The value of how many times the server should appear as up to be treated as alive after it was dead.",
 	},
 	"timeout": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "The timeout for TCP health check in seconds.",
 	},
 	"user": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The SNMPv3 user setting.",
 	},
 	"version": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("V2C"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("V1", "V2C", "V3"),
+		},
 		MarkdownDescription: "The SNMP protocol version for the SNMP health check.",
 	},
 }
@@ -153,7 +191,6 @@ func (m *DtcMonitorSnmpModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		return nil
 	}
 	to := &dtc.DtcMonitorSnmp{
-		Ref:       flex.ExpandStringPointer(m.Ref),
 		Comment:   flex.ExpandStringPointer(m.Comment),
 		Community: flex.ExpandStringPointer(m.Community),
 		Context:   flex.ExpandStringPointer(m.Context),
