@@ -263,6 +263,29 @@ func TestAccSharedrecordMxResource_Preference(t *testing.T) {
 	})
 }
 
+func TestAccSharedrecordMxResource_SharedRecordGroup(t *testing.T) {
+	var resourceName = "nios_dns_sharedrecord_mx.test_shared_record_group"
+	var v dns.SharedrecordMx
+	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
+	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccSharedrecordMxSharedRecordGroup(mail_exchanger, name, 10, sharedRecordGroup),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSharedrecordMxExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "shared_record_group", sharedRecordGroup),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccSharedrecordMxResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_mx.test_ttl"
 	var v dns.SharedrecordMx
@@ -464,6 +487,17 @@ resource "nios_dns_sharedrecord_mx" "test_preference" {
     mail_exchanger = %q
     name = %q
 	preference = %d
+    shared_record_group = %q
+}
+`, mailExchanger, name, preference, sharedRecordGroup)
+}
+
+func testAccSharedrecordMxSharedRecordGroup(mailExchanger, name string, preference int, sharedRecordGroup string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_sharedrecord_mx" "test_shared_record_group" {
+    mail_exchanger = %q
+    name = %q
+    preference = %d
     shared_record_group = %q
 }
 `, mailExchanger, name, preference, sharedRecordGroup)
