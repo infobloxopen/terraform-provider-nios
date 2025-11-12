@@ -28,6 +28,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -366,6 +367,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional: true,
