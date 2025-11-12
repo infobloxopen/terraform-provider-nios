@@ -114,7 +114,7 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		PlanModifiers: []planmodifier.Map{
-			importmod.MarkUnknownIfPrivateSet(),
+			importmod.AssociateInternalId(),
 		},
 	},
 	"health": schema.SingleNestedAttribute{

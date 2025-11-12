@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func (m *markUnknownIfPrivateSet) PlanModifyMap(ctx context.Context, req planmodifier.MapRequest, resp *planmodifier.MapResponse) {
+func (m *associateInternalId) PlanModifyMap(ctx context.Context, req planmodifier.MapRequest, resp *planmodifier.MapResponse) {
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
 	resp.Diagnostics.Append(diags...)
 	if associateInternalId == nil {
@@ -17,16 +17,16 @@ func (m *markUnknownIfPrivateSet) PlanModifyMap(ctx context.Context, req planmod
 	resp.PlanValue = types.MapUnknown(types.StringType)
 }
 
-type markUnknownIfPrivateSet struct{}
+type associateInternalId struct{}
 
-func (m *markUnknownIfPrivateSet) Description(ctx context.Context) string {
-	return "Marks the entire map attribute as unknown during plan when private key is set."
+func (m *associateInternalId) Description(ctx context.Context) string {
+	return "Marks the entire map attribute as unknown during plan when associate_internal_id private key is set."
 }
 
-func (m *markUnknownIfPrivateSet) MarkdownDescription(ctx context.Context) string {
-	return "Marks the entire map attribute as unknown during plan when private key is set."
+func (m *associateInternalId) MarkdownDescription(ctx context.Context) string {
+	return "Marks the entire map attribute as unknown during plan when associate_internal_id private key is set."
 }
 
-func MarkUnknownIfPrivateSet() planmodifier.Map {
-	return &markUnknownIfPrivateSet{}
+func AssociateInternalId() planmodifier.Map {
+	return &associateInternalId{}
 }

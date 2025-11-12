@@ -123,7 +123,7 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
 		PlanModifiers: []planmodifier.Map{
-			importmod.MarkUnknownIfPrivateSet(),
+			importmod.AssociateInternalId(),
 		},
 	},
 	"last_queried": schema.Int64Attribute{

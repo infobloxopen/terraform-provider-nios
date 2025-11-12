@@ -70,7 +70,7 @@ var NsgroupForwardstubserverResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
 		PlanModifiers: []planmodifier.Map{
-			importmod.MarkUnknownIfPrivateSet(),
+			importmod.AssociateInternalId(),
 		},
 	},
 	"external_servers": schema.ListNestedAttribute{

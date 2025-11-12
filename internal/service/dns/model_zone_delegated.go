@@ -159,7 +159,7 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
 		PlanModifiers: []planmodifier.Map{
-			importmod.MarkUnknownIfPrivateSet(),
+			importmod.AssociateInternalId(),
 		},
 	},
 	"fqdn": schema.StringAttribute{

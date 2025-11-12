@@ -148,7 +148,7 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
 		PlanModifiers: []planmodifier.Map{
-			importmod.MarkUnknownIfPrivateSet(),
+			importmod.AssociateInternalId(),
 		},
 	},
 	"forbid_reclamation": schema.BoolAttribute{
