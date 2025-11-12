@@ -126,12 +126,6 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 		},
 		Optional: true,
 		Computed: true,
-		Default: listdefault.StaticValue(
-			types.ListValueMust(
-				types.ObjectType{AttrTypes: Ipv6fixedaddresstemplateLogicFilterRulesAttrTypes},
-				[]attr.Value{},
-			),
-		),
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_logic_filter_rules")),
 			listvalidator.SizeAtLeast(1),
@@ -146,11 +140,17 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "Name of an IPv6 fixed address template object.",
 	},
 	"number_of_addresses": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("offset")),
+		},
 		MarkdownDescription: "The number of IPv6 addresses for this fixed address.",
 	},
 	"offset": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("number_of_addresses")),
+		},
 		MarkdownDescription: "The start address offset for this IPv6 fixed address.",
 	},
 	"options": schema.ListNestedAttribute{

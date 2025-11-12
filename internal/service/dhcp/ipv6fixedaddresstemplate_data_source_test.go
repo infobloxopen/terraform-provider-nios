@@ -15,6 +15,7 @@ func TestAccIpv6fixedaddresstemplateDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_ipv6fixedaddresstemplate.test"
 	resourceName := "nios_dhcp_ipv6fixedaddresstemplate.test"
 	var v dhcp.Ipv6fixedaddresstemplate
+	name := acctest.RandomNameWithPrefix("ipv6-fixedaddress-template")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +23,7 @@ func TestAccIpv6fixedaddresstemplateDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6fixedaddresstemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6fixedaddresstemplateDataSourceConfigFilters("NAME_REPLACE_ME"),
+				Config: testAccIpv6fixedaddresstemplateDataSourceConfigFilters(name),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6fixedaddresstemplateExists(context.Background(), resourceName, &v),
@@ -37,13 +38,15 @@ func TestAccIpv6fixedaddresstemplateDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_ipv6fixedaddresstemplate.test"
 	resourceName := "nios_dhcp_ipv6fixedaddresstemplate.test"
 	var v dhcp.Ipv6fixedaddresstemplate
+	name := acctest.RandomNameWithPrefix("ipv6-fixedaddress-template")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckIpv6fixedaddresstemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6fixedaddresstemplateDataSourceConfigExtAttrFilters("NAME_REPLACE_ME", acctest.RandomName()),
+				Config: testAccIpv6fixedaddresstemplateDataSourceConfigExtAttrFilters(name, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6fixedaddresstemplateExists(context.Background(), resourceName, &v),
