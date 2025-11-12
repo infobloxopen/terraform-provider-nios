@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_ipv6fixedaddresstemplate Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  Retrieves information about DHCP IPv6 Fixed Address Templates
+  Retrieves information about existing DHCP IPv6 Fixed Address Templates
 ---
 
 # nios_dhcp_ipv6fixedaddresstemplate (Data Source)
 
-Retrieves information about DHCP IPv6 Fixed Address Templates
+Retrieves information about existing DHCP IPv6 Fixed Address Templates
 
 ## Example Usage
 
