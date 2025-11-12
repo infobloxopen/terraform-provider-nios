@@ -37,8 +37,13 @@ func TestAccSharedrecordMxResource_basic(t *testing.T) {
 				Config: testAccSharedrecordMxBasicConfig(mail_exchanger, name, 10, sharedRecordGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordMxExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "mail_exchanger", mail_exchanger),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "preference", "10"),
+					resource.TestCheckResourceAttr(resourceName, "shared_record_group", sharedRecordGroup),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
