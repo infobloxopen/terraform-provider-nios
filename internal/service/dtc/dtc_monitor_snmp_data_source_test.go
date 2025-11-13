@@ -15,6 +15,7 @@ func TestAccDtcMonitorSnmpDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_monitor_snmp.test"
 	resourceName := "nios_dtc_monitor_snmp.test"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +23,7 @@ func TestAccDtcMonitorSnmpDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcMonitorSnmpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcMonitorSnmpDataSourceConfigFilters(),
+				Config: testAccDtcMonitorSnmpDataSourceConfigFilters(name),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
@@ -37,13 +38,16 @@ func TestAccDtcMonitorSnmpDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_monitor_snmp.test"
 	resourceName := "nios_dtc_monitor_snmp.test"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
+	extAttrValue := acctest.RandomName()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckDtcMonitorSnmpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcMonitorSnmpDataSourceConfigExtAttrFilters(acctest.RandomName()),
+				Config: testAccDtcMonitorSnmpDataSourceConfigExtAttrFilters(name, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
@@ -76,22 +80,24 @@ func testAccCheckDtcMonitorSnmpResourceAttrPair(resourceName, dataSourceName str
 	}
 }
 
-func testAccDtcMonitorSnmpDataSourceConfigFilters() string {
+func testAccDtcMonitorSnmpDataSourceConfigFilters(name string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test" {
+    name = %q
 }
 
 data "nios_dtc_monitor_snmp" "test" {
   filters = {
-	 = nios_dtc_monitor_snmp.test.
+    name = nios_dtc_monitor_snmp.test.name
   }
 }
-`)
+`, name)
 }
 
-func testAccDtcMonitorSnmpDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccDtcMonitorSnmpDataSourceConfigExtAttrFilters(name, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test" {
+  name = %q
   extattrs = {
     Site = %q
   } 
@@ -102,5 +108,5 @@ data "nios_dtc_monitor_snmp" "test" {
 	Site = nios_dtc_monitor_snmp.test.extattrs.Site
   }
 }
-`, extAttrsValue)
+`, name, extAttrsValue)
 }

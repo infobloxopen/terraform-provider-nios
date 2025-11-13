@@ -20,6 +20,7 @@ var readableAttributesForDtcMonitorSnmp = "comment,community,context,engine_id,e
 func TestAccDtcMonitorSnmpResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +28,20 @@ func TestAccDtcMonitorSnmpResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpBasicConfig(""),
+				Config: testAccDtcMonitorSnmpBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "community", "public"),
+					resource.TestCheckResourceAttr(resourceName, "interval", "5"),
+					resource.TestCheckResourceAttr(resourceName, "port", "161"),
+					resource.TestCheckResourceAttr(resourceName, "retry_down", "1"),
+					resource.TestCheckResourceAttr(resourceName, "retry_up", "1"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "15"),
+					resource.TestCheckResourceAttr(resourceName, "user", ""),
+					resource.TestCheckResourceAttr(resourceName, "version", "V2C"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +52,7 @@ func TestAccDtcMonitorSnmpResource_basic(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_monitor_snmp.test"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +60,7 @@ func TestAccDtcMonitorSnmpResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcMonitorSnmpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcMonitorSnmpBasicConfig(""),
+				Config: testAccDtcMonitorSnmpBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					testAccCheckDtcMonitorSnmpDisappears(context.Background(), &v),
@@ -60,38 +71,10 @@ func TestAccDtcMonitorSnmpResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccDtcMonitorSnmpResource_Ref(t *testing.T) {
-	var resourceName = "nios_dtc_monitor_snmp.test_ref"
-	var v dtc.DtcMonitorSnmp
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccDtcMonitorSnmpRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccDtcMonitorSnmpRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccDtcMonitorSnmpResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_comment"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +82,18 @@ func TestAccDtcMonitorSnmpResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpComment("COMMENT_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpComment(name, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpComment(name, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +104,7 @@ func TestAccDtcMonitorSnmpResource_Comment(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_Community(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_community"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,18 +112,18 @@ func TestAccDtcMonitorSnmpResource_Community(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpCommunity("COMMUNITY_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpCommunity(name, "private"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "community", "COMMUNITY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "community", "private"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpCommunity("COMMUNITY_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpCommunity(name, "trapuser"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "community", "COMMUNITY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "community", "trapuser"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -150,6 +134,7 @@ func TestAccDtcMonitorSnmpResource_Community(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_Context(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_context"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,18 +142,18 @@ func TestAccDtcMonitorSnmpResource_Context(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpContext("CONTEXT_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpContext(name, "text"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "context", "CONTEXT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "context", "text"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpContext("CONTEXT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpContext(name, "update context"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "context", "CONTEXT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "context", "update context"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -179,6 +164,7 @@ func TestAccDtcMonitorSnmpResource_Context(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_EngineId(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_engine_id"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,18 +172,18 @@ func TestAccDtcMonitorSnmpResource_EngineId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpEngineId("ENGINE_ID_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpEngineId(name, "66356e6574776f726B73"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "engine_id", "ENGINE_ID_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "engine_id", "66356e6574776f726B73"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpEngineId("ENGINE_ID_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpEngineId(name, "800007DB03000C754120"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "engine_id", "ENGINE_ID_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "engine_id", "800007DB03000C754120"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -208,6 +194,9 @@ func TestAccDtcMonitorSnmpResource_EngineId(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_extattrs"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,18 +204,22 @@ func TestAccDtcMonitorSnmpResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpExtAttrs(name , map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site",extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpExtAttrs(name , map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -237,6 +230,7 @@ func TestAccDtcMonitorSnmpResource_ExtAttrs(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_Interval(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_interval"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -244,18 +238,18 @@ func TestAccDtcMonitorSnmpResource_Interval(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpInterval("INTERVAL_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpInterval(name, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "interval", "INTERVAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "interval", "10"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpInterval("INTERVAL_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpInterval(name, 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "interval", "INTERVAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "interval", "20"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -266,6 +260,8 @@ func TestAccDtcMonitorSnmpResource_Interval(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_Name(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_name"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
+	nameUpdate := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -273,18 +269,18 @@ func TestAccDtcMonitorSnmpResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpName("NAME_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpName(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpName(nameUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -295,6 +291,38 @@ func TestAccDtcMonitorSnmpResource_Name(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_oids"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
+	oids := []map[string]any{
+		{
+			"oid":       ".2",
+			"condition": "EXACT",
+			"first":     "10",
+		},
+		{
+			"oid": ".02",
+		},
+		{
+			"oid":       ".1",
+			"condition": "EXACT",
+			"first":     "20",
+		},
+	}
+	oidsUpdate := []map[string]any{
+		{
+			"oid":       ".2",
+			"condition": "EXACT",
+			"first":     "10",
+		},
+		{
+			"oid": ".01",
+		},
+		{
+			"oid":       ".1",
+			"condition": "EXACT",
+			"first":     "20",
+		},
+	}
+
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -302,18 +330,28 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpOids("OIDS_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpOids(name , oids),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "oids", "OIDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "oids.0.oid", ".2"),
+					resource.TestCheckResourceAttr(resourceName, "oids.0.condition", "EXACT"),
+					resource.TestCheckResourceAttr(resourceName, "oids.0.first", "10"),
+					resource.TestCheckResourceAttr(resourceName, "oids.1.oid", ".02"),
+					resource.TestCheckResourceAttr(resourceName, "oids.2.oid", ".1"),
+					resource.TestCheckResourceAttr(resourceName, "oids.2.condition", "EXACT"),
+					resource.TestCheckResourceAttr(resourceName, "oids.2.first", "20"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpOids("OIDS_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpOids(name , oidsUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "oids", "OIDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "oids.0.oid", ".2"),
+					resource.TestCheckResourceAttr(resourceName, "oids.1.oid", ".01"),
+					resource.TestCheckResourceAttr(resourceName, "oids.2.oid", ".1"),
+					resource.TestCheckResourceAttr(resourceName, "oids.2.condition", "EXACT"),
+					resource.TestCheckResourceAttr(resourceName, "oids.2.first", "20"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -324,6 +362,7 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_Port(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_port"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -331,18 +370,18 @@ func TestAccDtcMonitorSnmpResource_Port(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpPort("PORT_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpPort(name , 10161),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port", "PORT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "port", "10161"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpPort("PORT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpPort(name , 10162),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port", "PORT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "port", "10162"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -353,6 +392,7 @@ func TestAccDtcMonitorSnmpResource_Port(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_RetryDown(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_retry_down"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -360,18 +400,18 @@ func TestAccDtcMonitorSnmpResource_RetryDown(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpRetryDown("RETRY_DOWN_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpRetryDown(name , 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "retry_down", "RETRY_DOWN_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "retry_down", "5"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpRetryDown("RETRY_DOWN_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpRetryDown(name , 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "retry_down", "RETRY_DOWN_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "retry_down", "10"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -382,6 +422,7 @@ func TestAccDtcMonitorSnmpResource_RetryDown(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_RetryUp(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_retry_up"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -389,18 +430,18 @@ func TestAccDtcMonitorSnmpResource_RetryUp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpRetryUp("RETRY_UP_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpRetryUp(name , 3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "retry_up", "RETRY_UP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "retry_up", "3"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpRetryUp("RETRY_UP_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpRetryUp(name , 7),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "retry_up", "RETRY_UP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "retry_up", "7"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -411,6 +452,7 @@ func TestAccDtcMonitorSnmpResource_RetryUp(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_Timeout(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_timeout"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -418,18 +460,18 @@ func TestAccDtcMonitorSnmpResource_Timeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpTimeout("TIMEOUT_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpTimeout(name, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "30"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpTimeout("TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpTimeout(name , 45),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "45"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -440,6 +482,7 @@ func TestAccDtcMonitorSnmpResource_Timeout(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_User(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_user"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -447,18 +490,18 @@ func TestAccDtcMonitorSnmpResource_User(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpUser("USER_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpUser(name, "admin"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "user", "USER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "user", "admin"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpUser("USER_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpUser(name, "new_user"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "user", "USER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "user", "new_user"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -469,6 +512,7 @@ func TestAccDtcMonitorSnmpResource_User(t *testing.T) {
 func TestAccDtcMonitorSnmpResource_Version(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_version"
 	var v dtc.DtcMonitorSnmp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -476,18 +520,18 @@ func TestAccDtcMonitorSnmpResource_Version(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpVersion("VERSION_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpVersion(name , "V1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "version", "VERSION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "version", "V1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpVersion("VERSION_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorSnmpVersion(name , "V2C"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "version", "VERSION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "version", "V2C"),	
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -553,68 +597,73 @@ func testAccCheckDtcMonitorSnmpDisappears(ctx context.Context, v *dtc.DtcMonitor
 	}
 }
 
-func testAccDtcMonitorSnmpBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccDtcMonitorSnmpBasicConfig(name string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test" {
+    name = %q
 }
-`)
-}
-
-func testAccDtcMonitorSnmpRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_snmp" "test_ref" {
-    ref = %q
-}
-`, ref)
+`, name)
 }
 
-func testAccDtcMonitorSnmpComment(comment string) string {
+func testAccDtcMonitorSnmpComment(name, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_comment" {
+	name = %q
     comment = %q
 }
-`, comment)
+`, name, comment)
 }
 
-func testAccDtcMonitorSnmpCommunity(community string) string {
+func testAccDtcMonitorSnmpCommunity(name, community string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_community" {
+	name = %q
     community = %q
 }
-`, community)
+`, name, community)
 }
 
-func testAccDtcMonitorSnmpContext(context string) string {
+func testAccDtcMonitorSnmpContext(name, context string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_context" {
+	name = %q
     context = %q
 }
-`, context)
+`, name, context)
 }
 
-func testAccDtcMonitorSnmpEngineId(engineId string) string {
+func testAccDtcMonitorSnmpEngineId(name, engineId string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_engine_id" {
+	name = %q
     engine_id = %q
 }
-`, engineId)
+`, name, engineId)
 }
 
-func testAccDtcMonitorSnmpExtAttrs(extAttrs string) string {
+func testAccDtcMonitorSnmpExtAttrs(name string , extAttrs map[string]string) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+  %s = %q
+`, k, v)
+	}
+	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_extattrs" {
-    extattrs = %q
+	name = %q
+    extattrs = %s
 }
-`, extAttrs)
+`, name, extattrsStr)
 }
 
-func testAccDtcMonitorSnmpInterval(interval string) string {
+func testAccDtcMonitorSnmpInterval(name string , interval int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_interval" {
-    interval = %q
+	name = %q
+    interval = %d
 }
-`, interval)
+`, name, interval)
 }
 
 func testAccDtcMonitorSnmpName(name string) string {
@@ -625,58 +674,66 @@ resource "nios_dtc_monitor_snmp" "test_name" {
 `, name)
 }
 
-func testAccDtcMonitorSnmpOids(oids string) string {
+func testAccDtcMonitorSnmpOids(name string , oids []map[string]any) string {
+	oidsStr := utils.ConvertSliceOfMapsToHCL(oids)
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_oids" {
-    oids = %q
+	name = %q
+    oids = %s
 }
-`, oids)
+`, name, oidsStr)
 }
 
-func testAccDtcMonitorSnmpPort(port string) string {
+func testAccDtcMonitorSnmpPort(name string , port int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_port" {
-    port = %q
+	name = %q
+    port = %d
 }
-`, port)
+`, name, port)
 }
 
-func testAccDtcMonitorSnmpRetryDown(retryDown string) string {
+func testAccDtcMonitorSnmpRetryDown(name string , retryDown int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_retry_down" {
-    retry_down = %q
+	name = %q
+    retry_down = %d
 }
-`, retryDown)
+`, name, retryDown)
 }
 
-func testAccDtcMonitorSnmpRetryUp(retryUp string) string {
+func testAccDtcMonitorSnmpRetryUp(name string , retryUp int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_retry_up" {
-    retry_up = %q
+	name = %q
+    retry_up = %d
 }
-`, retryUp)
+`, name, retryUp)
 }
 
-func testAccDtcMonitorSnmpTimeout(timeout string) string {
+func testAccDtcMonitorSnmpTimeout(name string , timeout int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_timeout" {
-    timeout = %q
+	name = %q
+    timeout = %d
 }
-`, timeout)
+`, name, timeout)
 }
 
-func testAccDtcMonitorSnmpUser(user string) string {
+func testAccDtcMonitorSnmpUser(name ,user string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_user" {
+	name = %q
     user = %q
 }
-`, user)
+`, name, user)
 }
 
-func testAccDtcMonitorSnmpVersion(version string) string {
+func testAccDtcMonitorSnmpVersion(name , version string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_version" {
+	name = %q
     version = %q
 }
-`, version)
+`, name, version)
 }

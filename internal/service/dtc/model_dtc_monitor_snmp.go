@@ -19,6 +19,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -83,6 +84,7 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"context": schema.StringAttribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -236,7 +238,14 @@ func (m *DtcMonitorSnmpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorS
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Interval = flex.FlattenInt64Pointer(from.Interval)
 	m.Name = flex.FlattenStringPointer(from.Name)
+	planOids := m.Oids
 	m.Oids = flex.FlattenFrameworkListNestedBlock(ctx, from.Oids, DtcMonitorSnmpOidsAttrTypes, diags, FlattenDtcMonitorSnmpOids)
+	if !planOids.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planOids, m.Oids, "oid")
+		if !diags.HasError() {
+			m.Oids = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.RetryDown = flex.FlattenInt64Pointer(from.RetryDown)
 	m.RetryUp = flex.FlattenInt64Pointer(from.RetryUp)
