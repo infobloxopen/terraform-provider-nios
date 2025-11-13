@@ -177,18 +177,6 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandDtcMonitorSnmp(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcMonitorSnmp {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcMonitorSnmpModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *DtcMonitorSnmpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcMonitorSnmp {
 	if m == nil {
 		return nil
