@@ -37,7 +37,7 @@ func (r *DtcMonitorSnmpResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *DtcMonitorSnmpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DTC SNMP Monitor",
 		Attributes:          DtcMonitorSnmpResourceSchemaAttributes,
 	}
 }
@@ -339,4 +339,24 @@ func (r *DtcMonitorSnmpResource) ImportState(ctx context.Context, req resource.I
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs"), data.ExtAttrs)...)
+}
+
+func (r *DtcMonitorSnmpResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data DtcMonitorSnmpModel
+
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.Version.IsNull() && !data.Version.IsUnknown() && data.Version.ValueString() == "V3" {
+		if data.User.IsNull() || data.User.IsUnknown() {
+			resp.Diagnostics.AddError(
+				"Validation Error",
+				"When 'version' is set to 'V3', the 'user' attribute must be specified.",
+			)
+		}
+	}
 }

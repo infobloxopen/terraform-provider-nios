@@ -3,12 +3,12 @@
 page_title: "nios_dtc_monitor_snmp Data Source - nios"
 subcategory: "DTC"
 description: |-
-  
+  Retrieves information about existing DTC SNMP Monitors.
 ---
 
 # nios_dtc_monitor_snmp (Data Source)
 
-
+Retrieves information about existing DTC SNMP Monitors.
 
 ## Example Usage
 
