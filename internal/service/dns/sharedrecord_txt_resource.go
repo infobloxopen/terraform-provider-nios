@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -73,16 +71,10 @@ func (r *SharedrecordTxtResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	// Add internal ID exists in the Extensible Attributes if not already present
-	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-
 	apiRes, _, err := r.client.DNSAPI.
 		SharedrecordTxtAPI.
 		Create(ctx).
-		SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics)).
+		SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
 		ReturnAsObject(1).
 		Execute()
@@ -124,7 +116,7 @@ func (r *SharedrecordTxtResource) Read(ctx context.Context, req resource.ReadReq
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SharedrecordTxt, got error: %s", err))
@@ -132,27 +124,6 @@ func (r *SharedrecordTxtResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	res := apiRes.GetSharedrecordTxtResponseObjectAsResult.GetResult()
-
-	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
-	if !ok {
-		apiTerraformId.Value = ""
-	}
-
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read SharedrecordTxt because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
-			return
-		}
-	}
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
@@ -239,23 +210,10 @@ func (r *SharedrecordTxtResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	// Add Inherited Extensible Attributes
-	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
 	apiRes, _, err := r.client.DNSAPI.
 		SharedrecordTxtAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics)).
+		SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
 		ReturnAsObject(1).
 		Execute()
@@ -302,41 +260,5 @@ func (r *SharedrecordTxtResource) Delete(ctx context.Context, req resource.Delet
 }
 
 func (r *SharedrecordTxtResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data SharedrecordTxtModel
-	var goClientData dns.SharedrecordTxt
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.DNSAPI.
-		SharedrecordTxtAPI.
-		Update(ctx, resourceRef).
-		SharedrecordTxt(goClientData).
-		ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update SharedrecordTxt for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateSharedrecordTxtResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update SharedrecordTxt due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs"), data.ExtAttrs)...)
 }

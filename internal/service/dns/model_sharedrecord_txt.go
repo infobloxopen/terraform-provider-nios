@@ -11,13 +11,14 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -96,7 +97,10 @@ var SharedrecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Name for this shared record. This value can be in unicode format.",
 	},
 	"shared_record_group": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of the shared record group in which the record resides.",
 	},
 	"text": schema.StringAttribute{
@@ -122,19 +126,7 @@ var SharedrecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandSharedrecordTxt(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.SharedrecordTxt {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m SharedrecordTxtModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
-func (m *SharedrecordTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.SharedrecordTxt {
+func (m *SharedrecordTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.SharedrecordTxt {
 	if m == nil {
 		return nil
 	}
@@ -147,6 +139,9 @@ func (m *SharedrecordTxtModel) Expand(ctx context.Context, diags *diag.Diagnosti
 		Text:              flex.ExpandStringPointer(m.Text),
 		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
+	}
+	if isCreate {
+		to.SharedRecordGroup = flex.ExpandStringPointer(m.SharedRecordGroup)
 	}
 	return to
 }
