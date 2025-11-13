@@ -269,7 +269,7 @@ func TestAccSharedrecordTxtResource_UseTtl(t *testing.T) {
 				Config: testAccSharedrecordTxtUseTtl(name, sharedRecordGroup, text, 300, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordTxtExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "300"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Update and Read
@@ -382,7 +382,7 @@ resource "nios_dns_sharedrecord_txt" "test_extattrs" {
     name = %q
 	shared_record_group = %q
 	text = %q
-    extattrs = %q
+    extattrs = %s
 }
 `, name, sharedRecordGroup, text, extAttrsStr)
 }

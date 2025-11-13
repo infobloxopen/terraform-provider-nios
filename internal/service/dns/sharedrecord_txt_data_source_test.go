@@ -80,8 +80,8 @@ func testAccSharedrecordTxtDataSourceConfigFilters(name, sharedRecordGroup, text
 	return fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test" {
   name = %q
-  shared_record_group = %q
   text = %q
+  shared_record_group = %q
 }
 
 data "nios_dns_sharedrecord_txt" "test" {
