@@ -13,10 +13,12 @@ Manages a DTC SNMP Monitor
 ## Example Usage
 
 ```terraform
+// Create DTC Monitor snmp with Basic Fields
 resource "nios_dtc_monitor_snmp" "create_monitor_snmp" {
   name = "dtc_monitor_snmp"
 }
 
+// Create DTC Monitor snmp with Additional Fields
 resource "nios_dtc_monitor_snmp" "create_monitor_snmp_with_additional_fields" {
   name    = "dtc_monitor_snmp2"
   comment = "Example DTC Monitor SNMP"
@@ -42,7 +44,7 @@ resource "nios_dtc_monitor_snmp" "create_monitor_snmp_with_additional_fields" {
   context    = "snmpv3-context"
   version    = "V3"
   user       = "admin"
-  engine_id  = "66356e6574776f726B73"
+  engine_id  = "0x2b060102010500"
   interval   = 20
   timeout    = 5
   port       = 10161
