@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -14,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 )
 
 type MemberDhcppropertiesModel struct {
@@ -208,6 +210,7 @@ var MemberDhcppropertiesAttrTypes = map[string]attr.Type{
 	"enable_leasequery":                         types.BoolType,
 	"enable_snmp_warnings":                      types.BoolType,
 	"extattrs":                                  types.MapType{ElemType: types.StringType},
+	"extattrs_all":                              types.MapType{ElemType: types.StringType},
 	"gss_tsig_keys":                             types.ListType{ElemType: types.StringType},
 	"high_water_mark":                           types.Int64Type,
 	"high_water_mark_reset":                     types.Int64Type,
@@ -487,6 +490,9 @@ var MemberDhcppropertiesResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Optional:            true,
 		MarkdownDescription: "All extensible attributes associated with the object.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"gss_tsig_keys": schema.ListAttribute{
 		ElementType: types.StringType,

@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -14,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/microsoftserver"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 )
 
 type MssuperscopeModel struct {
@@ -90,6 +92,9 @@ var MssuperscopeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"high_water_mark": schema.Int64Attribute{
 		Computed:            true,

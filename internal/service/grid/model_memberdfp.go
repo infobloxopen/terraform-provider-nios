@@ -6,12 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 )
 
 type MemberdfpModel struct {
@@ -50,6 +52,9 @@ var MemberdfpResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "Host name of the parent Member",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"is_dfp_override": schema.BoolAttribute{
 		Optional:            true,

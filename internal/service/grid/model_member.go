@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -14,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 )
 
 type MemberModel struct {
@@ -282,6 +284,9 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"external_syslog_backup_servers": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
