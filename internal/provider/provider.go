@@ -132,6 +132,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewRangeResource,
 		dhcp.NewRangetemplateResource,
 		dhcp.NewIpv6rangetemplateResource,
+		dhcp.NewIpv6fixedaddresstemplateResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -212,6 +213,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewRangetemplateDataSource,
 		dhcp.NewRangeDataSource,
 		dhcp.NewIpv6rangetemplateDataSource,
+		dhcp.NewIpv6fixedaddresstemplateDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
