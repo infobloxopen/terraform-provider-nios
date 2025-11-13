@@ -33,9 +33,9 @@ var DtcPoolConsolidatedMonitorsAttrTypes = map[string]attr.Type{
 
 var DtcPoolConsolidatedMonitorsResourceSchemaAttributes = map[string]schema.Attribute{
 	"members": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
-		Computed:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
