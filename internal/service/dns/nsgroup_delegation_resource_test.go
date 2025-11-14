@@ -23,8 +23,8 @@ func TestAccNsgroupDelegationResource_basic(t *testing.T) {
 	name := acctest.RandomName()
 	delegateTo := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group",
-			"address":"2.3.4.5",
+			"name":    "delegate_to_ns_group",
+			"address": "2.3.4.5",
 		},
 	}
 
@@ -34,15 +34,14 @@ func TestAccNsgroupDelegationResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupDelegationBasicConfig(name , delegateTo),
+				Config: testAccNsgroupDelegationBasicConfig(name, delegateTo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "delegate_to.0.address", "2.3.4.5"), 
+					resource.TestCheckResourceAttr(resourceName, "delegate_to.0.address", "2.3.4.5"),
 					resource.TestCheckResourceAttr(resourceName, "delegate_to.0.name", "delegate_to_ns_group"),
-					// Test fields with default value	
+					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
-
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -56,8 +55,8 @@ func TestAccNsgroupDelegationResource_disappears(t *testing.T) {
 	name := acctest.RandomName()
 	delegateTo := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group",
-			"address":"2.3.4.5",
+			"name":    "delegate_to_ns_group",
+			"address": "2.3.4.5",
 		},
 	}
 	resource.ParallelTest(t, resource.TestCase{
@@ -83,8 +82,8 @@ func TestAccNsgroupDelegationResource_Comment(t *testing.T) {
 	name := acctest.RandomName()
 	delegateTo := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group",
-			"address":"2.3.4.5",
+			"name":    "delegate_to_ns_group",
+			"address": "2.3.4.5",
 		},
 	}
 
@@ -94,7 +93,7 @@ func TestAccNsgroupDelegationResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupDelegationComment(name, delegateTo , "comment ns group" ),
+				Config: testAccNsgroupDelegationComment(name, delegateTo, "comment ns group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "comment ns group"),
@@ -119,14 +118,14 @@ func TestAccNsgroupDelegationResource_DelegateTo(t *testing.T) {
 	name := acctest.RandomName()
 	delegateTo := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group",
-			"address":"2.3.4.5",
+			"name":    "delegate_to_ns_group",
+			"address": "2.3.4.5",
 		},
 	}
 	delegateToUpdate := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group_update",
-			"address":"2.3.4.6",
+			"name":    "delegate_to_ns_group_update",
+			"address": "2.3.4.6",
 		},
 	}
 
@@ -136,7 +135,7 @@ func TestAccNsgroupDelegationResource_DelegateTo(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupDelegationDelegateTo(name , delegateTo),
+				Config: testAccNsgroupDelegationDelegateTo(name, delegateTo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delegate_to.0.address", "2.3.4.5"),
@@ -163,8 +162,8 @@ func TestAccNsgroupDelegationResource_ExtAttrs(t *testing.T) {
 	name := acctest.RandomName()
 	delegateTo := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group",
-			"address":"2.3.4.5",
+			"name":    "delegate_to_ns_group",
+			"address": "2.3.4.5",
 		},
 	}
 	extAttrValue1 := acctest.RandomName()
@@ -176,7 +175,7 @@ func TestAccNsgroupDelegationResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupDelegationExtAttrs(name , delegateTo , map[string]any{
+				Config: testAccNsgroupDelegationExtAttrs(name, delegateTo, map[string]any{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -186,7 +185,7 @@ func TestAccNsgroupDelegationResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupDelegationExtAttrs(name , delegateTo , map[string]any{
+				Config: testAccNsgroupDelegationExtAttrs(name, delegateTo, map[string]any{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -205,8 +204,8 @@ func TestAccNsgroupDelegationResource_Name(t *testing.T) {
 	name := acctest.RandomName()
 	delegateTo := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group",
-			"address":"2.3.4.5",
+			"name":    "delegate_to_ns_group",
+			"address": "2.3.4.5",
 		},
 	}
 	nameUpdate := acctest.RandomName()
@@ -217,7 +216,7 @@ func TestAccNsgroupDelegationResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupDelegationName(name , delegateTo),
+				Config: testAccNsgroupDelegationName(name, delegateTo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -325,7 +324,7 @@ resource "nios_dns_nsgroup_delegation" "test_delegate_to" {
 `, name, delegateToStr)
 }
 
-func testAccNsgroupDelegationExtAttrs(name string , delegateTo []map[string]any , extAttrs map[string]any) string {
+func testAccNsgroupDelegationExtAttrs(name string, delegateTo []map[string]any, extAttrs map[string]any) string {
 	delegateToStr := utils.ConvertSliceOfMapsToHCL(delegateTo)
 	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
 	return fmt.Sprintf(`
@@ -337,7 +336,7 @@ resource "nios_dns_nsgroup_delegation" "test_extattrs" {
 `, name, delegateToStr, extAttrsStr)
 }
 
-func testAccNsgroupDelegationName(name string , delegateTo []map[string]any) string {
+func testAccNsgroupDelegationName(name string, delegateTo []map[string]any) string {
 	delegateToStr := utils.ConvertSliceOfMapsToHCL(delegateTo)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_delegation" "test_name" {
