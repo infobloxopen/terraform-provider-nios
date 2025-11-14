@@ -219,7 +219,6 @@ func testAccCheckDhcpoptionspaceDisappears(ctx context.Context, v *dhcp.Dhcpopti
 }
 
 func testAccDhcpoptionspaceBasicConfig(name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_dhcpoptionspace" "test" {
     name = %q
