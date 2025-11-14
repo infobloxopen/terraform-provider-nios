@@ -52,8 +52,8 @@ var RangeSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RangesubscribesettingsMappedEaAttributesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},

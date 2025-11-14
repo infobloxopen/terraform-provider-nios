@@ -209,6 +209,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ttl": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Time To Live (TTL) value for the DTC Pool. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.",
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),

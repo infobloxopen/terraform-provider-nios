@@ -282,7 +282,7 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 				"When `enable_remote_lookup` is set to `true`, all fields `remote_lookup_service`, `remote_lookup_username`, and `remote_lookup_password` must be provided.",
 			)
 		}
-		
+
 		// Validate enable_password_request setting
 		if data.EnablePasswordRequest.IsNull() || data.EnablePasswordRequest.IsUnknown() || data.EnablePasswordRequest.ValueBool() {
 			resp.Diagnostics.AddError(

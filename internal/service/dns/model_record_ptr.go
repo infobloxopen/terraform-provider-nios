@@ -242,6 +242,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ttl": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
 		},

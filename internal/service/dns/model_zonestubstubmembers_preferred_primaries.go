@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"

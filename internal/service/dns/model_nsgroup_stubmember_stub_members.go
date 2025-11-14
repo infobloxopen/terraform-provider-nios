@@ -78,7 +78,7 @@ func (m *NsgroupStubmemberStubMembersModel) Expand(ctx context.Context, diags *d
 		return nil
 	}
 	to := &dns.NsgroupStubmemberStubMembers{
-		Name:                     flex.ExpandStringPointer(m.Name),
+		Name: flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }

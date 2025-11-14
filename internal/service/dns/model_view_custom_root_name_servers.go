@@ -56,15 +56,15 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"tsig_key": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "A generated TSIG key.",
 	},
 	"tsig_key_alg": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
 	},
 	"tsig_key_name": schema.StringAttribute{
-		Computed: true,
+		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
@@ -90,8 +90,8 @@ func (m *ViewCustomRootNameServersModel) Expand(ctx context.Context, diags *diag
 		return nil
 	}
 	to := &dns.ViewCustomRootNameServers{
-		Address:        flex.ExpandIPAddress(m.Address),
-		Name:           flex.ExpandStringPointer(m.Name),
+		Address: flex.ExpandIPAddress(m.Address),
+		Name:    flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }

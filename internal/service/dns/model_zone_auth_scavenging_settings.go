@@ -87,8 +87,8 @@ var ZoneAuthScavengingSettingsResourceSchemaAttributes = map[string]schema.Attri
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneauthscavengingsettingsExpressionListResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -98,8 +98,8 @@ var ZoneAuthScavengingSettingsResourceSchemaAttributes = map[string]schema.Attri
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneauthscavengingsettingsEaExpressionListResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},

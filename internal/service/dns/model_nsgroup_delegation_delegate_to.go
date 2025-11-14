@@ -2,7 +2,7 @@ package dns
 
 import (
 	"context"
-	
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -95,8 +95,8 @@ func (m *NsgroupDelegationDelegateToModel) Expand(ctx context.Context, diags *di
 		return nil
 	}
 	to := &dns.NsgroupDelegationDelegateTo{
-		Address:        flex.ExpandStringPointer(m.Address),
-		Name:           flex.ExpandStringPointer(m.Name),
+		Address: flex.ExpandStringPointer(m.Address),
+		Name:    flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }
