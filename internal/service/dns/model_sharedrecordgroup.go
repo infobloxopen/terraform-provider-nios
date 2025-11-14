@@ -16,8 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
@@ -52,9 +50,12 @@ var SharedrecordgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "The descriptive comment of this shared record group.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -85,7 +86,6 @@ var SharedrecordgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"record_name_policy": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		//Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_record_name_policy")),
 		},
@@ -109,24 +109,11 @@ var SharedrecordgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandSharedrecordgroup(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.Sharedrecordgroup {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m SharedrecordgroupModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *SharedrecordgroupModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.Sharedrecordgroup {
 	if m == nil {
 		return nil
 	}
 	to := &dns.Sharedrecordgroup{
-		Ref:                 flex.ExpandStringPointer(m.Ref),
 		Comment:             flex.ExpandStringPointer(m.Comment),
 		ExtAttrs:            ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                flex.ExpandStringPointer(m.Name),

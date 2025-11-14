@@ -3,15 +3,18 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SharedrecordgroupZoneAssociationsModel struct {
@@ -26,7 +29,14 @@ var SharedrecordgroupZoneAssociationsAttrTypes = map[string]attr.Type{
 
 var SharedrecordgroupZoneAssociationsResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.Any(
+				customvalidator.IsValidFQDN(),
+				customvalidator.IsValidIPCIDR(),
+			),
+			customvalidator.IsNotArpa(),
+		},
 		MarkdownDescription: "The FQDN of the authoritative forward zone.",
 	},
 	"view": schema.StringAttribute{

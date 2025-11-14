@@ -222,43 +222,33 @@ func TestAccSharedrecordgroupResource_ZoneAssociations(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecordgroup.test_zone_associations"
 	var v dns.Sharedrecordgroup
 	name := acctest.RandomNameWithPrefix("sharedrecordgroup")
-	zones1 := []map[string]any{
-		{
-			"fqdn": "example.com",
-			"view": "default",
-		},
-	}
-	zones2 := []map[string]any{
-		{
-			"fqdn": "info.com",
-			"view": "default",
-		},
-	}
+	zoneFqdn1 := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	zoneFqdn2 := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharedrecordgroupZoneAssociations(name, zones1),
+				Config: testAccSharedrecordgroupZoneAssociations(name, zoneFqdn1, "default", "test1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.fqdn", "example.com"),
+					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.fqdn", zoneFqdn1),
 					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.view", "default"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSharedrecordgroupZoneAssociations(name, zones2),
+				Config: testAccSharedrecordgroupZoneAssociations(name, zoneFqdn2, "default", "test2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.fqdn", "info.com"),
+					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.fqdn", zoneFqdn2),
 					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.view", "default"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSharedrecordgroupZoneAssociations(name, nil),
+				Config: testAccSharedrecordgroupZoneAssociations(name, "", "", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "zone_associations.#", "0"),
@@ -328,7 +318,6 @@ func testAccCheckSharedrecordgroupDisappears(ctx context.Context, v *dns.Sharedr
 }
 
 func testAccSharedrecordgroupBasicConfig(name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dns_sharedrecordgroup" "test" {
 	name = %q
@@ -383,15 +372,36 @@ resource "nios_dns_sharedrecordgroup" "test_use_record_name_policy" {
 `, name, recordNamePolicy, useRecordNamePolicy)
 }
 
-func testAccSharedrecordgroupZoneAssociations(name string, zoneAssociations []map[string]any) string {
-	zones := "null"
-	if zoneAssociations != nil {
-		zones = utils.ConvertSliceOfMapsToHCL(zoneAssociations)
+func testAccSharedrecordgroupZoneAssociations(name string, zone, view, parentZoneAuthResource string) string {
+	var zoneAssociationsConfig, parentZoneAuthConfig string
+
+	if zone != "" && view != "" && parentZoneAuthResource != "" {
+		zoneAssociationsConfig = fmt.Sprintf(`[
+            {
+                fqdn = nios_dns_zone_auth.%s.fqdn
+                view = nios_dns_zone_auth.%s.view
+            }
+        ]`, parentZoneAuthResource, parentZoneAuthResource)
+		parentZoneAuthConfig = testAccParentZoneAuth(zone, view, parentZoneAuthResource)
+	} else {
+		// Explicitly unset zone_associations
+		zoneAssociationsConfig = "null"
 	}
+
 	return fmt.Sprintf(`
+%s
 resource "nios_dns_sharedrecordgroup" "test_zone_associations" {
     name = %q
     zone_associations = %s
 }
-`, name, zones)
+`, parentZoneAuthConfig, name, zoneAssociationsConfig)
+}
+
+func testAccParentZoneAuth(zone, view, testZone string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" %q {
+  fqdn = %q
+  view = %q
+}
+`, testZone, zone, view)
 }
