@@ -14,6 +14,7 @@ import (
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
+	"github.com/infobloxopen/terraform-provider-nios/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -41,9 +42,10 @@ type NIOSProvider struct {
 
 // NIOSProviderModel describes the provider data model.
 type NIOSProviderModel struct {
-	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
-	NIOSUsername types.String `tfsdk:"nios_username"`
-	NIOSPassword types.String `tfsdk:"nios_password"`
+	NIOSHostURL          types.String `tfsdk:"nios_host_url"`
+	NIOSUsername         types.String `tfsdk:"nios_username"`
+	NIOSPassword         types.String `tfsdk:"nios_password"`
+	SuppressComputedPlan types.Bool   `tfsdk:"suppress_computed_plan"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -62,6 +64,9 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 				Optional: true,
 			},
 			"nios_password": schema.StringAttribute{
+				Optional: true,
+			},
+			"suppress_computed_plan": schema.BoolAttribute{
 				Optional: true,
 			},
 		},
@@ -84,6 +89,9 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithNIOSHostUrl(data.NIOSHostURL.ValueString()),
 		option.WithDebug(true),
 	)
+
+	// Set suppress computed plan configuration
+	config.SetSuppressComputedPlan(data.SuppressComputedPlan.ValueBool())
 
 	err := checkAndCreatePreRequisites(ctx, client)
 	if err != nil {
