@@ -1,5 +1,5 @@
 // Retrieve a specific DHCP Option Definition by filters
-data "nios_dhcp_dhcpoptiondefinition" "get__dhcp_option_definition_using_filters" {
+data "nios_dhcp_dhcpoptiondefinition" "get_dhcp_option_definition_using_filters" {
   filters = {
     name = "example_option_definition"
     code = 10
