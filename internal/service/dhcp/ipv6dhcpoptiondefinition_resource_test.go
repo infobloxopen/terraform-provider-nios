@@ -199,6 +199,22 @@ func TestAccIpv6dhcpoptiondefinitionResource_Type(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "type", "8-bit unsigned integer"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccIpv6dhcpoptiondefinitionType(optionSpace, "10", name, "ip-address"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6dhcpoptiondefinitionExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "type", "ip-address"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6dhcpoptiondefinitionType(optionSpace, "10", name, "array of 8-bit integer"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6dhcpoptiondefinitionExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "type", "array of 8-bit integer"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
