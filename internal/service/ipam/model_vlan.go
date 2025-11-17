@@ -5,11 +5,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -28,6 +30,7 @@ type VlanModel struct {
 	Description types.String `tfsdk:"description"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll types.Map    `tfsdk:"extattrs_all"`
+	FuncCall    types.Object `tfsdk:"func_call"`
 	Id          types.Int64  `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
 	Parent      types.String `tfsdk:"parent"`
@@ -44,6 +47,7 @@ var VlanAttrTypes = map[string]attr.Type{
 	"description":  types.StringType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
 	"extattrs_all": types.MapType{ElemType: types.StringType},
+	"func_call":    types.ObjectType{AttrTypes: FuncCallAttrTypes},
 	"id":           types.Int64Type,
 	"name":         types.StringType,
 	"parent":       types.StringType,
@@ -66,7 +70,9 @@ var VlanResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "A descriptive comment for this VLAN.",
 	},
 	"contact": schema.StringAttribute{
@@ -75,6 +81,7 @@ var VlanResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Contact information for person/team managing or using VLAN.",
 	},
 	"department": schema.StringAttribute{
@@ -83,6 +90,7 @@ var VlanResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Department where VLAN is used.",
 	},
 	"description": schema.StringAttribute{
@@ -91,6 +99,7 @@ var VlanResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Description for the VLAN object, may be potentially used for longer VLAN names.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -107,6 +116,12 @@ var VlanResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default and internal attributes.",
 		ElementType:         types.StringType,
+	},
+	"func_call": schema.SingleNestedAttribute{
+		Attributes:          FuncCallResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Record AAAA.",
 	},
 	"id": schema.Int64Attribute{
 		Required:            true,
@@ -184,6 +199,10 @@ func (m *VlanModel) Flatten(ctx context.Context, from *ipam.Vlan, diags *diag.Di
 	m.Parent = FlattenVlanParent(from.Parent)
 	m.Reserved = types.BoolPointerValue(from.Reserved)
 	m.Status = flex.FlattenStringPointer(from.Status)
+
+	if m.FuncCall.IsNull() || m.FuncCall.IsUnknown() {
+		m.FuncCall = FlattenFuncCall(ctx, from.FuncCall, diags)
+	}
 }
 
 func ExpandVlanParent(str types.String) *ipam.VlanParent {

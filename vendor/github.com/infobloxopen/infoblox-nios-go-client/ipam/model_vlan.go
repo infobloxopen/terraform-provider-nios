@@ -38,7 +38,8 @@ type Vlan struct {
 	// Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 	ExtAttrs *map[string]ExtAttrs `json:"extattrs,omitempty"`
 	// VLAN ID value.
-	Id *int64 `json:"id,omitempty"`
+	Id       *int64    `json:"id,omitempty"`
+	FuncCall *FuncCall `json:"func_call,omitempty"`
 	// Name of the VLAN.
 	Name   *string     `json:"name,omitempty"`
 	Parent *VlanParent `json:"parent,omitempty"`
@@ -385,6 +386,38 @@ func (o *Vlan) SetId(v int64) {
 	o.Id = &v
 }
 
+// GetFuncCall returns the FuncCall field value if set, zero value otherwise.
+func (o *Vlan) GetFuncCall() FuncCall {
+	if o == nil || IsNil(o.FuncCall) {
+		var ret FuncCall
+		return ret
+	}
+	return *o.FuncCall
+}
+
+// GetFuncCallOk returns a tuple with the FuncCall field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Vlan) GetFuncCallOk() (*FuncCall, bool) {
+	if o == nil || IsNil(o.FuncCall) {
+		return nil, false
+	}
+	return o.FuncCall, true
+}
+
+// HasFuncCall returns a boolean if a field has been set.
+func (o *Vlan) HasFuncCall() bool {
+	if o != nil && !IsNil(o.FuncCall) {
+		return true
+	}
+
+	return false
+}
+
+// SetFuncCall gets a reference to the given FuncCall and assigns it to the FuncCall field.
+func (o *Vlan) SetFuncCall(v FuncCall) {
+	o.FuncCall = &v
+}
+
 // GetName returns the Name field value if set, zero value otherwise.
 func (o *Vlan) GetName() string {
 	if o == nil || IsNil(o.Name) {
@@ -552,6 +585,9 @@ func (o Vlan) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.FuncCall) {
+		toSerialize["func_call"] = o.FuncCall
 	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name

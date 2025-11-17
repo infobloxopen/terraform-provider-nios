@@ -37,6 +37,7 @@ func TestAccVlanResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttrSet(resourceName, "parent"),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "reserved", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -117,7 +118,7 @@ func TestAccVlanResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanComment(54, name, "example_vlan_view4", "Comment for the Vlan object"),
+				Config: testAccVlanComment(54, name, "example_vlan_view4", "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -125,7 +126,7 @@ func TestAccVlanResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVlanComment(54, name, "example_vlan_view4", "Updated comment for the Vlan object"),
+				Config: testAccVlanComment(54, name, "example_vlan_view4", "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -147,7 +148,7 @@ func TestAccVlanResource_Contact(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanContact(55, name, "5", "contact_FIRST"),
+				Config: testAccVlanContact(55, name, "example_vlan_view5", "contact_FIRST"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "contact", "contact_FIRST"),
@@ -294,7 +295,7 @@ func TestAccVlanResource_Id(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanId(59, name, "example_vlan_view9"),
+				Config: testAccVlanId(51, name, "example_vlan_view9"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "id", "51"),
@@ -305,7 +306,7 @@ func TestAccVlanResource_Id(t *testing.T) {
 				Config: testAccVlanId(59, name2, "example_vlan_view9"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "id", "52"),
+					resource.TestCheckResourceAttr(resourceName, "id", "59"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -361,7 +362,7 @@ func TestAccVlanResource_Parent(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVlanParent(61, name, "example_vlan_view_updated"),
+				Config: testAccVlanParent(61, name, "example_vlan_view_11"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "parent"),
@@ -552,7 +553,7 @@ resource "nios_ipam_vlan" "test_extattrs" {
     id = %d
     name = %q
     parent = nios_ipam_vlanview.%s.ref
-    extattrs = %q
+    extattrs = %s
 }
 `, id, name, parent, extAttrsStr)
 	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
@@ -582,16 +583,16 @@ resource "nios_ipam_vlan" "test_name" {
 
 func testAccVlanParent(id int, name string, parent string) string {
 	config := fmt.Sprintf(`
-resource "nios_ipam_vlanview" "example_vlan_view_updated" {
+resource "nios_ipam_vlanview" "%[3]s_updated" {
   start_vlan_id = 50
   end_vlan_id   = 100
-  name          = "example_vlan_view_updated"
+  name          = "%[3]s_updated"
 }
 
 resource "nios_ipam_vlan" "test_parent" {
-    id = %d
-    name = %q
-    parent = nios_ipam_vlanview.%s.ref
+    id = %[1]d
+    name = %[2]q
+    parent = nios_ipam_vlanview.%[3]s.ref
 }
 `, id, name, parent)
 	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
