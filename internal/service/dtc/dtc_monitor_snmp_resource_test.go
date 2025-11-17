@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -204,17 +205,17 @@ func TestAccDtcMonitorSnmpResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpExtAttrs(name , map[string]string{
+				Config: testAccDtcMonitorSnmpExtAttrs(name, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site",extAttrValue1),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpExtAttrs(name , map[string]string{
+				Config: testAccDtcMonitorSnmpExtAttrs(name, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -323,14 +324,13 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 		},
 	}
 
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpOids(name , oids),
+				Config: testAccDtcMonitorSnmpOids(name, oids),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "oids.0.oid", ".2"),
@@ -344,7 +344,7 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpOids(name , oidsUpdate),
+				Config: testAccDtcMonitorSnmpOids(name, oidsUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "oids.0.oid", ".2"),
@@ -370,7 +370,7 @@ func TestAccDtcMonitorSnmpResource_Port(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpPort(name , 10161),
+				Config: testAccDtcMonitorSnmpPort(name, 10161),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", "10161"),
@@ -378,7 +378,7 @@ func TestAccDtcMonitorSnmpResource_Port(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpPort(name , 10162),
+				Config: testAccDtcMonitorSnmpPort(name, 10162),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", "10162"),
@@ -400,7 +400,7 @@ func TestAccDtcMonitorSnmpResource_RetryDown(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpRetryDown(name , 5),
+				Config: testAccDtcMonitorSnmpRetryDown(name, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "5"),
@@ -408,7 +408,7 @@ func TestAccDtcMonitorSnmpResource_RetryDown(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpRetryDown(name , 10),
+				Config: testAccDtcMonitorSnmpRetryDown(name, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "10"),
@@ -430,7 +430,7 @@ func TestAccDtcMonitorSnmpResource_RetryUp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpRetryUp(name , 3),
+				Config: testAccDtcMonitorSnmpRetryUp(name, 3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "3"),
@@ -438,7 +438,7 @@ func TestAccDtcMonitorSnmpResource_RetryUp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpRetryUp(name , 7),
+				Config: testAccDtcMonitorSnmpRetryUp(name, 7),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "7"),
@@ -468,7 +468,7 @@ func TestAccDtcMonitorSnmpResource_Timeout(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpTimeout(name , 45),
+				Config: testAccDtcMonitorSnmpTimeout(name, 45),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "45"),
@@ -483,6 +483,8 @@ func TestAccDtcMonitorSnmpResource_User(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_user"
 	var v dtc.DtcMonitorSnmp
 	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
+	snmpUser1 := "nios_security_snmp_user.snmpuser_parent"
+	snmpUser2 := "nios_security_snmp_user.snmpuser_parent1"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -490,18 +492,18 @@ func TestAccDtcMonitorSnmpResource_User(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpUser(name, "admin"),
+				Config: testAccDtcMonitorSnmpUser(name, snmpUser1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "user", "admin"),
+					resource.TestCheckResourceAttrPair(resourceName, "user", snmpUser1, "name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpUser(name, "new_user"),
+				Config: testAccDtcMonitorSnmpUser(name, snmpUser2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "user", "new_user"),
+					resource.TestCheckResourceAttrPair(resourceName, "user", snmpUser2, "name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -520,7 +522,7 @@ func TestAccDtcMonitorSnmpResource_Version(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSnmpVersion(name , "V1"),
+				Config: testAccDtcMonitorSnmpVersion(name, "V1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "version", "V1"),
@@ -528,10 +530,10 @@ func TestAccDtcMonitorSnmpResource_Version(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorSnmpVersion(name , "V2C"),
+				Config: testAccDtcMonitorSnmpVersion(name, "V2C"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "version", "V2C"),	
+					resource.TestCheckResourceAttr(resourceName, "version", "V2C"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -641,7 +643,7 @@ resource "nios_dtc_monitor_snmp" "test_engine_id" {
 `, name, engineId)
 }
 
-func testAccDtcMonitorSnmpExtAttrs(name string , extAttrs map[string]string) string {
+func testAccDtcMonitorSnmpExtAttrs(name string, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf(`
@@ -657,7 +659,7 @@ resource "nios_dtc_monitor_snmp" "test_extattrs" {
 `, name, extattrsStr)
 }
 
-func testAccDtcMonitorSnmpInterval(name string , interval int64) string {
+func testAccDtcMonitorSnmpInterval(name string, interval int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_interval" {
 	name = %q
@@ -674,7 +676,7 @@ resource "nios_dtc_monitor_snmp" "test_name" {
 `, name)
 }
 
-func testAccDtcMonitorSnmpOids(name string , oids []map[string]any) string {
+func testAccDtcMonitorSnmpOids(name string, oids []map[string]any) string {
 	oidsStr := utils.ConvertSliceOfMapsToHCL(oids)
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_oids" {
@@ -684,7 +686,7 @@ resource "nios_dtc_monitor_snmp" "test_oids" {
 `, name, oidsStr)
 }
 
-func testAccDtcMonitorSnmpPort(name string , port int64) string {
+func testAccDtcMonitorSnmpPort(name string, port int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_port" {
 	name = %q
@@ -693,7 +695,7 @@ resource "nios_dtc_monitor_snmp" "test_port" {
 `, name, port)
 }
 
-func testAccDtcMonitorSnmpRetryDown(name string , retryDown int64) string {
+func testAccDtcMonitorSnmpRetryDown(name string, retryDown int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_retry_down" {
 	name = %q
@@ -702,7 +704,7 @@ resource "nios_dtc_monitor_snmp" "test_retry_down" {
 `, name, retryDown)
 }
 
-func testAccDtcMonitorSnmpRetryUp(name string , retryUp int64) string {
+func testAccDtcMonitorSnmpRetryUp(name string, retryUp int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_retry_up" {
 	name = %q
@@ -711,7 +713,7 @@ resource "nios_dtc_monitor_snmp" "test_retry_up" {
 `, name, retryUp)
 }
 
-func testAccDtcMonitorSnmpTimeout(name string , timeout int64) string {
+func testAccDtcMonitorSnmpTimeout(name string, timeout int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_timeout" {
 	name = %q
@@ -720,16 +722,37 @@ resource "nios_dtc_monitor_snmp" "test_timeout" {
 `, name, timeout)
 }
 
-func testAccDtcMonitorSnmpUser(name ,user string) string {
-	return fmt.Sprintf(`
+func testAccDtcMonitorSnmpUser(name, user string) string {
+	config := fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_user" {
-	name = %q
-    user = %q
+    name = %q
+    version = "V3"
+    user = %s.name
 }
 `, name, user)
+	return strings.Join([]string{testAccBaseWithSnmpUsers(), config}, "")
 }
 
-func testAccDtcMonitorSnmpVersion(name , version string) string {
+func testAccBaseWithSnmpUsers() string {
+	snmpUser1 := acctest.RandomNameWithPrefix("snmpuser")
+	snmpUser2 := acctest.RandomNameWithPrefix("snmpuser")
+
+	return fmt.Sprintf(`
+resource "nios_security_snmp_user" "snmpuser_parent" {
+    name                    = %q
+    authentication_protocol = "NONE"
+    privacy_protocol        = "NONE"
+}
+
+resource "nios_security_snmp_user" "snmpuser_parent1" {
+    name                    = %q
+    authentication_protocol = "NONE"
+    privacy_protocol        = "NONE"
+}
+`, snmpUser1, snmpUser2)
+}
+
+func testAccDtcMonitorSnmpVersion(name, version string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_version" {
 	name = %q
