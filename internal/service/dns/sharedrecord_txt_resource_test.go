@@ -32,8 +32,11 @@ func TestAccSharedrecordTxtResource_basic(t *testing.T) {
 				Config: testAccSharedrecordTxtBasicConfig(name, sharedRecordGroup, text),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordTxtExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -45,7 +48,7 @@ func TestAccSharedrecordTxtResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_sharedrecord_txt.test"
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
-	text := "This is a shared record TXT record"
+	text := "example txt for sharedrecord:txt"
 	sharedRecordGroup := "sr1"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -58,7 +61,6 @@ func TestAccSharedrecordTxtResource_disappears(t *testing.T) {
 					testAccCheckSharedrecordTxtExists(context.Background(), resourceName, &v),
 					testAccCheckSharedrecordTxtDisappears(context.Background(), &v),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

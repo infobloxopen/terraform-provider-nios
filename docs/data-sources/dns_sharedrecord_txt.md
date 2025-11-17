@@ -3,12 +3,12 @@
 page_title: "nios_dns_sharedrecord_txt Data Source - nios"
 subcategory: "DNS"
 description: |-
-  Retrieves information about existing DNS Shared Record TXT records.
+  Retrieves information about existing DNS Shared TXT Records.
 ---
 
 # nios_dns_sharedrecord_txt (Data Source)
 
-Retrieves information about existing DNS Shared Record TXT records.
+Retrieves information about existing DNS Shared TXT Records.
 
 ## Example Usage
 
@@ -16,7 +16,7 @@ Retrieves information about existing DNS Shared Record TXT records.
 // Retrieve a specific Shared TXT Record by filters
 data "nios_dns_sharedrecord_txt" "get_sharedrecord_txt_using_filters" {
   filters = {
-    name = "example-shared-record-group"
+    name = "example-shared-record-txt"
   }
 }
 

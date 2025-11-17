@@ -35,7 +35,7 @@ func (r *SharedrecordTxtResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *SharedrecordTxtResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Shared Record TXT record.",
+		MarkdownDescription: "Manages a Shared TXT Record.",
 		Attributes:          SharedrecordTxtResourceSchemaAttributes,
 	}
 }
@@ -137,61 +137,6 @@ func (r *SharedrecordTxtResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *SharedrecordTxtResource) ReadByExtAttrs(ctx context.Context, data *SharedrecordTxtModel, resp *resource.ReadResponse) bool {
-	var diags diag.Diagnostics
-
-	if data.ExtAttrsAll.IsNull() {
-		return false
-	}
-
-	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if diags.HasError() {
-		return false
-	}
-
-	internalId := internalIdExtAttr[terraformInternalIDEA].Value
-	if internalId == "" {
-		return false
-	}
-
-	idMap := map[string]interface{}{
-		terraformInternalIDEA: internalId,
-	}
-
-	apiRes, _, err := r.client.DNSAPI.
-		SharedrecordTxtAPI.
-		List(ctx).
-		Extattrfilter(idMap).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SharedrecordTxt by extattrs, got error: %s", err))
-		return true
-	}
-
-	results := apiRes.ListSharedrecordTxtResponseObject.GetResult()
-
-	// If the list is empty, the resource no longer exists so remove it from state
-	if len(results) == 0 {
-		resp.State.RemoveResource(ctx)
-		return true
-	}
-
-	res := results[0]
-
-	// Remove inherited external attributes from extattrs
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		return true
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
-	return true
-}
-
 func (r *SharedrecordTxtResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
 	var data SharedrecordTxtModel
@@ -205,6 +150,19 @@ func (r *SharedrecordTxtResource) Update(ctx context.Context, req resource.Updat
 
 	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Add Inherited Extensible Attributes
+	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return

@@ -3,12 +3,12 @@
 page_title: "nios_dns_sharedrecord_txt Resource - nios"
 subcategory: "DNS"
 description: |-
-  Manages a Shared Record TXT record.
+  Manages a Shared TXT Record.
 ---
 
 # nios_dns_sharedrecord_txt (Resource)
 
-Manages a Shared Record TXT record.
+Manages a Shared TXT Record.
 
 ## Example Usage
 

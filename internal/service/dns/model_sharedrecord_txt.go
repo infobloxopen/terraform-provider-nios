@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -61,6 +62,7 @@ var SharedrecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
 		},
 		MarkdownDescription: "Comment for this shared record; maximum 256 characters.",
 	},
