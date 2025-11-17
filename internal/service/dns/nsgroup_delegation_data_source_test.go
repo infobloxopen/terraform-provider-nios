@@ -1,4 +1,3 @@
-
 package dns_test
 
 import (
@@ -20,8 +19,8 @@ func TestAccNsgroupDelegationDataSource_Filters(t *testing.T) {
 	name := acctest.RandomName()
 	delegateTo := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group",
-			"address":"2.3.4.5",
+			"name":    "delegate_to_ns_group",
+			"address": "2.3.4.5",
 		},
 	}
 
@@ -34,8 +33,8 @@ func TestAccNsgroupDelegationDataSource_Filters(t *testing.T) {
 				Config: testAccNsgroupDelegationDataSourceConfigFilters(name, delegateTo),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
-						}, testAccCheckNsgroupDelegationResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
+					}, testAccCheckNsgroupDelegationResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -49,8 +48,8 @@ func TestAccNsgroupDelegationDataSource_ExtAttrFilters(t *testing.T) {
 	name := acctest.RandomName()
 	delegateTo := []map[string]interface{}{
 		{
-			"name":"delegate_to_ns_group",
-			"address":"2.3.4.5",
+			"name":    "delegate_to_ns_group",
+			"address": "2.3.4.5",
 		},
 	}
 
@@ -60,11 +59,11 @@ func TestAccNsgroupDelegationDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupDelegationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupDelegationDataSourceConfigExtAttrFilters( name , delegateTo , acctest.RandomName()),
+				Config: testAccNsgroupDelegationDataSourceConfigExtAttrFilters(name, delegateTo, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
-						}, testAccCheckNsgroupDelegationResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckNsgroupDelegationExists(context.Background(), resourceName, &v),
+					}, testAccCheckNsgroupDelegationResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -73,14 +72,14 @@ func TestAccNsgroupDelegationDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckNsgroupDelegationResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "delegate_to", dataSourceName, "result.0.delegate_to"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-    }
+func testAccCheckNsgroupDelegationResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "delegate_to", dataSourceName, "result.0.delegate_to"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+	}
 }
 
 func testAccNsgroupDelegationDataSourceConfigFilters(name string, delegateTo []map[string]any) string {
@@ -99,7 +98,7 @@ data "nios_dns_nsgroup_delegation" "test" {
 `, name, delegateToStr)
 }
 
-func testAccNsgroupDelegationDataSourceConfigExtAttrFilters(name string , delegateTo []map[string]interface{}, extAttrsValue string) string {
+func testAccNsgroupDelegationDataSourceConfigExtAttrFilters(name string, delegateTo []map[string]interface{}, extAttrsValue string) string {
 	delegateToStr := utils.ConvertSliceOfMapsToHCL(delegateTo)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_delegation" "test" {
@@ -117,4 +116,3 @@ data "nios_dns_nsgroup_delegation" "test" {
 }
 `, name, delegateToStr, extAttrsValue)
 }
-
