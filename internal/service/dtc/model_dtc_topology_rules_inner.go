@@ -21,6 +21,8 @@ type DtcTopologyRulesInnerModel struct {
 	DestType        types.String `tfsdk:"dest_type"`
 	DestinationLink types.String `tfsdk:"destination_link"`
 	ReturnType      types.String `tfsdk:"return_type"`
+	Topology        types.String `tfsdk:"topology"`
+	Valid           types.Bool   `tfsdk:"valid"`
 	Sources         types.List   `tfsdk:"sources"`
 }
 
@@ -28,6 +30,8 @@ var DtcTopologyRulesInnerAttrTypes = map[string]attr.Type{
 	"dest_type":        types.StringType,
 	"destination_link": types.StringType,
 	"return_type":      types.StringType,
+	"topology":         types.StringType,
+	"valid":            types.BoolType,
 	"sources":          types.ListType{ElemType: types.ObjectType{AttrTypes: DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes}},
 }
 
@@ -46,6 +50,14 @@ var DtcTopologyRulesInnerResourceSchemaAttributes = map[string]schema.Attribute{
 	"return_type": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The type of the return value for this source.",
+	},
+	"topology": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The topology for this rule.",
+	},
+	"valid": schema.BoolAttribute{
+		Computed:            true,
+		MarkdownDescription: "Indicates whether the rule is valid.",
 	},
 	"sources": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -120,6 +132,12 @@ func (m *DtcTopologyRulesInnerModel) Flatten(ctx context.Context, from *dtc.DtcT
         if m.Sources.IsNull() || m.Sources.IsUnknown() {
             m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, nil, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
         }
+		if m.Topology.IsNull() || m.Topology.IsUnknown() {
+			m.Topology = flex.FlattenStringPointerNilAsNotEmpty(nil)
+		}
+		if m.Valid.IsNull() || m.Valid.IsUnknown() {
+			m.Valid = types.BoolNull()
+		}
 		return
 	}
 }

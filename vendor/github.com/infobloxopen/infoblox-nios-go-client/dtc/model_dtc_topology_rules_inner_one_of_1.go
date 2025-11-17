@@ -25,6 +25,10 @@ type DtcTopologyRulesInnerOneOf1 struct {
 	DestinationLink *string `json:"destination_link,omitempty"`
 	// The type of the return value for this source.
 	ReturnType *string `json:"return_type,omitempty"`
+	// The topology for this rule.
+	Topology *string `json:"topology,omitempty"`
+	// Indicates whether the rule is valid.
+	Valid *bool `json:"valid,omitempty"`
 	// Conditions for matching sources.
 	Sources []DtcTopologyRulesInnerOneOf1SourcesInner `json:"sources,omitempty"`
 }
@@ -142,6 +146,70 @@ func (o *DtcTopologyRulesInnerOneOf1) SetReturnType(v string) {
 	o.ReturnType = &v
 }
 
+// GetTopology returns the Topology field value if set, zero value otherwise.
+func (o *DtcTopologyRulesInnerOneOf1) GetTopology() string {
+	if o == nil || IsNil(o.Topology) {
+		var ret string
+		return ret
+	}
+	return *o.Topology
+}
+
+// GetTopologyOk returns a tuple with the Topology field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DtcTopologyRulesInnerOneOf1) GetTopologyOk() (*string, bool) {
+	if o == nil || IsNil(o.Topology) {
+		return nil, false
+	}
+	return o.Topology, true
+}
+
+// HasTopology returns a boolean if a field has been set.
+func (o *DtcTopologyRulesInnerOneOf1) HasTopology() bool {
+	if o != nil && !IsNil(o.Topology) {
+		return true
+	}
+
+	return false
+}
+
+// SetTopology gets a reference to the given string and assigns it to the Topology field.
+func (o *DtcTopologyRulesInnerOneOf1) SetTopology(v string) {
+	o.Topology = &v
+}
+
+// GetValid returns the Valid field value if set, zero value otherwise.
+func (o *DtcTopologyRulesInnerOneOf1) GetValid() bool {
+	if o == nil || IsNil(o.Valid) {
+		var ret bool
+		return ret
+	}
+	return *o.Valid
+}
+
+// GetValidOk returns a tuple with the Valid field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DtcTopologyRulesInnerOneOf1) GetValidOk() (*bool, bool) {
+	if o == nil || IsNil(o.Valid) {
+		return nil, false
+	}
+	return o.Valid, true
+}
+
+// HasValid returns a boolean if a field has been set.
+func (o *DtcTopologyRulesInnerOneOf1) HasValid() bool {
+	if o != nil && !IsNil(o.Valid) {
+		return true
+	}
+
+	return false
+}
+
+// SetValid gets a reference to the given bool and assigns it to the Valid field.
+func (o *DtcTopologyRulesInnerOneOf1) SetValid(v bool) {
+	o.Valid = &v
+}
+
 // GetSources returns the Sources field value if set, zero value otherwise.
 func (o *DtcTopologyRulesInnerOneOf1) GetSources() []DtcTopologyRulesInnerOneOf1SourcesInner {
 	if o == nil || IsNil(o.Sources) {
@@ -192,6 +260,12 @@ func (o DtcTopologyRulesInnerOneOf1) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ReturnType) {
 		toSerialize["return_type"] = o.ReturnType
+	}
+	if !IsNil(o.Topology) {
+		toSerialize["topology"] = o.Topology
+	}
+	if !IsNil(o.Valid) {
+		toSerialize["valid"] = o.Valid
 	}
 	if !IsNil(o.Sources) {
 		toSerialize["sources"] = o.Sources
