@@ -4,11 +4,15 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -17,6 +21,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcMonitorHttpModel struct {
@@ -89,39 +94,74 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "An optional client certificate, supplied in a secure HTTP/S mode if present.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Comment for this DTC monitor; maximum 256 characters.",
 	},
 	"content_check": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("NONE"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("NONE", "EXTRACT", "MATCH"),
+		},
 		MarkdownDescription: "The content check type.",
 	},
 	"content_check_input": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("ALL"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("ALL", "HEADERS", "BODY"),
+		},
 		MarkdownDescription: "A portion of response to use as input for content check.",
 	},
 	"content_check_op": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("EQ", "GEQ", "LEQ", "NEQ"),
+		},
 		MarkdownDescription: "A content check success criteria operator.",
 	},
 	"content_check_regex": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "A content check regular expression.",
 	},
 	"content_extract_group": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(0),
 		MarkdownDescription: "A content extraction sub-expression to extract.",
 	},
 	"content_extract_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("STRING"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("STRING", "INTEGER"),
+		},
 		MarkdownDescription: "A content extraction expected type for the extracted data.",
 	},
 	"content_extract_value": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "A content extraction value to compare with extracted result.",
 	},
 	"enable_sni": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether the Server Name Indication (SNI) for HTTPS monitor is enabled.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -144,14 +184,21 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"interval": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(5),
 		MarkdownDescription: "The interval for TCP health check.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The display name for this DTC monitor.",
 	},
 	"port": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(80),
 		MarkdownDescription: "Port for TCP requests.",
 	},
 	"request": schema.StringAttribute{
@@ -159,31 +206,48 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "An HTTP request to send.",
 	},
 	"result": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("ANY"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("ANY", "CODE_IS", "CODE_IS_NOT"),
+		},
 		MarkdownDescription: "The type of an expected result.",
 	},
 	"result_code": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(200),
 		MarkdownDescription: "The expected return code.",
 	},
 	"retry_down": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The value of how many times the server should appear as down to be treated as dead after it was alive.",
 	},
 	"retry_up": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The value of how many times the server should appear as up to be treated as alive after it was dead.",
 	},
 	"secure": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "The connection security status.",
 	},
 	"timeout": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "The timeout for TCP health check in seconds.",
 	},
 	"validate_cert": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines whether the validation of the remote server's certificate is enabled.",
 	},
 }
