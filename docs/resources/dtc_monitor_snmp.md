@@ -13,6 +13,13 @@ Manages a DTC SNMP Monitor
 ## Example Usage
 
 ```terraform
+// Create an snmp user(Required as Parent)
+resource "nios_security_snmp_user" "snmpuser_parent" {
+  name                    = "snmpuser_example_1"
+  authentication_protocol = "NONE"
+  privacy_protocol        = "NONE"
+}
+
 // Create DTC Monitor snmp with Basic Fields
 resource "nios_dtc_monitor_snmp" "create_monitor_snmp" {
   name = "dtc_monitor_snmp"
@@ -43,7 +50,7 @@ resource "nios_dtc_monitor_snmp" "create_monitor_snmp_with_additional_fields" {
   community  = "private"
   context    = "snmpv3-context"
   version    = "V3"
-  user       = "admin"
+  user       = nios_security_snmp_user.snmpuser_parent.name
   engine_id  = "0x2b060102010500"
   interval   = 20
   timeout    = 5
