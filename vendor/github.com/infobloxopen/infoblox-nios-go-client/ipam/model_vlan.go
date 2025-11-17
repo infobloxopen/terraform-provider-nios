@@ -40,9 +40,8 @@ type Vlan struct {
 	// VLAN ID value.
 	Id *int64 `json:"id,omitempty"`
 	// Name of the VLAN.
-	Name *string `json:"name,omitempty"`
-	// The VLAN View or VLAN Range to which this VLAN belongs.
-	Parent *string `json:"parent,omitempty"`
+	Name   *string     `json:"name,omitempty"`
+	Parent *VlanParent `json:"parent,omitempty"`
 	// When set VLAN can only be assigned to IPAM object manually.
 	Reserved *bool `json:"reserved,omitempty"`
 	// Status of VLAN object. Can be Assigned, Unassigned, Reserved.
@@ -419,9 +418,9 @@ func (o *Vlan) SetName(v string) {
 }
 
 // GetParent returns the Parent field value if set, zero value otherwise.
-func (o *Vlan) GetParent() string {
+func (o *Vlan) GetParent() VlanParent {
 	if o == nil || IsNil(o.Parent) {
-		var ret string
+		var ret VlanParent
 		return ret
 	}
 	return *o.Parent
@@ -429,7 +428,7 @@ func (o *Vlan) GetParent() string {
 
 // GetParentOk returns a tuple with the Parent field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Vlan) GetParentOk() (*string, bool) {
+func (o *Vlan) GetParentOk() (*VlanParent, bool) {
 	if o == nil || IsNil(o.Parent) {
 		return nil, false
 	}
@@ -445,8 +444,8 @@ func (o *Vlan) HasParent() bool {
 	return false
 }
 
-// SetParent gets a reference to the given string and assigns it to the Parent field.
-func (o *Vlan) SetParent(v string) {
+// SetParent gets a reference to the given VlanParent and assigns it to the Parent field.
+func (o *Vlan) SetParent(v VlanParent) {
 	o.Parent = &v
 }
 
