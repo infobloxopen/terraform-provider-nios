@@ -4,15 +4,23 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+)
+
+const (
+	// OptionSpaceOperationTimeout is the maximum amount of time to wait for eventual consistency
+	OptionSpaceOperationTimeout = 2 * time.Minute
 )
 
 var readableAttributesForDhcpoptionspace = "comment,name,option_definitions,space_type"
@@ -174,15 +182,24 @@ func (r *DhcpoptionspaceResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		DhcpoptionspaceAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	err := retry.RetryContext(ctx, OptionSpaceOperationTimeout, func() *retry.RetryError {
+		httpRes, err := r.client.DHCPAPI.
+			DhcpoptionspaceAPI.
+			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			Execute()
+		if err != nil {
+			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+				return nil
+			}
+			if strings.Contains(err.Error(), "cannot be deleted as it has an option referenced") {
+				return retry.RetryableError(err)
+			}
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpoptionspace, got error: %s", err))
+			return retry.NonRetryableError(err)
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpoptionspace, got error: %s", err))
+		return nil
+	})
+	if err != nil {
 		return
 	}
 }
