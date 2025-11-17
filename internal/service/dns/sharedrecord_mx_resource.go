@@ -36,7 +36,7 @@ func (r *SharedrecordMxResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *SharedrecordMxResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DNS MX Shared Record.",
+		MarkdownDescription: "Manages a DNS Shared MX Record.",
 		Attributes:          SharedrecordMxResourceSchemaAttributes,
 	}
 }

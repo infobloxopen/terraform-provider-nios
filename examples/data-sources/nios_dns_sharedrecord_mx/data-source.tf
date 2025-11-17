@@ -1,16 +1,16 @@
-// Retrieve a specific MX Shared Record by filters
-data "nios_dns_sharedrecord_mx" "get_mx_sharedrecord_with_filter" {
+// Retrieve a specific Shared MX Record by filters
+data "nios_dns_sharedrecord_mx" "get_sharedrecord_mx_with_filter" {
   filters = {
     name = "sharedrecord_mx_basic"
   }
 }
 
-// Retrieve specific MX Shared Records using Extensible Attributes
-data "nios_dns_sharedrecord_mx" "get_mx_sharedrecord_with_extattr_filter" {
+// Retrieve specific Shared MX Records using Extensible Attributes
+data "nios_dns_sharedrecord_mx" "get_sharedrecord_mx_with_extattr_filter" {
   extattrfilters = {
     Site = "location-1"
   }
 }
 
-// Retrieve all MX Shared Records
+// Retrieve all Shared MX Records
 data "nios_dns_sharedrecord_mx" "get_all_mx_sharedrecords" {}
