@@ -71,6 +71,11 @@ Optional:
 - `return_type` (String) The type of the return value for this source.
 - `sources` (Attributes List) Conditions for matching sources. (see [below for nested schema](#nestedatt--rules--sources))
 
+Read-Only:
+
+- `topology` (String) The topology for this rule.
+- `valid` (Boolean) Indicates whether the rule is valid.
+
 <a id="nestedatt--rules--sources"></a>
 ### Nested Schema for `rules.sources`
 
