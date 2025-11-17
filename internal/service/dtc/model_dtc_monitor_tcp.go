@@ -7,16 +7,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcMonitorTcpModel struct {
@@ -47,11 +50,17 @@ var DtcMonitorTcpAttrTypes = map[string]attr.Type{
 
 var DtcMonitorTcpResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "Comment for this DTC monitor; maximum 256 characters.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -74,48 +83,47 @@ var DtcMonitorTcpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"interval": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(5),
 		MarkdownDescription: "The interval for TCP health check.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The display name for this DTC monitor.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The port value for TCP requests.",
 	},
 	"retry_down": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The value of how many times the server should appear as down to be treated as dead after it was alive.",
 	},
 	"retry_up": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The value of how many times the server should appear as up to be treated as alive after it was dead.",
 	},
 	"timeout": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "The timeout for TCP health check in seconds.",
 	},
 }
 
-func ExpandDtcMonitorTcp(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcMonitorTcp {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcMonitorTcpModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
 
 func (m *DtcMonitorTcpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcMonitorTcp {
 	if m == nil {
 		return nil
 	}
 	to := &dtc.DtcMonitorTcp{
-		Ref:       flex.ExpandStringPointer(m.Ref),
 		Comment:   flex.ExpandStringPointer(m.Comment),
 		ExtAttrs:  ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Interval:  flex.ExpandInt64Pointer(m.Interval),

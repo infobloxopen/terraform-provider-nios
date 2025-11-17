@@ -20,6 +20,8 @@ var readableAttributesForDtcMonitorTcp = "comment,extattrs,interval,name,port,re
 func TestAccDtcMonitorTcpResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_tcp.test"
 	var v dtc.DtcMonitorTcp
+	name := acctest.RandomNameWithPrefix("dtc-pool")
+	port := 49152
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +29,16 @@ func TestAccDtcMonitorTcpResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorTcpBasicConfig(""),
+				Config: testAccDtcMonitorTcpBasicConfig(name, port),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "port", fmt.Sprintf("%d", port)),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "interval", "5"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "15"),
+					resource.TestCheckResourceAttr(resourceName, "retry_down", "1"),
+					resource.TestCheckResourceAttr(resourceName, "retry_up", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +49,8 @@ func TestAccDtcMonitorTcpResource_basic(t *testing.T) {
 func TestAccDtcMonitorTcpResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_monitor_tcp.test"
 	var v dtc.DtcMonitorTcp
+	name := acctest.RandomNameWithPrefix("dtc-pool")
+	port := 49152
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +58,7 @@ func TestAccDtcMonitorTcpResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcMonitorTcpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcMonitorTcpBasicConfig(""),
+				Config: testAccDtcMonitorTcpBasicConfig(name, port),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					testAccCheckDtcMonitorTcpDisappears(context.Background(), &v),
@@ -60,38 +69,11 @@ func TestAccDtcMonitorTcpResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccDtcMonitorTcpResource_Ref(t *testing.T) {
-	var resourceName = "nios_dtc_monitor_tcp.test_ref"
-	var v dtc.DtcMonitorTcp
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccDtcMonitorTcpRef("REF_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccDtcMonitorTcpRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccDtcMonitorTcpResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_tcp.test_comment"
 	var v dtc.DtcMonitorTcp
+	name := acctest.RandomNameWithPrefix("dtc-pool")
+	port := 49152
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +81,18 @@ func TestAccDtcMonitorTcpResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorTcpComment("COMMENT_REPLACE_ME"),
+				Config: testAccDtcMonitorTcpComment(name, port, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorTcpComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorTcpComment(name, port, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +103,10 @@ func TestAccDtcMonitorTcpResource_Comment(t *testing.T) {
 func TestAccDtcMonitorTcpResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_tcp.test_extattrs"
 	var v dtc.DtcMonitorTcp
+	name := acctest.RandomNameWithPrefix("dtc-pool")
+	port := 49152
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -379,12 +365,13 @@ func testAccCheckDtcMonitorTcpDisappears(ctx context.Context, v *dtc.DtcMonitorT
 	}
 }
 
-func testAccDtcMonitorTcpBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccDtcMonitorTcpBasicConfig(name string, port int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test" {
+    name  = %q
+    port  = %d
 }
-`)
+`, name, port)
 }
 
 func testAccDtcMonitorTcpRef(ref string) string {
@@ -395,12 +382,14 @@ resource "nios_dtc_monitor_tcp" "test_ref" {
 `, ref)
 }
 
-func testAccDtcMonitorTcpComment(comment string) string {
+func testAccDtcMonitorTcpComment(name string , port int, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_comment" {
+	name  = %q
+	port  = %d
     comment = %q
 }
-`, comment)
+`, name, port, comment)
 }
 
 func testAccDtcMonitorTcpExtAttrs(extAttrs string) string {
