@@ -3,7 +3,6 @@ resource "nios_ipam_vlanview" "ipam_vlanview_basic" {
   start_vlan_id = 5
   end_vlan_id   = 10
   name          = "example_vlan_view"
-
 }
 
 // Manage IPAM Vlan Views with Additional Fields

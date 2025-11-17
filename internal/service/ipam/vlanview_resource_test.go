@@ -68,7 +68,7 @@ func TestAccVlanviewResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccVlanviewResource_Import(t *testing.T) {
+func TestAccVlanviewResource_ImportVerify(t *testing.T) {
 	var resourceName = "nios_ipam_vlanview.test"
 	var v ipam.Vlanview
 	name := acctest.RandomNameWithPrefix("vlan_view")
