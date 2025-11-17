@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -22,7 +23,7 @@ func TestAccSharedrecordTxtResource_basic(t *testing.T) {
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -49,7 +50,7 @@ func TestAccSharedrecordTxtResource_disappears(t *testing.T) {
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "example txt for sharedrecord:txt"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -71,7 +72,7 @@ func TestAccSharedrecordTxtResource_Comment(t *testing.T) {
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -102,7 +103,7 @@ func TestAccSharedrecordTxtResource_Disable(t *testing.T) {
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -133,7 +134,7 @@ func TestAccSharedrecordTxtResource_ExtAttrs(t *testing.T) {
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	extAttrs1 := acctest.RandomName()
 	extAttrs2 := acctest.RandomName()
 	resource.ParallelTest(t, resource.TestCase{
@@ -167,7 +168,7 @@ func TestAccSharedrecordTxtResource_Name(t *testing.T) {
 	name1 := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	name2 := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -199,7 +200,7 @@ func TestAccSharedrecordTxtResource_Text(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text1 := acctest.RandomName()
 	text2 := acctest.RandomName()
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -230,7 +231,7 @@ func TestAccSharedrecordTxtResource_Ttl(t *testing.T) {
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -261,7 +262,7 @@ func TestAccSharedrecordTxtResource_UseTtl(t *testing.T) {
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -346,89 +347,105 @@ func testAccCheckSharedrecordTxtDisappears(ctx context.Context, v *dns.Sharedrec
 }
 
 func testAccSharedrecordTxtBasicConfig(name, sharedRecordGroup, text string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test" {
 	name = %q
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	text = %q
 }
-`, name, sharedRecordGroup, text)
+`, name, text)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordTxtComment(name, sharedRecordGroup, text, comment string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test_comment" {
     name = %q
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	text = %q
     comment = %q
 }
-`, name, sharedRecordGroup, text, comment)
+`, name, text, comment)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordTxtDisable(name, sharedRecordGroup, text string, disable bool) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test_disable" {
     name = %q
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	text = %q
     disable = %t
 }
-`, name, sharedRecordGroup, text, disable)
+`, name, text, disable)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordTxtExtAttrs(name, sharedRecordGroup, text string, extAttrs map[string]any) string {
 	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test_extattrs" {
     name = %q
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	text = %q
     extattrs = %s
 }
-`, name, sharedRecordGroup, text, extAttrsStr)
+`, name, text, extAttrsStr)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordTxtName(name, sharedRecordGroup, text string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test_name" {
     name = %q
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	text = %q
 }
-`, name, sharedRecordGroup, text)
+`, name, text)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordTxtText(name, sharedRecordGroup, text string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test_text" {
     name = %q
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	text = %q
 }
-`, name, sharedRecordGroup, text)
+`, name, text)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordTxtTtl(name, sharedRecordGroup, text string, ttl int32) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test_ttl" {
     name = %q
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	text = %q
     ttl = %d
     use_ttl = true
 }
-`, name, sharedRecordGroup, text, ttl)
+`, name, text, ttl)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordTxtUseTtl(name, sharedRecordGroup, text string, ttl int32, useTtl bool) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test_use_ttl" {
     name = %q
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	text = %q
 	ttl = %d
     use_ttl = %t
 }
-`, name, sharedRecordGroup, text, ttl, useTtl)
+`, name, text, ttl, useTtl)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
+}
+
+func testAccBaseSharedRecordGroup(name string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
+  name = %q
+}
+`, name)
 }
