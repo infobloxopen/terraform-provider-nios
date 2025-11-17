@@ -82,7 +82,7 @@ func (r *VlanviewResource) Create(ctx context.Context, req resource.CreateReques
 	apiRes, _, err := r.client.IPAMAPI.
 		VlanviewAPI.
 		Create(ctx).
-		Vlanview(*data.Expand(ctx, &resp.Diagnostics)).
+		Vlanview(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForVlanview).
 		ReturnAsObject(1).
 		Execute()
@@ -255,7 +255,7 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 	apiRes, _, err := r.client.IPAMAPI.
 		VlanviewAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Vlanview(*data.Expand(ctx, &resp.Diagnostics)).
+		Vlanview(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForVlanview).
 		ReturnAsObject(1).
 		Execute()

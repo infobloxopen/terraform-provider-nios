@@ -5,12 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -20,6 +22,7 @@ var readableAttributesForVlanview = "allow_range_overlapping,comment,end_vlan_id
 func TestAccVlanviewResource_basic(t *testing.T) {
 	var resourceName = "nios_ipam_vlanview.test"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +30,15 @@ func TestAccVlanviewResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewBasicConfig(),
+				Config: testAccVlanviewBasicConfig(15, name, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "15"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "10"),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "allow_range_overlapping", "false"),
+					resource.TestCheckResourceAttr(resourceName, "pre_create_vlan", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +49,7 @@ func TestAccVlanviewResource_basic(t *testing.T) {
 func TestAccVlanviewResource_disappears(t *testing.T) {
 	resourceName := "nios_ipam_vlanview.test"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +57,7 @@ func TestAccVlanviewResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckVlanviewDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVlanviewBasicConfig(),
+				Config: testAccVlanviewBasicConfig(15, name, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
 					testAccCheckVlanviewDisappears(context.Background(), &v),
@@ -60,9 +68,10 @@ func TestAccVlanviewResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccVlanviewResource_Ref(t *testing.T) {
-	var resourceName = "nios_ipam_vlanview.test_ref"
+func TestAccVlanviewResource_Import(t *testing.T) {
+	var resourceName = "nios_ipam_vlanview.test"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -70,19 +79,29 @@ func TestAccVlanviewResource_Ref(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewRef("REF_REPLACE_ME"),
+				Config: testAccVlanviewBasicConfig(15, name, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_REPLACE_ME"),
 				),
 			},
-			// Update and Read
+			// Import with PlanOnly to detect differences
 			{
-				Config: testAccVlanviewRef("REF_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ref", "REF_UPDATE_REPLACE_ME"),
-				),
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateIdFunc:                    testAccVlanviewImportStateIdFunc(resourceName),
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "ref",
+				PlanOnly:                             true,
+				ExpectError:                          regexp.MustCompile(`ImportStateVerify attributes not equivalent`),
+			},
+			// Import and Verify
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateIdFunc:                    testAccVlanviewImportStateIdFunc(resourceName),
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              []string{"extattrs_all"},
+				ImportStateVerifyIdentifierAttribute: "ref",
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -92,6 +111,7 @@ func TestAccVlanviewResource_Ref(t *testing.T) {
 func TestAccVlanviewResource_AllowRangeOverlapping(t *testing.T) {
 	var resourceName = "nios_ipam_vlanview.test_allow_range_overlapping"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,28 +119,28 @@ func TestAccVlanviewResource_AllowRangeOverlapping(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewAllowRangeOverlapping("ALLOW_RANGE_OVERLAPPING_REPLACE_ME"),
+				Config: testAccVlanviewAllowRangeOverlapping(15, name, 10, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "allow_range_overlapping", "ALLOW_RANGE_OVERLAPPING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "allow_range_overlapping", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanviewAllowRangeOverlapping("ALLOW_RANGE_OVERLAPPING_UPDATE_REPLACE_ME"),
+				Config: testAccVlanviewAllowRangeOverlapping(15, name, 10, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "allow_range_overlapping", "ALLOW_RANGE_OVERLAPPING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "allow_range_overlapping", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
-
 func TestAccVlanviewResource_Comment(t *testing.T) {
 	var resourceName = "nios_ipam_vlanview.test_comment"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,18 +148,18 @@ func TestAccVlanviewResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewComment("COMMENT_REPLACE_ME"),
+				Config: testAccVlanviewComment(15, name, 10, "Comment for the Vlan view object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanviewComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccVlanviewComment(15, name, 10, "Updated comment for the Vlan view object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the Vlan view object"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -150,6 +170,7 @@ func TestAccVlanviewResource_Comment(t *testing.T) {
 func TestAccVlanviewResource_EndVlanId(t *testing.T) {
 	var resourceName = "nios_ipam_vlanview.test_end_vlan_id"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,28 +178,30 @@ func TestAccVlanviewResource_EndVlanId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewEndVlanId("END_VLAN_ID_REPLACE_ME"),
+				Config: testAccVlanviewEndVlanId(4094, name, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "END_VLAN_ID_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "4094"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanviewEndVlanId("END_VLAN_ID_UPDATE_REPLACE_ME"),
+				Config: testAccVlanviewEndVlanId(1, name, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "END_VLAN_ID_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
-
 func TestAccVlanviewResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_ipam_vlanview.test_extattrs"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,28 +209,33 @@ func TestAccVlanviewResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccVlanviewExtAttrs(15, name, 10, map[string]string{
+					"Site": extAttrValue1,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanviewExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccVlanviewExtAttrs(15, name, 10, map[string]string{
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
-
 func TestAccVlanviewResource_Name(t *testing.T) {
 	var resourceName = "nios_ipam_vlanview.test_name"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
+	name2 := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,28 +243,29 @@ func TestAccVlanviewResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewName("NAME_REPLACE_ME"),
+				Config: testAccVlanviewName(15, name, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanviewName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccVlanviewName(15, name2, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
-
 func TestAccVlanviewResource_PreCreateVlan(t *testing.T) {
+	t.Skip("Skipping test as WAPI does not support updating pre_create_vlan attribute")
 	var resourceName = "nios_ipam_vlanview.test_pre_create_vlan"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -244,28 +273,20 @@ func TestAccVlanviewResource_PreCreateVlan(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewPreCreateVlan("PRE_CREATE_VLAN_REPLACE_ME"),
+				Config: testAccVlanviewPreCreateVlan(15, name, 10, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pre_create_vlan", "PRE_CREATE_VLAN_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccVlanviewPreCreateVlan("PRE_CREATE_VLAN_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pre_create_vlan", "PRE_CREATE_VLAN_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "pre_create_vlan", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
-
 func TestAccVlanviewResource_StartVlanId(t *testing.T) {
 	var resourceName = "nios_ipam_vlanview.test_start_vlan_id"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -273,28 +294,29 @@ func TestAccVlanviewResource_StartVlanId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewStartVlanId("START_VLAN_ID_REPLACE_ME"),
+				Config: testAccVlanviewStartVlanId(4094, name, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "START_VLAN_ID_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanviewStartVlanId("START_VLAN_ID_UPDATE_REPLACE_ME"),
+				Config: testAccVlanviewStartVlanId(4094, name, 4094),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "START_VLAN_ID_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "4094"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
-
 func TestAccVlanviewResource_VlanNamePrefix(t *testing.T) {
+	t.Skip("WAPI Doesnt allow updating vlan_name_prefix field")
 	var resourceName = "nios_ipam_vlanview.test_vlan_name_prefix"
 	var v ipam.Vlanview
+	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -302,15 +324,23 @@ func TestAccVlanviewResource_VlanNamePrefix(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanviewVlanNamePrefix("VLAN_NAME_PREFIX_REPLACE_ME"),
+				Config: testAccVlanviewVlanNamePrefix(15, name, 10, "prefixCaseInsensitive"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "VLAN_NAME_PREFIX_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "prefixCaseInsensitive"),
+				),
+			},
+			// Update and check for empty string
+			{
+				Config: testAccVlanviewVlanNamePrefix(15, name, 10, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", ""),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanviewVlanNamePrefix("VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
+				Config: testAccVlanviewVlanNamePrefix(15, name, 10, "VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
@@ -379,82 +409,116 @@ func testAccCheckVlanviewDisappears(ctx context.Context, v *ipam.Vlanview) resou
 	}
 }
 
-func testAccVlanviewBasicConfig() string {
-	// TODO: create basic resource with required fields
+func testAccVlanviewImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("not found: %s", resourceName)
+		}
+		if rs.Primary.Attributes["ref"] == "" {
+			return "", fmt.Errorf("ref is not set")
+		}
+		return rs.Primary.Attributes["ref"], nil
+	}
+}
+
+func testAccVlanviewBasicConfig(endVlanId int, name string, startVlanId int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test" {
+    end_vlan_id = %d
+    name = %q
+    start_vlan_id = %d
 }
-`)
-}
-
-func testAccVlanviewRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_vlanview" "test_ref" {
-    ref = %q
-}
-`, ref)
+`, endVlanId, name, startVlanId)
 }
 
-func testAccVlanviewAllowRangeOverlapping(allowRangeOverlapping string) string {
+func testAccVlanviewAllowRangeOverlapping(endVlanId int, name string, startVlanId int, allowRangeOverlapping string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test_allow_range_overlapping" {
-    allow_range_overlapping = %q
+    end_vlan_id = %d
+    name = %q
+    start_vlan_id = %d
+    allow_range_overlapping = %s
 }
-`, allowRangeOverlapping)
+`, endVlanId, name, startVlanId, allowRangeOverlapping)
 }
 
-func testAccVlanviewComment(comment string) string {
+func testAccVlanviewComment(endVlanId int, name string, startVlanId int, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test_comment" {
+    end_vlan_id = %d
+    name = %q
+    start_vlan_id = %d
     comment = %q
 }
-`, comment)
+`, endVlanId, name, startVlanId, comment)
 }
 
-func testAccVlanviewEndVlanId(endVlanId string) string {
+func testAccVlanviewEndVlanId(endVlanId int, name string, startVlanId int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test_end_vlan_id" {
-    end_vlan_id = %q
+    end_vlan_id = %d
+    name = %q
+    start_vlan_id = %d
 }
-`, endVlanId)
+`, endVlanId, name, startVlanId)
 }
 
-func testAccVlanviewExtAttrs(extAttrs string) string {
+func testAccVlanviewExtAttrs(endVlanId int, name string, startVlanId int, extAttrs map[string]string) string {
+	extAttrsStr := "{\n"
+	for k, v := range extAttrs {
+		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
+	}
+	extAttrsStr += "  }"
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test_extattrs" {
-    extattrs = %q
+    end_vlan_id = %d
+    name = %q
+    start_vlan_id = %d
+    extattrs = %s
 }
-`, extAttrs)
+`, endVlanId, name, startVlanId, extAttrsStr)
 }
 
-func testAccVlanviewName(name string) string {
+func testAccVlanviewName(endVlanId int, name string, startVlanId int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test_name" {
+    end_vlan_id = %d
     name = %q
+    start_vlan_id = %d
 }
-`, name)
+`, endVlanId, name, startVlanId)
 }
 
-func testAccVlanviewPreCreateVlan(preCreateVlan string) string {
+func testAccVlanviewPreCreateVlan(endVlanId int, name string, startVlanId int, preCreateVlan string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test_pre_create_vlan" {
-    pre_create_vlan = %q
+    end_vlan_id = %d
+    name = %q
+    start_vlan_id = %d
+    pre_create_vlan = %s
 }
-`, preCreateVlan)
+`, endVlanId, name, startVlanId, preCreateVlan)
 }
 
-func testAccVlanviewStartVlanId(startVlanId string) string {
+func testAccVlanviewStartVlanId(endVlanId int, name string, startVlanId int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test_start_vlan_id" {
-    start_vlan_id = %q
+    end_vlan_id = %d
+    name = %q
+    start_vlan_id = %d
 }
-`, startVlanId)
+`, endVlanId, name, startVlanId)
 }
 
-func testAccVlanviewVlanNamePrefix(vlanNamePrefix string) string {
+func testAccVlanviewVlanNamePrefix(endVlanId int, name string, startVlanId int, vlanNamePrefix string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test_vlan_name_prefix" {
+    end_vlan_id = %d
+    name = %q
+    start_vlan_id = %d
     vlan_name_prefix = %q
+	pre_create_vlan = true
 }
-`, vlanNamePrefix)
+`, endVlanId, name, startVlanId, vlanNamePrefix)
 }

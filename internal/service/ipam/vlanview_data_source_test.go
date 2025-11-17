@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
@@ -23,7 +24,7 @@ func TestAccVlanviewDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckVlanviewDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVlanviewDataSourceConfigFilters(name),
+				Config: testAccVlanviewDataSourceConfigFilters(15, name, 10),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVlanviewExists(context.Background(), resourceName, &v),
@@ -46,7 +47,7 @@ func TestAccVlanviewDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckVlanviewDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVlanviewDataSourceConfigExtAttrFilters(name, acctest.RandomName()),
+				Config: testAccVlanviewDataSourceConfigExtAttrFilters(15, name, 10, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVlanviewExists(context.Background(), resourceName, &v),
@@ -73,22 +74,28 @@ func testAccCheckVlanviewResourceAttrPair(resourceName, dataSourceName string) [
 	}
 }
 
-func testAccVlanviewDataSourceConfigFilters(name string) string {
+func testAccVlanviewDataSourceConfigFilters(endVlanId int, name string, startVlanId int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test" {
+  end_vlan_id = %d
+  name = %q
+  start_vlan_id = %d
 }
 
 data "nios_ipam_vlanview" "test" {
   filters = {
-	 = nios_ipam_vlanview.test.
+	end_vlan_id = nios_ipam_vlanview.test.end_vlan_id
   }
 }
-`)
+`, endVlanId, name, startVlanId)
 }
 
-func testAccVlanviewDataSourceConfigExtAttrFilters(name, extAttrsValue string) string {
+func testAccVlanviewDataSourceConfigExtAttrFilters(endVlanId int, name string, startVlanId int, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_vlanview" "test" {
+  end_vlan_id = %d
+  name = %q
+  start_vlan_id = %d
   extattrs = {
     Site = %q
   } 
@@ -99,5 +106,5 @@ data "nios_ipam_vlanview" "test" {
 	Site = nios_ipam_vlanview.test.extattrs.Site
   }
 }
-`, extAttrsValue)
+`, endVlanId, name, startVlanId, extAttrsValue)
 }

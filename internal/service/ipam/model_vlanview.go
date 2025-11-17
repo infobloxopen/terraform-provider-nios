@@ -3,10 +3,13 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -51,19 +54,25 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"allow_range_overlapping": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "When set to true VLAN Ranges under VLAN View can have overlapping ID.",
 	},
 	"comment": schema.StringAttribute{
-		Optional: true,
 		Computed: true,
-		Default:  stringdefault.StaticString(""),
+		Optional: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
 		},
-		MarkdownDescription: "Comment for the range; maximum 256 characters.",
+		Default:             stringdefault.StaticString(""),
+		MarkdownDescription: "A descriptive comment for this VLAN View.",
 	},
 	"end_vlan_id": schema.Int64Attribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 4094),
+		},
 		MarkdownDescription: "End ID for VLAN View.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -78,28 +87,40 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		MarkdownDescription: "Extensible attributes associated with the object , including default and internal attributes.",
 		ElementType:         types.StringType,
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Name of the VLAN View.",
 	},
 	"pre_create_vlan": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set on creation VLAN objects will be created once VLAN View created.",
 	},
 	"start_vlan_id": schema.Int64Attribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 4094),
+		},
 		MarkdownDescription: "Start ID for VLAN View.",
 	},
 	"vlan_name_prefix": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "If set on creation prefix string will be used for VLAN name.",
 	},
 }
 
-func (m *VlanviewModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Vlanview {
+func (m *VlanviewModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Vlanview {
 	if m == nil {
 		return nil
 	}
@@ -109,9 +130,11 @@ func (m *VlanviewModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ip
 		EndVlanId:             flex.ExpandInt64Pointer(m.EndVlanId),
 		ExtAttrs:              ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                  flex.ExpandStringPointer(m.Name),
-		PreCreateVlan:         flex.ExpandBoolPointer(m.PreCreateVlan),
 		StartVlanId:           flex.ExpandInt64Pointer(m.StartVlanId),
-		VlanNamePrefix:        flex.ExpandStringPointer(m.VlanNamePrefix),
+	}
+	if isCreate {
+		to.PreCreateVlan = flex.ExpandBoolPointer(m.PreCreateVlan)
+		to.VlanNamePrefix = flex.ExpandStringPointer(m.VlanNamePrefix)
 	}
 	return to
 }
