@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -162,47 +161,65 @@ func TestAccDtcTopologyResource_Name(t *testing.T) {
 }
 
 func TestAccDtcTopologyResource_Rules(t *testing.T) {
-	var resourceName = "nios_dtc_topology.test_rules"
-	var v dtc.DtcTopology
-	name := acctest.RandomNameWithPrefix("dtc-topology")
-	rules1 := []map[string]interface{}{
-		{
-			"dest_type": "SERVER",
-			"name":      "example-server1",
-			"host":      "2.2.2.2",
-		},
-	}
-	rules2 := []map[string]interface{}{
-		{
-			"dest_type": "SERVER",
-			"name":      "example-server1",
-			"host":      "2.2.2.2",
-		},
-	}
+    var resourceName = "nios_dtc_topology.test_rules"
+    var v dtc.DtcTopology
+    name := acctest.RandomNameWithPrefix("dtc-topology")
+    serverName := acctest.RandomNameWithPrefix("dtc-server")
+    
+    resource.ParallelTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.PreCheck(t) },
+        ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+        Steps: []resource.TestStep{
+            // Create and Read
+            {
+                Config: testAccDtcTopologyRulesWithServer(name, serverName, "2.2.2.2"),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
+                    resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
+                ),
+            },
+            // Update server host and verify topology rule still works
+            {
+                Config: testAccDtcTopologyRulesWithServer(name, serverName, "3.3.3.3"),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
+                    resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
+                ),
+            },
+            // Delete testing automatically occurs in TestCase
+        },
+    })
+}
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccDtcTopologyRules(name, rules1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccDtcTopologyRules(name, rules2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
+func TestAccDtcTopologyResource_RulesWithPool(t *testing.T) {
+    var resourceName = "nios_dtc_topology.test_rules_pool"
+    var v dtc.DtcTopology
+    name := acctest.RandomNameWithPrefix("dtc-topology")
+    poolName := acctest.RandomNameWithPrefix("dtc-pool")
+    
+    resource.ParallelTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.PreCheck(t) },
+        ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+        Steps: []resource.TestStep{
+            // Create and Read
+            {
+                Config: testAccDtcTopologyRulesWithPool(name, poolName, "ROUND_ROBIN"),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
+                    resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "POOL"),
+                ),
+            },
+            // Update pool lb_preferred_method and verify topology rule still works
+            {
+                Config: testAccDtcTopologyRulesWithPool(name, poolName, "GLOBAL_AVAILABILITY"),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
+                    resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "POOL"),
+                ),
+            },
+            // Delete testing automatically occurs in TestCase
+        },
+    })
 }
 
 func testAccCheckDtcTopologyExists(ctx context.Context, resourceName string, v *dtc.DtcTopology) resource.TestCheckFunc {
@@ -304,61 +321,52 @@ resource "nios_dtc_topology" "test_name" {
 `, name)
 }
 
-// func testAccDtcTopologyRules(name string , rules []map[string]any) string {
-// 	return fmt.Sprintf(`
-// resource "nios_dtc_topology" "test_rules" {
-//     rules = %q
-// }
-// `, rules)
-// }
 
-func testAccDtcServer(resourceName, name, host string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_server" "%s" {
+func testAccDtcTopologyRulesWithServer(topologyName, serverName, serverHost string) string {
+    return fmt.Sprintf(`
+resource "nios_dtc_server" "test_server" {
     name = "%s"
     host = "%s"
 }
-`, resourceName, name, host)
-}
-
-func testAccDtcTopologyRules(topologyName string, rules []map[string]interface{}) string {
-	var serverConfigs []string
-	var ruleConfigs []string
-
-	// First, create all the server resources
-	for i, rule := range rules {
-		if rule["dest_type"] == "SERVER" {
-			serverResourceName := fmt.Sprintf("server_%d", i)
-			serverName := rule["name"].(string)
-			serverHost := rule["host"].(string)
-
-			// Add server configuration - now passing serverName correctly
-			serverConfigs = append(serverConfigs, testAccDtcServer(serverResourceName, serverName, serverHost))
-
-			// Build rule configuration with reference to the server
-			ruleConfig := fmt.Sprintf(`
-        {
-            dest_type = "SERVER"
-            destination_link = nios_dtc_server.server_%d.ref
-        }`, i)
-			ruleConfigs = append(ruleConfigs, ruleConfig)
-		}
-	}
-
-	// Join all server configs
-	serversConfig := strings.Join(serverConfigs, "\n")
-
-	// Join all rule configs
-	rulesConfig := strings.Join(ruleConfigs, ",")
-
-	// Build the complete configuration
-	return fmt.Sprintf(`
-%s
 
 resource "nios_dtc_topology" "test_rules" {
     name = "%s"
-    rules = [%s
+    rules = [
+        {
+            dest_type = "SERVER"
+            destination_link = nios_dtc_server.test_server.ref
+        }
     ]
 }
-`, serversConfig, topologyName, rulesConfig)
+`, serverName, serverHost, topologyName)
+}
+
+func testAccDtcTopologyRulesWithPool(topologyName, poolName, lbMethod string) string {
+    return fmt.Sprintf(`
+resource "nios_dtc_server" "test_server_for_pool" {
+    name = "%s-server"
+    host = "2.3.3.4"
+}
+
+resource "nios_dtc_pool" "test_pool" {
+    name                = "%s"
+    lb_preferred_method = "%s"
+    servers = [
+        {
+            server = nios_dtc_server.test_server_for_pool.ref
+            ratio  = 1
+        }
+    ]
+}
+
+resource "nios_dtc_topology" "test_rules_pool" {
+    name = "%s"
+    rules = [
+        {
+            dest_type = "POOL"
+            destination_link = nios_dtc_pool.test_pool.ref
+        }
+    ]
+}
+`, poolName, poolName, lbMethod, topologyName)
 }

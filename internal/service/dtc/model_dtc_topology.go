@@ -89,17 +89,6 @@ var DtcTopologyResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandDtcTopology(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcTopology {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcTopologyModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
 
 func (m *DtcTopologyModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcTopology {
 	if m == nil {
