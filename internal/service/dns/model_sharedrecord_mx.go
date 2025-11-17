@@ -12,6 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,6 +20,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -120,7 +122,10 @@ var SharedrecordMxResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The preference value. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.",
 	},
 	"shared_record_group": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of the shared record group in which the record resides.",
 	},
 	"ttl": schema.Int64Attribute{
@@ -139,21 +144,22 @@ var SharedrecordMxResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *SharedrecordMxModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.SharedrecordMx {
+func (m *SharedrecordMxModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.SharedrecordMx {
 	if m == nil {
 		return nil
 	}
 	to := &dns.SharedrecordMx{
-		Ref:               flex.ExpandStringPointer(m.Ref),
-		Comment:           flex.ExpandStringPointer(m.Comment),
-		Disable:           flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		MailExchanger:     flex.ExpandStringPointer(m.MailExchanger),
-		Name:              flex.ExpandStringPointer(m.Name),
-		Preference:        flex.ExpandInt64Pointer(m.Preference),
-		SharedRecordGroup: flex.ExpandStringPointer(m.SharedRecordGroup),
-		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
+		Comment:       flex.ExpandStringPointer(m.Comment),
+		Disable:       flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:      ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		MailExchanger: flex.ExpandStringPointer(m.MailExchanger),
+		Name:          flex.ExpandStringPointer(m.Name),
+		Preference:    flex.ExpandInt64Pointer(m.Preference),
+		Ttl:           flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:        flex.ExpandBoolPointer(m.UseTtl),
+	}
+	if isCreate {
+		to.SharedRecordGroup = flex.ExpandStringPointer(m.SharedRecordGroup)
 	}
 	return to
 }

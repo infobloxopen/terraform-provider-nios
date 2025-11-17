@@ -20,13 +20,12 @@ import (
 
 var readableAttributesForSharedrecordMx = "comment,disable,dns_mail_exchanger,dns_name,extattrs,mail_exchanger,name,preference,shared_record_group,ttl,use_ttl"
 
-var sharedRecordGroup = "example-sharedrecordgroup"
-
 func TestAccSharedrecordMxResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_mx.test"
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -56,6 +55,7 @@ func TestAccSharedrecordMxResource_disappears(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -79,6 +79,7 @@ func TestAccSharedrecordMxResource_Comment(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -110,6 +111,7 @@ func TestAccSharedrecordMxResource_Disable(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -143,6 +145,7 @@ func TestAccSharedrecordMxResource_ExtAttrs(t *testing.T) {
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -179,6 +182,7 @@ func TestAccSharedrecordMxResource_MailExchanger(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger1 := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
 	mail_exchanger2 := acctest.RandomNameWithPrefix("updatedmail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -211,6 +215,7 @@ func TestAccSharedrecordMxResource_Name(t *testing.T) {
 	name1 := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	name2 := acctest.RandomNameWithPrefix("updatedsharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -242,6 +247,7 @@ func TestAccSharedrecordMxResource_Preference(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -273,6 +279,7 @@ func TestAccSharedrecordMxResource_SharedRecordGroup(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -296,6 +303,7 @@ func TestAccSharedrecordMxResource_Ttl(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -327,6 +335,7 @@ func TestAccSharedrecordMxResource_UseTtl(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	sharedRecordGroup := "example-sharedrecordgroup"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

@@ -75,7 +75,7 @@ func (r *SharedrecordMxResource) Create(ctx context.Context, req resource.Create
 	apiRes, _, err := r.client.DNSAPI.
 		SharedrecordMxAPI.
 		Create(ctx).
-		SharedrecordMx(*data.Expand(ctx, &resp.Diagnostics)).
+		SharedrecordMx(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordMx).
 		ReturnAsObject(1).
 		Execute()
@@ -173,7 +173,7 @@ func (r *SharedrecordMxResource) Update(ctx context.Context, req resource.Update
 	apiRes, _, err := r.client.DNSAPI.
 		SharedrecordMxAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		SharedrecordMx(*data.Expand(ctx, &resp.Diagnostics)).
+		SharedrecordMx(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordMx).
 		ReturnAsObject(1).
 		Execute()
