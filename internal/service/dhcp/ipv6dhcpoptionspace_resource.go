@@ -20,7 +20,7 @@ import (
 
 const (
 	// OptionSpaceOperationTimeout is the maximum amount of time to wait for eventual consistency
-	OptionSpaceOperationTimeout = 2 * time.Minute
+	IPv6OptionSpaceOperationTimeout = 2 * time.Minute
 )
 
 var readableAttributesForIpv6dhcpoptionspace = "comment,enterprise_number,name,option_definitions"
@@ -182,7 +182,7 @@ func (r *Ipv6dhcpoptionspaceResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	err := retry.RetryContext(ctx, OptionSpaceOperationTimeout, func() *retry.RetryError {
+	err := retry.RetryContext(ctx, IPv6OptionSpaceOperationTimeout, func() *retry.RetryError {
 		httpRes, err := r.client.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
 			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
