@@ -1,0 +1,159 @@
+package dtc
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+)
+
+type DtcMonitorTcpModel struct {
+	Ref         types.String `tfsdk:"ref"`
+	Comment     types.String `tfsdk:"comment"`
+	ExtAttrs    types.Map    `tfsdk:"extattrs"`
+	ExtAttrsAll types.Map    `tfsdk:"extattrs_all"`
+	Interval    types.Int64  `tfsdk:"interval"`
+	Name        types.String `tfsdk:"name"`
+	Port        types.Int64  `tfsdk:"port"`
+	RetryDown   types.Int64  `tfsdk:"retry_down"`
+	RetryUp     types.Int64  `tfsdk:"retry_up"`
+	Timeout     types.Int64  `tfsdk:"timeout"`
+}
+
+var DtcMonitorTcpAttrTypes = map[string]attr.Type{
+	"ref":          types.StringType,
+	"comment":      types.StringType,
+	"extattrs":     types.MapType{ElemType: types.StringType},
+	"extattrs_all": types.MapType{ElemType: types.StringType},
+	"interval":     types.Int64Type,
+	"name":         types.StringType,
+	"port":         types.Int64Type,
+	"retry_down":   types.Int64Type,
+	"retry_up":     types.Int64Type,
+	"timeout":      types.Int64Type,
+}
+
+var DtcMonitorTcpResourceSchemaAttributes = map[string]schema.Attribute{
+	"ref": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The reference to the object.",
+	},
+	"comment": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "Comment for this DTC monitor; maximum 256 characters.",
+	},
+	"extattrs": schema.MapAttribute{
+		Optional:    true,
+		Computed:    true,
+		ElementType: types.StringType,
+		Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
+		MarkdownDescription: "Extensible attributes associated with the object.",
+	},
+	"extattrs_all": schema.MapAttribute{
+		Computed:            true,
+		ElementType:         types.StringType,
+		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
+	},
+	"interval": schema.Int64Attribute{
+		Optional:            true,
+		MarkdownDescription: "The interval for TCP health check.",
+	},
+	"name": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The display name for this DTC monitor.",
+	},
+	"port": schema.Int64Attribute{
+		Optional:            true,
+		MarkdownDescription: "The port value for TCP requests.",
+	},
+	"retry_down": schema.Int64Attribute{
+		Optional:            true,
+		MarkdownDescription: "The value of how many times the server should appear as down to be treated as dead after it was alive.",
+	},
+	"retry_up": schema.Int64Attribute{
+		Optional:            true,
+		MarkdownDescription: "The value of how many times the server should appear as up to be treated as alive after it was dead.",
+	},
+	"timeout": schema.Int64Attribute{
+		Optional:            true,
+		MarkdownDescription: "The timeout for TCP health check in seconds.",
+	},
+}
+
+func ExpandDtcMonitorTcp(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcMonitorTcp {
+	if o.IsNull() || o.IsUnknown() {
+		return nil
+	}
+	var m DtcMonitorTcpModel
+	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil
+	}
+	return m.Expand(ctx, diags)
+}
+
+func (m *DtcMonitorTcpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcMonitorTcp {
+	if m == nil {
+		return nil
+	}
+	to := &dtc.DtcMonitorTcp{
+		Ref:       flex.ExpandStringPointer(m.Ref),
+		Comment:   flex.ExpandStringPointer(m.Comment),
+		ExtAttrs:  ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		Interval:  flex.ExpandInt64Pointer(m.Interval),
+		Name:      flex.ExpandStringPointer(m.Name),
+		Port:      flex.ExpandInt64Pointer(m.Port),
+		RetryDown: flex.ExpandInt64Pointer(m.RetryDown),
+		RetryUp:   flex.ExpandInt64Pointer(m.RetryUp),
+		Timeout:   flex.ExpandInt64Pointer(m.Timeout),
+	}
+	return to
+}
+
+func FlattenDtcMonitorTcp(ctx context.Context, from *dtc.DtcMonitorTcp, diags *diag.Diagnostics) types.Object {
+	if from == nil {
+		return types.ObjectNull(DtcMonitorTcpAttrTypes)
+	}
+	m := DtcMonitorTcpModel{}
+	m.Flatten(ctx, from, diags)
+	m.ExtAttrsAll = types.MapNull(types.StringType)
+	t, d := types.ObjectValueFrom(ctx, DtcMonitorTcpAttrTypes, m)
+	diags.Append(d...)
+	return t
+}
+
+func (m *DtcMonitorTcpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorTcp, diags *diag.Diagnostics) {
+	if from == nil {
+		return
+	}
+	if m == nil {
+		*m = DtcMonitorTcpModel{}
+	}
+	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Comment = flex.FlattenStringPointer(from.Comment)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	m.Interval = flex.FlattenInt64Pointer(from.Interval)
+	m.Name = flex.FlattenStringPointer(from.Name)
+	m.Port = flex.FlattenInt64Pointer(from.Port)
+	m.RetryDown = flex.FlattenInt64Pointer(from.RetryDown)
+	m.RetryUp = flex.FlattenInt64Pointer(from.RetryUp)
+	m.Timeout = flex.FlattenInt64Pointer(from.Timeout)
+}
