@@ -87,10 +87,12 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ciphers": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "An optional cipher list for a secure HTTP/S connection.",
 	},
 	"client_cert": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "An optional client certificate, supplied in a secure HTTP/S mode if present.",
 	},
 	"comment": schema.StringAttribute{
@@ -130,6 +132,7 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"content_check_regex": schema.StringAttribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -203,6 +206,7 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"request": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "An HTTP request to send.",
 	},
 	"result": schema.StringAttribute{
