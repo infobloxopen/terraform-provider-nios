@@ -3,12 +3,12 @@ resource "nios_dns_zone_auth" "parent_zone" {
   fqdn = "example_auth_zone.com"
 }
 
-// Create an Shared Record Group with Basic Fields
+// Create a Shared Record Group with Basic Fields
 resource "nios_dns_sharedrecordgroup" "shared_record_group_with_basic_fields" {
   name = "example-shared-record-group"
 }
 
-// Create an Shared Record Group with Additional Fields
+// Create a Shared Record Group with Additional Fields
 resource "nios_dns_sharedrecordgroup" "shared_record_group_with_additional_fields" {
   name = "example-shared-record-group-2"
 
