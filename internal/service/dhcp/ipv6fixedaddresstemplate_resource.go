@@ -250,7 +250,7 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 			23: true,
 		}
 
-		var options []FixedaddressOptionsModel
+		var options []Ipv6fixedaddresstemplateOptionsModel
 		diags := data.Options.ElementsAs(ctx, &options, false)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -313,7 +313,7 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 		}
 	}
 
-	var options []FixedaddressOptionsModel
+	var options []Ipv6fixedaddresstemplateOptionsModel
 	diags := data.Options.ElementsAs(ctx, &options, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
