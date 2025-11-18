@@ -26,7 +26,7 @@ data "nios_" "get__using_extensible_attributes" {
   }
 }
 
-// Retrieve all IPAM Vlan
+// Retrieve all IPAM Vlans
 data "nios_ipam_vlan" "get_all_ipam_vlan" {}
 ```
 
@@ -60,7 +60,6 @@ Optional:
 - `department` (String) Department where VLAN is used.
 - `description` (String) Description for the VLAN object, may be potentially used for longer VLAN names.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
-- `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for Record AAAA. (see [below for nested schema](#nestedatt--result--func_call))
 - `reserved` (Boolean) When set VLAN can only be assigned to IPAM object manually.
 
 Read-Only:
@@ -69,18 +68,3 @@ Read-Only:
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default and internal attributes.
 - `ref` (String) The reference to the object.
 - `status` (String) Status of VLAN object. Can be Assigned, Unassigned, Reserved.
-
-<a id="nestedatt--result--func_call"></a>
-### Nested Schema for `result.func_call`
-
-Required:
-
-- `attribute_name` (String) The attribute to be called.
-
-Optional:
-
-- `object` (String) The object to be called.
-- `object_function` (String) The function to be called.
-- `object_parameters` (Map of String) The parameters for the object.
-- `parameters` (Map of String) The parameters for the function.
-- `result_field` (String) The result field of the function.
