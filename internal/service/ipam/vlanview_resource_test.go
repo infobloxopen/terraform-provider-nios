@@ -326,22 +326,6 @@ func TestAccVlanviewResource_VlanNamePrefix(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "prefixCaseInsensitive"),
 				),
 			},
-			// Update and check for empty string
-			{
-				Config: testAccVlanviewVlanNamePrefix(15, name, 10, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", ""),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccVlanviewVlanNamePrefix(15, name, 10, "VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
-				),
-			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})

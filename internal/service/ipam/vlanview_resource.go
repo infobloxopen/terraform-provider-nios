@@ -20,6 +20,7 @@ var readableAttributesForVlanview = "allow_range_overlapping,comment,end_vlan_id
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &VlanviewResource{}
 var _ resource.ResourceWithImportState = &VlanviewResource{}
+var _ resource.ResourceWithValidateConfig = &VlanviewResource{}
 
 func NewVlanviewResource() resource.Resource {
 	return &VlanviewResource{}
@@ -320,6 +321,24 @@ func (r *VlanviewResource) Delete(ctx context.Context, req resource.DeleteReques
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Vlanview, got error: %s", err))
 		return
+	}
+}
+
+func (r *VlanviewResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data VlanviewModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.VlanNamePrefix.IsUnknown() && !data.VlanNamePrefix.IsNull() {
+		if data.PreCreateVlan.IsNull() && !data.PreCreateVlan.IsUnknown() && !data.PreCreateVlan.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Configuration Error",
+				"`vlan_name_prefix` can only be set when `pre_create_vlan` is set to true.",
+			)
+		}
 	}
 }
 
