@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -92,7 +91,6 @@ func TestAccVlanviewResource_Import(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "ref",
 				PlanOnly:                             true,
-				ExpectError:                          regexp.MustCompile(`ImportStateVerify attributes not equivalent`),
 			},
 			// Import and Verify
 			{
