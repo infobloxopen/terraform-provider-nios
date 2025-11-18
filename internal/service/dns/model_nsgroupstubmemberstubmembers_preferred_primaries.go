@@ -87,8 +87,7 @@ func (m *NsgroupstubmemberstubmembersPreferredPrimariesModel) Expand(ctx context
 	if m == nil {
 		return nil
 	}
-	to := &dns.NsgroupstubmemberstubmembersPreferredPrimaries{
-	}
+	to := &dns.NsgroupstubmemberstubmembersPreferredPrimaries{}
 	return to
 }
 
