@@ -103,9 +103,7 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Name of the VLAN View.",
 	},
 	"pre_create_vlan": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set on creation VLAN objects will be created once VLAN View created.",
 	},
 	"start_vlan_id": schema.Int64Attribute{
@@ -116,11 +114,7 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Start ID for VLAN View.",
 	},
 	"vlan_name_prefix": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-		},
+		Computed:            true,
 		MarkdownDescription: "If set on creation prefix string will be used for VLAN name.",
 	},
 }
@@ -136,10 +130,6 @@ func (m *VlanviewModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		ExtAttrs:              ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                  flex.ExpandStringPointer(m.Name),
 		StartVlanId:           flex.ExpandInt64Pointer(m.StartVlanId),
-	}
-	if isCreate {
-		to.PreCreateVlan = flex.ExpandBoolPointer(m.PreCreateVlan)
-		to.VlanNamePrefix = flex.ExpandStringPointer(m.VlanNamePrefix)
 	}
 	return to
 }
