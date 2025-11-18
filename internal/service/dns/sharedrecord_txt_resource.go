@@ -114,7 +114,6 @@ func (r *SharedrecordTxtResource) Read(ctx context.Context, req resource.ReadReq
 		ReturnAsObject(1).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
