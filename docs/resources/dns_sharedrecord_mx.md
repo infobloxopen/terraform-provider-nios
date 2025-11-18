@@ -13,7 +13,7 @@ Manages a DNS Shared MX Record.
 ## Example Usage
 
 ```terraform
-// Create Parent Shared Record Group
+// Create a Shared Record Group (Required as Parent)
 resource "nios_dns_sharedrecordgroup" "parent_sharedrecordgroup" {
   name = "example-sharedrecordgroup"
 }
