@@ -127,6 +127,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewIPAllocationResource,
 		dns.NewIPAssociationResource,
 		dns.NewSharedrecordgroupResource,
+		dns.NewSharedrecordTxtResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -135,6 +136,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewIpv6rangetemplateResource,
 		dhcp.NewIpv6dhcpoptionspaceResource,
 		dhcp.NewIpv6dhcpoptiondefinitionResource,
+		dhcp.NewIpv6fixedaddresstemplateResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -211,6 +213,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewNsgroupStubmemberDataSource,
 		dns.NewRecordHostDataSource,
 		dns.NewSharedrecordgroupDataSource,
+		dns.NewSharedrecordTxtDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -219,6 +222,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewIpv6rangetemplateDataSource,
 		dhcp.NewIpv6dhcpoptionspaceDataSource,
 		dhcp.NewIpv6dhcpoptiondefinitionDataSource,
+		dhcp.NewIpv6fixedaddresstemplateDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
