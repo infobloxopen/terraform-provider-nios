@@ -51,10 +51,10 @@ resource "nios_ipam_vlanview" "ipam_vlanview_with_additional_fields" {
 - `allow_range_overlapping` (Boolean) When set to true VLAN Ranges under VLAN View can have overlapping ID.
 - `comment` (String) A descriptive comment for this VLAN View.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
+- `pre_create_vlan` (Boolean) If set on creation VLAN objects will be created once VLAN View created.
+- `vlan_name_prefix` (String) If set on creation prefix string will be used for VLAN name.
 
 ### Read-Only
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default and internal attributes.
-- `pre_create_vlan` (Boolean) If set on creation VLAN objects will be created once VLAN View created.
 - `ref` (String) The reference to the object.
-- `vlan_name_prefix` (String) If set on creation prefix string will be used for VLAN name.

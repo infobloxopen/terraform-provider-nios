@@ -103,7 +103,9 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Name of the VLAN View.",
 	},
 	"pre_create_vlan": schema.BoolAttribute{
+		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set on creation VLAN objects will be created once VLAN View created.",
 	},
 	"start_vlan_id": schema.Int64Attribute{
@@ -114,7 +116,11 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Start ID for VLAN View.",
 	},
 	"vlan_name_prefix": schema.StringAttribute{
-		Computed:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "If set on creation prefix string will be used for VLAN name.",
 	},
 }
@@ -130,6 +136,10 @@ func (m *VlanviewModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		ExtAttrs:              ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                  flex.ExpandStringPointer(m.Name),
 		StartVlanId:           flex.ExpandInt64Pointer(m.StartVlanId),
+	}
+	if isCreate {
+		to.PreCreateVlan = flex.ExpandBoolPointer(m.PreCreateVlan)
+		to.VlanNamePrefix = flex.ExpandStringPointer(m.VlanNamePrefix)
 	}
 	return to
 }
@@ -159,7 +169,11 @@ func (m *VlanviewModel) Flatten(ctx context.Context, from *ipam.Vlanview, diags 
 	m.EndVlanId = flex.FlattenInt64Pointer(from.EndVlanId)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.PreCreateVlan = types.BoolPointerValue(from.PreCreateVlan)
+	if m.PreCreateVlan.IsUnknown() || m.PreCreateVlan.IsNull() {
+		m.PreCreateVlan = types.BoolPointerValue(from.PreCreateVlan)
+	}
 	m.StartVlanId = flex.FlattenInt64Pointer(from.StartVlanId)
-	m.VlanNamePrefix = flex.FlattenStringPointer(from.VlanNamePrefix)
+	if m.VlanNamePrefix.IsUnknown() || m.VlanNamePrefix.IsNull() {
+		m.VlanNamePrefix = flex.FlattenStringPointer(from.VlanNamePrefix)
+	}
 }
