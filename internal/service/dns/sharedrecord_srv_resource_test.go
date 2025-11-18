@@ -661,11 +661,3 @@ resource "nios_dns_sharedrecord_srv" "test_weight" {
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
-
-func testAccBaseSharedRecordGroup(name string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
-  name = %q
-}
-`, name)
-}
