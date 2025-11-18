@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
@@ -103,9 +104,12 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Name of the VLAN View.",
 	},
 	"pre_create_vlan": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		PlanModifiers: []planmodifier.Bool{
+			planmodifiers.ImmutableBool(),
+		},
 		MarkdownDescription: "If set on creation VLAN objects will be created once VLAN View created.",
 	},
 	"start_vlan_id": schema.Int64Attribute{
@@ -120,6 +124,9 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+		},
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
 		},
 		MarkdownDescription: "If set on creation prefix string will be used for VLAN name.",
 	},
