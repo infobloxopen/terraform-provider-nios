@@ -356,12 +356,27 @@ func TestAccIpv6fixedaddresstemplateResource_Options(t *testing.T) {
 			"num":   "15",
 			"value": "example.com",
 		},
+		{
+			"num":          "37",
+			"value":        "remote-id",
+			"vendor_class": "DHCPv6",
+		},
+		{
+			"name":         "dhcp6.subscriber-id",
+			"value":        "subscriber-id",
+			"vendor_class": "DHCPv6",
+		},
 	}
 	updatedOptions := []map[string]any{
 		{
 			"name":  "domain-name",
 			"num":   "15",
 			"value": "example.org",
+		},
+		{
+			"num":          "37",
+			"value":        "remote-id-updated",
+			"vendor_class": "DHCPv6",
 		},
 	}
 
@@ -374,10 +389,16 @@ func TestAccIpv6fixedaddresstemplateResource_Options(t *testing.T) {
 				Config: testAccIpv6fixedaddresstemplateOptions(name, options, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddresstemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "3"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.num", "15"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "example.com"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.num", "37"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "remote-id"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.vendor_class", "DHCPv6"),
+					resource.TestCheckResourceAttr(resourceName, "options.2.name", "dhcp6.subscriber-id"),
+					resource.TestCheckResourceAttr(resourceName, "options.2.value", "subscriber-id"),
+					resource.TestCheckResourceAttr(resourceName, "options.2.vendor_class", "DHCPv6"),
 				),
 			},
 			// Update and Read
@@ -385,10 +406,13 @@ func TestAccIpv6fixedaddresstemplateResource_Options(t *testing.T) {
 				Config: testAccIpv6fixedaddresstemplateOptions(name, updatedOptions, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddresstemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.num", "15"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "example.org"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.num", "37"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "remote-id-updated"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.vendor_class", "DHCPv6"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
