@@ -229,10 +229,8 @@ func TestAccRecordRpzAResource_Name(t *testing.T) {
 func TestAccRecordRpzAResource_RpZone(t *testing.T) {
 	var resourceName = "nios_rpz_record_rpz_a.test_rp_zone"
 	var v rpz.RecordRpzA
-	name1 := acctest.RandomName() + ".rpz.example.com"
-	name2 := acctest.RandomName() + ".rpz.test.com"
-	rpZone1 := "rpz.example.com"
-	rpZone2 := "rpz.test.com"
+	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := "rpz.example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -240,22 +238,15 @@ func TestAccRecordRpzAResource_RpZone(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzARpZone(name1, "10.10.0.1", rpZone1),
+				Config: testAccRecordRpzARpZone(name, "10.10.0.1", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name1),
-					resource.TestCheckResourceAttr(resourceName, "rp_zone", rpZone1),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "rp_zone", rpZone),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccRecordRpzARpZone(name2, "10.10.0.1", rpZone2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name2),
-					resource.TestCheckResourceAttr(resourceName, "rp_zone", rpZone2),
-				),
-			},
+			// Can't update rp_zone as it is immutable
+
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -325,8 +316,7 @@ func TestAccRecordRpzAResource_View(t *testing.T) {
 	var resourceName = "nios_rpz_record_rpz_a.test_view"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
-	view1 := "custom_view_1"
-	view2 := "custom_view_2"
+	view := "custom_view_1"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -334,20 +324,14 @@ func TestAccRecordRpzAResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzAView(name, "10.10.0.1", "rpz.example.com", view1),
+				Config: testAccRecordRpzAView(name, "10.10.0.1", "rpz.example.com", view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", view1),
+					resource.TestCheckResourceAttr(resourceName, "view", view),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccRecordRpzAView(name, "10.10.0.1", "rpz.example.com", view2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", view2),
-				),
-			},
+			// Can't update view as it is immutable
+
 			// Delete testing automatically occurs in TestCase
 		},
 	})

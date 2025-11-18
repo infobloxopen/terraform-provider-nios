@@ -21,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/rpz"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -95,13 +96,16 @@ var RecordRpzAResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "The name for a record in FQDN format. This value cannot be in unicode format.",
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 	},
 	"rp_zone": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The name of a response policy zone in which the record resides.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"ttl": schema.Int64Attribute{
 		Computed:            true,
@@ -121,6 +125,9 @@ var RecordRpzAResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The name of the DNS View in which the record resides. Example: \"external\".",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"zone": schema.StringAttribute{
 		Computed:            true,
