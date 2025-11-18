@@ -161,65 +161,65 @@ func TestAccDtcTopologyResource_Name(t *testing.T) {
 }
 
 func TestAccDtcTopologyResource_Rules(t *testing.T) {
-    var resourceName = "nios_dtc_topology.test_rules"
-    var v dtc.DtcTopology
-    name := acctest.RandomNameWithPrefix("dtc-topology")
-    serverName := acctest.RandomNameWithPrefix("dtc-server")
-    
-    resource.ParallelTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.PreCheck(t) },
-        ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-        Steps: []resource.TestStep{
-            // Create and Read
-            {
-                Config: testAccDtcTopologyRulesWithServer(name, serverName, "2.2.2.2"),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-                    resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
-                ),
-            },
-            // Update server host and verify topology rule still works
-            {
-                Config: testAccDtcTopologyRulesWithServer(name, serverName, "3.3.3.3"),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-                    resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
-                ),
-            },
-            // Delete testing automatically occurs in TestCase
-        },
-    })
+	var resourceName = "nios_dtc_topology.test_rules"
+	var v dtc.DtcTopology
+	name := acctest.RandomNameWithPrefix("dtc-topology")
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccDtcTopologyRulesWithServer(name, serverName, "2.2.2.2"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
+				),
+			},
+			// Update server host and verify topology rule still works
+			{
+				Config: testAccDtcTopologyRulesWithServer(name, serverName, "3.3.3.3"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "SERVER"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
 }
 
 func TestAccDtcTopologyResource_RulesWithPool(t *testing.T) {
-    var resourceName = "nios_dtc_topology.test_rules_pool"
-    var v dtc.DtcTopology
-    name := acctest.RandomNameWithPrefix("dtc-topology")
-    poolName := acctest.RandomNameWithPrefix("dtc-pool")
-    
-    resource.ParallelTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.PreCheck(t) },
-        ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-        Steps: []resource.TestStep{
-            // Create and Read
-            {
-                Config: testAccDtcTopologyRulesWithPool(name, poolName, "ROUND_ROBIN"),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-                    resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "POOL"),
-                ),
-            },
-            // Update pool lb_preferred_method and verify topology rule still works
-            {
-                Config: testAccDtcTopologyRulesWithPool(name, poolName, "GLOBAL_AVAILABILITY"),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
-                    resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "POOL"),
-                ),
-            },
-            // Delete testing automatically occurs in TestCase
-        },
-    })
+	var resourceName = "nios_dtc_topology.test_rules_pool"
+	var v dtc.DtcTopology
+	name := acctest.RandomNameWithPrefix("dtc-topology")
+	poolName := acctest.RandomNameWithPrefix("dtc-topology")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccDtcTopologyRulesWithPool(name, poolName, "ROUND_ROBIN"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "POOL"),
+				),
+			},
+			// Update pool lb_preferred_method and verify topology rule still works
+			{
+				Config: testAccDtcTopologyRulesWithPool(name, poolName, "GLOBAL_AVAILABILITY"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcTopologyExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rules.0.dest_type", "POOL"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
 }
 
 func testAccCheckDtcTopologyExists(ctx context.Context, resourceName string, v *dtc.DtcTopology) resource.TestCheckFunc {
@@ -321,9 +321,8 @@ resource "nios_dtc_topology" "test_name" {
 `, name)
 }
 
-
 func testAccDtcTopologyRulesWithServer(topologyName, serverName, serverHost string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "nios_dtc_server" "test_server" {
     name = "%s"
     host = "%s"
@@ -342,7 +341,7 @@ resource "nios_dtc_topology" "test_rules" {
 }
 
 func testAccDtcTopologyRulesWithPool(topologyName, poolName, lbMethod string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "nios_dtc_server" "test_server_for_pool" {
     name = "%s-server"
     host = "2.3.3.4"

@@ -1,4 +1,4 @@
-// Create an DTC Server(Required as Parent)
+// Create an DTC Server (Required as Parent)
 resource "nios_dtc_server" "create_dtc_server" {
   name = "example-server"
   host = "2.3.3.4"

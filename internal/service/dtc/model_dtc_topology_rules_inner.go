@@ -37,9 +37,9 @@ var DtcTopologyRulesInnerAttrTypes = map[string]attr.Type{
 
 var DtcTopologyRulesInnerResourceSchemaAttributes = map[string]schema.Attribute{
 	"dest_type": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("POOL","SERVER"),
+			stringvalidator.OneOf("POOL", "SERVER"),
 		},
 		MarkdownDescription: "The type of the destination for this rule.",
 	},
@@ -121,19 +121,19 @@ func (m *DtcTopologyRulesInnerModel) Flatten(ctx context.Context, from *dtc.DtcT
 	// Check which OneOf variant is populated
 	if from.DtcTopologyRulesInnerOneOf != nil && from.DtcTopologyRulesInnerOneOf.Ref != nil {
 		if m.DestType.IsNull() || m.DestType.IsUnknown() {
-            m.DestType = flex.FlattenStringPointerNilAsNotEmpty(nil)
-        }
-        if m.DestinationLink.IsNull() || m.DestinationLink.IsUnknown() {
-            m.DestinationLink = flex.FlattenStringPointerNilAsNotEmpty(nil)
-        }
-        if m.ReturnType.IsNull() || m.ReturnType.IsUnknown() {
-            m.ReturnType = flex.FlattenStringPointerNilAsNotEmpty(nil)
-        }
-        if m.Sources.IsNull() || m.Sources.IsUnknown() {
-            m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, nil, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
-        }
+			m.DestType = types.StringNull()
+		}
+		if m.DestinationLink.IsNull() || m.DestinationLink.IsUnknown() {
+			m.DestinationLink = types.StringNull()
+		}
+		if m.ReturnType.IsNull() || m.ReturnType.IsUnknown() {
+			m.ReturnType = types.StringNull()
+		}
+		if m.Sources.IsNull() || m.Sources.IsUnknown() {
+			m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, nil, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
+		}
 		if m.Topology.IsNull() || m.Topology.IsUnknown() {
-			m.Topology = flex.FlattenStringPointerNilAsNotEmpty(nil)
+			m.Topology = types.StringNull()
 		}
 		if m.Valid.IsNull() || m.Valid.IsUnknown() {
 			m.Valid = types.BoolNull()
