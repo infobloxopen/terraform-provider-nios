@@ -31,7 +31,7 @@ type DhcpoptiondefinitionResource struct {
 }
 
 func (r *DhcpoptiondefinitionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_dhcpoptiondefinition"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_optiondefinition"
 }
 
 func (r *DhcpoptiondefinitionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

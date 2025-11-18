@@ -32,7 +32,7 @@ type DhcpoptiondefinitionDataSource struct {
 }
 
 func (d *DhcpoptiondefinitionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_dhcpoptiondefinition"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_optiondefinition"
 }
 
 type DhcpoptiondefinitionModelWithFilter struct {

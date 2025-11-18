@@ -20,7 +20,7 @@ import (
 var readableAttributesForDhcpoptiondefinition = "code,name,space,type"
 
 func TestAccDhcpoptiondefinitionResource_basic(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpoptiondefinition.test"
+	var resourceName = "nios_dhcp_optiondefinition.test"
 	var v dhcp.Dhcpoptiondefinition
 	name := acctest.RandomNameWithPrefix("dhcp-option-definition")
 	space := acctest.RandomNameWithPrefix("dhcp-option-space")
@@ -46,7 +46,7 @@ func TestAccDhcpoptiondefinitionResource_basic(t *testing.T) {
 }
 
 func TestAccDhcpoptiondefinitionResource_disappears(t *testing.T) {
-	resourceName := "nios_dhcp_dhcpoptiondefinition.test"
+	resourceName := "nios_dhcp_optiondefinition.test"
 	var v dhcp.Dhcpoptiondefinition
 	name := acctest.RandomNameWithPrefix("dhcp-option-definition")
 	space := acctest.RandomNameWithPrefix("dhcp-option-space")
@@ -69,7 +69,7 @@ func TestAccDhcpoptiondefinitionResource_disappears(t *testing.T) {
 }
 
 func TestAccDhcpoptiondefinitionResource_Code(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpoptiondefinition.test_code"
+	var resourceName = "nios_dhcp_optiondefinition.test_code"
 	var v dhcp.Dhcpoptiondefinition
 	name := acctest.RandomNameWithPrefix("dhcp-option-definition")
 	space := acctest.RandomNameWithPrefix("dhcp-option-space")
@@ -100,7 +100,7 @@ func TestAccDhcpoptiondefinitionResource_Code(t *testing.T) {
 }
 
 func TestAccDhcpoptiondefinitionResource_Name(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpoptiondefinition.test_name"
+	var resourceName = "nios_dhcp_optiondefinition.test_name"
 	var v dhcp.Dhcpoptiondefinition
 	name := acctest.RandomNameWithPrefix("dhcp-option-definition")
 	updatedName := acctest.RandomNameWithPrefix("dhcp-option-definition")
@@ -132,13 +132,13 @@ func TestAccDhcpoptiondefinitionResource_Name(t *testing.T) {
 }
 
 func TestAccDhcpoptiondefinitionResource_Space(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpoptiondefinition.test_space"
+	var resourceName = "nios_dhcp_optiondefinition.test_space"
 	var v dhcp.Dhcpoptiondefinition
 	name := acctest.RandomNameWithPrefix("dhcp-option-definition")
 	optionSpace1 := acctest.RandomNameWithPrefix("option-space")
 	optionSpace2 := acctest.RandomNameWithPrefix("option-space")
-	optionSpace1ResourceName := "nios_dhcp_dhcpoptionspace.test1"
-	optionSpace2ResourceName := "nios_dhcp_dhcpoptionspace.test2"
+	optionSpace1ResourceName := "nios_dhcp_optionspace.test1"
+	optionSpace2ResourceName := "nios_dhcp_optionspace.test2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -166,7 +166,7 @@ func TestAccDhcpoptiondefinitionResource_Space(t *testing.T) {
 }
 
 func TestAccDhcpoptiondefinitionResource_Type(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpoptiondefinition.test_type"
+	var resourceName = "nios_dhcp_optiondefinition.test_type"
 	var v dhcp.Dhcpoptiondefinition
 	name := acctest.RandomNameWithPrefix("dhcp-option-definition")
 	space := acctest.RandomNameWithPrefix("dhcp-option-space")
@@ -256,11 +256,11 @@ func testAccCheckDhcpoptiondefinitionDisappears(ctx context.Context, v *dhcp.Dhc
 
 func testAccDhcpoptiondefinitionBasicConfig(code, name, optionType, optionSpace string) string {
 	config := fmt.Sprintf(`
-resource "nios_dhcp_dhcpoptiondefinition" "test" {
+resource "nios_dhcp_optiondefinition" "test" {
     code = %q
     name = %q
     type = %q
-	space = nios_dhcp_dhcpoptionspace.test.name
+	space = nios_dhcp_optionspace.test.name
 }
 `, code, name, optionType)
 	return strings.Join([]string{testAccBaseWithDHCPOptionSpace(optionSpace), config}, "")
@@ -268,11 +268,11 @@ resource "nios_dhcp_dhcpoptiondefinition" "test" {
 
 func testAccDhcpoptiondefinitionCode(code string, name string, optionType, optionSpace string) string {
 	config := fmt.Sprintf(`
-resource "nios_dhcp_dhcpoptiondefinition" "test_code" {
+resource "nios_dhcp_optiondefinition" "test_code" {
     code = %q
     name = %q
     type = %q
-	space = nios_dhcp_dhcpoptionspace.test.name
+	space = nios_dhcp_optionspace.test.name
 }
 `, code, name, optionType)
 	return strings.Join([]string{testAccBaseWithDHCPOptionSpace(optionSpace), config}, "")
@@ -280,11 +280,11 @@ resource "nios_dhcp_dhcpoptiondefinition" "test_code" {
 
 func testAccDhcpoptiondefinitionName(code string, name string, optionType, optionSpace string) string {
 	config := fmt.Sprintf(`
-resource "nios_dhcp_dhcpoptiondefinition" "test_name" {
+resource "nios_dhcp_optiondefinition" "test_name" {
     code = %q
     name = %q
     type = %q
-	space = nios_dhcp_dhcpoptionspace.test.name
+	space = nios_dhcp_optionspace.test.name
 }
 `, code, name, optionType)
 	return strings.Join([]string{testAccBaseWithDHCPOptionSpace(optionSpace), config}, "")
@@ -292,7 +292,7 @@ resource "nios_dhcp_dhcpoptiondefinition" "test_name" {
 
 func testAccDhcpoptiondefinitionSpace(code string, name string, optionType string, optionSpace1, optionSpace2, optionSpaceResourceName string) string {
 	config := fmt.Sprintf(`
-resource "nios_dhcp_dhcpoptiondefinition" "test_space" {
+resource "nios_dhcp_optiondefinition" "test_space" {
     code = %q
     name = %q
     type = %q
@@ -304,11 +304,11 @@ resource "nios_dhcp_dhcpoptiondefinition" "test_space" {
 
 func testAccDhcpoptiondefinitionType(code string, name string, optionType, optionSpace string) string {
 	config := fmt.Sprintf(`
-resource "nios_dhcp_dhcpoptiondefinition" "test_type" {
+resource "nios_dhcp_optiondefinition" "test_type" {
     code = %q
     name = %q
     type = %q
-	space = nios_dhcp_dhcpoptionspace.test.name
+	space = nios_dhcp_optionspace.test.name
 }
 `, code, name, optionType)
 	return strings.Join([]string{testAccBaseWithDHCPOptionSpace(optionSpace), config}, "")
@@ -316,18 +316,18 @@ resource "nios_dhcp_dhcpoptiondefinition" "test_type" {
 
 func testAccBaseWithDHCPOptionSpace(name string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpoptionspace" "test" {
+resource "nios_dhcp_optionspace" "test" {
   name = %q
 }`, name)
 }
 
 func testAccBaseWithTwoDHCPOptionSpaces(name1, name2 string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpoptionspace" "test1" {
+resource "nios_dhcp_optionspace" "test1" {
   name = %q
 }
 
-resource "nios_dhcp_dhcpoptionspace" "test2" {
+resource "nios_dhcp_optionspace" "test2" {
   name = %q
 }`, name1, name2)
 }
