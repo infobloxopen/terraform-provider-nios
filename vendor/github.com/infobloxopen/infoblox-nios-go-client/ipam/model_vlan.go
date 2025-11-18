@@ -37,9 +37,8 @@ type Vlan struct {
 	ExtAttrsMinus *map[string]ExtAttrs `json:"extattrs-,omitempty"`
 	// Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 	ExtAttrs *map[string]ExtAttrs `json:"extattrs,omitempty"`
-	// VLAN ID value.
-	Id       *int64    `json:"id,omitempty"`
-	FuncCall *FuncCall `json:"func_call,omitempty"`
+	Id       *VlanId              `json:"id,omitempty"`
+	FuncCall *FuncCall            `json:"func_call,omitempty"`
 	// Name of the VLAN.
 	Name   *string     `json:"name,omitempty"`
 	Parent *VlanParent `json:"parent,omitempty"`
@@ -355,9 +354,9 @@ func (o *Vlan) SetExtAttrs(v map[string]ExtAttrs) {
 }
 
 // GetId returns the Id field value if set, zero value otherwise.
-func (o *Vlan) GetId() int64 {
+func (o *Vlan) GetId() VlanId {
 	if o == nil || IsNil(o.Id) {
-		var ret int64
+		var ret VlanId
 		return ret
 	}
 	return *o.Id
@@ -365,7 +364,7 @@ func (o *Vlan) GetId() int64 {
 
 // GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Vlan) GetIdOk() (*int64, bool) {
+func (o *Vlan) GetIdOk() (*VlanId, bool) {
 	if o == nil || IsNil(o.Id) {
 		return nil, false
 	}
@@ -381,8 +380,8 @@ func (o *Vlan) HasId() bool {
 	return false
 }
 
-// SetId gets a reference to the given int64 and assigns it to the Id field.
-func (o *Vlan) SetId(v int64) {
+// SetId gets a reference to the given VlanId and assigns it to the Id field.
+func (o *Vlan) SetId(v VlanId) {
 	o.Id = &v
 }
 

@@ -283,6 +283,27 @@ func TestAccVlanResource_ExtAttrs(t *testing.T) {
 		},
 	})
 }
+
+func TestAccFixedaddressResource_FuncCall(t *testing.T) {
+	var resourceName = "nios_ipam_vlan.test_func_call"
+	var v ipam.Vlan
+	name := acctest.RandomNameWithPrefix("vlan")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccVlanFuncCall(65, name, "example_vlan_view65", "id", "next_available_vlan_id", "ips", "network", "15.0.0.0/24", "Original Function Call"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVlanExists(context.Background(), resourceName, &v),
+				),
+			},
+		},
+	})
+}
+
 func TestAccVlanResource_Id(t *testing.T) {
 	var resourceName = "nios_ipam_vlan.test_id"
 	var v ipam.Vlan
@@ -556,6 +577,28 @@ resource "nios_ipam_vlan" "test_extattrs" {
     extattrs = %s
 }
 `, id, name, parent, extAttrsStr)
+	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
+}
+
+func testAccVlanFuncCall(id int, name string, parent string, attributeName, objFunc, resultField, object, objectParameters, comment string) string {
+	config := fmt.Sprintf(`
+resource "nios_ipam_vlan" "test_func_call" {
+	id = %d
+    name = %q
+    parent = nios_ipam_vlanview.%s.ref
+	func_call = {
+		"attribute_name" = %q
+		"object_function" = %q
+		"result_field" = %q
+		"object" = %q
+		"object_parameters" = {
+			"network" = %q
+			"network_view" = "default"
+		}
+	}
+	comment = %q
+}
+`, id, name, parent, attributeName, objFunc, resultField, object, objectParameters, comment)
 	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
 }
 

@@ -3,7 +3,6 @@ package ipam
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -160,7 +159,7 @@ func (m *VlanModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.V
 		Department:  flex.ExpandStringPointer(m.Department),
 		Description: flex.ExpandStringPointer(m.Description),
 		ExtAttrs:    ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Id:          flex.ExpandInt64Pointer(m.Id),
+		Id:          ExpandVlanId(m.Id),
 		Name:        flex.ExpandStringPointer(m.Name),
 		Parent:      ExpandVlanParent(m.Parent),
 		Reserved:    flex.ExpandBoolPointer(m.Reserved),
@@ -194,7 +193,7 @@ func (m *VlanModel) Flatten(ctx context.Context, from *ipam.Vlan, diags *diag.Di
 	m.Department = flex.FlattenStringPointer(from.Department)
 	m.Description = flex.FlattenStringPointer(from.Description)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.Id = flex.FlattenInt64Pointer(from.Id)
+	m.Id = FlattenVlanId(from.Id)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Parent = FlattenVlanParent(from.Parent)
 	m.Reserved = types.BoolPointerValue(from.Reserved)
@@ -223,20 +222,20 @@ func FlattenVlanParent(from *ipam.VlanParent) types.String {
 	return m
 }
 
-func ExpandRecordAIpv4addr(str iptypes.IPv4Address) *ipam.VlanParent {
-	if str.IsNull() {
-		return &ipam.VlanParent{}
+func ExpandVlanId(val types.Int64) *ipam.VlanId {
+	if val.IsNull() {
+		return &ipam.VlanId{}
 	}
-	var m ipam.VlanParent
-	m.String = flex.ExpandIPv4Address(str)
+	var m ipam.VlanId
+	m.Int64 = flex.ExpandInt64Pointer(val)
 
 	return &m
 }
 
-func FlattenRecordAIpv4addr(from *ipam.VlanParent) iptypes.IPv4Address {
-	if from.String == nil {
-		return iptypes.NewIPv4AddressNull()
+func FlattenVlanId(from *ipam.VlanId) types.Int64 {
+	if from.Int64 == nil {
+		return types.Int64Null()
 	}
-	m := flex.FlattenIPv4Address(from.String)
+	m := flex.FlattenInt64Pointer(from.Int64)
 	return m
 }
