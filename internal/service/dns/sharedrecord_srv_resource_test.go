@@ -486,16 +486,15 @@ func testAccCheckSharedrecordSrvDisappears(ctx context.Context, v *dns.Sharedrec
 		return nil
 	}
 }
-
 func testAccSharedrecordSrvBasicConfig(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test" {
-	name = %q
-	port = %d
-	priority = %d
-	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-	target = %q
-	weight = %d
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
 }
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -504,13 +503,13 @@ resource "nios_dns_sharedrecord_srv" "test" {
 func testAccSharedrecordSrvComment(name string, port, priority int, sharedRecordGroup, target string, weight int, comment string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_comment" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
-    comment = %q
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
+  comment             = %q
 }
 `, name, port, priority, target, weight, comment)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -519,13 +518,13 @@ resource "nios_dns_sharedrecord_srv" "test_comment" {
 func testAccSharedrecordSrvDisable(name string, port, priority int, sharedRecordGroup, target string, weight int, disable bool) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_disable" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
-    disable = %t
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
+  disable             = %t
 }
 `, name, port, priority, target, weight, disable)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -535,13 +534,13 @@ func testAccSharedrecordSrvExtAttrs(name string, port, priority int, sharedRecor
 	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_extattrs" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
-    extattrs = %s
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
+  extattrs            = %s
 }
 `, name, port, priority, target, weight, extAttrsStr)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -550,12 +549,12 @@ resource "nios_dns_sharedrecord_srv" "test_extattrs" {
 func testAccSharedrecordSrvName(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_name" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
 }
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -564,12 +563,12 @@ resource "nios_dns_sharedrecord_srv" "test_name" {
 func testAccSharedrecordSrvPort(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_port" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
 }
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -578,12 +577,12 @@ resource "nios_dns_sharedrecord_srv" "test_port" {
 func testAccSharedrecordSrvPriority(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_priority" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
 }
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -592,12 +591,12 @@ resource "nios_dns_sharedrecord_srv" "test_priority" {
 func testAccSharedrecordSrvSharedRecordGroup(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_shared_record_group" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
 }
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -606,12 +605,12 @@ resource "nios_dns_sharedrecord_srv" "test_shared_record_group" {
 func testAccSharedrecordSrvTarget(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_target" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
 }
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -620,14 +619,14 @@ resource "nios_dns_sharedrecord_srv" "test_target" {
 func testAccSharedrecordSrvTtl(name string, port, priority int, sharedRecordGroup, target string, weight int, ttl int, useTtl bool) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_ttl" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
-    ttl = %d
-    use_ttl = %t
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
+  ttl                 = %d
+  use_ttl             = %t
 }
 `, name, port, priority, target, weight, ttl, useTtl)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -636,14 +635,14 @@ resource "nios_dns_sharedrecord_srv" "test_ttl" {
 func testAccSharedrecordSrvUseTtl(name string, port, priority int, sharedRecordGroup, target string, weight int, ttl int, useTtl bool) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_use_ttl" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
-	ttl = %d
-    use_ttl = %t
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
+  ttl                 = %d
+  use_ttl             = %t
 }
 `, name, port, priority, target, weight, ttl, useTtl)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -652,12 +651,12 @@ resource "nios_dns_sharedrecord_srv" "test_use_ttl" {
 func testAccSharedrecordSrvWeight(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_weight" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
-    target = %q
-    weight = %d
+  name                = %q
+  port                = %d
+  priority            = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target              = %q
+  weight              = %d
 }
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
@@ -666,7 +665,7 @@ resource "nios_dns_sharedrecord_srv" "test_weight" {
 func testAccBaseSharedRecordGroup(name string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
-  	name = %q
+  name = %q
 }
 `, name)
 }
