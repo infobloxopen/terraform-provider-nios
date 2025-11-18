@@ -273,7 +273,6 @@ func (m *DtcMonitorHttpModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		return nil
 	}
 	to := &dtc.DtcMonitorHttp{
-		Ref:                 flex.ExpandStringPointer(m.Ref),
 		Ciphers:             flex.ExpandStringPointer(m.Ciphers),
 		ClientCert:          flex.ExpandStringPointer(m.ClientCert),
 		Comment:             flex.ExpandStringPointer(m.Comment),
