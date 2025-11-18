@@ -1,7 +1,7 @@
 // Retrieve a specific Shared TXT Record by filters
 data "nios_dns_sharedrecord_txt" "get_sharedrecord_txt_using_filters" {
   filters = {
-    name = "example-shared-record-group"
+    name = "example-shared-record-txt"
   }
 }
 

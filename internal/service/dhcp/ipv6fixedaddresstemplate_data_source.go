@@ -1,4 +1,4 @@
-package dns
+package dhcp
 
 import (
 	"context"
@@ -13,28 +13,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &SharedrecordTxtDataSource{}
+var _ datasource.DataSource = &Ipv6fixedaddresstemplateDataSource{}
 
-func NewSharedrecordTxtDataSource() datasource.DataSource {
-	return &SharedrecordTxtDataSource{}
+func NewIpv6fixedaddresstemplateDataSource() datasource.DataSource {
+	return &Ipv6fixedaddresstemplateDataSource{}
 }
 
-// SharedrecordTxtDataSource defines the data source implementation.
-type SharedrecordTxtDataSource struct {
+// Ipv6fixedaddresstemplateDataSource defines the data source implementation.
+type Ipv6fixedaddresstemplateDataSource struct {
 	client *niosclient.APIClient
 }
 
-func (d *SharedrecordTxtDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dns_sharedrecord_txt"
+func (d *Ipv6fixedaddresstemplateDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6fixedaddresstemplate"
 }
 
-type SharedrecordTxtModelWithFilter struct {
+type Ipv6fixedaddresstemplateModelWithFilter struct {
 	Filters        types.Map   `tfsdk:"filters"`
 	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
 	Result         types.List  `tfsdk:"result"`
@@ -42,16 +43,16 @@ type SharedrecordTxtModelWithFilter struct {
 	Paging         types.Int32 `tfsdk:"paging"`
 }
 
-func (m *SharedrecordTxtModelWithFilter) FlattenResults(ctx context.Context, from []dns.SharedrecordTxt, diags *diag.Diagnostics) {
+func (m *Ipv6fixedaddresstemplateModelWithFilter) FlattenResults(ctx context.Context, from []dhcp.Ipv6fixedaddresstemplate, diags *diag.Diagnostics) {
 	if len(from) == 0 {
 		return
 	}
-	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, SharedrecordTxtAttrTypes, diags, FlattenSharedrecordTxt)
+	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, Ipv6fixedaddresstemplateAttrTypes, diags, FlattenIpv6fixedaddresstemplate)
 }
 
-func (d *SharedrecordTxtDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *Ipv6fixedaddresstemplateDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing DNS Shared TXT Records.",
+		MarkdownDescription: "Retrieves information about existing DHCP IPv6 Fixed Address Templates.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
@@ -65,7 +66,7 @@ func (d *SharedrecordTxtDataSource) Schema(ctx context.Context, req datasource.S
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: utils.DataSourceAttributeMap(SharedrecordTxtResourceSchemaAttributes, &resp.Diagnostics),
+					Attributes: utils.DataSourceAttributeMap(Ipv6fixedaddresstemplateResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
 			},
@@ -84,7 +85,7 @@ func (d *SharedrecordTxtDataSource) Schema(ctx context.Context, req datasource.S
 	}
 }
 
-func (d *SharedrecordTxtDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *Ipv6fixedaddresstemplateDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -104,8 +105,8 @@ func (d *SharedrecordTxtDataSource) Configure(ctx context.Context, req datasourc
 	d.client = client
 }
 
-func (d *SharedrecordTxtDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data SharedrecordTxtModelWithFilter
+func (d *Ipv6fixedaddresstemplateDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data Ipv6fixedaddresstemplateModelWithFilter
 	pageCount := 0
 
 	// Read Terraform prior state data into the model
@@ -116,7 +117,7 @@ func (d *SharedrecordTxtDataSource) Read(ctx context.Context, req datasource.Rea
 	}
 
 	allResults, err := utils.ReadWithPages(
-		func(pageID string, maxResults int32) ([]dns.SharedrecordTxt, string, error) {
+		func(pageID string, maxResults int32) ([]dhcp.Ipv6fixedaddresstemplate, string, error) {
 
 			if !data.MaxResults.IsNull() {
 				maxResults = data.MaxResults.ValueInt32()
@@ -129,13 +130,13 @@ func (d *SharedrecordTxtDataSource) Read(ctx context.Context, req datasource.Rea
 			//Increment the page count
 			pageCount++
 
-			request := d.client.DNSAPI.
-				SharedrecordTxtAPI.
+			request := d.client.DHCPAPI.
+				Ipv6fixedaddresstemplateAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
 				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
+				ReturnFieldsPlus(readableAttributesForIpv6fixedaddresstemplate).
 				Paging(paging).
 				MaxResults(maxResults)
 
@@ -147,15 +148,15 @@ func (d *SharedrecordTxtDataSource) Read(ctx context.Context, req datasource.Rea
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SharedrecordTxt by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6fixedaddresstemplate by extattrs, got error: %s", err))
 				return nil, "", err
 			}
 
-			res := apiRes.ListSharedrecordTxtResponseObject.GetResult()
+			res := apiRes.ListIpv6fixedaddresstemplateResponseObject.GetResult()
 			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
 
 			// Check for next page ID in additional properties
-			additionalProperties := apiRes.ListSharedrecordTxtResponseObject.AdditionalProperties
+			additionalProperties := apiRes.ListIpv6fixedaddresstemplateResponseObject.AdditionalProperties
 			var nextPageID string
 			npId, ok := additionalProperties["next_page_id"]
 			if ok {
@@ -170,7 +171,7 @@ func (d *SharedrecordTxtDataSource) Read(ctx context.Context, req datasource.Rea
 	)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SharedrecordTxt, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6fixedaddresstemplate, got error: %s", err))
 		return
 	}
 	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))

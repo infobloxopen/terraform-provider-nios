@@ -3,6 +3,7 @@ package dns_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -17,7 +18,7 @@ func TestAccSharedrecordTxtDataSource_Filters(t *testing.T) {
 	var v dns.SharedrecordTxt
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -40,7 +41,7 @@ func TestAccSharedrecordTxtDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dns_sharedrecord_txt.test"
 	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
 	text := "This is a shared record TXT record"
-	sharedRecordGroup := "sr1"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	var v dns.SharedrecordTxt
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -77,11 +78,11 @@ func testAccCheckSharedrecordTxtResourceAttrPair(resourceName, dataSourceName st
 }
 
 func testAccSharedrecordTxtDataSourceConfigFilters(name, sharedRecordGroup, text string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test" {
   name = %q
-  shared_record_group = %q
   text = %q
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 }
 
 data "nios_dns_sharedrecord_txt" "test" {
@@ -89,14 +90,15 @@ data "nios_dns_sharedrecord_txt" "test" {
 	 name = nios_dns_sharedrecord_txt.test.name
   }
 }
-`, name, sharedRecordGroup, text)
+`, name, text)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordTxtDataSourceConfigExtAttrFilters(name, sharedRecordGroup, text, extAttrsValue string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_txt" "test" {
   name = %q
-  shared_record_group = %q
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
   text = %q
   extattrs = {
     Site = %q
@@ -108,5 +110,6 @@ data "nios_dns_sharedrecord_txt" "test" {
 	Site = nios_dns_sharedrecord_txt.test.extattrs.Site
   }
 }
-`, name, sharedRecordGroup, text, extAttrsValue)
+`, name, text, extAttrsValue)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
