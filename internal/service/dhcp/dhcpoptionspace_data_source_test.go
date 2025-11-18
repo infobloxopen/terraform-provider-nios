@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccDhcpoptionspaceDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_dhcpoptionspace.test"
-	resourceName := "nios_dhcp_dhcpoptionspace.test"
+	dataSourceName := "data.nios_dhcp_optionspace.test"
+	resourceName := "nios_dhcp_optionspace.test"
 	var v dhcp.Dhcpoptionspace
 	name := acctest.RandomNameWithPrefix("dhcp-option-space")
 
@@ -49,13 +49,13 @@ func testAccCheckDhcpoptionspaceResourceAttrPair(resourceName, dataSourceName st
 
 func testAccDhcpoptionspaceDataSourceConfigFilters(name string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpoptionspace" "test" {
+resource "nios_dhcp_optionspace" "test" {
   name = %q
 }
 
-data "nios_dhcp_dhcpoptionspace" "test" {
+data "nios_dhcp_optionspace" "test" {
   filters = {
-	name = nios_dhcp_dhcpoptionspace.test.name
+	name = nios_dhcp_optionspace.test.name
   }
 }
 `, name)
