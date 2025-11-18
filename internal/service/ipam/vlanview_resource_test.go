@@ -151,7 +151,7 @@ func TestAccVlanviewResource_Comment(t *testing.T) {
 				Config: testAccVlanviewComment(15, name, 10, "Comment for the Vlan view object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the Vlan view object"),
 				),
 			},
 			// Update and Read
