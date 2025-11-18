@@ -98,6 +98,7 @@ func (r *SharedrecordSrvResource) Create(ctx context.Context, req resource.Creat
 }
 
 func (r *SharedrecordSrvResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var diags diag.Diagnostics
 	var data SharedrecordSrvModel
 
 	// Read Terraform prior state data into the model
@@ -126,6 +127,11 @@ func (r *SharedrecordSrvResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	res := apiRes.GetSharedrecordSrvResponseObjectAsResult.GetResult()
+	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
+	if diags.HasError() {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create SharedrecordMx due inherited Extensible attributes, got error: %s", err))
+		return
+	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
