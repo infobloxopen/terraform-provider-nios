@@ -16,9 +16,6 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO: OBJECTS TO BE PRESENT IN THE GRID FOR TESTS
-// sharedrecordgroup: "example-sharedrecordgroup"
-
 var readableAttributesForSharedrecordMx = "comment,disable,dns_mail_exchanger,dns_name,extattrs,mail_exchanger,name,preference,shared_record_group,ttl,use_ttl"
 
 func TestAccSharedrecordMxResource_basic(t *testing.T) {
