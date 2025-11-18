@@ -161,7 +161,7 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 		Computed: true,
 		Default: listdefault.StaticValue(
 			types.ListValueMust(
-				types.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes},
+				types.ObjectType{AttrTypes: Ipv6fixedaddresstemplateOptionsAttrTypes},
 				[]attr.Value{},
 			),
 		),
