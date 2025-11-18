@@ -3,6 +3,7 @@ package dns_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -17,7 +18,7 @@ func TestAccSharedrecordMxDataSource_Filters(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -41,7 +42,7 @@ func TestAccSharedrecordMxDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dns_sharedrecord_mx.test"
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	extAttrValue := acctest.RandomName()
 
 	var v dns.SharedrecordMx
@@ -80,40 +81,41 @@ func testAccCheckSharedrecordMxResourceAttrPair(resourceName, dataSourceName str
 		resource.TestCheckResourceAttrPair(resourceName, "use_ttl", dataSourceName, "result.0.use_ttl"),
 	}
 }
-
 func testAccSharedrecordMxDataSourceConfigFilters(mailExchanger, name string, preference int, sharedRecordGroup string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test" {
-	mail_exchanger = %q
-    name = %q
-    preference = %d
-    shared_record_group = %q
+	mail_exchanger     = %q
+	name               = %q
+  	preference          = %d
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 }
 
 data "nios_dns_sharedrecord_mx" "test" {
 	filters = {
-		name = nios_dns_sharedrecord_mx.test.name
-	}
+    	name = nios_dns_sharedrecord_mx.test.name
+  	}
 }
-`, mailExchanger, name, preference, sharedRecordGroup)
+`, mailExchanger, name, preference)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxDataSourceConfigExtAttrFilters(mailExchanger, name string, preference int, sharedRecordGroup, extAttrsValue string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test" {
-	mail_exchanger = %q
-    name = %q
-    preference = %d
-    shared_record_group = %q
+	mail_exchanger     = %q
+	name               = %q
+	preference         = %d
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
   	extattrs = {
-    	Site = %q
-  	} 
+   		Site = %q
+  	}
 }
 
 data "nios_dns_sharedrecord_mx" "test" {
-    extattrfilters = {
-		Site = nios_dns_sharedrecord_mx.test.extattrs.Site
-  	}
+	extattrfilters = {
+    	Site = nios_dns_sharedrecord_mx.test.extattrs.Site
+	}
 }
-`, mailExchanger, name, preference, sharedRecordGroup, extAttrsValue)
+`, mailExchanger, name, preference, extAttrsValue)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }

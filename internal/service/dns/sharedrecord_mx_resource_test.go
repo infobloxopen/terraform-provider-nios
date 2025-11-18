@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -25,7 +26,7 @@ func TestAccSharedrecordMxResource_basic(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -55,7 +56,7 @@ func TestAccSharedrecordMxResource_disappears(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -79,7 +80,7 @@ func TestAccSharedrecordMxResource_Comment(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -111,7 +112,7 @@ func TestAccSharedrecordMxResource_Disable(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -145,7 +146,7 @@ func TestAccSharedrecordMxResource_ExtAttrs(t *testing.T) {
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -153,7 +154,7 @@ func TestAccSharedrecordMxResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharedrecordMxExtAttrs(mail_exchanger, name, 10, sharedRecordGroup, map[string]string{
+				Config: testAccSharedrecordMxExtAttrs(mail_exchanger, name, 10, sharedRecordGroup, map[string]any{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -163,7 +164,7 @@ func TestAccSharedrecordMxResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSharedrecordMxExtAttrs(mail_exchanger, name, 10, sharedRecordGroup, map[string]string{
+				Config: testAccSharedrecordMxExtAttrs(mail_exchanger, name, 10, sharedRecordGroup, map[string]any{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -182,7 +183,7 @@ func TestAccSharedrecordMxResource_MailExchanger(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger1 := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
 	mail_exchanger2 := acctest.RandomNameWithPrefix("updatedmail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,7 +216,7 @@ func TestAccSharedrecordMxResource_Name(t *testing.T) {
 	name1 := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	name2 := acctest.RandomNameWithPrefix("updatedsharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -247,7 +248,7 @@ func TestAccSharedrecordMxResource_Preference(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -279,7 +280,7 @@ func TestAccSharedrecordMxResource_SharedRecordGroup(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -303,7 +304,7 @@ func TestAccSharedrecordMxResource_Ttl(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -335,7 +336,7 @@ func TestAccSharedrecordMxResource_UseTtl(t *testing.T) {
 	var v dns.SharedrecordMx
 	name := acctest.RandomNameWithPrefix("sharedrecord-mx") + ".example.com"
 	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -421,124 +422,137 @@ func testAccCheckSharedrecordMxDisappears(ctx context.Context, v *dns.Sharedreco
 }
 
 func testAccSharedrecordMxBasicConfig(mailExchanger, name string, preference int, sharedRecordGroup string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test" {
-	mail_exchanger = %q
-	name = %q
-	preference = %d
-	shared_record_group = %q
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 }
-`, mailExchanger, name, preference, sharedRecordGroup)
+`, mailExchanger, name, preference)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxComment(mailExchanger, name string, preference int, sharedRecordGroup, comment string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_comment" {
-    mail_exchanger = %q
-    name = %q
-    preference = %d
-    shared_record_group = %q
-    comment = %q
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+    comment             = %q
 }
-`, mailExchanger, name, preference, sharedRecordGroup, comment)
+`, mailExchanger, name, preference, comment)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxDisable(mailExchanger, name string, preference int, sharedRecordGroup, disable string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_disable" {
-    mail_exchanger = %q
-    name = %q
-    preference = %d
-    shared_record_group = %q
-    disable = %s
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+    disable             = %s
 }
-`, mailExchanger, name, preference, sharedRecordGroup, disable)
+`, mailExchanger, name, preference, disable)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
-func testAccSharedrecordMxExtAttrs(mailExchanger, name string, preference int, sharedRecordGroup string, extAttrs map[string]string) string {
-	extattrsStr := "{\n"
-	for k, v := range extAttrs {
-		extattrsStr += fmt.Sprintf("    %q = %q\n", k, v)
-	}
-	extattrsStr += "  }"
-
-	return fmt.Sprintf(`
+func testAccSharedrecordMxExtAttrs(mailExchanger, name string, preference int, sharedRecordGroup string, extAttrs map[string]any) string {
+	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_extattrs" {
-    mail_exchanger = %q
-    name = %q
-    preference = %d
-    shared_record_group = %q
-    extattrs = %s
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+    extattrs            = %s
 }
-`, mailExchanger, name, preference, sharedRecordGroup, extattrsStr)
+`, mailExchanger, name, preference, extAttrsStr)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxMailExchanger(mailExchanger, name string, preference int, sharedRecordGroup string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_mail_exchanger" {
-    mail_exchanger = %q 
-    name = %q
-    preference = %d
-    shared_record_group = %q
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 }
-`, mailExchanger, name, preference, sharedRecordGroup)
+`, mailExchanger, name, preference)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxName(mailExchanger, name string, preference int, sharedRecordGroup string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_name" {
-    mail_exchanger = %q
-	name = %q
-    preference = %d
-    shared_record_group = %q
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 }
-`, mailExchanger, name, preference, sharedRecordGroup)
+`, mailExchanger, name, preference)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxPreference(mailExchanger, name string, preference int, sharedRecordGroup string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_preference" {
-    mail_exchanger = %q
-    name = %q
-	preference = %d
-    shared_record_group = %q
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 }
-`, mailExchanger, name, preference, sharedRecordGroup)
+`, mailExchanger, name, preference)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxSharedRecordGroup(mailExchanger, name string, preference int, sharedRecordGroup string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_shared_record_group" {
-    mail_exchanger = %q
-    name = %q
-    preference = %d
-    shared_record_group = %q
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 }
-`, mailExchanger, name, preference, sharedRecordGroup)
+`, mailExchanger, name, preference)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxTtl(mailExchanger, name string, preference int, sharedRecordGroup string, ttl int, useTtl string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_ttl" {
-    mail_exchanger = %q
-    name = %q
-    preference = %d
-    shared_record_group = %q
-	ttl = %d
-    use_ttl = %s
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+    ttl                 = %d
+    use_ttl             = %s
 }
-`, mailExchanger, name, preference, sharedRecordGroup, ttl, useTtl)
+`, mailExchanger, name, preference, ttl, useTtl)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordMxUseTtl(mailExchanger, name string, preference int, sharedRecordGroup, useTtl string, ttl int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_mx" "test_use_ttl" {
-    mail_exchanger = %q
-    name = %q
-    preference = %d
-    shared_record_group = %q
-    use_ttl = %s
-    ttl = %d
+    mail_exchanger      = %q
+    name                = %q
+    preference          = %d
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+    use_ttl             = %s
+    ttl                 = %d
 }
-`, mailExchanger, name, preference, sharedRecordGroup, useTtl, ttl)
+`, mailExchanger, name, preference, useTtl, ttl)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
+}
+
+func testAccBaseSharedRecordGroup(name string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
+  name = %q
+}
+`, name)
 }
