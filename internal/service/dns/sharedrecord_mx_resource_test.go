@@ -548,11 +548,3 @@ resource "nios_dns_sharedrecord_mx" "test_use_ttl" {
 `, mailExchanger, name, preference, useTtl, ttl)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
-
-func testAccBaseSharedRecordGroup(name string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
-  name = %q
-}
-`, name)
-}
