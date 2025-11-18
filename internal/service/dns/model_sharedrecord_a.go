@@ -136,7 +136,6 @@ func (m *SharedrecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		Comment:  flex.ExpandStringPointer(m.Comment),
 		Disable:  flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs: ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		//Ipv4addr: ExpandSharedRecordAIpv4addr(m.Ipv4addr),
 		Ipv4addr: flex.ExpandIPv4Address(m.Ipv4addr),
 		Name:     flex.ExpandStringPointer(m.Name),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
@@ -172,26 +171,9 @@ func (m *SharedrecordAModel) Flatten(ctx context.Context, from *dns.Sharedrecord
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	//m.Ipv4addr = FlattenSharedRecordAIpv4addr(from.Ipv4addr)
 	m.Ipv4addr = flex.FlattenIPv4Address(from.Ipv4addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedRecordGroup = flex.FlattenStringPointer(from.SharedRecordGroup)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
 }
-
-// func ExpandSharedRecordAIpv4addr(str iptypes.IPv4Address) *string {
-// 	if str.IsNull() || str.IsUnknown() {
-// 		return nil
-// 	}
-// 	// Use the same pattern as regular A records, but return string pointer
-// 	return flex.ExpandIPv4Address(str)
-// }
-
-// func FlattenSharedRecordAIpv4addr(from *string) iptypes.IPv4Address {
-// 	if from == nil {
-// 		return iptypes.NewIPv4AddressNull()
-// 	}
-// 	// Use the same pattern as regular A records
-// 	return flex.FlattenIPv4Address(from)
-// }

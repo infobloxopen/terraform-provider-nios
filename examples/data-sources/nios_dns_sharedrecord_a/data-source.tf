@@ -11,3 +11,6 @@ data "nios_dns_sharedrecord_a" "get_sharedrecord_a_with_extattr_filter" {
     Site = "location-1"
   }
 }
+
+// Retrieve all Shared A Records
+data "nios_dns_sharedrecord_a" "get_all_shared_a_records" {}
