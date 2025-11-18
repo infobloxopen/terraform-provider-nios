@@ -3,17 +3,17 @@
 page_title: "nios_dtc_topology Resource - nios"
 subcategory: "DTC"
 description: |-
-  Manages DTC Topology
+  Manages a DTC Topology
 ---
 
 # nios_dtc_topology (Resource)
 
-Manages DTC Topology
+Manages a DTC Topology
 
 ## Example Usage
 
 ```terraform
-// Create an DTC Server(Required as Parent)
+// Create an DTC Server (Required as Parent)
 resource "nios_dtc_server" "create_dtc_server" {
   name = "example-server"
   host = "2.3.3.4"

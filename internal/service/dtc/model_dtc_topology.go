@@ -12,11 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -88,7 +88,6 @@ var DtcTopologyResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Topology rules.",
 	},
 }
-
 
 func (m *DtcTopologyModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcTopology {
 	if m == nil {
