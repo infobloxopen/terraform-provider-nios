@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -25,7 +26,7 @@ func TestAccSharedrecordSrvResource_basic(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -57,7 +58,7 @@ func TestAccSharedrecordSrvResource_disappears(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -81,7 +82,7 @@ func TestAccSharedrecordSrvResource_Comment(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -113,7 +114,7 @@ func TestAccSharedrecordSrvResource_Disable(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -145,7 +146,7 @@ func TestAccSharedrecordSrvResource_ExtAttrs(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -155,7 +156,7 @@ func TestAccSharedrecordSrvResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharedrecordSrvExtAttrs(name, 80, 10, sharedRecordGroup, target, 10, map[string]string{
+				Config: testAccSharedrecordSrvExtAttrs(name, 80, 10, sharedRecordGroup, target, 10, map[string]any{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -165,7 +166,7 @@ func TestAccSharedrecordSrvResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSharedrecordSrvExtAttrs(name, 80, 10, sharedRecordGroup, target, 10, map[string]string{
+				Config: testAccSharedrecordSrvExtAttrs(name, 80, 10, sharedRecordGroup, target, 10, map[string]any{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -184,7 +185,7 @@ func TestAccSharedrecordSrvResource_Name(t *testing.T) {
 	name1 := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	name2 := acctest.RandomNameWithPrefix("sharedrecord-srv-updated") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -216,7 +217,7 @@ func TestAccSharedrecordSrvResource_Port(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -248,7 +249,7 @@ func TestAccSharedrecordSrvResource_Priority(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -280,7 +281,7 @@ func TestAccSharedrecordSrvResource_SharedRecordGroup(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -305,7 +306,7 @@ func TestAccSharedrecordSrvResource_Target(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target1 := acctest.RandomName() + ".target1.com"
 	target2 := acctest.RandomName() + ".target2.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -337,7 +338,7 @@ func TestAccSharedrecordSrvResource_Ttl(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -369,7 +370,7 @@ func TestAccSharedrecordSrvResource_UseTtl(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -401,7 +402,7 @@ func TestAccSharedrecordSrvResource_Weight(t *testing.T) {
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -487,170 +488,185 @@ func testAccCheckSharedrecordSrvDisappears(ctx context.Context, v *dns.Sharedrec
 }
 
 func testAccSharedrecordSrvBasicConfig(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test" {
 	name = %q
 	port = %d
 	priority = %d
-	shared_record_group = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
 	target = %q
 	weight = %d
 }
-`, name, port, priority, sharedRecordGroup, target, weight)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvComment(name string, port, priority int, sharedRecordGroup, target string, weight int, comment string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_comment" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
     comment = %q
 }
-`, name, port, priority, sharedRecordGroup, target, weight, comment)
+`, name, port, priority, target, weight, comment)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvDisable(name string, port, priority int, sharedRecordGroup, target string, weight int, disable bool) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_disable" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
     disable = %t
 }
-`, name, port, priority, sharedRecordGroup, target, weight, disable)
+`, name, port, priority, target, weight, disable)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
-func testAccSharedrecordSrvExtAttrs(name string, port, priority int, sharedRecordGroup, target string, weight int, extAttrs map[string]string) string {
-	extattrsStr := "{\n"
-	for k, v := range extAttrs {
-		extattrsStr += fmt.Sprintf("    %q = %q\n", k, v)
-	}
-	extattrsStr += "  }"
-
-	return fmt.Sprintf(`
+func testAccSharedrecordSrvExtAttrs(name string, port, priority int, sharedRecordGroup, target string, weight int, extAttrs map[string]any) string {
+	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_extattrs" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
     extattrs = %s
 }
-`, name, port, priority, sharedRecordGroup, target, weight, extattrsStr)
+`, name, port, priority, target, weight, extAttrsStr)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvName(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_name" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
 }
-`, name, port, priority, sharedRecordGroup, target, weight)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvPort(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_port" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
 }
-`, name, port, priority, sharedRecordGroup, target, weight)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvPriority(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_priority" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
 }
-`, name, port, priority, sharedRecordGroup, target, weight)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvSharedRecordGroup(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_shared_record_group" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
 }
-`, name, port, priority, sharedRecordGroup, target, weight)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvTarget(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_target" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
 }
-`, name, port, priority, sharedRecordGroup, target, weight)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvTtl(name string, port, priority int, sharedRecordGroup, target string, weight int, ttl int, useTtl bool) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_ttl" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
     ttl = %d
     use_ttl = %t
 }
-`, name, port, priority, sharedRecordGroup, target, weight, ttl, useTtl)
+`, name, port, priority, target, weight, ttl, useTtl)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvUseTtl(name string, port, priority int, sharedRecordGroup, target string, weight int, ttl int, useTtl bool) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_use_ttl" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
 	ttl = %d
     use_ttl = %t
 }
-`, name, port, priority, sharedRecordGroup, target, weight, ttl, useTtl)
+`, name, port, priority, target, weight, ttl, useTtl)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvWeight(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test_weight" {
     name = %q
     port = %d
     priority = %d
-    shared_record_group = %q
+    shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
     target = %q
     weight = %d
 }
-`, name, port, priority, sharedRecordGroup, target, weight)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
+}
+
+func testAccBaseSharedRecordGroup(name string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
+  	name = %q
+}
+`, name)
 }

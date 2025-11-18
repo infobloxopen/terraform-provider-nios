@@ -3,6 +3,7 @@ package dns_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,7 +17,7 @@ func TestAccSharedrecordSrvDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dns_sharedrecord_srv.test"
 	var v dns.SharedrecordSrv
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	target := acctest.RandomName() + ".target.com"
 
 	resource.Test(t, resource.TestCase{
@@ -41,7 +42,7 @@ func TestAccSharedrecordSrvDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dns_sharedrecord_srv.test"
 	name := acctest.RandomNameWithPrefix("sharedrecord-srv") + ".example.com"
 	target := acctest.RandomName() + ".target.com"
-	sharedRecordGroup := "example-sharedrecordgroup"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	extAttrValue := acctest.RandomName()
 
 	var v dns.SharedrecordSrv
@@ -83,42 +84,44 @@ func testAccCheckSharedrecordSrvResourceAttrPair(resourceName, dataSourceName st
 }
 
 func testAccSharedrecordSrvDataSourceConfigFilters(name string, port, priority int, sharedRecordGroup, target string, weight int) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test" {
-	name = %q
-	port = %d
-	priority = %d
-	shared_record_group = %q
-	target = %q
-	weight = %d
+  name               = %q
+  port               = %d
+  priority           = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target             = %q
+  weight             = %d
 }
 
 data "nios_dns_sharedrecord_srv" "test" {
-  	filters = {
-		name = nios_dns_sharedrecord_srv.test.name
-  	}
+  filters = {
+    name = nios_dns_sharedrecord_srv.test.name
+  }
 }
-`, name, port, priority, sharedRecordGroup, target, weight)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
 
 func testAccSharedrecordSrvDataSourceConfigExtAttrFilters(name string, port, priority int, sharedRecordGroup, target string, weight int, extAttrsValue string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dns_sharedrecord_srv" "test" {
-    name = %q
-    port = %d
-    priority = %d
-    shared_record_group = %q
-    target = %q
-    weight = %d
-    extattrs = {
-        Site = %q
-    }
+  name               = %q
+  port               = %d
+  priority           = %d
+  shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+  target             = %q
+  weight             = %d
+  extattrs = {
+    Site = %q
+  }
 }
 
 data "nios_dns_sharedrecord_srv" "test" {
-    extattrfilters = {
-        Site = nios_dns_sharedrecord_srv.test.extattrs.Site
-    }
+  extattrfilters = {
+    Site = nios_dns_sharedrecord_srv.test.extattrs.Site
+  }
 }
-`, name, port, priority, sharedRecordGroup, target, weight, extAttrsValue)
+`, name, port, priority, target, weight, extAttrsValue)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
