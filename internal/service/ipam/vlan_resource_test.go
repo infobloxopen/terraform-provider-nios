@@ -355,7 +355,7 @@ func TestAccVlanResource_Parent(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanParent(61, name, "example_vlan_view11"),
+				Config: testAccVlanParent(61, name, "example_vlan_view11", "example_vlan_view11"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "parent"),
@@ -363,7 +363,7 @@ func TestAccVlanResource_Parent(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVlanParent(61, name, "example_vlan_view_11"),
+				Config: testAccVlanParent(61, name, "example_vlan_view_11", "example_vlan_view_11_updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "parent"),
@@ -560,28 +560,6 @@ resource "nios_ipam_vlan" "test_extattrs" {
 	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
 }
 
-func testAccVlanFuncCall(id int, name string, parent string, attributeName, objFunc, resultField, object, objectParameters, comment string) string {
-	config := fmt.Sprintf(`
-resource "nios_ipam_vlan" "test_func_call" {
-	id = %d
-    name = %q
-    parent = nios_ipam_vlanview.%s.ref
-	func_call = {
-		"attribute_name" = %q
-		"object_function" = %q
-		"result_field" = %q
-		"object" = %q
-		"object_parameters" = {
-			"network" = %q
-			"network_view" = "default"
-		}
-	}
-	comment = %q
-}
-`, id, name, parent, attributeName, objFunc, resultField, object, objectParameters, comment)
-	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
-}
-
 func testAccVlanId(id int, name string, parent string) string {
 	config := fmt.Sprintf(`
 resource "nios_ipam_vlan" "test_id" {
@@ -604,8 +582,14 @@ resource "nios_ipam_vlan" "test_name" {
 	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
 }
 
-func testAccVlanParent(id int, name string, parent string) string {
-	config := fmt.Sprintf(`
+func testAccVlanParent(id int, name string, vlanName, parent string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_vlanview" "%[3]s" {
+  start_vlan_id = 50
+  end_vlan_id   = 100
+  name          = "%[3]s"
+}
+
 resource "nios_ipam_vlanview" "%[3]s_updated" {
   start_vlan_id = 50
   end_vlan_id   = 100
@@ -615,10 +599,10 @@ resource "nios_ipam_vlanview" "%[3]s_updated" {
 resource "nios_ipam_vlan" "test_parent" {
     id = %[1]d
     name = %[2]q
-    parent = nios_ipam_vlanview.%[3]s.ref
+    parent = nios_ipam_vlanview.%[4]s.ref
+	depends_on = [nios_ipam_vlanview.%[3]s , nios_ipam_vlanview.%[3]s_updated]
 }
-`, id, name, parent)
-	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
+`, id, name, vlanName, parent)
 }
 
 func testAccVlanReserved(id int, name string, parent string, reserved string) string {

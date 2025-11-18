@@ -11,5 +11,5 @@ data "nios_" "get__using_extensible_attributes" {
   }
 }
 
-// Retrieve all IPAM Vlan
+// Retrieve all IPAM Vlans
 data "nios_ipam_vlan" "get_all_ipam_vlan" {}
