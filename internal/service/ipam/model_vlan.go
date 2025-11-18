@@ -4,12 +4,16 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -117,9 +121,15 @@ var VlanResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Attributes:          FuncCallResourceSchemaAttributes,
-		Optional:            true,
-		Computed:            true,
+		Attributes: FuncCallResourceSchemaAttributes,
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("id")),
+		},
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.RequiresReplaceIfConfigured(),
+		},
 		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Record AAAA.",
 	},
 	"id": schema.Int64Attribute{
