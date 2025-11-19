@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccIpv6dhcpoptionspaceDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_ipv6dhcpoptionspace.test"
-	resourceName := "nios_dhcp_ipv6dhcpoptionspace.test"
+	dataSourceName := "data.nios_dhcp_ipv6optionspace.test"
+	resourceName := "nios_dhcp_ipv6optionspace.test"
 	var v dhcp.Ipv6dhcpoptionspace
 	name := acctest.RandomNameWithPrefix("option-space")
 
@@ -49,15 +49,15 @@ func testAccCheckIpv6dhcpoptionspaceResourceAttrPair(resourceName, dataSourceNam
 
 func testAccIpv6dhcpoptionspaceDataSourceConfigFilters(enterpriseNumber, name string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6dhcpoptionspace" "test" {
+resource "nios_dhcp_ipv6optionspace" "test" {
 	enterprise_number = %q
 	name = %q
 }
 
-data "nios_dhcp_ipv6dhcpoptionspace" "test" {
+data "nios_dhcp_ipv6optionspace" "test" {
 	filters = {
-		enterprise_number = nios_dhcp_ipv6dhcpoptionspace.test.enterprise_number
-		name = nios_dhcp_ipv6dhcpoptionspace.test.name
+		enterprise_number = nios_dhcp_ipv6optionspace.test.enterprise_number
+		name = nios_dhcp_ipv6optionspace.test.name
 	}
 }
 `, enterpriseNumber, name)
