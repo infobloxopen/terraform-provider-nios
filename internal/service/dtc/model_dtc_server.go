@@ -20,6 +20,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -97,6 +98,9 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          DtcServerHealthResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The health status of DTC Server",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"host": schema.StringAttribute{
 		Required:            true,

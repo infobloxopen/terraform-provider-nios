@@ -6,12 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type RecordAAwsRte53RecordInfoModel struct {
@@ -48,50 +50,86 @@ var RecordAAwsRte53RecordInfoResourceSchemaAttributes = map[string]schema.Attrib
 	"alias_target_dns_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "DNS name of the alias target.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"alias_target_hosted_zone_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Hosted zone ID of the alias target.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"alias_target_evaluate_target_health": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicates if Amazon Route 53 evaluates the health of the alias target.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"failover": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicates whether this is the primary or secondary resource record for Amazon Route 53 failover routing.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"geolocation_continent_code": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Continent code for Amazon Route 53 geolocation routing.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"geolocation_country_code": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Country code for Amazon Route 53 geolocation routing.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"geolocation_subdivision_code": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Subdivision code for Amazon Route 53 geolocation routing.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"health_check_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "ID of the health check that Amazon Route 53 performs for this resource record.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"region": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Amazon EC2 region where this resource record resides for latency routing.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"set_identifier": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "An identifier that differentiates records with the same DNS name and type for weighted, latency, geolocation, and failover routing.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Type of Amazon Route 53 resource record.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"weight": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "Value that determines the portion of traffic for this record in weighted routing. The range is from 0 to 255.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 }
 

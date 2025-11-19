@@ -29,6 +29,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -237,6 +238,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          FixedaddressCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -328,11 +332,17 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The discovery status of this fixed address.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_data": schema.SingleNestedAttribute{
 		Attributes:          FixedaddressDiscoveredDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The discovered data for this fixed address.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"enable_ddns": schema.BoolAttribute{
 		Optional: true,
@@ -401,6 +411,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"is_invalid_mac": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This flag reflects whether the MAC address for this fixed address is invalid.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -440,6 +453,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          FixedaddressMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"ms_options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

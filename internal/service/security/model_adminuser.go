@@ -20,6 +20,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -181,6 +182,9 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Status of the user account.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"time_zone": schema.StringAttribute{
 		Optional: true,

@@ -22,6 +22,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -85,10 +86,16 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	"client_certificate_subject": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The client certificate subject of a notification REST endpoint.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"client_certificate_token": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop for a notification REST endpoit client certificate.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"client_certificate_file": schema.StringAttribute{
 		Optional:            true,
@@ -97,10 +104,16 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	"client_certificate_valid_from": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when client certificate for a notification REST endpoint was created.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"client_certificate_valid_to": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when client certificate for a notification REST endpoint expires.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,

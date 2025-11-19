@@ -6,11 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type ZoneAuthDnssecKeysModel struct {
@@ -39,22 +41,37 @@ var ZoneAuthDnssecKeysResourceSchemaAttributes = map[string]schema.Attribute{
 	"status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The status of the key for the zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"next_event_date": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The next event date for the key, the rollover date for an active key or the removal date for an already rolled one.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The key type.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"algorithm": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The public-key encryption algorithm. Values 1, 3 and 6 are deprecated from NIOS 9.0.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"public_key": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The Base-64 encoding of the public key.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 

@@ -6,12 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type NetworkcontainerCloudInfoModel struct {
@@ -46,30 +48,51 @@ var NetworkcontainerCloudInfoResourceSchemaAttributes = map[string]schema.Attrib
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"delegated_root": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"owned_by_adaptor": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines whether the object was created by the cloud adapter or not.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"usage": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicates the cloud origin of the object.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"tenant": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Reference to the tenant object associated with the object, if any.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"mgmt_platform": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicates the specified cloud management platform.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"authority_type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Type of authority over the object.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 

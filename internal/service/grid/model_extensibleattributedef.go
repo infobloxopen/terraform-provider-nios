@@ -19,6 +19,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type ExtensibleattributedefModel struct {
@@ -84,6 +85,9 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		Attributes:          ExtensibleattributedefDescendantsActionResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "This option describes the action that must be taken on the extensible attribute by its descendant in case the ‘Inheritable’ flag is set.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"flags": schema.StringAttribute{
 		Optional:            true,
@@ -126,6 +130,9 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 	"namespace": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Namespace for the Extensible Attribute Definition.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"type": schema.StringAttribute{
 		Required: true,

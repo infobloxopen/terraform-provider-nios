@@ -9,6 +9,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -17,6 +18,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -71,10 +73,16 @@ var Awsrte53taskgroupTaskListResourceSchemaAttributes = map[string]schema.Attrib
 	"state": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicate the sync status of this task.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"state_msg": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "State message for the task.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"filter": schema.StringAttribute{
 		Optional:            true,
@@ -105,10 +113,16 @@ var Awsrte53taskgroupTaskListResourceSchemaAttributes = map[string]schema.Attrib
 	"status_timestamp": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when the last state was logged.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"last_run": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when the task was started last.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"sync_public_zones": schema.BoolAttribute{
 		Optional:            true,
@@ -125,6 +139,9 @@ var Awsrte53taskgroupTaskListResourceSchemaAttributes = map[string]schema.Attrib
 	"zone_count": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The number of zones synchronized by this task.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"credentials_type": schema.StringAttribute{
 		Optional: true,
