@@ -191,6 +191,38 @@ func TestAccDhcpoptiondefinitionResource_Type(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "type", "ip-address"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccDhcpoptiondefinitionType("10", name, "8-bit unsigned integer", space),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpoptiondefinitionExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "type", "8-bit unsigned integer"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDhcpoptiondefinitionType("10", name, "domain-name", space),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpoptiondefinitionExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "type", "domain-name"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDhcpoptiondefinitionType("10", name, "array of ip-address", space),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpoptiondefinitionExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "type", "array of ip-address"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDhcpoptiondefinitionType("10", name, "boolean", space),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpoptiondefinitionExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "type", "boolean"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})

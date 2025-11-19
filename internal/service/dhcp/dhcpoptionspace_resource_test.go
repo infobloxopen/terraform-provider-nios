@@ -130,8 +130,8 @@ func TestAccDhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
 	var v dhcp.Dhcpoptionspace
 	optionSpace1 := acctest.RandomNameWithPrefix("option-space")
 	optionSpace2 := acctest.RandomNameWithPrefix("option-space")
-	optionDefinition1 := "nios_dhcp_dhcpoptiondefinition.test2"
-	optionDefinition2 := "nios_dhcp_dhcpoptiondefinition.test3"
+	optionDefinition1 := "nios_dhcp_optiondefinition.test2"
+	optionDefinition2 := "nios_dhcp_optiondefinition.test3"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
