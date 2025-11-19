@@ -430,14 +430,14 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Map{
 			mapvalidator.SizeAtLeast(1),
 		},
-		PlanModifiers: []planmodifier.Map{
-			importmod.AssociateInternalId(),
-		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"federated_realms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
