@@ -23,6 +23,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -97,6 +98,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		MarkdownDescription: "The IP address of the server that is serving this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -122,10 +126,16 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"display_domain": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The displayed name of the DNS zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"dns_fqdn": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of this DNS zone in punycode format. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
@@ -205,10 +215,16 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"locked_by": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of a superuser or the administrator who locked this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"mask_prefix": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "IPv4 Netmask or IPv6 prefix for this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ms_ad_integrated": schema.BoolAttribute{
 		Optional:            true,
@@ -228,14 +244,23 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"ms_managed": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The flag that indicates whether the zone is assigned to a Microsoft DNS server. This flag returns the authoritative name server type of the Microsoft DNS server. Valid values are: \"NONE\" if the zone is not assigned to any Microsoft DNS server. \"STUB\" if the zone is assigned to a Microsoft DNS server as a stub zone. \"AUTH_PRIMARY\" if only the primary server of the zone is a Microsoft DNS server. \"AUTH_SECONDARY\" if only the secondary server of the zone is a Microsoft DNS server. \"AUTH_BOTH\" if both the primary and secondary servers of the zone are Microsoft DNS servers.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ms_read_only": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines if a Grid member manages the zone served by a Microsoft DNS server in read-only mode. This flag is true when a Grid member manages the zone in read-only mode, false otherwise. When the zone has the ms_read_only flag set to True, no changes can be made to this zone.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"ms_sync_master_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of MS synchronization master for this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ns_group": schema.StringAttribute{
 		Optional: true,
@@ -248,6 +273,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"parent": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The parent zone of this zone. Note that when searching for reverse zones, the \"in-addr.arpa\" notation should be used.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"prefix": schema.StringAttribute{
 		Optional: true,
@@ -261,6 +289,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"using_srg_associations": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This is true if the zone is associated with a shared record group.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"view": schema.StringAttribute{
 		Optional: true,

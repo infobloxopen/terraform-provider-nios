@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -13,6 +14,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -46,6 +48,9 @@ var DistributionscheduleUpgradeGroupsResourceSchemaAttributes = map[string]schem
 	"time_zone": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The time zone for scheduling operations.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"distribution_dependent_group": schema.StringAttribute{
 		Optional:            true,
@@ -55,6 +60,9 @@ var DistributionscheduleUpgradeGroupsResourceSchemaAttributes = map[string]schem
 	"upgrade_dependent_group": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The upgrade dependent group name.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"distribution_time": schema.StringAttribute{
 		Optional:            true,
@@ -67,6 +75,9 @@ var DistributionscheduleUpgradeGroupsResourceSchemaAttributes = map[string]schem
 	"upgrade_time": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the next scheduled upgrade.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 }
 

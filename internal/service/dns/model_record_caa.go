@@ -21,6 +21,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -99,6 +100,9 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RecordCaaCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The cloud information associated with the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -113,6 +117,9 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"creation_time": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The creation time of the record.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"creator": schema.StringAttribute{
 		Optional: true,
@@ -144,6 +151,9 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the CAA record in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
@@ -172,6 +182,9 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -183,6 +196,9 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"reclaimable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines if the record is reclaimable or not.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"ttl": schema.Int64Attribute{
 		Optional: true,
@@ -210,6 +226,9 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"zone": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the zone in which the record resides. Example: \"zone.com\". If a view is not specified when searching by zone, the default view is used.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 

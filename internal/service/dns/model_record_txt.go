@@ -22,6 +22,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -84,11 +85,17 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RecordTxtAwsRte53RecordInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The AWS Route53 record information associated with the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          RecordTxtCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The cloud information associated with the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -102,6 +109,9 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"creation_time": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the record creation in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"creator": schema.StringAttribute{
 		Optional: true,
@@ -132,6 +142,9 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name for a TXT record in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
@@ -160,6 +173,9 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -171,10 +187,16 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"reclaimable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines if the record is reclaimable or not.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"shared_record_group": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the shared record group in which the record resides. This field exists only on db_objects if this record is a shared record.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"text": schema.StringAttribute{
 		Required: true,
@@ -209,6 +231,9 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"zone": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the zone in which the record resides. Example: \"zone.com\". If a view is not specified when searching by zone, the default view is used.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 

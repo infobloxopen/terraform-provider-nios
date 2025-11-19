@@ -8,12 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -70,6 +72,9 @@ var AwsuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_used": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when this AWS user credentials was last used.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -96,6 +101,9 @@ var AwsuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicate the validity status of this AWS user.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 

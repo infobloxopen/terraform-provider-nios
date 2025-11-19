@@ -6,11 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type ZoneAuthAwsRte53ZoneInfoModel struct {
@@ -38,31 +40,52 @@ var ZoneAuthAwsRte53ZoneInfoResourceSchemaAttributes = map[string]schema.Attribu
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "List of AWS VPC strings that are associated with this zone.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"callerreference": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "User specified caller reference when zone was created.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"delegation_set_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "ID of delegation set associated with this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"hosted_zone_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "AWS route 53 assigned ID for this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"name_servers": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "List of AWS name servers that are authoritative for this domain name.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"record_set_count": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "Number of resource record sets in the hosted zone.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicates whether private or public zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 
