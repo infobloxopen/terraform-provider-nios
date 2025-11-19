@@ -1092,6 +1092,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"srgs": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The associated shared record groups of a DNS zone. If a shared record group is associated with a zone, then all shared records in a shared record group will be shared in the zone.",
 	},
 	"update_forwarding": schema.ListNestedAttribute{
