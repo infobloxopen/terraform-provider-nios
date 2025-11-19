@@ -2,6 +2,7 @@ package dtc
 
 import (
 	"context"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -335,7 +336,7 @@ func (m *DtcMonitorHttpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorH
 	m.Interval = flex.FlattenInt64Pointer(from.Interval)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
-	m.Request = flex.FlattenStringPointer(from.Request)
+	m.Request = FlattenRquestDtcMonitorHttp(ctx, from.Request, m.Request, diags)
 	m.Result = flex.FlattenStringPointer(from.Result)
 	m.ResultCode = flex.FlattenInt64Pointer(from.ResultCode)
 	m.RetryDown = flex.FlattenInt64Pointer(from.RetryDown)
@@ -343,4 +344,23 @@ func (m *DtcMonitorHttpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorH
 	m.Secure = types.BoolPointerValue(from.Secure)
 	m.Timeout = flex.FlattenInt64Pointer(from.Timeout)
 	m.ValidateCert = types.BoolPointerValue(from.ValidateCert)
+}
+
+func FlattenRquestDtcMonitorHttp(ctx context.Context, fromRequest *string, planRequest types.String, diags *diag.Diagnostics) types.String {
+	if fromRequest == nil {
+		return types.StringNull()
+	}
+	requestValue := *fromRequest
+
+	if strings.HasPrefix(requestValue, "POST") || strings.HasPrefix(requestValue, "GET") || strings.HasPrefix(requestValue, "HEAD") {
+		if strings.HasSuffix(requestValue, "\n\n") && !strings.HasSuffix(planRequest.ValueString(), "\n\n") {
+			requestValue = strings.TrimSuffix(requestValue, "\n\n")
+		}
+
+		if strings.Contains(requestValue, "HTTP/1.1") && !strings.Contains(planRequest.ValueString(), "\nConnection: close") {
+			requestValue = strings.ReplaceAll(requestValue, "\nConnection: close", "")
+		}
+	}
+
+	return types.StringValue(requestValue)
 }
