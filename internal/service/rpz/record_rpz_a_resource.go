@@ -81,7 +81,7 @@ func (r *RecordRpzAResource) Create(ctx context.Context, req resource.CreateRequ
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzAAPI.
 		Create(ctx).
-		RecordRpzA(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordRpzA(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzA).
 		ReturnAsObject(1).
 		Execute()
@@ -274,7 +274,7 @@ func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequ
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzAAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzA(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordRpzA(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzA).
 		ReturnAsObject(1).
 		Execute()

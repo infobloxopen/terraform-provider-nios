@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/rpz"
 
@@ -143,19 +142,7 @@ var RecordRpzAResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRecordRpzA(ctx context.Context, o types.Object, diags *diag.Diagnostics) *rpz.RecordRpzA {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m RecordRpzAModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
-func (m *RecordRpzAModel) Expand(ctx context.Context, diags *diag.Diagnostics) *rpz.RecordRpzA {
+func (m *RecordRpzAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *rpz.RecordRpzA {
 	if m == nil {
 		return nil
 	}
@@ -165,10 +152,12 @@ func (m *RecordRpzAModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		ExtAttrs: ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Ipv4addr: flex.ExpandIPv4Address(m.Ipv4addr),
 		Name:     flex.ExpandStringPointer(m.Name),
-		RpZone:   flex.ExpandStringPointer(m.RpZone),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
-		View:     flex.ExpandStringPointer(m.View),
+	}
+	if isCreate {
+		to.RpZone = flex.ExpandStringPointer(m.RpZone)
+		to.View = flex.ExpandStringPointer(m.View)
 	}
 	return to
 }
