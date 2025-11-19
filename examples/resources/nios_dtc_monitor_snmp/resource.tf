@@ -1,4 +1,4 @@
-// Create an snmp user(Required as Parent)
+// Create an snmp user (Required as Parent)
 resource "nios_security_snmp_user" "snmpuser_parent" {
   name                    = "snmpuser_example_1"
   authentication_protocol = "NONE"

@@ -301,6 +301,10 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 		},
 		{
 			"oid": ".02",
+			"condition": "RANGE",
+			"first":     "2",
+			"last":      "4",
+			"type":      "INTEGER",
 		},
 		{
 			"oid":       ".1",
@@ -311,15 +315,17 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 	oidsUpdate := []map[string]any{
 		{
 			"oid":       ".2",
-			"condition": "EXACT",
+			"condition": "LEQ",
 			"first":     "10",
 		},
 		{
 			"oid": ".01",
+			"condition": "GEQ",
+			"first":     "25",
 		},
 		{
 			"oid":       ".1",
-			"condition": "EXACT",
+			"condition": "LEQ",
 			"first":     "20",
 		},
 	}
@@ -337,6 +343,10 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "oids.0.condition", "EXACT"),
 					resource.TestCheckResourceAttr(resourceName, "oids.0.first", "10"),
 					resource.TestCheckResourceAttr(resourceName, "oids.1.oid", ".02"),
+					resource.TestCheckResourceAttr(resourceName, "oids.1.condition", "RANGE"),
+					resource.TestCheckResourceAttr(resourceName, "oids.1.first", "2"),
+					resource.TestCheckResourceAttr(resourceName, "oids.1.last", "4"),
+					resource.TestCheckResourceAttr(resourceName, "oids.1.type", "INTEGER"),
 					resource.TestCheckResourceAttr(resourceName, "oids.2.oid", ".1"),
 					resource.TestCheckResourceAttr(resourceName, "oids.2.condition", "EXACT"),
 					resource.TestCheckResourceAttr(resourceName, "oids.2.first", "20"),
@@ -348,9 +358,13 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "oids.0.oid", ".2"),
+					resource.TestCheckResourceAttr(resourceName, "oids.0.condition", "LEQ"),
+					resource.TestCheckResourceAttr(resourceName, "oids.0.first", "10"),
 					resource.TestCheckResourceAttr(resourceName, "oids.1.oid", ".01"),
+					resource.TestCheckResourceAttr(resourceName, "oids.1.condition", "GEQ"),
+					resource.TestCheckResourceAttr(resourceName, "oids.1.first", "25"),
 					resource.TestCheckResourceAttr(resourceName, "oids.2.oid", ".1"),
-					resource.TestCheckResourceAttr(resourceName, "oids.2.condition", "EXACT"),
+					resource.TestCheckResourceAttr(resourceName, "oids.2.condition", "LEQ"),
 					resource.TestCheckResourceAttr(resourceName, "oids.2.first", "20"),
 				),
 			},
@@ -515,6 +529,7 @@ func TestAccDtcMonitorSnmpResource_Version(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_snmp.test_version"
 	var v dtc.DtcMonitorSnmp
 	name := acctest.RandomNameWithPrefix("dtc-monitor-snmp")
+	snmpUser := "nios_security_snmp_user.snmpuser_parent1"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -534,6 +549,13 @@ func TestAccDtcMonitorSnmpResource_Version(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "version", "V2C"),
+				),
+			},
+			{
+				Config: testAccDtcMonitorSnmpVersionV3(name, "V3", snmpUser),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcMonitorSnmpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "version", "V3"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -759,4 +781,15 @@ resource "nios_dtc_monitor_snmp" "test_version" {
     version = %q
 }
 `, name, version)
+}
+
+func testAccDtcMonitorSnmpVersionV3(name, version, snmpUser string) string {
+    config := fmt.Sprintf(`
+resource "nios_dtc_monitor_snmp" "test_version" {
+    name = %q
+    version = %q
+    user = %s.name
+}
+`, name, version, snmpUser)
+    return strings.Join([]string{testAccBaseWithSnmpUsers(), config}, "")
 }
