@@ -141,6 +141,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
+		dtc.NewDtcMonitorPdpResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworkcontainerResource,
@@ -226,6 +227,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+		dtc.NewDtcMonitorPdpDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworkcontainerDataSource,
