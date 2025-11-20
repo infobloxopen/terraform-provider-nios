@@ -846,13 +846,6 @@ resource "nios_dtc_monitor_http" "test" {
 `, name)
 }
 
-func testAccDtcMonitorHttpRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_http" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
 
 func testAccDtcMonitorHttpCiphers(name, ciphers string) string {
 	return fmt.Sprintf(`
