@@ -22,7 +22,7 @@ func TestAccSharedrecordCnameResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_cname.test"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -33,8 +33,11 @@ func TestAccSharedrecordCnameResource_basic(t *testing.T) {
 				Config: testAccSharedrecordCnameBasicConfig(name, canonical, sharedRecordGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordCnameExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -46,7 +49,7 @@ func TestAccSharedrecordCnameResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_sharedrecord_cname.test"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -68,8 +71,8 @@ func TestAccSharedrecordCnameResource_Canonical(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_cname.test_canonical"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical1 := acctest.RandomName()
-	canonical2 := acctest.RandomName()
+	canonical1 := acctest.RandomNameWithPrefix("canonical-name") + ".com"
+	canonical2 := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -100,7 +103,7 @@ func TestAccSharedrecordCnameResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_cname.test_comment"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -131,7 +134,7 @@ func TestAccSharedrecordCnameResource_Disable(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_cname.test_disable"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -162,7 +165,7 @@ func TestAccSharedrecordCnameResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_cname.test_extattrs"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	extAttrs1 := acctest.RandomName()
 	extAttrs2 := acctest.RandomName()
@@ -200,7 +203,7 @@ func TestAccSharedrecordCnameResource_Name(t *testing.T) {
 	var v dns.SharedrecordCname
 	name1 := acctest.RandomNameWithPrefix("sharedrecord-cname-")
 	name2 := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -231,7 +234,7 @@ func TestAccSharedrecordCnameResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_cname.test_ttl"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -262,7 +265,7 @@ func TestAccSharedrecordCnameResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dns_sharedrecord_cname.test_use_ttl"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
