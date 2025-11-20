@@ -20,6 +20,7 @@ import (
 
 type MemberModel struct {
 	Ref                             types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	ActivePosition                  types.String `tfsdk:"active_position"`
 	AdditionalIpList                types.List   `tfsdk:"additional_ip_list"`
 	AutomatedTrafficCaptureSetting  types.Object `tfsdk:"automated_traffic_capture_setting"`
@@ -108,6 +109,7 @@ type MemberModel struct {
 
 var MemberAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+    "uuid":        types.StringType,
 	"active_position":                     types.StringType,
 	"additional_ip_list":                  types.ListType{ElemType: types.ObjectType{AttrTypes: MemberAdditionalIpListAttrTypes}},
 	"automated_traffic_capture_setting":   types.ObjectType{AttrTypes: MemberAutomatedTrafficCaptureSettingAttrTypes},
@@ -199,6 +201,10 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"active_position": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The active server of a Grid member.",
@@ -749,6 +755,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 		*m = MemberModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ActivePosition = flex.FlattenStringPointer(from.ActivePosition)
 	m.AdditionalIpList = flex.FlattenFrameworkListNestedBlock(ctx, from.AdditionalIpList, MemberAdditionalIpListAttrTypes, diags, FlattenMemberAdditionalIpList)
 	m.AutomatedTrafficCaptureSetting = FlattenMemberAutomatedTrafficCaptureSetting(ctx, from.AutomatedTrafficCaptureSetting, diags)

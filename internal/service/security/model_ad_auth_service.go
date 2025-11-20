@@ -18,6 +18,7 @@ import (
 
 type AdAuthServiceModel struct {
 	Ref                 types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AdDomain            types.String `tfsdk:"ad_domain"`
 	Comment             types.String `tfsdk:"comment"`
 	Disabled            types.Bool   `tfsdk:"disabled"`
@@ -29,6 +30,7 @@ type AdAuthServiceModel struct {
 
 var AdAuthServiceAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
+    "uuid":        types.StringType,
 	"ad_domain":             types.StringType,
 	"comment":               types.StringType,
 	"disabled":              types.BoolType,
@@ -43,6 +45,10 @@ var AdAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"ad_domain": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The Active Directory domain to which this server belongs.",
@@ -127,6 +133,7 @@ func (m *AdAuthServiceModel) Flatten(ctx context.Context, from *security.AdAuthS
 		*m = AdAuthServiceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AdDomain = flex.FlattenStringPointer(from.AdDomain)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disabled = types.BoolPointerValue(from.Disabled)

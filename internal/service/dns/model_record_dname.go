@@ -27,6 +27,7 @@ import (
 
 type RecordDnameModel struct {
 	Ref               types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	CloudInfo         types.Object `tfsdk:"cloud_info"`
 	Comment           types.String `tfsdk:"comment"`
 	CreationTime      types.Int64  `tfsdk:"creation_time"`
@@ -52,6 +53,7 @@ type RecordDnameModel struct {
 
 var RecordDnameAttrTypes = map[string]attr.Type{
 	"ref":                 types.StringType,
+    "uuid":        types.StringType,
 	"cloud_info":          types.ObjectType{AttrTypes: RecordDnameCloudInfoAttrTypes},
 	"comment":             types.StringType,
 	"creation_time":       types.Int64Type,
@@ -80,6 +82,10 @@ var RecordDnameResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          RecordDnameCloudInfoResourceSchemaAttributes,
 		Computed:            true,
@@ -256,6 +262,7 @@ func (m *RecordDnameModel) Flatten(ctx context.Context, from *dns.RecordDname, d
 		*m = RecordDnameModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudInfo = FlattenRecordDnameCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CreationTime = flex.FlattenInt64Pointer(from.CreationTime)

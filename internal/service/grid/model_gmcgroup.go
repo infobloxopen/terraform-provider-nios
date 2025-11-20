@@ -18,6 +18,7 @@ import (
 
 type GmcgroupModel struct {
 	Ref                types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment            types.String `tfsdk:"comment"`
 	GmcPromotionPolicy types.String `tfsdk:"gmc_promotion_policy"`
 	Members            types.List   `tfsdk:"members"`
@@ -28,6 +29,7 @@ type GmcgroupModel struct {
 
 var GmcgroupAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+    "uuid":        types.StringType,
 	"comment":              types.StringType,
 	"gmc_promotion_policy": types.StringType,
 	"members":              types.ListType{ElemType: types.ObjectType{AttrTypes: GmcgroupMembersAttrTypes}},
@@ -41,6 +43,10 @@ var GmcgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Description of the group",
@@ -119,6 +125,7 @@ func (m *GmcgroupModel) Flatten(ctx context.Context, from *grid.Gmcgroup, diags 
 		*m = GmcgroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.GmcPromotionPolicy = flex.FlattenStringPointer(from.GmcPromotionPolicy)
 	m.Members = flex.FlattenFrameworkListNestedBlock(ctx, from.Members, GmcgroupMembersAttrTypes, diags, FlattenGmcgroupMembers)

@@ -20,6 +20,7 @@ import (
 
 type ThreatprotectionProfileModel struct {
 	Ref                             types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment                         types.String `tfsdk:"comment"`
 	CurrentRuleset                  types.String `tfsdk:"current_ruleset"`
 	DisableMultipleDnsTcpRequest    types.Bool   `tfsdk:"disable_multiple_dns_tcp_request"`
@@ -37,6 +38,7 @@ type ThreatprotectionProfileModel struct {
 
 var ThreatprotectionProfileAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+    "uuid":        types.StringType,
 	"comment":                              types.StringType,
 	"current_ruleset":                      types.StringType,
 	"disable_multiple_dns_tcp_request":     types.BoolType,
@@ -57,6 +59,10 @@ var ThreatprotectionProfileResourceSchemaAttributes = map[string]schema.Attribut
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The comment for the Threat Protection profile.",
@@ -174,6 +180,7 @@ func (m *ThreatprotectionProfileModel) Flatten(ctx context.Context, from *threat
 		*m = ThreatprotectionProfileModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CurrentRuleset = flex.FlattenStringPointer(from.CurrentRuleset)
 	m.DisableMultipleDnsTcpRequest = types.BoolPointerValue(from.DisableMultipleDnsTcpRequest)

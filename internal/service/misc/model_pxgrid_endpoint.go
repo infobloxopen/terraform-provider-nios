@@ -20,6 +20,7 @@ import (
 
 type PxgridEndpointModel struct {
 	Ref                        types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Address                    types.String `tfsdk:"address"`
 	ClientCertificateSubject   types.String `tfsdk:"client_certificate_subject"`
 	ClientCertificateToken     types.String `tfsdk:"client_certificate_token"`
@@ -45,6 +46,7 @@ type PxgridEndpointModel struct {
 
 var PxgridEndpointAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
+    "uuid":        types.StringType,
 	"address":                       types.StringType,
 	"client_certificate_subject":    types.StringType,
 	"client_certificate_token":      types.StringType,
@@ -73,6 +75,10 @@ var PxgridEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"address": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The pxgrid endpoint IPv4 Address or IPv6 Address or Fully-Qualified Domain Name (FQDN)",
@@ -223,6 +229,7 @@ func (m *PxgridEndpointModel) Flatten(ctx context.Context, from *misc.PxgridEndp
 		*m = PxgridEndpointModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.ClientCertificateSubject = flex.FlattenStringPointer(from.ClientCertificateSubject)
 	m.ClientCertificateToken = flex.FlattenStringPointer(from.ClientCertificateToken)

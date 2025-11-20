@@ -34,6 +34,7 @@ import (
 
 type ZoneRpModel struct {
 	Ref                              types.String                             `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Address                          iptypes.IPAddress                        `tfsdk:"address"`
 	Comment                          types.String                             `tfsdk:"comment"`
 	Disable                          types.Bool                               `tfsdk:"disable"`
@@ -88,6 +89,7 @@ type ZoneRpModel struct {
 
 var ZoneRpAttrTypes = map[string]attr.Type{
 	"ref":                      types.StringType,
+    "uuid":        types.StringType,
 	"address":                  iptypes.IPAddressType{},
 	"comment":                  types.StringType,
 	"disable":                  types.BoolType,
@@ -145,6 +147,10 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
@@ -641,6 +647,7 @@ func (m *ZoneRpModel) Flatten(ctx context.Context, from *dns.ZoneRp, diags *diag
 		*m = ZoneRpModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

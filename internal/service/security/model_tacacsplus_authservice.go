@@ -18,6 +18,7 @@ import (
 
 type TacacsplusAuthserviceModel struct {
 	Ref         types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AcctRetries types.Int64  `tfsdk:"acct_retries"`
 	AcctTimeout types.Int64  `tfsdk:"acct_timeout"`
 	AuthRetries types.Int64  `tfsdk:"auth_retries"`
@@ -30,6 +31,7 @@ type TacacsplusAuthserviceModel struct {
 
 var TacacsplusAuthserviceAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+    "uuid":        types.StringType,
 	"acct_retries": types.Int64Type,
 	"acct_timeout": types.Int64Type,
 	"auth_retries": types.Int64Type,
@@ -45,6 +47,10 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"acct_retries": schema.Int64Attribute{
 		Optional:            true,
 		MarkdownDescription: "The number of the accounting retries before giving up and moving on to the next server.",
@@ -134,6 +140,7 @@ func (m *TacacsplusAuthserviceModel) Flatten(ctx context.Context, from *security
 		*m = TacacsplusAuthserviceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AcctRetries = flex.FlattenInt64Pointer(from.AcctRetries)
 	m.AcctTimeout = flex.FlattenInt64Pointer(from.AcctTimeout)
 	m.AuthRetries = flex.FlattenInt64Pointer(from.AuthRetries)

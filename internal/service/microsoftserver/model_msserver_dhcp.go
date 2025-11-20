@@ -16,6 +16,7 @@ import (
 
 type MsserverDhcpModel struct {
 	Ref                        types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Address                    types.String `tfsdk:"address"`
 	Comment                    types.String `tfsdk:"comment"`
 	DhcpUtilization            types.Int64  `tfsdk:"dhcp_utilization"`
@@ -41,6 +42,7 @@ type MsserverDhcpModel struct {
 
 var MsserverDhcpAttrTypes = map[string]attr.Type{
 	"ref":                          types.StringType,
+    "uuid":        types.StringType,
 	"address":                      types.StringType,
 	"comment":                      types.StringType,
 	"dhcp_utilization":             types.Int64Type,
@@ -69,6 +71,10 @@ var MsserverDhcpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"address": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The address or FQDN of the DHCP Microsoft Server.",
@@ -203,6 +209,7 @@ func (m *MsserverDhcpModel) Flatten(ctx context.Context, from *microsoftserver.M
 		*m = MsserverDhcpModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DhcpUtilization = flex.FlattenInt64Pointer(from.DhcpUtilization)

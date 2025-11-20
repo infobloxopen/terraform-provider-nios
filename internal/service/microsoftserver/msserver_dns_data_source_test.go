@@ -37,6 +37,7 @@ func TestAccMsserverDnsDataSource_Filters(t *testing.T) {
 func testAccCheckMsserverDnsResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "address", dataSourceName, "result.0.address"),
 		resource.TestCheckResourceAttrPair(resourceName, "enable_dns_reports_sync", dataSourceName, "result.0.enable_dns_reports_sync"),
 		resource.TestCheckResourceAttrPair(resourceName, "login_name", dataSourceName, "result.0.login_name"),

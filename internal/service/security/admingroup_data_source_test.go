@@ -61,6 +61,7 @@ func TestAccAdmingroupDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckAdmingroupResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "access_method", dataSourceName, "result.0.access_method"),
 		resource.TestCheckResourceAttrPair(resourceName, "admin_set_commands", dataSourceName, "result.0.admin_set_commands"),
 		resource.TestCheckResourceAttrPair(resourceName, "admin_show_commands", dataSourceName, "result.0.admin_show_commands"),

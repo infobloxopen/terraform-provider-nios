@@ -26,6 +26,7 @@ import (
 
 type NetworkviewModel struct {
 	Ref                  types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AssociatedDnsViews   types.List   `tfsdk:"associated_dns_views"`
 	AssociatedMembers    types.List   `tfsdk:"associated_members"`
 	CloudInfo            types.Object `tfsdk:"cloud_info"`
@@ -46,6 +47,7 @@ type NetworkviewModel struct {
 
 var NetworkviewAttrTypes = map[string]attr.Type{
 	"ref":                    types.StringType,
+    "uuid":        types.StringType,
 	"associated_dns_views":   types.ListType{ElemType: types.StringType},
 	"associated_members":     types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkviewAssociatedMembersAttrTypes}},
 	"cloud_info":             types.ObjectType{AttrTypes: NetworkviewCloudInfoAttrTypes},
@@ -69,6 +71,10 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"associated_dns_views": schema.ListAttribute{
 		ElementType: types.StringType,
 		Computed:    true,
@@ -252,6 +258,7 @@ func (m *NetworkviewModel) Flatten(ctx context.Context, from *ipam.Networkview, 
 		*m = NetworkviewModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AssociatedDnsViews = flex.FlattenFrameworkListString(ctx, from.AssociatedDnsViews, diags)
 	m.AssociatedMembers = flex.FlattenFrameworkListNestedBlock(ctx, from.AssociatedMembers, NetworkviewAssociatedMembersAttrTypes, diags, FlattenNetworkviewAssociatedMembers)
 	m.CloudInfo = FlattenNetworkviewCloudInfo(ctx, from.CloudInfo, diags)

@@ -28,6 +28,7 @@ import (
 
 type ZoneStubModel struct {
 	Ref                  types.String                             `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Address              types.String                             `tfsdk:"address"`
 	Comment              types.String                             `tfsdk:"comment"`
 	Disable              types.Bool                               `tfsdk:"disable"`
@@ -66,6 +67,7 @@ type ZoneStubModel struct {
 
 var ZoneStubAttrTypes = map[string]attr.Type{
 	"ref":                    types.StringType,
+    "uuid":        types.StringType,
 	"address":                types.StringType,
 	"comment":                types.StringType,
 	"disable":                types.BoolType,
@@ -107,6 +109,10 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"address": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The IP address of the server that is serving this zone.",
@@ -383,6 +389,7 @@ func (m *ZoneStubModel) Flatten(ctx context.Context, from *dns.ZoneStub, diags *
 		*m = ZoneStubModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

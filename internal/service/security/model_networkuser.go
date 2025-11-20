@@ -16,6 +16,7 @@ import (
 
 type NetworkuserModel struct {
 	Ref             types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Address         types.String `tfsdk:"address"`
 	AddressObject   types.String `tfsdk:"address_object"`
 	DataSource      types.String `tfsdk:"data_source"`
@@ -35,6 +36,7 @@ type NetworkuserModel struct {
 
 var NetworkuserAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+    "uuid":        types.StringType,
 	"address":           types.StringType,
 	"address_object":    types.StringType,
 	"data_source":       types.StringType,
@@ -57,6 +59,10 @@ var NetworkuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"address": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address of the Network User.",
@@ -170,6 +176,7 @@ func (m *NetworkuserModel) Flatten(ctx context.Context, from *security.Networkus
 		*m = NetworkuserModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.AddressObject = flex.FlattenStringPointer(from.AddressObject)
 	m.DataSource = flex.FlattenStringPointer(from.DataSource)

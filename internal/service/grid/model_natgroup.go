@@ -18,12 +18,14 @@ import (
 
 type NatgroupModel struct {
 	Ref     types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment types.String `tfsdk:"comment"`
 	Name    types.String `tfsdk:"name"`
 }
 
 var NatgroupAttrTypes = map[string]attr.Type{
 	"ref":     types.StringType,
+    "uuid":        types.StringType,
 	"comment": types.StringType,
 	"name":    types.StringType,
 }
@@ -33,6 +35,10 @@ var NatgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -81,6 +87,7 @@ func (m *NatgroupModel) Flatten(ctx context.Context, from *grid.Natgroup, diags 
 		*m = NatgroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }

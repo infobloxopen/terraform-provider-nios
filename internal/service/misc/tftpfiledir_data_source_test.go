@@ -37,6 +37,7 @@ func TestAccTftpfiledirDataSource_Filters(t *testing.T) {
 func testAccCheckTftpfiledirResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "directory", dataSourceName, "result.0.directory"),
 		resource.TestCheckResourceAttrPair(resourceName, "is_synced_to_gm", dataSourceName, "result.0.is_synced_to_gm"),
 		resource.TestCheckResourceAttrPair(resourceName, "last_modify", dataSourceName, "result.0.last_modify"),

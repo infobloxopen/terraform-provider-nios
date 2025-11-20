@@ -18,6 +18,7 @@ import (
 
 type ParentalcontrolAvpModel struct {
 	Ref          types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment      types.String `tfsdk:"comment"`
 	DomainTypes  types.List   `tfsdk:"domain_types"`
 	IsRestricted types.Bool   `tfsdk:"is_restricted"`
@@ -31,6 +32,7 @@ type ParentalcontrolAvpModel struct {
 
 var ParentalcontrolAvpAttrTypes = map[string]attr.Type{
 	"ref":           types.StringType,
+    "uuid":        types.StringType,
 	"comment":       types.StringType,
 	"domain_types":  types.ListType{ElemType: types.StringType},
 	"is_restricted": types.BoolType,
@@ -47,6 +49,10 @@ var ParentalcontrolAvpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The comment for the AVP.",
@@ -138,6 +144,7 @@ func (m *ParentalcontrolAvpModel) Flatten(ctx context.Context, from *parentalcon
 		*m = ParentalcontrolAvpModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DomainTypes = flex.FlattenFrameworkListString(ctx, from.DomainTypes, diags)
 	m.IsRestricted = types.BoolPointerValue(from.IsRestricted)

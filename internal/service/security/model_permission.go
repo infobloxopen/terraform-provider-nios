@@ -20,6 +20,7 @@ import (
 
 type PermissionModel struct {
 	Ref          types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Group        types.String `tfsdk:"group"`
 	Object       types.String `tfsdk:"object"`
 	Permission   types.String `tfsdk:"permission"`
@@ -29,6 +30,7 @@ type PermissionModel struct {
 
 var PermissionAttrTypes = map[string]attr.Type{
 	"ref":           types.StringType,
+    "uuid":        types.StringType,
 	"group":         types.StringType,
 	"object":        types.StringType,
 	"permission":    types.StringType,
@@ -41,6 +43,10 @@ var PermissionResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -138,6 +144,7 @@ func (m *PermissionModel) Flatten(ctx context.Context, from *security.Permission
 		*m = PermissionModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Group = flex.FlattenStringPointer(from.Group)
 	m.Object = flex.FlattenStringPointer(from.Object)
 	m.Permission = flex.FlattenStringPointer(from.Permission)

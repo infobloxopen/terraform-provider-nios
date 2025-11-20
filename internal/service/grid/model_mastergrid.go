@@ -155,6 +155,6 @@ func (m *MastergridModel) Flatten(ctx context.Context, from *grid.Mastergrid, di
 	m.LastEventDetails = flex.FlattenStringPointer(from.LastEventDetails)
 	m.LastSyncTimestamp = flex.FlattenInt64Pointer(from.LastSyncTimestamp)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
-	m.Status = flex.FlattenStringPointer(from.Status)
+	m.Status = flex.FlattenStringPointer(from.JoinStatus)
 	m.UseMgmtPort = types.BoolPointerValue(from.UseMgmtPort)
 }

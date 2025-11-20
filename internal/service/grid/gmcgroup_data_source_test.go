@@ -37,6 +37,7 @@ func TestAccGmcgroupDataSource_Filters(t *testing.T) {
 func testAccCheckGmcgroupResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "gmc_promotion_policy", dataSourceName, "result.0.gmc_promotion_policy"),
 		resource.TestCheckResourceAttrPair(resourceName, "members", dataSourceName, "result.0.members"),

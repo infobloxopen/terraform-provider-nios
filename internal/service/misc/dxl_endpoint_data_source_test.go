@@ -59,6 +59,7 @@ func TestAccDxlEndpointDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckDxlEndpointResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "brokers", dataSourceName, "result.0.brokers"),
 		resource.TestCheckResourceAttrPair(resourceName, "brokers_import_token", dataSourceName, "result.0.brokers_import_token"),
 		resource.TestCheckResourceAttrPair(resourceName, "client_certificate_subject", dataSourceName, "result.0.client_certificate_subject"),

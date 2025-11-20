@@ -18,6 +18,7 @@ import (
 
 type ApprovalworkflowModel struct {
 	Ref                     types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	ApprovalGroup           types.String `tfsdk:"approval_group"`
 	ApprovalNotifyTo        types.String `tfsdk:"approval_notify_to"`
 	ApprovedNotifyTo        types.String `tfsdk:"approved_notify_to"`
@@ -43,6 +44,7 @@ type ApprovalworkflowModel struct {
 
 var ApprovalworkflowAttrTypes = map[string]attr.Type{
 	"ref":                       types.StringType,
+    "uuid":        types.StringType,
 	"approval_group":            types.StringType,
 	"approval_notify_to":        types.StringType,
 	"approved_notify_to":        types.StringType,
@@ -71,6 +73,10 @@ var ApprovalworkflowResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"approval_group": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The approval administration group.",
@@ -224,6 +230,7 @@ func (m *ApprovalworkflowModel) Flatten(ctx context.Context, from *security.Appr
 		*m = ApprovalworkflowModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ApprovalGroup = flex.FlattenStringPointer(from.ApprovalGroup)
 	m.ApprovalNotifyTo = flex.FlattenStringPointer(from.ApprovalNotifyTo)
 	m.ApprovedNotifyTo = flex.FlattenStringPointer(from.ApprovedNotifyTo)

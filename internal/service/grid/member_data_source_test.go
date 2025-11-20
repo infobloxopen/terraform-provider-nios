@@ -59,6 +59,7 @@ func TestAccMemberDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckMemberResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "active_position", dataSourceName, "result.0.active_position"),
 		resource.TestCheckResourceAttrPair(resourceName, "additional_ip_list", dataSourceName, "result.0.additional_ip_list"),
 		resource.TestCheckResourceAttrPair(resourceName, "automated_traffic_capture_setting", dataSourceName, "result.0.automated_traffic_capture_setting"),

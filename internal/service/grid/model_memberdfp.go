@@ -18,6 +18,7 @@ import (
 
 type MemberdfpModel struct {
 	Ref             types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	DfpForwardFirst types.Bool   `tfsdk:"dfp_forward_first"`
 	ExtAttrs        types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll     types.Map    `tfsdk:"extattrs_all"`
@@ -27,6 +28,7 @@ type MemberdfpModel struct {
 
 var MemberdfpAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+    "uuid":        types.StringType,
 	"dfp_forward_first": types.BoolType,
 	"extattrs":          types.MapType{ElemType: types.StringType},
 	"extattrs_all":      types.MapType{ElemType: types.StringType},
@@ -39,6 +41,10 @@ var MemberdfpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"dfp_forward_first": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Option to resolve DNS query if resolution over Active Trust Cloud failed.",
@@ -107,6 +113,7 @@ func (m *MemberdfpModel) Flatten(ctx context.Context, from *grid.Memberdfp, diag
 		*m = MemberdfpModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.DfpForwardFirst = types.BoolPointerValue(from.DfpForwardFirst)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.HostName = flex.FlattenStringPointer(from.HostName)

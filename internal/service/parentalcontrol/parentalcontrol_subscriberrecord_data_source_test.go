@@ -37,6 +37,7 @@ func TestAccParentalcontrolSubscriberrecordDataSource_Filters(t *testing.T) {
 func testAccCheckParentalcontrolSubscriberrecordResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "accounting_session_id", dataSourceName, "result.0.accounting_session_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "alt_ip_addr", dataSourceName, "result.0.alt_ip_addr"),
 		resource.TestCheckResourceAttrPair(resourceName, "ans0", dataSourceName, "result.0.ans0"),

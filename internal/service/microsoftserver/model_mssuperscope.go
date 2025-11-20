@@ -20,6 +20,7 @@ import (
 
 type MssuperscopeModel struct {
 	Ref                   types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment               types.String `tfsdk:"comment"`
 	DhcpUtilization       types.Int64  `tfsdk:"dhcp_utilization"`
 	DhcpUtilizationStatus types.String `tfsdk:"dhcp_utilization_status"`
@@ -40,6 +41,7 @@ type MssuperscopeModel struct {
 
 var MssuperscopeAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+    "uuid":        types.StringType,
 	"comment":                 types.StringType,
 	"dhcp_utilization":        types.Int64Type,
 	"dhcp_utilization_status": types.StringType,
@@ -63,6 +65,10 @@ var MssuperscopeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The superscope descriptive comment.",
@@ -186,6 +192,7 @@ func (m *MssuperscopeModel) Flatten(ctx context.Context, from *microsoftserver.M
 		*m = MssuperscopeModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DhcpUtilization = flex.FlattenInt64Pointer(from.DhcpUtilization)
 	m.DhcpUtilizationStatus = flex.FlattenStringPointer(from.DhcpUtilizationStatus)

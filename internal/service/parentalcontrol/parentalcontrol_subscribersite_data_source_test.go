@@ -60,6 +60,7 @@ func TestAccParentalcontrolSubscribersiteDataSource_ExtAttrFilters(t *testing.T)
 func testAccCheckParentalcontrolSubscribersiteResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
     return []resource.TestCheckFunc{
         resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
         resource.TestCheckResourceAttrPair(resourceName, "abss", dataSourceName, "result.0.abss"),
         resource.TestCheckResourceAttrPair(resourceName, "api_members", dataSourceName, "result.0.api_members"),
         resource.TestCheckResourceAttrPair(resourceName, "api_port", dataSourceName, "result.0.api_port"),

@@ -18,6 +18,7 @@ import (
 
 type HsmEntrustnshieldgroupModel struct {
 	Ref               types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	CardName          types.String `tfsdk:"card_name"`
 	Comment           types.String `tfsdk:"comment"`
 	EntrustnshieldHsm types.List   `tfsdk:"entrustnshield_hsm"`
@@ -31,6 +32,7 @@ type HsmEntrustnshieldgroupModel struct {
 
 var HsmEntrustnshieldgroupAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+    "uuid":        types.StringType,
 	"card_name":          types.StringType,
 	"comment":            types.StringType,
 	"entrustnshield_hsm": types.ListType{ElemType: types.ObjectType{AttrTypes: HsmEntrustnshieldgroupEntrustnshieldHsmAttrTypes}},
@@ -47,6 +49,10 @@ var HsmEntrustnshieldgroupResourceSchemaAttributes = map[string]schema.Attribute
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"card_name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The Entrust nShield HSM softcard name.",
@@ -140,6 +146,7 @@ func (m *HsmEntrustnshieldgroupModel) Flatten(ctx context.Context, from *securit
 		*m = HsmEntrustnshieldgroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CardName = flex.FlattenStringPointer(from.CardName)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.EntrustnshieldHsm = flex.FlattenFrameworkListNestedBlock(ctx, from.EntrustnshieldHsm, HsmEntrustnshieldgroupEntrustnshieldHsmAttrTypes, diags, FlattenHsmEntrustnshieldgroupEntrustnshieldHsm)
