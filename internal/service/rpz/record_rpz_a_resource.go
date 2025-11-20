@@ -31,7 +31,7 @@ type RecordRpzAResource struct {
 }
 
 func (r *RecordRpzAResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_rpz_a"
+	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_a"
 }
 
 func (r *RecordRpzAResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

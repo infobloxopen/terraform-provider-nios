@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -18,7 +19,7 @@ import (
 var readableAttributesForRecordRpzA = "comment,disable,extattrs,ipv4addr,name,rp_zone,ttl,use_ttl,view,zone"
 
 func TestAccRecordRpzAResource_basic(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test"
+	var resourceName = "nios_rpz_record_a.test"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 
@@ -46,7 +47,7 @@ func TestAccRecordRpzAResource_basic(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_disappears(t *testing.T) {
-	resourceName := "nios_rpz_record_rpz_a.test"
+	resourceName := "nios_rpz_record_a.test"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 
@@ -68,7 +69,7 @@ func TestAccRecordRpzAResource_disappears(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_Comment(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_comment"
+	var resourceName = "nios_rpz_record_a.test_comment"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 	comment1 := "This is a new rpz a record"
@@ -100,7 +101,7 @@ func TestAccRecordRpzAResource_Comment(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_Disable(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_disable"
+	var resourceName = "nios_rpz_record_a.test_disable"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 
@@ -130,7 +131,7 @@ func TestAccRecordRpzAResource_Disable(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_extattrs"
+	var resourceName = "nios_rpz_record_a.test_extattrs"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 	extAttrValue1 := acctest.RandomName()
@@ -166,7 +167,7 @@ func TestAccRecordRpzAResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_Ipv4addr(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_ipv4addr"
+	var resourceName = "nios_rpz_record_a.test_ipv4addr"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 
@@ -196,7 +197,7 @@ func TestAccRecordRpzAResource_Ipv4addr(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_Name(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_name"
+	var resourceName = "nios_rpz_record_a.test_name"
 	var v rpz.RecordRpzA
 	name1 := acctest.RandomName() + ".rpz.example.com"
 	name2 := acctest.RandomName() + ".rpz.example.com"
@@ -227,7 +228,7 @@ func TestAccRecordRpzAResource_Name(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_RpZone(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_rp_zone"
+	var resourceName = "nios_rpz_record_a.test_rp_zone"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 	rpZone := "rpz.example.com"
@@ -253,7 +254,7 @@ func TestAccRecordRpzAResource_RpZone(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_Ttl(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_ttl"
+	var resourceName = "nios_rpz_record_a.test_ttl"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 
@@ -283,7 +284,7 @@ func TestAccRecordRpzAResource_Ttl(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_UseTtl(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_use_ttl"
+	var resourceName = "nios_rpz_record_a.test_use_ttl"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 
@@ -313,7 +314,7 @@ func TestAccRecordRpzAResource_UseTtl(t *testing.T) {
 }
 
 func TestAccRecordRpzAResource_View(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_a.test_view"
+	var resourceName = "nios_rpz_record_a.test_view"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 	view := "custom_view_1"
@@ -396,35 +397,41 @@ func testAccCheckRecordRpzADisappears(ctx context.Context, v *rpz.RecordRpzA) re
 }
 
 func testAccRecordRpzABasicConfig(name, ipV4Addr, rpZone string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test" {
 	name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 }
-`, name, ipV4Addr, rpZone)
+`, name, ipV4Addr)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzAComment(name, ipV4Addr, rpZone, comment string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_comment" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_comment" {
     name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 	comment = %q
 }
-`, name, ipV4Addr, rpZone, comment)
+`, name, ipV4Addr, comment)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzADisable(name, ipV4Addr, rpZone, disable string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_disable" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_disable" {
 	name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
     disable = %q
 }
-`, name, ipV4Addr, rpZone, disable)
+`, name, ipV4Addr, disable)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzAExtAttrs(name, ipV4Addr, rpZone string, extAttrs map[string]string) string {
@@ -435,77 +442,99 @@ func testAccRecordRpzAExtAttrs(name, ipV4Addr, rpZone string, extAttrs map[strin
 	`, k, v)
 	}
 	extattrsStr += "\t}"
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_extattrs" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_extattrs" {
 	name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
     extattrs = %s
 }
-`, name, ipV4Addr, rpZone, extattrsStr)
+`, name, ipV4Addr, extattrsStr)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzAIpv4addr(name, ipV4Addr, rpZone string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_ipv4addr" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_ipv4addr" {
     name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 }
-`, name, ipV4Addr, rpZone)
+`, name, ipV4Addr)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzAName(name, ipV4Addr, rpZone string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_name" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_name" {
     name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 }
-`, name, ipV4Addr, rpZone)
+`, name, ipV4Addr)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzARpZone(name, ipV4Addr, rpZone string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_rp_zone" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_rp_zone" {
     name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 }
-`, name, ipV4Addr, rpZone)
+`, name, ipV4Addr)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzATtl(name, ipV4Addr, rpZone string, use_ttl string, ttl int32) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_ttl" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_ttl" {
     name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 	ttl = %d
 	use_ttl = %q
 }
-`, name, ipV4Addr, rpZone, ttl, use_ttl)
+`, name, ipV4Addr, ttl, use_ttl)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzAUseTtl(name, ipV4Addr, rpZone string, use_ttl string, ttl int32) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_use_ttl" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_use_ttl" {
     name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 	ttl = %d
 	use_ttl = %q
 }
-`, name, ipV4Addr, rpZone, ttl, use_ttl)
+`, name, ipV4Addr, ttl, use_ttl)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzAView(name, ipV4Addr, rpZone, view string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test_view" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test_view" {
     name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 	view = %q
 }
-`, name, ipV4Addr, rpZone, view)
+`, name, ipV4Addr, view)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+}
+
+func testAccBaseWithZone(zoneFqdn string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test" {
+    fqdn = %q
+}
+`, zoneFqdn)
 }

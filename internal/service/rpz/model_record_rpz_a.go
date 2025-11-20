@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -64,6 +65,7 @@ var RecordRpzAResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The comment for the record; maximum 256 characters.",
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
 			customvalidator.ValidateTrimmedString(),
@@ -87,8 +89,7 @@ var RecordRpzAResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ipv4addr": schema.StringAttribute{
 		CustomType:          iptypes.IPv4AddressType{},
-		Optional:            true,
-		Computed:            true,
+		Required:            true,
 		MarkdownDescription: "The IPv4 Address of the substitute rule.",
 	},
 	"name": schema.StringAttribute{
@@ -99,8 +100,7 @@ var RecordRpzAResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"rp_zone": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The name of a response policy zone in which the record resides.",
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),

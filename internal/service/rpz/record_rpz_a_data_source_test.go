@@ -3,6 +3,7 @@ package rpz_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -12,8 +13,8 @@ import (
 )
 
 func TestAccRecordRpzADataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_rpz_record_rpz_a.test"
-	resourceName := "nios_rpz_record_rpz_a.test"
+	dataSourceName := "data.nios_rpz_record_a.test"
+	resourceName := "nios_rpz_record_a.test"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 
@@ -35,8 +36,8 @@ func TestAccRecordRpzADataSource_Filters(t *testing.T) {
 }
 
 func TestAccRecordRpzADataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_rpz_record_rpz_a.test"
-	resourceName := "nios_rpz_record_rpz_a.test"
+	dataSourceName := "data.nios_rpz_record_a.test"
+	resourceName := "nios_rpz_record_a.test"
 	var v rpz.RecordRpzA
 	name := acctest.RandomName() + ".rpz.example.com"
 	extAttrValue := acctest.RandomName()
@@ -77,36 +78,40 @@ func testAccCheckRecordRpzAResourceAttrPair(resourceName, dataSourceName string)
 }
 
 func testAccRecordRpzADataSourceConfigFilters(name, ipV4Addr, rpZone string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test" {
 	name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 }
 
-data "nios_rpz_record_rpz_a" "test" {
+data "nios_rpz_record_a" "test" {
   filters = {
-	name = nios_rpz_record_rpz_a.test.name
+	name = nios_rpz_record_a.test.name
   }
 }
-`, name, ipV4Addr, rpZone)
+`, name, ipV4Addr)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
 
 func testAccRecordRpzADataSourceConfigExtAttrFilters(name, ipV4Addr, rpZone, extAttrsValue string) string {
-	return fmt.Sprintf(`
-resource "nios_rpz_record_rpz_a" "test" {
+	config := fmt.Sprintf(`
+resource "nios_rpz_record_a" "test" {
 	name = %q
 	ipv4addr = %q
-	rp_zone = %q
+	rp_zone = nios_dns_zone_rp.test.fqdn
 	extattrs = {
 		Site = %q
 	} 
 }
 
-data "nios_rpz_record_rpz_a" "test" {
+data "nios_rpz_record_a" "test" {
   extattrfilters = {
-	Site = nios_rpz_record_rpz_a.test.extattrs.Site
+	Site = nios_rpz_record_a.test.extattrs.Site
   }
 }
-`, name, ipV4Addr, rpZone, extAttrsValue)
+`, name, ipV4Addr, extAttrsValue)
+
+	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
 }
