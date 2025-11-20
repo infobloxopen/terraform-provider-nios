@@ -13,6 +13,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -104,7 +106,10 @@ var SharedrecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Name for this shared record. This value can be in unicode format.",
 	},
 	"shared_record_group": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of the shared record group in which the record resides.",
 	},
 	"ttl": schema.Int64Attribute{
@@ -123,19 +128,21 @@ var SharedrecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *SharedrecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.SharedrecordAaaa {
+func (m *SharedrecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.SharedrecordAaaa {
 	if m == nil {
 		return nil
 	}
 	to := &dns.SharedrecordAaaa{
-		Comment:           flex.ExpandStringPointer(m.Comment),
-		Disable:           flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Ipv6addr:          flex.ExpandIPv6Address(m.Ipv6addr),
-		Name:              flex.ExpandStringPointer(m.Name),
-		SharedRecordGroup: flex.ExpandStringPointer(m.SharedRecordGroup),
-		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
+		Comment:  flex.ExpandStringPointer(m.Comment),
+		Disable:  flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs: ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		Ipv6addr: flex.ExpandIPv6Address(m.Ipv6addr),
+		Name:     flex.ExpandStringPointer(m.Name),
+		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
+	}
+	if isCreate {
+		to.SharedRecordGroup = flex.ExpandStringPointer(m.SharedRecordGroup)
 	}
 	return to
 }

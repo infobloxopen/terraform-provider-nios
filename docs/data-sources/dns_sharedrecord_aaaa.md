@@ -3,12 +3,12 @@
 page_title: "nios_dns_sharedrecord_aaaa Data Source - nios"
 subcategory: "DNS"
 description: |-
-  
+  Retrieves information about existing DNS Shared AAAA Records.
 ---
 
 # nios_dns_sharedrecord_aaaa (Data Source)
 
-
+Retrieves information about existing DNS Shared AAAA Records.
 
 ## Example Usage
 
