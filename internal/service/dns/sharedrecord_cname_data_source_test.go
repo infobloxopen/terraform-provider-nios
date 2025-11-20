@@ -17,7 +17,7 @@ func TestAccSharedrecordCnameDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dns_sharedrecord_cname.test"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -41,7 +41,7 @@ func TestAccSharedrecordCnameDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dns_sharedrecord_cname.test"
 	var v dns.SharedrecordCname
 	name := acctest.RandomNameWithPrefix("sharedrecord-cname-")
-	canonical := acctest.RandomName()
+	canonical := acctest.RandomNameWithPrefix("canonical-name") + ".com"
 	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
