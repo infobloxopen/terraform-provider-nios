@@ -15,7 +15,7 @@ Manages a Shared AAAA Record.
 ```terraform
 // Create a Shared Record Group (Required as Parent)
 resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
-  name = "example-sharedrecordgroup11"
+  name = "example-sharedrecordgroup"
 }
 
 // Create a Shared AAAA Record with Basic Fields
