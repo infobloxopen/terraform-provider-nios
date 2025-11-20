@@ -1,4 +1,3 @@
-
 package dtc_test
 
 import (
@@ -16,7 +15,7 @@ func TestAccDtcMonitorIcmpDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_monitor_icmp.test"
 	resourceName := "nios_dtc_monitor_icmp.test"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,8 +26,8 @@ func TestAccDtcMonitorIcmpDataSource_Filters(t *testing.T) {
 				Config: testAccDtcMonitorIcmpDataSourceConfigFilters(name),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
-						}, testAccCheckDtcMonitorIcmpResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
+					}, testAccCheckDtcMonitorIcmpResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -39,7 +38,7 @@ func TestAccDtcMonitorIcmpDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_monitor_icmp.test"
 	resourceName := "nios_dtc_monitor_icmp.test"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
@@ -48,11 +47,11 @@ func TestAccDtcMonitorIcmpDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcMonitorIcmpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcMonitorIcmpDataSourceConfigExtAttrFilters(name , extAttrValue),
+				Config: testAccDtcMonitorIcmpDataSourceConfigExtAttrFilters(name, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
-						}, testAccCheckDtcMonitorIcmpResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
+					}, testAccCheckDtcMonitorIcmpResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -61,17 +60,17 @@ func TestAccDtcMonitorIcmpDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckDtcMonitorIcmpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "interval", dataSourceName, "result.0.interval"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-        resource.TestCheckResourceAttrPair(resourceName, "retry_down", dataSourceName, "result.0.retry_down"),
-        resource.TestCheckResourceAttrPair(resourceName, "retry_up", dataSourceName, "result.0.retry_up"),
-        resource.TestCheckResourceAttrPair(resourceName, "timeout", dataSourceName, "result.0.timeout"),
-    }
+func testAccCheckDtcMonitorIcmpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "interval", dataSourceName, "result.0.interval"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+		resource.TestCheckResourceAttrPair(resourceName, "retry_down", dataSourceName, "result.0.retry_down"),
+		resource.TestCheckResourceAttrPair(resourceName, "retry_up", dataSourceName, "result.0.retry_up"),
+		resource.TestCheckResourceAttrPair(resourceName, "timeout", dataSourceName, "result.0.timeout"),
+	}
 }
 
 func testAccDtcMonitorIcmpDataSourceConfigFilters(name string) string {
@@ -102,6 +101,5 @@ data "nios_dtc_monitor_icmp" "test" {
 	Site = nios_dtc_monitor_icmp.test.extattrs.Site
   }
 }
-`,name , extAttrsValue)
+`, name, extAttrsValue)
 }
-

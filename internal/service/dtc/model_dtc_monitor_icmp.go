@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,11 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -113,24 +112,11 @@ var DtcMonitorIcmpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandDtcMonitorIcmp(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcMonitorIcmp {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcMonitorIcmpModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
-
 func (m *DtcMonitorIcmpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcMonitorIcmp {
 	if m == nil {
 		return nil
 	}
 	to := &dtc.DtcMonitorIcmp{
-		Ref:       flex.ExpandStringPointer(m.Ref),
 		Comment:   flex.ExpandStringPointer(m.Comment),
 		ExtAttrs:  ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Interval:  flex.ExpandInt64Pointer(m.Interval),

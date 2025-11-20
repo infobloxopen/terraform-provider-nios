@@ -20,7 +20,7 @@ var readableAttributesForDtcMonitorIcmp = "comment,extattrs,interval,name,retry_
 func TestAccDtcMonitorIcmpResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_icmp.test"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -31,7 +31,6 @@ func TestAccDtcMonitorIcmpResource_basic(t *testing.T) {
 				Config: testAccDtcMonitorIcmpBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "interval", "5"),
@@ -56,7 +55,7 @@ func TestAccDtcMonitorIcmpResource_basic(t *testing.T) {
 func TestAccDtcMonitorIcmpResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_monitor_icmp.test"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -75,11 +74,10 @@ func TestAccDtcMonitorIcmpResource_disappears(t *testing.T) {
 	})
 }
 
-
 func TestAccDtcMonitorIcmpResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_icmp.test_comment"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -87,7 +85,7 @@ func TestAccDtcMonitorIcmpResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorIcmpComment(name , "This is a comment"),
+				Config: testAccDtcMonitorIcmpComment(name, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -109,7 +107,7 @@ func TestAccDtcMonitorIcmpResource_Comment(t *testing.T) {
 func TestAccDtcMonitorIcmpResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_icmp.test_extattrs"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -119,7 +117,7 @@ func TestAccDtcMonitorIcmpResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorIcmpExtAttrs(name , map[string]string{
+				Config: testAccDtcMonitorIcmpExtAttrs(name, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -129,7 +127,7 @@ func TestAccDtcMonitorIcmpResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorIcmpExtAttrs(name , map[string]string{
+				Config: testAccDtcMonitorIcmpExtAttrs(name, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -145,7 +143,7 @@ func TestAccDtcMonitorIcmpResource_ExtAttrs(t *testing.T) {
 func TestAccDtcMonitorIcmpResource_Interval(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_icmp.test_interval"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -153,7 +151,7 @@ func TestAccDtcMonitorIcmpResource_Interval(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorIcmpInterval(name , 20),
+				Config: testAccDtcMonitorIcmpInterval(name, 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "interval", "20"),
@@ -161,7 +159,7 @@ func TestAccDtcMonitorIcmpResource_Interval(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorIcmpInterval(name , 30),
+				Config: testAccDtcMonitorIcmpInterval(name, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "interval", "30"),
@@ -175,8 +173,8 @@ func TestAccDtcMonitorIcmpResource_Interval(t *testing.T) {
 func TestAccDtcMonitorIcmpResource_Name(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_icmp.test_name"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
-	nameUpdate := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
+	nameUpdate := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -206,7 +204,7 @@ func TestAccDtcMonitorIcmpResource_Name(t *testing.T) {
 func TestAccDtcMonitorIcmpResource_RetryDown(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_icmp.test_retry_down"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -214,7 +212,7 @@ func TestAccDtcMonitorIcmpResource_RetryDown(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorIcmpRetryDown(name,2),
+				Config: testAccDtcMonitorIcmpRetryDown(name, 2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "2"),
@@ -236,7 +234,7 @@ func TestAccDtcMonitorIcmpResource_RetryDown(t *testing.T) {
 func TestAccDtcMonitorIcmpResource_RetryUp(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_icmp.test_retry_up"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -244,7 +242,7 @@ func TestAccDtcMonitorIcmpResource_RetryUp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorIcmpRetryUp(name , 5),
+				Config: testAccDtcMonitorIcmpRetryUp(name, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "5"),
@@ -252,10 +250,10 @@ func TestAccDtcMonitorIcmpResource_RetryUp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorIcmpRetryUp(name , 4),
+				Config: testAccDtcMonitorIcmpRetryUp(name, 4),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "retry_up", "4"),	
+					resource.TestCheckResourceAttr(resourceName, "retry_up", "4"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -266,7 +264,7 @@ func TestAccDtcMonitorIcmpResource_RetryUp(t *testing.T) {
 func TestAccDtcMonitorIcmpResource_Timeout(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_icmp.test_timeout"
 	var v dtc.DtcMonitorIcmp
-	name := acctest.RandomNameWithPrefix("icmp")
+	name := acctest.RandomNameWithPrefix("dtc-monitor-icmp")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -274,7 +272,7 @@ func TestAccDtcMonitorIcmpResource_Timeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorIcmpTimeout(name , 30),
+				Config: testAccDtcMonitorIcmpTimeout(name, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "30"),
@@ -359,7 +357,6 @@ resource "nios_dtc_monitor_icmp" "test" {
 `, name)
 }
 
-
 func testAccDtcMonitorIcmpComment(name, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test_comment" {
@@ -369,7 +366,7 @@ resource "nios_dtc_monitor_icmp" "test_comment" {
 `, name, comment)
 }
 
-func testAccDtcMonitorIcmpExtAttrs(name string , extAttrs map[string]string) string {
+func testAccDtcMonitorIcmpExtAttrs(name string, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf(`
@@ -385,7 +382,7 @@ resource "nios_dtc_monitor_icmp" "test_extattrs" {
 `, name, extattrsStr)
 }
 
-func testAccDtcMonitorIcmpInterval(name string , interval int64) string {
+func testAccDtcMonitorIcmpInterval(name string, interval int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test_interval" {
 	name = %q
@@ -402,7 +399,7 @@ resource "nios_dtc_monitor_icmp" "test_name" {
 `, name)
 }
 
-func testAccDtcMonitorIcmpRetryDown(name string , retryDown int64) string {
+func testAccDtcMonitorIcmpRetryDown(name string, retryDown int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test_retry_down" {
 	name = %q
@@ -411,7 +408,7 @@ resource "nios_dtc_monitor_icmp" "test_retry_down" {
 `, name, retryDown)
 }
 
-func testAccDtcMonitorIcmpRetryUp(name string , retryUp int64) string {
+func testAccDtcMonitorIcmpRetryUp(name string, retryUp int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test_retry_up" {
 	name = %q
@@ -420,7 +417,7 @@ resource "nios_dtc_monitor_icmp" "test_retry_up" {
 `, name, retryUp)
 }
 
-func testAccDtcMonitorIcmpTimeout(name string , timeout int64) string {
+func testAccDtcMonitorIcmpTimeout(name string, timeout int64) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test_timeout" {
     name = %q
