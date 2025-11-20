@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -91,7 +90,6 @@ func TestAccVlanResource_Import(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "ref",
 				PlanOnly:                             true,
-				ExpectError:                          regexp.MustCompile(`ImportStateVerify attributes not equivalent`),
 			},
 			// Import and Verify
 			{
@@ -355,7 +353,7 @@ func TestAccVlanResource_Parent(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanParent(61, name, "example_vlan_view11", "example_vlan_view11"),
+				Config: testAccVlanParent(61, name, "example_vlan_view11", "example_vlan_view11_updated", "one"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "parent"),
@@ -363,7 +361,7 @@ func TestAccVlanResource_Parent(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVlanParent(61, name, "example_vlan_view_11", "example_vlan_view_11_updated"),
+				Config: testAccVlanParent(61, name, "example_vlan_view_11", "example_vlan_view_11_updated", "two"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "parent"),
@@ -484,6 +482,22 @@ resource "nios_ipam_vlanview" "%[1]s" {
 `, vlanViewName)
 }
 
+func testAccBaseWithTwoVlanViews(vlanViewName, vlanViewName2 string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_vlanview" "one" {
+  start_vlan_id = 50
+  end_vlan_id   = 100
+  name          = %q
+}
+
+resource "nios_ipam_vlanview" "two" {
+  start_vlan_id = 51
+  end_vlan_id   = 101
+  name          = %q
+}
+`, vlanViewName, vlanViewName2)
+}
+
 func testAccVlanBasicConfig(id int, name, parent string) string {
 	config := fmt.Sprintf(`
 resource "nios_ipam_vlan" "test" {
@@ -582,27 +596,16 @@ resource "nios_ipam_vlan" "test_name" {
 	return strings.Join([]string{testAccBaseWithVlanView(parent), config}, "")
 }
 
-func testAccVlanParent(id int, name string, vlanName, parent string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_vlanview" "%[3]s" {
-  start_vlan_id = 50
-  end_vlan_id   = 100
-  name          = "%[3]s"
-}
-
-resource "nios_ipam_vlanview" "%[3]s_updated" {
-  start_vlan_id = 50
-  end_vlan_id   = 100
-  name          = "%[3]s_updated"
-}
-
+func testAccVlanParent(id int, name string, vlanName1, vlanName2, parent string) string {
+	config := fmt.Sprintf(`
 resource "nios_ipam_vlan" "test_parent" {
-    id = %[1]d
-    name = %[2]q
-    parent = nios_ipam_vlanview.%[4]s.ref
-	depends_on = [nios_ipam_vlanview.%[3]s , nios_ipam_vlanview.%[3]s_updated]
+    id = %d
+    name = %q
+    parent = nios_ipam_vlanview.%s.ref
+	depends_on = [nios_ipam_vlanview.one, nios_ipam_vlanview.two]
 }
-`, id, name, vlanName, parent)
+`, id, name, parent)
+	return strings.Join([]string{testAccBaseWithTwoVlanViews(vlanName1, vlanName2), config}, "")
 }
 
 func testAccVlanReserved(id int, name string, parent string, reserved string) string {
