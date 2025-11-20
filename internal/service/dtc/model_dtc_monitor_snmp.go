@@ -3,6 +3,7 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -11,11 +12,11 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
@@ -143,9 +144,12 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A list of OIDs for SNMP monitoring.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(161),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(161),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 65535),
+		},
 		MarkdownDescription: "The port value for SNMP requests.",
 	},
 	"retry_down": schema.Int64Attribute{
