@@ -32,7 +32,7 @@ type Ipv6dhcpoptiondefinitionDataSource struct {
 }
 
 func (d *Ipv6dhcpoptiondefinitionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6dhcpoptiondefinition"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6optiondefinition"
 }
 
 type Ipv6dhcpoptiondefinitionModelWithFilter struct {
