@@ -128,7 +128,6 @@ func (m *SharedrecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnost
 		return nil
 	}
 	to := &dns.SharedrecordAaaa{
-		Ref:               flex.ExpandStringPointer(m.Ref),
 		Comment:           flex.ExpandStringPointer(m.Comment),
 		Disable:           flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
