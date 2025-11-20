@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -16,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
@@ -140,9 +140,12 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "A content check regular expression.",
 	},
 	"content_extract_group": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(0),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(0),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 8),
+		},
 		MarkdownDescription: "A content extraction sub-expression to extract.",
 	},
 	"content_extract_type": schema.StringAttribute{
@@ -255,18 +258,6 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines whether the validation of the remote server's certificate is enabled.",
 	},
-}
-
-func ExpandDtcMonitorHttp(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcMonitorHttp {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcMonitorHttpModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *DtcMonitorHttpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcMonitorHttp {

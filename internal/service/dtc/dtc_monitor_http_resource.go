@@ -36,7 +36,7 @@ func (r *DtcMonitorHttpResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *DtcMonitorHttpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DTC Monitor HTTP",
 		Attributes:          DtcMonitorHttpResourceSchemaAttributes,
 	}
 }
@@ -326,4 +326,43 @@ func (r *DtcMonitorHttpResource) Delete(ctx context.Context, req resource.Delete
 func (r *DtcMonitorHttpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
+}
+
+func (r *DtcMonitorHttpResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+    var data DtcMonitorHttpModel
+    resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    // Validate content check configurations
+    if !data.ContentCheck.IsNull() && !data.ContentCheck.IsUnknown() {
+        contentCheckValue := data.ContentCheck.ValueString()
+        
+        // Validate EXTRACT operation
+        if contentCheckValue == "EXTRACT" {
+            if data.ContentCheckRegex.IsNull() || data.ContentCheckRegex.IsUnknown() ||
+                data.ContentExtractType.IsNull() || data.ContentExtractType.IsUnknown() ||
+                data.ContentExtractValue.IsNull() || data.ContentExtractValue.IsUnknown() ||
+				data.ContentCheckOp.IsNull() || data.ContentCheckOp.IsUnknown() {
+                resp.Diagnostics.AddAttributeError(
+                    path.Root("content_check"),
+                    "Invalid configuration for content check EXTRACT",
+                    "When 'content_check' is set to 'EXTRACT', the fields 'content_check_regex', 'content_extract_type', 'content_check_op' and 'content_extract_value' must be provided.",
+                )
+            }
+        }
+        
+        // Validate MATCH operation
+        if contentCheckValue == "MATCH" {
+            if data.ContentCheckRegex.IsNull() || data.ContentCheckRegex.IsUnknown() ||
+				data.ContentCheckOp.IsNull() || data.ContentCheckOp.IsUnknown() {
+                resp.Diagnostics.AddAttributeError(
+                    path.Root("content_check"),
+                    "Invalid configuration for content check MATCH",
+                    "When 'content_check' is set to 'MATCH', 'content_check_regex' and 'content_check_op' must be provided.",
+                )
+            }
+        }
+    }
 }

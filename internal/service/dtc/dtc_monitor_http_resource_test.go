@@ -109,6 +109,9 @@ func TestAccDtcMonitorHttpResource_Ciphers(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ClientCert(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_client_cert"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
+	certificate1 := "dtc:certificate/ZG5zLmlkbnNfY2VydGlmaWNhdGUkYjNiY2FjYjM0YjYzNWM4NzkwMGMxODUxN2MzODA0NTIyMGI1MTEyZTQwNzMzZTM1YzNkNTdmZjk3MGMwYTliY2NkN2Q4NzhkODBmYjE0MmQzZmYzYTRkNjI3Zjk5NDlmZmYwOWMwMDdkZGEzMmQxMDhiMWZkMTlmYjRkOThiNTI:7e78dced4c4715b761a25427848e7153671c496d"
+	certificate2 := "dtc:certificate/ZG5zLmlkbnNfY2VydGlmaWNhdGUkYmJiNmU0NDBlZGY5NDA3ODQ0NzAzMDA3MzgxN2RmYWU4OTg3YzQwYjg5N2E1NmQyZDMwMWQ5YjlkY2NkZjFiYmM3MmJmZmNlODg1ZTJkODdmMzQ5YjczYzI0OTY3YmYyMGFlNDQ5MTI2Zjg5OGMzMDk2MzJiYzI4YWFlMDM0NzI:6595a8c26f84ac126cec62e770dff3058118e658"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -116,18 +119,18 @@ func TestAccDtcMonitorHttpResource_ClientCert(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpClientCert("CLIENT_CERT_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpClientCert(name, certificate1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "client_cert", "CLIENT_CERT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "client_cert", certificate1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpClientCert("CLIENT_CERT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpClientCert(name, certificate2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "client_cert", "CLIENT_CERT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "client_cert", certificate2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -169,6 +172,10 @@ func TestAccDtcMonitorHttpResource_ContentCheck(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_content_check"
 	var v dtc.DtcMonitorHttp
 	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
+	contentCheckOp := "EQ"
+	contentCheckRegex := "The current load is ([0-9]+)"
+	contentExtractType := "STRING"
+	contentExtractValue := "default value"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -176,7 +183,7 @@ func TestAccDtcMonitorHttpResource_ContentCheck(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpContentCheck(name, "EXTRACT"),
+				Config: testAccDtcMonitorHttpContentCheck(name, "EXTRACT", contentCheckOp, contentCheckRegex, contentExtractType, contentExtractValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "content_check", "EXTRACT"),
@@ -184,7 +191,7 @@ func TestAccDtcMonitorHttpResource_ContentCheck(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpContentCheck(name, "MATCH"),
+				Config: testAccDtcMonitorHttpContentCheck(name, "MATCH", contentCheckOp, contentCheckRegex, contentExtractType, contentExtractValue),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "content_check", "MATCH"),
@@ -198,6 +205,7 @@ func TestAccDtcMonitorHttpResource_ContentCheck(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ContentCheckInput(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_content_check_input"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -205,18 +213,18 @@ func TestAccDtcMonitorHttpResource_ContentCheckInput(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpContentCheckInput("CONTENT_CHECK_INPUT_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentCheckInput(name, "BODY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_check_input", "CONTENT_CHECK_INPUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_check_input", "BODY"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpContentCheckInput("CONTENT_CHECK_INPUT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentCheckInput(name, "HEADERS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_check_input", "CONTENT_CHECK_INPUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_check_input", "HEADERS"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -227,6 +235,7 @@ func TestAccDtcMonitorHttpResource_ContentCheckInput(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ContentCheckOp(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_content_check_op"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -234,18 +243,18 @@ func TestAccDtcMonitorHttpResource_ContentCheckOp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpContentCheckOp("CONTENT_CHECK_OP_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentCheckOp(name, "GEQ"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_check_op", "CONTENT_CHECK_OP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_check_op", "GEQ"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpContentCheckOp("CONTENT_CHECK_OP_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentCheckOp(name, "LEQ"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_check_op", "CONTENT_CHECK_OP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_check_op", "LEQ"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -256,6 +265,7 @@ func TestAccDtcMonitorHttpResource_ContentCheckOp(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ContentCheckRegex(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_content_check_regex"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -263,18 +273,18 @@ func TestAccDtcMonitorHttpResource_ContentCheckRegex(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpContentCheckRegex("CONTENT_CHECK_REGEX_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentCheckRegex(name, "HTTP/1\\.[01] (200|201|204)"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_check_regex", "CONTENT_CHECK_REGEX_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_check_regex", "HTTP/1\\.[01] (200|201|204)"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpContentCheckRegex("CONTENT_CHECK_REGEX_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentCheckRegex(name, "Status: (2[0-9]{2})"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_check_regex", "CONTENT_CHECK_REGEX_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_check_regex", "Status: (2[0-9]{2})"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -285,6 +295,7 @@ func TestAccDtcMonitorHttpResource_ContentCheckRegex(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ContentExtractGroup(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_content_extract_group"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -292,18 +303,18 @@ func TestAccDtcMonitorHttpResource_ContentExtractGroup(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpContentExtractGroup("CONTENT_EXTRACT_GROUP_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentExtractGroup(name, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_extract_group", "CONTENT_EXTRACT_GROUP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_extract_group", "5"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpContentExtractGroup("CONTENT_EXTRACT_GROUP_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentExtractGroup(name, 8),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_extract_group", "CONTENT_EXTRACT_GROUP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_extract_group", "8"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -314,6 +325,7 @@ func TestAccDtcMonitorHttpResource_ContentExtractGroup(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ContentExtractType(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_content_extract_type"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -321,18 +333,18 @@ func TestAccDtcMonitorHttpResource_ContentExtractType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpContentExtractType("CONTENT_EXTRACT_TYPE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentExtractType(name, "STRING"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_extract_type", "CONTENT_EXTRACT_TYPE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_extract_type", "STRING"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpContentExtractType("CONTENT_EXTRACT_TYPE_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentExtractType(name, "INTEGER"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_extract_type", "CONTENT_EXTRACT_TYPE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_extract_type", "INTEGER"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -343,6 +355,7 @@ func TestAccDtcMonitorHttpResource_ContentExtractType(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ContentExtractValue(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_content_extract_value"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -350,18 +363,18 @@ func TestAccDtcMonitorHttpResource_ContentExtractValue(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpContentExtractValue("CONTENT_EXTRACT_VALUE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentExtractValue(name, "SUCCESS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_extract_value", "CONTENT_EXTRACT_VALUE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_extract_value", "SUCCESS"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpContentExtractValue("CONTENT_EXTRACT_VALUE_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpContentExtractValue(name, "ACTIVE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "content_extract_value", "CONTENT_EXTRACT_VALUE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "content_extract_value", "ACTIVE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -380,7 +393,7 @@ func TestAccDtcMonitorHttpResource_EnableSni(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpEnableSni(name , false),
+				Config: testAccDtcMonitorHttpEnableSni(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_sni", "false"),
@@ -388,7 +401,7 @@ func TestAccDtcMonitorHttpResource_EnableSni(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpEnableSni(name , true),
+				Config: testAccDtcMonitorHttpEnableSni(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_sni", "true"),
@@ -423,8 +436,8 @@ func TestAccDtcMonitorHttpResource_ExtAttrs(t *testing.T) {
 			// Update and Read
 			{
 				Config: testAccDtcMonitorHttpExtAttrs(name, map[string]string{
-					"Site":        extAttrValue2,
-			}),
+					"Site": extAttrValue2,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
@@ -507,7 +520,7 @@ func TestAccDtcMonitorHttpResource_Port(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpPort(name , 80),
+				Config: testAccDtcMonitorHttpPort(name, 80),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", "80"),
@@ -515,7 +528,7 @@ func TestAccDtcMonitorHttpResource_Port(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpPort(name , 8080),
+				Config: testAccDtcMonitorHttpPort(name, 8080),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", "8080"),
@@ -529,6 +542,7 @@ func TestAccDtcMonitorHttpResource_Port(t *testing.T) {
 func TestAccDtcMonitorHttpResource_Request(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_request"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -536,18 +550,18 @@ func TestAccDtcMonitorHttpResource_Request(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpRequest("REQUEST_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpRequest(name, "GET /api/health HTTP/1.1\nHost: example.com\nUser-Agent: NIOS-Monitor"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "request", "REQUEST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "request", "GET /api/health HTTP/1.1\nHost: example.com\nUser-Agent: NIOS-Monitor"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpRequest("REQUEST_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpRequest(name, "HEAD /resource HTTP/1.1\nHost: example.com\nAccept: */*"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "request", "REQUEST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "request", "HEAD /resource HTTP/1.1\nHost: example.com\nAccept: */*"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -558,6 +572,7 @@ func TestAccDtcMonitorHttpResource_Request(t *testing.T) {
 func TestAccDtcMonitorHttpResource_Result(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_result"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -565,18 +580,18 @@ func TestAccDtcMonitorHttpResource_Result(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpResult("RESULT_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpResult(name, "CODE_IS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "result", "RESULT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "result", "CODE_IS"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpResult("RESULT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpResult(name, "CODE_IS_NOT"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "result", "RESULT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "result", "CODE_IS_NOT"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -587,6 +602,7 @@ func TestAccDtcMonitorHttpResource_Result(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ResultCode(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_result_code"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -594,18 +610,18 @@ func TestAccDtcMonitorHttpResource_ResultCode(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpResultCode("RESULT_CODE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpResultCode(name, 200),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "result_code", "RESULT_CODE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "result_code", "200"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpResultCode("RESULT_CODE_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpResultCode(name, 404),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "result_code", "RESULT_CODE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "result_code", "404"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -684,7 +700,7 @@ func TestAccDtcMonitorHttpResource_Secure(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpSecure(name , false),
+				Config: testAccDtcMonitorHttpSecure(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
@@ -692,7 +708,7 @@ func TestAccDtcMonitorHttpResource_Secure(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpSecure(name , true),
+				Config: testAccDtcMonitorHttpSecure(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "secure", "true"),
@@ -706,6 +722,7 @@ func TestAccDtcMonitorHttpResource_Secure(t *testing.T) {
 func TestAccDtcMonitorHttpResource_Timeout(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_timeout"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -713,18 +730,18 @@ func TestAccDtcMonitorHttpResource_Timeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpTimeout("TIMEOUT_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpTimeout(name, 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "20"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpTimeout("TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpTimeout(name, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "30"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -735,6 +752,7 @@ func TestAccDtcMonitorHttpResource_Timeout(t *testing.T) {
 func TestAccDtcMonitorHttpResource_ValidateCert(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_validate_cert"
 	var v dtc.DtcMonitorHttp
+	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -742,18 +760,18 @@ func TestAccDtcMonitorHttpResource_ValidateCert(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorHttpValidateCert("VALIDATE_CERT_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpValidateCert(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "validate_cert", "VALIDATE_CERT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "validate_cert", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpValidateCert("VALIDATE_CERT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcMonitorHttpValidateCert("name", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "validate_cert", "VALIDATE_CERT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "validate_cert", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -845,12 +863,13 @@ resource "nios_dtc_monitor_http" "test_ciphers" {
 `, name, ciphers)
 }
 
-func testAccDtcMonitorHttpClientCert(clientCert string) string {
+func testAccDtcMonitorHttpClientCert(name, clientCert string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_client_cert" {
+	name    = %q
     client_cert = %q
 }
-`, clientCert)
+`, name, clientCert)
 }
 
 func testAccDtcMonitorHttpComment(name, comment string) string {
@@ -862,64 +881,74 @@ resource "nios_dtc_monitor_http" "test_comment" {
 `, name, comment)
 }
 
-func testAccDtcMonitorHttpContentCheck(name, contentCheck string) string {
+func testAccDtcMonitorHttpContentCheck(name, contentCheck, contentCheckOp, contentCheckRegex, contentExtractType, contentExtractValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_content_check" {
     name         = %q
-    content_check = %q
-}
-`, name, contentCheck)
-}
-
-func testAccDtcMonitorHttpContentCheckInput(contentCheckInput string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_http" "test_content_check_input" {
-    content_check_input = %q
-}
-`, contentCheckInput)
-}
-
-func testAccDtcMonitorHttpContentCheckOp(contentCheckOp string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_http" "test_content_check_op" {
+	content_check = %q
     content_check_op = %q
-}
-`, contentCheckOp)
-}
-
-func testAccDtcMonitorHttpContentCheckRegex(contentCheckRegex string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_http" "test_content_check_regex" {
     content_check_regex = %q
-}
-`, contentCheckRegex)
-}
-
-func testAccDtcMonitorHttpContentExtractGroup(contentExtractGroup string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_http" "test_content_extract_group" {
-    content_extract_group = %q
-}
-`, contentExtractGroup)
-}
-
-func testAccDtcMonitorHttpContentExtractType(contentExtractType string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_http" "test_content_extract_type" {
     content_extract_type = %q
-}
-`, contentExtractType)
-}
-
-func testAccDtcMonitorHttpContentExtractValue(contentExtractValue string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_http" "test_content_extract_value" {
     content_extract_value = %q
 }
-`, contentExtractValue)
+`, name, contentCheck, contentCheckOp, contentCheckRegex, contentExtractType, contentExtractValue)
 }
 
-func testAccDtcMonitorHttpEnableSni(name string , enableSni bool) string {
+func testAccDtcMonitorHttpContentCheckInput(name, contentCheckInput string) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_monitor_http" "test_content_check_input" {
+	name    = %q
+    content_check_input = %q
+}
+`, name, contentCheckInput)
+}
+
+func testAccDtcMonitorHttpContentCheckOp(name, contentCheckOp string) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_monitor_http" "test_content_check_op" {
+	name    = %q
+    content_check_op = %q
+}
+`, name, contentCheckOp)
+}
+
+func testAccDtcMonitorHttpContentCheckRegex(name, contentCheckRegex string) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_monitor_http" "test_content_check_regex" {
+	name    = %q
+    content_check_regex = %q
+}
+`, name, contentCheckRegex)
+}
+
+func testAccDtcMonitorHttpContentExtractGroup(name string, contentExtractGroup int) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_monitor_http" "test_content_extract_group" {
+	name    = %q
+    content_extract_group = %d
+}
+`, name, contentExtractGroup)
+}
+
+func testAccDtcMonitorHttpContentExtractType(name, contentExtractType string) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_monitor_http" "test_content_extract_type" {
+	name    = %q
+    content_extract_type = %q
+}
+`, name, contentExtractType)
+}
+
+func testAccDtcMonitorHttpContentExtractValue(name, contentExtractValue string) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_monitor_http" "test_content_extract_value" {
+	name    = %q
+    content_extract_value = %q
+}
+`, name, contentExtractValue)
+}
+
+func testAccDtcMonitorHttpEnableSni(name string, enableSni bool) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_enable_sni" {
 	name    = %q
@@ -928,7 +957,7 @@ resource "nios_dtc_monitor_http" "test_enable_sni" {
 `, name, enableSni)
 }
 
-func testAccDtcMonitorHttpExtAttrs(name string , extAttrs map[string]string) string {
+func testAccDtcMonitorHttpExtAttrs(name string, extAttrs map[string]string) string {
 	extattrsStr := "{"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf(`%s = %q`, k, v)
@@ -942,7 +971,7 @@ resource "nios_dtc_monitor_http" "test_extattrs" {
 `, name, extattrsStr)
 }
 
-func testAccDtcMonitorHttpInterval(name string ,interval int) string {
+func testAccDtcMonitorHttpInterval(name string, interval int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_interval" {
 	name    = %q
@@ -959,7 +988,7 @@ resource "nios_dtc_monitor_http" "test_name" {
 `, name)
 }
 
-func testAccDtcMonitorHttpPort(name string , port int) string {
+func testAccDtcMonitorHttpPort(name string, port int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_port" {
     name = %q
@@ -968,31 +997,34 @@ resource "nios_dtc_monitor_http" "test_port" {
 `, name, port)
 }
 
-func testAccDtcMonitorHttpRequest(request string) string {
+func testAccDtcMonitorHttpRequest(name, request string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_request" {
+	name    = %q
     request = %q
 }
-`, request)
+`, name, request)
 }
 
-func testAccDtcMonitorHttpResult(result string) string {
+func testAccDtcMonitorHttpResult(name, result string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_result" {
+	name    = %q
     result = %q
 }
-`, result)
+`, name, result)
 }
 
-func testAccDtcMonitorHttpResultCode(resultCode string) string {
+func testAccDtcMonitorHttpResultCode(name string, resultCode int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_result_code" {
-    result_code = %q
+	name    = %q
+    result_code = %d
 }
-`, resultCode)
+`, name, resultCode)
 }
 
-func testAccDtcMonitorHttpRetryDown(name string , retryDown int) string {
+func testAccDtcMonitorHttpRetryDown(name string, retryDown int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_retry_down" {
 	name = %q	
@@ -1001,7 +1033,7 @@ resource "nios_dtc_monitor_http" "test_retry_down" {
 `, name, retryDown)
 }
 
-func testAccDtcMonitorHttpRetryUp(name string , RetryUp int) string {
+func testAccDtcMonitorHttpRetryUp(name string, RetryUp int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_retry_up" {
 	name = %q
@@ -1010,7 +1042,7 @@ resource "nios_dtc_monitor_http" "test_retry_up" {
 `, name, RetryUp)
 }
 
-func testAccDtcMonitorHttpSecure(name string , secure bool) string {
+func testAccDtcMonitorHttpSecure(name string, secure bool) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_secure" {
 	name    = %q
@@ -1019,18 +1051,20 @@ resource "nios_dtc_monitor_http" "test_secure" {
 `, name, secure)
 }
 
-func testAccDtcMonitorHttpTimeout(timeout string) string {
+func testAccDtcMonitorHttpTimeout(name string, timeout int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_timeout" {
-    timeout = %q
+    name    = %q
+    timeout = %d
 }
-`, timeout)
+`, name, timeout)
 }
 
-func testAccDtcMonitorHttpValidateCert(validateCert string) string {
+func testAccDtcMonitorHttpValidateCert(name string, validateCert bool) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_validate_cert" {
-    validate_cert = %q
+    name = %q
+    validate_cert = %t
 }
-`, validateCert)
+`, name, validateCert)
 }
