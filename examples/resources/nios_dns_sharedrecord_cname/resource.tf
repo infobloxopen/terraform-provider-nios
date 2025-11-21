@@ -4,14 +4,14 @@ resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
 }
 
 // Create a Shared CNAME Record with Basic Fields
-resource "nios_dns_sharedrecord_cname" "sharedrecord_cname_record_with_basic_fields" {
+resource "nios_dns_sharedrecord_cname" "shared_cname_record_with_basic_fields" {
   name                = "example-shared-record-cname"
   shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
   canonical           = "example.canonical.com"
 }
 
 // Create a Shared CNAME Record with Additional Fields
-resource "nios_dns_sharedrecord_cname" "sharedrecord_cname_record_with_additional_fields" {
+resource "nios_dns_sharedrecord_cname" "shared_cname_record_with_additional_fields" {
   name                = "example-shared-record-cname2"
   shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
   canonical           = "example.canonical2.com"

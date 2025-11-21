@@ -34,6 +34,8 @@ func TestAccSharedrecordCnameResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "canonical", canonical),
+					resource.TestCheckResourceAttr(resourceName, "shared_record_group", sharedRecordGroup),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),

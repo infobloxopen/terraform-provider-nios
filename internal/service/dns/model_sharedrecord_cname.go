@@ -16,8 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
@@ -62,7 +62,6 @@ var SharedrecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	"canonical": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
 			customvalidator.IsValidFQDN(),
 		},
 		MarkdownDescription: "Canonical name in FQDN format. This value can be in unicode format.",
