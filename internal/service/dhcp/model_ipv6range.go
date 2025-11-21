@@ -163,9 +163,12 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The discovery basic poll settings for this range.",
 	},
 	"discovery_blackout_setting": schema.SingleNestedAttribute{
-		Attributes:          Ipv6rangeDiscoveryBlackoutSettingResourceSchemaAttributes,
-		Optional:            true,
-		Computed:            true,
+		Attributes: Ipv6rangeDiscoveryBlackoutSettingResourceSchemaAttributes,
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_blackout_setting")),
+		},
 		MarkdownDescription: "The discovery blackout setting for this range.",
 	},
 	"discovery_member": schema.StringAttribute{
