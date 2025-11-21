@@ -36,7 +36,7 @@ func (r *DtcMonitorSipResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *DtcMonitorSipResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DTC SIP Monitor",
 		Attributes:          DtcMonitorSipResourceSchemaAttributes,
 	}
 }
