@@ -40,14 +40,15 @@ func TestAccDtcMonitorPdpDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dtc_monitor_pdp.test"
 	var v dtc.DtcMonitorPdp
 	name := acctest.RandomNameWithPrefix("dtc-monitor-pdp")
-	
+	extAttrValue := acctest.RandomName()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckDtcMonitorPdpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcMonitorPdpDataSourceConfigExtAttrFilters( acctest.RandomName()),
+				Config: testAccDtcMonitorPdpDataSourceConfigExtAttrFilters(name , extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 							testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
@@ -88,9 +89,10 @@ data "nios_dtc_monitor_pdp" "test" {
 `, name)
 }
 
-func testAccDtcMonitorPdpDataSourceConfigExtAttrFilters(extAttrsValue string) string {
+func testAccDtcMonitorPdpDataSourceConfigExtAttrFilters(name, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_pdp" "test" {
+  name = %q	
   extattrs = {
     Site = %q
   } 
@@ -101,6 +103,6 @@ data "nios_dtc_monitor_pdp" "test" {
 	Site = nios_dtc_monitor_pdp.test.extattrs.Site
   }
 }
-`,extAttrsValue)
+`, name, extAttrsValue)
 }
 
