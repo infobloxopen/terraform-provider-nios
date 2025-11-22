@@ -183,18 +183,18 @@ func (r *DhcpoptionspaceResource) Delete(ctx context.Context, req resource.Delet
 	}
 
 	err := retry.RetryContext(ctx, OptionSpaceOperationTimeout, func() *retry.RetryError {
-	httpRes, err := r.client.DHCPAPI.
-		DhcpoptionspaceAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+		httpRes, err := r.client.DHCPAPI.
+			DhcpoptionspaceAPI.
+			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			Execute()
+		if err != nil {
+			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 				return nil
 			}
 			if strings.Contains(err.Error(), "cannot be deleted as it has an option referenced") {
 				return retry.RetryableError(err)
-		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpoptionspace, got error: %s", err))
+			}
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpoptionspace, got error: %s", err))
 			return retry.NonRetryableError(err)
 		}
 		return nil

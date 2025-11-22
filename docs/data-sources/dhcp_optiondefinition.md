@@ -21,7 +21,7 @@ data "nios_dhcp_optiondefinition" "get_dhcp_option_definition_using_filters" {
   }
 }
 
-// Retrieve all IPv6 DHCP Option Definitions
+// Retrieve all DHCP Option Definitions
 data "nios_dhcp_optiondefinition" "get_all_dhcp_option_definitions" {}
 ```
 

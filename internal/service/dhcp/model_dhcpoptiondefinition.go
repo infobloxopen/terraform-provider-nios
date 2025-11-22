@@ -56,7 +56,7 @@ var DhcpoptiondefinitionResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.OneOf(
 				"16-bit signed integer", "16-bit unsigned integer", "32-bit signed integer", "32-bit unsigned integer",
-				"64-bit unsigned integer", "8-bit signed integer", "8-bit unsigned integer", "8-bit unsigned integer",
+				"64-bit unsigned integer", "8-bit signed integer", "8-bit unsigned integer",
 				"array of 16-bit integer", "array of 16-bit unsigned integer", "array of 32-bit integer",
 				"array of 32-bit unsigned integer", "array of 64-bit unsigned integer",
 				"array of 8-bit integer", "array of 8-bit unsigned integer",
