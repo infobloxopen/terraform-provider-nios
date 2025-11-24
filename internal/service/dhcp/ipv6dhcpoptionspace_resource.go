@@ -39,7 +39,7 @@ type Ipv6dhcpoptionspaceResource struct {
 }
 
 func (r *Ipv6dhcpoptionspaceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6dhcpoptionspace"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6optionspace"
 }
 
 func (r *Ipv6dhcpoptionspaceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
