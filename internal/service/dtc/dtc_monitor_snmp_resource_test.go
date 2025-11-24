@@ -41,7 +41,6 @@ func TestAccDtcMonitorSnmpResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "1"),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "1"),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "15"),
-					resource.TestCheckResourceAttr(resourceName, "user", ""),
 					resource.TestCheckResourceAttr(resourceName, "version", "V2C"),
 				),
 			},

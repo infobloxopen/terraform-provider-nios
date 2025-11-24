@@ -141,6 +141,7 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "A list of OIDs for SNMP monitoring.",
 	},
 	"port": schema.Int64Attribute{
