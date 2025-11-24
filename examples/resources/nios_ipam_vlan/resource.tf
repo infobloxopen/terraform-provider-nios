@@ -5,14 +5,14 @@ resource "nios_ipam_vlanview" "ipam_vlanview_parent" {
   name          = "example_vlan_view"
 }
 
-// Manage  IPAM Vlan with Basic Fields
+// Manage IPAM Vlan with Basic Fields
 resource "nios_ipam_vlan" "ipam_vlan_basic" {
   id     = 6
   name   = "example_vlan"
   parent = nios_ipam_vlanview.ipam_vlanview_parent.ref
 }
 
-// Manage  IPAM Vlan with Additional Fields
+// Manage IPAM Vlan with Additional Fields
 resource "nios_ipam_vlan" "ipam_vlan_with_additional_fields" {
   id     = 7
   name   = "example_vlan_additional"
