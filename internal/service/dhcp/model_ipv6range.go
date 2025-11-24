@@ -264,6 +264,7 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"member": schema.SingleNestedAttribute{
 		Attributes:          Ipv6rangeMemberResourceSchemaAttributes,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The member that will provide service for this range. server_association_typeneeds to be set to ‘MEMBER’ if you want the server specified here to serve the range. For searching by this field you should use a HTTP method that contains a body (POST or PUT) with :ref:Dhcp Member structure<struct:dhcpmember>and the request should have option _method=GET.",
 	},
 	"name": schema.StringAttribute{
@@ -280,9 +281,12 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The network this range belongs to, in IPv6 Address/CIDR format.",
 	},
 	"network_view": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
-		Default:             stringdefault.StaticString("default"),
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("default"),
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of the network view in which this range resides.",
 	},
 	"option_filter_rules": schema.ListNestedAttribute{
@@ -417,7 +421,6 @@ func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 		Member:                           ExpandIpv6rangeMember(ctx, m.Member, diags),
 		Name:                             flex.ExpandStringPointer(m.Name),
 		Network:                          flex.ExpandIPv6CIDR(m.Network),
-		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
 		OptionFilterRules:                flex.ExpandFrameworkListNestedBlock(ctx, m.OptionFilterRules, diags, ExpandIpv6rangeOptionFilterRules),
 		PortControlBlackoutSetting:       ExpandIpv6rangePortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
 		RecycleLeases:                    flex.ExpandBoolPointer(m.RecycleLeases),
@@ -435,6 +438,7 @@ func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 	}
 	if isCreate {
 		to.Template = flex.ExpandStringPointer(m.Template)
+		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
 	}
 	return to
 }

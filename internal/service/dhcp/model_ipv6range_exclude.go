@@ -20,8 +20,8 @@ import (
 )
 
 type Ipv6rangeExcludeModel struct {
-	StartAddress iptypes.IPv4Address `tfsdk:"start_address"`
-	EndAddress   iptypes.IPv4Address `tfsdk:"end_address"`
+	StartAddress iptypes.IPv6Address `tfsdk:"start_address"`
+	EndAddress   iptypes.IPv6Address `tfsdk:"end_address"`
 	Comment      types.String        `tfsdk:"comment"`
 }
 
@@ -33,12 +33,12 @@ var Ipv6rangeExcludeAttrTypes = map[string]attr.Type{
 
 var Ipv6rangeExcludeResourceSchemaAttributes = map[string]schema.Attribute{
 	"start_address": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
+		CustomType:          iptypes.IPv6AddressType{},
 		Required:            true,
 		MarkdownDescription: "The IPv4 Address starting address of the exclusion range.",
 	},
 	"end_address": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
+		CustomType:          iptypes.IPv6AddressType{},
 		Required:            true,
 		MarkdownDescription: "The IPv4 Address ending address of the exclusion range.",
 	},
@@ -71,8 +71,8 @@ func (m *Ipv6rangeExcludeModel) Expand(ctx context.Context, diags *diag.Diagnost
 		return nil
 	}
 	to := &dhcp.Ipv6rangeExclude{
-		StartAddress: flex.ExpandIPv4Address(m.StartAddress),
-		EndAddress:   flex.ExpandIPv4Address(m.EndAddress),
+		StartAddress: flex.ExpandIPv6Address(m.StartAddress),
+		EndAddress:   flex.ExpandIPv6Address(m.EndAddress),
 		Comment:      flex.ExpandStringPointer(m.Comment),
 	}
 	return to
@@ -96,7 +96,7 @@ func (m *Ipv6rangeExcludeModel) Flatten(ctx context.Context, from *dhcp.Ipv6rang
 	if m == nil {
 		*m = Ipv6rangeExcludeModel{}
 	}
-	m.StartAddress = flex.FlattenIPv4Address(from.StartAddress)
-	m.EndAddress = flex.FlattenIPv4Address(from.EndAddress)
+	m.StartAddress = flex.FlattenIPv6Address(from.StartAddress)
+	m.EndAddress = flex.FlattenIPv6Address(from.EndAddress)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 }

@@ -36,7 +36,7 @@ func (r *Ipv6rangeResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *Ipv6rangeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an Ipv6 Range resource.",
+		MarkdownDescription: "Manages an Ipv6 Range.",
 		Attributes:          Ipv6rangeResourceSchemaAttributes,
 	}
 }

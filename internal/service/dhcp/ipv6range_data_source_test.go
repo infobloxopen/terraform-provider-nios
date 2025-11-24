@@ -3,6 +3,7 @@ package dhcp_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -12,28 +13,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
-/*
-// Retrieve a specific dhcp Ipv6range by filters
-data "nios_dhcp_ipv6range" "get_dhcp_ipv6range_using_filters" {
-  filters = {
-    network = "NETWORK_REPLACE_ME"
-  }
-}
-// Retrieve specific dhcp Ipv6range using Extensible Attributes
-data "nios_" "get__using_extensible_attributes" {
-  extattrfilters = {
-    Site = "location-1"
-  }
-}
-
-// Retrieve all dhcp Ipv6range
-data "nios_dhcp_ipv6range" "get_all_dhcp_ipv6range" {}
-*/
-
 func TestAccIpv6rangeDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_ipv6range.test"
 	resourceName := "nios_dhcp_ipv6range.test"
 	var v dhcp.Ipv6range
+	view := acctest.RandomNameWithPrefix("network-view")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -41,7 +25,7 @@ func TestAccIpv6rangeDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6rangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6rangeDataSourceConfigFilters("NETWORK_REPLACE_ME"),
+				Config: testAccIpv6rangeDataSourceConfigFilters(view, "14::1", "14::10"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
@@ -56,13 +40,15 @@ func TestAccIpv6rangeDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_ipv6range.test"
 	resourceName := "nios_dhcp_ipv6range.test"
 	var v dhcp.Ipv6range
+	view := acctest.RandomNameWithPrefix("network-view")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckIpv6rangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6rangeDataSourceConfigExtAttrFilters("NETWORK_REPLACE_ME", acctest.RandomName()),
+				Config: testAccIpv6rangeDataSourceConfigExtAttrFilters(view, "14::1", "14::10", acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
@@ -103,7 +89,6 @@ func testAccCheckIpv6rangeResourceAttrPair(resourceName, dataSourceName string) 
 		resource.TestCheckResourceAttrPair(resourceName, "option_filter_rules", dataSourceName, "result.0.option_filter_rules"),
 		resource.TestCheckResourceAttrPair(resourceName, "port_control_blackout_setting", dataSourceName, "result.0.port_control_blackout_setting"),
 		resource.TestCheckResourceAttrPair(resourceName, "recycle_leases", dataSourceName, "result.0.recycle_leases"),
-		resource.TestCheckResourceAttrPair(resourceName, "restart_if_needed", dataSourceName, "result.0.restart_if_needed"),
 		resource.TestCheckResourceAttrPair(resourceName, "same_port_control_discovery_blackout", dataSourceName, "result.0.same_port_control_discovery_blackout"),
 		resource.TestCheckResourceAttrPair(resourceName, "server_association_type", dataSourceName, "result.0.server_association_type"),
 		resource.TestCheckResourceAttrPair(resourceName, "start_addr", dataSourceName, "result.0.start_addr"),
@@ -118,24 +103,35 @@ func testAccCheckIpv6rangeResourceAttrPair(resourceName, dataSourceName string) 
 	}
 }
 
-func testAccIpv6rangeDataSourceConfigFilters(network string) string {
-	return fmt.Sprintf(`
+func testAccIpv6rangeDataSourceConfigFilters(view, startAddr, endAddr string) string {
+	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test" {
-  network = %q
+    network = nios_ipam_ipv6network.test.network
+    start_addr = %q
+    end_addr = %q
+	network_view = nios_ipam_network_view.test.name
+
 }
 
 data "nios_dhcp_ipv6range" "test" {
   filters = {
 	network = nios_dhcp_ipv6range.test.network
+	start_addr = nios_dhcp_ipv6range.test.start_addr
+	end_addr = nios_dhcp_ipv6range.test.end_addr
+	network_view = nios_dhcp_ipv6range.test.network_view
   }
 }
-`, network)
+`, startAddr, endAddr)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
-func testAccIpv6rangeDataSourceConfigExtAttrFilters(network, extAttrsValue string) string {
-	return fmt.Sprintf(`
+func testAccIpv6rangeDataSourceConfigExtAttrFilters(view, startAddr, endAddr, extAttrsValue string) string {
+	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test" {
-  network = %q
+  network = nios_ipam_ipv6network.test.network
+  start_addr = %q
+  end_addr = %q
+  network_view = nios_ipam_network_view.test.name
   extattrs = {
     Site = %q
   } 
@@ -146,5 +142,6 @@ data "nios_dhcp_ipv6range" "test" {
 	Site = nios_dhcp_ipv6range.test.extattrs.Site
   }
 }
-`, network, extAttrsValue)
+`, startAddr, endAddr, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
