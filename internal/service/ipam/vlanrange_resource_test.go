@@ -485,19 +485,6 @@ resource "nios_ipam_vlanrange" "test_comment" {
 	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
-func testAccVlanrangeDeleteVlans(endVlanId int, name string, startVlanId int, vlanView string, deleteVlans string) string {
-	config := fmt.Sprintf(`
-resource "nios_ipam_vlanrange" "test_delete_vlans" {
-    end_vlan_id = %d
-    name = %q
-    start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
-    delete_vlans = %q
-}
-`, endVlanId, name, startVlanId, deleteVlans)
-	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
-}
-
 func testAccVlanrangeEndVlanId(endVlanId int, name string, startVlanId int, vlanView string) string {
 	config := fmt.Sprintf(`
 resource "nios_ipam_vlanrange" "test_end_vlan_id" {
