@@ -124,6 +124,9 @@ var RecordRpzAResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The name of the DNS View in which the record resides. Example: \"external\".",
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
