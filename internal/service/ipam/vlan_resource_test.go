@@ -357,6 +357,7 @@ func TestAccVlanResource_Parent(t *testing.T) {
 	var v ipam.Vlan
 	name := acctest.RandomNameWithPrefix("vlan")
 	view := acctest.RandomNameWithPrefix("example-vlan-view")
+	view2 := acctest.RandomNameWithPrefix("example-vlan-view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -364,18 +365,19 @@ func TestAccVlanResource_Parent(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanParent(61, name, view, "example_vlan_view11_updated", "one"),
+				Config: testAccVlanParent(61, name, view, view2, "one"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "parent"),
+					resource.TestCheckResourceAttrPair(resourceName, "parent", "nios_ipam_vlanview.one", "ref"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanParent(61, name, "example_vlan_view_11", "example_vlan_view_11_updated", "two"),
+				Config: testAccVlanParent(61, name, view, view2, "two"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrSet(resourceName, "parent"),
+					resource.TestCheckResourceAttrPair(resourceName, "parent", "nios_ipam_vlanview.two", "two"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
