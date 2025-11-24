@@ -64,8 +64,9 @@ var VlanrangeResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "A descriptive comment for this VLAN Range.",
 	},
+	// DeleteVlans can only be set during delete operation, so it is computed here.
 	"delete_vlans": schema.BoolAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Vlans delete option. Determines whether all child objects should be removed alongside with the VLAN Range or child objects should be assigned to another parental VLAN Range/View. By default child objects are re-parented.",
 	},
 	"end_vlan_id": schema.Int64Attribute{
@@ -99,6 +100,7 @@ var VlanrangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"pre_create_vlan": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set on creation VLAN objects will be created once VLAN Range created.",
 	},
 	"start_vlan_id": schema.Int64Attribute{
@@ -119,20 +121,21 @@ var VlanrangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *VlanrangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *ipam.Vlanrange {
+func (m *VlanrangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *ipam.Vlanrange {
 	if m == nil {
 		return nil
 	}
 	to := &ipam.Vlanrange{
-		Comment:        flex.ExpandStringPointer(m.Comment),
-		DeleteVlans:    flex.ExpandBoolPointer(m.DeleteVlans),
-		EndVlanId:      flex.ExpandInt64Pointer(m.EndVlanId),
-		ExtAttrs:       ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Name:           flex.ExpandStringPointer(m.Name),
-		PreCreateVlan:  flex.ExpandBoolPointer(m.PreCreateVlan),
-		StartVlanId:    flex.ExpandInt64Pointer(m.StartVlanId),
-		VlanNamePrefix: flex.ExpandStringPointer(m.VlanNamePrefix),
-		VlanView:       flex.ExpandStringPointer(m.VlanView),
+		Comment:     flex.ExpandStringPointer(m.Comment),
+		EndVlanId:   flex.ExpandInt64Pointer(m.EndVlanId),
+		ExtAttrs:    ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		Name:        flex.ExpandStringPointer(m.Name),
+		StartVlanId: flex.ExpandInt64Pointer(m.StartVlanId),
+		VlanView:    ExpandVlanView(m.VlanView),
+	}
+	if isCreate {
+		to.PreCreateVlan = flex.ExpandBoolPointer(m.PreCreateVlan)
+		to.VlanNamePrefix = flex.ExpandStringPointer(m.VlanNamePrefix)
 	}
 	return to
 }
@@ -162,8 +165,30 @@ func (m *VlanrangeModel) Flatten(ctx context.Context, from *ipam.Vlanrange, diag
 	m.EndVlanId = flex.FlattenInt64Pointer(from.EndVlanId)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.PreCreateVlan = types.BoolPointerValue(from.PreCreateVlan)
+	if m.PreCreateVlan.IsUnknown() || m.PreCreateVlan.IsNull() {
+		m.PreCreateVlan = types.BoolPointerValue(from.PreCreateVlan)
+	}
 	m.StartVlanId = flex.FlattenInt64Pointer(from.StartVlanId)
-	m.VlanNamePrefix = flex.FlattenStringPointer(from.VlanNamePrefix)
-	m.VlanView = flex.FlattenStringPointer(from.VlanView)
+	if m.VlanNamePrefix.IsUnknown() || m.VlanNamePrefix.IsNull() {
+		m.VlanNamePrefix = flex.FlattenStringPointer(from.VlanNamePrefix)
+	}
+	m.VlanView = FlattenVlanView(from.VlanView)
+}
+
+func ExpandVlanView(str types.String) *ipam.VlanrangeVlanView {
+	if str.IsNull() {
+		return &ipam.VlanrangeVlanView{}
+	}
+	var m ipam.VlanrangeVlanView
+	m.String = flex.ExpandStringPointer(str)
+
+	return &m
+}
+
+func FlattenVlanView(from *ipam.VlanrangeVlanView) types.String {
+	if from.VlanrangeVlanViewOneOf == nil {
+		return types.StringNull()
+	}
+	m := flex.FlattenStringPointer(from.VlanrangeVlanViewOneOf.Ref)
+	return m
 }

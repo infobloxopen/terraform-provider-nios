@@ -81,7 +81,7 @@ func (r *VlanrangeResource) Create(ctx context.Context, req resource.CreateReque
 	apiRes, _, err := r.client.IPAMAPI.
 		VlanrangeAPI.
 		Create(ctx).
-		Vlanrange(*data.Expand(ctx, &resp.Diagnostics)).
+		Vlanrange(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForVlanrange).
 		ReturnAsObject(1).
 		Execute()
@@ -274,7 +274,7 @@ func (r *VlanrangeResource) Update(ctx context.Context, req resource.UpdateReque
 	apiRes, _, err := r.client.IPAMAPI.
 		VlanrangeAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Vlanrange(*data.Expand(ctx, &resp.Diagnostics)).
+		Vlanrange(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForVlanrange).
 		ReturnAsObject(1).
 		Execute()
