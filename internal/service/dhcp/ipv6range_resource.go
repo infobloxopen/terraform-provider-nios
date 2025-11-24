@@ -300,6 +300,46 @@ func (r *Ipv6rangeResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 }
 
+func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+
+	var data Ipv6rangeModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// When address_type is "ADDRESS", start_addr and end_addr are required
+	if !data.AddressType.IsNull() && !data.AddressType.IsUnknown() {
+		switch data.AddressType.ValueString() {
+		case "ADDRESS":
+			if data.StartAddr.IsNull() || data.EndAddr.IsNull() {
+				resp.Diagnostics.AddError(
+					"Configuration Error",
+					"When address_type is set to 'ADDRESS', both start_addr and end_addr must be specified.",
+				)
+			}
+		case "PREFIX":
+			if data.Ipv6StartPrefix.IsNull() || data.Ipv6EndPrefix.IsNull() || data.Ipv6PrefixBits.IsNull() {
+				resp.Diagnostics.AddError(
+					"Configuration Error",
+					"When address_type is set to 'PREFIX', ipv6_start_prefix, ipv6_end_prefix, and ipv6_prefix_bits must be specified.",
+				)
+			}
+		case "BOTH":
+			if data.StartAddr.IsNull() || data.EndAddr.IsNull() || data.Ipv6StartPrefix.IsNull() || data.Ipv6EndPrefix.IsNull() || data.Ipv6PrefixBits.IsNull() {
+				resp.Diagnostics.AddError(
+					"Configuration Error",
+					"When address_type is set to 'BOTH', start_addr, end_addr, ipv6_start_prefix, ipv6_end_prefix, and ipv6_prefix_bits must be specified.",
+				)
+			}
+		default:
+			resp.Diagnostics.AddError(
+				"Configuration Error",
+				"address_type must be either 'ADDRESS' 'PREFIX' or 'BOTH'.",
+			)
+		}
+	}
+}
 func (r *Ipv6rangeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data Ipv6rangeModel
 

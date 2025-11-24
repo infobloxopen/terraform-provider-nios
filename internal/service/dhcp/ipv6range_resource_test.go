@@ -658,18 +658,18 @@ func TestAccIpv6rangeResource_Member(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeMember(view, "14::1", "14::10", "infoblox.member1"),
+				Config: testAccIpv6rangeMember(view, "14::1", "14::10", "infoblox.localdomain", "infoblox.member1", "MEMBER"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member1"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeMember(view, "14::1", "14::10", "infoblox.member2"),
+				Config: testAccIpv6rangeMember(view, "14::1", "14::10", "infoblox.member1", "infoblox.localdomain", "MEMBER"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member2"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1488,7 +1488,7 @@ resource "nios_dhcp_ipv6range" "test_logic_filter_rules" {
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
-func testAccIpv6rangeMember(view, startAddr, endAddr string, member string) string {
+func testAccIpv6rangeMember(view, startAddr, endAddr string, member1, member2 string, serverAssociationType string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test_member" {
     network = nios_ipam_ipv6network.test.network
@@ -1498,9 +1498,10 @@ resource "nios_dhcp_ipv6range" "test_member" {
     member = {
 		name = %q
 	}
+	server_association_type = %q
 }
-`, startAddr, endAddr, member)
-	return strings.Join([]string{testAccBaseWithIpv6NetworkWithMemberandView(view, member), config}, "")
+`, startAddr, endAddr, member1, serverAssociationType)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkWithTwoMembersandView(view, member1, member2), config}, "")
 }
 
 func testAccIpv6rangeName(view, startAddr, endAddr string, name string) string {
@@ -1765,6 +1766,25 @@ resource "nios_ipam_ipv6network" "test2" {
 	network_view = nios_ipam_network_view.test.name
 }
 `, view)
+}
+
+func testAccBaseWithIpv6NetworkWithTwoMembersandView(view, member1, member2 string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_view" "test" {
+	name = %q
+}
+
+resource "nios_ipam_ipv6network" "test" {
+    network = "14::/64"
+	network_view = nios_ipam_network_view.test.name
+	members = [{
+		name = %q
+	},
+	{
+		name = %q
+	}]
+}
+`, view, member1, member2)
 }
 
 func testAccBaseWithIpv6NetworkWithMemberandView(view, member string) string {
