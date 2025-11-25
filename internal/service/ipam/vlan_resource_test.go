@@ -377,7 +377,7 @@ func TestAccVlanResource_Parent(t *testing.T) {
 				Config: testAccVlanParent(61, name, view, view2, "two"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrPair(resourceName, "parent", "nios_ipam_vlanview.two", "two"),
+					resource.TestCheckResourceAttrPair(resourceName, "parent", "nios_ipam_vlanview.two", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
