@@ -25,7 +25,7 @@ resource "nios_ipam_vlanrange" "ipam_vlanrange_with_additional_fields" {
   pre_create_vlan  = true
   vlan_name_prefix = "vlan_range_"
 
-  //Extensible Attributes
+  // Extensible Attributes
   extattrs = {
     Site = "location-1"
   }

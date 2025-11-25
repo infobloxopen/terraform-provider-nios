@@ -209,8 +209,8 @@ func TestAccVlanrangeResource_Name(t *testing.T) {
 	var resourceName = "nios_ipam_vlanrange.test_name"
 	var v ipam.Vlanrange
 	vlanRange := acctest.RandomNameWithPrefix("vlan-range")
+	vlanRangeUpdated := acctest.RandomNameWithPrefix("vlan-range")
 	vlanView := acctest.RandomNameWithPrefix("vlan-view")
-	vlanViewUpdated := acctest.RandomNameWithPrefix("vlan-view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -226,10 +226,10 @@ func TestAccVlanrangeResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVlanrangeName(15, vlanRange, 10, vlanViewUpdated),
+				Config: testAccVlanrangeName(15, vlanRangeUpdated, 10, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", vlanViewUpdated),
+					resource.TestCheckResourceAttr(resourceName, "name", vlanRangeUpdated),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -345,7 +345,6 @@ func TestAccVlanrangeResource_VlanView(t *testing.T) {
 				Config: testAccVlanrangeVlanView(71, vlanRange, 60, vlanView1, vlanView2, "one"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					//resource.TestCheckResourceAttr(resourceName, "vlan_view", vlanView),
 					resource.TestCheckResourceAttrPair(resourceName, "vlan_view", "nios_ipam_vlanview.one", "ref"),
 				),
 			},

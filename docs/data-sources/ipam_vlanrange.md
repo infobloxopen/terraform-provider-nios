@@ -13,7 +13,7 @@ Retrieves information about existing Vlan Ranges.
 ## Example Usage
 
 ```terraform
-// Retrieve a specific IPAM Vlan Ranges by filters
+// Retrieve a specific IPAM Vlan Range by filters
 data "nios_ipam_vlanrange" "get_ipam_vlanrange_using_filters" {
   filters = {
     name = "example_vlan_range"

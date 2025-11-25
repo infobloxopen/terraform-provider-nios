@@ -3,6 +3,7 @@ package ipam_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,6 +17,8 @@ func TestAccVlanrangeDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_vlanrange.test"
 	resourceName := "nios_ipam_vlanrange.test"
 	var v ipam.Vlanrange
+	vlanRange := acctest.RandomNameWithPrefix("vlan-range")
+	vlanView := acctest.RandomNameWithPrefix("vlan-view")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +26,7 @@ func TestAccVlanrangeDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckVlanrangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVlanrangeDataSourceConfigFilters("END_VLAN_ID_REPLACE_ME", "NAME_REPLACE_ME", "START_VLAN_ID_REPLACE_ME", "VLAN_VIEW_REPLACE_ME"),
+				Config: testAccVlanrangeDataSourceConfigFilters(15, vlanRange, 10, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
@@ -38,13 +41,16 @@ func TestAccVlanrangeDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_vlanrange.test"
 	resourceName := "nios_ipam_vlanrange.test"
 	var v ipam.Vlanrange
+	vlanRange := acctest.RandomNameWithPrefix("vlan-range")
+	vlanView := acctest.RandomNameWithPrefix("vlan-view")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckVlanrangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVlanrangeDataSourceConfigExtAttrFilters("END_VLAN_ID_REPLACE_ME", "NAME_REPLACE_ME", "START_VLAN_ID_REPLACE_ME", "VLAN_VIEW_REPLACE_ME", acctest.RandomName()),
+				Config: testAccVlanrangeDataSourceConfigExtAttrFilters(15, vlanRange, 10, vlanView, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
@@ -72,13 +78,13 @@ func testAccCheckVlanrangeResourceAttrPair(resourceName, dataSourceName string) 
 	}
 }
 
-func testAccVlanrangeDataSourceConfigFilters(endVlanId, name, startVlanId, vlanView string) string {
-	return fmt.Sprintf(`
+func testAccVlanrangeDataSourceConfigFilters(endVlanId int, name string, startVlanId int, vlanView string) string {
+	config := fmt.Sprintf(`
 resource "nios_ipam_vlanrange" "test" {
-  end_vlan_id = %q
+  end_vlan_id = %d
   name = %q
-  start_vlan_id = %q
-  vlan_view = %q
+  start_vlan_id = %d
+  vlan_view = nios_ipam_vlanview.test.ref
 }
 
 data "nios_ipam_vlanrange" "test" {
@@ -86,16 +92,17 @@ data "nios_ipam_vlanrange" "test" {
 	end_vlan_id = nios_ipam_vlanrange.test.end_vlan_id
   }
 }
-`, endVlanId, name, startVlanId, vlanView)
+`, endVlanId, name, startVlanId)
+	return strings.Join([]string{testAccBaseWithVlanView(acctest.RandomNameWithPrefix("vlan-view")), config}, "")
 }
 
-func testAccVlanrangeDataSourceConfigExtAttrFilters(endVlanId, name, startVlanId, vlanView, extAttrsValue string) string {
-	return fmt.Sprintf(`
+func testAccVlanrangeDataSourceConfigExtAttrFilters(endVlanId int, name string, startVlanId int, vlanView, extAttrsValue string) string {
+	config := fmt.Sprintf(`
 resource "nios_ipam_vlanrange" "test" {
-  end_vlan_id = %q
+  end_vlan_id = %d
   name = %q
-  start_vlan_id = %q
-  vlan_view = %q
+  start_vlan_id = %d
+  vlan_view = nios_ipam_vlanview.test.ref
   extattrs = {
     Site = %q
   } 
@@ -106,5 +113,6 @@ data "nios_ipam_vlanrange" "test" {
 	Site = nios_ipam_vlanrange.test.extattrs.Site
   }
 }
-`, endVlanId, name, startVlanId, vlanView, extAttrsValue)
+`, endVlanId, name, startVlanId, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithVlanView(acctest.RandomNameWithPrefix("vlan-view")), config}, "")
 }
