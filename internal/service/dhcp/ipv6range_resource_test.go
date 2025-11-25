@@ -1764,9 +1764,13 @@ resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
 
 func testAccBaseWithIpv6NetworkandView(view string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network_view" "test" {
+	name = %q
+}
+
 resource "nios_ipam_ipv6network" "test" {
     network = "14::/64"
-	network_view = %q
+	network_view = nios_ipam_network_view.test.name
 }
 `, view)
 }
