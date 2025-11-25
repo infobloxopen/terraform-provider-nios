@@ -392,14 +392,6 @@ resource "nios_dtc_monitor_tcp" "test" {
 `, name, port)
 }
 
-func testAccDtcMonitorTcpRef(ref string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_monitor_tcp" "test_ref" {
-    ref = %q
-}
-`, ref)
-}
-
 func testAccDtcMonitorTcpComment(name string , port int, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_comment" {
