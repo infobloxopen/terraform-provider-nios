@@ -220,5 +220,5 @@ func (r *SharedrecordSrvResource) Delete(ctx context.Context, req resource.Delet
 }
 
 func (r *SharedrecordSrvResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 }
