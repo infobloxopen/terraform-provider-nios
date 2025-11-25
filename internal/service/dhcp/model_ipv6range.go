@@ -435,10 +435,10 @@ func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 		UseLogicFilterRules:              flex.ExpandBoolPointer(m.UseLogicFilterRules),
 		UseRecycleLeases:                 flex.ExpandBoolPointer(m.UseRecycleLeases),
 		UseSubscribeSettings:             flex.ExpandBoolPointer(m.UseSubscribeSettings),
+		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
 	}
 	if isCreate {
 		to.Template = flex.ExpandStringPointer(m.Template)
-		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
 	}
 	return to
 }
