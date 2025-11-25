@@ -11,13 +11,16 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -89,6 +92,9 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default and internal attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -98,9 +104,12 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Name of the VLAN View.",
 	},
 	"pre_create_vlan": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		PlanModifiers: []planmodifier.Bool{
+			planmodifiers.ImmutableBool(),
+		},
 		MarkdownDescription: "If set on creation VLAN objects will be created once VLAN View created.",
 	},
 	"start_vlan_id": schema.Int64Attribute{
@@ -115,6 +124,9 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+		},
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
 		},
 		MarkdownDescription: "If set on creation prefix string will be used for VLAN name.",
 	},
@@ -164,7 +176,11 @@ func (m *VlanviewModel) Flatten(ctx context.Context, from *ipam.Vlanview, diags 
 	m.EndVlanId = flex.FlattenInt64Pointer(from.EndVlanId)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.PreCreateVlan = types.BoolPointerValue(from.PreCreateVlan)
+	if m.PreCreateVlan.IsUnknown() || m.PreCreateVlan.IsNull() {
+		m.PreCreateVlan = types.BoolPointerValue(from.PreCreateVlan)
+	}
 	m.StartVlanId = flex.FlattenInt64Pointer(from.StartVlanId)
-	m.VlanNamePrefix = flex.FlattenStringPointer(from.VlanNamePrefix)
+	if m.VlanNamePrefix.IsUnknown() || m.VlanNamePrefix.IsNull() {
+		m.VlanNamePrefix = flex.FlattenStringPointer(from.VlanNamePrefix)
+	}
 }

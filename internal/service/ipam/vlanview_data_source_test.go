@@ -84,7 +84,8 @@ resource "nios_ipam_vlanview" "test" {
 
 data "nios_ipam_vlanview" "test" {
   filters = {
-	end_vlan_id = nios_ipam_vlanview.test.end_vlan_id
+    end_vlan_id = nios_ipam_vlanview.test.end_vlan_id
+    name = nios_ipam_vlanview.test.name
   }
 }
 `, endVlanId, name, startVlanId)

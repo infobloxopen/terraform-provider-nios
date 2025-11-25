@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -21,6 +20,7 @@ var readableAttributesForVlanview = "allow_range_overlapping,comment,end_vlan_id
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &VlanviewResource{}
 var _ resource.ResourceWithImportState = &VlanviewResource{}
+var _ resource.ResourceWithValidateConfig = &VlanviewResource{}
 
 func NewVlanviewResource() resource.Resource {
 	return &VlanviewResource{}
@@ -115,6 +115,12 @@ func (r *VlanviewResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		VlanviewAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -138,19 +144,21 @@ func (r *VlanviewResource) Read(ctx context.Context, req resource.ReadRequest, r
 		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read Vlanview because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
+	if associateInternalId == nil {
+		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
+		if stateExtAttrs == nil {
+			resp.Diagnostics.AddError(
+				"Missing Internal ID",
+				"Unable to read Vlanview because the internal ID (from extattrs_all) is missing or invalid.",
+			)
 			return
+		}
+
+		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
+		if apiTerraformId.Value != stateTerraformId.Value {
+			if r.ReadByExtAttrs(ctx, &data, resp) {
+				return
+			}
 		}
 	}
 
@@ -245,6 +253,18 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+	if associateInternalId != nil {
+		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+		if diags.HasError() {
+			return
+		}
+	}
+
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
 	if diags.HasError() {
@@ -276,6 +296,9 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if associateInternalId != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
+	}
 }
 
 func (r *VlanviewResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -301,42 +324,34 @@ func (r *VlanviewResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 }
 
-func (r *VlanviewResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
+func (r *VlanviewResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
 	var data VlanviewModel
-	var goClientData ipam.Vlanview
 
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.IPAMAPI.
-		VlanviewAPI.
-		Update(ctx, resourceRef).
-		Vlanview(goClientData).
-		ReturnFieldsPlus(readableAttributesForVlanview).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Vlanview for import, got error: %s", err))
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	res := updateRes.UpdateVlanviewResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Vlanview due inherited Extensible attributes for import, got error: %s", diags))
-		return
+	if !data.VlanNamePrefix.IsUnknown() && !data.VlanNamePrefix.IsNull() {
+		if !data.PreCreateVlan.IsNull() && !data.PreCreateVlan.IsUnknown() && !data.PreCreateVlan.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Configuration Error",
+				"`vlan_name_prefix` can only be set when `pre_create_vlan` is set to true.",
+			)
+		}
 	}
+	if !data.StartVlanId.IsUnknown() && !data.StartVlanId.IsNull() &&
+		!data.EndVlanId.IsUnknown() && !data.EndVlanId.IsNull() {
+		if data.StartVlanId.ValueInt64() > data.EndVlanId.ValueInt64() {
+			resp.Diagnostics.AddError(
+				"Configuration Error",
+				"`start_vlan_id` must be less than or equal to `end_vlan_id`.",
+			)
+		}
+	}
+}
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
+func (r *VlanviewResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs"), data.ExtAttrs)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

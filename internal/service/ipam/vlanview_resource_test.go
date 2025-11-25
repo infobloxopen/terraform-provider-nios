@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -92,7 +91,6 @@ func TestAccVlanviewResource_Import(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "ref",
 				PlanOnly:                             true,
-				ExpectError:                          regexp.MustCompile(`ImportStateVerify attributes not equivalent`),
 			},
 			// Import and Verify
 			{
@@ -262,7 +260,6 @@ func TestAccVlanviewResource_Name(t *testing.T) {
 	})
 }
 func TestAccVlanviewResource_PreCreateVlan(t *testing.T) {
-	t.Skip("Skipping test as WAPI does not support updating pre_create_vlan attribute")
 	var resourceName = "nios_ipam_vlanview.test_pre_create_vlan"
 	var v ipam.Vlanview
 	name := acctest.RandomNameWithPrefix("vlan_view")
@@ -313,7 +310,6 @@ func TestAccVlanviewResource_StartVlanId(t *testing.T) {
 	})
 }
 func TestAccVlanviewResource_VlanNamePrefix(t *testing.T) {
-	t.Skip("WAPI Doesnt allow updating vlan_name_prefix field")
 	var resourceName = "nios_ipam_vlanview.test_vlan_name_prefix"
 	var v ipam.Vlanview
 	name := acctest.RandomNameWithPrefix("vlan_view")
@@ -328,22 +324,6 @@ func TestAccVlanviewResource_VlanNamePrefix(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "prefixCaseInsensitive"),
-				),
-			},
-			// Update and check for empty string
-			{
-				Config: testAccVlanviewVlanNamePrefix(15, name, 10, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", ""),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccVlanviewVlanNamePrefix(15, name, 10, "VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -518,7 +498,7 @@ resource "nios_ipam_vlanview" "test_vlan_name_prefix" {
     name = %q
     start_vlan_id = %d
     vlan_name_prefix = %q
-	pre_create_vlan = true
+    pre_create_vlan = true
 }
 `, endVlanId, name, startVlanId, vlanNamePrefix)
 }
