@@ -310,13 +310,6 @@ func (r *FixedaddresstemplateResource) ValidateConfig(ctx context.Context, req r
 			}
 		}
 	}
-
-	var options []FixedaddresstemplateOptionsModel
-	diags := data.Options.ElementsAs(ctx, &options, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *FixedaddresstemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
