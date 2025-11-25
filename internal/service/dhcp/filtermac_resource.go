@@ -37,7 +37,7 @@ func (r *FiltermacResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *FiltermacResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DHCP Filter MAC.",
 		Attributes:          FiltermacResourceSchemaAttributes,
 	}
 }
@@ -428,22 +428,6 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// // domain_name attribute must match the value of option 'domain-name'
-	// if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-	// 	for i, option := range options {
-	// 		if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "domain-name" {
-	// 			if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-	// 				option.Value.ValueString() != data.DomainName.ValueString() {
-	// 				resp.Diagnostics.AddAttributeError(
-	// 					path.Root("options").AtListIndex(i).AtName("value"),
-	// 					"Invalid configuration for Domain Name",
-	// 					"domain_name attribute must match the 'value' attribute for DHCP Option 'domain-name'.",
-	// 				)
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
 	if !data.LeaseTime.IsNull() && !data.LeaseTime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {

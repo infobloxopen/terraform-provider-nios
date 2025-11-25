@@ -15,6 +15,7 @@ func TestAccFiltermacDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_filtermac.test"
 	resourceName := "nios_dhcp_filtermac.test"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +23,7 @@ func TestAccFiltermacDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckFiltermacDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFiltermacDataSourceConfigFilters("mac_filter"),
+				Config: testAccFiltermacDataSourceConfigFilters(macFilterName),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckFiltermacExists(context.Background(), resourceName, &v),
@@ -37,13 +38,14 @@ func TestAccFiltermacDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_filtermac.test"
 	resourceName := "nios_dhcp_filtermac.test"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckFiltermacDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFiltermacDataSourceConfigExtAttrFilters("mac_filter", acctest.RandomName()),
+				Config: testAccFiltermacDataSourceConfigExtAttrFilters(macFilterName, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckFiltermacExists(context.Background(), resourceName, &v),

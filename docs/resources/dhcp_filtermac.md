@@ -3,25 +3,19 @@
 page_title: "nios_dhcp_filtermac Resource - nios"
 subcategory: "DHCP"
 description: |-
-  
+  Manages a DHCP Filter MAC.
 ---
 
 # nios_dhcp_filtermac (Resource)
 
-
+Manages a DHCP Filter MAC.
 
 ## Example Usage
 
 ```terraform
 #create a filtermac resource
 resource "nios_dhcp_filtermac" "mac_filter" {
-  name                  = "mac_filter_example"
-  reserved_for_infoblox = "Reserved_For_Infoblox_Value"
-
-  // Extensible Attributes
-  extattrs = {
-    Site = "location-1"
-  }
+  name = "mac_filter_example"
 }
 
 #Create another filtermac with different name
@@ -32,6 +26,11 @@ resource "nios_dhcp_filtermac" "mac_filter_update" {
   default_mac_address_expiration = 1440
   never_expires                  = false
   reserved_for_infoblox          = "Updated_Reserved_For_Infoblox_Value"
+
+  // Extensible Attributes
+  extattrs = {
+    Site = "location-1"
+  }
 }
 
 # Create another filtermac resource with dhcp option dhcp_lease_time

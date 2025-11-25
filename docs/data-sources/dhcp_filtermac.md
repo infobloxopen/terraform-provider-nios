@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_filtermac Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  
+  Retrieves information about existing DHCP Filter MACs based on specified filters and external attribute filters.
 ---
 
 # nios_dhcp_filtermac (Data Source)
 
-
+Retrieves information about existing DHCP Filter MACs based on specified filters and external attribute filters.
 
 ## Example Usage
 

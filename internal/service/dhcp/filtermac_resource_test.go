@@ -20,33 +20,22 @@ var readableAttributesForFiltermac = "comment,default_mac_address_expiration,dis
 func TestAccFiltermacResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test"
 	var v dhcp.Filtermac
-	name := acctest.RandomName()
-	comment := "DISAPPEARS_REPLACE_ME"
-	defaultMacAddressExpiration := "1800"
-	disable := "false"
-	neverExpires := "false"
-	enforceExpirationTimes := "true"
-	extAttrs := map[string]string{"Site": "DISAPPEARS_REPLACE_ME"}
-	leaseTime := "1200"
-
+	name := acctest.RandomNameWithPrefix("mac_filter")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacBasicConfig(name, comment, defaultMacAddressExpiration, disable, enforceExpirationTimes, extAttrs, leaseTime, neverExpires),
+				Config: testAccFiltermacBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "comment", comment),
-					resource.TestCheckResourceAttr(resourceName, "default_mac_address_expiration", defaultMacAddressExpiration),
-					resource.TestCheckResourceAttr(resourceName, "disable", disable),
-					resource.TestCheckResourceAttr(resourceName, "enforce_expiration_times", enforceExpirationTimes),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrs["Site"]),
-					resource.TestCheckResourceAttr(resourceName, "lease_time", leaseTime),
 					// TODO: check and validate these
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "enforce_expiration_times", "true"),
+					resource.TestCheckResourceAttr(resourceName, "never_expires", "true"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -56,14 +45,7 @@ func TestAccFiltermacResource_basic(t *testing.T) {
 
 func TestAccFiltermacResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_filtermac.test"
-	name := acctest.RandomName()
-	comment := "DISAPPEARS_REPLACE_ME"
-	defaultMacAddressExpiration := "1800"
-	disable := "false"
-	neverExpires := "false"
-	enforceExpirationTimes := "true"
-	extAttrs := map[string]string{"Site": "DISAPPEARS_REPLACE_ME"}
-	leaseTime := "3600"
+	name := acctest.RandomNameWithPrefix("mac_filter")
 
 	var v dhcp.Filtermac
 
@@ -73,7 +55,7 @@ func TestAccFiltermacResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckFiltermacDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFiltermacBasicConfig(name, comment, defaultMacAddressExpiration, disable, enforceExpirationTimes, extAttrs, leaseTime, neverExpires),
+				Config: testAccFiltermacBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					testAccCheckFiltermacDisappears(context.Background(), &v),
@@ -87,6 +69,7 @@ func TestAccFiltermacResource_disappears(t *testing.T) {
 func TestAccFiltermacResource_Comment(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test_comment"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -94,18 +77,18 @@ func TestAccFiltermacResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacComment("mac_filter", "COMMENT_REPLACE_ME"),
+				Config: testAccFiltermacComment(macFilterName, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacComment("mac_filter", "COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccFiltermacComment(macFilterName, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -116,6 +99,7 @@ func TestAccFiltermacResource_Comment(t *testing.T) {
 func TestAccFiltermacResource_DefaultMacAddressExpiration(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test_default_mac_address_expiration"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -123,7 +107,7 @@ func TestAccFiltermacResource_DefaultMacAddressExpiration(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacDefaultMacAddressExpiration("mac_filter", "1200"),
+				Config: testAccFiltermacDefaultMacAddressExpiration(macFilterName, "1200"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "default_mac_address_expiration", "1200"),
@@ -131,7 +115,7 @@ func TestAccFiltermacResource_DefaultMacAddressExpiration(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacDefaultMacAddressExpiration("mac_filter", "2400"),
+				Config: testAccFiltermacDefaultMacAddressExpiration(macFilterName, "2400"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "default_mac_address_expiration", "2400"),
@@ -145,6 +129,7 @@ func TestAccFiltermacResource_DefaultMacAddressExpiration(t *testing.T) {
 func TestAccFiltermacResource_Disable(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test_disable"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -152,7 +137,7 @@ func TestAccFiltermacResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacDisable("mac_filter", "true"),
+				Config: testAccFiltermacDisable(macFilterName, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -160,7 +145,7 @@ func TestAccFiltermacResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacDisable("mac_filter", "false"),
+				Config: testAccFiltermacDisable(macFilterName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -174,6 +159,7 @@ func TestAccFiltermacResource_Disable(t *testing.T) {
 func TestAccFiltermacResource_EnforceExpirationTimes(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test_enforce_expiration_times"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -181,7 +167,7 @@ func TestAccFiltermacResource_EnforceExpirationTimes(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacEnforceExpirationTimes("mac_filter", "true"),
+				Config: testAccFiltermacEnforceExpirationTimes(macFilterName, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enforce_expiration_times", "true"),
@@ -189,7 +175,7 @@ func TestAccFiltermacResource_EnforceExpirationTimes(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacEnforceExpirationTimes("mac_filter", "false"),
+				Config: testAccFiltermacEnforceExpirationTimes(macFilterName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enforce_expiration_times", "false"),
@@ -203,15 +189,16 @@ func TestAccFiltermacResource_EnforceExpirationTimes(t *testing.T) {
 func TestAccFiltermacResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test_extattrs"
 	var v dhcp.Filtermac
-	extAttrValue1 := "EXT_ATTRS_REPLACE_ME"
-	extAttrValue2 := "EXT_ATTRS_UPDATE_REPLACE_ME"
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacExtAttrs("mac_filter", map[string]string{"Site": extAttrValue1}),
+				Config: testAccFiltermacExtAttrs(macFilterName, map[string]string{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
@@ -219,7 +206,7 @@ func TestAccFiltermacResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacExtAttrs("mac_filter", map[string]string{"Site": extAttrValue2}),
+				Config: testAccFiltermacExtAttrs(macFilterName, map[string]string{"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
@@ -235,6 +222,7 @@ func TestAccFiltermacResource_LeaseTime(t *testing.T) {
 	var v dhcp.Filtermac
 	lease_time := "7200"
 	updated_lease_time := "3600"
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -242,7 +230,7 @@ func TestAccFiltermacResource_LeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacLeaseTime("mac_filter", lease_time),
+				Config: testAccFiltermacLeaseTime(macFilterName, lease_time),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lease_time", lease_time),
@@ -250,7 +238,7 @@ func TestAccFiltermacResource_LeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacLeaseTime("mac_filter", updated_lease_time),
+				Config: testAccFiltermacLeaseTime(macFilterName, updated_lease_time),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lease_time", updated_lease_time),
@@ -264,6 +252,8 @@ func TestAccFiltermacResource_LeaseTime(t *testing.T) {
 func TestAccFiltermacResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test_name"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
+	macFilterNameUpdate := acctest.RandomNameWithPrefix("mac_filter_upd")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -271,18 +261,18 @@ func TestAccFiltermacResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacName("NAME_REPLACE_ME"),
+				Config: testAccFiltermacName(macFilterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", macFilterName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccFiltermacName(macFilterNameUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", macFilterNameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -293,6 +283,7 @@ func TestAccFiltermacResource_Name(t *testing.T) {
 func TestAccFiltermacResource_NeverExpires(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test_never_expires"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -300,7 +291,7 @@ func TestAccFiltermacResource_NeverExpires(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacNeverExpires("mac_filter", "true", ""),
+				Config: testAccFiltermacNeverExpires(macFilterName, "true", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "never_expires", "true"),
@@ -308,7 +299,7 @@ func TestAccFiltermacResource_NeverExpires(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacNeverExpires("mac_filter", "false", "3600"),
+				Config: testAccFiltermacNeverExpires(macFilterName, "false", "3600"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "never_expires", "false"),
@@ -322,6 +313,7 @@ func TestAccFiltermacResource_NeverExpires(t *testing.T) {
 func TestAccFiltermacResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_filtermac.test_options"
 	var v dhcp.Filtermac
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 	options := []map[string]any{
 		{
 			"name":  "dhcp-lease-time",
@@ -343,7 +335,7 @@ func TestAccFiltermacResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacOptions("mac_filter", options),
+				Config: testAccFiltermacOptions(macFilterName, options),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
@@ -354,7 +346,7 @@ func TestAccFiltermacResource_Options(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacOptions("mac_filter", updatedOptions),
+				Config: testAccFiltermacOptions(macFilterName, updatedOptions),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
@@ -373,6 +365,7 @@ func TestAccFiltermacResource_ReservedForInfoblox(t *testing.T) {
 	var v dhcp.Filtermac
 	reserved_for_infoblox := acctest.RandomName()
 	reserved_for_infoblox_update := acctest.RandomName()
+	macFilterName := acctest.RandomNameWithPrefix("mac_filter")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -380,7 +373,7 @@ func TestAccFiltermacResource_ReservedForInfoblox(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFiltermacReservedForInfoblox("mac_filter", reserved_for_infoblox),
+				Config: testAccFiltermacReservedForInfoblox(macFilterName, reserved_for_infoblox),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "reserved_for_infoblox", reserved_for_infoblox),
@@ -388,7 +381,7 @@ func TestAccFiltermacResource_ReservedForInfoblox(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFiltermacReservedForInfoblox("mac_filter", reserved_for_infoblox_update),
+				Config: testAccFiltermacReservedForInfoblox(macFilterName, reserved_for_infoblox_update),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "reserved_for_infoblox", reserved_for_infoblox_update),
@@ -457,25 +450,13 @@ func testAccCheckFiltermacDisappears(ctx context.Context, v *dhcp.Filtermac) res
 	}
 }
 
-func testAccFiltermacBasicConfig(name string, comment string, defaultMacAddressExpiration string, disable string, enforceExpirationTimes string, extAttrs map[string]string, leaseTime string, neverExpires string) string {
+func testAccFiltermacBasicConfig(name string) string {
 	// TODO: create basic resource with required fields
-	extattrsStr := "{\n"
-	for k, v := range extAttrs {
-		extattrsStr += fmt.Sprintf("  %s = %q\n", k, v)
-	}
-	extattrsStr += "}"
 	return fmt.Sprintf(`
 resource "nios_dhcp_filtermac" "test" {
     name = %q
-	comment = %q
-	default_mac_address_expiration = %q
-	disable = %q
-	enforce_expiration_times = %q
-	extattrs = %s
-	lease_time = %q
-	never_expires = %q
 }
-`, name, comment, defaultMacAddressExpiration, disable, enforceExpirationTimes, extattrsStr, leaseTime, neverExpires)
+`, name)
 }
 
 func testAccFiltermacComment(name string, comment string) string {
