@@ -22,8 +22,8 @@ resource "nios_dtc_monitor_http" "dtc_monitor_http_basic_fields" {
 resource "nios_dtc_monitor_http" "dtc_monitor_http_additional_fields" {
   name                  = "example-monitor-http-all-fields"
   ciphers               = "DHE-RSA-AES256-SHA"
-  client_cert           = "dtc:certificate/ZG5zLmlkbnNfY2VydGlmaWNhdGUkYjNiY2FjYjM0YjYzNWM4NzkwMGMxODUxN2MzODA0NTIyMGI1MTEyZTQwNzMzZTM1YzNkNTdmZjk3MGMwYTliY2NkN2Q4NzhkODBmYjE0MmQzZmYzYTRkNjI3Zjk5NDlmZmYwOWMwMDdkZGEzMmQxMDhiMWZkMTlmYjRkOThiNTI:7e78dced4c4715b761a25427848e7153671c496d"
-  comment               = "This is a comment"
+  client_cert           = "dtc:certificate/example"
+  comment               = "Example DTC Monitor HTTP"
   content_check         = "EXTRACT"
   content_check_input   = "BODY"
   content_check_op      = "EQ"

@@ -257,6 +257,22 @@ func TestAccDtcMonitorHttpResource_ContentCheckOp(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "content_check_op", "LEQ"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccDtcMonitorHttpContentCheckOp(name, "EQ"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "content_check_op", "EQ"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDtcMonitorHttpContentCheckOp(name, "NEQ"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "content_check_op", "NEQ"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
