@@ -39,14 +39,6 @@ func TestAccDtcMonitorIcmpResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "timeout", "15"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccDtcMonitorIcmpBasicConfig(name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcMonitorIcmpExists(context.Background(), resourceName, &v),
-					// Test fields with default value
-				),
-			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
