@@ -29,6 +29,8 @@ import (
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
+// TODO: Add validation to ensure that 'nextserver' and 'bootserver' are valid IP addresses or FQDNs.
+
 type FixedaddresstemplateModel struct {
 	Ref                            types.String `tfsdk:"ref"`
 	Bootfile                       types.String `tfsdk:"bootfile"`
