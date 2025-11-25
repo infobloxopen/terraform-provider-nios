@@ -255,14 +255,7 @@ func TestAccVlanrangeResource_PreCreateVlan(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "pre_create_vlan", "true"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccVlanrangePreCreateVlan(15, vlanRange, 10, vlanView, "false"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pre_create_vlan", "false"),
-				),
-			},
+			// Update Not Possible
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -316,14 +309,7 @@ func TestAccVlanrangeResource_VlanNamePrefix(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "prefixCaseInsensitive"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccVlanrangeVlanNamePrefix(15, vlanRange, 10, vlanView, "VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "VLAN_NAME_PREFIX_UPDATE_REPLACE_ME"),
-				),
-			},
+			// Update Not Possible
 			// Delete testing automatically occurs in TestCase
 		},
 	})

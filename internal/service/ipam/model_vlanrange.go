@@ -17,6 +17,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -99,8 +100,11 @@ var VlanrangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Name of the VLAN Range.",
 	},
 	"pre_create_vlan": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		PlanModifiers: []planmodifier.Bool{
+			planmodifiers.ImmutableBool(),
+		},
 		MarkdownDescription: "If set on creation VLAN objects will be created once VLAN Range created.",
 	},
 	"start_vlan_id": schema.Int64Attribute{
@@ -112,6 +116,9 @@ var VlanrangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+		},
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
 		},
 		MarkdownDescription: "If set on creation prefix string will be used for VLAN name.",
 	},
