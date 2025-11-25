@@ -31,7 +31,7 @@ type Ipv6dhcpoptiondefinitionResource struct {
 }
 
 func (r *Ipv6dhcpoptiondefinitionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6dhcpoptiondefinition"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6optiondefinition"
 }
 
 func (r *Ipv6dhcpoptiondefinitionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
