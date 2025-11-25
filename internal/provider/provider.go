@@ -128,6 +128,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewIPAssociationResource,
 		dns.NewSharedrecordgroupResource,
 		dns.NewSharedrecordTxtResource,
+		dns.NewSharedrecordMxResource,
 		dns.NewSharedrecordAaaaResource,
 
 		dhcp.NewFixedaddressResource,
@@ -149,6 +150,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewIpv6networkResource,
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
+		ipam.NewVlanviewResource,
 
 		cloud.NewAwsrte53taskgroupResource,
 		cloud.NewAwsuserResource,
@@ -214,6 +216,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordHostDataSource,
 		dns.NewSharedrecordgroupDataSource,
 		dns.NewSharedrecordTxtDataSource,
+		dns.NewSharedrecordMxDataSource,
 		dns.NewSharedrecordAaaaDataSource,
 
 		dhcp.NewFixedaddressDataSource,
@@ -235,6 +238,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewIpv6networkDataSource,
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
+		ipam.NewVlanviewDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
 		cloud.NewAwsuserDataSource,
