@@ -676,6 +676,7 @@ func TestAccIpv6rangeResource_Member(t *testing.T) {
 		},
 	})
 }
+
 func TestAccIpv6rangeResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_name"
 	var v dhcp.Ipv6range
@@ -949,9 +950,8 @@ func TestAccIpv6rangeResource_StartAddr(t *testing.T) {
 
 func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_subscribe_settings"
-	// t.Skip("Additional configuration is required to run this test")
 	var v dhcp.Ipv6range
-	// view := acctest.RandomNameWithPrefix("network-view")
+	view := acctest.RandomNameWithPrefix("network-view")
 	subscribeSettings := map[string]any{
 		"enabled_attributes": []string{"DOMAINNAME", "ENDPOINT_PROFILE"},
 	}
@@ -965,7 +965,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings("default", "14::1", "14::10", subscribeSettings, "true"),
+				Config: testAccIpv6rangeSubscribeSettings(view, "14::1", "14::10", subscribeSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "DOMAINNAME"),
@@ -974,7 +974,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings("default", "14::1", "14::10", subscribeSettingsUpdated, "true"),
+				Config: testAccIpv6rangeSubscribeSettings(view, "14::1", "14::10", subscribeSettingsUpdated, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "SECURITY_GROUP"),
@@ -1143,9 +1143,8 @@ func TestAccIpv6rangeResource_UseRecycleLeases(t *testing.T) {
 
 func TestAccIpv6rangeResource_UseSubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_use_subscribe_settings"
-	// t.Skip("Additional configuration is required to run this test")
 	var v dhcp.Ipv6range
-	// view := acctest.RandomNameWithPrefix("network-view")
+	view := acctest.RandomNameWithPrefix("network-view")
 	subscribeSettings := map[string]any{
 		"enabled_attributes": []string{"DOMAINNAME"},
 	}
@@ -1156,7 +1155,7 @@ func TestAccIpv6rangeResource_UseSubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeUseSubscribeSettings("default", "14::1", "14::10", "true", subscribeSettings),
+				Config: testAccIpv6rangeUseSubscribeSettings(view, "14::1", "14::10", "true", subscribeSettings),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
@@ -1164,7 +1163,7 @@ func TestAccIpv6rangeResource_UseSubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeUseSubscribeSettingsUpdate("default", "14::1", "14::10", "false"),
+				Config: testAccIpv6rangeUseSubscribeSettingsUpdate(view, "14::1", "14::10", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
