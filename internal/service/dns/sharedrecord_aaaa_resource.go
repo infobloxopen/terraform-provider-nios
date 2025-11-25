@@ -186,7 +186,7 @@ func (r *SharedrecordAaaaResource) Update(ctx context.Context, req resource.Upda
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update SharedrecordMx due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update SharedrecordAaaa due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
