@@ -100,7 +100,6 @@ var FixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"bootfile": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		// Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
 		},
@@ -109,7 +108,6 @@ var FixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"bootserver": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		// Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
 		},
@@ -160,9 +158,12 @@ var FixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
 	},
 	"enable_pxe_lease_time": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("pxe_lease_time")),
+		},
 		MarkdownDescription: "Set this to True if you want the DHCP server to use a different lease time for PXE clients.",
 	},
 	"extattrs": schema.MapAttribute{
