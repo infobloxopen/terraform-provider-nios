@@ -20,7 +20,7 @@ import (
 var readableAttributesForIpv6dhcpoptionspace = "comment,enterprise_number,name,option_definitions"
 
 func TestAccIpv6dhcpoptionspaceResource_basic(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6dhcpoptionspace.test"
+	var resourceName = "nios_dhcp_ipv6optionspace.test"
 	var v dhcp.Ipv6dhcpoptionspace
 	name := acctest.RandomNameWithPrefix("option-space")
 
@@ -45,7 +45,7 @@ func TestAccIpv6dhcpoptionspaceResource_basic(t *testing.T) {
 }
 
 func TestAccIpv6dhcpoptionspaceResource_disappears(t *testing.T) {
-	resourceName := "nios_dhcp_ipv6dhcpoptionspace.test"
+	resourceName := "nios_dhcp_ipv6optionspace.test"
 	var v dhcp.Ipv6dhcpoptionspace
 	name := acctest.RandomNameWithPrefix("option-space")
 
@@ -67,7 +67,7 @@ func TestAccIpv6dhcpoptionspaceResource_disappears(t *testing.T) {
 }
 
 func TestAccIpv6dhcpoptionspaceResource_Comment(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6dhcpoptionspace.test_comment"
+	var resourceName = "nios_dhcp_ipv6optionspace.test_comment"
 	var v dhcp.Ipv6dhcpoptionspace
 	name := acctest.RandomNameWithPrefix("option-space")
 
@@ -97,7 +97,7 @@ func TestAccIpv6dhcpoptionspaceResource_Comment(t *testing.T) {
 }
 
 func TestAccIpv6dhcpoptionspaceResource_EnterpriseNumber(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6dhcpoptionspace.test_enterprise_number"
+	var resourceName = "nios_dhcp_ipv6optionspace.test_enterprise_number"
 	var v dhcp.Ipv6dhcpoptionspace
 	name := acctest.RandomNameWithPrefix("option-space")
 
@@ -127,7 +127,7 @@ func TestAccIpv6dhcpoptionspaceResource_EnterpriseNumber(t *testing.T) {
 }
 
 func TestAccIpv6dhcpoptionspaceResource_Name(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6dhcpoptionspace.test_name"
+	var resourceName = "nios_dhcp_ipv6optionspace.test_name"
 	var v dhcp.Ipv6dhcpoptionspace
 	name := acctest.RandomNameWithPrefix("option-space")
 	updatedName := acctest.RandomNameWithPrefix("option-space")
@@ -158,12 +158,12 @@ func TestAccIpv6dhcpoptionspaceResource_Name(t *testing.T) {
 }
 
 func TestAccIpv6dhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6dhcpoptionspace.test_option_definitions"
+	var resourceName = "nios_dhcp_ipv6optionspace.test_option_definitions"
 	var v dhcp.Ipv6dhcpoptionspace
 	optionSpace1 := acctest.RandomNameWithPrefix("option-space")
 	optionSpace2 := acctest.RandomNameWithPrefix("option-space")
-	optionDefinition1 := "nios_dhcp_ipv6dhcpoptiondefinition.test2"
-	optionDefinition2 := "nios_dhcp_ipv6dhcpoptiondefinition.test3"
+	optionDefinition1 := "nios_dhcp_ipv6optiondefinition.test2"
+	optionDefinition2 := "nios_dhcp_ipv6optiondefinition.test3"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -252,7 +252,7 @@ func testAccCheckIpv6dhcpoptionspaceDisappears(ctx context.Context, v *dhcp.Ipv6
 
 func testAccIpv6dhcpoptionspaceBasicConfig(enterpriseNumber, name string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6dhcpoptionspace" "test" {
+resource "nios_dhcp_ipv6optionspace" "test" {
     enterprise_number = %q
     name = %q
 }
@@ -261,7 +261,7 @@ resource "nios_dhcp_ipv6dhcpoptionspace" "test" {
 
 func testAccIpv6dhcpoptionspaceComment(enterpriseNumber string, name string, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6dhcpoptionspace" "test_comment" {
+resource "nios_dhcp_ipv6optionspace" "test_comment" {
     enterprise_number = %q
     name = %q
     comment = %q
@@ -271,7 +271,7 @@ resource "nios_dhcp_ipv6dhcpoptionspace" "test_comment" {
 
 func testAccIpv6dhcpoptionspaceEnterpriseNumber(enterpriseNumber string, name string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6dhcpoptionspace" "test_enterprise_number" {
+resource "nios_dhcp_ipv6optionspace" "test_enterprise_number" {
     enterprise_number = %q
     name = %q
 }
@@ -280,7 +280,7 @@ resource "nios_dhcp_ipv6dhcpoptionspace" "test_enterprise_number" {
 
 func testAccIpv6dhcpoptionspaceName(enterpriseNumber string, name string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6dhcpoptionspace" "test_name" {
+resource "nios_dhcp_ipv6optionspace" "test_name" {
     enterprise_number = %q
     name = %q
 }
@@ -289,7 +289,7 @@ resource "nios_dhcp_ipv6dhcpoptionspace" "test_name" {
 
 func testAccIpv6dhcpoptionspaceOptionDefinitions(enterpriseNumber string, optionSpace1 string, optionSpace2 string, name string) string {
 	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6dhcpoptionspace" "test_option_definitions" {
+resource "nios_dhcp_ipv6optionspace" "test_option_definitions" {
     enterprise_number = %q
     name = %q
     option_definitions = [
@@ -305,21 +305,21 @@ func testAccBaseWithIpv6DHCPOptionSpaceAndOptionDefinition(name1, enterpriseNumb
 	optionDefinition2 := acctest.RandomNameWithPrefix("option-definition")
 
 	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6dhcpoptionspace" "test1" {
+resource "nios_dhcp_ipv6optionspace" "test1" {
   name = %q
   enterprise_number = %q
 }
-resource "nios_dhcp_ipv6dhcpoptiondefinition" "test2" {
+resource "nios_dhcp_ipv6optiondefinition" "test2" {
   name = %q
   code = 1234
-  space = nios_dhcp_ipv6dhcpoptionspace.test1.name
+  space = nios_dhcp_ipv6optionspace.test1.name
   type = "string"
 }
 
-resource "nios_dhcp_ipv6dhcpoptiondefinition" "test3" {
+resource "nios_dhcp_ipv6optiondefinition" "test3" {
   name = %q
   code = 12345
-  space = nios_dhcp_ipv6dhcpoptionspace.test1.name
+  space = nios_dhcp_ipv6optionspace.test1.name
   type = "ip-address"
 }
 

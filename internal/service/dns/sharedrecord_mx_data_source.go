@@ -1,4 +1,4 @@
-package dhcp
+package dns
 
 import (
 	"context"
@@ -13,54 +13,59 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &Ipv6dhcpoptiondefinitionDataSource{}
+var _ datasource.DataSource = &SharedrecordMxDataSource{}
 
-func NewIpv6dhcpoptiondefinitionDataSource() datasource.DataSource {
-	return &Ipv6dhcpoptiondefinitionDataSource{}
+func NewSharedrecordMxDataSource() datasource.DataSource {
+	return &SharedrecordMxDataSource{}
 }
 
-// Ipv6dhcpoptiondefinitionDataSource defines the data source implementation.
-type Ipv6dhcpoptiondefinitionDataSource struct {
+// SharedrecordMxDataSource defines the data source implementation.
+type SharedrecordMxDataSource struct {
 	client *niosclient.APIClient
 }
 
-func (d *Ipv6dhcpoptiondefinitionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_ipv6optiondefinition"
+func (d *SharedrecordMxDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "dns_sharedrecord_mx"
 }
 
-type Ipv6dhcpoptiondefinitionModelWithFilter struct {
-	Filters    types.Map   `tfsdk:"filters"`
-	Result     types.List  `tfsdk:"result"`
-	MaxResults types.Int32 `tfsdk:"max_results"`
-	Paging     types.Int32 `tfsdk:"paging"`
+type SharedrecordMxModelWithFilter struct {
+	Filters        types.Map   `tfsdk:"filters"`
+	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
+	Result         types.List  `tfsdk:"result"`
+	MaxResults     types.Int32 `tfsdk:"max_results"`
+	Paging         types.Int32 `tfsdk:"paging"`
 }
 
-func (m *Ipv6dhcpoptiondefinitionModelWithFilter) FlattenResults(ctx context.Context, from []dhcp.Ipv6dhcpoptiondefinition, diags *diag.Diagnostics) {
+func (m *SharedrecordMxModelWithFilter) FlattenResults(ctx context.Context, from []dns.SharedrecordMx, diags *diag.Diagnostics) {
 	if len(from) == 0 {
 		return
 	}
-	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, Ipv6dhcpoptiondefinitionAttrTypes, diags, FlattenIpv6dhcpoptiondefinition)
+	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, SharedrecordMxAttrTypes, diags, FlattenSharedrecordMx)
 }
 
-func (d *Ipv6dhcpoptiondefinitionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *SharedrecordMxDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing IPv6 DHCP Option Definitions.",
+		MarkdownDescription: "Retrieves information about existing DNS Shared MX Records.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType: types.StringType,
 				Optional:    true,
 			},
+			"extattrfilters": schema.MapAttribute{
+				Description: "External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
+				ElementType: types.StringType,
+				Optional:    true,
+			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: utils.DataSourceAttributeMap(Ipv6dhcpoptiondefinitionResourceSchemaAttributes, &resp.Diagnostics),
+					Attributes: utils.DataSourceAttributeMap(SharedrecordMxResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
 			},
@@ -79,7 +84,7 @@ func (d *Ipv6dhcpoptiondefinitionDataSource) Schema(ctx context.Context, req dat
 	}
 }
 
-func (d *Ipv6dhcpoptiondefinitionDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SharedrecordMxDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -99,8 +104,8 @@ func (d *Ipv6dhcpoptiondefinitionDataSource) Configure(ctx context.Context, req 
 	d.client = client
 }
 
-func (d *Ipv6dhcpoptiondefinitionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data Ipv6dhcpoptiondefinitionModelWithFilter
+func (d *SharedrecordMxDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data SharedrecordMxModelWithFilter
 	pageCount := 0
 
 	// Read Terraform prior state data into the model
@@ -111,7 +116,7 @@ func (d *Ipv6dhcpoptiondefinitionDataSource) Read(ctx context.Context, req datas
 	}
 
 	allResults, err := utils.ReadWithPages(
-		func(pageID string, maxResults int32) ([]dhcp.Ipv6dhcpoptiondefinition, string, error) {
+		func(pageID string, maxResults int32) ([]dns.SharedrecordMx, string, error) {
 
 			if !data.MaxResults.IsNull() {
 				maxResults = data.MaxResults.ValueInt32()
@@ -124,12 +129,13 @@ func (d *Ipv6dhcpoptiondefinitionDataSource) Read(ctx context.Context, req datas
 			//Increment the page count
 			pageCount++
 
-			request := d.client.DHCPAPI.
-				Ipv6dhcpoptiondefinitionAPI.
+			request := d.client.DNSAPI.
+				SharedrecordMxAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
+				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForIpv6dhcpoptiondefinition).
+				ReturnFieldsPlus(readableAttributesForSharedrecordMx).
 				Paging(paging).
 				MaxResults(maxResults)
 
@@ -141,15 +147,15 @@ func (d *Ipv6dhcpoptiondefinitionDataSource) Read(ctx context.Context, req datas
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6dhcpoptiondefinition by filter, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SharedrecordMx by extattrs, got error: %s", err))
 				return nil, "", err
 			}
 
-			res := apiRes.ListIpv6dhcpoptiondefinitionResponseObject.GetResult()
+			res := apiRes.ListSharedrecordMxResponseObject.GetResult()
 			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
 
 			// Check for next page ID in additional properties
-			additionalProperties := apiRes.ListIpv6dhcpoptiondefinitionResponseObject.AdditionalProperties
+			additionalProperties := apiRes.ListSharedrecordMxResponseObject.AdditionalProperties
 			var nextPageID string
 			npId, ok := additionalProperties["next_page_id"]
 			if ok {
@@ -164,7 +170,7 @@ func (d *Ipv6dhcpoptiondefinitionDataSource) Read(ctx context.Context, req datas
 	)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6dhcpoptiondefinition, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read SharedrecordMx, got error: %s", err))
 		return
 	}
 	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
