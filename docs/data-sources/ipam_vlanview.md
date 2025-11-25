@@ -20,7 +20,7 @@ data "nios_ipam_vlanview" "get_ipam_vlanview_using_filters" {
   }
 }
 // Retrieve specific IPAM Vlan Views using Extensible Attributes
-data "nios_" "get_ipam_vlanview_using_extensible_attributes" {
+data "nios_ipam_vlanview" "get_ipam_vlanview_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }
