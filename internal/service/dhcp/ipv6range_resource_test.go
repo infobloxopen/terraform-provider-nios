@@ -17,6 +17,13 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+/*
+	TODO: grid setup to run test cases
+	Cisco ISE settings
+	Grid Members - infoblox.localdomain, infoblox.member1
+	filteroption - example-ipv6-option-filter-1 , example-ipv6-option-filter-2
+*/
+
 var readableAttributesForIpv6range = "address_type,cloud_info,comment,disable,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_member,enable_discovery,end_addr,endpoint_sources,exclude,extattrs,ipv6_end_prefix,ipv6_prefix_bits,ipv6_start_prefix,logic_filter_rules,member,name,network,network_view,option_filter_rules,port_control_blackout_setting,recycle_leases,same_port_control_discovery_blackout,server_association_type,start_addr,subscribe_settings,use_blackout_setting,use_discovery_basic_polling_settings,use_enable_discovery,use_logic_filter_rules,use_recycle_leases,use_subscribe_settings"
 
 func TestAccIpv6rangeResource_basic(t *testing.T) {
