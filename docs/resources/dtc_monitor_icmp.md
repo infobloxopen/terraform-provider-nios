@@ -14,12 +14,12 @@ Manages a DTC Monitor ICMP
 
 ```terraform
 // Create a DTC monitor icmp with Basic Fields 
-resource "nios_dtc_monitor_icmp" "example" {
+resource "nios_dtc_monitor_icmp" "dtc_monitor_icmp_basic_fields" {
   name = "example_icmp_monitor"
 }
 
 // Create a DTC monitor icmp with Additional Fields
-resource "nios_dtc_monitor_icmp" "example2" {
+resource "nios_dtc_monitor_icmp" "dtc_monitor_icmp_additional_fields" {
   name    = "example_icmp_monitor2"
   comment = "DTC ICMP monitor creation"
   extattrs = {
