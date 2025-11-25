@@ -132,6 +132,7 @@ var RecordRpzAResourceSchemaAttributes = map[string]schema.Attribute{
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
+		Default: stringdefault.StaticString("default"),
 	},
 	"zone": schema.StringAttribute{
 		Computed:            true,

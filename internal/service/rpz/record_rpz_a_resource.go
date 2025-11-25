@@ -75,6 +75,7 @@ func (r *RecordRpzAResource) Create(ctx context.Context, req resource.CreateRequ
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -260,6 +261,7 @@ func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequ
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
