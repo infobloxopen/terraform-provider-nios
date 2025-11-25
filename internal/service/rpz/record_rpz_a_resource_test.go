@@ -21,7 +21,8 @@ var readableAttributesForRecordRpzA = "comment,disable,extattrs,ipv4addr,name,rp
 func TestAccRecordRpzAResource_basic(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -29,12 +30,12 @@ func TestAccRecordRpzAResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzABasicConfig(name, "10.10.0.1", "rpz.example.com"),
+				Config: testAccRecordRpzABasicConfig(name, "10.10.0.1", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.10.0.1"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "rp_zone", "rpz.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "rp_zone", rpZone),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -49,7 +50,8 @@ func TestAccRecordRpzAResource_basic(t *testing.T) {
 func TestAccRecordRpzAResource_disappears(t *testing.T) {
 	resourceName := "nios_rpz_record_a.test"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -57,7 +59,7 @@ func TestAccRecordRpzAResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzADestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzABasicConfig(name, "10.10.0.1", "rpz.example.com"),
+				Config: testAccRecordRpzABasicConfig(name, "10.10.0.1", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					testAccCheckRecordRpzADisappears(context.Background(), &v),
@@ -71,7 +73,8 @@ func TestAccRecordRpzAResource_disappears(t *testing.T) {
 func TestAccRecordRpzAResource_Comment(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_comment"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 	comment1 := "This is a new rpz a record"
 	comment2 := "This is a updated rpz a record"
 
@@ -81,7 +84,7 @@ func TestAccRecordRpzAResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzAComment(name, "10.10.0.1", "rpz.example.com", comment1),
+				Config: testAccRecordRpzAComment(name, "10.10.0.1", rpZone, comment1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", comment1),
@@ -89,7 +92,7 @@ func TestAccRecordRpzAResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzAComment(name, "10.10.0.1", "rpz.example.com", comment2),
+				Config: testAccRecordRpzAComment(name, "10.10.0.1", rpZone, comment2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", comment2),
@@ -103,7 +106,8 @@ func TestAccRecordRpzAResource_Comment(t *testing.T) {
 func TestAccRecordRpzAResource_Disable(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_disable"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -111,7 +115,7 @@ func TestAccRecordRpzAResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzADisable(name, "10.10.0.1", "rpz.example.com", "false"),
+				Config: testAccRecordRpzADisable(name, "10.10.0.1", rpZone, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -119,7 +123,7 @@ func TestAccRecordRpzAResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzADisable(name, "10.10.0.1", "rpz.example.com", "true"),
+				Config: testAccRecordRpzADisable(name, "10.10.0.1", rpZone, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -133,7 +137,8 @@ func TestAccRecordRpzAResource_Disable(t *testing.T) {
 func TestAccRecordRpzAResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_extattrs"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -143,7 +148,7 @@ func TestAccRecordRpzAResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzAExtAttrs(name, "10.10.0.1", "rpz.example.com", map[string]string{
+				Config: testAccRecordRpzAExtAttrs(name, "10.10.0.1", rpZone, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -153,7 +158,7 @@ func TestAccRecordRpzAResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzAExtAttrs(name, "10.10.0.1", "rpz.example.com", map[string]string{
+				Config: testAccRecordRpzAExtAttrs(name, "10.10.0.1", rpZone, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -169,7 +174,8 @@ func TestAccRecordRpzAResource_ExtAttrs(t *testing.T) {
 func TestAccRecordRpzAResource_Ipv4addr(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_ipv4addr"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -177,7 +183,7 @@ func TestAccRecordRpzAResource_Ipv4addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzAIpv4addr(name, "10.10.0.1", "rpz.example.com"),
+				Config: testAccRecordRpzAIpv4addr(name, "10.10.0.1", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.10.0.1"),
@@ -185,7 +191,7 @@ func TestAccRecordRpzAResource_Ipv4addr(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzAIpv4addr(name, "10.10.0.2", "rpz.example.com"),
+				Config: testAccRecordRpzAIpv4addr(name, "10.10.0.2", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", "10.10.0.2"),
@@ -199,8 +205,9 @@ func TestAccRecordRpzAResource_Ipv4addr(t *testing.T) {
 func TestAccRecordRpzAResource_Name(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_name"
 	var v rpz.RecordRpzA
-	name1 := acctest.RandomName() + ".rpz.example.com"
-	name2 := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name1 := acctest.RandomName() + "." + rpZone
+	name2 := acctest.RandomName() + "." + rpZone
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -208,7 +215,7 @@ func TestAccRecordRpzAResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzAName(name1, "10.10.0.1", "rpz.example.com"),
+				Config: testAccRecordRpzAName(name1, "10.10.0.1", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name1),
@@ -216,7 +223,7 @@ func TestAccRecordRpzAResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzAName(name2, "10.10.0.1", "rpz.example.com"),
+				Config: testAccRecordRpzAName(name2, "10.10.0.1", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name2),
@@ -230,8 +237,8 @@ func TestAccRecordRpzAResource_Name(t *testing.T) {
 func TestAccRecordRpzAResource_RpZone(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_rp_zone"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
-	rpZone := "rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -256,7 +263,8 @@ func TestAccRecordRpzAResource_RpZone(t *testing.T) {
 func TestAccRecordRpzAResource_Ttl(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_ttl"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -264,7 +272,7 @@ func TestAccRecordRpzAResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzATtl(name, "10.10.0.1", "rpz.example.com", "true", 10),
+				Config: testAccRecordRpzATtl(name, "10.10.0.1", rpZone, "true", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
@@ -272,7 +280,7 @@ func TestAccRecordRpzAResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzATtl(name, "10.10.0.1", "rpz.example.com", "true", 0),
+				Config: testAccRecordRpzATtl(name, "10.10.0.1", rpZone, "true", 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "0"),
@@ -286,7 +294,8 @@ func TestAccRecordRpzAResource_Ttl(t *testing.T) {
 func TestAccRecordRpzAResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_use_ttl"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -294,7 +303,7 @@ func TestAccRecordRpzAResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzAUseTtl(name, "10.10.0.1", "rpz.example.com", "true", 10),
+				Config: testAccRecordRpzAUseTtl(name, "10.10.0.1", rpZone, "true", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
@@ -302,7 +311,7 @@ func TestAccRecordRpzAResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzAUseTtl(name, "10.10.0.1", "rpz.example.com", "false", 10),
+				Config: testAccRecordRpzAUseTtl(name, "10.10.0.1", rpZone, "false", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -316,8 +325,9 @@ func TestAccRecordRpzAResource_UseTtl(t *testing.T) {
 func TestAccRecordRpzAResource_View(t *testing.T) {
 	var resourceName = "nios_rpz_record_a.test_view"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
-	view := "custom_view_1"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
+	view := "custom_view"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -325,7 +335,7 @@ func TestAccRecordRpzAResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzAView(name, "10.10.0.1", "rpz.example.com", view),
+				Config: testAccRecordRpzAView(name, "10.10.0.1", rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", view),
@@ -405,7 +415,7 @@ resource "nios_rpz_record_a" "test" {
 }
 `, name, ipV4Addr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzAComment(name, ipV4Addr, rpZone, comment string) string {
@@ -418,7 +428,7 @@ resource "nios_rpz_record_a" "test_comment" {
 }
 `, name, ipV4Addr, comment)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzADisable(name, ipV4Addr, rpZone, disable string) string {
@@ -431,7 +441,7 @@ resource "nios_rpz_record_a" "test_disable" {
 }
 `, name, ipV4Addr, disable)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzAExtAttrs(name, ipV4Addr, rpZone string, extAttrs map[string]string) string {
@@ -451,7 +461,7 @@ resource "nios_rpz_record_a" "test_extattrs" {
 }
 `, name, ipV4Addr, extattrsStr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzAIpv4addr(name, ipV4Addr, rpZone string) string {
@@ -463,7 +473,7 @@ resource "nios_rpz_record_a" "test_ipv4addr" {
 }
 `, name, ipV4Addr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzAName(name, ipV4Addr, rpZone string) string {
@@ -475,7 +485,7 @@ resource "nios_rpz_record_a" "test_name" {
 }
 `, name, ipV4Addr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzARpZone(name, ipV4Addr, rpZone string) string {
@@ -487,7 +497,7 @@ resource "nios_rpz_record_a" "test_rp_zone" {
 }
 `, name, ipV4Addr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzATtl(name, ipV4Addr, rpZone string, use_ttl string, ttl int32) string {
@@ -501,7 +511,7 @@ resource "nios_rpz_record_a" "test_ttl" {
 }
 `, name, ipV4Addr, ttl, use_ttl)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzAUseTtl(name, ipV4Addr, rpZone string, use_ttl string, ttl int32) string {
@@ -515,7 +525,7 @@ resource "nios_rpz_record_a" "test_use_ttl" {
 }
 `, name, ipV4Addr, ttl, use_ttl)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzAView(name, ipV4Addr, rpZone, view string) string {
@@ -528,13 +538,17 @@ resource "nios_rpz_record_a" "test_view" {
 }
 `, name, ipV4Addr, view)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, view), config}, "")
 }
 
-func testAccBaseWithZone(zoneFqdn string) string {
+func testAccBaseWithZone(zoneFqdn, view string) string {
+	if view == "" {
+		view = "default"
+	}
 	return fmt.Sprintf(`
 resource "nios_dns_zone_rp" "test" {
     fqdn = %q
+	view = %q
 }
-`, zoneFqdn)
+`, zoneFqdn, view)
 }

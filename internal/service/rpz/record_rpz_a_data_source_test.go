@@ -16,7 +16,8 @@ func TestAccRecordRpzADataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_rpz_record_a.test"
 	resourceName := "nios_rpz_record_a.test"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -24,7 +25,7 @@ func TestAccRecordRpzADataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzADestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzADataSourceConfigFilters(name, "10.10.0.1", "rpz.example.com"),
+				Config: testAccRecordRpzADataSourceConfigFilters(name, "10.10.0.1", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
@@ -39,7 +40,8 @@ func TestAccRecordRpzADataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_rpz_record_a.test"
 	resourceName := "nios_rpz_record_a.test"
 	var v rpz.RecordRpzA
-	name := acctest.RandomName() + ".rpz.example.com"
+	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomName() + "." + rpZone
 	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
@@ -48,7 +50,7 @@ func TestAccRecordRpzADataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzADestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzADataSourceConfigExtAttrFilters(name, "10.10.0.1", "rpz.example.com", extAttrValue),
+				Config: testAccRecordRpzADataSourceConfigExtAttrFilters(name, "10.10.0.1", rpZone, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordRpzAExists(context.Background(), resourceName, &v),
@@ -92,7 +94,7 @@ data "nios_rpz_record_a" "test" {
 }
 `, name, ipV4Addr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzADataSourceConfigExtAttrFilters(name, ipV4Addr, rpZone, extAttrsValue string) string {
@@ -113,5 +115,5 @@ data "nios_rpz_record_a" "test" {
 }
 `, name, ipV4Addr, extAttrsValue)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
