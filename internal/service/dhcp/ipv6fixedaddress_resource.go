@@ -353,3 +353,182 @@ func (r *Ipv6fixedaddressResource) ImportState(ctx context.Context, req resource
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
+
+func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data Ipv6fixedaddressModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if options are defined
+	if !data.Options.IsNull() && !data.Options.IsUnknown() {
+		// Special DHCP option names that require use_option to be set
+		specialOptions := map[string]bool{
+			"routers":                  true,
+			"router-templates":         true,
+			"domain-name-servers":      true,
+			"domain-name":              true,
+			"broadcast-address":        true,
+			"broadcast-address-offset": true,
+			"dhcp-lease-time":          true,
+			"dhcp6.name-servers":       true,
+		}
+
+		specialOptionsNum := map[int64]bool{
+			3:  true,
+			6:  true,
+			15: true,
+			28: true,
+			51: true,
+			23: true,
+		}
+
+		var options []Ipv6fixedaddressOptionsModel
+		diags := data.Options.ElementsAs(ctx, &options, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for i, option := range options {
+			isSpecialOption := false
+			optionName := ""
+			if option.Value.IsNull() || option.Value.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("value"),
+					"Invalid configuration for DHCP Option",
+					"The 'value' attribute is a required field and must be set for all DHCP Options.",
+				)
+			}
+			if !option.Name.IsNull() && !option.Name.IsUnknown() {
+				optionName = option.Name.ValueString()
+				isSpecialOption = specialOptions[optionName]
+			} else if !option.Num.IsNull() && !option.Num.IsUnknown() {
+				optionNum := option.Num.ValueInt64()
+				isSpecialOption = specialOptionsNum[optionNum]
+				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("name"),
+					"Invalid configuration for DHCP Option",
+					"Either the 'name' or 'num' attribute must be set for all DHCP Options. "+
+						"Missing both attributes for 'option' at index "+fmt.Sprint(i)+".",
+				)
+				continue
+			}
+
+			if option.Value.ValueString() == "" {
+				if !isSpecialOption {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
+					)
+				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
+					)
+				}
+			}
+
+			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("use_option"),
+					"Invalid configuration",
+					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Option '%s'. "+
+						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
+						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
+						optionName),
+				)
+			}
+		}
+	}
+
+	// Check if allow_telnet is true, then cli_credentials must contain at least one element with credentials_type set to "TELNET"
+	if !data.AllowTelnet.IsUnknown() && !data.AllowTelnet.IsNull() && data.AllowTelnet.ValueBool() {
+		isTelnet := false
+		isSSH := false
+		if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
+			// Iterate through cli_credentials to check if an element has credentials_type set to "TELNET"
+			var cliCredentials []Ipv6fixedaddressCliCredentialsModel
+			diags := data.CliCredentials.ElementsAs(ctx, &cliCredentials, false)
+			resp.Diagnostics.Append(diags...)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+
+			for _, credentials := range cliCredentials {
+				if credentials.CredentialType.IsUnknown() || credentials.CredentialType.IsNull() {
+					continue
+				}
+				credentialsType := credentials.CredentialType.ValueString()
+				if credentialsType == "SSH" {
+					isSSH = true
+				}
+				if credentialsType == "TELNET" {
+					isTelnet = true
+				}
+			}
+		}
+		if !isSSH {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("allow_telnet"),
+				"Invalid configuration",
+				"The 'cli_credentials' must contain credentials with 'credentials_type' set to 'SSH'.",
+			)
+		}
+		if !isTelnet {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("allow_telnet"),
+				"Invalid configuration",
+				"The 'allow_telnet' attribute must be set to false when 'cli_credentials' is not set or does not contain any credentials with 'credentials_type' set to 'TELNET'.",
+			)
+		}
+	}
+
+	// Check if credentials are defined, then the corresponding use_cli_credentials attribute must be set to true
+	if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
+		if !data.UseCliCredentials.IsUnknown() && !data.UseCliCredentials.IsNull() && !data.UseCliCredentials.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("cli_credentials"),
+				"Invalid configuration",
+				"The 'cli_credentials' attribute is set, but 'use_cli_credentials' is false. "+
+					"Please set 'use_cli_credentials' to true to use CLI credentials.",
+			)
+		}
+	}
+	// Check if SNMP , then the corresponding use_snmp_credential attribute must be set to true
+	if !data.SnmpCredential.IsUnknown() && !data.SnmpCredential.IsNull() {
+		if !data.UseSnmpCredential.IsUnknown() && !data.UseSnmpCredential.IsNull() && !data.UseSnmpCredential.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp_credential"),
+				"Invalid configuration",
+				"The 'snmp_credential' attribute is set, but 'use_snmp_credential' is false. "+
+					"Please set 'use_snmp_credential' to true to use SNMP Credentials.",
+			)
+		}
+	}
+
+	// Check if SNMP3 credentials are set , then the corresponding use_snmp3_credential and use_cli_credentials attribute must be set to true
+	if !data.Snmp3Credential.IsUnknown() && !data.Snmp3Credential.IsNull() {
+		if !data.UseSnmp3Credential.IsUnknown() && !data.UseSnmp3Credential.IsNull() && !data.UseSnmp3Credential.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp3_credential"),
+				"Invalid configuration",
+				"The 'snmp3_credential' attribute is set, but 'use_snmp3_credential' is false. "+
+					"Please set 'use_snmp3_credential' to true to use SNMP3 Credentials.",
+			)
+		}
+		if !data.UseCliCredentials.IsUnknown() && !data.UseCliCredentials.IsNull() && !data.UseCliCredentials.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("snmp3_credential"),
+				"Invalid configuration",
+				"The 'snmp3_credential' attribute is set, but 'use_cli_credentials' is false. "+
+					"Please set 'use_cli_credentials' to true to use SNMP3 Credentials.",
+			)
+		}
+	}
+}

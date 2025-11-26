@@ -371,9 +371,10 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: Ipv6fixedaddressOptionsResourceSchemaAttributes,
 		},
 		Computed: true,
+		Optional: true,
 		Default: listdefault.StaticValue(
 			types.ListValueMust(
-				types.ObjectType{AttrTypes: FixedaddressOptionsAttrTypes},
+				types.ObjectType{AttrTypes: Ipv6fixedaddressOptionsAttrTypes},
 				[]attr.Value{},
 			),
 		),

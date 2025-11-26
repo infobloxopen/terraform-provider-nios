@@ -2,6 +2,9 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -28,15 +31,24 @@ var Ipv6fixedaddressSnmpCredentialAttrTypes = map[string]attr.Type{
 
 var Ipv6fixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attribute{
 	"community_string": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The public community string.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Comments for the SNMPv1 and SNMPv2 users.",
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the SNMPv1 and SNMPv2 credential.",
 	},
 }

@@ -2,6 +2,9 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -36,31 +39,51 @@ var Ipv6fixedaddressSnmp3CredentialAttrTypes = map[string]attr.Type{
 
 var Ipv6fixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attribute{
 	"user": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The SNMPv3 user name.",
 	},
 	"authentication_protocol": schema.StringAttribute{
-		Optional:            true,
+		Required: true, Validators: []validator.String{
+			stringvalidator.OneOf("MD5", "NONE", "SHA", "SHA-224", "SHA-256", "SHA-384", "SHA-512"),
+		},
 		MarkdownDescription: "Authentication protocol for the SNMPv3 user.",
 	},
 	"authentication_password": schema.StringAttribute{
-		Optional:            true,
+		Optional:  true,
+		Computed:  true,
+		Sensitive: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Authentication password for the SNMPv3 user.",
 	},
 	"privacy_protocol": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("3DES", "AES", "AES-192", "AES-192C", "AES-256", "AES-256C", "DES", "NONE"),
+		},
 		MarkdownDescription: "Privacy protocol for the SNMPv3 user.",
 	},
 	"privacy_password": schema.StringAttribute{
-		Optional:            true,
+		Optional:  true,
+		Computed:  true,
+		Sensitive: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Comments for the SNMPv3 user.",
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Group for the SNMPv3 credential.",
 	},
 }

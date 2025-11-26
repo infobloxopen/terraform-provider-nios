@@ -18,6 +18,12 @@ import (
 
 var readableAttributesForIpv6fixedaddress = "address_type,allow_telnet,cli_credentials,cloud_info,comment,device_description,device_location,device_type,device_vendor,disable,disable_discovery,discover_now_status,discovered_data,domain_name,domain_name_servers,duid,extattrs,ipv6addr,ipv6prefix,ipv6prefix_bits,logic_filter_rules,mac_address,match_client,ms_ad_user_data,name,network,network_view,options,preferred_lifetime,reserved_interface,snmp3_credential,snmp_credential,use_cli_credentials,use_domain_name,use_domain_name_servers,use_logic_filter_rules,use_options,use_preferred_lifetime,use_snmp3_credential,use_snmp_credential,use_valid_lifetime,valid_lifetime"
 
+// TODO: Add tests:
+// The following require additional resource/data source objects to be supported.
+// - Logic Filter Rules
+// - Reserved Interface
+// - IPV6 Fixed Address Template
+
 func TestAccIpv6fixedaddressResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test"
 	var v dhcp.Ipv6fixedaddress
@@ -851,38 +857,6 @@ func TestAccIpv6fixedaddressResource_MatchClient(t *testing.T) {
 	})
 }
 
-//func TestAccIpv6fixedaddressResource_MsAdUserData(t *testing.T) {
-//	var resourceName = "nios_dhcp_ipv6fixedaddress.test_ms_ad_user_data"
-//	var v dhcp.Ipv6fixedaddress
-//	ipv6Network := "2001:db8:abcd:1231::/64"
-//	ipv6addr := "2001:db8:abcd:1231::1"
-//	networkView := acctest.RandomNameWithPrefix("network-view")
-//	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
-//	resource.ParallelTest(t, resource.TestCase{
-//		PreCheck:                 func() { acctest.PreCheck(t) },
-//		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-//		Steps: []resource.TestStep{
-//			// Create and Read
-//			{
-//				Config: testAccIpv6fixedaddressMsAdUserData("MS_AD_USER_DATA_REPLACE_ME"),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-//					resource.TestCheckResourceAttr(resourceName, "ms_ad_user_data", "MS_AD_USER_DATA_REPLACE_ME"),
-//				),
-//			},
-//			// Update and Read
-//			{
-//				Config: testAccIpv6fixedaddressMsAdUserData("MS_AD_USER_DATA_UPDATE_REPLACE_ME"),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-//					resource.TestCheckResourceAttr(resourceName, "ms_ad_user_data", "MS_AD_USER_DATA_UPDATE_REPLACE_ME"),
-//				),
-//			},
-//			// Delete testing automatically occurs in TestCase
-//		},
-//	})
-//}
-
 func TestAccIpv6fixedaddressResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_name"
 	var v dhcp.Ipv6fixedaddress
@@ -1027,18 +1001,18 @@ func TestAccIpv6fixedaddressResource_PreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6fixedaddressPreferredLifetime(ipv6addr, duid, networkView, ipv6Network, 36100),
+				Config: testAccIpv6fixedaddressPreferredLifetime(ipv6addr, duid, networkView, ipv6Network, 6200),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "36100"),
+					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "6200"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6fixedaddressPreferredLifetime(ipv6addr, duid, networkView, ipv6Network, 48000),
+				Config: testAccIpv6fixedaddressPreferredLifetime(ipv6addr, duid, networkView, ipv6Network, 4800),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "48000"),
+					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "4800"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1265,13 +1239,14 @@ func TestAccIpv6fixedaddressResource_UseDomainName(t *testing.T) {
 	ipv6addr := "2001:db8:abcd:1231::1"
 	networkView := acctest.RandomNameWithPrefix("network-view")
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
+	domainName := acctest.RandomName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6fixedaddressUseDomainName(ipv6addr, duid, networkView, ipv6Network, true),
+				Config: testAccIpv6fixedaddressUseDomainName(ipv6addr, duid, networkView, ipv6Network, true, domainName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_domain_name", "true"),
@@ -1279,7 +1254,7 @@ func TestAccIpv6fixedaddressResource_UseDomainName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6fixedaddressUseDomainName(ipv6addr, duid, networkView, ipv6Network, false),
+				Config: testAccIpv6fixedaddressUseDomainName(ipv6addr, duid, networkView, ipv6Network, false, domainName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_domain_name", "false"),
@@ -1977,6 +1952,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_preferred_lifetime" {
     ipv6addr = %q
     duid = %q
     preferred_lifetime = %d
+    use_preferred_lifetime = true
     network = nios_ipam_ipv6network.test_ipv6_network.network
     network_view = nios_ipam_network_view.parent_network_view.name
 }
@@ -2077,16 +2053,17 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_cli_credentials" {
 	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
 }
 
-func testAccIpv6fixedaddressUseDomainName(ipv6addr, duid, networkView, ipv6Network string, useDomainName bool) string {
+func testAccIpv6fixedaddressUseDomainName(ipv6addr, duid, networkView, ipv6Network string, useDomainName bool, domainName string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddress" "test_use_domain_name" {
     ipv6addr = %q
     duid = %q
     use_domain_name = %t
+    domain_name = %q
     network = nios_ipam_ipv6network.test_ipv6_network.network
     network_view = nios_ipam_network_view.parent_network_view.name
 }
-`, ipv6addr, duid, useDomainName)
+`, ipv6addr, duid, useDomainName, domainName)
 	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
 }
 
@@ -2187,6 +2164,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_valid_lifetime" {
     ipv6addr = %q
     duid = %q
     valid_lifetime = %d
+    use_valid_lifetime = true
     network = nios_ipam_ipv6network.test_ipv6_network.network
     network_view = nios_ipam_network_view.parent_network_view.name
 }

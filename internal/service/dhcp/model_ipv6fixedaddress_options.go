@@ -2,6 +2,8 @@ package dhcp
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -32,23 +34,37 @@ var Ipv6fixedaddressOptionsAttrTypes = map[string]attr.Type{
 
 var Ipv6fixedaddressOptionsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Name of the DHCP option.",
 	},
 	"num": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The code of the DHCP option.",
 	},
 	"vendor_class": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The name of the space this DHCP option is associated to.",
 	},
 	"value": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Value of the DHCP option",
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers",
 	},
 }
