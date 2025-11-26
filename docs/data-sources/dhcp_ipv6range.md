@@ -18,7 +18,6 @@ data "nios_dhcp_ipv6range" "get_ipv6range_with_filter" {
   filters = {
     start_addr = "15::10"
     end_addr   = "15::20"
-    network    = "15::/64"
   }
 }
 
