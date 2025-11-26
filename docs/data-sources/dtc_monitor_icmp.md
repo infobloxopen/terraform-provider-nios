@@ -3,25 +3,25 @@
 page_title: "nios_dtc_monitor_icmp Data Source - nios"
 subcategory: "DTC"
 description: |-
-  Retrieves information about existing DTC Monitor ICMP.
+  Retrieves information about existing ICMP DTC Monitors.
 ---
 
 # nios_dtc_monitor_icmp (Data Source)
 
-Retrieves information about existing DTC Monitor ICMP.
+Retrieves information about existing ICMP DTC Monitors.
 
 ## Example Usage
 
 ```terraform
 // Retrieve a specific DTC ICMP Monitor by filters
-data "nios_dtc_monitor_icmp" "get_monitor_icmp_with_filter" {
+data "nios_dtc_monitor_icmp" "get_monitor_icmp_with_filters" {
   filters = {
     name = "example_monitor_icmp"
   }
 }
 
 // Retrieve specific DTC ICMP Monitor using Extensible Attributes
-data "nios_dtc_monitor_icmp" "get_monitor_icmp_with_extattr_filter" {
+data "nios_dtc_monitor_icmp" "get_monitor_icmp_with_extattr_filters" {
   extattrfilters = {
     Site = "location-1"
   }
