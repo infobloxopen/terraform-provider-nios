@@ -30,13 +30,13 @@ func TestAccVlanrangeResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangeBasicConfig(15, vlanRange, 10, vlanView),
+				Config: testAccVlanrangeBasicConfig(71, vlanRange, 61, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "15"),
+					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "71"),
 					resource.TestCheckResourceAttr(resourceName, "name", vlanRange),
-					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "10"),
-					resource.TestCheckResourceAttrPair(resourceName, "vlan_view", "nios_ipam_vlanview.test", "ref"),
+					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "61"),
+					resource.TestCheckResourceAttrPair(resourceName, "vlan_view", "nios_ipam_vlanview."+vlanView, "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -56,7 +56,7 @@ func TestAccVlanrangeResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckVlanrangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVlanrangeBasicConfig(15, vlanRange, 10, vlanView),
+				Config: testAccVlanrangeBasicConfig(71, vlanRange, 61, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 					testAccCheckVlanrangeDisappears(context.Background(), &v),
@@ -79,7 +79,7 @@ func TestAccVlanrangeResource_Import(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangeBasicConfig(15, vlanRange, 10, vlanView),
+				Config: testAccVlanrangeBasicConfig(71, vlanRange, 61, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 				),
@@ -119,7 +119,7 @@ func TestAccVlanrangeResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangeComment(15, vlanRange, 10, vlanView, "Comment for the object"),
+				Config: testAccVlanrangeComment(71, vlanRange, 61, vlanView, "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -127,7 +127,7 @@ func TestAccVlanrangeResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVlanrangeComment(15, vlanRange, 10, vlanView, "Updated comment for the object"),
+				Config: testAccVlanrangeComment(71, vlanRange, 61, vlanView, "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -150,18 +150,18 @@ func TestAccVlanrangeResource_EndVlanId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangeEndVlanId(4094, vlanRange, 1, vlanView),
+				Config: testAccVlanrangeEndVlanId(99, vlanRange, 51, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "4094"),
+					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "99"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanrangeEndVlanId(1, vlanRange, 1, vlanView),
+				Config: testAccVlanrangeEndVlanId(51, vlanRange, 51, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "end_vlan_id", "51"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -182,7 +182,7 @@ func TestAccVlanrangeResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangeExtAttrs(15, vlanRange, 10, vlanView, map[string]string{
+				Config: testAccVlanrangeExtAttrs(71, vlanRange, 61, vlanView, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -192,7 +192,7 @@ func TestAccVlanrangeResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVlanrangeExtAttrs(15, vlanRange, 10, vlanView, map[string]string{
+				Config: testAccVlanrangeExtAttrs(71, vlanRange, 61, vlanView, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -218,7 +218,7 @@ func TestAccVlanrangeResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangeName(15, vlanRange, 10, vlanView),
+				Config: testAccVlanrangeName(71, vlanRange, 61, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", vlanRange),
@@ -226,7 +226,7 @@ func TestAccVlanrangeResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVlanrangeName(15, vlanRangeUpdated, 10, vlanView),
+				Config: testAccVlanrangeName(71, vlanRangeUpdated, 61, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", vlanRangeUpdated),
@@ -249,7 +249,7 @@ func TestAccVlanrangeResource_PreCreateVlan(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangePreCreateVlan(15, vlanRange, 10, vlanView, "true"),
+				Config: testAccVlanrangePreCreateVlan(71, vlanRange, 61, vlanView, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pre_create_vlan", "true"),
@@ -273,18 +273,18 @@ func TestAccVlanrangeResource_StartVlanId(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangeStartVlanId(15, vlanRange, 10, vlanView),
+				Config: testAccVlanrangeStartVlanId(71, vlanRange, 61, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "10"),
+					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "61"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVlanrangeStartVlanId(15, vlanRange, 1, vlanView),
+				Config: testAccVlanrangeStartVlanId(71, vlanRange, 51, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "start_vlan_id", "51"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -303,7 +303,7 @@ func TestAccVlanrangeResource_VlanNamePrefix(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVlanrangeVlanNamePrefix(15, vlanRange, 10, vlanView, "prefixCaseInsensitive"),
+				Config: testAccVlanrangeVlanNamePrefix(71, vlanRange, 61, vlanView, "prefixCaseInsensitive"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "vlan_name_prefix", "prefixCaseInsensitive"),
@@ -418,43 +418,16 @@ func testAccVlanrangeImportStateIdFunc(resourceName string) resource.ImportState
 	}
 }
 
-// TODO : Remove these helpers as VLAN files is merged
-func testAccBaseWithVlanView(vlanViewName string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_vlanview" "test" {
-  start_vlan_id = 1
-  end_vlan_id   = 4094
-  name          = %[1]q
-}
-`, vlanViewName)
-}
-
-func testAccBaseWithTwoVlanViews(vlanViewName, vlanViewName2 string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_vlanview" "one" {
-  start_vlan_id = 50
-  end_vlan_id   = 100
-  name          = %q
-}
-
-resource "nios_ipam_vlanview" "two" {
-  start_vlan_id = 51
-  end_vlan_id   = 101
-  name          = %q
-}
-`, vlanViewName, vlanViewName2)
-}
-
 func testAccVlanrangeBasicConfig(endVlanId int, name string, startVlanId int, vlanView string) string {
 	config := fmt.Sprintf(`
 resource "nios_ipam_vlanrange" "test" {
     end_vlan_id = %d
     name = %q
     start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
+    vlan_view = nios_ipam_vlanview.%s.ref
 }
-`, endVlanId, name, startVlanId)
-	return strings.Join([]string{testAccBaseWithVlanView(acctest.RandomNameWithPrefix("vlan-view")), config}, "")
+`, endVlanId, name, startVlanId, vlanView)
+	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
 func testAccVlanrangeComment(endVlanId int, name string, startVlanId int, vlanView string, comment string) string {
@@ -463,10 +436,10 @@ resource "nios_ipam_vlanrange" "test_comment" {
     end_vlan_id = %d
     name = %q
     start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
+    vlan_view = nios_ipam_vlanview.%s.ref
     comment = %q
 }
-`, endVlanId, name, startVlanId, comment)
+`, endVlanId, name, startVlanId, vlanView, comment)
 	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
@@ -476,9 +449,9 @@ resource "nios_ipam_vlanrange" "test_end_vlan_id" {
     end_vlan_id = %d
     name = %q
     start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
+    vlan_view = nios_ipam_vlanview.%s.ref
 }
-`, endVlanId, name, startVlanId)
+`, endVlanId, name, startVlanId, vlanView)
 	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
@@ -493,10 +466,10 @@ resource "nios_ipam_vlanrange" "test_extattrs" {
     end_vlan_id = %d
     name = %q
     start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
+    vlan_view = nios_ipam_vlanview.%s.ref
     extattrs = %s
 }
-`, endVlanId, name, startVlanId, extAttrsStr)
+`, endVlanId, name, startVlanId, vlanView, extAttrsStr)
 	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
@@ -506,9 +479,9 @@ resource "nios_ipam_vlanrange" "test_name" {
     end_vlan_id = %d
     name = %q
     start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
+    vlan_view = nios_ipam_vlanview.%s.ref
 }
-`, endVlanId, name, startVlanId)
+`, endVlanId, name, startVlanId, vlanView)
 	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
@@ -518,10 +491,10 @@ resource "nios_ipam_vlanrange" "test_pre_create_vlan" {
     end_vlan_id = %d
     name = %q
     start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
+    vlan_view = nios_ipam_vlanview.%s.ref
     pre_create_vlan = %q
 }
-`, endVlanId, name, startVlanId, preCreateVlan)
+`, endVlanId, name, startVlanId, vlanView, preCreateVlan)
 	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
@@ -531,9 +504,9 @@ resource "nios_ipam_vlanrange" "test_start_vlan_id" {
     end_vlan_id = %d
     name = %q
     start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
+    vlan_view = nios_ipam_vlanview.%s.ref
 }
-`, endVlanId, name, startVlanId)
+`, endVlanId, name, startVlanId, vlanView)
 	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
@@ -543,11 +516,11 @@ resource "nios_ipam_vlanrange" "test_vlan_name_prefix" {
     end_vlan_id = %d
     name = %q
     start_vlan_id = %d
-    vlan_view = nios_ipam_vlanview.test.ref
+    vlan_view = nios_ipam_vlanview.%s.ref
     vlan_name_prefix = %q
 	pre_create_vlan = true
 }
-`, endVlanId, name, startVlanId, vlanNamePrefix)
+`, endVlanId, name, startVlanId, vlanView, vlanNamePrefix)
 	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 

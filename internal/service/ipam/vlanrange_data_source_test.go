@@ -26,7 +26,7 @@ func TestAccVlanrangeDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckVlanrangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVlanrangeDataSourceConfigFilters(15, vlanRange, 10, vlanView),
+				Config: testAccVlanrangeDataSourceConfigFilters(71, vlanRange, 61, vlanView),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
@@ -50,7 +50,7 @@ func TestAccVlanrangeDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckVlanrangeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVlanrangeDataSourceConfigExtAttrFilters(15, vlanRange, 10, vlanView, acctest.RandomName()),
+				Config: testAccVlanrangeDataSourceConfigExtAttrFilters(71, vlanRange, 61, vlanView, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
@@ -84,7 +84,7 @@ resource "nios_ipam_vlanrange" "test" {
   end_vlan_id = %d
   name = %q
   start_vlan_id = %d
-  vlan_view = nios_ipam_vlanview.test.ref
+  vlan_view = nios_ipam_vlanview.%s.ref
 }
 
 data "nios_ipam_vlanrange" "test" {
@@ -92,8 +92,8 @@ data "nios_ipam_vlanrange" "test" {
 	end_vlan_id = nios_ipam_vlanrange.test.end_vlan_id
   }
 }
-`, endVlanId, name, startVlanId)
-	return strings.Join([]string{testAccBaseWithVlanView(acctest.RandomNameWithPrefix("vlan-view")), config}, "")
+`, endVlanId, name, startVlanId, vlanView)
+	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }
 
 func testAccVlanrangeDataSourceConfigExtAttrFilters(endVlanId int, name string, startVlanId int, vlanView, extAttrsValue string) string {
@@ -102,7 +102,7 @@ resource "nios_ipam_vlanrange" "test" {
   end_vlan_id = %d
   name = %q
   start_vlan_id = %d
-  vlan_view = nios_ipam_vlanview.test.ref
+  vlan_view = nios_ipam_vlanview.%s.ref
   extattrs = {
     Site = %q
   } 
@@ -113,6 +113,6 @@ data "nios_ipam_vlanrange" "test" {
 	Site = nios_ipam_vlanrange.test.extattrs.Site
   }
 }
-`, endVlanId, name, startVlanId, extAttrsValue)
-	return strings.Join([]string{testAccBaseWithVlanView(acctest.RandomNameWithPrefix("vlan-view")), config}, "")
+`, endVlanId, name, startVlanId, vlanView, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithVlanView(vlanView), config}, "")
 }

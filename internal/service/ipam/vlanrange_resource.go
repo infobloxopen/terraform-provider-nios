@@ -323,6 +323,33 @@ func (r *VlanrangeResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 }
 
+func (r *VlanrangeResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data VlanrangeModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.VlanNamePrefix.IsUnknown() && !data.VlanNamePrefix.IsNull() {
+		if !data.PreCreateVlan.IsNull() && !data.PreCreateVlan.IsUnknown() && !data.PreCreateVlan.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Configuration Error",
+				"`vlan_name_prefix` can only be set when `pre_create_vlan` is set to true.",
+			)
+		}
+	}
+	if !data.StartVlanId.IsUnknown() && !data.StartVlanId.IsNull() &&
+		!data.EndVlanId.IsUnknown() && !data.EndVlanId.IsNull() {
+		if data.StartVlanId.ValueInt64() > data.EndVlanId.ValueInt64() {
+			resp.Diagnostics.AddError(
+				"Configuration Error",
+				"`start_vlan_id` must be less than or equal to `end_vlan_id`.",
+			)
+		}
+	}
+}
+
 func (r *VlanrangeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
