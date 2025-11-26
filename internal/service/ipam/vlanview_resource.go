@@ -333,10 +333,19 @@ func (r *VlanviewResource) ValidateConfig(ctx context.Context, req resource.Vali
 	}
 
 	if !data.VlanNamePrefix.IsUnknown() && !data.VlanNamePrefix.IsNull() {
-		if data.PreCreateVlan.IsNull() && !data.PreCreateVlan.IsUnknown() && !data.PreCreateVlan.ValueBool() {
+		if !data.PreCreateVlan.IsNull() && !data.PreCreateVlan.IsUnknown() && !data.PreCreateVlan.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Configuration Error",
 				"`vlan_name_prefix` can only be set when `pre_create_vlan` is set to true.",
+			)
+		}
+	}
+	if !data.StartVlanId.IsUnknown() && !data.StartVlanId.IsNull() &&
+		!data.EndVlanId.IsUnknown() && !data.EndVlanId.IsNull() {
+		if data.StartVlanId.ValueInt64() > data.EndVlanId.ValueInt64() {
+			resp.Diagnostics.AddError(
+				"Configuration Error",
+				"`start_vlan_id` must be less than or equal to `end_vlan_id`.",
 			)
 		}
 	}

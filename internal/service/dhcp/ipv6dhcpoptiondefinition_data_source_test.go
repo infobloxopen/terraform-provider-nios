@@ -14,8 +14,8 @@ import (
 )
 
 func TestAccIpv6dhcpoptiondefinitionDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_ipv6dhcpoptiondefinition.test"
-	resourceName := "nios_dhcp_ipv6dhcpoptiondefinition.test"
+	dataSourceName := "data.nios_dhcp_ipv6optiondefinition.test"
+	resourceName := "nios_dhcp_ipv6optiondefinition.test"
 	var v dhcp.Ipv6dhcpoptiondefinition
 	name := acctest.RandomNameWithPrefix("option-definition")
 	optionSpace := acctest.RandomNameWithPrefix("option-space")
@@ -51,18 +51,18 @@ func testAccCheckIpv6dhcpoptiondefinitionResourceAttrPair(resourceName, dataSour
 
 func testAccIpv6dhcpoptiondefinitionDataSourceConfigFilters(optionSpace, code, name, optionType string) string {
 	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6dhcpoptiondefinition" "test" {
+resource "nios_dhcp_ipv6optiondefinition" "test" {
 	code = %q
 	name = %q
 	type = %q
-	space = nios_dhcp_ipv6dhcpoptionspace.test.name
+	space = nios_dhcp_ipv6optionspace.test.name
 }
 
-data "nios_dhcp_ipv6dhcpoptiondefinition" "test" {
+data "nios_dhcp_ipv6optiondefinition" "test" {
   filters = {
-	code = nios_dhcp_ipv6dhcpoptiondefinition.test.code
-	name = nios_dhcp_ipv6dhcpoptiondefinition.test.name
-	type = nios_dhcp_ipv6dhcpoptiondefinition.test.type
+	code = nios_dhcp_ipv6optiondefinition.test.code
+	name = nios_dhcp_ipv6optiondefinition.test.name
+	type = nios_dhcp_ipv6optiondefinition.test.type
   }
 }
 `, code, name, optionType)

@@ -498,7 +498,7 @@ resource "nios_ipam_vlanview" "test_vlan_name_prefix" {
     name = %q
     start_vlan_id = %d
     vlan_name_prefix = %q
-	pre_create_vlan = true
+    pre_create_vlan = true
 }
 `, endVlanId, name, startVlanId, vlanNamePrefix)
 }
