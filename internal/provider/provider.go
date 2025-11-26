@@ -128,6 +128,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewIPAssociationResource,
 		dns.NewSharedrecordgroupResource,
 		dns.NewSharedrecordTxtResource,
+		dns.NewSharedrecordMxResource,
+		dns.NewSharedrecordSrvResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -137,10 +139,13 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewIpv6dhcpoptionspaceResource,
 		dhcp.NewIpv6dhcpoptiondefinitionResource,
 		dhcp.NewIpv6fixedaddresstemplateResource,
+		dhcp.NewDhcpoptionspaceResource,
+		dhcp.NewDhcpoptiondefinitionResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
+		dtc.NewDtcTopologyResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworkcontainerResource,
@@ -148,6 +153,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewIpv6networkResource,
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
+		ipam.NewVlanviewResource,
+		ipam.NewVlanResource,
 
 		cloud.NewAwsrte53taskgroupResource,
 		cloud.NewAwsuserResource,
@@ -213,6 +220,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordHostDataSource,
 		dns.NewSharedrecordgroupDataSource,
 		dns.NewSharedrecordTxtDataSource,
+		dns.NewSharedrecordMxDataSource,
+		dns.NewSharedrecordSrvDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -222,10 +231,13 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewIpv6dhcpoptionspaceDataSource,
 		dhcp.NewIpv6dhcpoptiondefinitionDataSource,
 		dhcp.NewIpv6fixedaddresstemplateDataSource,
+		dhcp.NewDhcpoptionspaceDataSource,
+		dhcp.NewDhcpoptiondefinitionDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+		dtc.NewDtcTopologyDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworkcontainerDataSource,
@@ -233,6 +245,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewIpv6networkDataSource,
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
+		ipam.NewVlanviewDataSource,
+		ipam.NewVlanDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
 		cloud.NewAwsuserDataSource,
