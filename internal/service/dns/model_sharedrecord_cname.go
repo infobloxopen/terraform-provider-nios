@@ -143,14 +143,13 @@ func (m *SharedrecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnos
 		return nil
 	}
 	to := &dns.SharedrecordCname{
-		Canonical:         flex.ExpandStringPointer(m.Canonical),
-		Comment:           flex.ExpandStringPointer(m.Comment),
-		Disable:           flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Name:              flex.ExpandStringPointer(m.Name),
-		SharedRecordGroup: flex.ExpandStringPointer(m.SharedRecordGroup),
-		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
+		Canonical: flex.ExpandStringPointer(m.Canonical),
+		Comment:   flex.ExpandStringPointer(m.Comment),
+		Disable:   flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:  ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		Name:      flex.ExpandStringPointer(m.Name),
+		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
 	}
 	if isCreate {
 		to.SharedRecordGroup = flex.ExpandStringPointer(m.SharedRecordGroup)
