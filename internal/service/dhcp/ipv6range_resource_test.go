@@ -1704,19 +1704,6 @@ resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
 	return strings.Join([]string{testAccBaseWithIpv6Network(view), config}, "")
 }
 
-func testAccIpv6rangeUseSubscribeSettingsUpdate(view, startAddr, endAddr string, useSubscribeSettings string) string {
-	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
-    network = nios_ipam_ipv6network.test.network
-    start_addr = %q
-    end_addr = %q
-    network_view = nios_ipam_ipv6network.test.network_view
-    use_subscribe_settings = %q
-}
-`, startAddr, endAddr, useSubscribeSettings)
-	return strings.Join([]string{testAccBaseWithIpv6Network(view), config}, "")
-}
-
 func testAccBaseWithIpv6NetworkandView(view string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network_view" "test" {
