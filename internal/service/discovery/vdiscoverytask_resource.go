@@ -320,7 +320,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 			}
 		}
 
-		// When allow_unsecured_connection is true, driver_type must be VMware or OPENSTACK
+		// When allow_unsecured_connection is true, driver_type must be VMware or OpenStack
 		if !data.DriverType.IsNull() && !data.DriverType.IsUnknown() {
 			driverType := data.DriverType.ValueString()
 			if driverType != "VMWARE" && driverType != "OPENSTACK" {
