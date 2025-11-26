@@ -180,11 +180,11 @@ func (m *RecordRpzPtrModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		Ipv6addr: flex.ExpandIPv6Address(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
 		Ptrdname: flex.ExpandStringPointer(m.Ptrdname),
+		RpZone:   flex.ExpandStringPointer(m.RpZone),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
 	}
 	if isCreate {
-		to.RpZone = flex.ExpandStringPointer(m.RpZone)
 		to.View = flex.ExpandStringPointer(m.View)
 	}
 	return to
