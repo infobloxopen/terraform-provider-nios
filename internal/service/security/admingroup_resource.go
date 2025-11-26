@@ -3,15 +3,15 @@ package security
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"net/http"
-	"reflect"
 
+	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -323,33 +323,6 @@ func (r *AdmingroupResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	var currentState, plannedState AdmingroupModel
-
-	// Retrieve the current state
-	resp.Diagnostics.Append(req.State.Get(ctx, &currentState)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Retrieve the planned state
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plannedState)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Check if password_setting has changed
-	if !reflect.DeepEqual(currentState.PasswordSetting, plannedState.PasswordSetting) {
-		// Validate use_password_setting
-		if !plannedState.UsePasswordSetting.ValueBool() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("password_setting"),
-				"Invalid Configuration",
-				"The `password_setting` field can only be updated when `use_password_setting` is set to true.",
-			)
-			return
-		}
 	}
 
 	planExtAttrs := data.ExtAttrs
