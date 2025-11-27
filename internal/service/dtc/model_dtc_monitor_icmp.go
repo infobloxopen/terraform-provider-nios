@@ -83,7 +83,7 @@ var DtcMonitorIcmpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(5),
-		MarkdownDescription: "The interval for TCP health check.",
+		MarkdownDescription: "The interval for ICMP health check.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -108,7 +108,7 @@ var DtcMonitorIcmpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(15),
-		MarkdownDescription: "The timeout for TCP health check in seconds.",
+		MarkdownDescription: "The timeout for ICMP health check in seconds.",
 	},
 }
 

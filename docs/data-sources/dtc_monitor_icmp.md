@@ -56,10 +56,10 @@ Optional:
 
 - `comment` (String) Comment for this DTC monitor; maximum 256 characters.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
-- `interval` (Number) The interval for TCP health check.
+- `interval` (Number) The interval for ICMP health check.
 - `retry_down` (Number) The value of how many times the server should appear as down to be treated as dead after it was alive.
 - `retry_up` (Number) The value of how many times the server should appear as up to be treated as alive after it was dead.
-- `timeout` (Number) The timeout for TCP health check in seconds.
+- `timeout` (Number) The timeout for ICMP health check in seconds.
 
 Read-Only:
 
