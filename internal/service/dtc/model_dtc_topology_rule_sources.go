@@ -29,14 +29,17 @@ var DtcTopologyRuleSourcesAttrTypes = map[string]attr.Type{
 var DtcTopologyRuleSourcesResourceSchemaAttributes = map[string]schema.Attribute{
 	"source_type": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The source type.",
 	},
 	"source_op": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The operation used to match the value.",
 	},
 	"source_value": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The source value.",
 	},
 }
