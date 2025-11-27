@@ -4,8 +4,8 @@ data "nios_dhcp_filtermac" "get_filtermac_using_filters" {
     name = "mac_filter_example"
   }
 }
-// Retrieve a specific nios dhcp macfilter by extensible attribute filters
-data "nios_dhcp_filtermac" "get_filtermac_using_extattrfilters" {
+// Retrieve specific DHCP MAC Filters using extensible attributes
+data "nios_dhcp_filtermac" "get_filtermac_using_extattr_filter" {
   extattrfilters = {
     Site = "location-1"
   }
