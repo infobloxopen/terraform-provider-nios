@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_filtermac Resource - nios"
 subcategory: "DHCP"
 description: |-
-  Manages a DHCP Filter MAC.
+  Manages a DHCP MAC Address Filter.
 ---
 
 # nios_dhcp_filtermac (Resource)
 
-Manages a DHCP Filter MAC.
+Manages a DHCP MAC Address Filter.
 
 ## Example Usage
 
