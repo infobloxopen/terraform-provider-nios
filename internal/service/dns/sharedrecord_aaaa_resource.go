@@ -87,7 +87,7 @@ func (r *SharedrecordAaaaResource) Create(ctx context.Context, req resource.Crea
 	res := apiRes.CreateSharedrecordAaaaResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create SharedrecordTxt due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create SharedrecordAaaa due inherited Extensible attributes, got error: %s", err))
 		return
 	}
 
@@ -129,7 +129,7 @@ func (r *SharedrecordAaaaResource) Read(ctx context.Context, req resource.ReadRe
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading SharedrecordTxt due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading SharedrecordAaaa due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
