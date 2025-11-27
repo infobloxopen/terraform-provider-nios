@@ -36,7 +36,7 @@ func (r *DtcMonitorTcpResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *DtcMonitorTcpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DTC TCP Monitor.",
+		MarkdownDescription: "Manages an DTC TCP Monitor.",
 		Attributes:          DtcMonitorTcpResourceSchemaAttributes,
 	}
 }
