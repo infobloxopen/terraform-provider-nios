@@ -22,6 +22,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type FiltermacModel struct {
@@ -64,6 +65,7 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthBetween(0, 256),
 		},
 		MarkdownDescription: "The descriptive comment of a DHCP MAC Filter object.",
@@ -114,6 +116,9 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The name of a DHCP MAC Filter object.",
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 	},
 	"never_expires": schema.BoolAttribute{
 		Optional:            true,
@@ -137,6 +142,7 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthBetween(0, 1023),
 		},
 		MarkdownDescription: "This is reserved for writing comments related to the particular MAC address filter. The length of comment cannot exceed 1024 bytes.",
