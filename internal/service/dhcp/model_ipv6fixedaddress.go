@@ -283,13 +283,13 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType: iptypes.IPv6AddressType{},
 		Optional:   true,
 		Computed:   true,
-		Validators: []validator.String{
-			stringvalidator.ExactlyOneOf(
-				path.MatchRoot("ipv6addr"),
-				path.MatchRoot("func_call"),
-				path.MatchRoot("ipv6prefix"),
-			),
-		},
+		//Validators: []validator.String{
+		//	stringvalidator.ExactlyOneOf(
+		//		path.MatchRoot("ipv6addr"),
+		//		path.MatchRoot("func_call"),
+		//		//path.MatchRoot("ipv6prefix"),
+		//	),
+		//},
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
@@ -608,7 +608,9 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	m.Duid = flex.FlattenStringPointer(from.Duid)
 	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.Ipv6addr = FlattenIpv6fixedaddressIpv6addr(from.Ipv6addr)
+	if from.AddressType != nil && *from.AddressType != "PREFIX" {
+		m.Ipv6addr = FlattenIpv6fixedaddressIpv6addr(from.Ipv6addr)
+	}
 	m.FuncCall = FlattenFuncCall(ctx, from.FuncCall, diags)
 	m.Ipv6prefix = flex.FlattenStringPointer(from.Ipv6prefix)
 	m.Ipv6prefixBits = flex.FlattenInt64Pointer(from.Ipv6prefixBits)
@@ -655,7 +657,6 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	m.UseValidLifetime = types.BoolPointerValue(from.UseValidLifetime)
 	m.ValidLifetime = flex.FlattenInt64Pointer(from.ValidLifetime)
 }
-
 func ExpandIpv6fixedaddressIpv6addr(ipv6addr iptypes.IPv6Address) *dhcp.Ipv6fixedaddressIpv6addr {
 	if ipv6addr.IsNull() {
 		return &dhcp.Ipv6fixedaddressIpv6addr{}

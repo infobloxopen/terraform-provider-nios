@@ -16,7 +16,8 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_basic" {
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   // Basic Fields
   address_type = "PREFIX"
-  ipv6prefix   = "2001:db8:abcd:1234::2"
+  ipv6prefix   = "2001:db8:abcd:1234::"
+  ipv6prefix_bits = 64
   match_client = "MAC_ADDRESS"
   mac_address  = "01:6a:7b:8c:9d:5e"
   network_view = "default"
@@ -48,7 +49,8 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional2" {
   // Basic Fields
   address_type = "BOTH"
-  ipv6prefix   = "2001:db8:abcd:1234::2"
+  ipv6addr = "2001:db8:abcd:1234::3"
+  ipv6prefix   = "2001:db8:abcd:1234::"
   ipv6prefix_bits = 64
   match_client = "MAC_ADDRESS"
   mac_address  = "00:6a:7b:8c:9d:5e"
