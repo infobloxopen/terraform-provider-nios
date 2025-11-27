@@ -24,6 +24,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/notification"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
@@ -191,6 +192,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		notification.NewNotificationRuleResource,
 		notification.NewNotificationRestEndpointResource,
+
+		rpz.NewRecordRpzAResource,
 	}
 }
 
@@ -289,6 +292,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		notification.NewNotificationRuleDataSource,
 
 		notification.NewNotificationRestEndpointDataSource,
+
+		rpz.NewRecordRpzADataSource,
 	}
 }
 
