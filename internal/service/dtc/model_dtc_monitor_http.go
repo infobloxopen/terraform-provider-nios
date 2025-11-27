@@ -193,7 +193,7 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(5),
-		MarkdownDescription: "The interval for TCP health check.",
+		MarkdownDescription: "The interval for HTTP health check.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -206,7 +206,7 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(80),
-		MarkdownDescription: "Port for TCP requests.",
+		MarkdownDescription: "Port for HTTP requests.",
 	},
 	"request": schema.StringAttribute{
 		Optional:            true,
@@ -250,7 +250,7 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(15),
-		MarkdownDescription: "The timeout for TCP health check in seconds.",
+		MarkdownDescription: "The timeout for HTTP health check in seconds.",
 	},
 	"validate_cert": schema.BoolAttribute{
 		Optional:            true,

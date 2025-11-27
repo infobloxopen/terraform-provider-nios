@@ -69,15 +69,15 @@ resource "nios_dtc_monitor_http" "dtc_monitor_http_additional_fields" {
 - `content_extract_value` (String) A content extraction value to compare with extracted result.
 - `enable_sni` (Boolean) Determines whether the Server Name Indication (SNI) for HTTPS monitor is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
-- `interval` (Number) The interval for TCP health check.
-- `port` (Number) Port for TCP requests.
+- `interval` (Number) The interval for HTTP health check.
+- `port` (Number) Port for HTTP requests.
 - `request` (String) An HTTP request to send.
 - `result` (String) The type of an expected result.
 - `result_code` (Number) The expected return code.
 - `retry_down` (Number) The value of how many times the server should appear as down to be treated as dead after it was alive.
 - `retry_up` (Number) The value of how many times the server should appear as up to be treated as alive after it was dead.
 - `secure` (Boolean) The connection security status.
-- `timeout` (Number) The timeout for TCP health check in seconds.
+- `timeout` (Number) The timeout for HTTP health check in seconds.
 - `validate_cert` (Boolean) Determines whether the validation of the remote server's certificate is enabled.
 
 ### Read-Only
