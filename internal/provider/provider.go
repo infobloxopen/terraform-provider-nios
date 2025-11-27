@@ -24,6 +24,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/notification"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
@@ -130,6 +131,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewSharedrecordTxtResource,
 		dns.NewSharedrecordMxResource,
 		dns.NewSharedrecordSrvResource,
+		dns.NewSharedrecordAResource,
+		dns.NewSharedrecordCnameResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -146,6 +149,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
 		dtc.NewDtcTopologyResource,
+		dtc.NewDtcMonitorSnmpResource,
 		dtc.NewDtcMonitorTcpResource,
 
 		ipam.NewNetworkResource,
@@ -188,6 +192,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		notification.NewNotificationRuleResource,
 		notification.NewNotificationRestEndpointResource,
+
+		rpz.NewRecordRpzAResource,
 	}
 }
 
@@ -224,6 +230,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewSharedrecordTxtDataSource,
 		dns.NewSharedrecordMxDataSource,
 		dns.NewSharedrecordSrvDataSource,
+		dns.NewSharedrecordADataSource,
+		dns.NewSharedrecordCnameDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -240,6 +248,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
 		dtc.NewDtcTopologyDataSource,
+		dtc.NewDtcMonitorSnmpDataSource,
 		dtc.NewDtcMonitorTcpDataSource,
 
 		ipam.NewNetworkDataSource,
@@ -283,6 +292,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		notification.NewNotificationRuleDataSource,
 
 		notification.NewNotificationRestEndpointDataSource,
+
+		rpz.NewRecordRpzADataSource,
 	}
 }
 
