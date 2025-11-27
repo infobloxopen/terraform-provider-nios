@@ -784,7 +784,7 @@ func TestAccDtcMonitorHttpResource_ValidateCert(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorHttpValidateCert("name", false),
+				Config: testAccDtcMonitorHttpValidateCert(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorHttpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "validate_cert", "false"),
@@ -854,7 +854,6 @@ func testAccCheckDtcMonitorHttpDisappears(ctx context.Context, v *dtc.DtcMonitor
 }
 
 func testAccDtcMonitorHttpBasicConfig(name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test" {
     name = %q
@@ -1042,13 +1041,13 @@ resource "nios_dtc_monitor_http" "test_retry_down" {
 `, name, retryDown)
 }
 
-func testAccDtcMonitorHttpRetryUp(name string, RetryUp int) string {
+func testAccDtcMonitorHttpRetryUp(name string, retryUp int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_retry_up" {
 	name = %q
     retry_up = %d
 }
-`, name, RetryUp)
+`, name, retryUp)
 }
 
 func testAccDtcMonitorHttpSecure(name string, secure bool) string {

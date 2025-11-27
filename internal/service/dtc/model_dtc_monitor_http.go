@@ -327,7 +327,7 @@ func (m *DtcMonitorHttpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorH
 	m.Interval = flex.FlattenInt64Pointer(from.Interval)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
-	m.Request = FlattenRquestDtcMonitorHttp(ctx, from.Request, m.Request, diags)
+	m.Request = FlattenRequestDtcMonitorHttp(ctx, from.Request, m.Request, diags)
 	m.Result = flex.FlattenStringPointer(from.Result)
 	m.ResultCode = flex.FlattenInt64Pointer(from.ResultCode)
 	m.RetryDown = flex.FlattenInt64Pointer(from.RetryDown)
@@ -337,7 +337,7 @@ func (m *DtcMonitorHttpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorH
 	m.ValidateCert = types.BoolPointerValue(from.ValidateCert)
 }
 
-func FlattenRquestDtcMonitorHttp(ctx context.Context, fromRequest *string, planRequest types.String, diags *diag.Diagnostics) types.String {
+func FlattenRequestDtcMonitorHttp(ctx context.Context, fromRequest *string, planRequest types.String, diags *diag.Diagnostics) types.String {
 	if fromRequest == nil {
 		return types.StringNull()
 	}

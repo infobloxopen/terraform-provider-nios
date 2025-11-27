@@ -20,6 +20,7 @@ var readableAttributesForDtcMonitorHttp = "ciphers,client_cert,comment,content_c
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &DtcMonitorHttpResource{}
 var _ resource.ResourceWithImportState = &DtcMonitorHttpResource{}
+var _ resource.ResourceWithValidateConfig = &DtcMonitorHttpResource{}
 
 func NewDtcMonitorHttpResource() resource.Resource {
 	return &DtcMonitorHttpResource{}
@@ -329,40 +330,40 @@ func (r *DtcMonitorHttpResource) ImportState(ctx context.Context, req resource.I
 }
 
 func (r *DtcMonitorHttpResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-    var data DtcMonitorHttpModel
-    resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+	var data DtcMonitorHttpModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-    // Validate content check configurations
-    if !data.ContentCheck.IsNull() && !data.ContentCheck.IsUnknown() {
-        contentCheckValue := data.ContentCheck.ValueString()
-        
-        // Validate EXTRACT operation
-        if contentCheckValue == "EXTRACT" {
-            if data.ContentCheckRegex.IsNull() || data.ContentCheckRegex.IsUnknown() ||
-                data.ContentExtractType.IsNull() || data.ContentExtractType.IsUnknown() ||
-                data.ContentExtractValue.IsNull() || data.ContentExtractValue.IsUnknown() ||
+	// Validate content check configurations
+	if !data.ContentCheck.IsNull() && !data.ContentCheck.IsUnknown() {
+		contentCheckValue := data.ContentCheck.ValueString()
+
+		// Validate EXTRACT operation
+		if contentCheckValue == "EXTRACT" {
+			if data.ContentCheckRegex.IsNull() || data.ContentCheckRegex.IsUnknown() ||
+				data.ContentExtractType.IsNull() || data.ContentExtractType.IsUnknown() ||
+				data.ContentExtractValue.IsNull() || data.ContentExtractValue.IsUnknown() ||
 				data.ContentCheckOp.IsNull() || data.ContentCheckOp.IsUnknown() {
-                resp.Diagnostics.AddAttributeError(
-                    path.Root("content_check"),
-                    "Invalid configuration for content check EXTRACT",
-                    "When 'content_check' is set to 'EXTRACT', the fields 'content_check_regex', 'content_extract_type', 'content_check_op' and 'content_extract_value' must be provided.",
-                )
-            }
-        }
-        
-        // Validate MATCH operation
-        if contentCheckValue == "MATCH" {
-            if data.ContentCheckRegex.IsNull() || data.ContentCheckRegex.IsUnknown() ||
+				resp.Diagnostics.AddAttributeError(
+					path.Root("content_check"),
+					"Invalid configuration for content check EXTRACT",
+					"When 'content_check' is set to 'EXTRACT', the fields 'content_check_regex', 'content_extract_type', 'content_check_op' and 'content_extract_value' must be provided.",
+				)
+			}
+		}
+
+		// Validate MATCH operation
+		if contentCheckValue == "MATCH" {
+			if data.ContentCheckRegex.IsNull() || data.ContentCheckRegex.IsUnknown() ||
 				data.ContentCheckOp.IsNull() || data.ContentCheckOp.IsUnknown() {
-                resp.Diagnostics.AddAttributeError(
-                    path.Root("content_check"),
-                    "Invalid configuration for content check MATCH",
-                    "When 'content_check' is set to 'MATCH', 'content_check_regex' and 'content_check_op' must be provided.",
-                )
-            }
-        }
-    }
+				resp.Diagnostics.AddAttributeError(
+					path.Root("content_check"),
+					"Invalid configuration for content check MATCH",
+					"When 'content_check' is set to 'MATCH', 'content_check_regex' and 'content_check_op' must be provided.",
+				)
+			}
+		}
+	}
 }
