@@ -82,9 +82,14 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The flag to enforce MAC address expiration of the DHCP MAC Address Filter object.",
 	},
 	"extattrs": schema.MapAttribute{
-		ElementType:         types.StringType,
 		Optional:            true,
-		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		Computed:            true,
+		MarkdownDescription: "Extensible attributes associated with the object.",
+		ElementType:         types.StringType,
+		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
+		Validators: []validator.Map{
+			mapvalidator.SizeAtLeast(1),
+		},
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
