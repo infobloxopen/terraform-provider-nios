@@ -37,7 +37,7 @@ func (r *FiltermacResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *FiltermacResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DHCP Filter MAC.",
+		MarkdownDescription: "Manages a DHCP MAC Address Filter.",
 		Attributes:          FiltermacResourceSchemaAttributes,
 	}
 }
