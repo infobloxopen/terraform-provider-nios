@@ -3,7 +3,7 @@ resource "nios_dhcp_filtermac" "mac_filter" {
   name = "mac_filter_example"
 }
 
-#Create another filtermac with different name
+// Create Filter MAC with Additional Fields
 resource "nios_dhcp_filtermac" "mac_filter_update" {
   name                           = "mac_filter_example_2"
   lease_time                     = 7200
