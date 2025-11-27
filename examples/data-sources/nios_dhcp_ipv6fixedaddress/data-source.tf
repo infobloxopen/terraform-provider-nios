@@ -1,7 +1,7 @@
 // Retrieve a specific IPV6 Fixed Addresses by filters
 data "nios_dhcp_ipv6fixedaddress" "get_ipv6_fixed_address_using_filters" {
   filters = {
-    ipv4addr = "16.0.0.20"
+    ipv6addr = "2001:db8:abcd:1234::1"
   }
 }
 
@@ -9,16 +9,6 @@ data "nios_dhcp_ipv6fixedaddress" "get_ipv6_fixed_address_using_filters" {
 data "nios_dhcp_ipv6fixedaddress" "get_ipv6_fixed_address_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
-  }
-}
-
-// Search for a IPV6 Fixed aAddress by Microsoft Server
-data "nios_dhcp_ipv6fixedaddress" "get_ipv6_fixed_address_using_microsoft_server" {
-  body = {
-    ms_server = {
-      struct   = "msdhcpserver"
-      ipv4addr = "1.1.1.1" // Specify the IP address of the Microsoft DHCP server
-    }
   }
 }
 

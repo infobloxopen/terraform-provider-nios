@@ -525,36 +525,39 @@ func (m *Ipv6fixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnost
 		Duid:                     flex.ExpandStringPointer(m.Duid),
 		EnableImmediateDiscovery: flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		ExtAttrs:                 ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Ipv6addr:                 ExpandIpv6fixedaddressIpv6addr(m.Ipv6addr),
-		FuncCall:                 ExpandFuncCall(ctx, m.FuncCall, diags),
-		Ipv6prefix:               flex.ExpandStringPointer(m.Ipv6prefix),
-		Ipv6prefixBits:           flex.ExpandInt64Pointer(m.Ipv6prefixBits),
-		LogicFilterRules:         flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6fixedaddressLogicFilterRules),
-		MacAddress:               flex.ExpandMACAddr(m.MacAddress),
-		MatchClient:              flex.ExpandStringPointer(m.MatchClient),
-		MsAdUserData:             ExpandIpv6fixedaddressMsAdUserData(ctx, m.MsAdUserData, diags),
-		Name:                     flex.ExpandStringPointer(m.Name),
-		Network:                  flex.ExpandStringPointer(m.Network),
-		NetworkView:              flex.ExpandStringPointer(m.NetworkView),
-		Options:                  flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6fixedaddressOptions),
-		PreferredLifetime:        flex.ExpandInt64Pointer(m.PreferredLifetime),
-		ReservedInterface:        flex.ExpandStringPointer(m.ReservedInterface),
-		RestartIfNeeded:          flex.ExpandBoolPointer(m.RestartIfNeeded),
-		Snmp3Credential:          ExpandIpv6fixedaddressSnmp3Credential(ctx, m.Snmp3Credential, diags),
-		SnmpCredential:           ExpandIpv6fixedaddressSnmpCredential(ctx, m.SnmpCredential, diags),
-		UseCliCredentials:        flex.ExpandBoolPointer(m.UseCliCredentials),
-		UseDomainName:            flex.ExpandBoolPointer(m.UseDomainName),
-		UseDomainNameServers:     flex.ExpandBoolPointer(m.UseDomainNameServers),
-		UseLogicFilterRules:      flex.ExpandBoolPointer(m.UseLogicFilterRules),
-		UseOptions:               flex.ExpandBoolPointer(m.UseOptions),
-		UsePreferredLifetime:     flex.ExpandBoolPointer(m.UsePreferredLifetime),
-		UseSnmp3Credential:       flex.ExpandBoolPointer(m.UseSnmp3Credential),
-		UseSnmpCredential:        flex.ExpandBoolPointer(m.UseSnmpCredential),
-		UseValidLifetime:         flex.ExpandBoolPointer(m.UseValidLifetime),
-		ValidLifetime:            flex.ExpandInt64Pointer(m.ValidLifetime),
+		//Ipv6addr:                 ExpandIpv6fixedaddressIpv6addr(m.Ipv6addr),
+		FuncCall:             ExpandFuncCall(ctx, m.FuncCall, diags),
+		Ipv6prefix:           flex.ExpandStringPointer(m.Ipv6prefix),
+		Ipv6prefixBits:       flex.ExpandInt64Pointer(m.Ipv6prefixBits),
+		LogicFilterRules:     flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6fixedaddressLogicFilterRules),
+		MacAddress:           flex.ExpandMACAddr(m.MacAddress),
+		MatchClient:          flex.ExpandStringPointer(m.MatchClient),
+		MsAdUserData:         ExpandIpv6fixedaddressMsAdUserData(ctx, m.MsAdUserData, diags),
+		Name:                 flex.ExpandStringPointer(m.Name),
+		Network:              flex.ExpandStringPointer(m.Network),
+		NetworkView:          flex.ExpandStringPointer(m.NetworkView),
+		Options:              flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6fixedaddressOptions),
+		PreferredLifetime:    flex.ExpandInt64Pointer(m.PreferredLifetime),
+		ReservedInterface:    flex.ExpandStringPointer(m.ReservedInterface),
+		RestartIfNeeded:      flex.ExpandBoolPointer(m.RestartIfNeeded),
+		Snmp3Credential:      ExpandIpv6fixedaddressSnmp3Credential(ctx, m.Snmp3Credential, diags),
+		SnmpCredential:       ExpandIpv6fixedaddressSnmpCredential(ctx, m.SnmpCredential, diags),
+		UseCliCredentials:    flex.ExpandBoolPointer(m.UseCliCredentials),
+		UseDomainName:        flex.ExpandBoolPointer(m.UseDomainName),
+		UseDomainNameServers: flex.ExpandBoolPointer(m.UseDomainNameServers),
+		UseLogicFilterRules:  flex.ExpandBoolPointer(m.UseLogicFilterRules),
+		UseOptions:           flex.ExpandBoolPointer(m.UseOptions),
+		UsePreferredLifetime: flex.ExpandBoolPointer(m.UsePreferredLifetime),
+		UseSnmp3Credential:   flex.ExpandBoolPointer(m.UseSnmp3Credential),
+		UseSnmpCredential:    flex.ExpandBoolPointer(m.UseSnmpCredential),
+		UseValidLifetime:     flex.ExpandBoolPointer(m.UseValidLifetime),
+		ValidLifetime:        flex.ExpandInt64Pointer(m.ValidLifetime),
 	}
 	if isCreate {
 		to.Template = flex.ExpandStringPointer(m.Template)
+	}
+	if m.AddressType.ValueString() != "PREFIX" {
+		to.Ipv6addr = ExpandIpv6fixedaddressIpv6addr(m.Ipv6addr)
 	}
 	return to
 }
@@ -608,9 +611,7 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	m.Duid = flex.FlattenStringPointer(from.Duid)
 	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	if from.AddressType != nil && *from.AddressType != "PREFIX" {
-		m.Ipv6addr = FlattenIpv6fixedaddressIpv6addr(from.Ipv6addr)
-	}
+	m.Ipv6addr = FlattenIpv6fixedaddressIpv6addr(from.Ipv6addr)
 	m.FuncCall = FlattenFuncCall(ctx, from.FuncCall, diags)
 	m.Ipv6prefix = flex.FlattenStringPointer(from.Ipv6prefix)
 	m.Ipv6prefixBits = flex.FlattenInt64Pointer(from.Ipv6prefixBits)

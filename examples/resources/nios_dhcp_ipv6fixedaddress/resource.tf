@@ -15,26 +15,26 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_basic" {
 // Create an IPV6 Fixed Address with Additional Fields with PREFIX address type
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   // Basic Fields
-  address_type = "PREFIX"
-  ipv6prefix   = "2001:db8:abcd:1234::"
+  address_type    = "PREFIX"
+  ipv6prefix      = "2001:db8:abcd:1234::"
   ipv6prefix_bits = 64
-  match_client = "MAC_ADDRESS"
-  mac_address  = "01:6a:7b:8c:9d:5e"
-  network_view = "default"
+  match_client    = "MAC_ADDRESS"
+  mac_address     = "01:6a:7b:8c:9d:5e"
+  network_view    = "default"
 
   // Additional Fields
   comment = "IPV6 Fixed Address created with additional fields"
 
   options = [
     {
-      name  = "time-offset"
-      num   = 2
-      value = "50"
+      name  = "domain-name"
+      num   = 15
+      value = "example.com"
     },
     {
-      name  = "dhcp-lease-time"
-      num   = 51
-      value = "7200"
+      name  = "dhcp-renewal-time"
+      num   = 58
+      value = "720"
     }
   ]
   use_options = true
@@ -48,24 +48,24 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
 // Create an IPV6 Fixed Address with Additional Fields with BOTH address type
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional2" {
   // Basic Fields
-  address_type = "BOTH"
-  ipv6addr = "2001:db8:abcd:1234::3"
-  ipv6prefix   = "2001:db8:abcd:1234::"
+  address_type    = "BOTH"
+  ipv6addr        = "2001:db8:abcd:1234::3"
+  ipv6prefix      = "2001:db8:abcd:1234::"
   ipv6prefix_bits = 64
-  match_client = "MAC_ADDRESS"
-  mac_address  = "00:6a:7b:8c:9d:5e"
-  network_view = "default"
+  match_client    = "MAC_ADDRESS"
+  mac_address     = "00:6a:7b:8c:9d:5e"
+  network_view    = "default"
 
   // Additional Fields
-  preferred_lifetime = 2400
-  use_preferred_lifetime = true
-  valid_lifetime = 4800
-  use_valid_lifetime = true
-  domain_name = "example.com"
-  use_domain_name = true
-  domain_name_servers = ["2001:4860:4860::8888", "2001:4860:4860::8844"]
+  preferred_lifetime      = 2400
+  use_preferred_lifetime  = true
+  valid_lifetime          = 4800
+  use_valid_lifetime      = true
+  domain_name             = "example.com"
+  use_domain_name         = true
+  domain_name_servers     = ["2001:4860:4860::8888", "2001:4860:4860::8844"]
   use_domain_name_servers = true
-  use_logic_filter_rules = true
+  use_logic_filter_rules  = true
   logic_filter_rules = [
     {
       filter = "ipv6_option_filter"
