@@ -336,6 +336,13 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 		return
 	}
 
+	var options []FiltermacOptionsModel
+	diags := data.Options.ElementsAs(ctx, &options, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
 		// Special DHCP option names that require use_option to be set
@@ -350,6 +357,13 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 			"dhcp6.name-servers":       true,
 		}
 
+		var options []FiltermacOptionsModel
+		diags := data.Options.ElementsAs(ctx, &options, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
 		specialOptionsNum := map[int64]bool{
 			3:  true,
 			6:  true,
@@ -358,14 +372,6 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 			51: true,
 			23: true,
 		}
-
-		var options []FixedaddressOptionsModel
-		diags := data.Options.ElementsAs(ctx, &options, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
@@ -422,14 +428,7 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 		}
 	}
 
-	var options []FixedaddressOptionsModel
-	diags := data.Options.ElementsAs(ctx, &options, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+	// When dhcp-lease-time option is set, lease_time attribute must have the same value as option value
 	if !data.LeaseTime.IsNull() && !data.LeaseTime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
 		for i, option := range options {
 			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {

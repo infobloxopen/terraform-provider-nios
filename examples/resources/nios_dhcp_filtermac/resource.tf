@@ -1,4 +1,4 @@
-#create a filtermac resource
+// create a filtermac resource
 resource "nios_dhcp_filtermac" "mac_filter" {
   name = "mac_filter_example"
 }
@@ -18,7 +18,7 @@ resource "nios_dhcp_filtermac" "mac_filter_update" {
   }
 }
 
-# Create another filtermac resource with dhcp option dhcp_lease_time
+// Create another filtermac resource with dhcp option dhcp_lease_time
 resource "nios_dhcp_filtermac" "mac_filter_with_option" {
   name = "mac_filter_with_option"
   options = [

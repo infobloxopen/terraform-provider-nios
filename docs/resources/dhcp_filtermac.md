@@ -13,12 +13,12 @@ Manages a DHCP Filter MAC.
 ## Example Usage
 
 ```terraform
-#create a filtermac resource
+// create a filtermac resource
 resource "nios_dhcp_filtermac" "mac_filter" {
   name = "mac_filter_example"
 }
 
-#Create another filtermac with different name
+// Create Filter MAC with Additional Fields
 resource "nios_dhcp_filtermac" "mac_filter_update" {
   name                           = "mac_filter_example_2"
   lease_time                     = 7200
@@ -33,7 +33,7 @@ resource "nios_dhcp_filtermac" "mac_filter_update" {
   }
 }
 
-# Create another filtermac resource with dhcp option dhcp_lease_time
+// Create another filtermac resource with dhcp option dhcp_lease_time
 resource "nios_dhcp_filtermac" "mac_filter_with_option" {
   name = "mac_filter_with_option"
   options = [
@@ -59,7 +59,7 @@ resource "nios_dhcp_filtermac" "mac_filter_with_option" {
 - `default_mac_address_expiration` (Number) The default MAC expiration time of the DHCP MAC Address Filter object. By default, the MAC address filter never expires; otherwise, it is the absolute interval when the MAC address filter expires. The maximum value can extend up to 4294967295 secs. The minimum value is 60 secs (1 min).
 - `disable` (Boolean) Determines if the DHCP Fingerprint object is disabled or not.
 - `enforce_expiration_times` (Boolean) The flag to enforce MAC address expiration of the DHCP MAC Address Filter object.
-- `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
+- `extattrs` (Map of String) Extensible attributes associated with the object.
 - `lease_time` (Number) The length of time the DHCP server leases an IP address to a client. The lease time applies to hosts that meet the filter criteria.
 - `never_expires` (Boolean) Determines if DHCP MAC Filter never expires or automatically expires.
 - `options` (Attributes List) An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object. (see [below for nested schema](#nestedatt--options))
@@ -78,5 +78,5 @@ Optional:
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
-- `value` (String) Value of the DHCP option
+- `value` (String) Value of the DHCP option. Required to be set for all options.
 - `vendor_class` (String) The name of the space this DHCP option is associated to.

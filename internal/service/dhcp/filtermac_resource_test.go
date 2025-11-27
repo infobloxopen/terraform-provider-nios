@@ -31,7 +31,6 @@ func TestAccFiltermacResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					// TODO: check and validate these
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "enforce_expiration_times", "true"),
 					resource.TestCheckResourceAttr(resourceName, "never_expires", "true"),
@@ -46,9 +45,7 @@ func TestAccFiltermacResource_basic(t *testing.T) {
 func TestAccFiltermacResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_filtermac.test"
 	name := acctest.RandomNameWithPrefix("mac_filter")
-
 	var v dhcp.Filtermac
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -451,7 +448,6 @@ func testAccCheckFiltermacDisappears(ctx context.Context, v *dhcp.Filtermac) res
 }
 
 func testAccFiltermacBasicConfig(name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_filtermac" "test" {
     name = %q

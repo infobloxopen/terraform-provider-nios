@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -129,7 +128,6 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: FiltermacOptionsAttrTypes})),
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
@@ -194,7 +192,6 @@ func (m *FiltermacModel) Flatten(ctx context.Context, from *dhcp.Filtermac, diag
 	m.NeverExpires = types.BoolPointerValue(from.NeverExpires)
 	planOptions := m.Options
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, FiltermacOptionsAttrTypes, diags, FlattenFiltermacOptions)
-	//m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, Ipv6fixedaddresstemplateOptionsAttrTypes, diags, Flatten)
 	if !planOptions.IsUnknown() {
 		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
 		if !diags.HasError() {
