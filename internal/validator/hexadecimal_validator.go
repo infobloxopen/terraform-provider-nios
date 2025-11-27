@@ -12,6 +12,8 @@ import (
 // hexadecimalValidator validates if the provided value is a valid hexadecimal string.
 type hexadecimalValidator struct{}
 
+var hexPattern = regexp.MustCompile(`^[0-9a-fA-F]+$`)
+
 func IsValidHexadecimal() validator.String {
 	return hexadecimalValidator{}
 }
@@ -58,6 +60,5 @@ func isValidHexadecimal(value string) bool {
 		return false
 	}
 
-	hexPattern := regexp.MustCompile(`^[0-9a-fA-F]+$`)
 	return hexPattern.MatchString(value)
 }

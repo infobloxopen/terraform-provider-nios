@@ -74,12 +74,12 @@ resource "nios_dtc_monitor_snmp" "create_monitor_snmp_with_additional_fields" {
 - `context` (String) The SNMPv3 context.
 - `engine_id` (String) The SNMPv3 engine identifier.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
-- `interval` (Number) The interval for TCP health check.
+- `interval` (Number) The interval for SNMP health check.
 - `oids` (Attributes List) A list of OIDs for SNMP monitoring. (see [below for nested schema](#nestedatt--oids))
 - `port` (Number) The port value for SNMP requests.
 - `retry_down` (Number) The value of how many times the server should appear as down to be treated as dead after it was alive.
 - `retry_up` (Number) The value of how many times the server should appear as up to be treated as alive after it was dead.
-- `timeout` (Number) The timeout for TCP health check in seconds.
+- `timeout` (Number) The timeout for SNMP health check in seconds.
 - `user` (String) The SNMPv3 user setting.
 - `version` (String) The SNMP protocol version for the SNMP health check.
 
