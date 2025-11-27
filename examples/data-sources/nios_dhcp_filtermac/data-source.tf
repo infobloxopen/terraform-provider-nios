@@ -1,4 +1,4 @@
-// Retrieve a specific nios dhcp macfilter by filters "name"
+// Retrieve a specific DHCP Filter MAC by filters
 data "nios_dhcp_filtermac" "get_filtermac_using_filters" {
   filters = {
     name = "mac_filter_example"
