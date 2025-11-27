@@ -130,6 +130,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewSharedrecordTxtResource,
 		dns.NewSharedrecordMxResource,
 		dns.NewSharedrecordSrvResource,
+		dns.NewSharedrecordAResource,
 		dns.NewSharedrecordCnameResource,
 
 		dhcp.NewFixedaddressResource,
@@ -146,6 +147,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
+		dtc.NewDtcTopologyResource,
+		dtc.NewDtcMonitorSnmpResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworkcontainerResource,
@@ -155,6 +158,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewBulkhostnametemplateResource,
 		ipam.NewVlanviewResource,
 		ipam.NewVlanResource,
+		ipam.NewVlanrangeResource,
 
 		cloud.NewAwsrte53taskgroupResource,
 		cloud.NewAwsuserResource,
@@ -222,6 +226,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewSharedrecordTxtDataSource,
 		dns.NewSharedrecordMxDataSource,
 		dns.NewSharedrecordSrvDataSource,
+		dns.NewSharedrecordADataSource,
 		dns.NewSharedrecordCnameDataSource,
 
 		dhcp.NewFixedaddressDataSource,
@@ -238,6 +243,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+		dtc.NewDtcTopologyDataSource,
+		dtc.NewDtcMonitorSnmpDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworkcontainerDataSource,
@@ -247,6 +254,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewBulkhostnametemplateDataSource,
 		ipam.NewVlanviewDataSource,
 		ipam.NewVlanDataSource,
+		ipam.NewVlanrangeDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
 		cloud.NewAwsuserDataSource,
