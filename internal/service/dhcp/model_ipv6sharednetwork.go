@@ -19,12 +19,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -81,7 +83,7 @@ var Ipv6sharednetworkAttrTypes = map[string]attr.Type{
 	"logic_filter_rules":              types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6sharednetworkLogicFilterRulesAttrTypes}},
 	"name":                            types.StringType,
 	"network_view":                    types.StringType,
-	"networks":                        types.ListType{ElemType: types.ObjectType{AttrTypes: IPv6SharednetworkNetworksAttrTypes}},
+	"networks":                        types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6sharednetworkNetworksAttrTypes}},
 	"options":                         types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6sharednetworkOptionsAttrTypes}},
 	"preferred_lifetime":              types.Int64Type,
 	"update_dns_on_lease_renewal":     types.BoolType,
@@ -244,7 +246,7 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"networks": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
-			Attributes: IPv6SharednetworkNetworksResourceSchemaAttributes,
+			Attributes: Ipv6sharednetworkNetworksResourceSchemaAttributes,
 		},
 		Required: true,
 		Validators: []validator.List{
@@ -365,7 +367,7 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *Ipv6sharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Ipv6sharednetwork {
+func (m *Ipv6sharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Ipv6sharednetwork {
 	if m == nil {
 		return nil
 	}
@@ -383,7 +385,7 @@ func (m *Ipv6sharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnos
 		ExtAttrs:                   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		LogicFilterRules:           flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6sharednetworkLogicFilterRules),
 		Name:                       flex.ExpandStringPointer(m.Name),
-		Networks:                   flex.ExpandFrameworkListNestedBlock(ctx, m.Networks, diags, ExpandIPv6SharednetworkNetworks),
+		Networks:                   flex.ExpandFrameworkListNestedBlock(ctx, m.Networks, diags, ExpandIpv6sharednetworkNetworks),
 		Options:                    flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6sharednetworkOptions),
 		PreferredLifetime:          flex.ExpandInt64Pointer(m.PreferredLifetime),
 		UpdateDnsOnLeaseRenewal:    flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
@@ -401,7 +403,9 @@ func (m *Ipv6sharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnos
 		UseValidLifetime:           flex.ExpandBoolPointer(m.UseValidLifetime),
 		ValidLifetime:              flex.ExpandInt64Pointer(m.ValidLifetime),
 	}
-	// TODO: NetworkView is non-updatable, Please create an IsCreate Block for the same
+	if isCreate {
+		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
+	}
 	return to
 }
 
@@ -439,8 +443,20 @@ func (m *Ipv6sharednetworkModel) Flatten(ctx context.Context, from *dhcp.Ipv6sha
 	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, Ipv6sharednetworkLogicFilterRulesAttrTypes, diags, FlattenIpv6sharednetworkLogicFilterRules)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	m.Networks = flex.FlattenFrameworkListNestedBlock(ctx, from.Networks, IPv6SharednetworkNetworksAttrTypes, diags, FlattenIPv6SharednetworkNetworks)
+	planNetworks := m.Networks
+	m.Networks = flex.FlattenFrameworkListNestedBlock(ctx, from.Networks, Ipv6sharednetworkNetworksAttrTypes, diags, FlattenIpv6sharednetworkNetworks)
+	reOrderedNetworks, diags := utils.ReorderAndFilterNestedListResponse(ctx, planNetworks, m.Networks, "ref")
+	if !diags.HasError() {
+		m.Networks = reOrderedNetworks.(basetypes.ListValue)
+	}
+	planOptions := m.Options
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, Ipv6sharednetworkOptionsAttrTypes, diags, FlattenIpv6sharednetworkOptions)
+	if !planOptions.IsUnknown() {
+		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
+		if !diags.HasError() {
+			m.Options = reOrderedOptions.(basetypes.ListValue)
+		}
+	}
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)
 	m.UseDdnsDomainname = types.BoolPointerValue(from.UseDdnsDomainname)

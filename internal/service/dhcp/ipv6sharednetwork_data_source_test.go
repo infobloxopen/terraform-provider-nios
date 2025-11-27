@@ -3,6 +3,7 @@ package dhcp_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -10,31 +11,20 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
-
-/*
-// Retrieve a specific dhcp Ipv6sharednetwork by filters
-data "nios_dhcp_ipv6sharednetwork" "get_dhcp_ipv6sharednetwork_using_filters" {
-  filters = {
-    name = "NAME_REPLACE_ME"
-    networks = "NETWORKS_REPLACE_ME"
-  }
-}
-// Retrieve specific dhcp Ipv6sharednetwork using Extensible Attributes
-data "nios_dhcp_ipv6sharednetwork" "get_dhcp_ipv6sharednetwork_using_extensible_attributes" {
-  extattrfilters = {
-    Site = "location-1"
-  }
-}
-
-// Retrieve all dhcp Ipv6sharednetwork
-data "nios_dhcp_ipv6sharednetwork" "get_all_dhcp_ipv6sharednetwork" {}
-*/
 
 func TestAccIpv6sharednetworkDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_ipv6sharednetwork.test"
 	resourceName := "nios_dhcp_ipv6sharednetwork.test"
 	var v dhcp.Ipv6sharednetwork
+	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
+	network1 := acctest.RandomIPv6Network()
+	network2 := acctest.RandomIPv6Network()
+	networks := []map[string]any{
+		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
+		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -42,7 +32,7 @@ func TestAccIpv6sharednetworkDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6sharednetworkDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6sharednetworkDataSourceConfigFilters("NAME_REPLACE_ME", "NETWORKS_REPLACE_ME"),
+				Config: testAccIpv6sharednetworkDataSourceConfigFilters(name, networks, network1, network2),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
@@ -57,13 +47,21 @@ func TestAccIpv6sharednetworkDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_ipv6sharednetwork.test"
 	resourceName := "nios_dhcp_ipv6sharednetwork.test"
 	var v dhcp.Ipv6sharednetwork
+	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
+	network1 := acctest.RandomIPv6Network()
+	network2 := acctest.RandomIPv6Network()
+	networks := []map[string]any{
+		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
+		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckIpv6sharednetworkDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6sharednetworkDataSourceConfigExtAttrFilters("NAME_REPLACE_ME", "NETWORKS_REPLACE_ME", acctest.RandomName()),
+				Config: testAccIpv6sharednetworkDataSourceConfigExtAttrFilters(name, networks, network1, network2, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
@@ -113,11 +111,12 @@ func testAccCheckIpv6sharednetworkResourceAttrPair(resourceName, dataSourceName 
 	}
 }
 
-func testAccIpv6sharednetworkDataSourceConfigFilters(name, networks string) string {
-	return fmt.Sprintf(`
+func testAccIpv6sharednetworkDataSourceConfigFilters(name string, networks []map[string]any, network1, network2 string) string {
+	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test" {
   name = %q
-  networks = %q
+  networks = %s
 }
 
 data "nios_dhcp_ipv6sharednetwork" "test" {
@@ -125,14 +124,16 @@ data "nios_dhcp_ipv6sharednetwork" "test" {
 	name = nios_dhcp_ipv6sharednetwork.test.name
   }
 }
-`, name, networks)
+`, name, networksStr)
+	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDataSourceConfigExtAttrFilters(name, networks, extAttrsValue string) string {
-	return fmt.Sprintf(`
+func testAccIpv6sharednetworkDataSourceConfigExtAttrFilters(name string, networks []map[string]any, network1, network2, extAttrsValue string) string {
+	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test" {
   name = %q
-  networks = %q
+  networks = %s
   extattrs = {
     Site = %q
   } 
@@ -143,5 +144,6 @@ data "nios_dhcp_ipv6sharednetwork" "test" {
 	Site = nios_dhcp_ipv6sharednetwork.test.extattrs.Site
   }
 }
-`, name, networks, extAttrsValue)
+`, name, networksStr, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }

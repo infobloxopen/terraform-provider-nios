@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -36,7 +37,7 @@ func (r *Ipv6sharednetworkResource) Metadata(ctx context.Context, req resource.M
 
 func (r *Ipv6sharednetworkResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Ipv6sharednetwork resource object.",
+		MarkdownDescription: "Manages an IPv6 Shared Network.",
 		Attributes:          Ipv6sharednetworkResourceSchemaAttributes,
 	}
 }
@@ -81,7 +82,7 @@ func (r *Ipv6sharednetworkResource) Create(ctx context.Context, req resource.Cre
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6sharednetworkAPI.
 		Create(ctx).
-		Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics)).
+		Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
 		ReturnAsObject(1).
 		Execute()
@@ -274,7 +275,7 @@ func (r *Ipv6sharednetworkResource) Update(ctx context.Context, req resource.Upd
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6sharednetworkAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics)).
+		Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
 		ReturnAsObject(1).
 		Execute()
@@ -320,6 +321,139 @@ func (r *Ipv6sharednetworkResource) Delete(ctx context.Context, req resource.Del
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ipv6sharednetwork, got error: %s", err))
 		return
+	}
+}
+
+func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data Ipv6sharednetworkModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if options are defined
+	if !data.Options.IsNull() && !data.Options.IsUnknown() {
+		// Special DHCP option names that require use_option to be set
+		specialOptions := map[string]bool{
+			"routers":                  true,
+			"router-templates":         true,
+			"domain-name-servers":      true,
+			"domain-name":              true,
+			"broadcast-address":        true,
+			"broadcast-address-offset": true,
+			"dhcp-lease-time":          true,
+			"dhcp6.name-servers":       true,
+		}
+
+		specialOptionsNum := map[int64]bool{
+			3:  true,
+			6:  true,
+			15: true,
+			28: true,
+			51: true,
+			23: true,
+		}
+
+		var options []Ipv6sharednetworkOptionsModel
+		diags := data.Options.ElementsAs(ctx, &options, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for i, option := range options {
+			isSpecialOption := false
+			optionName := ""
+			if option.Value.IsNull() || option.Value.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("value"),
+					"Invalid configuration for DHCP Option",
+					"The 'value' attribute is a required field and must be set for all DHCP Options.",
+				)
+			}
+			if !option.Name.IsNull() && !option.Name.IsUnknown() {
+				optionName = option.Name.ValueString()
+				isSpecialOption = specialOptions[optionName]
+			} else if !option.Num.IsNull() && !option.Num.IsUnknown() {
+				optionNum := option.Num.ValueInt64()
+				isSpecialOption = specialOptionsNum[optionNum]
+				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("name"),
+					"Invalid configuration for DHCP Option",
+					"Either the 'name' or 'num' attribute must be set for all DHCP Options. "+
+						"Missing both attributes for 'option' at index "+fmt.Sprint(i)+".",
+				)
+				continue
+			}
+
+			if option.Value.ValueString() == "" {
+				if !isSpecialOption {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
+					)
+				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
+					)
+				}
+			}
+
+			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("use_option"),
+					"Invalid configuration",
+					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Option '%s'. "+
+						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
+						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
+						optionName),
+				)
+			}
+		}
+	}
+
+	var options []Ipv6fixedaddresstemplateOptionsModel
+	diags := data.Options.ElementsAs(ctx, &options, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// domain_name attribute must match the value of option 'domain-name'
+	if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "domain-name" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != data.DomainName.ValueString() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Domain Name",
+						"domain_name attribute must match the 'value' attribute for DHCP Option 'domain-name'.",
+					)
+				}
+			}
+		}
+	}
+
+	// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+	if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Valid Lifetime",
+						"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+					)
+				}
+			}
+		}
 	}
 }
 
