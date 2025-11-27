@@ -5,16 +5,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -56,9 +61,12 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "The descriptive comment of a DHCP MAC Filter object.",
 	},
 	"default_mac_address_expiration": schema.Int64Attribute{
@@ -95,6 +103,9 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"lease_time": schema.Int64Attribute{
 		Computed:            true,
@@ -118,14 +129,18 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
+		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: FiltermacOptionsAttrTypes})),
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "An array of DHCP option dhcpoption structs that lists the DHCP options associated with the object.",
 	},
 	"reserved_for_infoblox": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 1023),
+		},
 		MarkdownDescription: "This is reserved for writing comments related to the particular MAC address filter. The length of comment cannot exceed 1024 bytes.",
 	},
 }
