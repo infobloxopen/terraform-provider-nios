@@ -12,6 +12,14 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_basic" {
   network  = nios_ipam_ipv6network.parent_network.network
 }
 
+
+// Create an IPV6 Fixed Address with Basic Fields
+resource "nios_dhcp_ipv6fixedaddress" "ipv6fa" {
+  ipv6addr = "2001:db8:abcd:1222::18"
+  duid     = "02:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
+  network  = "2001:db8:abcd:1222::/64"
+}
+
 // Create an IPV6 Fixed Address with Additional Fields with PREFIX address type
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   // Basic Fields
