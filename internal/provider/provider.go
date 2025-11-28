@@ -24,6 +24,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/notification"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
 )
@@ -128,6 +129,10 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewIPAssociationResource,
 		dns.NewSharedrecordgroupResource,
 		dns.NewSharedrecordTxtResource,
+		dns.NewSharedrecordMxResource,
+		dns.NewSharedrecordSrvResource,
+		dns.NewSharedrecordAResource,
+		dns.NewSharedrecordCnameResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -137,10 +142,15 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewIpv6dhcpoptionspaceResource,
 		dhcp.NewIpv6dhcpoptiondefinitionResource,
 		dhcp.NewIpv6fixedaddresstemplateResource,
+		dhcp.NewDhcpoptionspaceResource,
+		dhcp.NewDhcpoptiondefinitionResource,
+		dhcp.NewFixedaddresstemplateResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
+		dtc.NewDtcTopologyResource,
+		dtc.NewDtcMonitorSnmpResource,
 		dtc.NewDtcMonitorPdpResource,
 
 		ipam.NewNetworkResource,
@@ -149,6 +159,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewIpv6networkResource,
 		ipam.NewNetworkviewResource,
 		ipam.NewBulkhostnametemplateResource,
+		ipam.NewVlanviewResource,
+		ipam.NewVlanResource,
+		ipam.NewVlanrangeResource,
 
 		cloud.NewAwsrte53taskgroupResource,
 		cloud.NewAwsuserResource,
@@ -180,6 +193,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		notification.NewNotificationRuleResource,
 		notification.NewNotificationRestEndpointResource,
+
+		rpz.NewRecordRpzAResource,
 	}
 }
 
@@ -214,6 +229,10 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewRecordHostDataSource,
 		dns.NewSharedrecordgroupDataSource,
 		dns.NewSharedrecordTxtDataSource,
+		dns.NewSharedrecordMxDataSource,
+		dns.NewSharedrecordSrvDataSource,
+		dns.NewSharedrecordADataSource,
+		dns.NewSharedrecordCnameDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -223,10 +242,15 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewIpv6dhcpoptionspaceDataSource,
 		dhcp.NewIpv6dhcpoptiondefinitionDataSource,
 		dhcp.NewIpv6fixedaddresstemplateDataSource,
+		dhcp.NewDhcpoptionspaceDataSource,
+		dhcp.NewDhcpoptiondefinitionDataSource,
+		dhcp.NewFixedaddresstemplateDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+		dtc.NewDtcTopologyDataSource,
+		dtc.NewDtcMonitorSnmpDataSource,
 		dtc.NewDtcMonitorPdpDataSource,
 
 		ipam.NewNetworkDataSource,
@@ -235,6 +259,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewIpv6networkDataSource,
 		ipam.NewNetworkviewDataSource,
 		ipam.NewBulkhostnametemplateDataSource,
+		ipam.NewVlanviewDataSource,
+		ipam.NewVlanDataSource,
+		ipam.NewVlanrangeDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
 		cloud.NewAwsuserDataSource,
@@ -267,6 +294,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		notification.NewNotificationRuleDataSource,
 
 		notification.NewNotificationRestEndpointDataSource,
+
+		rpz.NewRecordRpzADataSource,
 	}
 }
 
