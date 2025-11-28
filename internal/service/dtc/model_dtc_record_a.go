@@ -3,15 +3,19 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcRecordAModel struct {
@@ -46,11 +50,18 @@ var DtcRecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Flag that indicates whether this record was automatically created by NIOS.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if the record is disabled or not. False means that the record is enabled.",
 	},
 	"dtc_server": schema.StringAttribute{
