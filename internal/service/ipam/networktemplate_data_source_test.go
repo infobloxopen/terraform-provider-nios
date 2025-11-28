@@ -24,7 +24,7 @@ func TestAccNetworktemplateDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworktemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworktemplateDataSourceConfigFilters(name),
+				Config: testAccNetworktemplateDataSourceConfigFilters(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
@@ -47,7 +47,7 @@ func TestAccNetworktemplateDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworktemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworktemplateDataSourceConfigExtAttrFilters(name, acctest.RandomName()),
+				Config: testAccNetworktemplateDataSourceConfigExtAttrFilters(name, 24, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
@@ -136,10 +136,11 @@ func testAccCheckNetworktemplateResourceAttrPair(resourceName, dataSourceName st
 	}
 }
 
-func testAccNetworktemplateDataSourceConfigFilters(name string) string {
+func testAccNetworktemplateDataSourceConfigFilters(name string, netmask int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test" {
-	name = %q
+  name = %q
+  netmask = %d
 }
 
 data "nios_ipam_networktemplate" "test" {
@@ -147,22 +148,23 @@ data "nios_ipam_networktemplate" "test" {
 	name = nios_ipam_networktemplate.test.name
   }
 }
-`, name)
+`, name, netmask)
 }
 
-func testAccNetworktemplateDataSourceConfigExtAttrFilters(name, extAttrsValue string) string {
+func testAccNetworktemplateDataSourceConfigExtAttrFilters(name string, netmask int, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test" {
   name = %q
+  netmask = %d
   extattrs = {
-	Site = %q
+    Site = %q
   } 
 }
 
 data "nios_ipam_networktemplate" "test" {
   extattrfilters = {
-	Site = nios_ipam_networktemplate.test.extattrs.Site
+    Site = nios_ipam_networktemplate.test.extattrs.Site
   }
 }
-`, name, extAttrsValue)
+`, name, netmask, extAttrsValue)
 }

@@ -21,11 +21,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -856,7 +858,14 @@ func (m *NetworktemplateModel) Flatten(ctx context.Context, from *ipam.Networkte
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Netmask = flex.FlattenInt64Pointer(from.Netmask)
 	m.Nextserver = flex.FlattenStringPointer(from.Nextserver)
+	planOptions := m.Options
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, NetworktemplateOptionsAttrTypes, diags, FlattenNetworktemplateOptions)
+	if !planOptions.IsUnknown() {
+		reOrderedOptions, diags := utils.ReorderAndFilterDHCPOptions(ctx, planOptions, m.Options)
+		if !diags.HasError() {
+			m.Options = reOrderedOptions.(basetypes.ListValue)
+		}
+	}
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RangeTemplates = flex.FlattenFrameworkListString(ctx, from.RangeTemplates, diags)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)

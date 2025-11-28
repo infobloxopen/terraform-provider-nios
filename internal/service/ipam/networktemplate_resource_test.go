@@ -15,30 +15,12 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-/*
-// Manage ipam Networktemplate with Basic Fields
-resource "nios_ipam_networktemplate" "ipam_networktemplate_basic" {
-    name = "NAME_REPLACE_ME"
-}
-
-// Manage ipam Networktemplate with Additional Fields
-resource "nios_ipam_networktemplate" "ipam_networktemplate_with_additional_fields" {
-    name = "NAME_REPLACE_ME"
-
-// TODO : Add additional optional fields below
-
-    //Extensible Attributes
-    extattrs = {
-        Site = "location-1"
-    }
-}
-*/
-
 var readableAttributesForNetworktemplate = "allow_any_netmask,authority,auto_create_reversezone,bootfile,bootserver,cloud_api_compatible,comment,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,delegated_member,deny_bootp,email_list,enable_ddns,enable_dhcp_thresholds,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,extattrs,fixed_address_templates,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ipam_email_addresses,ipam_threshold_settings,ipam_trap_settings,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,members,name,netmask,nextserver,options,pxe_lease_time,range_templates,recycle_leases,rir,rir_organization,rir_registration_action,rir_registration_status,send_rir_request,update_dns_on_lease_renewal,use_authority,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_ignore_dhcp_option_list_request,use_ipam_email_addresses,use_ipam_threshold_settings,use_ipam_trap_settings,use_lease_scavenge_time,use_logic_filter_rules,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_update_dns_on_lease_renewal"
 
 func TestAccNetworktemplateResource_basic(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -46,16 +28,16 @@ func TestAccNetworktemplateResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccNetworktemplateBasicConfig(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "netmask", "24"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "allow_any_netmask", "false"),
 					resource.TestCheckResourceAttr(resourceName, "authority", "false"),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "false"),
-					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "false"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "true"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "0"),
@@ -70,14 +52,9 @@ func TestAccNetworktemplateResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "95"),
 					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "85"),
 					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "false"),
-					// TODO : Add validation for default value for field ipam_threshold_settings if applicable
-					// TODO : Add validation for default value for field ipam_trap_settings if applicable
 					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "-1"),
-					// TODO : Add validation for default value for field logic_filter_rules if applicable
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "0"),
 					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "10"),
-					// TODO : Add validation for default value for field members if applicable
-					// TODO : Add validation for default value for field options if applicable
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
@@ -116,6 +93,7 @@ func TestAccNetworktemplateResource_basic(t *testing.T) {
 func TestAccNetworktemplateResource_disappears(t *testing.T) {
 	resourceName := "nios_ipam_networktemplate.test"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -123,7 +101,7 @@ func TestAccNetworktemplateResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworktemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworktemplateBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccNetworktemplateBasicConfig(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					testAccCheckNetworktemplateDisappears(context.Background(), &v),
@@ -137,6 +115,7 @@ func TestAccNetworktemplateResource_disappears(t *testing.T) {
 func TestAccNetworktemplateResource_Import(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -144,7 +123,7 @@ func TestAccNetworktemplateResource_Import(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccNetworktemplateBasicConfig(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 				),
@@ -157,7 +136,6 @@ func TestAccNetworktemplateResource_Import(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "ref",
 				PlanOnly:                             true,
-				//ExpectError:                          regexp.MustCompile(`ImportStateVerify attributes not equivalent`),
 			},
 			// Import and Verify
 			{
@@ -176,6 +154,7 @@ func TestAccNetworktemplateResource_Import(t *testing.T) {
 func TestAccNetworktemplateResource_AllowAnyNetmask(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_allow_any_netmask"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -183,7 +162,7 @@ func TestAccNetworktemplateResource_AllowAnyNetmask(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateAllowAnyNetmask("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateAllowAnyNetmask(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_any_netmask", "true"),
@@ -191,7 +170,7 @@ func TestAccNetworktemplateResource_AllowAnyNetmask(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateAllowAnyNetmask("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateAllowAnyNetmask(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_any_netmask", "false"),
@@ -205,6 +184,7 @@ func TestAccNetworktemplateResource_AllowAnyNetmask(t *testing.T) {
 func TestAccNetworktemplateResource_Authority(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_authority"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -212,7 +192,7 @@ func TestAccNetworktemplateResource_Authority(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateAuthority("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateAuthority(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "authority", "true"),
@@ -220,7 +200,7 @@ func TestAccNetworktemplateResource_Authority(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateAuthority("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateAuthority(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "authority", "false"),
@@ -234,6 +214,7 @@ func TestAccNetworktemplateResource_Authority(t *testing.T) {
 func TestAccNetworktemplateResource_AutoCreateReversezone(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_auto_create_reversezone"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -241,7 +222,7 @@ func TestAccNetworktemplateResource_AutoCreateReversezone(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateAutoCreateReversezone("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateAutoCreateReversezone(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "true"),
@@ -249,7 +230,7 @@ func TestAccNetworktemplateResource_AutoCreateReversezone(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateAutoCreateReversezone("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateAutoCreateReversezone(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "false"),
@@ -263,6 +244,7 @@ func TestAccNetworktemplateResource_AutoCreateReversezone(t *testing.T) {
 func TestAccNetworktemplateResource_Bootfile(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_bootfile"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -270,18 +252,18 @@ func TestAccNetworktemplateResource_Bootfile(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateBootfile("NAME_REPLACE_ME", "BOOTFILE_REPLACE_ME"),
+				Config: testAccNetworktemplateBootfile(name, 24, "bootfile.txt"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bootfile", "BOOTFILE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "bootfile", "bootfile.txt"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateBootfile("NAME_REPLACE_ME", "BOOTFILE_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateBootfile(name, 24, "bootfile_UPDATED.txt"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bootfile", "BOOTFILE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "bootfile", "bootfile_UPDATED.txt"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -292,6 +274,7 @@ func TestAccNetworktemplateResource_Bootfile(t *testing.T) {
 func TestAccNetworktemplateResource_Bootserver(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_bootserver"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -299,18 +282,18 @@ func TestAccNetworktemplateResource_Bootserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateBootserver("NAME_REPLACE_ME", "BOOTSERVER_REPLACE_ME"),
+				Config: testAccNetworktemplateBootserver(name, 24, "test_bootserver"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bootserver", "BOOTSERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "bootserver", "test_bootserver"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateBootserver("NAME_REPLACE_ME", "BOOTSERVER_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateBootserver(name, 24, "updated_test_bootserver"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bootserver", "BOOTSERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "bootserver", "updated_test_bootserver"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -318,9 +301,14 @@ func TestAccNetworktemplateResource_Bootserver(t *testing.T) {
 	})
 }
 
+// The testcase will fail, as this is a known issue
+// If the user is a cloud-user, then they need Terraform internal ID with cloud permission and enable cloud delegation for the user to create a range template.
+// if the user is a non cloud-user, they need to have  Terraform internal ID without cloud permission.
 func TestAccNetworktemplateResource_CloudApiCompatible(t *testing.T) {
+	t.Skip("Skipping this test as it is a known issue.")
 	var resourceName = "nios_ipam_networktemplate.test_cloud_api_compatible"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -328,7 +316,7 @@ func TestAccNetworktemplateResource_CloudApiCompatible(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateCloudApiCompatible("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateCloudApiCompatible(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "true"),
@@ -336,7 +324,7 @@ func TestAccNetworktemplateResource_CloudApiCompatible(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateCloudApiCompatible("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateCloudApiCompatible(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "false"),
@@ -350,6 +338,7 @@ func TestAccNetworktemplateResource_CloudApiCompatible(t *testing.T) {
 func TestAccNetworktemplateResource_Comment(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_comment"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -357,7 +346,7 @@ func TestAccNetworktemplateResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateComment("NAME_REPLACE_ME", "Comment for the object"),
+				Config: testAccNetworktemplateComment(name, 24, "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -365,7 +354,7 @@ func TestAccNetworktemplateResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateComment("NAME_REPLACE_ME", "Updated comment for the object"),
+				Config: testAccNetworktemplateComment(name, 24, "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -379,6 +368,7 @@ func TestAccNetworktemplateResource_Comment(t *testing.T) {
 func TestAccNetworktemplateResource_DdnsDomainname(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ddns_domainname"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -386,18 +376,18 @@ func TestAccNetworktemplateResource_DdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateDdnsDomainname("NAME_REPLACE_ME", "DDNS_DOMAINNAME_REPLACE_ME"),
+				Config: testAccNetworktemplateDdnsDomainname(name, 24, "ddns_domain.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "ddns_domain.name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDdnsDomainname("NAME_REPLACE_ME", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateDdnsDomainname(name, 24, "UPDATED_ddns_domain.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "UPDATED_ddns_domain.name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -408,6 +398,7 @@ func TestAccNetworktemplateResource_DdnsDomainname(t *testing.T) {
 func TestAccNetworktemplateResource_DdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ddns_generate_hostname"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -415,7 +406,7 @@ func TestAccNetworktemplateResource_DdnsGenerateHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateDdnsGenerateHostname("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateDdnsGenerateHostname(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "true"),
@@ -423,7 +414,7 @@ func TestAccNetworktemplateResource_DdnsGenerateHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDdnsGenerateHostname("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateDdnsGenerateHostname(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
@@ -437,6 +428,7 @@ func TestAccNetworktemplateResource_DdnsGenerateHostname(t *testing.T) {
 func TestAccNetworktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ddns_server_always_updates"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -444,7 +436,7 @@ func TestAccNetworktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateDdnsServerAlwaysUpdates("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateDdnsServerAlwaysUpdates(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
@@ -452,7 +444,7 @@ func TestAccNetworktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDdnsServerAlwaysUpdates("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateDdnsServerAlwaysUpdates(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "false"),
@@ -466,6 +458,7 @@ func TestAccNetworktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 func TestAccNetworktemplateResource_DdnsTtl(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ddns_ttl"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -473,18 +466,18 @@ func TestAccNetworktemplateResource_DdnsTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateDdnsTtl("NAME_REPLACE_ME", "DDNS_TTL_REPLACE_ME"),
+				Config: testAccNetworktemplateDdnsTtl(name, 24, 1000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "DDNS_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "1000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDdnsTtl("NAME_REPLACE_ME", "DDNS_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateDdnsTtl(name, 24, 1000000000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "DDNS_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "1000000000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -494,6 +487,7 @@ func TestAccNetworktemplateResource_DdnsTtl(t *testing.T) {
 func TestAccNetworktemplateResource_DdnsUpdateFixedAddresses(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ddns_update_fixed_addresses"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -501,7 +495,7 @@ func TestAccNetworktemplateResource_DdnsUpdateFixedAddresses(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateDdnsUpdateFixedAddresses("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateDdnsUpdateFixedAddresses(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_update_fixed_addresses", "true"),
@@ -509,7 +503,7 @@ func TestAccNetworktemplateResource_DdnsUpdateFixedAddresses(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDdnsUpdateFixedAddresses("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateDdnsUpdateFixedAddresses(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_update_fixed_addresses", "false"),
@@ -523,6 +517,7 @@ func TestAccNetworktemplateResource_DdnsUpdateFixedAddresses(t *testing.T) {
 func TestAccNetworktemplateResource_DdnsUseOption81(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ddns_use_option81"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -530,7 +525,7 @@ func TestAccNetworktemplateResource_DdnsUseOption81(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateDdnsUseOption81("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateDdnsUseOption81(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_use_option81", "true"),
@@ -538,7 +533,7 @@ func TestAccNetworktemplateResource_DdnsUseOption81(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDdnsUseOption81("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateDdnsUseOption81(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_use_option81", "false"),
@@ -552,8 +547,15 @@ func TestAccNetworktemplateResource_DdnsUseOption81(t *testing.T) {
 func TestAccNetworktemplateResource_DelegatedMember(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_delegated_member"
 	var v ipam.Networktemplate
-	delegatedMemberVal := map[string]string{}
-	delegatedMemberValUpdated := map[string]string{}
+	name := acctest.RandomNameWithPrefix("network-template")
+	delegatedMemberVal := map[string]any{
+		"name":     "infoblox.172_28_82_250",
+		"ipv4addr": "172.28.82.250",
+	}
+	delegatedMemberValUpdated := map[string]any{
+		"name":     "infoblox.localdomain",
+		"ipv4addr": "1.1.1.1",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -561,18 +563,20 @@ func TestAccNetworktemplateResource_DelegatedMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateDelegatedMember("NAME_REPLACE_ME", delegatedMemberVal),
+				Config: testAccNetworktemplateDelegatedMember(name, 24, delegatedMemberVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member", "DELEGATED_MEMBER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_250"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.250"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDelegatedMember("NAME_REPLACE_ME", delegatedMemberValUpdated),
+				Config: testAccNetworktemplateDelegatedMember(name, 24, delegatedMemberValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member", "DELEGATED_MEMBER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -582,6 +586,7 @@ func TestAccNetworktemplateResource_DelegatedMember(t *testing.T) {
 func TestAccNetworktemplateResource_DenyBootp(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_deny_bootp"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -589,7 +594,7 @@ func TestAccNetworktemplateResource_DenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateDenyBootp("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateDenyBootp(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "true"),
@@ -597,7 +602,7 @@ func TestAccNetworktemplateResource_DenyBootp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDenyBootp("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateDenyBootp(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "false"),
@@ -611,8 +616,9 @@ func TestAccNetworktemplateResource_DenyBootp(t *testing.T) {
 func TestAccNetworktemplateResource_EmailList(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_email_list"
 	var v ipam.Networktemplate
-	emailListVal := []string{"EMAIL_LIST_REPLACE_ME1", "EMAIL_LIST_REPLACE_ME2"}
-	emailListValUpdated := []string{"EMAIL_LIST_REPLACE_ME1", "EMAIL_LIST_REPLACE_ME2"}
+	name := acctest.RandomNameWithPrefix("network-template")
+	emailListVal := []string{"bbb@info.com", "aaa@wapi.com"}
+	emailListValUpdated := []string{"abc@info.com", "xyz@wapi.com"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -620,18 +626,20 @@ func TestAccNetworktemplateResource_EmailList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateEmailList("NAME_REPLACE_ME", emailListVal),
+				Config: testAccNetworktemplateEmailList(name, 24, emailListVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "email_list", "EMAIL_LIST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "email_list.0", "bbb@info.com"),
+					resource.TestCheckResourceAttr(resourceName, "email_list.1", "aaa@wapi.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateEmailList("NAME_REPLACE_ME", emailListValUpdated),
+				Config: testAccNetworktemplateEmailList(name, 24, emailListValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "email_list", "EMAIL_LIST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "email_list.0", "abc@info.com"),
+					resource.TestCheckResourceAttr(resourceName, "email_list.1", "xyz@wapi.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -642,6 +650,7 @@ func TestAccNetworktemplateResource_EmailList(t *testing.T) {
 func TestAccNetworktemplateResource_EnableDdns(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_enable_ddns"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -649,7 +658,7 @@ func TestAccNetworktemplateResource_EnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateEnableDdns("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateEnableDdns(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "true"),
@@ -657,7 +666,7 @@ func TestAccNetworktemplateResource_EnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateEnableDdns("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateEnableDdns(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
@@ -671,6 +680,7 @@ func TestAccNetworktemplateResource_EnableDdns(t *testing.T) {
 func TestAccNetworktemplateResource_EnableDhcpThresholds(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_enable_dhcp_thresholds"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -678,7 +688,7 @@ func TestAccNetworktemplateResource_EnableDhcpThresholds(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateEnableDhcpThresholds("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateEnableDhcpThresholds(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_dhcp_thresholds", "true"),
@@ -686,7 +696,7 @@ func TestAccNetworktemplateResource_EnableDhcpThresholds(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateEnableDhcpThresholds("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateEnableDhcpThresholds(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_dhcp_thresholds", "false"),
@@ -700,6 +710,7 @@ func TestAccNetworktemplateResource_EnableDhcpThresholds(t *testing.T) {
 func TestAccNetworktemplateResource_EnableEmailWarnings(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_enable_email_warnings"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -707,7 +718,7 @@ func TestAccNetworktemplateResource_EnableEmailWarnings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateEnableEmailWarnings("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateEnableEmailWarnings(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_email_warnings", "true"),
@@ -715,7 +726,7 @@ func TestAccNetworktemplateResource_EnableEmailWarnings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateEnableEmailWarnings("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateEnableEmailWarnings(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_email_warnings", "false"),
@@ -729,6 +740,7 @@ func TestAccNetworktemplateResource_EnableEmailWarnings(t *testing.T) {
 func TestAccNetworktemplateResource_EnablePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_enable_pxe_lease_time"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -736,7 +748,7 @@ func TestAccNetworktemplateResource_EnablePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateEnablePxeLeaseTime("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateEnablePxeLeaseTime(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "true"),
@@ -744,7 +756,7 @@ func TestAccNetworktemplateResource_EnablePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateEnablePxeLeaseTime("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateEnablePxeLeaseTime(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
@@ -758,6 +770,7 @@ func TestAccNetworktemplateResource_EnablePxeLeaseTime(t *testing.T) {
 func TestAccNetworktemplateResource_EnableSnmpWarnings(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_enable_snmp_warnings"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -765,7 +778,7 @@ func TestAccNetworktemplateResource_EnableSnmpWarnings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateEnableSnmpWarnings("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateEnableSnmpWarnings(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_snmp_warnings", "true"),
@@ -773,7 +786,7 @@ func TestAccNetworktemplateResource_EnableSnmpWarnings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateEnableSnmpWarnings("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateEnableSnmpWarnings(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_snmp_warnings", "false"),
@@ -787,6 +800,7 @@ func TestAccNetworktemplateResource_EnableSnmpWarnings(t *testing.T) {
 func TestAccNetworktemplateResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_extattrs"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -796,7 +810,7 @@ func TestAccNetworktemplateResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateExtAttrs("NAME_REPLACE_ME", map[string]string{
+				Config: testAccNetworktemplateExtAttrs(name, 24, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -806,7 +820,7 @@ func TestAccNetworktemplateResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateExtAttrs("NAME_REPLACE_ME", map[string]string{
+				Config: testAccNetworktemplateExtAttrs(name, 24, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -822,6 +836,7 @@ func TestAccNetworktemplateResource_ExtAttrs(t *testing.T) {
 func TestAccNetworktemplateResource_FixedAddressTemplates(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_fixed_address_templates"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	fixedAddressTemplatesVal := []string{"FIXED_ADDRESS_TEMPLATES_REPLACE_ME1", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME2"}
 	fixedAddressTemplatesValUpdated := []string{"FIXED_ADDRESS_TEMPLATES_REPLACE_ME1", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME2"}
 
@@ -831,7 +846,7 @@ func TestAccNetworktemplateResource_FixedAddressTemplates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateFixedAddressTemplates("NAME_REPLACE_ME", fixedAddressTemplatesVal),
+				Config: testAccNetworktemplateFixedAddressTemplates(name, 24, fixedAddressTemplatesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fixed_address_templates", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME"),
@@ -839,7 +854,7 @@ func TestAccNetworktemplateResource_FixedAddressTemplates(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateFixedAddressTemplates("NAME_REPLACE_ME", fixedAddressTemplatesValUpdated),
+				Config: testAccNetworktemplateFixedAddressTemplates(name, 24, fixedAddressTemplatesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fixed_address_templates", "FIXED_ADDRESS_TEMPLATES_UPDATE_REPLACE_ME"),
@@ -853,6 +868,7 @@ func TestAccNetworktemplateResource_FixedAddressTemplates(t *testing.T) {
 func TestAccNetworktemplateResource_HighWaterMark(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_high_water_mark"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -860,18 +876,18 @@ func TestAccNetworktemplateResource_HighWaterMark(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateHighWaterMark("NAME_REPLACE_ME", "HIGH_WATER_MARK_REPLACE_ME"),
+				Config: testAccNetworktemplateHighWaterMark(name, 24, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "HIGH_WATER_MARK_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateHighWaterMark("NAME_REPLACE_ME", "HIGH_WATER_MARK_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateHighWaterMark(name, 24, 99),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "HIGH_WATER_MARK_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "high_water_mark", "99"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -881,6 +897,7 @@ func TestAccNetworktemplateResource_HighWaterMark(t *testing.T) {
 func TestAccNetworktemplateResource_HighWaterMarkReset(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_high_water_mark_reset"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -888,18 +905,18 @@ func TestAccNetworktemplateResource_HighWaterMarkReset(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateHighWaterMarkReset("NAME_REPLACE_ME", "HIGH_WATER_MARK_RESET_REPLACE_ME"),
+				Config: testAccNetworktemplateHighWaterMarkReset(name, 24, 50),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "HIGH_WATER_MARK_RESET_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "50"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateHighWaterMarkReset("NAME_REPLACE_ME", "HIGH_WATER_MARK_RESET_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateHighWaterMarkReset(name, 24, 100),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "HIGH_WATER_MARK_RESET_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "high_water_mark_reset", "100"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -909,6 +926,7 @@ func TestAccNetworktemplateResource_HighWaterMarkReset(t *testing.T) {
 func TestAccNetworktemplateResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ignore_dhcp_option_list_request"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -916,7 +934,7 @@ func TestAccNetworktemplateResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateIgnoreDhcpOptionListRequest("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateIgnoreDhcpOptionListRequest(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "true"),
@@ -924,7 +942,7 @@ func TestAccNetworktemplateResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateIgnoreDhcpOptionListRequest("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateIgnoreDhcpOptionListRequest(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "false"),
@@ -938,8 +956,9 @@ func TestAccNetworktemplateResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 func TestAccNetworktemplateResource_IpamEmailAddresses(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ipam_email_addresses"
 	var v ipam.Networktemplate
-	ipamEmailAddressesVal := []string{"IPAM_EMAIL_ADDRESSES_REPLACE_ME1", "IPAM_EMAIL_ADDRESSES_REPLACE_ME2"}
-	ipamEmailAddressesValUpdated := []string{"IPAM_EMAIL_ADDRESSES_REPLACE_ME1", "IPAM_EMAIL_ADDRESSES_REPLACE_ME2"}
+	name := acctest.RandomNameWithPrefix("network-template")
+	ipamEmailAddressesVal := []string{"bbb@info.com", "aaa@wapi.com"}
+	ipamEmailAddressesValUpdated := []string{"abc@info.com", "xyz@wapi.com"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -947,18 +966,20 @@ func TestAccNetworktemplateResource_IpamEmailAddresses(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateIpamEmailAddresses("NAME_REPLACE_ME", ipamEmailAddressesVal),
+				Config: testAccNetworktemplateIpamEmailAddresses(name, 24, ipamEmailAddressesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipam_email_addresses", "IPAM_EMAIL_ADDRESSES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipam_email_addresses.0", "bbb@info.com"),
+					resource.TestCheckResourceAttr(resourceName, "ipam_email_addresses.1", "aaa@wapi.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateIpamEmailAddresses("NAME_REPLACE_ME", ipamEmailAddressesValUpdated),
+				Config: testAccNetworktemplateIpamEmailAddresses(name, 24, ipamEmailAddressesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipam_email_addresses", "IPAM_EMAIL_ADDRESSES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipam_email_addresses.0", "abc@info.com"),
+					resource.TestCheckResourceAttr(resourceName, "ipam_email_addresses.1", "xyz@wapi.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -969,8 +990,15 @@ func TestAccNetworktemplateResource_IpamEmailAddresses(t *testing.T) {
 func TestAccNetworktemplateResource_IpamThresholdSettings(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ipam_threshold_settings"
 	var v ipam.Networktemplate
-	ipamThresholdSettingsVal := map[string]string{}
-	ipamThresholdSettingsValUpdated := map[string]string{}
+	name := acctest.RandomNameWithPrefix("network-template")
+	ipamThresholdSettingsVal := map[string]any{
+		"trigger_value": "100",
+		"reset_value":   "10",
+	}
+	ipamThresholdSettingsValUpdated := map[string]any{
+		"trigger_value": "9",
+		"reset_value":   "1",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -978,7 +1006,7 @@ func TestAccNetworktemplateResource_IpamThresholdSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateIpamThresholdSettings("NAME_REPLACE_ME", ipamThresholdSettingsVal),
+				Config: testAccNetworktemplateIpamThresholdSettings(name, 24, ipamThresholdSettingsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipam_threshold_settings", "IPAM_THRESHOLD_SETTINGS_REPLACE_ME"),
@@ -986,7 +1014,7 @@ func TestAccNetworktemplateResource_IpamThresholdSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateIpamThresholdSettings("NAME_REPLACE_ME", ipamThresholdSettingsValUpdated),
+				Config: testAccNetworktemplateIpamThresholdSettings(name, 24, ipamThresholdSettingsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipam_threshold_settings", "IPAM_THRESHOLD_SETTINGS_UPDATE_REPLACE_ME"),
@@ -999,8 +1027,15 @@ func TestAccNetworktemplateResource_IpamThresholdSettings(t *testing.T) {
 func TestAccNetworktemplateResource_IpamTrapSettings(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_ipam_trap_settings"
 	var v ipam.Networktemplate
-	ipamTrapSettingsVal := map[string]string{}
-	ipamTrapSettingsValUpdated := map[string]string{}
+	name := acctest.RandomNameWithPrefix("network-template")
+	ipamTrapSettingsVal := map[string]any{
+		"enable_email_warnings": "true",
+		"enable_snmp_warnings":  "true",
+	}
+	ipamTrapSettingsValUpdated := map[string]any{
+		"enable_email_warnings": "false",
+		"enable_snmp_warnings":  "false",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1008,19 +1043,20 @@ func TestAccNetworktemplateResource_IpamTrapSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateIpamTrapSettings("NAME_REPLACE_ME", ipamTrapSettingsVal),
+				Config: testAccNetworktemplateIpamTrapSettings(name, 24, ipamTrapSettingsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings", "IPAM_TRAP_SETTINGS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_email_warnings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_snmp_warnings", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateIpamTrapSettings("NAME_REPLACE_ME", ipamTrapSettingsValUpdated),
+				Config: testAccNetworktemplateIpamTrapSettings(name, 24, ipamTrapSettingsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings", "IPAM_TRAP_SETTINGS_UPDATE_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_email_warnings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_snmp_warnings", "false")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -1029,6 +1065,7 @@ func TestAccNetworktemplateResource_IpamTrapSettings(t *testing.T) {
 func TestAccNetworktemplateResource_LeaseScavengeTime(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_lease_scavenge_time"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1036,18 +1073,18 @@ func TestAccNetworktemplateResource_LeaseScavengeTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateLeaseScavengeTime("NAME_REPLACE_ME", "LEASE_SCAVENGE_TIME_REPLACE_ME"),
+				Config: testAccNetworktemplateLeaseScavengeTime(name, 24, 2147471999),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "LEASE_SCAVENGE_TIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "2147471999"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateLeaseScavengeTime("NAME_REPLACE_ME", "LEASE_SCAVENGE_TIME_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateLeaseScavengeTime(name, 24, 86401),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "LEASE_SCAVENGE_TIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "lease_scavenge_time", "86401"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1057,8 +1094,19 @@ func TestAccNetworktemplateResource_LeaseScavengeTime(t *testing.T) {
 func TestAccNetworktemplateResource_LogicFilterRules(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_logic_filter_rules"
 	var v ipam.Networktemplate
-	logicFilterRulesVal := []map[string]any{}
-	logicFilterRulesValUpdated := []map[string]any{}
+	name := acctest.RandomNameWithPrefix("network-template")
+	logicFilterRulesVal := []map[string]any{
+		{
+			"filter": "ipv6_option_filter",
+			"type":   "Option",
+		},
+	}
+	logicFilterRulesValUpdated := []map[string]any{
+		{
+			"filter": "ipv6_option_filter1",
+			"type":   "Option",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1066,18 +1114,20 @@ func TestAccNetworktemplateResource_LogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateLogicFilterRules("NAME_REPLACE_ME", logicFilterRulesVal),
+				Config: testAccNetworktemplateLogicFilterRules(name, 24, logicFilterRulesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.filter", "ipv6_option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.type", "Option"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateLogicFilterRules("NAME_REPLACE_ME", logicFilterRulesValUpdated),
+				Config: testAccNetworktemplateLogicFilterRules(name, 24, logicFilterRulesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.filter", "ipv6_option_filter1"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.type", "Option"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1088,6 +1138,7 @@ func TestAccNetworktemplateResource_LogicFilterRules(t *testing.T) {
 func TestAccNetworktemplateResource_LowWaterMark(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_low_water_mark"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1095,18 +1146,18 @@ func TestAccNetworktemplateResource_LowWaterMark(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateLowWaterMark("NAME_REPLACE_ME", "LOW_WATER_MARK_REPLACE_ME"),
+				Config: testAccNetworktemplateLowWaterMark(name, 24, 100),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "LOW_WATER_MARK_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "100"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateLowWaterMark("NAME_REPLACE_ME", "LOW_WATER_MARK_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateLowWaterMark(name, 24, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "LOW_WATER_MARK_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "low_water_mark", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1116,6 +1167,7 @@ func TestAccNetworktemplateResource_LowWaterMark(t *testing.T) {
 func TestAccNetworktemplateResource_LowWaterMarkReset(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_low_water_mark_reset"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1123,18 +1175,18 @@ func TestAccNetworktemplateResource_LowWaterMarkReset(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateLowWaterMarkReset("NAME_REPLACE_ME", "LOW_WATER_MARK_RESET_REPLACE_ME"),
+				Config: testAccNetworktemplateLowWaterMarkReset(name, 24, "30"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "LOW_WATER_MARK_RESET_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "30"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateLowWaterMarkReset("NAME_REPLACE_ME", "LOW_WATER_MARK_RESET_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateLowWaterMarkReset(name, 24, "0"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "LOW_WATER_MARK_RESET_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "low_water_mark_reset", "0"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1144,6 +1196,7 @@ func TestAccNetworktemplateResource_LowWaterMarkReset(t *testing.T) {
 func TestAccNetworktemplateResource_Members(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_members"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	membersVal := []map[string]any{}
 	membersValUpdated := []map[string]any{}
 
@@ -1153,7 +1206,7 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateMembers("NAME_REPLACE_ME", membersVal),
+				Config: testAccNetworktemplateMembers(name, 24, membersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members", "MEMBERS_REPLACE_ME"),
@@ -1161,7 +1214,7 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateMembers("NAME_REPLACE_ME", membersValUpdated),
+				Config: testAccNetworktemplateMembers(name, 24, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members", "MEMBERS_UPDATE_REPLACE_ME"),
@@ -1175,6 +1228,8 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 func TestAccNetworktemplateResource_Name(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_name"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
+	nameUpdated := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1182,18 +1237,18 @@ func TestAccNetworktemplateResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateName("NAME_REPLACE_ME"),
+				Config: testAccNetworktemplateName(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateName("NAME_REPLACE_ME"),
+				Config: testAccNetworktemplateName(nameUpdated, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdated),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1204,6 +1259,7 @@ func TestAccNetworktemplateResource_Name(t *testing.T) {
 func TestAccNetworktemplateResource_Netmask(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_netmask"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1211,18 +1267,18 @@ func TestAccNetworktemplateResource_Netmask(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateNetmask("NAME_REPLACE_ME", "NETMASK_REPLACE_ME"),
+				Config: testAccNetworktemplateNetmask(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "netmask", "NETMASK_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "netmask", "24"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateNetmask("NAME_REPLACE_ME", "NETMASK_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateNetmask(name, 42),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "netmask", "NETMASK_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "netmask", "42"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1232,6 +1288,7 @@ func TestAccNetworktemplateResource_Netmask(t *testing.T) {
 func TestAccNetworktemplateResource_Nextserver(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_nextserver"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1239,7 +1296,7 @@ func TestAccNetworktemplateResource_Nextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateNextserver("NAME_REPLACE_ME", "NEXTSERVER_REPLACE_ME"),
+				Config: testAccNetworktemplateNextserver(name, 24, "NEXTSERVER_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_REPLACE_ME"),
@@ -1247,7 +1304,7 @@ func TestAccNetworktemplateResource_Nextserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateNextserver("NAME_REPLACE_ME", "NEXTSERVER_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateNextserver(name, 24, "NEXTSERVER_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_UPDATE_REPLACE_ME"),
@@ -1261,8 +1318,29 @@ func TestAccNetworktemplateResource_Nextserver(t *testing.T) {
 func TestAccNetworktemplateResource_Options(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_options"
 	var v ipam.Networktemplate
-	optionsVal := []map[string]any{}
-	optionsValUpdated := []map[string]any{}
+	name := acctest.RandomNameWithPrefix("network-template")
+	optionsVal := []map[string]any{
+		{
+			"name":  "time-offset",
+			"num":   2,
+			"value": "50",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+
+	optionsValUpdated := []map[string]any{
+		{
+			"num":   51,
+			"value": "7200",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1270,19 +1348,24 @@ func TestAccNetworktemplateResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateOptions("NAME_REPLACE_ME", optionsVal),
+				Config: testAccNetworktemplateOptions(name, 24, optionsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "50"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1")),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateOptions("NAME_REPLACE_ME", optionsValUpdated),
+				Config: testAccNetworktemplateOptions(name, 24, optionsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_UPDATE_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "7200"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -1292,6 +1375,7 @@ func TestAccNetworktemplateResource_Options(t *testing.T) {
 func TestAccNetworktemplateResource_PxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_pxe_lease_time"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1299,18 +1383,18 @@ func TestAccNetworktemplateResource_PxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplatePxeLeaseTime("NAME_REPLACE_ME", "PXE_LEASE_TIME_REPLACE_ME"),
+				Config: testAccNetworktemplatePxeLeaseTime(name, 24, "1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "PXE_LEASE_TIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplatePxeLeaseTime("NAME_REPLACE_ME", "PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplatePxeLeaseTime(name, 24, "1000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "1000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1320,6 +1404,7 @@ func TestAccNetworktemplateResource_PxeLeaseTime(t *testing.T) {
 func TestAccNetworktemplateResource_RangeTemplates(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_range_templates"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	rangeTemplatesVal := []string{"RANGE_TEMPLATES_REPLACE_ME1", "RANGE_TEMPLATES_REPLACE_ME2"}
 	rangeTemplatesValUpdated := []string{"RANGE_TEMPLATES_REPLACE_ME1", "RANGE_TEMPLATES_REPLACE_ME2"}
 
@@ -1329,7 +1414,7 @@ func TestAccNetworktemplateResource_RangeTemplates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateRangeTemplates("NAME_REPLACE_ME", rangeTemplatesVal),
+				Config: testAccNetworktemplateRangeTemplates(name, 24, rangeTemplatesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "range_templates", "RANGE_TEMPLATES_REPLACE_ME"),
@@ -1337,7 +1422,7 @@ func TestAccNetworktemplateResource_RangeTemplates(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateRangeTemplates("NAME_REPLACE_ME", rangeTemplatesValUpdated),
+				Config: testAccNetworktemplateRangeTemplates(name, 24, rangeTemplatesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "range_templates", "RANGE_TEMPLATES_UPDATE_REPLACE_ME"),
@@ -1351,6 +1436,7 @@ func TestAccNetworktemplateResource_RangeTemplates(t *testing.T) {
 func TestAccNetworktemplateResource_RecycleLeases(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_recycle_leases"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1358,7 +1444,7 @@ func TestAccNetworktemplateResource_RecycleLeases(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateRecycleLeases("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateRecycleLeases(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
@@ -1366,7 +1452,7 @@ func TestAccNetworktemplateResource_RecycleLeases(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateRecycleLeases("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateRecycleLeases(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "false"),
@@ -1380,6 +1466,7 @@ func TestAccNetworktemplateResource_RecycleLeases(t *testing.T) {
 func TestAccNetworktemplateResource_RirOrganization(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_rir_organization"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1387,7 +1474,7 @@ func TestAccNetworktemplateResource_RirOrganization(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateRirOrganization("NAME_REPLACE_ME", "RIR_ORGANIZATION_REPLACE_ME"),
+				Config: testAccNetworktemplateRirOrganization(name, 24, "RIR_ORGANIZATION_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_organization", "RIR_ORGANIZATION_REPLACE_ME"),
@@ -1395,7 +1482,7 @@ func TestAccNetworktemplateResource_RirOrganization(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateRirOrganization("NAME_REPLACE_ME", "RIR_ORGANIZATION_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateRirOrganization(name, 24, "RIR_ORGANIZATION_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_organization", "RIR_ORGANIZATION_UPDATE_REPLACE_ME"),
@@ -1409,6 +1496,7 @@ func TestAccNetworktemplateResource_RirOrganization(t *testing.T) {
 func TestAccNetworktemplateResource_RirRegistrationAction(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_rir_registration_action"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1416,14 +1504,14 @@ func TestAccNetworktemplateResource_RirRegistrationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateRirRegistrationAction("RIR_REGISTRATION_ACTION_REPLACE_ME", "CREATE"),
+				Config: testAccNetworktemplateRirRegistrationAction(name, 24, "CREATE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
 				),
 			},
 			{
-				Config: testAccNetworktemplateRirRegistrationAction("RIR_REGISTRATION_ACTION_REPLACE_ME", "NONE"),
+				Config: testAccNetworktemplateRirRegistrationAction(name, 24, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
@@ -1436,6 +1524,7 @@ func TestAccNetworktemplateResource_RirRegistrationAction(t *testing.T) {
 func TestAccNetworktemplateResource_RirRegistrationStatus(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_rir_registration_status"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1443,14 +1532,14 @@ func TestAccNetworktemplateResource_RirRegistrationStatus(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateRirRegistrationStatus("RIR_REGISTRATION_STATUS_REPLACE_ME", "NOT_REGISTERED"),
+				Config: testAccNetworktemplateRirRegistrationStatus(name, 24, "NOT_REGISTERED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
 				),
 			},
 			{
-				Config: testAccNetworktemplateRirRegistrationStatus("RIR_REGISTRATION_STATUS_REPLACE_ME", "REGISTERED"),
+				Config: testAccNetworktemplateRirRegistrationStatus(name, 24, "REGISTERED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "REGISTERED"),
@@ -1463,6 +1552,7 @@ func TestAccNetworktemplateResource_RirRegistrationStatus(t *testing.T) {
 func TestAccNetworktemplateResource_SendRirRequest(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_send_rir_request"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1470,7 +1560,7 @@ func TestAccNetworktemplateResource_SendRirRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateSendRirRequest("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateSendRirRequest(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "true"),
@@ -1478,7 +1568,7 @@ func TestAccNetworktemplateResource_SendRirRequest(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateSendRirRequest("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateSendRirRequest(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "false"),
@@ -1492,6 +1582,7 @@ func TestAccNetworktemplateResource_SendRirRequest(t *testing.T) {
 func TestAccNetworktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_update_dns_on_lease_renewal"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1499,7 +1590,7 @@ func TestAccNetworktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUpdateDnsOnLeaseRenewal("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUpdateDnsOnLeaseRenewal(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "true"),
@@ -1507,7 +1598,7 @@ func TestAccNetworktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUpdateDnsOnLeaseRenewal("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUpdateDnsOnLeaseRenewal(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "false"),
@@ -1521,6 +1612,7 @@ func TestAccNetworktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 func TestAccNetworktemplateResource_UseAuthority(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_authority"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1528,7 +1620,7 @@ func TestAccNetworktemplateResource_UseAuthority(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseAuthority("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseAuthority(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_authority", "true"),
@@ -1536,7 +1628,7 @@ func TestAccNetworktemplateResource_UseAuthority(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseAuthority("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseAuthority(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_authority", "false"),
@@ -1550,6 +1642,7 @@ func TestAccNetworktemplateResource_UseAuthority(t *testing.T) {
 func TestAccNetworktemplateResource_UseBootfile(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_bootfile"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1557,7 +1650,7 @@ func TestAccNetworktemplateResource_UseBootfile(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseBootfile("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseBootfile(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "true"),
@@ -1565,7 +1658,7 @@ func TestAccNetworktemplateResource_UseBootfile(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseBootfile("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseBootfile(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "false"),
@@ -1579,6 +1672,7 @@ func TestAccNetworktemplateResource_UseBootfile(t *testing.T) {
 func TestAccNetworktemplateResource_UseBootserver(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_bootserver"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1586,7 +1680,7 @@ func TestAccNetworktemplateResource_UseBootserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseBootserver("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseBootserver(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "true"),
@@ -1594,7 +1688,7 @@ func TestAccNetworktemplateResource_UseBootserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseBootserver("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseBootserver(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "false"),
@@ -1608,6 +1702,7 @@ func TestAccNetworktemplateResource_UseBootserver(t *testing.T) {
 func TestAccNetworktemplateResource_UseDdnsDomainname(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ddns_domainname"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1615,7 +1710,7 @@ func TestAccNetworktemplateResource_UseDdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseDdnsDomainname("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseDdnsDomainname(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "true"),
@@ -1623,7 +1718,7 @@ func TestAccNetworktemplateResource_UseDdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseDdnsDomainname("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseDdnsDomainname(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "false"),
@@ -1637,6 +1732,7 @@ func TestAccNetworktemplateResource_UseDdnsDomainname(t *testing.T) {
 func TestAccNetworktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ddns_generate_hostname"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1644,7 +1740,7 @@ func TestAccNetworktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseDdnsGenerateHostname("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseDdnsGenerateHostname(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "true"),
@@ -1652,7 +1748,7 @@ func TestAccNetworktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseDdnsGenerateHostname("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseDdnsGenerateHostname(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "false"),
@@ -1666,6 +1762,7 @@ func TestAccNetworktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 func TestAccNetworktemplateResource_UseDdnsTtl(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ddns_ttl"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1673,7 +1770,7 @@ func TestAccNetworktemplateResource_UseDdnsTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseDdnsTtl("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseDdnsTtl(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "true"),
@@ -1681,7 +1778,7 @@ func TestAccNetworktemplateResource_UseDdnsTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseDdnsTtl("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseDdnsTtl(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "false"),
@@ -1695,6 +1792,7 @@ func TestAccNetworktemplateResource_UseDdnsTtl(t *testing.T) {
 func TestAccNetworktemplateResource_UseDdnsUpdateFixedAddresses(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ddns_update_fixed_addresses"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1702,7 +1800,7 @@ func TestAccNetworktemplateResource_UseDdnsUpdateFixedAddresses(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseDdnsUpdateFixedAddresses("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseDdnsUpdateFixedAddresses(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_update_fixed_addresses", "true"),
@@ -1710,7 +1808,7 @@ func TestAccNetworktemplateResource_UseDdnsUpdateFixedAddresses(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseDdnsUpdateFixedAddresses("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseDdnsUpdateFixedAddresses(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_update_fixed_addresses", "false"),
@@ -1724,6 +1822,7 @@ func TestAccNetworktemplateResource_UseDdnsUpdateFixedAddresses(t *testing.T) {
 func TestAccNetworktemplateResource_UseDdnsUseOption81(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ddns_use_option81"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1731,7 +1830,7 @@ func TestAccNetworktemplateResource_UseDdnsUseOption81(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseDdnsUseOption81("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseDdnsUseOption81(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_use_option81", "true"),
@@ -1739,7 +1838,7 @@ func TestAccNetworktemplateResource_UseDdnsUseOption81(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseDdnsUseOption81("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseDdnsUseOption81(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_use_option81", "false"),
@@ -1753,6 +1852,7 @@ func TestAccNetworktemplateResource_UseDdnsUseOption81(t *testing.T) {
 func TestAccNetworktemplateResource_UseDenyBootp(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_deny_bootp"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1760,7 +1860,7 @@ func TestAccNetworktemplateResource_UseDenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseDenyBootp("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseDenyBootp(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "true"),
@@ -1768,7 +1868,7 @@ func TestAccNetworktemplateResource_UseDenyBootp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseDenyBootp("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseDenyBootp(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "false"),
@@ -1782,6 +1882,7 @@ func TestAccNetworktemplateResource_UseDenyBootp(t *testing.T) {
 func TestAccNetworktemplateResource_UseEmailList(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_email_list"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1789,7 +1890,7 @@ func TestAccNetworktemplateResource_UseEmailList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseEmailList("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseEmailList(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_email_list", "true"),
@@ -1797,7 +1898,7 @@ func TestAccNetworktemplateResource_UseEmailList(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseEmailList("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseEmailList(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_email_list", "false"),
@@ -1811,6 +1912,7 @@ func TestAccNetworktemplateResource_UseEmailList(t *testing.T) {
 func TestAccNetworktemplateResource_UseEnableDdns(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_enable_ddns"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1818,7 +1920,7 @@ func TestAccNetworktemplateResource_UseEnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseEnableDdns("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseEnableDdns(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "true"),
@@ -1826,7 +1928,7 @@ func TestAccNetworktemplateResource_UseEnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseEnableDdns("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseEnableDdns(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "false"),
@@ -1840,6 +1942,7 @@ func TestAccNetworktemplateResource_UseEnableDdns(t *testing.T) {
 func TestAccNetworktemplateResource_UseEnableDhcpThresholds(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_enable_dhcp_thresholds"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1847,7 +1950,7 @@ func TestAccNetworktemplateResource_UseEnableDhcpThresholds(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseEnableDhcpThresholds("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseEnableDhcpThresholds(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_dhcp_thresholds", "true"),
@@ -1855,7 +1958,7 @@ func TestAccNetworktemplateResource_UseEnableDhcpThresholds(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseEnableDhcpThresholds("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseEnableDhcpThresholds(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_dhcp_thresholds", "false"),
@@ -1869,6 +1972,7 @@ func TestAccNetworktemplateResource_UseEnableDhcpThresholds(t *testing.T) {
 func TestAccNetworktemplateResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ignore_dhcp_option_list_request"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1876,7 +1980,7 @@ func TestAccNetworktemplateResource_UseIgnoreDhcpOptionListRequest(t *testing.T)
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseIgnoreDhcpOptionListRequest("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseIgnoreDhcpOptionListRequest(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "true"),
@@ -1884,7 +1988,7 @@ func TestAccNetworktemplateResource_UseIgnoreDhcpOptionListRequest(t *testing.T)
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseIgnoreDhcpOptionListRequest("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseIgnoreDhcpOptionListRequest(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "false"),
@@ -1898,6 +2002,7 @@ func TestAccNetworktemplateResource_UseIgnoreDhcpOptionListRequest(t *testing.T)
 func TestAccNetworktemplateResource_UseIpamEmailAddresses(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ipam_email_addresses"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1905,7 +2010,7 @@ func TestAccNetworktemplateResource_UseIpamEmailAddresses(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseIpamEmailAddresses("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseIpamEmailAddresses(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipam_email_addresses", "true"),
@@ -1913,7 +2018,7 @@ func TestAccNetworktemplateResource_UseIpamEmailAddresses(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseIpamEmailAddresses("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseIpamEmailAddresses(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipam_email_addresses", "false"),
@@ -1927,6 +2032,7 @@ func TestAccNetworktemplateResource_UseIpamEmailAddresses(t *testing.T) {
 func TestAccNetworktemplateResource_UseIpamThresholdSettings(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ipam_threshold_settings"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1934,7 +2040,7 @@ func TestAccNetworktemplateResource_UseIpamThresholdSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseIpamThresholdSettings("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseIpamThresholdSettings(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipam_threshold_settings", "true"),
@@ -1942,7 +2048,7 @@ func TestAccNetworktemplateResource_UseIpamThresholdSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseIpamThresholdSettings("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseIpamThresholdSettings(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipam_threshold_settings", "false"),
@@ -1956,6 +2062,7 @@ func TestAccNetworktemplateResource_UseIpamThresholdSettings(t *testing.T) {
 func TestAccNetworktemplateResource_UseIpamTrapSettings(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_ipam_trap_settings"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1963,7 +2070,7 @@ func TestAccNetworktemplateResource_UseIpamTrapSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseIpamTrapSettings("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseIpamTrapSettings(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipam_trap_settings", "true"),
@@ -1971,7 +2078,7 @@ func TestAccNetworktemplateResource_UseIpamTrapSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseIpamTrapSettings("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseIpamTrapSettings(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipam_trap_settings", "false"),
@@ -1985,6 +2092,7 @@ func TestAccNetworktemplateResource_UseIpamTrapSettings(t *testing.T) {
 func TestAccNetworktemplateResource_UseLeaseScavengeTime(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_lease_scavenge_time"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1992,7 +2100,7 @@ func TestAccNetworktemplateResource_UseLeaseScavengeTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseLeaseScavengeTime("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseLeaseScavengeTime(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_lease_scavenge_time", "true"),
@@ -2000,7 +2108,7 @@ func TestAccNetworktemplateResource_UseLeaseScavengeTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseLeaseScavengeTime("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseLeaseScavengeTime(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_lease_scavenge_time", "false"),
@@ -2014,6 +2122,7 @@ func TestAccNetworktemplateResource_UseLeaseScavengeTime(t *testing.T) {
 func TestAccNetworktemplateResource_UseLogicFilterRules(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_logic_filter_rules"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2021,7 +2130,7 @@ func TestAccNetworktemplateResource_UseLogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseLogicFilterRules("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseLogicFilterRules(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "true"),
@@ -2029,7 +2138,7 @@ func TestAccNetworktemplateResource_UseLogicFilterRules(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseLogicFilterRules("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseLogicFilterRules(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "false"),
@@ -2043,6 +2152,7 @@ func TestAccNetworktemplateResource_UseLogicFilterRules(t *testing.T) {
 func TestAccNetworktemplateResource_UseNextserver(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_nextserver"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2050,7 +2160,7 @@ func TestAccNetworktemplateResource_UseNextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseNextserver("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseNextserver(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "true"),
@@ -2058,7 +2168,7 @@ func TestAccNetworktemplateResource_UseNextserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseNextserver("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseNextserver(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "false"),
@@ -2072,6 +2182,7 @@ func TestAccNetworktemplateResource_UseNextserver(t *testing.T) {
 func TestAccNetworktemplateResource_UseOptions(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_options"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2079,7 +2190,7 @@ func TestAccNetworktemplateResource_UseOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseOptions("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseOptions(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
@@ -2087,7 +2198,7 @@ func TestAccNetworktemplateResource_UseOptions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseOptions("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseOptions(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "false"),
@@ -2101,6 +2212,7 @@ func TestAccNetworktemplateResource_UseOptions(t *testing.T) {
 func TestAccNetworktemplateResource_UsePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_pxe_lease_time"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2108,7 +2220,7 @@ func TestAccNetworktemplateResource_UsePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUsePxeLeaseTime("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUsePxeLeaseTime(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "true"),
@@ -2116,7 +2228,7 @@ func TestAccNetworktemplateResource_UsePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUsePxeLeaseTime("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUsePxeLeaseTime(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "false"),
@@ -2130,6 +2242,7 @@ func TestAccNetworktemplateResource_UsePxeLeaseTime(t *testing.T) {
 func TestAccNetworktemplateResource_UseRecycleLeases(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_recycle_leases"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2137,7 +2250,7 @@ func TestAccNetworktemplateResource_UseRecycleLeases(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseRecycleLeases("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseRecycleLeases(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_recycle_leases", "true"),
@@ -2145,7 +2258,7 @@ func TestAccNetworktemplateResource_UseRecycleLeases(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseRecycleLeases("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseRecycleLeases(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_recycle_leases", "false"),
@@ -2159,6 +2272,7 @@ func TestAccNetworktemplateResource_UseRecycleLeases(t *testing.T) {
 func TestAccNetworktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_use_update_dns_on_lease_renewal"
 	var v ipam.Networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2166,7 +2280,7 @@ func TestAccNetworktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateUseUpdateDnsOnLeaseRenewal("NAME_REPLACE_ME", "true"),
+				Config: testAccNetworktemplateUseUpdateDnsOnLeaseRenewal(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "true"),
@@ -2174,7 +2288,7 @@ func TestAccNetworktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateUseUpdateDnsOnLeaseRenewal("NAME_REPLACE_ME", "false"),
+				Config: testAccNetworktemplateUseUpdateDnsOnLeaseRenewal(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "false"),
@@ -2256,205 +2370,244 @@ func testAccNetworktemplateImportStateIdFunc(resourceName string) resource.Impor
 	}
 }
 
-func testAccNetworktemplateBasicConfig(name string) string {
+func testAccNetworktemplateBasicConfig(name string, netmask int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test" {
     name = %q
+    netmask = %d
 }
-`, name)
+`, name, netmask)
 }
 
-func testAccNetworktemplateAllowAnyNetmask(name string, allowAnyNetmask string) string {
+func testAccNetworktemplateAllowAnyNetmask(name string, netmask int, allowAnyNetmask string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_allow_any_netmask" {
     name = %q
+    netmask = %d
     allow_any_netmask = %q
 }
-`, name, allowAnyNetmask)
+`, name, netmask, allowAnyNetmask)
 }
 
-func testAccNetworktemplateAuthority(name string, authority string) string {
+func testAccNetworktemplateAuthority(name string, netmask int, authority string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_authority" {
     name = %q
+    netmask = %d
     authority = %q
+    use_authority = true
 }
-`, name, authority)
+`, name, netmask, authority)
 }
 
-func testAccNetworktemplateAutoCreateReversezone(name string, autoCreateReversezone string) string {
+func testAccNetworktemplateAutoCreateReversezone(name string, netmask int, autoCreateReversezone string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_auto_create_reversezone" {
     name = %q
+    netmask = %d
     auto_create_reversezone = %q
 }
-`, name, autoCreateReversezone)
+`, name, netmask, autoCreateReversezone)
 }
 
-func testAccNetworktemplateBootfile(name string, bootfile string) string {
+func testAccNetworktemplateBootfile(name string, netmask int, bootfile string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_bootfile" {
     name = %q
+    netmask = %d
     bootfile = %q
+    use_bootfile = true
 }
-`, name, bootfile)
+`, name, netmask, bootfile)
 }
 
-func testAccNetworktemplateBootserver(name string, bootserver string) string {
+func testAccNetworktemplateBootserver(name string, netmask int, bootserver string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_bootserver" {
     name = %q
+    netmask = %d
     bootserver = %q
+    use_bootserver = true
 }
-`, name, bootserver)
+`, name, netmask, bootserver)
 }
 
-func testAccNetworktemplateCloudApiCompatible(name string, cloudApiCompatible string) string {
+func testAccNetworktemplateCloudApiCompatible(name string, netmask int, cloudApiCompatible string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_cloud_api_compatible" {
     name = %q
+    netmask = %d
     cloud_api_compatible = %q
 }
-`, name, cloudApiCompatible)
+`, name, netmask, cloudApiCompatible)
 }
 
-func testAccNetworktemplateComment(name string, comment string) string {
+func testAccNetworktemplateComment(name string, netmask int, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_comment" {
     name = %q
+    netmask = %d
     comment = %q
 }
-`, name, comment)
+`, name, netmask, comment)
 }
 
-func testAccNetworktemplateDdnsDomainname(name string, ddnsDomainname string) string {
+func testAccNetworktemplateDdnsDomainname(name string, netmask int, ddnsDomainname string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ddns_domainname" {
     name = %q
+    netmask = %d
     ddns_domainname = %q
+    use_ddns_domainname = true
 }
-`, name, ddnsDomainname)
+`, name, netmask, ddnsDomainname)
 }
 
-func testAccNetworktemplateDdnsGenerateHostname(name string, ddnsGenerateHostname string) string {
+func testAccNetworktemplateDdnsGenerateHostname(name string, netmask int, ddnsGenerateHostname string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ddns_generate_hostname" {
     name = %q
+    netmask = %d
     ddns_generate_hostname = %q
+    use_ddns_generate_hostname = true
 }
-`, name, ddnsGenerateHostname)
+`, name, netmask, ddnsGenerateHostname)
 }
 
-func testAccNetworktemplateDdnsServerAlwaysUpdates(name string, ddnsServerAlwaysUpdates string) string {
+func testAccNetworktemplateDdnsServerAlwaysUpdates(name string, netmask int, ddnsServerAlwaysUpdates string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ddns_server_always_updates" {
     name = %q
+    netmask = %d
     ddns_server_always_updates = %q
+    ddns_use_option81 = true
+    use_ddns_use_option81 = true
 }
-`, name, ddnsServerAlwaysUpdates)
+`, name, netmask, ddnsServerAlwaysUpdates)
 }
 
-func testAccNetworktemplateDdnsTtl(name string, ddnsTtl string) string {
+func testAccNetworktemplateDdnsTtl(name string, netmask int, ddnsTtl int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ddns_ttl" {
     name = %q
-    ddns_ttl = %q
+    netmask = %d
+    ddns_ttl = %d
+    use_ddns_ttl = true
 }
-`, name, ddnsTtl)
+`, name, netmask, ddnsTtl)
 }
 
-func testAccNetworktemplateDdnsUpdateFixedAddresses(name string, ddnsUpdateFixedAddresses string) string {
+func testAccNetworktemplateDdnsUpdateFixedAddresses(name string, netmask int, ddnsUpdateFixedAddresses string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ddns_update_fixed_addresses" {
     name = %q
+    netmask = %d
     ddns_update_fixed_addresses = %q
+    use_ddns_update_fixed_addresses = true
 }
-`, name, ddnsUpdateFixedAddresses)
+`, name, netmask, ddnsUpdateFixedAddresses)
 }
 
-func testAccNetworktemplateDdnsUseOption81(name string, ddnsUseOption81 string) string {
+func testAccNetworktemplateDdnsUseOption81(name string, netmask int, ddnsUseOption81 string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ddns_use_option81" {
     name = %q
+    netmask = %d
     ddns_use_option81 = %q
+    use_ddns_use_option81 = true
 }
-`, name, ddnsUseOption81)
+`, name, netmask, ddnsUseOption81)
 }
 
-func testAccNetworktemplateDelegatedMember(name string, delegatedMember map[string]string) string {
+func testAccNetworktemplateDelegatedMember(name string, netmask int, delegatedMember map[string]any) string {
+	delegatedMemberStr := utils.ConvertMapToHCL(delegatedMember)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_delegated_member" {
     name = %q
+    netmask = %d
     delegated_member = %s
 }
-`, name, delegatedMember)
+`, name, netmask, delegatedMemberStr)
 }
 
-func testAccNetworktemplateDenyBootp(name string, denyBootp string) string {
+func testAccNetworktemplateDenyBootp(name string, netmask int, denyBootp string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_deny_bootp" {
     name = %q
+    netmask = %d
     deny_bootp = %q
+    use_deny_bootp = true
 }
-`, name, denyBootp)
+`, name, netmask, denyBootp)
 }
 
-func testAccNetworktemplateEmailList(name string, emailList []string) string {
+func testAccNetworktemplateEmailList(name string, netmask int, emailList []string) string {
 	emailListStr := utils.ConvertStringSliceToHCL(emailList)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_email_list" {
     name = %q
-    email_list = %q
+    netmask = %d
+    email_list = %s
+    use_email_list = true
 }
-`, name, emailListStr)
+`, name, netmask, emailListStr)
 }
 
-func testAccNetworktemplateEnableDdns(name string, enableDdns string) string {
+func testAccNetworktemplateEnableDdns(name string, netmask int, enableDdns string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_enable_ddns" {
     name = %q
+    netmask = %d
     enable_ddns = %q
+    use_enable_ddns = true
 }
-`, name, enableDdns)
+`, name, netmask, enableDdns)
 }
 
-func testAccNetworktemplateEnableDhcpThresholds(name string, enableDhcpThresholds string) string {
+func testAccNetworktemplateEnableDhcpThresholds(name string, netmask int, enableDhcpThresholds string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_enable_dhcp_thresholds" {
     name = %q
+    netmask = %d
     enable_dhcp_thresholds = %q
+    use_enable_dhcp_thresholds = true
 }
-`, name, enableDhcpThresholds)
+`, name, netmask, enableDhcpThresholds)
 }
 
-func testAccNetworktemplateEnableEmailWarnings(name string, enableEmailWarnings string) string {
+func testAccNetworktemplateEnableEmailWarnings(name string, netmask int, enableEmailWarnings string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_enable_email_warnings" {
     name = %q
+    netmask = %d
     enable_email_warnings = %q
 }
-`, name, enableEmailWarnings)
+`, name, netmask, enableEmailWarnings)
 }
 
-func testAccNetworktemplateEnablePxeLeaseTime(name string, enablePxeLeaseTime string) string {
+func testAccNetworktemplateEnablePxeLeaseTime(name string, netmask int, enablePxeLeaseTime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_enable_pxe_lease_time" {
     name = %q
+    netmask = %d
     enable_pxe_lease_time = %q
+    pxe_lease_time = 600
+    use_pxe_lease_time = true
 }
-`, name, enablePxeLeaseTime)
+`, name, netmask, enablePxeLeaseTime)
 }
 
-func testAccNetworktemplateEnableSnmpWarnings(name string, enableSnmpWarnings string) string {
+func testAccNetworktemplateEnableSnmpWarnings(name string, netmask int, enableSnmpWarnings string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_enable_snmp_warnings" {
     name = %q
+    netmask = %d
     enable_snmp_warnings = %q
 }
-`, name, enableSnmpWarnings)
+`, name, netmask, enableSnmpWarnings)
 }
 
-func testAccNetworktemplateExtAttrs(name string, extAttrs map[string]string) string {
+func testAccNetworktemplateExtAttrs(name string, netmask int, extAttrs map[string]string) string {
 	extAttrsStr := "{\n"
 	for k, v := range extAttrs {
 		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
@@ -2463,435 +2616,496 @@ func testAccNetworktemplateExtAttrs(name string, extAttrs map[string]string) str
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_extattrs" {
     name = %q
+    netmask = %d
     extattrs = %s
 }
-`, name, extAttrsStr)
+`, name, netmask, extAttrsStr)
 }
 
-func testAccNetworktemplateFixedAddressTemplates(name string, fixedAddressTemplates []string) string {
+func testAccNetworktemplateFixedAddressTemplates(name string, netmask int, fixedAddressTemplates []string) string {
 	fixedAddressTemplatesStr := utils.ConvertStringSliceToHCL(fixedAddressTemplates)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_fixed_address_templates" {
     name = %q
-    fixed_address_templates = %q
+    netmask = %d
+    fixed_address_templates = %s
 }
-`, name, fixedAddressTemplatesStr)
+`, name, netmask, fixedAddressTemplatesStr)
 }
 
-func testAccNetworktemplateHighWaterMark(name string, highWaterMark string) string {
+func testAccNetworktemplateHighWaterMark(name string, netmask int, highWaterMark int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_high_water_mark" {
     name = %q
-    high_water_mark = %q
+    netmask = %d
+    high_water_mark = %d
 }
-`, name, highWaterMark)
+`, name, netmask, highWaterMark)
 }
 
-func testAccNetworktemplateHighWaterMarkReset(name string, highWaterMarkReset string) string {
+func testAccNetworktemplateHighWaterMarkReset(name string, netmask int, highWaterMarkReset int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_high_water_mark_reset" {
     name = %q
-    high_water_mark_reset = %q
+    netmask = %d
+    high_water_mark_reset = %d
 }
-`, name, highWaterMarkReset)
+`, name, netmask, highWaterMarkReset)
 }
 
-func testAccNetworktemplateIgnoreDhcpOptionListRequest(name string, ignoreDhcpOptionListRequest string) string {
+func testAccNetworktemplateIgnoreDhcpOptionListRequest(name string, netmask int, ignoreDhcpOptionListRequest string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ignore_dhcp_option_list_request" {
     name = %q
+    netmask = %d
     ignore_dhcp_option_list_request = %q
+    use_ignore_dhcp_option_list_request = true
 }
-`, name, ignoreDhcpOptionListRequest)
+`, name, netmask, ignoreDhcpOptionListRequest)
 }
 
-func testAccNetworktemplateIpamEmailAddresses(name string, ipamEmailAddresses []string) string {
+func testAccNetworktemplateIpamEmailAddresses(name string, netmask int, ipamEmailAddresses []string) string {
 	ipamEmailAddressesStr := utils.ConvertStringSliceToHCL(ipamEmailAddresses)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ipam_email_addresses" {
     name = %q
-    ipam_email_addresses = %q
+    netmask = %d
+    ipam_email_addresses = %s
+    use_ipam_email_addresses = true
 }
-`, name, ipamEmailAddressesStr)
+`, name, netmask, ipamEmailAddressesStr)
 }
 
-func testAccNetworktemplateIpamThresholdSettings(name string, ipamThresholdSettings map[string]string) string {
+func testAccNetworktemplateIpamThresholdSettings(name string, netmask int, ipamThresholdSettings map[string]any) string {
+	ipamThresholdSettingsStr := utils.ConvertMapToHCL(ipamThresholdSettings)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ipam_threshold_settings" {
     name = %q
+    netmask = %d
     ipam_threshold_settings = %s
+    use_ipam_threshold_settings = true
 }
-`, name, ipamThresholdSettings)
+`, name, netmask, ipamThresholdSettingsStr)
 }
 
-func testAccNetworktemplateIpamTrapSettings(name string, ipamTrapSettings map[string]string) string {
+func testAccNetworktemplateIpamTrapSettings(name string, netmask int, ipamTrapSettings map[string]any) string {
+	ipamTrapSettingsStr := utils.ConvertMapToHCL(ipamTrapSettings)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_ipam_trap_settings" {
     name = %q
+    netmask = %d
     ipam_trap_settings = %s
+    use_ipam_trap_settings = true
 }
-`, name, ipamTrapSettings)
+`, name, netmask, ipamTrapSettingsStr)
 }
 
-func testAccNetworktemplateLeaseScavengeTime(name string, leaseScavengeTime string) string {
+func testAccNetworktemplateLeaseScavengeTime(name string, netmask int, leaseScavengeTime int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_lease_scavenge_time" {
     name = %q
-    lease_scavenge_time = %q
+    netmask = %d
+    lease_scavenge_time = %d
+    use_lease_scavenge_time = true
 }
-`, name, leaseScavengeTime)
+`, name, netmask, leaseScavengeTime)
 }
 
-func testAccNetworktemplateLogicFilterRules(name string, logicFilterRules []map[string]any) string {
+func testAccNetworktemplateLogicFilterRules(name string, netmask int, logicFilterRules []map[string]any) string {
 	logicFilterRulesStr := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_logic_filter_rules" {
     name = %q
+    netmask = %d
     logic_filter_rules = %s
+    use_logic_filter_rules = true
 }
-`, name, logicFilterRulesStr)
+`, name, netmask, logicFilterRulesStr)
 }
 
-func testAccNetworktemplateLowWaterMark(name string, lowWaterMark string) string {
+func testAccNetworktemplateLowWaterMark(name string, netmask int, lowWaterMark int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_low_water_mark" {
     name = %q
-    low_water_mark = %q
+    netmask = %d
+    low_water_mark = %d
 }
-`, name, lowWaterMark)
+`, name, netmask, lowWaterMark)
 }
 
-func testAccNetworktemplateLowWaterMarkReset(name string, lowWaterMarkReset string) string {
+func testAccNetworktemplateLowWaterMarkReset(name string, netmask int, lowWaterMarkReset string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_low_water_mark_reset" {
     name = %q
+    netmask = %d
     low_water_mark_reset = %q
 }
-`, name, lowWaterMarkReset)
+`, name, netmask, lowWaterMarkReset)
 }
 
-func testAccNetworktemplateMembers(name string, members []map[string]any) string {
+func testAccNetworktemplateMembers(name string, netmask int, members []map[string]any) string {
 	membersStr := utils.ConvertSliceOfMapsToHCL(members)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_members" {
     name = %q
+    netmask = %d
     members = %s
 }
-`, name, membersStr)
+`, name, netmask, membersStr)
 }
 
-func testAccNetworktemplateName(name string) string {
+func testAccNetworktemplateName(name string, netmask int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_name" {
     name = %q
-}
-`, name)
-}
-
-func testAccNetworktemplateNetmask(name string, netmask string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_networktemplate" "test_netmask" {
-    name = %q
-    netmask = %q
+    netmask = %d
 }
 `, name, netmask)
 }
 
-func testAccNetworktemplateNextserver(name string, nextserver string) string {
+func testAccNetworktemplateNetmask(name string, netmask int) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_networktemplate" "test_netmask" {
+    name = %q
+    netmask = %d
+}
+`, name, netmask)
+}
+
+func testAccNetworktemplateNextserver(name string, netmask int, nextserver string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_nextserver" {
     name = %q
+    netmask = %d
     nextserver = %q
+    use_nextserver = true
 }
-`, name, nextserver)
+`, name, netmask, nextserver)
 }
 
-func testAccNetworktemplateOptions(name string, options []map[string]any) string {
+func testAccNetworktemplateOptions(name string, netmask int, options []map[string]any) string {
 	optionsStr := utils.ConvertSliceOfMapsToHCL(options)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_options" {
     name = %q
+    netmask = %d
     options = %s
+    use_options = true
 }
-`, name, optionsStr)
+`, name, netmask, optionsStr)
 }
 
-func testAccNetworktemplatePxeLeaseTime(name string, pxeLeaseTime string) string {
+func testAccNetworktemplatePxeLeaseTime(name string, netmask int, pxeLeaseTime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_pxe_lease_time" {
     name = %q
+    netmask = %d
     pxe_lease_time = %q
+    use_pxe_lease_time = true
 }
-`, name, pxeLeaseTime)
+`, name, netmask, pxeLeaseTime)
 }
 
-func testAccNetworktemplateRangeTemplates(name string, rangeTemplates []string) string {
+func testAccNetworktemplateRangeTemplates(name string, netmask int, rangeTemplates []string) string {
 	rangeTemplatesStr := utils.ConvertStringSliceToHCL(rangeTemplates)
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_range_templates" {
     name = %q
+    netmask = %d
     range_templates = %q
 }
-`, name, rangeTemplatesStr)
+`, name, netmask, rangeTemplatesStr)
 }
 
-func testAccNetworktemplateRecycleLeases(name string, recycleLeases string) string {
+func testAccNetworktemplateRecycleLeases(name string, netmask int, recycleLeases string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_recycle_leases" {
     name = %q
+    netmask = %d
     recycle_leases = %q
+    use_recycle_leases = true
 }
-`, name, recycleLeases)
+`, name, netmask, recycleLeases)
 }
 
-func testAccNetworktemplateRirOrganization(name string, rirOrganization string) string {
+func testAccNetworktemplateRirOrganization(name string, netmask int, rirOrganization string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_rir_organization" {
     name = %q
+    netmask = %d
     rir_organization = %q
 }
-`, name, rirOrganization)
+`, name, netmask, rirOrganization)
 }
 
-func testAccNetworktemplateRirRegistrationAction(name string, rirRegistrationAction string) string {
+func testAccNetworktemplateRirRegistrationAction(name string, netmask int, rirRegistrationAction string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_rir_registration_action" {
     name = %q
+    netmask = %d
     rir_registration_action = %q
+    rir_organization = "Test Organization"
 }
-`, name, rirRegistrationAction)
+`, name, netmask, rirRegistrationAction)
 }
 
-func testAccNetworktemplateRirRegistrationStatus(name string, rirRegistrationStatus string) string {
+func testAccNetworktemplateRirRegistrationStatus(name string, netmask int, rirRegistrationStatus string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_rir_registration_status" {
     name = %q
+    netmask = %d
     rir_registration_status = %q
 }
-`, name, rirRegistrationStatus)
+`, name, netmask, rirRegistrationStatus)
 }
 
-func testAccNetworktemplateSendRirRequest(name string, sendRirRequest string) string {
+func testAccNetworktemplateSendRirRequest(name string, netmask int, sendRirRequest string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_send_rir_request" {
     name = %q
+    netmask = %d
     send_rir_request = %q
 }
-`, name, sendRirRequest)
+`, name, netmask, sendRirRequest)
 }
 
-func testAccNetworktemplateUpdateDnsOnLeaseRenewal(name string, updateDnsOnLeaseRenewal string) string {
+func testAccNetworktemplateUpdateDnsOnLeaseRenewal(name string, netmask int, updateDnsOnLeaseRenewal string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_update_dns_on_lease_renewal" {
     name = %q
+    netmask = %d
     update_dns_on_lease_renewal = %q
+    use_update_dns_on_lease_renewal = true
 }
-`, name, updateDnsOnLeaseRenewal)
+`, name, netmask, updateDnsOnLeaseRenewal)
 }
 
-func testAccNetworktemplateUseAuthority(name string, useAuthority string) string {
+func testAccNetworktemplateUseAuthority(name string, netmask int, useAuthority string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_authority" {
     name = %q
+    netmask = %d
     use_authority = %q
 }
-`, name, useAuthority)
+`, name, netmask, useAuthority)
 }
 
-func testAccNetworktemplateUseBootfile(name string, useBootfile string) string {
+func testAccNetworktemplateUseBootfile(name string, netmask int, useBootfile string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_bootfile" {
     name = %q
+    netmask = %d
     use_bootfile = %q
 }
-`, name, useBootfile)
+`, name, netmask, useBootfile)
 }
 
-func testAccNetworktemplateUseBootserver(name string, useBootserver string) string {
+func testAccNetworktemplateUseBootserver(name string, netmask int, useBootserver string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_bootserver" {
     name = %q
+    netmask = %d
     use_bootserver = %q
 }
-`, name, useBootserver)
+`, name, netmask, useBootserver)
 }
 
-func testAccNetworktemplateUseDdnsDomainname(name string, useDdnsDomainname string) string {
+func testAccNetworktemplateUseDdnsDomainname(name string, netmask int, useDdnsDomainname string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ddns_domainname" {
     name = %q
+    netmask = %d
     use_ddns_domainname = %q
 }
-`, name, useDdnsDomainname)
+`, name, netmask, useDdnsDomainname)
 }
 
-func testAccNetworktemplateUseDdnsGenerateHostname(name string, useDdnsGenerateHostname string) string {
+func testAccNetworktemplateUseDdnsGenerateHostname(name string, netmask int, useDdnsGenerateHostname string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ddns_generate_hostname" {
     name = %q
+    netmask = %d
     use_ddns_generate_hostname = %q
 }
-`, name, useDdnsGenerateHostname)
+`, name, netmask, useDdnsGenerateHostname)
 }
 
-func testAccNetworktemplateUseDdnsTtl(name string, useDdnsTtl string) string {
+func testAccNetworktemplateUseDdnsTtl(name string, netmask int, useDdnsTtl string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ddns_ttl" {
     name = %q
+    netmask = %d
     use_ddns_ttl = %q
 }
-`, name, useDdnsTtl)
+`, name, netmask, useDdnsTtl)
 }
 
-func testAccNetworktemplateUseDdnsUpdateFixedAddresses(name string, useDdnsUpdateFixedAddresses string) string {
+func testAccNetworktemplateUseDdnsUpdateFixedAddresses(name string, netmask int, useDdnsUpdateFixedAddresses string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ddns_update_fixed_addresses" {
     name = %q
+    netmask = %d
     use_ddns_update_fixed_addresses = %q
 }
-`, name, useDdnsUpdateFixedAddresses)
+`, name, netmask, useDdnsUpdateFixedAddresses)
 }
 
-func testAccNetworktemplateUseDdnsUseOption81(name string, useDdnsUseOption81 string) string {
+func testAccNetworktemplateUseDdnsUseOption81(name string, netmask int, useDdnsUseOption81 string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ddns_use_option81" {
     name = %q
+    netmask = %d
     use_ddns_use_option81 = %q
 }
-`, name, useDdnsUseOption81)
+`, name, netmask, useDdnsUseOption81)
 }
 
-func testAccNetworktemplateUseDenyBootp(name string, useDenyBootp string) string {
+func testAccNetworktemplateUseDenyBootp(name string, netmask int, useDenyBootp string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_deny_bootp" {
     name = %q
+    netmask = %d
     use_deny_bootp = %q
 }
-`, name, useDenyBootp)
+`, name, netmask, useDenyBootp)
 }
 
-func testAccNetworktemplateUseEmailList(name string, useEmailList string) string {
+func testAccNetworktemplateUseEmailList(name string, netmask int, useEmailList string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_email_list" {
     name = %q
+    netmask = %d
     use_email_list = %q
 }
-`, name, useEmailList)
+`, name, netmask, useEmailList)
 }
 
-func testAccNetworktemplateUseEnableDdns(name string, useEnableDdns string) string {
+func testAccNetworktemplateUseEnableDdns(name string, netmask int, useEnableDdns string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_enable_ddns" {
     name = %q
+    netmask = %d
     use_enable_ddns = %q
 }
-`, name, useEnableDdns)
+`, name, netmask, useEnableDdns)
 }
 
-func testAccNetworktemplateUseEnableDhcpThresholds(name string, useEnableDhcpThresholds string) string {
+func testAccNetworktemplateUseEnableDhcpThresholds(name string, netmask int, useEnableDhcpThresholds string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_enable_dhcp_thresholds" {
     name = %q
+    netmask = %d
     use_enable_dhcp_thresholds = %q
 }
-`, name, useEnableDhcpThresholds)
+`, name, netmask, useEnableDhcpThresholds)
 }
 
-func testAccNetworktemplateUseIgnoreDhcpOptionListRequest(name string, useIgnoreDhcpOptionListRequest string) string {
+func testAccNetworktemplateUseIgnoreDhcpOptionListRequest(name string, netmask int, useIgnoreDhcpOptionListRequest string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ignore_dhcp_option_list_request" {
     name = %q
+    netmask = %d
     use_ignore_dhcp_option_list_request = %q
 }
-`, name, useIgnoreDhcpOptionListRequest)
+`, name, netmask, useIgnoreDhcpOptionListRequest)
 }
 
-func testAccNetworktemplateUseIpamEmailAddresses(name string, useIpamEmailAddresses string) string {
+func testAccNetworktemplateUseIpamEmailAddresses(name string, netmask int, useIpamEmailAddresses string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ipam_email_addresses" {
     name = %q
+    netmask = %d
     use_ipam_email_addresses = %q
 }
-`, name, useIpamEmailAddresses)
+`, name, netmask, useIpamEmailAddresses)
 }
 
-func testAccNetworktemplateUseIpamThresholdSettings(name string, useIpamThresholdSettings string) string {
+func testAccNetworktemplateUseIpamThresholdSettings(name string, netmask int, useIpamThresholdSettings string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ipam_threshold_settings" {
     name = %q
+    netmask = %d
     use_ipam_threshold_settings = %q
 }
-`, name, useIpamThresholdSettings)
+`, name, netmask, useIpamThresholdSettings)
 }
 
-func testAccNetworktemplateUseIpamTrapSettings(name string, useIpamTrapSettings string) string {
+func testAccNetworktemplateUseIpamTrapSettings(name string, netmask int, useIpamTrapSettings string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_ipam_trap_settings" {
     name = %q
+    netmask = %d
     use_ipam_trap_settings = %q
 }
-`, name, useIpamTrapSettings)
+`, name, netmask, useIpamTrapSettings)
 }
 
-func testAccNetworktemplateUseLeaseScavengeTime(name string, useLeaseScavengeTime string) string {
+func testAccNetworktemplateUseLeaseScavengeTime(name string, netmask int, useLeaseScavengeTime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_lease_scavenge_time" {
     name = %q
+    netmask = %d
     use_lease_scavenge_time = %q
 }
-`, name, useLeaseScavengeTime)
+`, name, netmask, useLeaseScavengeTime)
 }
 
-func testAccNetworktemplateUseLogicFilterRules(name string, useLogicFilterRules string) string {
+func testAccNetworktemplateUseLogicFilterRules(name string, netmask int, useLogicFilterRules string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_logic_filter_rules" {
     name = %q
+    netmask = %d
     use_logic_filter_rules = %q
 }
-`, name, useLogicFilterRules)
+`, name, netmask, useLogicFilterRules)
 }
 
-func testAccNetworktemplateUseNextserver(name string, useNextserver string) string {
+func testAccNetworktemplateUseNextserver(name string, netmask int, useNextserver string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_nextserver" {
     name = %q
+    netmask = %d
     use_nextserver = %q
 }
-`, name, useNextserver)
+`, name, netmask, useNextserver)
 }
 
-func testAccNetworktemplateUseOptions(name string, useOptions string) string {
+func testAccNetworktemplateUseOptions(name string, netmask int, useOptions string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_options" {
     name = %q
+    netmask = %d
     use_options = %q
 }
-`, name, useOptions)
+`, name, netmask, useOptions)
 }
 
-func testAccNetworktemplateUsePxeLeaseTime(name string, usePxeLeaseTime string) string {
+func testAccNetworktemplateUsePxeLeaseTime(name string, netmask int, usePxeLeaseTime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_pxe_lease_time" {
     name = %q
+    netmask = %d
     use_pxe_lease_time = %q
 }
-`, name, usePxeLeaseTime)
+`, name, netmask, usePxeLeaseTime)
 }
 
-func testAccNetworktemplateUseRecycleLeases(name string, useRecycleLeases string) string {
+func testAccNetworktemplateUseRecycleLeases(name string, netmask int, useRecycleLeases string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_recycle_leases" {
     name = %q
+    netmask = %d
     use_recycle_leases = %q
 }
-`, name, useRecycleLeases)
+`, name, netmask, useRecycleLeases)
 }
 
-func testAccNetworktemplateUseUpdateDnsOnLeaseRenewal(name string, useUpdateDnsOnLeaseRenewal string) string {
+func testAccNetworktemplateUseUpdateDnsOnLeaseRenewal(name string, netmask int, useUpdateDnsOnLeaseRenewal string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_use_update_dns_on_lease_renewal" {
     name = %q
+    netmask = %d
     use_update_dns_on_lease_renewal = %q
 }
-`, name, useUpdateDnsOnLeaseRenewal)
+`, name, netmask, useUpdateDnsOnLeaseRenewal)
 }

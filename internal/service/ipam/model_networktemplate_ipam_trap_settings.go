@@ -33,9 +33,9 @@ var NetworktemplateIpamTrapSettingsResourceSchemaAttributes = map[string]schema.
 		MarkdownDescription: "Determines whether sending warnings by email is enabled or not.",
 	},
 	"enable_snmp_warnings": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether sending warnings by SNMP is enabled or not.",
 	},
 }
