@@ -22,28 +22,29 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordRpzNaptrModel struct {
-	Ref         types.String `tfsdk:"ref"`
-	Comment     types.String `tfsdk:"comment"`
-	Disable     types.Bool   `tfsdk:"disable"`
-	ExtAttrs    types.Map    `tfsdk:"extattrs"`
-	Flags       types.String `tfsdk:"flags"`
-	LastQueried types.Int64  `tfsdk:"last_queried"`
-	Name        types.String `tfsdk:"name"`
-	Order       types.Int64  `tfsdk:"order"`
-	Preference  types.Int64  `tfsdk:"preference"`
-	Regexp      types.String `tfsdk:"regexp"`
-	Replacement types.String `tfsdk:"replacement"`
-	RpZone      types.String `tfsdk:"rp_zone"`
-	Services    types.String `tfsdk:"services"`
-	Ttl         types.Int64  `tfsdk:"ttl"`
-	UseTtl      types.Bool   `tfsdk:"use_ttl"`
-	View        types.String `tfsdk:"view"`
-	Zone        types.String `tfsdk:"zone"`
-	ExtAttrsAll types.Map    `tfsdk:"extattrs_all"`
+	Ref         types.String                             `tfsdk:"ref"`
+	Comment     types.String                             `tfsdk:"comment"`
+	Disable     types.Bool                               `tfsdk:"disable"`
+	ExtAttrs    types.Map                                `tfsdk:"extattrs"`
+	Flags       types.String                             `tfsdk:"flags"`
+	LastQueried types.Int64                              `tfsdk:"last_queried"`
+	Name        internaltypes.CaseInsensitiveStringValue `tfsdk:"name"`
+	Order       types.Int64                              `tfsdk:"order"`
+	Preference  types.Int64                              `tfsdk:"preference"`
+	Regexp      types.String                             `tfsdk:"regexp"`
+	Replacement types.String                             `tfsdk:"replacement"`
+	RpZone      types.String                             `tfsdk:"rp_zone"`
+	Services    types.String                             `tfsdk:"services"`
+	Ttl         types.Int64                              `tfsdk:"ttl"`
+	UseTtl      types.Bool                               `tfsdk:"use_ttl"`
+	View        types.String                             `tfsdk:"view"`
+	Zone        types.String                             `tfsdk:"zone"`
+	ExtAttrsAll types.Map                                `tfsdk:"extattrs_all"`
 }
 
 var RecordRpzNaptrAttrTypes = map[string]attr.Type{
@@ -53,7 +54,7 @@ var RecordRpzNaptrAttrTypes = map[string]attr.Type{
 	"extattrs":     types.MapType{ElemType: types.StringType},
 	"flags":        types.StringType,
 	"last_queried": types.Int64Type,
-	"name":         types.StringType,
+	"name":         internaltypes.CaseInsensitiveString{},
 	"order":        types.Int64Type,
 	"preference":   types.Int64Type,
 	"regexp":       types.StringType,
@@ -113,7 +114,8 @@ var RecordRpzNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
 	},
 	"name": schema.StringAttribute{
-		Required: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Required:   true,
 		Validators: []validator.String{
 			customvalidator.IsValidDomainName(),
 		},
@@ -215,7 +217,7 @@ func (m *RecordRpzNaptrModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		Disable:     flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:    ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Flags:       flex.ExpandStringPointer(m.Flags),
-		Name:        flex.ExpandStringPointer(m.Name),
+		Name:        flex.ExpandStringPointer(m.Name.StringValue),
 		Order:       flex.ExpandInt64Pointer(m.Order),
 		Preference:  flex.ExpandInt64Pointer(m.Preference),
 		Regexp:      flex.ExpandStringPointer(m.Regexp),
@@ -256,7 +258,7 @@ func (m *RecordRpzNaptrModel) Flatten(ctx context.Context, from *rpz.RecordRpzNa
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Flags = flex.FlattenStringPointer(from.Flags)
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)
-	m.Name = flex.FlattenStringPointer(from.Name)
+	m.Name.StringValue = flex.FlattenStringPointer(from.Name)
 	m.Order = flex.FlattenInt64Pointer(from.Order)
 	m.Preference = flex.FlattenInt64Pointer(from.Preference)
 	m.Regexp = flex.FlattenStringPointer(from.Regexp)
