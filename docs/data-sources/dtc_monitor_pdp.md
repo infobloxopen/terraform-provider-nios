@@ -3,12 +3,12 @@
 page_title: "nios_dtc_monitor_pdp Data Source - nios"
 subcategory: "DTC"
 description: |-
-  
+  Manages a DTC PDP Monitor.
 ---
 
 # nios_dtc_monitor_pdp (Data Source)
 
-
+Manages a DTC PDP Monitor.
 
 ## Example Usage
 
