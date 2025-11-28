@@ -628,15 +628,3 @@ resource "nios_rpz_record_ptr" "test_view" {
 
 	return strings.Join([]string{testAccBaseWithZone(rpZone, view), config}, "")
 }
-
-func testAccBaseWithZone(zoneFqdn, view string) string {
-	if view == "" {
-		view = "default"
-	}
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test" {
-    fqdn = %q
-	view = %q
-}
-`, zoneFqdn, view)
-}
