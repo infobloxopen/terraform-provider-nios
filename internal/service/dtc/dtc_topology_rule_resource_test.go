@@ -256,3 +256,65 @@ resource "nios_dtc_topology_rule" "test_sources" {
 }
 `, sources)
 }
+
+func TestAccResourceDTCTopologyRuleImportAndUpdate(t *testing.T) {
+    var resourceName = "nios_dtc_topology_rule.dtc_topology_rule1"
+    var v dtc.DtcTopologyRule
+
+    resource.ParallelTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.PreCheck(t) },
+        ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+        Steps: []resource.TestStep{
+            // Step 1: Import the existing resource
+            {
+                Config:            testAccResourceDTCTopologyRuleImportBasic(),
+                ResourceName:      resourceName,
+                ImportState:       true,
+                ImportStateVerify: false,
+                ImportStateId:     "dtc:topology:rule/ZG5zLmlkbnNfdG9wb2xvZ3lfcnVsZSR0b3BvbG9neV9ydWxlc2V0LjAzYzVmMTM5LTcyYjgtNDYzMy1iZDI2LWUzNGU1ZGJmZTRmYw:topology_ruleset/NOERR/1",
+            },
+            // Step 2: Update the imported resource
+            {
+                Config: testAccResourceDTCTopologyRuleImportUpdate(),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckDtcTopologyRuleExists(context.Background(), resourceName, &v),
+                    resource.TestCheckResourceAttr(resourceName, "dest_type", "POOL"),
+                    resource.TestCheckResourceAttr(resourceName, "return_type", "NOERR"),
+                    resource.TestCheckResourceAttr(resourceName, "sources.#", "2"),
+                    resource.TestCheckResourceAttr(resourceName, "sources.0.source_type", "CONTINENT"),
+                    resource.TestCheckResourceAttr(resourceName, "sources.0.source_value", "Antarctica"),
+                ),
+            },
+        },
+    })
+}
+
+func testAccResourceDTCTopologyRuleImportBasic() string {
+    return `
+resource "nios_dtc_topology_rule" "dtc_topology_rule1" {
+  dest_type = "POOL"
+  return_type = "NOERR"
+}
+`
+}
+
+func testAccResourceDTCTopologyRuleImportUpdate() string {
+    return `
+resource "nios_dtc_topology_rule" "dtc_topology_rule1" {
+  dest_type = "POOL"
+  return_type = "NOERR"
+  sources = [
+    {
+      source_op    = "IS"
+      source_type  = "CONTINENT"
+      source_value = "Antarctica"
+    },
+    {
+      source_op    = "IS"
+      source_type  = "COUNTRY"
+      source_value = "Antarctica"
+    }
+  ]
+}
+`
+}
