@@ -1,9 +1,9 @@
-// Create a DTC Monitor Pdp with Basic Fields 
+// Create a DTC PDP Monitor with Basic Fields 
 resource "nios_dtc_monitor_pdp" "monitor_pdp_basic_fields" {
   name = "example_dtc_monitor_pdp"
 }
 
-// Create a DTC Monitor Pdp with Additional Fields
+// Create a DTC PDP Monitor with Additional Fields
 resource "nios_dtc_monitor_pdp" "monitor_pdp_additional_fields" {
   name    = "example_dtc_monitor_pdp_additional_fields"
   comment = "This is a DTC Monitor PDP"

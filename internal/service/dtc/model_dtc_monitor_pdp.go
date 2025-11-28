@@ -77,7 +77,7 @@ var DtcMonitorPdpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(5),
-		MarkdownDescription: "The interval for TCP health check.",
+		MarkdownDescription: "The interval for PDP health check.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -108,7 +108,7 @@ var DtcMonitorPdpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(15),
-		MarkdownDescription: "The timeout for TCP health check in seconds.",
+		MarkdownDescription: "The timeout for PDP health check in seconds.",
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,

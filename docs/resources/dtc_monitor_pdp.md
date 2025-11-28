@@ -13,12 +13,12 @@ description: |-
 ## Example Usage
 
 ```terraform
-// Create a DTC Monitor Pdp with Basic Fields 
+// Create a DTC PDP Monitor with Basic Fields 
 resource "nios_dtc_monitor_pdp" "monitor_pdp_basic_fields" {
   name = "example_dtc_monitor_pdp"
 }
 
-// Create a DTC Monitor Pdp with Additional Fields
+// Create a DTC PDP Monitor with Additional Fields
 resource "nios_dtc_monitor_pdp" "monitor_pdp_additional_fields" {
   name    = "example_dtc_monitor_pdp_additional_fields"
   comment = "This is a DTC Monitor PDP"
@@ -44,11 +44,11 @@ resource "nios_dtc_monitor_pdp" "monitor_pdp_additional_fields" {
 
 - `comment` (String) Comment for this DTC monitor; maximum 256 characters.
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
-- `interval` (Number) The interval for TCP health check.
+- `interval` (Number) The interval for PDP health check.
 - `port` (Number) The port value for PDP requests.
 - `retry_down` (Number) The value of how many times the server should appear as down to be treated as dead after it was alive.
 - `retry_up` (Number) The value of how many times the server should appear as up to be treated as alive after it was dead.
-- `timeout` (Number) The timeout for TCP health check in seconds.
+- `timeout` (Number) The timeout for PDP health check in seconds.
 
 ### Read-Only
 
