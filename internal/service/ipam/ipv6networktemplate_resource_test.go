@@ -15,30 +15,12 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-/*
-// Manage ipam Ipv6networktemplate with Basic Fields
-resource "nios_ipam_ipv6networktemplate" "ipam_ipv6networktemplate_basic" {
-    name = "NAME_REPLACE_ME"
-}
-
-// Manage ipam Ipv6networktemplate with Additional Fields
-resource "nios_ipam_ipv6networktemplate" "ipam_ipv6networktemplate_with_additional_fields" {
-    name = "NAME_REPLACE_ME"
-
-// TODO : Add additional optional fields below
-
-    //Extensible Attributes
-    extattrs = {
-        Site = "location-1"
-    }
-}
-*/
-
 var readableAttributesForIpv6networktemplate = "allow_any_netmask,auto_create_reversezone,cidr,cloud_api_compatible,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,delegated_member,domain_name,domain_name_servers,enable_ddns,extattrs,fixed_address_templates,ipv6prefix,logic_filter_rules,members,name,options,preferred_lifetime,range_templates,recycle_leases,rir,rir_organization,rir_registration_action,rir_registration_status,send_rir_request,update_dns_on_lease_renewal,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_domain_name,use_domain_name_servers,use_enable_ddns,use_logic_filter_rules,use_options,use_preferred_lifetime,use_recycle_leases,use_update_dns_on_lease_renewal,use_valid_lifetime,valid_lifetime"
 
 func TestAccIpv6networktemplateResource_basic(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -46,24 +28,19 @@ func TestAccIpv6networktemplateResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateBasicConfig(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "allow_any_netmask", "false"),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "false"),
-					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "false"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "true"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_enable_option_fqdn", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "0"),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
-					// TODO : Add validation for default value for field logic_filter_rules if applicable
-					// TODO : Add validation for default value for field members if applicable
-					// TODO : Add validation for default value for field options if applicable
-					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "27000"),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
@@ -93,6 +70,7 @@ func TestAccIpv6networktemplateResource_basic(t *testing.T) {
 func TestAccIpv6networktemplateResource_disappears(t *testing.T) {
 	resourceName := "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -100,7 +78,7 @@ func TestAccIpv6networktemplateResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6networktemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6networktemplateBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateBasicConfig(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					testAccCheckIpv6networktemplateDisappears(context.Background(), &v),
@@ -114,6 +92,7 @@ func TestAccIpv6networktemplateResource_disappears(t *testing.T) {
 func TestAccIpv6networktemplateResource_Import(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -121,7 +100,7 @@ func TestAccIpv6networktemplateResource_Import(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateBasicConfig(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 				),
@@ -152,6 +131,7 @@ func TestAccIpv6networktemplateResource_Import(t *testing.T) {
 func TestAccIpv6networktemplateResource_AllowAnyNetmask(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_allow_any_netmask"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -159,7 +139,7 @@ func TestAccIpv6networktemplateResource_AllowAnyNetmask(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateAllowAnyNetmask("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateAllowAnyNetmask(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_any_netmask", "true"),
@@ -167,7 +147,7 @@ func TestAccIpv6networktemplateResource_AllowAnyNetmask(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateAllowAnyNetmask("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateAllowAnyNetmask(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_any_netmask", "false"),
@@ -181,6 +161,7 @@ func TestAccIpv6networktemplateResource_AllowAnyNetmask(t *testing.T) {
 func TestAccIpv6networktemplateResource_AutoCreateReversezone(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_auto_create_reversezone"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -188,7 +169,7 @@ func TestAccIpv6networktemplateResource_AutoCreateReversezone(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateAutoCreateReversezone("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateAutoCreateReversezone(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "true"),
@@ -196,7 +177,7 @@ func TestAccIpv6networktemplateResource_AutoCreateReversezone(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateAutoCreateReversezone("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateAutoCreateReversezone(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "false"),
@@ -210,6 +191,7 @@ func TestAccIpv6networktemplateResource_AutoCreateReversezone(t *testing.T) {
 func TestAccIpv6networktemplateResource_Cidr(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_cidr"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -217,18 +199,18 @@ func TestAccIpv6networktemplateResource_Cidr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateCidr("NAME_REPLACE_ME", "CIDR_REPLACE_ME"),
+				Config: testAccIpv6networktemplateCidr(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cidr", "CIDR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "cidr", "24"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateCidr("NAME_REPLACE_ME", "CIDR_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateCidr(name, 32),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cidr", "CIDR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "cidr", "32"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -238,6 +220,7 @@ func TestAccIpv6networktemplateResource_Cidr(t *testing.T) {
 func TestAccIpv6networktemplateResource_CloudApiCompatible(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_cloud_api_compatible"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -245,7 +228,7 @@ func TestAccIpv6networktemplateResource_CloudApiCompatible(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateCloudApiCompatible("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateCloudApiCompatible(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "true"),
@@ -253,7 +236,7 @@ func TestAccIpv6networktemplateResource_CloudApiCompatible(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateCloudApiCompatible("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateCloudApiCompatible(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "false"),
@@ -267,6 +250,7 @@ func TestAccIpv6networktemplateResource_CloudApiCompatible(t *testing.T) {
 func TestAccIpv6networktemplateResource_Comment(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_comment"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -274,7 +258,7 @@ func TestAccIpv6networktemplateResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateComment("NAME_REPLACE_ME", "Comment for the object"),
+				Config: testAccIpv6networktemplateComment(name, 24, "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -282,7 +266,7 @@ func TestAccIpv6networktemplateResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateComment("NAME_REPLACE_ME", "Updated comment for the object"),
+				Config: testAccIpv6networktemplateComment(name, 24, "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -296,6 +280,7 @@ func TestAccIpv6networktemplateResource_Comment(t *testing.T) {
 func TestAccIpv6networktemplateResource_DdnsDomainname(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_domainname"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -303,7 +288,7 @@ func TestAccIpv6networktemplateResource_DdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDdnsDomainname("NAME_REPLACE_ME", "DDNS_DOMAINNAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDdnsDomainname(name, 24, "DDNS_DOMAINNAME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_REPLACE_ME"),
@@ -311,7 +296,7 @@ func TestAccIpv6networktemplateResource_DdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDdnsDomainname("NAME_REPLACE_ME", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDdnsDomainname(name, 24, "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
@@ -325,6 +310,7 @@ func TestAccIpv6networktemplateResource_DdnsDomainname(t *testing.T) {
 func TestAccIpv6networktemplateResource_DdnsEnableOptionFqdn(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_enable_option_fqdn"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -332,7 +318,7 @@ func TestAccIpv6networktemplateResource_DdnsEnableOptionFqdn(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDdnsEnableOptionFqdn("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateDdnsEnableOptionFqdn(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_enable_option_fqdn", "true"),
@@ -340,7 +326,7 @@ func TestAccIpv6networktemplateResource_DdnsEnableOptionFqdn(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDdnsEnableOptionFqdn("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateDdnsEnableOptionFqdn(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_enable_option_fqdn", "false"),
@@ -354,6 +340,7 @@ func TestAccIpv6networktemplateResource_DdnsEnableOptionFqdn(t *testing.T) {
 func TestAccIpv6networktemplateResource_DdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_generate_hostname"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -361,7 +348,7 @@ func TestAccIpv6networktemplateResource_DdnsGenerateHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDdnsGenerateHostname("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateDdnsGenerateHostname(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "true"),
@@ -369,7 +356,7 @@ func TestAccIpv6networktemplateResource_DdnsGenerateHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDdnsGenerateHostname("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateDdnsGenerateHostname(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
@@ -383,6 +370,7 @@ func TestAccIpv6networktemplateResource_DdnsGenerateHostname(t *testing.T) {
 func TestAccIpv6networktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_server_always_updates"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -390,7 +378,7 @@ func TestAccIpv6networktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDdnsServerAlwaysUpdates("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateDdnsServerAlwaysUpdates(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
@@ -398,7 +386,7 @@ func TestAccIpv6networktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDdnsServerAlwaysUpdates("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateDdnsServerAlwaysUpdates(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "false"),
@@ -412,6 +400,7 @@ func TestAccIpv6networktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 func TestAccIpv6networktemplateResource_DdnsTtl(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_ttl"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -419,7 +408,7 @@ func TestAccIpv6networktemplateResource_DdnsTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDdnsTtl("NAME_REPLACE_ME", "DDNS_TTL_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDdnsTtl(name, 24, "DDNS_TTL_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "DDNS_TTL_REPLACE_ME"),
@@ -427,7 +416,7 @@ func TestAccIpv6networktemplateResource_DdnsTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDdnsTtl("NAME_REPLACE_ME", "DDNS_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDdnsTtl(name, 24, "DDNS_TTL_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "DDNS_TTL_UPDATE_REPLACE_ME"),
@@ -440,6 +429,7 @@ func TestAccIpv6networktemplateResource_DdnsTtl(t *testing.T) {
 func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_delegated_member"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	delegatedMemberVal := map[string]any{}
 	delegatedMemberValUpdated := map[string]any{}
 
@@ -449,7 +439,7 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDelegatedMember("NAME_REPLACE_ME", delegatedMemberVal),
+				Config: testAccIpv6networktemplateDelegatedMember(name, 24, delegatedMemberVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member", "DELEGATED_MEMBER_REPLACE_ME"),
@@ -457,7 +447,7 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDelegatedMember("NAME_REPLACE_ME", delegatedMemberValUpdated),
+				Config: testAccIpv6networktemplateDelegatedMember(name, 24, delegatedMemberValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member", "DELEGATED_MEMBER_UPDATE_REPLACE_ME"),
@@ -470,6 +460,7 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 func TestAccIpv6networktemplateResource_DomainName(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_domain_name"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -477,7 +468,7 @@ func TestAccIpv6networktemplateResource_DomainName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDomainName("NAME_REPLACE_ME", "DOMAIN_NAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDomainName(name, 24, "DOMAIN_NAME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "domain_name", "DOMAIN_NAME_REPLACE_ME"),
@@ -485,7 +476,7 @@ func TestAccIpv6networktemplateResource_DomainName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDomainName("NAME_REPLACE_ME", "DOMAIN_NAME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDomainName(name, 24, "DOMAIN_NAME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "domain_name", "DOMAIN_NAME_UPDATE_REPLACE_ME"),
@@ -499,6 +490,7 @@ func TestAccIpv6networktemplateResource_DomainName(t *testing.T) {
 func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_domain_name_servers"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	domainNameServersVal := []string{"DOMAIN_NAME_SERVERS_REPLACE_ME1", "DOMAIN_NAME_SERVERS_REPLACE_ME2"}
 	domainNameServersValUpdated := []string{"DOMAIN_NAME_SERVERS_REPLACE_ME1", "DOMAIN_NAME_SERVERS_REPLACE_ME2"}
 
@@ -508,7 +500,7 @@ func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDomainNameServers("NAME_REPLACE_ME", domainNameServersVal),
+				Config: testAccIpv6networktemplateDomainNameServers(name, 24, domainNameServersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "domain_name_servers", "DOMAIN_NAME_SERVERS_REPLACE_ME"),
@@ -516,7 +508,7 @@ func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDomainNameServers("NAME_REPLACE_ME", domainNameServersValUpdated),
+				Config: testAccIpv6networktemplateDomainNameServers(name, 24, domainNameServersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "domain_name_servers", "DOMAIN_NAME_SERVERS_UPDATE_REPLACE_ME"),
@@ -530,6 +522,7 @@ func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
 func TestAccIpv6networktemplateResource_EnableDdns(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_enable_ddns"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -537,7 +530,7 @@ func TestAccIpv6networktemplateResource_EnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateEnableDdns("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateEnableDdns(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "true"),
@@ -545,7 +538,7 @@ func TestAccIpv6networktemplateResource_EnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateEnableDdns("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateEnableDdns(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
@@ -559,6 +552,7 @@ func TestAccIpv6networktemplateResource_EnableDdns(t *testing.T) {
 func TestAccIpv6networktemplateResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_extattrs"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -568,7 +562,7 @@ func TestAccIpv6networktemplateResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateExtAttrs("NAME_REPLACE_ME", map[string]string{
+				Config: testAccIpv6networktemplateExtAttrs(name, 24, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -578,7 +572,7 @@ func TestAccIpv6networktemplateResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateExtAttrs("NAME_REPLACE_ME", map[string]string{
+				Config: testAccIpv6networktemplateExtAttrs(name, 24, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -594,6 +588,7 @@ func TestAccIpv6networktemplateResource_ExtAttrs(t *testing.T) {
 func TestAccIpv6networktemplateResource_FixedAddressTemplates(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_fixed_address_templates"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	fixedAddressTemplatesVal := []string{"FIXED_ADDRESS_TEMPLATES_REPLACE_ME1", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME2"}
 	fixedAddressTemplatesValUpdated := []string{"FIXED_ADDRESS_TEMPLATES_REPLACE_ME1", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME2"}
 
@@ -603,7 +598,7 @@ func TestAccIpv6networktemplateResource_FixedAddressTemplates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateFixedAddressTemplates("NAME_REPLACE_ME", fixedAddressTemplatesVal),
+				Config: testAccIpv6networktemplateFixedAddressTemplates(name, 24, fixedAddressTemplatesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fixed_address_templates", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME"),
@@ -611,7 +606,7 @@ func TestAccIpv6networktemplateResource_FixedAddressTemplates(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateFixedAddressTemplates("NAME_REPLACE_ME", fixedAddressTemplatesValUpdated),
+				Config: testAccIpv6networktemplateFixedAddressTemplates(name, 24, fixedAddressTemplatesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fixed_address_templates", "FIXED_ADDRESS_TEMPLATES_UPDATE_REPLACE_ME"),
@@ -625,6 +620,7 @@ func TestAccIpv6networktemplateResource_FixedAddressTemplates(t *testing.T) {
 func TestAccIpv6networktemplateResource_Ipv6prefix(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ipv6prefix"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -632,7 +628,7 @@ func TestAccIpv6networktemplateResource_Ipv6prefix(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateIpv6prefix("NAME_REPLACE_ME", "IPV6PREFIX_REPLACE_ME"),
+				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "IPV6PREFIX_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "IPV6PREFIX_REPLACE_ME"),
@@ -640,7 +636,7 @@ func TestAccIpv6networktemplateResource_Ipv6prefix(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateIpv6prefix("NAME_REPLACE_ME", "IPV6PREFIX_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "IPV6PREFIX_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "IPV6PREFIX_UPDATE_REPLACE_ME"),
@@ -654,6 +650,7 @@ func TestAccIpv6networktemplateResource_Ipv6prefix(t *testing.T) {
 func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_logic_filter_rules"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	logicFilterRulesVal := []map[string]any{}
 	logicFilterRulesValUpdated := []map[string]any{}
 
@@ -663,7 +660,7 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateLogicFilterRules("NAME_REPLACE_ME", logicFilterRulesVal),
+				Config: testAccIpv6networktemplateLogicFilterRules(name, 24, logicFilterRulesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_REPLACE_ME"),
@@ -671,7 +668,7 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateLogicFilterRules("NAME_REPLACE_ME", logicFilterRulesValUpdated),
+				Config: testAccIpv6networktemplateLogicFilterRules(name, 24, logicFilterRulesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_UPDATE_REPLACE_ME"),
@@ -685,6 +682,7 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_members"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	membersVal := []map[string]any{}
 	membersValUpdated := []map[string]any{}
 
@@ -694,7 +692,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateMembers("NAME_REPLACE_ME", membersVal),
+				Config: testAccIpv6networktemplateMembers(name, 24, membersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members", "MEMBERS_REPLACE_ME"),
@@ -702,7 +700,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateMembers("NAME_REPLACE_ME", membersValUpdated),
+				Config: testAccIpv6networktemplateMembers(name, 24, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members", "MEMBERS_UPDATE_REPLACE_ME"),
@@ -716,6 +714,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 func TestAccIpv6networktemplateResource_Name(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_name"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -723,15 +722,15 @@ func TestAccIpv6networktemplateResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateName("NAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateName(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateName("NAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateName(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
@@ -745,6 +744,7 @@ func TestAccIpv6networktemplateResource_Name(t *testing.T) {
 func TestAccIpv6networktemplateResource_Options(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_options"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	optionsVal := []map[string]any{}
 	optionsValUpdated := []map[string]any{}
 
@@ -754,7 +754,7 @@ func TestAccIpv6networktemplateResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateOptions("NAME_REPLACE_ME", optionsVal),
+				Config: testAccIpv6networktemplateOptions(name, 24, optionsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_REPLACE_ME"),
@@ -762,7 +762,7 @@ func TestAccIpv6networktemplateResource_Options(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateOptions("NAME_REPLACE_ME", optionsValUpdated),
+				Config: testAccIpv6networktemplateOptions(name, 24, optionsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_UPDATE_REPLACE_ME"),
@@ -776,6 +776,7 @@ func TestAccIpv6networktemplateResource_Options(t *testing.T) {
 func TestAccIpv6networktemplateResource_PreferredLifetime(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_preferred_lifetime"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -783,7 +784,7 @@ func TestAccIpv6networktemplateResource_PreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplatePreferredLifetime("NAME_REPLACE_ME", "PREFERRED_LIFETIME_REPLACE_ME"),
+				Config: testAccIpv6networktemplatePreferredLifetime(name, 24, "PREFERRED_LIFETIME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "PREFERRED_LIFETIME_REPLACE_ME"),
@@ -791,7 +792,7 @@ func TestAccIpv6networktemplateResource_PreferredLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplatePreferredLifetime("NAME_REPLACE_ME", "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplatePreferredLifetime(name, 24, "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
@@ -804,6 +805,7 @@ func TestAccIpv6networktemplateResource_PreferredLifetime(t *testing.T) {
 func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_range_templates"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 	rangeTemplatesVal := []string{"RANGE_TEMPLATES_REPLACE_ME1", "RANGE_TEMPLATES_REPLACE_ME2"}
 	rangeTemplatesValUpdated := []string{"RANGE_TEMPLATES_REPLACE_ME1", "RANGE_TEMPLATES_REPLACE_ME2"}
 
@@ -813,7 +815,7 @@ func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateRangeTemplates("NAME_REPLACE_ME", rangeTemplatesVal),
+				Config: testAccIpv6networktemplateRangeTemplates(name, 24, rangeTemplatesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "range_templates", "RANGE_TEMPLATES_REPLACE_ME"),
@@ -821,7 +823,7 @@ func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateRangeTemplates("NAME_REPLACE_ME", rangeTemplatesValUpdated),
+				Config: testAccIpv6networktemplateRangeTemplates(name, 24, rangeTemplatesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "range_templates", "RANGE_TEMPLATES_UPDATE_REPLACE_ME"),
@@ -835,6 +837,7 @@ func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 func TestAccIpv6networktemplateResource_RecycleLeases(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_recycle_leases"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -842,7 +845,7 @@ func TestAccIpv6networktemplateResource_RecycleLeases(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateRecycleLeases("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateRecycleLeases(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "true"),
@@ -850,7 +853,7 @@ func TestAccIpv6networktemplateResource_RecycleLeases(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateRecycleLeases("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateRecycleLeases(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "recycle_leases", "false"),
@@ -864,6 +867,7 @@ func TestAccIpv6networktemplateResource_RecycleLeases(t *testing.T) {
 func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_rir_organization"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -871,7 +875,7 @@ func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateRirOrganization("NAME_REPLACE_ME", "RIR_ORGANIZATION_REPLACE_ME"),
+				Config: testAccIpv6networktemplateRirOrganization(name, 24, "RIR_ORGANIZATION_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_organization", "RIR_ORGANIZATION_REPLACE_ME"),
@@ -879,7 +883,7 @@ func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateRirOrganization("NAME_REPLACE_ME", "RIR_ORGANIZATION_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateRirOrganization(name, 24, "RIR_ORGANIZATION_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_organization", "RIR_ORGANIZATION_UPDATE_REPLACE_ME"),
@@ -893,6 +897,7 @@ func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
 func TestAccIpv6networktemplateResource_RirRegistrationAction(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_rir_registration_action"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -900,14 +905,14 @@ func TestAccIpv6networktemplateResource_RirRegistrationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateRirRegistrationAction("RIR_REGISTRATION_ACTION_REPLACE_ME", "CREATE"),
+				Config: testAccIpv6networktemplateRirRegistrationAction(name, 24, "CREATE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
 				),
 			},
 			{
-				Config: testAccIpv6networktemplateRirRegistrationAction("RIR_REGISTRATION_ACTION_REPLACE_ME", "NONE"),
+				Config: testAccIpv6networktemplateRirRegistrationAction(name, 24, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
@@ -920,6 +925,7 @@ func TestAccIpv6networktemplateResource_RirRegistrationAction(t *testing.T) {
 func TestAccIpv6networktemplateResource_RirRegistrationStatus(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_rir_registration_status"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -927,14 +933,14 @@ func TestAccIpv6networktemplateResource_RirRegistrationStatus(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateRirRegistrationStatus("RIR_REGISTRATION_STATUS_REPLACE_ME", "NOT_REGISTERED"),
+				Config: testAccIpv6networktemplateRirRegistrationStatus(name, 24, "NOT_REGISTERED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
 				),
 			},
 			{
-				Config: testAccIpv6networktemplateRirRegistrationStatus("RIR_REGISTRATION_STATUS_REPLACE_ME", "REGISTERED"),
+				Config: testAccIpv6networktemplateRirRegistrationStatus(name, 24, "REGISTERED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "REGISTERED"),
@@ -947,6 +953,7 @@ func TestAccIpv6networktemplateResource_RirRegistrationStatus(t *testing.T) {
 func TestAccIpv6networktemplateResource_SendRirRequest(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_send_rir_request"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -954,7 +961,7 @@ func TestAccIpv6networktemplateResource_SendRirRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateSendRirRequest("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateSendRirRequest(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "true"),
@@ -962,7 +969,7 @@ func TestAccIpv6networktemplateResource_SendRirRequest(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateSendRirRequest("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateSendRirRequest(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "false"),
@@ -976,6 +983,7 @@ func TestAccIpv6networktemplateResource_SendRirRequest(t *testing.T) {
 func TestAccIpv6networktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_update_dns_on_lease_renewal"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -983,7 +991,7 @@ func TestAccIpv6networktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUpdateDnsOnLeaseRenewal("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUpdateDnsOnLeaseRenewal(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "true"),
@@ -991,7 +999,7 @@ func TestAccIpv6networktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUpdateDnsOnLeaseRenewal("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUpdateDnsOnLeaseRenewal(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_on_lease_renewal", "false"),
@@ -1005,6 +1013,7 @@ func TestAccIpv6networktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseDdnsDomainname(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_ddns_domainname"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1012,7 +1021,7 @@ func TestAccIpv6networktemplateResource_UseDdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseDdnsDomainname("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseDdnsDomainname(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "true"),
@@ -1020,7 +1029,7 @@ func TestAccIpv6networktemplateResource_UseDdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseDdnsDomainname("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseDdnsDomainname(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "false"),
@@ -1034,6 +1043,7 @@ func TestAccIpv6networktemplateResource_UseDdnsDomainname(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseDdnsEnableOptionFqdn(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_ddns_enable_option_fqdn"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1041,7 +1051,7 @@ func TestAccIpv6networktemplateResource_UseDdnsEnableOptionFqdn(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseDdnsEnableOptionFqdn("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseDdnsEnableOptionFqdn(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_enable_option_fqdn", "true"),
@@ -1049,7 +1059,7 @@ func TestAccIpv6networktemplateResource_UseDdnsEnableOptionFqdn(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseDdnsEnableOptionFqdn("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseDdnsEnableOptionFqdn(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_enable_option_fqdn", "false"),
@@ -1063,6 +1073,7 @@ func TestAccIpv6networktemplateResource_UseDdnsEnableOptionFqdn(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_ddns_generate_hostname"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1070,7 +1081,7 @@ func TestAccIpv6networktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseDdnsGenerateHostname("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseDdnsGenerateHostname(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "true"),
@@ -1078,7 +1089,7 @@ func TestAccIpv6networktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseDdnsGenerateHostname("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseDdnsGenerateHostname(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_generate_hostname", "false"),
@@ -1092,6 +1103,7 @@ func TestAccIpv6networktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseDdnsTtl(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_ddns_ttl"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1099,7 +1111,7 @@ func TestAccIpv6networktemplateResource_UseDdnsTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseDdnsTtl("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseDdnsTtl(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "true"),
@@ -1107,7 +1119,7 @@ func TestAccIpv6networktemplateResource_UseDdnsTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseDdnsTtl("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseDdnsTtl(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_ttl", "false"),
@@ -1121,6 +1133,7 @@ func TestAccIpv6networktemplateResource_UseDdnsTtl(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseDomainName(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_domain_name"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1128,7 +1141,7 @@ func TestAccIpv6networktemplateResource_UseDomainName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseDomainName("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseDomainName(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_domain_name", "true"),
@@ -1136,7 +1149,7 @@ func TestAccIpv6networktemplateResource_UseDomainName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseDomainName("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseDomainName(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_domain_name", "false"),
@@ -1150,6 +1163,7 @@ func TestAccIpv6networktemplateResource_UseDomainName(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseDomainNameServers(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_domain_name_servers"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1157,7 +1171,7 @@ func TestAccIpv6networktemplateResource_UseDomainNameServers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseDomainNameServers("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseDomainNameServers(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_domain_name_servers", "true"),
@@ -1165,7 +1179,7 @@ func TestAccIpv6networktemplateResource_UseDomainNameServers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseDomainNameServers("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseDomainNameServers(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_domain_name_servers", "false"),
@@ -1179,6 +1193,7 @@ func TestAccIpv6networktemplateResource_UseDomainNameServers(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseEnableDdns(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_enable_ddns"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1186,7 +1201,7 @@ func TestAccIpv6networktemplateResource_UseEnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseEnableDdns("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseEnableDdns(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "true"),
@@ -1194,7 +1209,7 @@ func TestAccIpv6networktemplateResource_UseEnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseEnableDdns("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseEnableDdns(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "false"),
@@ -1208,6 +1223,7 @@ func TestAccIpv6networktemplateResource_UseEnableDdns(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseLogicFilterRules(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_logic_filter_rules"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1215,7 +1231,7 @@ func TestAccIpv6networktemplateResource_UseLogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseLogicFilterRules("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseLogicFilterRules(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "true"),
@@ -1223,7 +1239,7 @@ func TestAccIpv6networktemplateResource_UseLogicFilterRules(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseLogicFilterRules("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseLogicFilterRules(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_logic_filter_rules", "false"),
@@ -1237,6 +1253,7 @@ func TestAccIpv6networktemplateResource_UseLogicFilterRules(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseOptions(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_options"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1244,7 +1261,7 @@ func TestAccIpv6networktemplateResource_UseOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseOptions("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseOptions(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
@@ -1252,7 +1269,7 @@ func TestAccIpv6networktemplateResource_UseOptions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseOptions("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseOptions(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "false"),
@@ -1266,6 +1283,7 @@ func TestAccIpv6networktemplateResource_UseOptions(t *testing.T) {
 func TestAccIpv6networktemplateResource_UsePreferredLifetime(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_preferred_lifetime"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1273,7 +1291,7 @@ func TestAccIpv6networktemplateResource_UsePreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUsePreferredLifetime("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUsePreferredLifetime(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "true"),
@@ -1281,7 +1299,7 @@ func TestAccIpv6networktemplateResource_UsePreferredLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUsePreferredLifetime("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUsePreferredLifetime(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "false"),
@@ -1295,6 +1313,7 @@ func TestAccIpv6networktemplateResource_UsePreferredLifetime(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseRecycleLeases(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_recycle_leases"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1302,7 +1321,7 @@ func TestAccIpv6networktemplateResource_UseRecycleLeases(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseRecycleLeases("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseRecycleLeases(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_recycle_leases", "true"),
@@ -1310,7 +1329,7 @@ func TestAccIpv6networktemplateResource_UseRecycleLeases(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseRecycleLeases("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseRecycleLeases(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_recycle_leases", "false"),
@@ -1324,6 +1343,7 @@ func TestAccIpv6networktemplateResource_UseRecycleLeases(t *testing.T) {
 func TestAccIpv6networktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_update_dns_on_lease_renewal"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1331,7 +1351,7 @@ func TestAccIpv6networktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T)
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseUpdateDnsOnLeaseRenewal("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseUpdateDnsOnLeaseRenewal(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "true"),
@@ -1339,7 +1359,7 @@ func TestAccIpv6networktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T)
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseUpdateDnsOnLeaseRenewal("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseUpdateDnsOnLeaseRenewal(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "false"),
@@ -1353,6 +1373,7 @@ func TestAccIpv6networktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T)
 func TestAccIpv6networktemplateResource_UseValidLifetime(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_valid_lifetime"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1360,7 +1381,7 @@ func TestAccIpv6networktemplateResource_UseValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateUseValidLifetime("NAME_REPLACE_ME", "true"),
+				Config: testAccIpv6networktemplateUseValidLifetime(name, 24, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
@@ -1368,7 +1389,7 @@ func TestAccIpv6networktemplateResource_UseValidLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateUseValidLifetime("NAME_REPLACE_ME", "false"),
+				Config: testAccIpv6networktemplateUseValidLifetime(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
@@ -1382,6 +1403,7 @@ func TestAccIpv6networktemplateResource_UseValidLifetime(t *testing.T) {
 func TestAccIpv6networktemplateResource_ValidLifetime(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_valid_lifetime"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1389,7 +1411,7 @@ func TestAccIpv6networktemplateResource_ValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateValidLifetime("NAME_REPLACE_ME", "VALID_LIFETIME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateValidLifetime(name, 24, "VALID_LIFETIME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_REPLACE_ME"),
@@ -1397,7 +1419,7 @@ func TestAccIpv6networktemplateResource_ValidLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateValidLifetime("NAME_REPLACE_ME", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateValidLifetime(name, 24, "VALID_LIFETIME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
@@ -1479,149 +1501,166 @@ func testAccIpv6networktemplateImportStateIdFunc(resourceName string) resource.I
 	}
 }
 
-func testAccIpv6networktemplateBasicConfig(name string) string {
+func testAccIpv6networktemplateBasicConfig(name string, cidr int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test" {
     name = %q
-}
-`, name)
-}
-
-func testAccIpv6networktemplateAllowAnyNetmask(name string, allowAnyNetmask string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6networktemplate" "test_allow_any_netmask" {
-    name = %q
-    allow_any_netmask = %q
-}
-`, name, allowAnyNetmask)
-}
-
-func testAccIpv6networktemplateAutoCreateReversezone(name string, autoCreateReversezone string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6networktemplate" "test_auto_create_reversezone" {
-    name = %q
-    auto_create_reversezone = %q
-}
-`, name, autoCreateReversezone)
-}
-
-func testAccIpv6networktemplateCidr(name string, cidr string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6networktemplate" "test_cidr" {
-    name = %q
-    cidr = %q
+    cidr = %d
 }
 `, name, cidr)
 }
 
-func testAccIpv6networktemplateCloudApiCompatible(name string, cloudApiCompatible string) string {
+func testAccIpv6networktemplateAllowAnyNetmask(name string, cidr int, allowAnyNetmask string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6networktemplate" "test_allow_any_netmask" {
+    name = %q
+    cidr = %d
+    allow_any_netmask = %q
+}
+`, name, cidr, allowAnyNetmask)
+}
+
+func testAccIpv6networktemplateAutoCreateReversezone(name string, cidr int, autoCreateReversezone string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6networktemplate" "test_auto_create_reversezone" {
+    name = %q
+    cidr = %d
+    auto_create_reversezone = %q
+}
+`, name, cidr, autoCreateReversezone)
+}
+
+func testAccIpv6networktemplateCidr(name string, cidr int) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6networktemplate" "test_cidr" {
+    name = %q
+    cidr = %d
+}
+`, name, cidr)
+}
+
+func testAccIpv6networktemplateCloudApiCompatible(name string, cidr int, cloudApiCompatible string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_cloud_api_compatible" {
     name = %q
+    cidr = %d
     cloud_api_compatible = %q
 }
-`, name, cloudApiCompatible)
+`, name, cidr, cloudApiCompatible)
 }
 
-func testAccIpv6networktemplateComment(name string, comment string) string {
+func testAccIpv6networktemplateComment(name string, cidr int, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_comment" {
     name = %q
+    cidr = %d
     comment = %q
 }
-`, name, comment)
+`, name, cidr, comment)
 }
 
-func testAccIpv6networktemplateDdnsDomainname(name string, ddnsDomainname string) string {
+func testAccIpv6networktemplateDdnsDomainname(name string, cidr int, ddnsDomainname string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_ddns_domainname" {
     name = %q
+    cidr = %d
     ddns_domainname = %q
+    cidr = %d
     use_ddns_domainname = true
 }
-`, name, ddnsDomainname)
+`, name, cidr, ddnsDomainname)
 }
 
-func testAccIpv6networktemplateDdnsEnableOptionFqdn(name string, ddnsEnableOptionFqdn string) string {
+func testAccIpv6networktemplateDdnsEnableOptionFqdn(name string, cidr int, ddnsEnableOptionFqdn string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_ddns_enable_option_fqdn" {
     name = %q
+    cidr = %d
     ddns_enable_option_fqdn = %q
     use_ddns_enable_option_fqdn = true
 }
-`, name, ddnsEnableOptionFqdn)
+`, name, cidr, ddnsEnableOptionFqdn)
 }
 
-func testAccIpv6networktemplateDdnsGenerateHostname(name string, ddnsGenerateHostname string) string {
+func testAccIpv6networktemplateDdnsGenerateHostname(name string, cidr int, ddnsGenerateHostname string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_ddns_generate_hostname" {
     name = %q
+    cidr = %d
     ddns_generate_hostname = %q
+    cidr = %d
     use_ddns_generate_hostname = true
 }
-`, name, ddnsGenerateHostname)
+`, name, cidr, ddnsGenerateHostname)
 }
 
-func testAccIpv6networktemplateDdnsServerAlwaysUpdates(name string, ddnsServerAlwaysUpdates string) string {
+func testAccIpv6networktemplateDdnsServerAlwaysUpdates(name string, cidr int, ddnsServerAlwaysUpdates string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_ddns_server_always_updates" {
     name = %q
+    cidr = %d
     ddns_server_always_updates = %q
 }
-`, name, ddnsServerAlwaysUpdates)
+`, name, cidr, ddnsServerAlwaysUpdates)
 }
 
-func testAccIpv6networktemplateDdnsTtl(name string, ddnsTtl string) string {
+func testAccIpv6networktemplateDdnsTtl(name string, cidr int, ddnsTtl string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_ddns_ttl" {
     name = %q
+    cidr = %d
     ddns_ttl = %q
     use_ddns_ttl = true
 }
-`, name, ddnsTtl)
+`, name, cidr, ddnsTtl)
 }
 
-func testAccIpv6networktemplateDelegatedMember(name string, delegatedMember map[string]string) string {
+func testAccIpv6networktemplateDelegatedMember(name string, cidr int, delegatedMember map[string]any) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_delegated_member" {
     name = %q
+    cidr = %d
     delegated_member = %s
 }
-`, name, delegatedMember)
+`, name, cidr, delegatedMember)
 }
 
-func testAccIpv6networktemplateDomainName(name string, domainName string) string {
+func testAccIpv6networktemplateDomainName(name string, cidr int, domainName string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_domain_name" {
     name = %q
+    cidr = %d
     domain_name = %q
+    cidr = %d
     use_domain_name = true
 }
-`, name, domainName)
+`, name, cidr, domainName)
 }
 
-func testAccIpv6networktemplateDomainNameServers(name string, domainNameServers []string) string {
+func testAccIpv6networktemplateDomainNameServers(name string, cidr int, domainNameServers []string) string {
 	domainNameServersStr := utils.ConvertStringSliceToHCL(domainNameServers)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_domain_name_servers" {
     name = %q
+    cidr = %d
     domain_name_servers = %s
     use_domain_name_servers = true
 }
-`, name, domainNameServersStr)
+`, name, cidr, domainNameServersStr)
 }
 
-func testAccIpv6networktemplateEnableDdns(name string, enableDdns string) string {
+func testAccIpv6networktemplateEnableDdns(name string, cidr int, enableDdns string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_enable_ddns" {
     name = %q
+    cidr = %d
     enable_ddns = %q
     use_enable_ddns = true
 }
-`, name, enableDdns)
+`, name, cidr, enableDdns)
 }
 
-func testAccIpv6networktemplateExtAttrs(name string, extAttrs map[string]string) string {
+func testAccIpv6networktemplateExtAttrs(name string, cidr int, extAttrs map[string]string) string {
 	extAttrsStr := "{\n"
 	for k, v := range extAttrs {
 		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
@@ -1630,269 +1669,301 @@ func testAccIpv6networktemplateExtAttrs(name string, extAttrs map[string]string)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_extattrs" {
     name = %q
+    cidr = %d
     extattrs = %s
 }
-`, name, extAttrsStr)
+`, name, cidr, extAttrsStr)
 }
 
-func testAccIpv6networktemplateFixedAddressTemplates(name string, fixedAddressTemplates []string) string {
+func testAccIpv6networktemplateFixedAddressTemplates(name string, cidr int, fixedAddressTemplates []string) string {
 	fixedAddressTemplatesStr := utils.ConvertStringSliceToHCL(fixedAddressTemplates)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_fixed_address_templates" {
     name = %q
+    cidr = %d
     fixed_address_templates = %s
 }
-`, name, fixedAddressTemplatesStr)
+`, name, cidr, fixedAddressTemplatesStr)
 }
 
-func testAccIpv6networktemplateIpv6prefix(name string, ipv6prefix string) string {
+func testAccIpv6networktemplateIpv6prefix(name string, cidr int, ipv6prefix string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_ipv6prefix" {
     name = %q
+    cidr = %d
     ipv6prefix = %q
 }
-`, name, ipv6prefix)
+`, name, cidr, ipv6prefix)
 }
 
-func testAccIpv6networktemplateLogicFilterRules(name string, logicFilterRules []map[string]any) string {
+func testAccIpv6networktemplateLogicFilterRules(name string, cidr int, logicFilterRules []map[string]any) string {
 	logicFilterRulesStr := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_logic_filter_rules" {
     name = %q
+    cidr = %d
     logic_filter_rules = %s
     use_logic_filter_rules = true
 }
-`, name, logicFilterRulesStr)
+`, name, cidr, logicFilterRulesStr)
 }
 
-func testAccIpv6networktemplateMembers(name string, members []map[string]any) string {
+func testAccIpv6networktemplateMembers(name string, cidr int, members []map[string]any) string {
 	membersStr := utils.ConvertSliceOfMapsToHCL(members)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_members" {
     name = %q
+    cidr = %d
     members = %s
 }
-`, name, membersStr)
+`, name, cidr, membersStr)
 }
 
 func testAccIpv6networktemplateName(name string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_name" {
     name = %q
+    cidr = %d
 }
 `, name)
 }
 
-func testAccIpv6networktemplateOptions(name string, options []map[string]any) string {
+func testAccIpv6networktemplateOptions(name string, cidr int, options []map[string]any) string {
 	optionsStr := utils.ConvertSliceOfMapsToHCL(options)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_options" {
     name = %q
+    cidr = %d
     options = %s
     use_options = true
 }
-`, name, optionsStr)
+`, name, cidr, optionsStr)
 }
 
-func testAccIpv6networktemplatePreferredLifetime(name string, preferredLifetime string) string {
+func testAccIpv6networktemplatePreferredLifetime(name string, cidr int, preferredLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_preferred_lifetime" {
     name = %q
+    cidr = %d
     preferred_lifetime = %q
     use_preferred_lifetime = true
 }
-`, name, preferredLifetime)
+`, name, cidr, preferredLifetime)
 }
 
-func testAccIpv6networktemplateRangeTemplates(name string, rangeTemplates []string) string {
+func testAccIpv6networktemplateRangeTemplates(name string, cidr int, rangeTemplates []string) string {
 	rangeTemplatesStr := utils.ConvertStringSliceToHCL(rangeTemplates)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_range_templates" {
     name = %q
+    cidr = %d
     range_templates = %s
 }
-`, name, rangeTemplatesStr)
+`, name, cidr, rangeTemplatesStr)
 }
 
-func testAccIpv6networktemplateRecycleLeases(name string, recycleLeases string) string {
+func testAccIpv6networktemplateRecycleLeases(name string, cidr int, recycleLeases string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_recycle_leases" {
     name = %q
+    cidr = %d
     recycle_leases = %q
     use_recycle_leases = true
 }
-`, name, recycleLeases)
+`, name, cidr, recycleLeases)
 }
 
-func testAccIpv6networktemplateRirOrganization(name string, rirOrganization string) string {
+func testAccIpv6networktemplateRirOrganization(name string, cidr int, rirOrganization string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_rir_organization" {
     name = %q
+    cidr = %d
     rir_organization = %q
 }
-`, name, rirOrganization)
+`, name, cidr, rirOrganization)
 }
 
-func testAccIpv6networktemplateRirRegistrationAction(name string, rirRegistrationAction string) string {
+func testAccIpv6networktemplateRirRegistrationAction(name string, cidr int, rirRegistrationAction string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_rir_registration_action" {
     name = %q
+    cidr = %d
     rir_registration_action = %q
 }
-`, name, rirRegistrationAction)
+`, name, cidr, rirRegistrationAction)
 }
 
-func testAccIpv6networktemplateRirRegistrationStatus(name string, rirRegistrationStatus string) string {
+func testAccIpv6networktemplateRirRegistrationStatus(name string, cidr int, rirRegistrationStatus string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_rir_registration_status" {
     name = %q
+    cidr = %d
     rir_registration_status = %q
 }
-`, name, rirRegistrationStatus)
+`, name, cidr, rirRegistrationStatus)
 }
 
-func testAccIpv6networktemplateSendRirRequest(name string, sendRirRequest string) string {
+func testAccIpv6networktemplateSendRirRequest(name string, cidr int, sendRirRequest string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_send_rir_request" {
     name = %q
+    cidr = %d
     send_rir_request = %q
 }
-`, name, sendRirRequest)
+`, name, cidr, sendRirRequest)
 }
 
-func testAccIpv6networktemplateUpdateDnsOnLeaseRenewal(name string, updateDnsOnLeaseRenewal string) string {
+func testAccIpv6networktemplateUpdateDnsOnLeaseRenewal(name string, cidr int, updateDnsOnLeaseRenewal string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_update_dns_on_lease_renewal" {
     name = %q
+    cidr = %d
     update_dns_on_lease_renewal = %q
     use_update_dns_on_lease_renewal = true
 }
-`, name, updateDnsOnLeaseRenewal)
+`, name, cidr, updateDnsOnLeaseRenewal)
 }
 
-func testAccIpv6networktemplateUseDdnsDomainname(name string, useDdnsDomainname string) string {
+func testAccIpv6networktemplateUseDdnsDomainname(name string, cidr int, useDdnsDomainname string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_ddns_domainname" {
     name = %q
+    cidr = %d
     use_ddns_domainname = %q
+    cidr = %d
 }
-`, name, useDdnsDomainname)
+`, name, cidr, useDdnsDomainname)
 }
 
-func testAccIpv6networktemplateUseDdnsEnableOptionFqdn(name string, useDdnsEnableOptionFqdn string) string {
+func testAccIpv6networktemplateUseDdnsEnableOptionFqdn(name string, cidr int, useDdnsEnableOptionFqdn string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_ddns_enable_option_fqdn" {
     name = %q
+    cidr = %d
     use_ddns_enable_option_fqdn = %q
 }
-`, name, useDdnsEnableOptionFqdn)
+`, name, cidr, useDdnsEnableOptionFqdn)
 }
 
-func testAccIpv6networktemplateUseDdnsGenerateHostname(name string, useDdnsGenerateHostname string) string {
+func testAccIpv6networktemplateUseDdnsGenerateHostname(name string, cidr int, useDdnsGenerateHostname string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_ddns_generate_hostname" {
     name = %q
+    cidr = %d
     use_ddns_generate_hostname = %q
+    cidr = %d
 }
-`, name, useDdnsGenerateHostname)
+`, name, cidr, useDdnsGenerateHostname)
 }
 
-func testAccIpv6networktemplateUseDdnsTtl(name string, useDdnsTtl string) string {
+func testAccIpv6networktemplateUseDdnsTtl(name string, cidr int, useDdnsTtl string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_ddns_ttl" {
     name = %q
+    cidr = %d
     use_ddns_ttl = %q
 }
-`, name, useDdnsTtl)
+`, name, cidr, useDdnsTtl)
 }
 
-func testAccIpv6networktemplateUseDomainName(name string, useDomainName string) string {
+func testAccIpv6networktemplateUseDomainName(name string, cidr int, useDomainName string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_domain_name" {
     name = %q
+    cidr = %d
     use_domain_name = %q
+    cidr = %d
 }
-`, name, useDomainName)
+`, name, cidr, useDomainName)
 }
 
-func testAccIpv6networktemplateUseDomainNameServers(name string, useDomainNameServers string) string {
+func testAccIpv6networktemplateUseDomainNameServers(name string, cidr int, useDomainNameServers string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_domain_name_servers" {
     name = %q
+    cidr = %d
     use_domain_name_servers = %q
 }
-`, name, useDomainNameServers)
+`, name, cidr, useDomainNameServers)
 }
 
-func testAccIpv6networktemplateUseEnableDdns(name string, useEnableDdns string) string {
+func testAccIpv6networktemplateUseEnableDdns(name string, cidr int, useEnableDdns string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_enable_ddns" {
     name = %q
+    cidr = %d
     use_enable_ddns = %q
 }
-`, name, useEnableDdns)
+`, name, cidr, useEnableDdns)
 }
 
-func testAccIpv6networktemplateUseLogicFilterRules(name string, useLogicFilterRules string) string {
+func testAccIpv6networktemplateUseLogicFilterRules(name string, cidr int, useLogicFilterRules string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_logic_filter_rules" {
     name = %q
+    cidr = %d
     use_logic_filter_rules = %q
 }
-`, name, useLogicFilterRules)
+`, name, cidr, useLogicFilterRules)
 }
 
-func testAccIpv6networktemplateUseOptions(name string, useOptions string) string {
+func testAccIpv6networktemplateUseOptions(name string, cidr int, useOptions string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_options" {
     name = %q
+    cidr = %d
     use_options = %q
 }
-`, name, useOptions)
+`, name, cidr, useOptions)
 }
 
-func testAccIpv6networktemplateUsePreferredLifetime(name string, usePreferredLifetime string) string {
+func testAccIpv6networktemplateUsePreferredLifetime(name string, cidr int, usePreferredLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_preferred_lifetime" {
     name = %q
+    cidr = %d
     use_preferred_lifetime = %q
 }
-`, name, usePreferredLifetime)
+`, name, cidr, usePreferredLifetime)
 }
 
-func testAccIpv6networktemplateUseRecycleLeases(name string, useRecycleLeases string) string {
+func testAccIpv6networktemplateUseRecycleLeases(name string, cidr int, useRecycleLeases string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_recycle_leases" {
     name = %q
+    cidr = %d
     use_recycle_leases = %q
 }
-`, name, useRecycleLeases)
+`, name, cidr, useRecycleLeases)
 }
 
-func testAccIpv6networktemplateUseUpdateDnsOnLeaseRenewal(name string, useUpdateDnsOnLeaseRenewal string) string {
+func testAccIpv6networktemplateUseUpdateDnsOnLeaseRenewal(name string, cidr int, useUpdateDnsOnLeaseRenewal string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_update_dns_on_lease_renewal" {
     name = %q
+    cidr = %d
     use_update_dns_on_lease_renewal = %q
 }
-`, name, useUpdateDnsOnLeaseRenewal)
+`, name, cidr, useUpdateDnsOnLeaseRenewal)
 }
 
-func testAccIpv6networktemplateUseValidLifetime(name string, useValidLifetime string) string {
+func testAccIpv6networktemplateUseValidLifetime(name string, cidr int, useValidLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_use_valid_lifetime" {
     name = %q
+    cidr = %d
     use_valid_lifetime = %q
 }
-`, name, useValidLifetime)
+`, name, cidr, useValidLifetime)
 }
 
-func testAccIpv6networktemplateValidLifetime(name string, validLifetime string) string {
+func testAccIpv6networktemplateValidLifetime(name string, cidr int, validLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_valid_lifetime" {
     name = %q
+    cidr = %d
     valid_lifetime = %q
     use_valid_lifetime = true
 }
-`, name, validLifetime)
+`, name, cidr, validLifetime)
 }
