@@ -12,28 +12,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
-/*
-// Retrieve a specific ipam Ipv6networktemplate by filters
-data "nios_ipam_ipv6networktemplate" "get_ipam_ipv6networktemplate_using_filters" {
-  filters = {
-    name = "NAME_REPLACE_ME"
-  }
-}
-// Retrieve specific ipam Ipv6networktemplate using Extensible Attributes
-data "nios_ipam_ipv6networktemplate" "get_ipam_ipv6networktemplate_using_extensible_attributes" {
-  extattrfilters = {
-    Site = "location-1"
-  }
-}
-
-// Retrieve all ipam Ipv6networktemplate
-data "nios_ipam_ipv6networktemplate" "get_all_ipam_ipv6networktemplate" {}
-*/
-
 func TestAccIpv6networktemplateDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_ipv6networktemplate.test"
 	resourceName := "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -41,7 +24,7 @@ func TestAccIpv6networktemplateDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6networktemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6networktemplateDataSourceConfigFilters("NAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDataSourceConfigFilters(name),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
@@ -56,13 +39,15 @@ func TestAccIpv6networktemplateDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_ipv6networktemplate.test"
 	resourceName := "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
+	name := acctest.RandomNameWithPrefix("network-template")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckIpv6networktemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6networktemplateDataSourceConfigExtAttrFilters("NAME_REPLACE_ME", acctest.RandomName()),
+				Config: testAccIpv6networktemplateDataSourceConfigExtAttrFilters(name, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
@@ -133,7 +118,7 @@ resource "nios_ipam_ipv6networktemplate" "test" {
 
 data "nios_ipam_ipv6networktemplate" "test" {
   filters = {
-	name = nios_ipam_ipv6networktemplate.test.name
+    name = nios_ipam_ipv6networktemplate.test.name
   }
 }
 `, name)

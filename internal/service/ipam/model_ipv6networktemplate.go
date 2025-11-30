@@ -15,6 +15,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -55,7 +56,7 @@ type Ipv6networktemplateModel struct {
 	PreferredLifetime          types.Int64         `tfsdk:"preferred_lifetime"`
 	RangeTemplates             types.List          `tfsdk:"range_templates"`
 	RecycleLeases              types.Bool          `tfsdk:"recycle_leases"`
-	Rir                        iptypes.IPv6Address `tfsdk:"rir"`
+	Rir                        types.String        `tfsdk:"rir"`
 	RirOrganization            types.String        `tfsdk:"rir_organization"`
 	RirRegistrationAction      types.String        `tfsdk:"rir_registration_action"`
 	RirRegistrationStatus      types.String        `tfsdk:"rir_registration_status"`
@@ -104,7 +105,7 @@ var Ipv6networktemplateAttrTypes = map[string]attr.Type{
 	"preferred_lifetime":              types.Int64Type,
 	"range_templates":                 types.ListType{ElemType: types.StringType},
 	"recycle_leases":                  types.BoolType,
-	"rir":                             iptypes.IPv6AddressType{},
+	"rir":                             types.StringType,
 	"rir_organization":                types.StringType,
 	"rir_registration_action":         types.StringType,
 	"rir_registration_status":         types.StringType,
@@ -150,7 +151,7 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"cloud_api_compatible": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "This flag controls whether this template can be used to create network objects in a cloud-computing deployment.",
 	},
 	"comment": schema.StringAttribute{
@@ -191,9 +192,12 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If this field is set to True, the DHCP server generates a hostname and updates DNS with it when the DHCP client request does not contain a hostname.",
 	},
 	"ddns_server_always_updates": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("ddns_enable_option_fqdn")),
+		},
 		MarkdownDescription: "This field controls whether the DHCP server is allowed to update DNS, regardless of the DHCP client requests. Note that changes for this field take effect only if ddns_enable_option_fqdn is True.",
 	},
 	"ddns_ttl": schema.Int64Attribute{
@@ -306,6 +310,12 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Computed: true,
 		Optional: true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: Ipv6networktemplateOptionsAttrTypes},
+				[]attr.Value{},
+			),
+		),
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.AlsoRequires(path.MatchRoot("use_options")),
@@ -315,7 +325,6 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"preferred_lifetime": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(27000),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_preferred_lifetime")),
 		},
@@ -339,7 +348,6 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.",
 	},
 	"rir": schema.StringAttribute{
-		CustomType:          iptypes.IPv6AddressType{},
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the IPv6 network address space.",
 	},
@@ -569,7 +577,7 @@ func (m *Ipv6networktemplateModel) Flatten(ctx context.Context, from *ipam.Ipv6n
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.RangeTemplates = flex.FlattenFrameworkListString(ctx, from.RangeTemplates, diags)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
-	m.Rir = flex.FlattenIPv6Address(from.Rir)
+	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
