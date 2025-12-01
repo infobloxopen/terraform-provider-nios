@@ -75,6 +75,7 @@ func (r *DtcMonitorIcmpResource) Create(ctx context.Context, req resource.Create
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -93,7 +94,8 @@ func (r *DtcMonitorIcmpResource) Create(ctx context.Context, req resource.Create
 	res := apiRes.CreateDtcMonitorIcmpResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create DtcMonitorIcmp due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating DtcMonitorIcmp due to inherited Extensible attributes")
 		return
 	}
 
@@ -163,7 +165,8 @@ func (r *DtcMonitorIcmpResource) Read(ctx context.Context, req resource.ReadRequ
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading DtcMonitorIcmp due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading DtcMonitorIcmp due to inherited Extensible attributes")
 		return
 	}
 
@@ -253,13 +256,14 @@ func (r *DtcMonitorIcmpResource) Update(ctx context.Context, req resource.Update
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -287,7 +291,8 @@ func (r *DtcMonitorIcmpResource) Update(ctx context.Context, req resource.Update
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update DtcMonitorIcmp due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating DtcMonitorIcmp due to inherited Extensible attributes")
 		return
 	}
 
