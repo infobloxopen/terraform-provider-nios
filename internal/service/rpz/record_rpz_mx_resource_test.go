@@ -441,7 +441,6 @@ func testAccCheckRecordRpzMxDisappears(ctx context.Context, v *rpz.RecordRpzMx) 
 		return nil
 	}
 }
-
 func testAccRecordRpzMxBasicConfig(name, mailExchanger, rpZone string, preference int) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_mx" "test" {
@@ -460,7 +459,7 @@ func testAccRecordRpzMxComment(name, mailExchanger, rpZone string, preference in
 resource "nios_rpz_record_mx" "test_comment" {
     name           = %q
     mail_exchanger = %q
-	rp_zone        = nios_dns_zone_rp.test.fqdn
+    rp_zone        = nios_dns_zone_rp.test.fqdn
     preference     = %d
     comment        = %q
 }
@@ -543,7 +542,7 @@ resource "nios_rpz_record_mx" "test_rp_zone" {
     name           = %q
     mail_exchanger = %q
     rp_zone        = nios_dns_zone_rp.test.fqdn
-	preference     = %d
+    preference     = %d
 }
 `, name, mailExchanger, preference)
 
