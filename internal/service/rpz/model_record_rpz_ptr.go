@@ -96,6 +96,13 @@ var RecordRpzPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the substitute rule.",
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv4addr"),
+				path.MatchRoot("ipv6addr"),
+				path.MatchRoot("name"),
+			),
+		},
 	},
 	"ipv6addr": schema.StringAttribute{
 		CustomType:          iptypes.IPv6AddressType{},

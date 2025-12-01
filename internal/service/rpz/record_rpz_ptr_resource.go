@@ -20,7 +20,6 @@ var readableAttributesForRecordRpzPtr = "comment,disable,extattrs,ipv4addr,ipv6a
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RecordRpzPtrResource{}
 var _ resource.ResourceWithImportState = &RecordRpzPtrResource{}
-var _ resource.ResourceWithValidateConfig = &RecordRpzPtrResource{}
 
 func NewRecordRpzPtrResource() resource.Resource {
 	return &RecordRpzPtrResource{}
@@ -60,47 +59,6 @@ func (r *RecordRpzPtrResource) Configure(ctx context.Context, req resource.Confi
 	}
 
 	r.client = client
-}
-
-func (r *RecordRpzPtrResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var data RecordRpzPtrModel
-
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	ipv4Empty := data.Ipv4addr.IsNull() || data.Ipv4addr.String() == ""
-	ipv6Empty := data.Ipv6addr.IsNull() || data.Ipv6addr.String() == ""
-	nameEmpty := data.Name.IsNull() || data.Name.String() == ""
-
-	if ipv4Empty && ipv6Empty && nameEmpty {
-		resp.Diagnostics.AddError(
-			"Invalid Configuration",
-			"At least one of 'ipv4addr' or 'ipv6addr' or 'name' must be configured.",
-		)
-	}
-
-	if !ipv4Empty && (!nameEmpty || !ipv6Empty) {
-		resp.Diagnostics.AddError(
-			"Invalid Configuration",
-			"'ipv4addr' cannot be configured with 'name' or 'ipv6addr'. Please configure only one of these attributes.",
-		)
-	}
-
-	if !ipv6Empty && (!nameEmpty || !ipv4Empty) {
-		resp.Diagnostics.AddError(
-			"Invalid Configuration",
-			"'ipv6addr' cannot be configured with 'name' or 'ipv4addr'. Please configure only one of these attributes.",
-		)
-	}
-
-	if !nameEmpty && (!ipv4Empty || !ipv6Empty) {
-		resp.Diagnostics.AddError(
-			"Invalid Configuration",
-			"'name' cannot be configured with 'ipv4addr' or 'ipv6addr'. Please configure only one of these attributes.",
-		)
-	}
 }
 
 func (r *RecordRpzPtrResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
