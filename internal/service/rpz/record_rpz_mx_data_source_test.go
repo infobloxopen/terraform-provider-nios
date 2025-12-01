@@ -97,7 +97,7 @@ data "nios_rpz_record_mx" "test" {
 	}
 }
 `, name, mailExchanger, preference)
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxDataSourceConfigExtAttrFilters(name, mailExchanger, rpZone string, preference int, extAttrsValue string) string {
@@ -118,6 +118,6 @@ data "nios_rpz_record_mx" "test" {
 	}
 }
 `, name, mailExchanger, preference, extAttrsValue)
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 
 }

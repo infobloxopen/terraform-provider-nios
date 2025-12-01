@@ -451,7 +451,7 @@ resource "nios_rpz_record_mx" "test" {
 }
 `, name, mailExchanger, preference)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxComment(name, mailExchanger, rpZone string, preference int, comment string) string {
@@ -465,7 +465,7 @@ resource "nios_rpz_record_mx" "test_comment" {
 }
 `, name, mailExchanger, preference, comment)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxDisable(name, mailExchanger, rpZone string, preference int, disable bool) string {
@@ -479,7 +479,7 @@ resource "nios_rpz_record_mx" "test_disable" {
 }
 `, name, mailExchanger, preference, disable)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxExtAttrs(name, mailExchanger, rpZone string, preference int, extAttrs map[string]any) string {
@@ -494,7 +494,7 @@ resource "nios_rpz_record_mx" "test_extattrs" {
 }
 `, name, mailExchanger, preference, extAttrsStr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxMailExchanger(name, mailExchanger, rpZone string, preference int) string {
@@ -507,7 +507,7 @@ resource "nios_rpz_record_mx" "test_mail_exchanger" {
 }
 `, name, mailExchanger, preference)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxName(name, mailExchanger, rpZone string, preference int) string {
@@ -520,7 +520,7 @@ resource "nios_rpz_record_mx" "test_name" {
 }
 `, name, mailExchanger, preference)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxPreference(name, mailExchanger, rpZone string, preference int) string {
@@ -533,7 +533,7 @@ resource "nios_rpz_record_mx" "test_preference" {
 }
 `, name, mailExchanger, preference)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxRpZone(name, mailExchanger, rpZone string, preference int) string {
@@ -546,7 +546,7 @@ resource "nios_rpz_record_mx" "test_rp_zone" {
 }
 `, name, mailExchanger, preference)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxTtl(name, mailExchanger, rpZone string, preference int, ttl int32, useTtl bool) string {
@@ -561,7 +561,7 @@ resource "nios_rpz_record_mx" "test_ttl" {
 }
 `, name, mailExchanger, preference, ttl, useTtl)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxUseTtl(name, mailExchanger, rpZone string, preference int, ttl int32, useTtl bool) string {
@@ -576,7 +576,7 @@ resource "nios_rpz_record_mx" "test_use_ttl" {
 }
 `, name, mailExchanger, preference, ttl, useTtl)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzMxView(name, mailExchanger, rpZone string, preference int, view string) string {
@@ -589,13 +589,5 @@ resource "nios_rpz_record_mx" "test_view" {
     view           = %q
 }`, name, mailExchanger, preference, view)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone), config}, "")
-}
-
-func testAccBaseWithZone(zoneFqdn string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_rp" "test" {
-    fqdn = %q
-}
-`, zoneFqdn)
+	return strings.Join([]string{testAccBaseWithZone(rpZone, view), config}, "")
 }
