@@ -55,8 +55,8 @@ var DtcMonitorIcmpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthBetween(0, 256),
+			customvalidator.ValidateTrimmedString(),
 		},
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Comment for this DTC monitor; maximum 256 characters.",
