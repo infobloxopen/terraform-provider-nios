@@ -25,9 +25,9 @@ func TestAccIpv6sharednetworkResource_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -78,9 +78,9 @@ func TestAccIpv6sharednetworkResource_disappears(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -106,9 +106,9 @@ func TestAccIpv6sharednetworkResource_Import(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1421,8 +1421,8 @@ func testAccIpv6sharednetworkImportStateIdFunc(resourceName string) resource.Imp
 	}
 }
 
-func testAccIpv6sharednetworkBasicConfig(name string, networks []map[string]any, network1 string, network2 string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkBasicConfig(name string, networks []string, network1 string, network2 string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test" {
     name = %q

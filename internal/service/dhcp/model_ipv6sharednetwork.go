@@ -48,7 +48,7 @@ type Ipv6sharednetworkModel struct {
 	LogicFilterRules           types.List                               `tfsdk:"logic_filter_rules"`
 	Name                       types.String                             `tfsdk:"name"`
 	NetworkView                types.String                             `tfsdk:"network_view"`
-	Networks                   types.List                               `tfsdk:"networks"`
+	Networks                   internaltypes.UnorderedListValue         `tfsdk:"networks"`
 	Options                    types.List                               `tfsdk:"options"`
 	PreferredLifetime          types.Int64                              `tfsdk:"preferred_lifetime"`
 	UpdateDnsOnLeaseRenewal    types.Bool                               `tfsdk:"update_dns_on_lease_renewal"`
@@ -84,7 +84,7 @@ var Ipv6sharednetworkAttrTypes = map[string]attr.Type{
 	"logic_filter_rules":              types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6sharednetworkLogicFilterRulesAttrTypes}},
 	"name":                            types.StringType,
 	"network_view":                    types.StringType,
-	"networks":                        types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6sharednetworkNetworksAttrTypes}},
+	"networks":                        internaltypes.UnorderedListOfStringType,
 	"options":                         types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6sharednetworkOptionsAttrTypes}},
 	"preferred_lifetime":              types.Int64Type,
 	"update_dns_on_lease_renewal":     types.BoolType,
@@ -247,11 +247,10 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The name of the network view in which this IPv6 shared network resides.",
 	},
-	"networks": schema.ListNestedAttribute{
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: Ipv6sharednetworkNetworksResourceSchemaAttributes,
-		},
-		Required: true,
+	"networks": schema.ListAttribute{
+		ElementType: types.StringType,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		Required:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -388,7 +387,7 @@ func (m *Ipv6sharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnos
 		ExtAttrs:                   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		LogicFilterRules:           flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6sharednetworkLogicFilterRules),
 		Name:                       flex.ExpandStringPointer(m.Name),
-		Networks:                   flex.ExpandFrameworkListNestedBlock(ctx, m.Networks, diags, ExpandIpv6sharednetworkNetworks),
+		Networks:                   ExpandNetworks(ctx, m.Networks, diags),
 		Options:                    flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6sharednetworkOptions),
 		PreferredLifetime:          flex.ExpandInt64Pointer(m.PreferredLifetime),
 		UpdateDnsOnLeaseRenewal:    flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
@@ -410,6 +409,26 @@ func (m *Ipv6sharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnos
 		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
 	}
 	return to
+}
+
+func ExpandNetworks(ctx context.Context, list internaltypes.UnorderedListValue, diags *diag.Diagnostics) []dhcp.Ipv6sharednetworkNetworks {
+	if list.IsNull() || list.IsUnknown() {
+		return nil
+	}
+
+	var networkRefs []string
+	diags.Append(list.ElementsAs(ctx, &networkRefs, false)...)
+	if diags.HasError() {
+		return nil
+	}
+
+	result := make([]dhcp.Ipv6sharednetworkNetworks, len(networkRefs))
+	for i, ref := range networkRefs {
+		result[i] = dhcp.Ipv6sharednetworkNetworks{
+			Ref: &ref,
+		}
+	}
+	return result
 }
 
 func FlattenIpv6sharednetwork(ctx context.Context, from *dhcp.Ipv6sharednetwork, diags *diag.Diagnostics) types.Object {
@@ -446,12 +465,7 @@ func (m *Ipv6sharednetworkModel) Flatten(ctx context.Context, from *dhcp.Ipv6sha
 	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, Ipv6sharednetworkLogicFilterRulesAttrTypes, diags, FlattenIpv6sharednetworkLogicFilterRules)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
-	planNetworks := m.Networks
-	m.Networks = flex.FlattenFrameworkListNestedBlock(ctx, from.Networks, Ipv6sharednetworkNetworksAttrTypes, diags, FlattenIpv6sharednetworkNetworks)
-	reOrderedNetworks, diags := utils.ReorderAndFilterNestedListResponse(ctx, planNetworks, m.Networks, "ref")
-	if !diags.HasError() {
-		m.Networks = reOrderedNetworks.(basetypes.ListValue)
-	}
+	m.Networks = FlattenNetworks(ctx, from.Networks, diags)
 	planOptions := m.Options
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, Ipv6sharednetworkOptionsAttrTypes, diags, FlattenIpv6sharednetworkOptions)
 	if !planOptions.IsUnknown() {
@@ -475,4 +489,21 @@ func (m *Ipv6sharednetworkModel) Flatten(ctx context.Context, from *dhcp.Ipv6sha
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
 	m.UseValidLifetime = types.BoolPointerValue(from.UseValidLifetime)
 	m.ValidLifetime = flex.FlattenInt64Pointer(from.ValidLifetime)
+}
+
+func FlattenNetworks(ctx context.Context, networks []dhcp.Ipv6sharednetworkNetworks, diags *diag.Diagnostics) internaltypes.UnorderedListValue {
+	if networks == nil {
+		return internaltypes.NewUnorderedListValueNull(types.StringType)
+	}
+
+	networkRefs := make([]string, len(networks))
+	for i, network := range networks {
+		if network.Ref != nil {
+			networkRefs[i] = *network.Ref
+		}
+	}
+
+	listValue, d := internaltypes.NewUnorderedListValueFrom(ctx, types.StringType, networkRefs)
+	diags.Append(d...)
+	return listValue
 }
