@@ -94,7 +94,7 @@ var Ipv6rangeAttrTypes = map[string]attr.Type{
 	"logic_filter_rules":                   types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6rangeLogicFilterRulesAttrTypes}},
 	"member":                               types.ObjectType{AttrTypes: Ipv6rangeMemberAttrTypes},
 	"name":                                 types.StringType,
-	"network":                              cidrtypes.IPv4PrefixType{},
+	"network":                              cidrtypes.IPv6PrefixType{},
 	"network_view":                         types.StringType,
 	"option_filter_rules":                  types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6rangeOptionFilterRulesAttrTypes}},
 	"port_control_blackout_setting":        types.ObjectType{AttrTypes: Ipv6rangePortControlBlackoutSettingAttrTypes},

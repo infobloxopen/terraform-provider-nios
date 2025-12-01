@@ -26,8 +26,8 @@ type Ipv6rangeExcludeModel struct {
 }
 
 var Ipv6rangeExcludeAttrTypes = map[string]attr.Type{
-	"start_address": iptypes.IPv4AddressType{},
-	"end_address":   iptypes.IPv4AddressType{},
+	"start_address": iptypes.IPv6AddressType{},
+	"end_address":   iptypes.IPv6AddressType{},
 	"comment":       types.StringType,
 }
 
@@ -35,12 +35,12 @@ var Ipv6rangeExcludeResourceSchemaAttributes = map[string]schema.Attribute{
 	"start_address": schema.StringAttribute{
 		CustomType:          iptypes.IPv6AddressType{},
 		Required:            true,
-		MarkdownDescription: "The IPv4 Address starting address of the exclusion range.",
+		MarkdownDescription: "The IPv6 Address starting address of the exclusion range.",
 	},
 	"end_address": schema.StringAttribute{
 		CustomType:          iptypes.IPv6AddressType{},
 		Required:            true,
-		MarkdownDescription: "The IPv4 Address ending address of the exclusion range.",
+		MarkdownDescription: "The IPv6 Address ending address of the exclusion range.",
 	},
 	"comment": schema.StringAttribute{
 		Computed: true,

@@ -33,7 +33,7 @@ var Ipv6rangesubscribesettingsMappedEaAttributesResourceSchemaAttributes = map[s
 		Validators: []validator.String{
 			stringvalidator.OneOf("ACCOUNT_SESSION_ID", "AUDIT_SESSION_ID", "EPS_STATUS", "IP_ADDRESS", "MAC", "NAS_IP_ADDRESS", "NAS_PORT_ID", "POSTURE_STATUS", "POSTURE_TIMESTAMP"),
 		},
-		MarkdownDescription: "The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.",
+		MarkdownDescription: "The Cisco ISE attribute name that is enabled for publishing from a Cisco ISE endpoint.",
 	},
 	"mapped_ea": schema.StringAttribute{
 		Optional:            true,

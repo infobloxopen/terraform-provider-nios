@@ -199,8 +199,8 @@ Optional:
 
 Required:
 
-- `end_address` (String) The IPv4 Address ending address of the exclusion range.
-- `start_address` (String) The IPv4 Address starting address of the exclusion range.
+- `end_address` (String) The IPv6 Address ending address of the exclusion range.
+- `start_address` (String) The IPv6 Address starting address of the exclusion range.
 
 Optional:
 
@@ -278,4 +278,4 @@ Optional:
 Optional:
 
 - `mapped_ea` (String) The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.
-- `name` (String) The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.
+- `name` (String) The Cisco ISE attribute name that is enabled for publishing from a Cisco ISE endpoint.
