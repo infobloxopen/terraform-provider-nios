@@ -79,8 +79,8 @@ func TestAccRecordRpzNaptrResource_Comment(t *testing.T) {
 	var v rpz.RecordRpzNaptr
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	name := acctest.RandomName() + "." + rpZone
-	comment1 := "This is a new rpz a record"
-	comment2 := "This is a updated rpz a record"
+	comment1 := "This is a new rpz naptr record"
+	comment2 := "This is an updated rpz naptr record"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
