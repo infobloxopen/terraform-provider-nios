@@ -36,7 +36,7 @@ func (r *RecordRpzNaptrResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *RecordRpzNaptrResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a RPZ NAPTR record.",
+		MarkdownDescription: "Manages an RPZ NAPTR record.",
 		Attributes:          RecordRpzNaptrResourceSchemaAttributes,
 	}
 }

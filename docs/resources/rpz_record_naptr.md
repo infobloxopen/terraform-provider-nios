@@ -3,12 +3,12 @@
 page_title: "nios_rpz_record_naptr Resource - nios"
 subcategory: "RPZ"
 description: |-
-  Manages a RPZ NAPTR record.
+  Manages an RPZ NAPTR record.
 ---
 
 # nios_rpz_record_naptr (Resource)
 
-Manages a RPZ NAPTR record.
+Manages an RPZ NAPTR record.
 
 ## Example Usage
 
