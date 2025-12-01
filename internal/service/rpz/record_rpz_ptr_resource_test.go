@@ -391,7 +391,7 @@ func TestAccRecordRpzPtrResource_View(t *testing.T) {
 	var v rpz.RecordRpzPtr
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	ptrDName := acctest.RandomName() + "." + rpZone
-	view := "custom_view"
+	view := acctest.RandomNameWithPrefix("test-view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -622,9 +622,9 @@ resource "nios_rpz_record_ptr" "test_view" {
     ptrdname = %q
 	ipv4addr = %q
 	rp_zone = nios_dns_zone_rp.test.fqdn
-	view = %q
+	view = nios_dns_view.custom_view.name
 }
-`, ptrDName, ipV4Addr, view)
+`, ptrDName, ipV4Addr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone, view), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZone(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }
