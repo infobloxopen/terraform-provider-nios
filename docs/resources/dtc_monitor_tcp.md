@@ -3,12 +3,12 @@
 page_title: "nios_dtc_monitor_tcp Resource - nios"
 subcategory: "DTC"
 description: |-
-  Manages an DTC TCP Monitor.
+  Manages a DTC TCP Monitor.
 ---
 
 # nios_dtc_monitor_tcp (Resource)
 
-Manages an DTC TCP Monitor.
+Manages a DTC TCP Monitor.
 
 ## Example Usage
 
