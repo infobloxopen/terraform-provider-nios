@@ -41,8 +41,8 @@ func TestAccIpv6sharednetworkResource_basic(t *testing.T) {
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "networks.#", "2"),
-					resource.TestCheckResourceAttrPair(resourceName, "networks.0.ref", "nios_ipam_ipv6network.test1", "ref"),
-					resource.TestCheckResourceAttrPair(resourceName, "networks.1.ref", "nios_ipam_ipv6network.test2", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "networks.0", "nios_ipam_ipv6network.test1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "networks.1", "nios_ipam_ipv6network.test2", "ref"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "ddns_generate_hostname", "false"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
@@ -137,7 +137,7 @@ func TestAccIpv6sharednetworkResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccIpv6sharednetworkImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all"},
+				ImportStateVerifyIgnore:              []string{"networks"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 			},
 			// Delete testing automatically occurs in TestCase
@@ -151,9 +151,9 @@ func TestAccIpv6sharednetworkResource_Comment(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -187,9 +187,9 @@ func TestAccIpv6sharednetworkResource_DdnsDomainname(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -223,9 +223,9 @@ func TestAccIpv6sharednetworkResource_DdnsGenerateHostname(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -259,9 +259,9 @@ func TestAccIpv6sharednetworkResource_DdnsServerAlwaysUpdates(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -295,9 +295,9 @@ func TestAccIpv6sharednetworkResource_DdnsTtl(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -330,9 +330,9 @@ func TestAccIpv6sharednetworkResource_DdnsUseOption81(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -366,9 +366,9 @@ func TestAccIpv6sharednetworkResource_Disable(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -402,9 +402,9 @@ func TestAccIpv6sharednetworkResource_DomainName(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -438,9 +438,9 @@ func TestAccIpv6sharednetworkResource_DomainNameServers(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 	domainNameServersVal := []string{"2001:4860:4860::8888", "2001:4860:4860::9999", "2001:4860:4860::8899"}
 	domainNameServersValUpdated := []string{"2001:4860:4860::8881", "2001:4860:4860::9991"}
@@ -481,9 +481,9 @@ func TestAccIpv6sharednetworkResource_EnableDdns(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -517,9 +517,9 @@ func TestAccIpv6sharednetworkResource_ExtAttrs(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -559,9 +559,9 @@ func TestAccIpv6sharednetworkResource_LogicFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 	logicFilterRulesVal := []map[string]any{
 		{
@@ -612,9 +612,9 @@ func TestAccIpv6sharednetworkResource_Name(t *testing.T) {
 	nameUpdated := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -648,9 +648,9 @@ func TestAccIpv6sharednetworkResource_NetworkView(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -675,12 +675,12 @@ func TestAccIpv6sharednetworkResource_Networks(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networksVal := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networksVal := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
-	networksValUpdated := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
+	networksValUpdated := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -717,9 +717,9 @@ func TestAccIpv6sharednetworkResource_Options(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 	optionsVal := []map[string]any{
 		{
@@ -797,9 +797,9 @@ func TestAccIpv6sharednetworkResource_PreferredLifetime(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -833,9 +833,9 @@ func TestAccIpv6sharednetworkResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -869,9 +869,9 @@ func TestAccIpv6sharednetworkResource_UseDdnsDomainname(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -905,9 +905,9 @@ func TestAccIpv6sharednetworkResource_UseDdnsGenerateHostname(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -941,9 +941,9 @@ func TestAccIpv6sharednetworkResource_UseDdnsTtl(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -977,9 +977,9 @@ func TestAccIpv6sharednetworkResource_UseDdnsUseOption81(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1013,9 +1013,9 @@ func TestAccIpv6sharednetworkResource_UseDomainName(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1049,9 +1049,9 @@ func TestAccIpv6sharednetworkResource_UseDomainNameServers(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 	domainNameServersVal := []string{"2001:4860:4860::8888", "2001:4860:4860::9999", "2001:4860:4860::8899"}
 
@@ -1086,9 +1086,9 @@ func TestAccIpv6sharednetworkResource_UseEnableDdns(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1122,9 +1122,9 @@ func TestAccIpv6sharednetworkResource_UseLogicFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 	logicFilterRulesVal := []map[string]any{
 		{
@@ -1164,9 +1164,9 @@ func TestAccIpv6sharednetworkResource_UseOptions(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 	optionsVal := []map[string]any{
 		{
@@ -1212,9 +1212,9 @@ func TestAccIpv6sharednetworkResource_UsePreferredLifetime(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1248,9 +1248,9 @@ func TestAccIpv6sharednetworkResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1284,9 +1284,9 @@ func TestAccIpv6sharednetworkResource_UseValidLifetime(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1320,9 +1320,9 @@ func TestAccIpv6sharednetworkResource_ValidLifetime(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1432,8 +1432,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkComment(name string, networks []map[string]any, network1 string, network2 string, comment string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkComment(name string, networks []string, network1 string, network2 string, comment string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_comment" {
     name = %q
@@ -1444,8 +1444,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_comment" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDdnsDomainname(name string, networks []map[string]any, network1 string, network2 string, ddnsDomainname string, useDdnsDomainname string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDdnsDomainname(name string, networks []string, network1 string, network2 string, ddnsDomainname string, useDdnsDomainname string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_ddns_domainname" {
     name = %q
@@ -1457,8 +1457,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_ddns_domainname" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDdnsGenerateHostname(name string, networks []map[string]any, network1 string, network2 string, ddnsGenerateHostname string, useDdnsGenerateHostname string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDdnsGenerateHostname(name string, networks []string, network1 string, network2 string, ddnsGenerateHostname string, useDdnsGenerateHostname string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_ddns_generate_hostname" {
     name = %q
@@ -1470,8 +1470,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_ddns_generate_hostname" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDdnsServerAlwaysUpdates(name string, networks []map[string]any, network1 string, network2 string, ddnsServerAlwaysUpdates string, ddnsUseOption81 string, useDdnsUseOption81 string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDdnsServerAlwaysUpdates(name string, networks []string, network1 string, network2 string, ddnsServerAlwaysUpdates string, ddnsUseOption81 string, useDdnsUseOption81 string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_ddns_server_always_updates" {
     name = %q
@@ -1484,8 +1484,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_ddns_server_always_updates" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDdnsTtl(name string, networks []map[string]any, network1 string, network2 string, ddnsTtl string, useDdnsTtl string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDdnsTtl(name string, networks []string, network1 string, network2 string, ddnsTtl string, useDdnsTtl string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_ddns_ttl" {
     name = %q
@@ -1497,8 +1497,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_ddns_ttl" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDdnsUseOption81(name string, networks []map[string]any, network1 string, network2 string, ddnsUseOption81 string, useDdnsUseOption81 string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDdnsUseOption81(name string, networks []string, network1 string, network2 string, ddnsUseOption81 string, useDdnsUseOption81 string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_ddns_use_option81" {
     name = %q
@@ -1510,8 +1510,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_ddns_use_option81" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDisable(name string, networks []map[string]any, network1 string, network2 string, disable string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDisable(name string, networks []string, network1 string, network2 string, disable string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_disable" {
     name = %q
@@ -1522,8 +1522,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_disable" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDomainName(name string, networks []map[string]any, network1 string, network2 string, domainName string, useDomainName string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDomainName(name string, networks []string, network1 string, network2 string, domainName string, useDomainName string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_domain_name" {
     name = %q
@@ -1535,8 +1535,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_domain_name" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDomainNameServers(name string, networks []map[string]any, network1 string, network2 string, domainNameServers []string, useDomainNameServers string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDomainNameServers(name string, networks []string, network1 string, network2 string, domainNameServers []string, useDomainNameServers string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	domainNameServersStr := utils.ConvertStringSliceToHCL(domainNameServers)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_domain_name_servers" {
@@ -1549,8 +1549,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_domain_name_servers" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkEnableDdns(name string, networks []map[string]any, network1 string, network2 string, enableDdns string, useEnableDdns string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkEnableDdns(name string, networks []string, network1 string, network2 string, enableDdns string, useEnableDdns string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_enable_ddns" {
     name = %q
@@ -1562,8 +1562,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_enable_ddns" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkExtAttrs(name string, networks []map[string]any, network1 string, network2 string, extAttrs map[string]string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkExtAttrs(name string, networks []string, network1 string, network2 string, extAttrs map[string]string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	extAttrsStr := "{\n"
 	for k, v := range extAttrs {
 		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
@@ -1579,8 +1579,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_extattrs" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkLogicFilterRules(name string, networks []map[string]any, network1 string, network2 string, logicFilterRules []map[string]any, useLogicFilterRules string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkLogicFilterRules(name string, networks []string, network1 string, network2 string, logicFilterRules []map[string]any, useLogicFilterRules string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	logicFilterRulesStr := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_logic_filter_rules" {
@@ -1593,8 +1593,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_logic_filter_rules" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkName(name string, networks []map[string]any, network1 string, network2 string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkName(name string, networks []string, network1 string, network2 string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_name" {
     name = %q
@@ -1604,8 +1604,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_name" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkNetworkView(name string, networks []map[string]any, network1 string, network2 string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkNetworkView(name string, networks []string, network1 string, network2 string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_network_view" {
     name = %q
@@ -1615,8 +1615,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_network_view" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkNetworks(name string, networks []map[string]any, network1 string, network2 string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkNetworks(name string, networks []string, network1 string, network2 string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_networks" {
     name = %q
@@ -1626,8 +1626,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_networks" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkOptions(name string, networks []map[string]any, network1 string, network2 string, options []map[string]any, useOptions string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkOptions(name string, networks []string, network1 string, network2 string, options []map[string]any, useOptions string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	optionsStr := utils.ConvertSliceOfMapsToHCL(options)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_options" {
@@ -1640,8 +1640,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_options" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkPreferredLifetime(name string, networks []map[string]any, network1 string, network2 string, preferredLifetime string, usePreferredLifetime string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkPreferredLifetime(name string, networks []string, network1 string, network2 string, preferredLifetime string, usePreferredLifetime string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_preferred_lifetime" {
     name = %q
@@ -1653,8 +1653,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_preferred_lifetime" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUpdateDnsOnLeaseRenewal(name string, networks []map[string]any, network1 string, network2 string, updateDnsOnLeaseRenewal string, useUpdateDnsOnLeaseRenewal string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUpdateDnsOnLeaseRenewal(name string, networks []string, network1 string, network2 string, updateDnsOnLeaseRenewal string, useUpdateDnsOnLeaseRenewal string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_update_dns_on_lease_renewal" {
     name = %q
@@ -1666,8 +1666,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_update_dns_on_lease_renewal" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseDdnsDomainname(name string, networks []map[string]any, network1 string, network2 string, ddnsDomainname string, useDdnsDomainname string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseDdnsDomainname(name string, networks []string, network1 string, network2 string, ddnsDomainname string, useDdnsDomainname string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_ddns_domainname" {
     name = %q
@@ -1679,8 +1679,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_ddns_domainname" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseDdnsGenerateHostname(name string, networks []map[string]any, network1 string, network2 string, ddnsGenerateHostname string, useDdnsGenerateHostname string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseDdnsGenerateHostname(name string, networks []string, network1 string, network2 string, ddnsGenerateHostname string, useDdnsGenerateHostname string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_ddns_generate_hostname" {
     name = %q
@@ -1692,8 +1692,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_ddns_generate_hostname" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseDdnsTtl(name string, networks []map[string]any, network1 string, network2 string, ddnsTtl string, useDdnsTtl string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseDdnsTtl(name string, networks []string, network1 string, network2 string, ddnsTtl string, useDdnsTtl string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_ddns_ttl" {
     name = %q
@@ -1705,8 +1705,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_ddns_ttl" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseDdnsUseOption81(name string, networks []map[string]any, network1 string, network2 string, useDdnsUseOption81 string, ddnsUseOption81 string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseDdnsUseOption81(name string, networks []string, network1 string, network2 string, useDdnsUseOption81 string, ddnsUseOption81 string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_ddns_use_option81" {
     name = %q
@@ -1718,8 +1718,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_ddns_use_option81" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseDomainName(name string, networks []map[string]any, network1 string, network2 string, useDomainName string, domainName string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseDomainName(name string, networks []string, network1 string, network2 string, useDomainName string, domainName string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_domain_name" {
     name = %q
@@ -1731,9 +1731,9 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_domain_name" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseDomainNameServers(name string, networks []map[string]any, network1 string, network2 string, useDomainNameServers string, domainNameServers []string) string {
+func testAccIpv6sharednetworkUseDomainNameServers(name string, networks []string, network1 string, network2 string, useDomainNameServers string, domainNameServers []string) string {
 	domainNameServersStr := utils.ConvertStringSliceToHCL(domainNameServers)
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_domain_name_servers" {
     name = %q
@@ -1745,8 +1745,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_domain_name_servers" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseEnableDdns(name string, networks []map[string]any, network1 string, network2 string, useEnableDdns string, enableDdns string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseEnableDdns(name string, networks []string, network1 string, network2 string, useEnableDdns string, enableDdns string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_enable_ddns" {
     name = %q
@@ -1758,8 +1758,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_enable_ddns" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseLogicFilterRules(name string, networks []map[string]any, network1 string, network2 string, useLogicFilterRules string, logicFilterRules []map[string]any) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseLogicFilterRules(name string, networks []string, network1 string, network2 string, useLogicFilterRules string, logicFilterRules []map[string]any) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	logicFilterRulesStr := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_logic_filter_rules" {
@@ -1772,8 +1772,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_logic_filter_rules" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseOptions(name string, networks []map[string]any, network1 string, network2 string, useOptions string, options []map[string]any) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseOptions(name string, networks []string, network1 string, network2 string, useOptions string, options []map[string]any) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	optionsStr := utils.ConvertSliceOfMapsToHCL(options)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_options" {
@@ -1786,8 +1786,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_options" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUsePreferredLifetime(name string, networks []map[string]any, network1 string, network2 string, usePreferredLifetime string, preferredLifetime string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUsePreferredLifetime(name string, networks []string, network1 string, network2 string, usePreferredLifetime string, preferredLifetime string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_preferred_lifetime" {
     name = %q
@@ -1799,8 +1799,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_preferred_lifetime" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseUpdateDnsOnLeaseRenewal(name string, networks []map[string]any, network1 string, network2 string, useUpdateDnsOnLeaseRenewal string, updateDnsOnLeaseRenewal string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseUpdateDnsOnLeaseRenewal(name string, networks []string, network1 string, network2 string, useUpdateDnsOnLeaseRenewal string, updateDnsOnLeaseRenewal string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_update_dns_on_lease_renewal" {
     name = %q
@@ -1812,8 +1812,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_update_dns_on_lease_renewal" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkUseValidLifetime(name string, networks []map[string]any, network1 string, network2 string, validLifetime string, useValidLifetime string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkUseValidLifetime(name string, networks []string, network1 string, network2 string, validLifetime string, useValidLifetime string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_use_valid_lifetime" {
     name = %q
@@ -1825,8 +1825,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_valid_lifetime" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkValidLifetime(name string, networks []map[string]any, network1 string, network2 string, validLifetime string, useValidLifetime string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkValidLifetime(name string, networks []string, network1 string, network2 string, validLifetime string, useValidLifetime string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test_valid_lifetime" {
     name = %q

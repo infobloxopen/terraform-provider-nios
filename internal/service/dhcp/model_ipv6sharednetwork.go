@@ -411,26 +411,6 @@ func (m *Ipv6sharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnos
 	return to
 }
 
-func ExpandNetworks(ctx context.Context, list internaltypes.UnorderedListValue, diags *diag.Diagnostics) []dhcp.Ipv6sharednetworkNetworks {
-	if list.IsNull() || list.IsUnknown() {
-		return nil
-	}
-
-	var networkRefs []string
-	diags.Append(list.ElementsAs(ctx, &networkRefs, false)...)
-	if diags.HasError() {
-		return nil
-	}
-
-	result := make([]dhcp.Ipv6sharednetworkNetworks, len(networkRefs))
-	for i, ref := range networkRefs {
-		result[i] = dhcp.Ipv6sharednetworkNetworks{
-			Ref: &ref,
-		}
-	}
-	return result
-}
-
 func FlattenIpv6sharednetwork(ctx context.Context, from *dhcp.Ipv6sharednetwork, diags *diag.Diagnostics) types.Object {
 	if from == nil {
 		return types.ObjectNull(Ipv6sharednetworkAttrTypes)
@@ -489,6 +469,26 @@ func (m *Ipv6sharednetworkModel) Flatten(ctx context.Context, from *dhcp.Ipv6sha
 	m.UseUpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UseUpdateDnsOnLeaseRenewal)
 	m.UseValidLifetime = types.BoolPointerValue(from.UseValidLifetime)
 	m.ValidLifetime = flex.FlattenInt64Pointer(from.ValidLifetime)
+}
+
+func ExpandNetworks(ctx context.Context, networks internaltypes.UnorderedListValue, diags *diag.Diagnostics) []dhcp.Ipv6sharednetworkNetworks {
+	if networks.IsNull() || networks.IsUnknown() {
+		return nil
+	}
+
+	var networkRefs []string
+	diags.Append(networks.ElementsAs(ctx, &networkRefs, false)...)
+	if diags.HasError() {
+		return nil
+	}
+
+	result := make([]dhcp.Ipv6sharednetworkNetworks, len(networkRefs))
+	for i, ref := range networkRefs {
+		result[i] = dhcp.Ipv6sharednetworkNetworks{
+			Ref: &ref,
+		}
+	}
+	return result
 }
 
 func FlattenNetworks(ctx context.Context, networks []dhcp.Ipv6sharednetworkNetworks, diags *diag.Diagnostics) internaltypes.UnorderedListValue {

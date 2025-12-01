@@ -24,18 +24,14 @@ resource "nios_ipam_ipv6network" "parent_ipv6network2" {
 
 // Manage DHCP IPv6 Shared Network with Basic Fields
 resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_basic_fields" {
-  name = "shared_network_1"
-  networks = [{
-    ref = nios_ipam_ipv6network.parent_ipv6network1.ref
-  }]
+  name     = "shared_network_1"
+  networks = [nios_ipam_ipv6network.parent_ipv6network1.ref]
 }
 
 // Manage IPv6 Shared Network with Additional Fields
 resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_with_additional_fields" {
-  name = "shared_network_2"
-  networks = [{
-    ref = nios_ipam_ipv6network.parent_ipv6network2.ref
-  }]
+  name     = "shared_network_2"
+  networks = [nios_ipam_ipv6network.parent_ipv6network2.ref]
 
   // Additional Fields
   comment         = "Ipv6 Shared Network created by Terraform"
@@ -63,7 +59,7 @@ resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_with_additional_f
 ### Required
 
 - `name` (String) The name of the IPv6 Shared Network.
-- `networks` (Attributes List) A list of IPv6 networks belonging to the shared network Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ "ref": "ipv6network/ZG5zdHdvcmskMTAuAvMTYvMA", }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ "ref": { 'network': 'aabb::/64', } }] note that in this case the search must match exactly one network for the assignment to be successful. (see [below for nested schema](#nestedatt--networks))
+- `networks` (List of String) A list of IPv6 networks belonging to the shared network Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ "ref": "ipv6network/ZG5zdHdvcmskMTAuAvMTYvMA", }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ "ref": { 'network': 'aabb::/64', } }] note that in this case the search must match exactly one network for the assignment to be successful.
 
 ### Optional
 
@@ -101,14 +97,6 @@ resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_with_additional_f
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default and internal attributes.
 - `ref` (String) The reference to the object.
-
-<a id="nestedatt--networks"></a>
-### Nested Schema for `networks`
-
-Required:
-
-- `ref` (String) Reference to the IPv6 Network.
-
 
 <a id="nestedatt--logic_filter_rules"></a>
 ### Nested Schema for `logic_filter_rules`

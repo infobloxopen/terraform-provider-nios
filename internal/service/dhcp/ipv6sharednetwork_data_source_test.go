@@ -21,9 +21,9 @@ func TestAccIpv6sharednetworkDataSource_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -50,9 +50,9 @@ func TestAccIpv6sharednetworkDataSource_ExtAttrFilters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6sharednetwork")
 	network1 := acctest.RandomIPv6Network()
 	network2 := acctest.RandomIPv6Network()
-	networks := []map[string]any{
-		{"ref": "${nios_ipam_ipv6network.test1.ref}"},
-		{"ref": "${nios_ipam_ipv6network.test2.ref}"},
+	networks := []string{
+		"${nios_ipam_ipv6network.test1.ref}",
+		"${nios_ipam_ipv6network.test2.ref}",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -111,8 +111,8 @@ func testAccCheckIpv6sharednetworkResourceAttrPair(resourceName, dataSourceName 
 	}
 }
 
-func testAccIpv6sharednetworkDataSourceConfigFilters(name string, networks []map[string]any, network1, network2 string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDataSourceConfigFilters(name string, networks []string, network1, network2 string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test" {
   name = %q
@@ -128,8 +128,8 @@ data "nios_dhcp_ipv6sharednetwork" "test" {
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
 }
 
-func testAccIpv6sharednetworkDataSourceConfigExtAttrFilters(name string, networks []map[string]any, network1, network2, extAttrsValue string) string {
-	networksStr := utils.ConvertSliceOfMapsToHCL(networks)
+func testAccIpv6sharednetworkDataSourceConfigExtAttrFilters(name string, networks []string, network1, network2, extAttrsValue string) string {
+	networksStr := utils.ConvertStringSliceToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6sharednetwork" "test" {
   name = %q

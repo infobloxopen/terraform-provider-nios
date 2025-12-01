@@ -51,7 +51,7 @@ data "nios_dhcp_ipv6sharednetwork" "get_all_dhcp_ipv6sharednetworks" {}
 Required:
 
 - `name` (String) The name of the IPv6 Shared Network.
-- `networks` (Attributes List) A list of IPv6 networks belonging to the shared network Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ "ref": "ipv6network/ZG5zdHdvcmskMTAuAvMTYvMA", }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ "ref": { 'network': 'aabb::/64', } }] note that in this case the search must match exactly one network for the assignment to be successful. (see [below for nested schema](#nestedatt--result--networks))
+- `networks` (List of String) A list of IPv6 networks belonging to the shared network Each individual list item must be specified as an object containing a 'ref' parameter to a network reference, for example:: [{ "ref": "ipv6network/ZG5zdHdvcmskMTAuAvMTYvMA", }] if the reference of the wanted network is not known, it is possible to specify search parameters for the network instead in the following way:: [{ "ref": { 'network': 'aabb::/64', } }] note that in this case the search must match exactly one network for the assignment to be successful.
 
 Optional:
 
@@ -89,14 +89,6 @@ Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default and internal attributes.
 - `ref` (String) The reference to the object.
-
-<a id="nestedatt--result--networks"></a>
-### Nested Schema for `result.networks`
-
-Required:
-
-- `ref` (String) Reference to the IPv6 Network.
-
 
 <a id="nestedatt--result--logic_filter_rules"></a>
 ### Nested Schema for `result.logic_filter_rules`
