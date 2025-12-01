@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -30,6 +31,7 @@ var Ipv6rangePortControlBlackoutSettingResourceSchemaAttributes = map[string]sch
 	"enable_blackout": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a blackout is enabled or not.",
 	},
 	"blackout_duration": schema.Int64Attribute{

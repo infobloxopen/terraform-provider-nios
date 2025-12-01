@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -337,7 +338,6 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 	}
 
 	switch addressType {
-	// When address_type is "ADDRESS", start_addr and end_addr are required
 	case "ADDRESS":
 		if !data.StartAddr.IsUnknown() && !data.EndAddr.IsUnknown() {
 			if data.StartAddr.IsNull() || data.EndAddr.IsNull() {
@@ -347,7 +347,6 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 				)
 			}
 		}
-		// PREFIX related fields cannot be specified when address_type is "ADDRESS"
 		if !data.Ipv6StartPrefix.IsUnknown() && !data.Ipv6EndPrefix.IsUnknown() && !data.Ipv6PrefixBits.IsUnknown() {
 			if !data.Ipv6StartPrefix.IsNull() || !data.Ipv6EndPrefix.IsNull() || !data.Ipv6PrefixBits.IsNull() {
 				resp.Diagnostics.AddError(
@@ -356,7 +355,6 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 				)
 			}
 		}
-		// When address_type is "PREFIX", ipv6_start_prefix, ipv6_end_prefix, and ipv6_prefix_bits are required
 	case "PREFIX":
 		if !data.Ipv6StartPrefix.IsUnknown() && !data.Ipv6EndPrefix.IsUnknown() && !data.Ipv6PrefixBits.IsUnknown() {
 			if data.Ipv6StartPrefix.IsNull() || data.Ipv6EndPrefix.IsNull() || data.Ipv6PrefixBits.IsNull() {
@@ -366,7 +364,6 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 				)
 			}
 		}
-		// ADDRESS related fields cannot be specified when address_type is "PREFIX"
 		if !data.StartAddr.IsUnknown() && !data.EndAddr.IsUnknown() {
 			if !data.StartAddr.IsNull() || !data.EndAddr.IsNull() {
 				resp.Diagnostics.AddError(
@@ -375,7 +372,6 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 				)
 			}
 		}
-		// When address_type is "BOTH", all start_addr, end_addr, ipv6_start_prefix, ipv6_end_prefix, and ipv6_prefix_bits are required
 	case "BOTH":
 		if !data.StartAddr.IsUnknown() && !data.EndAddr.IsUnknown() && !data.Ipv6StartPrefix.IsUnknown() && !data.Ipv6EndPrefix.IsUnknown() && !data.Ipv6PrefixBits.IsUnknown() {
 			if data.StartAddr.IsNull() || data.EndAddr.IsNull() || data.Ipv6StartPrefix.IsNull() || data.Ipv6EndPrefix.IsNull() || data.Ipv6PrefixBits.IsNull() {
@@ -387,6 +383,118 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 		}
 	}
 
+	// Validate discovery_blackout_setting blackout_schedule
+	if !data.DiscoveryBlackoutSetting.IsNull() && !data.DiscoveryBlackoutSetting.IsUnknown() {
+		validateBlackoutSchedule(
+			data.DiscoveryBlackoutSetting,
+			path.Root("discovery_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
+	// Validate port_control_blackout_setting blackout_schedule
+	if !data.PortControlBlackoutSetting.IsNull() && !data.PortControlBlackoutSetting.IsUnknown() {
+		validateBlackoutSchedule(
+			data.PortControlBlackoutSetting,
+			path.Root("port_control_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+}
+
+// validateBlackoutSchedule validates the blackout_schedule configuration
+func validateBlackoutSchedule(settingObj types.Object, basePath path.Path, diagnostics *diag.Diagnostics) {
+	scheduleAttr := settingObj.Attributes()["blackout_schedule"]
+	if scheduleAttr.IsNull() || scheduleAttr.IsUnknown() {
+		return
+	}
+
+	scheduleObj, ok := scheduleAttr.(types.Object)
+	if !ok {
+		diagnostics.AddAttributeError(
+			basePath.AtName("blackout_schedule"),
+			"Invalid Blackout Schedule Attribute",
+			"Expected blackout_schedule to be an object but got different type",
+		)
+		return
+	}
+
+	schedule := scheduleObj.Attributes()
+	recurringTime := schedule["recurring_time"]
+
+	if !recurringTime.IsNull() && !recurringTime.IsUnknown() {
+		if !schedule["hour_of_day"].IsNull() || !schedule["hour_of_day"].IsUnknown() || !schedule["year"].IsNull() || !schedule["year"].IsUnknown() || !schedule["month"].IsNull() || !schedule["month"].IsUnknown() || !schedule["day_of_month"].IsNull() || !schedule["day_of_month"].IsUnknown() {
+			diagnostics.AddAttributeError(
+				basePath.AtName("blackout_schedule").AtName("schedule").AtName("recurring_time"),
+				"Invalid Configuration for Schedule",
+				"Cannot Set Recurring Time if any of hour_of_day, year, month, day_of_month is set",
+			)
+		}
+	}
+
+	repeat := schedule["repeat"]
+	if !repeat.IsNull() && !repeat.IsUnknown() {
+		repeatStr, ok := repeat.(types.String)
+		if !ok {
+			diagnostics.AddAttributeError(
+				basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
+				"Invalid Repeat Attribute",
+				"Expected repeat to be a string but got different type",
+			)
+			return
+		}
+
+		if repeatStr.ValueString() == "ONCE" {
+			if (!schedule["weekdays"].IsNull() && !schedule["weekdays"].IsUnknown()) || (!schedule["frequency"].IsNull() && !schedule["frequency"].IsUnknown()) || (!schedule["every"].IsNull() && !schedule["every"].IsUnknown()) {
+				diagnostics.AddAttributeError(
+					basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
+					"Invalid Configuration for Repeat",
+					"Cannot Set Frequency, Weekdays and Every if Repeat is set to ONCE",
+				)
+			}
+			if schedule["month"].IsNull() || schedule["month"].IsUnknown() || schedule["day_of_month"].IsNull() || schedule["day_of_month"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() {
+				diagnostics.AddAttributeError(
+					basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
+					"Invalid Configuration for Schedule",
+					"If REPEAT is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
+				)
+			}
+		} else {
+			if (!schedule["month"].IsNull() && !schedule["month"].IsUnknown()) || (!schedule["day_of_month"].IsNull() && !schedule["day_of_month"].IsUnknown()) || (!schedule["year"].IsNull() && !schedule["year"].IsUnknown()) {
+				diagnostics.AddAttributeError(
+					basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
+					"Invalid Configuration for Repeat",
+					"Cannot Set Month, Day of Month and Year if Repeat is set to RECUR",
+				)
+			}
+
+			if schedule["frequency"].IsNull() || schedule["frequency"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() {
+				diagnostics.AddAttributeError(
+					basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
+					"Invalid Configuration for Schedule",
+					"If REPEAT is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
+				)
+			}
+
+			if schedule["frequency"].String() == "\"WEEKLY\"" {
+				if schedule["weekdays"].IsNull() || schedule["weekdays"].IsUnknown() {
+					diagnostics.AddAttributeError(
+						basePath.AtName("blackout_schedule").AtName("schedule").AtName("weekdays"),
+						"Invalid Configuration for Weekdays",
+						"Weekdays must be set if Frequency is set to WEEKLY",
+					)
+				}
+			} else {
+				if !schedule["weekdays"].IsNull() && !schedule["weekdays"].IsUnknown() {
+					diagnostics.AddAttributeError(
+						basePath.AtName("blackout_schedule").AtName("schedule").AtName("weekdays"),
+						"Invalid Configuration for Weekdays",
+						"Weekdays can only be set if Frequency is set to WEEKLY",
+					)
+				}
+			}
+		}
+	}
 }
 
 func (r *Ipv6rangeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
