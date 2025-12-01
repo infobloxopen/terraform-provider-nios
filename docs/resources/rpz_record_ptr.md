@@ -3,12 +3,12 @@
 page_title: "nios_rpz_record_ptr Resource - nios"
 subcategory: "RPZ"
 description: |-
-  Manages a RPZ PTR record.
+  Manages an RPZ PTR record.
 ---
 
 # nios_rpz_record_ptr (Resource)
 
-Manages a RPZ PTR record.
+Manages an RPZ PTR record.
 
 ## Example Usage
 
@@ -26,7 +26,7 @@ resource "nios_rpz_record_ptr" "create_record_rpz_ptr" {
 }
 
 // Create Record RPZ PTR with Additional Fields
-resource "nios_rpz_record_ptr" "create_record_rpz_a_with_additional_fields" {
+resource "nios_rpz_record_ptr" "create_record_rpz_ptr_with_additional_fields" {
   ptrdname = "record2.${nios_dns_zone_rp.parent_zone.fqdn}"
   ipv4addr = "10.10.0.2"
   rp_zone  = nios_dns_zone_rp.parent_zone.fqdn
@@ -40,7 +40,7 @@ resource "nios_rpz_record_ptr" "create_record_rpz_a_with_additional_fields" {
 }
 
 // Create Record RPZ PTR with Name
-resource "nios_rpz_record_ptr" "create_record_rpz_a_with_name" {
+resource "nios_rpz_record_ptr" "create_record_rpz_ptr_with_name" {
   ptrdname = "record3.${nios_dns_zone_rp.parent_zone.fqdn}"
   name     = "3.0.10.10.in-addr.arpa.${nios_dns_zone_rp.parent_zone.fqdn}"
   rp_zone  = nios_dns_zone_rp.parent_zone.fqdn
@@ -51,7 +51,7 @@ resource "nios_rpz_record_ptr" "create_record_rpz_a_with_name" {
 }
 
 // Create Record RPZ PTR with IPv6 Address
-resource "nios_rpz_record_ptr" "create_record_rpz_a_with_ipv6addr" {
+resource "nios_rpz_record_ptr" "create_record_rpz_ptr_with_ipv6addr" {
   ptrdname = "record4.${nios_dns_zone_rp.parent_zone.fqdn}"
   ipv6addr = "2002:1f93::12:1"
   rp_zone  = nios_dns_zone_rp.parent_zone.fqdn

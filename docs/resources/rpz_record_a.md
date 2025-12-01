@@ -3,12 +3,12 @@
 page_title: "nios_rpz_record_a Resource - nios"
 subcategory: "RPZ"
 description: |-
-  Manages a RPZ A record.
+  Manages an RPZ A record.
 ---
 
 # nios_rpz_record_a (Resource)
 
-Manages a RPZ A record.
+Manages an RPZ A record.
 
 ## Example Usage
 
