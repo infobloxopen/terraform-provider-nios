@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_ipv6range Resource - nios"
 subcategory: "DHCP"
 description: |-
-  Manages an Ipv6 Range.
+  Manages an IPv6 Range.
 ---
 
 # nios_dhcp_ipv6range (Resource)
 
-Manages an Ipv6 Range.
+Manages an IPv6 Range.
 
 ## Example Usage
 

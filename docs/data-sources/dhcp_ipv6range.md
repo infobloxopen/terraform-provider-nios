@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_ipv6range Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  Retrieves information about existing Ipv6 Ranges.
+  Retrieves information about existing IPv6 Ranges.
 ---
 
 # nios_dhcp_ipv6range (Data Source)
 
-Retrieves information about existing Ipv6 Ranges.
+Retrieves information about existing IPv6 Ranges.
 
 ## Example Usage
 

@@ -107,13 +107,19 @@ var Ipv6rangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes 
 		MarkdownDescription: "The number of frequency to wait before repeating the scheduled task.",
 	},
 	"minutes_past_hour": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 59),
+		},
 		MarkdownDescription: "The minutes past the hour for the scheduled task.",
 	},
 	"hour_of_day": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 23),
+		},
 		MarkdownDescription: "The hour of day for the scheduled task.",
 	},
 	"year": schema.Int64Attribute{
@@ -121,13 +127,19 @@ var Ipv6rangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes 
 		MarkdownDescription: "The year for the scheduled task.",
 	},
 	"month": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 12),
+		},
 		MarkdownDescription: "The month for the scheduled task.",
 	},
 	"day_of_month": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 31),
+		},
 		MarkdownDescription: "The day of the month for the scheduled task.",
 	},
 	"repeat": schema.StringAttribute{
