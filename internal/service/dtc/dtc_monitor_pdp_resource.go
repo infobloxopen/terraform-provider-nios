@@ -36,7 +36,7 @@ func (r *DtcMonitorPdpResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *DtcMonitorPdpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing DTC PDP Monitors.",
+		MarkdownDescription: "Manages a DTC PDP Monitor.",
 		Attributes:          DtcMonitorPdpResourceSchemaAttributes,
 	}
 }

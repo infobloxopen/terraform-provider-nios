@@ -51,7 +51,7 @@ func (m *DtcMonitorPdpModelWithFilter) FlattenResults(ctx context.Context, from 
 
 func (d *DtcMonitorPdpDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DTC PDP Monitor.",
+		MarkdownDescription: "Retrieves information about existing DTC PDP Monitors.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

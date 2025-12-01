@@ -3,12 +3,12 @@
 page_title: "nios_dtc_monitor_pdp Resource - nios"
 subcategory: "DTC"
 description: |-
-  Retrieves information about existing DTC PDP Monitors.
+  Manages a DTC PDP Monitor.
 ---
 
 # nios_dtc_monitor_pdp (Resource)
 
-Retrieves information about existing DTC PDP Monitors.
+Manages a DTC PDP Monitor.
 
 ## Example Usage
 
