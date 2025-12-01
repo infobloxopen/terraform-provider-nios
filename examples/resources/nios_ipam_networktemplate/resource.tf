@@ -1,21 +1,23 @@
 // Create an IPAM Network Template with Basic Fields
-resource "nios_ipam_network" "ipam_network_template_basic" {
-  name      = "example_network_template"
+resource "nios_ipam_networktemplate" "ipam_network_template_basic" {
+  name    = "example_network_template"
   netmask = 24
+
+  // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
+  cloud_api_compatible = false
 }
 
 // Create an IPAM Network Template with Additional Fields
 resource "nios_ipam_networktemplate" "ipam_network_template_with_additional_fields" {
   // Required attributes
-  name      = "example_network_template2"
+  name = "example_network_template2"
 
-  comment      = "Example IPAM Network Template"
+  comment = "Example IPAM Network Template"
 
   auto_create_reversezone = false
-  allow_any_netmask    = true
+  allow_any_netmask       = true
   bootfile                = "pxelinux.0"
   bootserver              = "192.168.1.10"
-  use_authority           = true
   use_bootfile            = true
   use_bootserver          = true
 
@@ -43,9 +45,12 @@ resource "nios_ipam_networktemplate" "ipam_network_template_with_additional_fiel
   low_water_mark        = 10
   low_water_mark_reset  = 20
 
+  // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
+  cloud_api_compatible = true
+
   // Extensible attributes
   extattrs = {
-    Site = "location-1"
+    "Tenant ID" = "location-1"
   }
 }
 

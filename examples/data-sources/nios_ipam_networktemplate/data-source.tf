@@ -1,4 +1,4 @@
-// Retrieve a specific IPAM Network Template container using filters
+// Retrieve a specific IPAM Network Template using filters
 data "nios_ipam_networktemplate" "get_ipam_networktemplate_using_filters" {
   filters = {
     name = "example_network_template"
