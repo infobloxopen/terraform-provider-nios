@@ -20,7 +20,7 @@ import (
 
 type DtcRecordAModel struct {
 	Ref         types.String `tfsdk:"ref"`
-	AutoCreated types.String `tfsdk:"auto_created"`
+	AutoCreated types.Bool   `tfsdk:"auto_created"`
 	Comment     types.String `tfsdk:"comment"`
 	Disable     types.Bool   `tfsdk:"disable"`
 	DtcServer   types.String `tfsdk:"dtc_server"`
@@ -31,7 +31,7 @@ type DtcRecordAModel struct {
 
 var DtcRecordAAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
-	"auto_created": types.StringType,
+	"auto_created": types.BoolType,
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
 	"dtc_server":   types.StringType,
@@ -45,7 +45,7 @@ var DtcRecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
-	"auto_created": schema.StringAttribute{
+	"auto_created": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Flag that indicates whether this record was automatically created by NIOS.",
 	},
@@ -120,7 +120,7 @@ func (m *DtcRecordAModel) Flatten(ctx context.Context, from *dtc.DtcRecordA, dia
 		*m = DtcRecordAModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.AutoCreated = flex.FlattenStringPointer(from.AutoCreated)
+	m.AutoCreated = types.BoolPointerValue(from.AutoCreated)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DtcServer = flex.FlattenStringPointer(from.DtcServer)
