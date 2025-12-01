@@ -21,6 +21,7 @@ var readableAttributesForIpv6sharednetwork = "comment,ddns_domainname,ddns_gener
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &Ipv6sharednetworkResource{}
 var _ resource.ResourceWithImportState = &Ipv6sharednetworkResource{}
+var _ resource.ResourceWithValidateConfig = &Ipv6sharednetworkResource{}
 
 func NewIpv6sharednetworkResource() resource.Resource {
 	return &Ipv6sharednetworkResource{}
@@ -329,6 +330,17 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
+		// Check if ddns_use_option81 is set to false
+		if data.DdnsUseOption81.IsNull() && data.DdnsUseOption81.IsUnknown() && !data.DdnsUseOption81.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ddns_server_always_updates"),
+				"Invalid Configuration",
+				"ddns_use_option81 must be set to true if ddns_server_always_updates is configured.",
+			)
+		}
 	}
 
 	// Check if options are defined

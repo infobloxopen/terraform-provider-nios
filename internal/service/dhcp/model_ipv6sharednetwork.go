@@ -26,56 +26,57 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6sharednetworkModel struct {
-	Ref                        types.String `tfsdk:"ref"`
-	Comment                    types.String `tfsdk:"comment"`
-	DdnsDomainname             types.String `tfsdk:"ddns_domainname"`
-	DdnsGenerateHostname       types.Bool   `tfsdk:"ddns_generate_hostname"`
-	DdnsServerAlwaysUpdates    types.Bool   `tfsdk:"ddns_server_always_updates"`
-	DdnsTtl                    types.Int64  `tfsdk:"ddns_ttl"`
-	DdnsUseOption81            types.Bool   `tfsdk:"ddns_use_option81"`
-	Disable                    types.Bool   `tfsdk:"disable"`
-	DomainName                 types.String `tfsdk:"domain_name"`
-	DomainNameServers          types.List   `tfsdk:"domain_name_servers"`
-	EnableDdns                 types.Bool   `tfsdk:"enable_ddns"`
-	ExtAttrs                   types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                types.Map    `tfsdk:"extattrs_all"`
-	LogicFilterRules           types.List   `tfsdk:"logic_filter_rules"`
-	Name                       types.String `tfsdk:"name"`
-	NetworkView                types.String `tfsdk:"network_view"`
-	Networks                   types.List   `tfsdk:"networks"`
-	Options                    types.List   `tfsdk:"options"`
-	PreferredLifetime          types.Int64  `tfsdk:"preferred_lifetime"`
-	UpdateDnsOnLeaseRenewal    types.Bool   `tfsdk:"update_dns_on_lease_renewal"`
-	UseDdnsDomainname          types.Bool   `tfsdk:"use_ddns_domainname"`
-	UseDdnsGenerateHostname    types.Bool   `tfsdk:"use_ddns_generate_hostname"`
-	UseDdnsTtl                 types.Bool   `tfsdk:"use_ddns_ttl"`
-	UseDdnsUseOption81         types.Bool   `tfsdk:"use_ddns_use_option81"`
-	UseDomainName              types.Bool   `tfsdk:"use_domain_name"`
-	UseDomainNameServers       types.Bool   `tfsdk:"use_domain_name_servers"`
-	UseEnableDdns              types.Bool   `tfsdk:"use_enable_ddns"`
-	UseLogicFilterRules        types.Bool   `tfsdk:"use_logic_filter_rules"`
-	UseOptions                 types.Bool   `tfsdk:"use_options"`
-	UsePreferredLifetime       types.Bool   `tfsdk:"use_preferred_lifetime"`
-	UseUpdateDnsOnLeaseRenewal types.Bool   `tfsdk:"use_update_dns_on_lease_renewal"`
-	UseValidLifetime           types.Bool   `tfsdk:"use_valid_lifetime"`
-	ValidLifetime              types.Int64  `tfsdk:"valid_lifetime"`
+	Ref                        types.String                             `tfsdk:"ref"`
+	Comment                    types.String                             `tfsdk:"comment"`
+	DdnsDomainname             internaltypes.CaseInsensitiveStringValue `tfsdk:"ddns_domainname"`
+	DdnsGenerateHostname       types.Bool                               `tfsdk:"ddns_generate_hostname"`
+	DdnsServerAlwaysUpdates    types.Bool                               `tfsdk:"ddns_server_always_updates"`
+	DdnsTtl                    types.Int64                              `tfsdk:"ddns_ttl"`
+	DdnsUseOption81            types.Bool                               `tfsdk:"ddns_use_option81"`
+	Disable                    types.Bool                               `tfsdk:"disable"`
+	DomainName                 internaltypes.CaseInsensitiveStringValue `tfsdk:"domain_name"`
+	DomainNameServers          types.List                               `tfsdk:"domain_name_servers"`
+	EnableDdns                 types.Bool                               `tfsdk:"enable_ddns"`
+	ExtAttrs                   types.Map                                `tfsdk:"extattrs"`
+	ExtAttrsAll                types.Map                                `tfsdk:"extattrs_all"`
+	LogicFilterRules           types.List                               `tfsdk:"logic_filter_rules"`
+	Name                       types.String                             `tfsdk:"name"`
+	NetworkView                types.String                             `tfsdk:"network_view"`
+	Networks                   types.List                               `tfsdk:"networks"`
+	Options                    types.List                               `tfsdk:"options"`
+	PreferredLifetime          types.Int64                              `tfsdk:"preferred_lifetime"`
+	UpdateDnsOnLeaseRenewal    types.Bool                               `tfsdk:"update_dns_on_lease_renewal"`
+	UseDdnsDomainname          types.Bool                               `tfsdk:"use_ddns_domainname"`
+	UseDdnsGenerateHostname    types.Bool                               `tfsdk:"use_ddns_generate_hostname"`
+	UseDdnsTtl                 types.Bool                               `tfsdk:"use_ddns_ttl"`
+	UseDdnsUseOption81         types.Bool                               `tfsdk:"use_ddns_use_option81"`
+	UseDomainName              types.Bool                               `tfsdk:"use_domain_name"`
+	UseDomainNameServers       types.Bool                               `tfsdk:"use_domain_name_servers"`
+	UseEnableDdns              types.Bool                               `tfsdk:"use_enable_ddns"`
+	UseLogicFilterRules        types.Bool                               `tfsdk:"use_logic_filter_rules"`
+	UseOptions                 types.Bool                               `tfsdk:"use_options"`
+	UsePreferredLifetime       types.Bool                               `tfsdk:"use_preferred_lifetime"`
+	UseUpdateDnsOnLeaseRenewal types.Bool                               `tfsdk:"use_update_dns_on_lease_renewal"`
+	UseValidLifetime           types.Bool                               `tfsdk:"use_valid_lifetime"`
+	ValidLifetime              types.Int64                              `tfsdk:"valid_lifetime"`
 }
 
 var Ipv6sharednetworkAttrTypes = map[string]attr.Type{
 	"ref":                             types.StringType,
 	"comment":                         types.StringType,
-	"ddns_domainname":                 types.StringType,
+	"ddns_domainname":                 internaltypes.CaseInsensitiveString{},
 	"ddns_generate_hostname":          types.BoolType,
 	"ddns_server_always_updates":      types.BoolType,
 	"ddns_ttl":                        types.Int64Type,
 	"ddns_use_option81":               types.BoolType,
 	"disable":                         types.BoolType,
-	"domain_name":                     types.StringType,
+	"domain_name":                     internaltypes.CaseInsensitiveString{},
 	"domain_name_servers":             types.ListType{ElemType: types.StringType},
 	"enable_ddns":                     types.BoolType,
 	"extattrs":                        types.MapType{ElemType: types.StringType},
@@ -118,11 +119,12 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Comment for the IPv6 shared network, maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Computed:   true,
+		Optional:   true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidFQDN(),
 		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.",
 	},
@@ -169,11 +171,12 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines whether an IPv6 shared network is disabled or not. When this is set to False, the IPv6 shared network is enabled.",
 	},
 	"domain_name": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Computed:   true,
+		Optional:   true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_domain_name")),
-			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidFQDN(),
 		},
 		MarkdownDescription: "Use this method to set or retrieve the domain_name value of a DHCP IPv6 Shared Network object.",
 	},
@@ -373,13 +376,13 @@ func (m *Ipv6sharednetworkModel) Expand(ctx context.Context, diags *diag.Diagnos
 	}
 	to := &dhcp.Ipv6sharednetwork{
 		Comment:                    flex.ExpandStringPointer(m.Comment),
-		DdnsDomainname:             flex.ExpandStringPointer(m.DdnsDomainname),
+		DdnsDomainname:             flex.ExpandStringPointer(m.DdnsDomainname.StringValue),
 		DdnsGenerateHostname:       flex.ExpandBoolPointer(m.DdnsGenerateHostname),
 		DdnsServerAlwaysUpdates:    flex.ExpandBoolPointer(m.DdnsServerAlwaysUpdates),
 		DdnsTtl:                    flex.ExpandInt64Pointer(m.DdnsTtl),
 		DdnsUseOption81:            flex.ExpandBoolPointer(m.DdnsUseOption81),
 		Disable:                    flex.ExpandBoolPointer(m.Disable),
-		DomainName:                 flex.ExpandStringPointer(m.DomainName),
+		DomainName:                 flex.ExpandStringPointer(m.DomainName.StringValue),
 		DomainNameServers:          flex.ExpandFrameworkListString(ctx, m.DomainNameServers, diags),
 		EnableDdns:                 flex.ExpandBoolPointer(m.EnableDdns),
 		ExtAttrs:                   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
@@ -430,13 +433,13 @@ func (m *Ipv6sharednetworkModel) Flatten(ctx context.Context, from *dhcp.Ipv6sha
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-	m.DdnsDomainname = flex.FlattenStringPointer(from.DdnsDomainname)
+	m.DdnsDomainname.StringValue = flex.FlattenStringPointer(from.DdnsDomainname)
 	m.DdnsGenerateHostname = types.BoolPointerValue(from.DdnsGenerateHostname)
 	m.DdnsServerAlwaysUpdates = types.BoolPointerValue(from.DdnsServerAlwaysUpdates)
 	m.DdnsTtl = flex.FlattenInt64Pointer(from.DdnsTtl)
 	m.DdnsUseOption81 = types.BoolPointerValue(from.DdnsUseOption81)
 	m.Disable = types.BoolPointerValue(from.Disable)
-	m.DomainName = flex.FlattenStringPointer(from.DomainName)
+	m.DomainName.StringValue = flex.FlattenStringPointer(from.DomainName)
 	m.DomainNameServers = flex.FlattenFrameworkListString(ctx, from.DomainNameServers, diags)
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)

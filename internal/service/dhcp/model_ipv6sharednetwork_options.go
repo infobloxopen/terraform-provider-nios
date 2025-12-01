@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -50,7 +49,6 @@ var Ipv6sharednetworkOptionsResourceSchemaAttributes = map[string]schema.Attribu
 	"vendor_class": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
-		Default:  stringdefault.StaticString("DHCP"),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},

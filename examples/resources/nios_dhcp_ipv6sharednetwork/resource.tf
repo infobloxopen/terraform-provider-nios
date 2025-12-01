@@ -7,7 +7,7 @@ resource "nios_ipam_ipv6network" "parent_ipv6network2" {
   network = "2024:db8:2::/64"
 }
 
-// Manage DHCP Ipv6 Shared Network with Basic Fields
+// Manage DHCP IPv6 Shared Network with Basic Fields
 resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_basic_fields" {
   name = "shared_network_1"
   networks = [{
@@ -15,7 +15,7 @@ resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_basic_fields" {
   }]
 }
 
-// Manage Ipv6 Shared Network with Additional Fields
+// Manage IPv6 Shared Network with Additional Fields
 resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_with_additional_fields" {
   name = "shared_network_2"
   networks = [{
