@@ -333,8 +333,8 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 	}
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
-		// Check if ddns_use_option81 is set to false
-		if data.DdnsUseOption81.IsNull() && data.DdnsUseOption81.IsUnknown() && !data.DdnsUseOption81.ValueBool() {
+		// Check if ddns_use_option81 is not set to true
+		if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ddns_server_always_updates"),
 				"Invalid Configuration",
@@ -429,7 +429,7 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 		}
 	}
 
-	var options []Ipv6fixedaddresstemplateOptionsModel
+	var options []Ipv6sharednetworkOptionsModel
 	diags := data.Options.ElementsAs(ctx, &options, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

@@ -693,8 +693,8 @@ func TestAccIpv6sharednetworkResource_Networks(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "networks.#", "2"),
-					resource.TestCheckResourceAttrPair(resourceName, "networks.0.ref", "nios_ipam_ipv6network.test1", "ref"),
-					resource.TestCheckResourceAttrPair(resourceName, "networks.1.ref", "nios_ipam_ipv6network.test2", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "networks.0", "nios_ipam_ipv6network.test1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "networks.1", "nios_ipam_ipv6network.test2", "ref"),
 				),
 			},
 			// Update and Read
@@ -703,7 +703,7 @@ func TestAccIpv6sharednetworkResource_Networks(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "networks.#", "1"),
-					resource.TestCheckResourceAttrPair(resourceName, "networks.0.ref", "nios_ipam_ipv6network.test1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "networks.0", "nios_ipam_ipv6network.test1", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
