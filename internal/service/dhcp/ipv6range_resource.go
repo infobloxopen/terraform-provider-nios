@@ -421,6 +421,15 @@ func validateBlackoutSchedule(settingObj types.Object, basePath path.Path, diagn
 
 	schedule := scheduleObj.Attributes()
 	recurringTime := schedule["recurring_time"]
+	repeat := schedule["repeat"]
+	weekdays := schedule["weekdays"]
+	frequency := schedule["frequency"]
+	every := schedule["every"]
+	minutesPastHour := schedule["minutes_past_hour"]
+	month := schedule["month"]
+	dayOfMonth := schedule["day_of_month"]
+	hourOfDay := schedule["hour_of_day"]
+	year := schedule["year"]
 
 	if !recurringTime.IsNull() && !recurringTime.IsUnknown() {
 		if !schedule["hour_of_day"].IsNull() || !schedule["hour_of_day"].IsUnknown() || !schedule["year"].IsNull() || !schedule["year"].IsUnknown() || !schedule["month"].IsNull() || !schedule["month"].IsUnknown() || !schedule["day_of_month"].IsNull() || !schedule["day_of_month"].IsUnknown() {
@@ -432,7 +441,6 @@ func validateBlackoutSchedule(settingObj types.Object, basePath path.Path, diagn
 		}
 	}
 
-	repeat := schedule["repeat"]
 	if !repeat.IsNull() && !repeat.IsUnknown() {
 		repeatStr, ok := repeat.(types.String)
 		if !ok {
@@ -444,53 +452,71 @@ func validateBlackoutSchedule(settingObj types.Object, basePath path.Path, diagn
 			return
 		}
 
-		if repeatStr.ValueString() == "ONCE" {
-			if (!schedule["weekdays"].IsNull() && !schedule["weekdays"].IsUnknown()) || (!schedule["frequency"].IsNull() && !schedule["frequency"].IsUnknown()) || (!schedule["every"].IsNull() && !schedule["every"].IsUnknown()) {
+		switch repeatStr.ValueString() {
+		case "ONCE":
+			// For ONCE: cannot set weekdays, frequency, every
+			if (!weekdays.IsNull() && !weekdays.IsUnknown()) ||
+				(!frequency.IsNull() && !frequency.IsUnknown()) ||
+				(!every.IsNull() && !every.IsUnknown()) {
 				diagnostics.AddAttributeError(
 					basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
 					"Invalid Configuration for Repeat",
-					"Cannot Set Frequency, Weekdays and Every if Repeat is set to ONCE",
+					"Cannot set frequency, weekdays and every if repeat is set to ONCE",
 				)
 			}
-			if schedule["month"].IsNull() || schedule["month"].IsUnknown() || schedule["day_of_month"].IsNull() || schedule["day_of_month"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() {
+			// For ONCE: must set month, day_of_month, hour_of_day, minutes_past_hour
+			if month.IsNull() || month.IsUnknown() ||
+				dayOfMonth.IsNull() || dayOfMonth.IsUnknown() ||
+				hourOfDay.IsNull() || hourOfDay.IsUnknown() ||
+				minutesPastHour.IsNull() || minutesPastHour.IsUnknown() {
 				diagnostics.AddAttributeError(
 					basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
 					"Invalid Configuration for Schedule",
-					"If REPEAT is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
+					"If repeat is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
 				)
 			}
-		} else {
-			if (!schedule["month"].IsNull() && !schedule["month"].IsUnknown()) || (!schedule["day_of_month"].IsNull() && !schedule["day_of_month"].IsUnknown()) || (!schedule["year"].IsNull() && !schedule["year"].IsUnknown()) {
+		case "RECUR":
+			// For RECUR: cannot set month, day_of_month, year
+			if (!month.IsNull() && !month.IsUnknown()) ||
+				(!dayOfMonth.IsNull() && !dayOfMonth.IsUnknown()) ||
+				(!year.IsNull() && !year.IsUnknown()) {
 				diagnostics.AddAttributeError(
 					basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
 					"Invalid Configuration for Repeat",
-					"Cannot Set Month, Day of Month and Year if Repeat is set to RECUR",
+					"Cannot set month, day_of_month and year if repeat is set to RECUR",
 				)
 			}
-
-			if schedule["frequency"].IsNull() || schedule["frequency"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() {
+			// For RECUR: must set frequency, hour_of_day, minutes_past_hour
+			if frequency.IsNull() || frequency.IsUnknown() ||
+				hourOfDay.IsNull() || hourOfDay.IsUnknown() ||
+				minutesPastHour.IsNull() || minutesPastHour.IsUnknown() {
 				diagnostics.AddAttributeError(
 					basePath.AtName("blackout_schedule").AtName("schedule").AtName("repeat"),
 					"Invalid Configuration for Schedule",
-					"If REPEAT is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
+					"If repeat is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
 				)
 			}
-
-			if schedule["frequency"].String() == "\"WEEKLY\"" {
-				if schedule["weekdays"].IsNull() || schedule["weekdays"].IsUnknown() {
-					diagnostics.AddAttributeError(
-						basePath.AtName("blackout_schedule").AtName("schedule").AtName("weekdays"),
-						"Invalid Configuration for Weekdays",
-						"Weekdays must be set if Frequency is set to WEEKLY",
-					)
-				}
-			} else {
-				if !schedule["weekdays"].IsNull() && !schedule["weekdays"].IsUnknown() {
-					diagnostics.AddAttributeError(
-						basePath.AtName("blackout_schedule").AtName("schedule").AtName("weekdays"),
-						"Invalid Configuration for Weekdays",
-						"Weekdays can only be set if Frequency is set to WEEKLY",
-					)
+			// Handle weekdays validation based on frequency for RECUR only
+			if !frequency.IsNull() && !frequency.IsUnknown() {
+				freqStr, ok := frequency.(types.String)
+				if ok && freqStr.ValueString() == "WEEKLY" {
+					// WEEKLY requires weekdays
+					if weekdays.IsNull() || weekdays.IsUnknown() {
+						diagnostics.AddAttributeError(
+							basePath.AtName("blackout_schedule").AtName("schedule").AtName("weekdays"),
+							"Invalid Configuration for Weekdays",
+							"Weekdays must be set if frequency is set to WEEKLY",
+						)
+					}
+				} else {
+					// Non-WEEKLY cannot have weekdays
+					if !weekdays.IsNull() && !weekdays.IsUnknown() {
+						diagnostics.AddAttributeError(
+							basePath.AtName("blackout_schedule").AtName("schedule").AtName("weekdays"),
+							"Invalid Configuration for Weekdays",
+							"Weekdays can only be set if frequency is set to WEEKLY",
+						)
+					}
 				}
 			}
 		}
