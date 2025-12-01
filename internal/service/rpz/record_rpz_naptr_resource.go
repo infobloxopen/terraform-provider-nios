@@ -75,6 +75,7 @@ func (r *RecordRpzNaptrResource) Create(ctx context.Context, req resource.Create
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -93,7 +94,7 @@ func (r *RecordRpzNaptrResource) Create(ctx context.Context, req resource.Create
 	res := apiRes.CreateRecordRpzNaptrResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordRpzNaptr due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating RecordRpzNaptr due to inherited Extensible attributes, got error: %s", err))
 		return
 	}
 
@@ -163,7 +164,7 @@ func (r *RecordRpzNaptrResource) Read(ctx context.Context, req resource.ReadRequ
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordRpzNaptr due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordRpzNaptr due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -260,6 +261,7 @@ func (r *RecordRpzNaptrResource) Update(ctx context.Context, req resource.Update
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -287,7 +289,7 @@ func (r *RecordRpzNaptrResource) Update(ctx context.Context, req resource.Update
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordRpzNaptr due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating RecordRpzNaptr due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
