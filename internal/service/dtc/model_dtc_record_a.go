@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -15,6 +16,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -66,7 +68,10 @@ var DtcRecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the record is disabled or not. False means that the record is enabled.",
 	},
 	"dtc_server": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of the DTC Server object with which the DTC record is associated.",
 	},
 	"ipv4addr": schema.StringAttribute{
@@ -80,23 +85,24 @@ var DtcRecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_ttl": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default: booldefault.StaticBool(false),
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ttl",
 	},
 }
 
-
-func (m *DtcRecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcRecordA {
+func (m *DtcRecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dtc.DtcRecordA {
 	if m == nil {
 		return nil
 	}
 	to := &dtc.DtcRecordA{
 		Comment:   flex.ExpandStringPointer(m.Comment),
 		Disable:   flex.ExpandBoolPointer(m.Disable),
-		DtcServer: flex.ExpandStringPointer(m.DtcServer),
 		Ipv4addr:  flex.ExpandStringPointer(m.Ipv4addr),
 		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
+	}
+	if isCreate{
+		to.DtcServer = flex.ExpandStringPointer(m.DtcServer)
 	}
 	return to
 }
