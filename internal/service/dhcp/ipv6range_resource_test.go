@@ -145,10 +145,18 @@ func TestAccIpv6rangeResource_AddressType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeAddressTypeUpdate(view, "PREFIX", "14:0:0:1000::", "14:0:0:1fff::", "80"),
+				Config: testAccIpv6rangeAddressTypePrefix(view, "PREFIX", "14:0:0:1000::", "14:0:0:1fff::", "80"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "address_type", "PREFIX"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6rangeAddressTypeBoth(view, "BOTH", "14::1", "14::10", "14:0:0:2000::", "14:0:0:2fff::", "80"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "address_type", "BOTH"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -173,6 +181,14 @@ func TestAccIpv6rangeResource_CloudInfo(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.authority_type", "GM"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_scope", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.owned_by_adaptor", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6rangeCloudInfoNull(view, "14::1", "14::10"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "cloud_info.#", "0"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -250,12 +266,19 @@ func TestAccIpv6rangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 		"device_profile":                      false,
 		"switch_port_data_collection_polling": "PERIODIC",
 	}
-	updatedDiscoveryBasicPollSettings := map[string]any{
+	discoveryBasicPollSettingsUpdate1 := map[string]any{
 		"auto_arp_refresh_before_switch_port_polling": true,
 		"cli_collection":                      true,
 		"complete_ping_sweep":                 false,
 		"device_profile":                      false,
 		"switch_port_data_collection_polling": "SCHEDULED",
+	}
+	discoveryBasicPollSettingsUpdate2 := map[string]any{
+		"auto_arp_refresh_before_switch_port_polling": true,
+		"cli_collection":                      true,
+		"complete_ping_sweep":                 false,
+		"device_profile":                      false,
+		"switch_port_data_collection_polling": "DISABLED",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -276,11 +299,23 @@ func TestAccIpv6rangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeDiscoveryBasicPollSettings(view, "14::1", "14::10", updatedDiscoveryBasicPollSettings, "true"),
+				Config: testAccIpv6rangeDiscoveryBasicPollSettings(view, "14::1", "14::10", discoveryBasicPollSettingsUpdate1, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "SCHEDULED"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6rangeDiscoveryBasicPollSettings(view, "14::1", "14::10", discoveryBasicPollSettingsUpdate2, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "DISABLED"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
@@ -294,6 +329,31 @@ func TestAccIpv6rangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_discovery_blackout_setting"
 	var v dhcp.Ipv6range
 	view := acctest.RandomNameWithPrefix("network-view")
+	discoveryBlackoutSetting := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 100,
+		"blackout_schedule": map[string]any{
+			"weekdays":          []string{"TUESDAY", "MONDAY", "FRIDAY"},
+			"frequency":         "WEEKLY",
+			"every":             15,
+			"minutes_past_hour": 6,
+			"disable":           false,
+			"repeat":            "RECUR",
+			"hour_of_day":       20,
+		},
+	}
+	discoveryBlackoutSettingUpdated := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 200,
+		"blackout_schedule": map[string]any{
+			"minutes_past_hour": 6,
+			"repeat":            "ONCE",
+			"day_of_month":      30,
+			"month":             1,
+			"year":              2026,
+			"hour_of_day":       20,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -301,16 +361,40 @@ func TestAccIpv6rangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeDiscoveryBlackoutSetting(view, "14::1", "14::10", "true"),
+				Config: testAccIpv6rangeDiscoveryBlackoutSetting(view, "14::1", "14::10", discoveryBlackoutSetting, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_duration", "100"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.0", "TUESDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.1", "MONDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.2", "FRIDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.repeat", "RECUR"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6rangeDiscoveryBlackoutSetting(view, "14::1", "14::10", discoveryBlackoutSettingUpdated, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_duration", "200"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.repeat", "ONCE"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.day_of_month", "30"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.month", "1"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.year", "2026"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
+
 func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
 	t.Skip("Additional configuration is required to run this test")
 	var resourceName = "nios_dhcp_ipv6range.test_discovery_member"
@@ -788,6 +872,31 @@ func TestAccIpv6rangeResource_PortControlBlackoutSetting(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_port_control_blackout_setting"
 	var v dhcp.Ipv6range
 	view := acctest.RandomNameWithPrefix("network-view")
+	portControlBlackoutSetting := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 100,
+		"blackout_schedule": map[string]any{
+			"weekdays":          []string{"TUESDAY", "MONDAY", "FRIDAY"},
+			"frequency":         "WEEKLY",
+			"every":             15,
+			"minutes_past_hour": 6,
+			"disable":           false,
+			"repeat":            "RECUR",
+			"hour_of_day":       20,
+		},
+	}
+	portControlBlackoutSettingUpdated := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 200,
+		"blackout_schedule": map[string]any{
+			"minutes_past_hour": 6,
+			"repeat":            "ONCE",
+			"day_of_month":      30,
+			"month":             1,
+			"year":              2026,
+			"hour_of_day":       20,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -795,10 +904,33 @@ func TestAccIpv6rangeResource_PortControlBlackoutSetting(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangePortControlBlackoutSetting(view, "14::1", "14::10", "false", "true"),
+				Config: testAccIpv6rangePortControlBlackoutSetting(view, "14::1", "14::10", portControlBlackoutSetting, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "false"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_duration", "100"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.0", "TUESDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.1", "MONDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.2", "FRIDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.repeat", "RECUR"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6rangePortControlBlackoutSetting(view, "14::1", "14::10", portControlBlackoutSettingUpdated, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_duration", "200"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.repeat", "ONCE"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.day_of_month", "30"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.month", "1"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.year", "2026"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1245,7 +1377,7 @@ resource "nios_dhcp_ipv6range" "test_address_type" {
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
-func testAccIpv6rangeAddressTypeUpdate(view, addressType, ipv6StartPrefix, ipv6EndPrefix string, prefixBits string) string {
+func testAccIpv6rangeAddressTypePrefix(view, addressType, ipv6StartPrefix, ipv6EndPrefix string, prefixBits string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test_address_type" {
     network = nios_ipam_ipv6network.test.network
@@ -1259,12 +1391,43 @@ resource "nios_dhcp_ipv6range" "test_address_type" {
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
+func testAccIpv6rangeAddressTypeBoth(view, addressType, startAddr, endAddr, ipv6StartPrefix, ipv6EndPrefix string, prefixBits string) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6range" "test_address_type" {
+    network = nios_ipam_ipv6network.test.network
+	start_addr = %q
+	end_addr = %q
+    ipv6_start_prefix = %q
+    ipv6_end_prefix = %q
+    network_view = nios_ipam_network_view.test.name
+    address_type = %q
+	ipv6_prefix_bits = %q
+}
+`, startAddr, endAddr, ipv6StartPrefix, ipv6EndPrefix, addressType, prefixBits)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
+}
+
 func testAccIpv6rangeCloudInfo(view, startAddr, endAddr string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test_cloud_info" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
     end_addr = %q
+    network_view = nios_ipam_network_view.test.name
+}
+`, startAddr, endAddr)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
+}
+
+func testAccIpv6rangeCloudInfoNull(view, startAddr, endAddr string) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6range" "test_cloud_info" {
+    network = nios_ipam_ipv6network.test.network
+    start_addr = %q
+    end_addr = %q
+	cloud_info = {
+		delegated_member = null
+	}
     network_view = nios_ipam_network_view.test.name
 }
 `, startAddr, endAddr)
@@ -1312,16 +1475,18 @@ resource "nios_dhcp_ipv6range" "test_discovery_basic_poll_settings" {
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
-func testAccIpv6rangeDiscoveryBlackoutSetting(view, startAddr, endAddr string, useBlackoutSetting string) string {
+func testAccIpv6rangeDiscoveryBlackoutSetting(view, startAddr, endAddr string, discoveryBlackoutSetting map[string]any, useBlackoutSetting string) string {
+	discoveryBlackoutSettingStr := utils.ConvertMapToHCL(discoveryBlackoutSetting)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test_discovery_blackout_setting" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
     end_addr = %q
+	discovery_blackout_setting = %s
     network_view = nios_ipam_network_view.test.name
 	use_blackout_setting = %q
 }
-`, startAddr, endAddr, useBlackoutSetting)
+`, startAddr, endAddr, discoveryBlackoutSettingStr, useBlackoutSetting)
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
@@ -1520,19 +1685,18 @@ resource "nios_dhcp_ipv6range" "test_option_filter_rules" {
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
-func testAccIpv6rangePortControlBlackoutSetting(view, startAddr, endAddr string, enableBlackout string, useBlackoutSetting string) string {
+func testAccIpv6rangePortControlBlackoutSetting(view, startAddr, endAddr string, portControlBlackoutSetting map[string]any, useBlackoutSetting string) string {
+	portControlBlackoutSettingStr := utils.ConvertMapToHCL(portControlBlackoutSetting)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test_port_control_blackout_setting" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
     end_addr = %q
     network_view = nios_ipam_network_view.test.name
-    port_control_blackout_setting = {
-		enable_blackout = %q
-	}
+    port_control_blackout_setting = %s
 	use_blackout_setting = %q
 }
-`, startAddr, endAddr, enableBlackout, useBlackoutSetting)
+`, startAddr, endAddr, portControlBlackoutSettingStr, useBlackoutSetting)
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 

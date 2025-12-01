@@ -52,7 +52,7 @@ func (m *Ipv6rangeModelWithFilter) FlattenResults(ctx context.Context, from []dh
 
 func (d *Ipv6rangeDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing Ipv6 Ranges.",
+		MarkdownDescription: "Retrieves information about existing IPv6 Ranges.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
