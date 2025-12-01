@@ -483,8 +483,11 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of this network template.",
 	},
 	"netmask": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 32),
+		},
 		MarkdownDescription: "The netmask of the network in CIDR format.",
 	},
 	"nextserver": schema.StringAttribute{
