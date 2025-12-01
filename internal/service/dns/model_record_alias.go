@@ -20,6 +20,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -74,11 +75,17 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RecordAliasAwsRte53RecordInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The AWS Route53 record information associated with the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          RecordAliasCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The cloud information associated with the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -103,10 +110,16 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name for an Alias record in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"dns_target_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Target name in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
@@ -129,6 +142,9 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
@@ -170,6 +186,9 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 	"zone": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The zone in which the record resides.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 

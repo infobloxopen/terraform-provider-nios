@@ -20,6 +20,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -75,6 +76,9 @@ var SharedrecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name for this shared record in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,

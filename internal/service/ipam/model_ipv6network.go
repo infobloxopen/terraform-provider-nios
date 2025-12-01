@@ -29,6 +29,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -294,10 +295,16 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this network.",
 		Default:             stringdefault.StaticString("NONE"),
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_bgp_as": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Number of the discovered BGP AS. When multiple BGP autonomous systems are discovered in the network, this field displays \"Multiple\".",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_bridge_domain": schema.StringAttribute{
 		Optional:            true,
@@ -320,22 +327,37 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovered_vlan_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The identifier of the discovered VLAN. When multiple VLANs are discovered in the network, this field displays \"Multiple\".",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_vlan_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the discovered VLAN. When multiple VLANs are discovered in the network, this field displays \"Multiple\".",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_vrf_description": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Description of the discovered VRF. When multiple VRFs are discovered in the network, this field displays \"Multiple\".",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_vrf_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the discovered VRF. When multiple VRFs are discovered in the network, this field displays \"Multiple\".",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_vrf_rd": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Route distinguisher of the discovered VRF. When multiple VRFs are discovered in the network, this field displays \"Multiple\".",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkDiscoveryBasicPollSettingsResourceSchemaAttributes,
@@ -359,6 +381,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The network discovery engine type.",
 		Default:             stringdefault.StaticString("NONE"),
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
@@ -420,6 +445,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The endpoints that provides data for the DHCP IPv6 Network object.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
@@ -452,10 +480,16 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_rir_registration_update_sent": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when the last RIR registration update was sent.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"last_rir_registration_update_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Last RIR registration update status.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -491,11 +525,17 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"mgm_private_overridable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes:          Ipv6networkMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 
 	"network": schema.StringAttribute{
@@ -524,6 +564,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The network container to which this network belongs, if any.",
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
+			plancontrol.UseStateForUnknownString(),
 		},
 	},
 	"network_view": schema.StringAttribute{
@@ -588,6 +629,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the IPv6 network address space.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
@@ -636,6 +680,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"template": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "If set on creation, the network is created according to the values specified in the selected template.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"unmanaged": schema.BoolAttribute{
 		Optional:            true,
@@ -646,6 +693,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"unmanaged_count": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The number of unmanaged IP addresses as discovered by network discovery.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"update_dns_on_lease_renewal": schema.BoolAttribute{
 		Optional:            true,

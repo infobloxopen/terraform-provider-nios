@@ -29,6 +29,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -253,6 +254,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this network container.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes,
@@ -274,6 +278,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"discovery_engine_type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network discovery engine type.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
@@ -318,6 +325,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The endpoints that provides data for the DHCP IPv6 Network Container.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		ElementType:         types.StringType,
@@ -350,10 +360,16 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_rir_registration_update_sent": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when the last RIR registration update was sent.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"last_rir_registration_update_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Last RIR registration update status.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -378,11 +394,17 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"mgm_private_overridable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes:          Ipv6networkcontainerMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Microsoft Active Directory user data associated with the network container.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"network": schema.StringAttribute{
 		CustomType:          cidrtypes.IPv6PrefixType{},
@@ -410,6 +432,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The network container to which this network belongs, if any.",
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
+			plancontrol.UseStateForUnknownString(),
 		},
 	},
 	"network_view": schema.StringAttribute{
@@ -468,6 +491,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the IPv6 network container address space.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
@@ -632,6 +658,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"utilization": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The network container utilization in percentage.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"valid_lifetime": schema.Int64Attribute{
 		Optional:            true,

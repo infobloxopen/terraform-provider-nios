@@ -22,6 +22,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -90,11 +91,17 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RecordAAwsRte53RecordInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The AWS Route53 record information associated with the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          RecordACloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The cloud information associated with the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -109,6 +116,9 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"creation_time": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the record creation in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"creator": schema.StringAttribute{
 		Optional: true,
@@ -140,10 +150,16 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Attributes:          RecordADiscoveredDataResourceSchemaAttributes,
 		MarkdownDescription: "The discovered data for the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name for an A record in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
@@ -190,11 +206,17 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Computed:            true,
 		Attributes:          RecordAMsAdUserDataResourceSchemaAttributes,
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
@@ -206,10 +228,16 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"reclaimable": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines if the record is reclaimable or not.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"shared_record_group": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The shared record group this record belongs to.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ttl": schema.Int64Attribute{
 		Computed:            true,
@@ -236,6 +264,9 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"zone": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The zone in which the record resides.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 
