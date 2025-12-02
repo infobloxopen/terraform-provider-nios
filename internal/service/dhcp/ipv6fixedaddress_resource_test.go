@@ -1845,19 +1845,6 @@ resource "nios_dhcp_ipv6fixedaddress" "test_match_client" {
 	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
 }
 
-func testAccIpv6fixedaddressMsAdUserData(ipv6addr, duid, networkView, ipv6Network string, msAdUserData string) string {
-	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6fixedaddress" "test_ms_ad_user_data" {
-    ipv6addr = %q
-    duid = %q
-    ms_ad_user_data = %q
-    network = nios_ipam_ipv6network.test_ipv6_network.network
-    network_view = nios_ipam_network_view.parent_network_view.name
-}
-`, ipv6addr, duid, msAdUserData)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
-}
-
 func testAccIpv6fixedaddressName(ipv6addr, duid, networkView, ipv6Network, name string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddress" "test_name" {
@@ -1925,19 +1912,6 @@ resource "nios_dhcp_ipv6fixedaddress" "test_reserved_interface" {
 	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
 }
 
-func testAccIpv6fixedaddressRestartIfNeeded(ipv6addr, duid, networkView, ipv6Network string, restartIfNeeded bool) string {
-	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6fixedaddress" "test_restart_if_needed" {
-    ipv6addr = %q
-    duid = %q
-    restart_if_needed = %t
-    network = nios_ipam_ipv6network.test_ipv6_network.network
-    network_view = nios_ipam_network_view.parent_network_view.name
-}
-`, ipv6addr, duid, restartIfNeeded)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
-}
-
 func testAccIpv6fixedaddressSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup, useSnmp3Credentials string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddress" "test_snmp3_credential" {
@@ -1976,19 +1950,6 @@ resource "nios_dhcp_ipv6fixedaddress" "test_snmp_credential" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
-}
-
-func testAccIpv6fixedaddressTemplate(ipv6addr, duid, networkView, ipv6Network, template string) string {
-	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6fixedaddress" "test_template" {
-    ipv6addr = %q
-    duid = %q
-    template = %q
-    network = nios_ipam_ipv6network.test_ipv6_network.network
-    network_view = nios_ipam_network_view.parent_network_view.name
-}
-`, ipv6addr, duid, template)
 	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
 }
 
