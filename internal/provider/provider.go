@@ -258,7 +258,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewFixedaddresstemplateDataSource,
 		dhcp.NewIpv6sharednetworkDataSource,
 		dhcp.NewIpv6rangeDataSource,
-    dhcp.NewFiltermacDataSource,
+		dhcp.NewFiltermacDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
