@@ -357,13 +357,6 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 			"dhcp6.name-servers":       true,
 		}
 
-		var options []FiltermacOptionsModel
-		diags := data.Options.ElementsAs(ctx, &options, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
 		specialOptionsNum := map[int64]bool{
 			3:  true,
 			6:  true,
