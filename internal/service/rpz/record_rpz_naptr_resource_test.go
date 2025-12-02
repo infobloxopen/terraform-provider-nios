@@ -499,7 +499,7 @@ func TestAccRecordRpzNaptrResource_View(t *testing.T) {
 	var v rpz.RecordRpzNaptr
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	name := acctest.RandomName() + "." + rpZone
-	view := "custom_view"
+	view := acctest.RandomNameWithPrefix("test-view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -801,9 +801,9 @@ resource "nios_rpz_record_naptr" "test_view" {
 	order = %d
     preference = %d
     replacement = %q
-	view = %q
+	view = nios_dns_view.custom_view.name
 }
-`, name, order, preference, replacement, view)
+`, name, order, preference, replacement)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone, view), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZone(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }
