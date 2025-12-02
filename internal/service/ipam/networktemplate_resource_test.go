@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -816,7 +817,7 @@ func TestAccNetworktemplateResource_ExtAttrs(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					//resource.TestCheckResourceAttr(resourceName, "extattrs.Tenant ID", extAttrValue1),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Tenant ID", extAttrValue1),
 				),
 			},
 			// Update and Read
@@ -826,7 +827,7 @@ func TestAccNetworktemplateResource_ExtAttrs(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					//resource.TestCheckResourceAttr(resourceName, "extattrs.Tenant ID", extAttrValue2),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Tenant ID", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1425,18 +1426,18 @@ func TestAccNetworktemplateResource_RangeTemplates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateRangeTemplates(name, 24, "test1"),
+				Config: testAccNetworktemplateRangeTemplates(name, 24, "one"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_range_template.test1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_range_template.one", "name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateRangeTemplates(name, 24, "test2"),
+				Config: testAccNetworktemplateRangeTemplates(name, 24, "two"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_range_template.test2", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_range_template.two", "name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2383,6 +2384,24 @@ func testAccNetworktemplateImportStateIdFunc(resourceName string) resource.Impor
 	}
 }
 
+func testAccBaseWithRangeTemplates(template1, template2 string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_range_template" "one" {
+	name = %q
+	number_of_addresses = 100
+	offset = 50
+    cloud_api_compatible = true
+}
+
+resource "nios_dhcp_range_template" "two" {
+	name = %q
+	number_of_addresses = 100
+	offset = 50
+    cloud_api_compatible = true
+}
+`, template1, template2)
+}
+
 func testAccNetworktemplateBasicConfig(name string, netmask int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test" {
@@ -2623,7 +2642,12 @@ resource "nios_ipam_networktemplate" "test_enable_snmp_warnings" {
 func testAccNetworktemplateExtAttrs(name string, netmask int, extAttrs map[string]string) string {
 	extAttrsStr := "{\n"
 	for k, v := range extAttrs {
-		extAttrsStr += fmt.Sprintf("    %q = %q\n", k, v)
+		// Quote keys that contain spaces
+		key := k
+		if strings.Contains(k, " ") {
+			key = fmt.Sprintf("%q", k)
+		}
+		extAttrsStr += fmt.Sprintf("    %s = %q\n", key, v)
 	}
 	extAttrsStr += "  }"
 	return fmt.Sprintf(`
@@ -2819,28 +2843,15 @@ resource "nios_ipam_networktemplate" "test_pxe_lease_time" {
 `, name, netmask, pxeLeaseTime)
 }
 
-func testAccNetworktemplateRangeTemplates(name string, netmask int, rangeTemplates string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_range_template" "test1" {
-	name = "range-template-1"
-	number_of_addresses = 100
-	offset = 50
-    cloud_api_compatible = true
-}
-
-resource "nios_dhcp_range_template" "test2" {
-	name = "range-template-2"
-	number_of_addresses = 100
-	offset = 50
-    cloud_api_compatible = true
-}
-
+func testAccNetworktemplateRangeTemplates(name string, netmask int, rangeTemplate string) string {
+	config := fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_range_templates" {
     name = %q
     netmask = %d
-    range_templates = [nios_dhcp_range_template.%s.ref]
+    range_templates = [nios_dhcp_range_template.%s.name]
 }
-`, name, netmask, rangeTemplates)
+`, name, netmask, rangeTemplate)
+	return strings.Join([]string{testAccBaseWithRangeTemplates(acctest.RandomName(), acctest.RandomName()), config}, "")
 }
 
 func testAccNetworktemplateRecycleLeases(name string, netmask int, recycleLeases string) string {

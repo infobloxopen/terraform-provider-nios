@@ -8,7 +8,7 @@ data "nios_ipam_networktemplate" "get_ipam_networktemplate_using_filters" {
 // Retrieve specific IPAM Network Templates using Extensible Attributes
 data "nios_ipam_networktemplate" "get_ipam_networktemplates_using_extensible_attributes" {
   extattrfilters = {
-    Site = "location-1"
+    "Tenant ID" = "location-1"
   }
 }
 
