@@ -159,7 +159,7 @@ func TestAccIpv6fixedaddressResource_AllowTelnet(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6fixedaddressAllowTelnet(ipv6addr, duid, networkView, ipv6Network, true),
+				Config: testAccIpv6fixedaddressAllowTelnet(ipv6addr, duid, networkView, ipv6Network, true, "Comment for CLI Credentials", "NIOS_USER", "NIOS_PASSWORD", "TELNET", "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_telnet", "true"),
@@ -167,7 +167,7 @@ func TestAccIpv6fixedaddressResource_AllowTelnet(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6fixedaddressAllowTelnet(ipv6addr, duid, networkView, ipv6Network, false),
+				Config: testAccIpv6fixedaddressAllowTelnet(ipv6addr, duid, networkView, ipv6Network, false, "Comment for CLI Credentials", "NIOS_USER", "NIOS_PASSWORD", "SSH", "default", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_telnet", "false"),
@@ -191,7 +191,7 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6fixedaddressCliCredentials(ipv6addr, duid, networkView, ipv6Network, "Comment for CLI Credentials", "NIOS_USER", "NIOS_PASSWORD", "SSH", "default", "true"),
+				Config: testAccIpv6fixedaddressCliCredentials(ipv6addr, duid, networkView, ipv6Network, "Comment for CLI Credentials", "NIOS_USER1", "NIOS_PASSWORD", "SSH", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "Comment for CLI Credentials"),
@@ -203,7 +203,7 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6fixedaddressCliCredentials(ipv6addr, duid, networkView, ipv6Network, "Updated Comment for CLI Credentials", "NIOS_USER", "NIOS_PASSWORD", "TELNET", "default", "true"),
+				Config: testAccIpv6fixedaddressCliCredentials(ipv6addr, duid, networkView, ipv6Network, "Updated Comment for CLI Credentials", "NIOS_USER1	", "NIOS_PASSWORD", "TELNET", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
@@ -1319,6 +1319,7 @@ func TestAccIpv6fixedaddressResource_UsePreferredLifetime(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
+	t.Skip("Skipping test as SNMP3 Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_use_snmp3_credential"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
@@ -1339,7 +1340,7 @@ func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, false, false, "", "", "", "", "", "", ""),
+				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, false, true, "", "", "", "", "", "", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
@@ -1351,6 +1352,7 @@ func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_UseSnmpCredential(t *testing.T) {
+	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_use_snmp_credential"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
@@ -1519,9 +1521,12 @@ func testAccIpv6fixedaddressAddressType(ipv6addr, duid, networkView, ipv6Network
 	var ipv6Config string
 	switch addressType {
 	case "BOTH":
-		ipv6Config = fmt.Sprintf(`ipv6prefix = %q, ipv6prefix_bits = %d`, ipv6Prefix, ipv6PrefixBits)
+		ipv6Config = fmt.Sprintf(`ipv6addr = %q
+                     ipv6prefix = %q
+                     ipv6prefix_bits = %d`, ipv6addr, ipv6Prefix, ipv6PrefixBits)
 	case "PREFIX":
-		ipv6Config = fmt.Sprintf(`ipv6prefix = %q`, ipv6Prefix)
+		ipv6Config = fmt.Sprintf(`ipv6prefix = %q
+                     ipv6prefix_bits = %d`, ipv6Prefix, ipv6PrefixBits)
 	case "ADDRESS":
 		ipv6Config = fmt.Sprintf(`ipv6addr = %q`, ipv6addr)
 	}
@@ -1537,7 +1542,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_address_type" {
 	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
 }
 
-func testAccIpv6fixedaddressAllowTelnet(ipv6addr, duid, networkView, ipv6Network string, allowTelnet bool) string {
+func testAccIpv6fixedaddressAllowTelnet(ipv6addr, duid, networkView, ipv6Network string, allowTelnet bool, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup string, useCLICredentials bool) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddress" "test_allow_telnet" {
     ipv6addr = %q
@@ -1545,8 +1550,16 @@ resource "nios_dhcp_ipv6fixedaddress" "test_allow_telnet" {
     network = nios_ipam_ipv6network.test_ipv6_network.network
     network_view = nios_ipam_network_view.parent_network_view.name
     allow_telnet = %t
+    cli_credentials = [{
+		comment          = %q
+		user             = %q
+		password         = %q
+		credential_type  = %q
+		credential_group = %q
+	}]
+	use_cli_credentials = %t
 }
-`, ipv6addr, duid, allowTelnet)
+`, ipv6addr, duid, allowTelnet, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup, useCLICredentials)
 	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
 }
 

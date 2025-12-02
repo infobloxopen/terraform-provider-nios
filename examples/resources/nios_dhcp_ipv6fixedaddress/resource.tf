@@ -1,30 +1,29 @@
 // Create an IPV6 Network (Required as Parent)
 resource "nios_ipam_ipv6network" "parent_network" {
-  network      = "2001:db8:abcd:1234::/64"
+  network      = "2001:db8:abcd:1231::/64"
   network_view = "default"
   comment      = "Parent network for DHCP fixed addresses"
 }
 
 // Create an IPV6 Fixed Address with Basic Fields
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_basic" {
-  ipv6addr = "2001:db8:abcd:1234::1"
+  ipv6addr = "2001:db8:abcd:1231::1"
   duid     = "01:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
   network  = nios_ipam_ipv6network.parent_network.network
 }
 
-
-// Create an IPV6 Fixed Address with Basic Fields
-resource "nios_dhcp_ipv6fixedaddress" "ipv6fa" {
-  ipv6addr = "2001:db8:abcd:1222::18"
-  duid     = "02:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
-  network  = "2001:db8:abcd:1222::/64"
+// Create an IPV6 Network (Required as Parent)
+resource "nios_ipam_ipv6network" "parent_network1" {
+  network      = "2001:db8:abcd:1235::/64"
+  network_view = "default"
+  comment      = "Parent network for DHCP fixed addresses"
 }
 
 // Create an IPV6 Fixed Address with Additional Fields with PREFIX address type
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   // Basic Fields
   address_type    = "PREFIX"
-  ipv6prefix      = "2001:db8:abcd:1234::"
+  ipv6prefix      = "2001:db8:abcd:1235::"
   ipv6prefix_bits = 64
   match_client    = "MAC_ADDRESS"
   mac_address     = "01:6a:7b:8c:9d:5e"
@@ -50,15 +49,22 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   extattrs = {
     Site = "location-2"
   }
-  depends_on = [nios_ipam_ipv6network.parent_network]
+  depends_on = [nios_ipam_ipv6network.parent_network1]
+}
+
+// Create an IPV6 Network (Required as Parent)
+resource "nios_ipam_ipv6network" "parent_network2" {
+  network      = "2001:db8:abcd:1233::/64"
+  network_view = "default"
+  comment      = "Parent network for DHCP fixed addresses"
 }
 
 // Create an IPV6 Fixed Address with Additional Fields with BOTH address type
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional2" {
   // Basic Fields
   address_type    = "BOTH"
-  ipv6addr        = "2001:db8:abcd:1234::3"
-  ipv6prefix      = "2001:db8:abcd:1234::"
+  ipv6addr        = "2001:db8:abcd:1233::3"
+  ipv6prefix      = "2001:db8:abcd:1233::"
   ipv6prefix_bits = 64
   match_client    = "MAC_ADDRESS"
   mac_address     = "00:6a:7b:8c:9d:5e"
@@ -80,7 +86,14 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional2" {
       type   = "Option"
     }
   ]
-  depends_on = [nios_ipam_ipv6network.parent_network]
+  network = nios_ipam_ipv6network.parent_network2.network
+}
+
+// Create an IPV6 Network (Required as Parent)
+resource "nios_ipam_ipv6network" "parent_network3" {
+  network      = "2001:db8:abcd:1236::/64"
+  network_view = "default"
+  comment      = "Parent network for DHCP fixed addresses"
 }
 
 // Create an IPV6 Fixed Address using function call to retrieve ipv4addr
@@ -92,7 +105,7 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
     result_field    = "ips"
     object          = "ipv6network"
     object_parameters = {
-      network      = "2001:db8:abcd:1234::/64"
+      network      = nios_ipam_ipv6network.parent_network3.network
       network_view = "default"
     }
   }

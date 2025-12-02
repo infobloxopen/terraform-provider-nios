@@ -283,13 +283,6 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType: iptypes.IPv6AddressType{},
 		Optional:   true,
 		Computed:   true,
-		//Validators: []validator.String{
-		//	stringvalidator.ExactlyOneOf(
-		//		path.MatchRoot("ipv6addr"),
-		//		path.MatchRoot("func_call"),
-		//		//path.MatchRoot("ipv6prefix"),
-		//	),
-		//},
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
