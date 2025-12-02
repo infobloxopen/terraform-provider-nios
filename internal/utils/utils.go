@@ -370,6 +370,9 @@ func ToComputedAttribute(name string, val resourceschema.Attribute) resourcesche
 
 func ExtractResourceRef(ref string) string {
 	v := strings.SplitN(strings.Trim(ref, "/"), "/", 2)
+	if len(v) < 2 {
+		return ref
+	}
 	return v[1]
 }
 
