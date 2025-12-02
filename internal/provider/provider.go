@@ -133,6 +133,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewSharedrecordSrvResource,
 		dns.NewSharedrecordAResource,
 		dns.NewSharedrecordCnameResource,
+		dns.NewSharedrecordAaaaResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -145,6 +146,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewDhcpoptionspaceResource,
 		dhcp.NewDhcpoptiondefinitionResource,
 		dhcp.NewFixedaddresstemplateResource,
+		dhcp.NewIpv6sharednetworkResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -153,6 +155,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcMonitorSnmpResource,
 		dtc.NewDtcMonitorHttpResource,
 		dtc.NewDtcMonitorTcpResource,
+		dtc.NewDtcMonitorPdpResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworktemplateResource,
@@ -197,6 +200,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		notification.NewNotificationRestEndpointResource,
 
 		rpz.NewRecordRpzAResource,
+		rpz.NewRecordRpzNaptrResource,
+		rpz.NewRecordRpzPtrResource,
+		rpz.NewRecordRpzMxResource,
 	}
 }
 
@@ -235,6 +241,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewSharedrecordSrvDataSource,
 		dns.NewSharedrecordADataSource,
 		dns.NewSharedrecordCnameDataSource,
+		dns.NewSharedrecordAaaaDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
@@ -247,6 +254,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewDhcpoptionspaceDataSource,
 		dhcp.NewDhcpoptiondefinitionDataSource,
 		dhcp.NewFixedaddresstemplateDataSource,
+		dhcp.NewIpv6sharednetworkDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
@@ -255,6 +263,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcMonitorSnmpDataSource,
 		dtc.NewDtcMonitorHttpDataSource,
 		dtc.NewDtcMonitorTcpDataSource,
+		dtc.NewDtcMonitorPdpDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworktemplateDataSource,
@@ -300,6 +309,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		notification.NewNotificationRestEndpointDataSource,
 
 		rpz.NewRecordRpzADataSource,
+		rpz.NewRecordRpzNaptrDataSource,
+		rpz.NewRecordRpzPtrDataSource,
+		rpz.NewRecordRpzMxDataSource,
 	}
 }
 
