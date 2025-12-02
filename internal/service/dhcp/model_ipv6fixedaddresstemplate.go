@@ -141,6 +141,7 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"number_of_addresses": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("offset")),
 		},
@@ -148,6 +149,7 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"offset": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("number_of_addresses")),
 		},
