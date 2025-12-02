@@ -198,6 +198,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		notification.NewNotificationRestEndpointResource,
 
 		rpz.NewRecordRpzAResource,
+		rpz.NewRecordRpzNaptrResource,
 		rpz.NewRecordRpzPtrResource,
 		rpz.NewRecordRpzMxResource,
 	}
@@ -304,6 +305,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		notification.NewNotificationRestEndpointDataSource,
 
 		rpz.NewRecordRpzADataSource,
+		rpz.NewRecordRpzNaptrDataSource,
 		rpz.NewRecordRpzPtrDataSource,
 		rpz.NewRecordRpzMxDataSource,
 	}
