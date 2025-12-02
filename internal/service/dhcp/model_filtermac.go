@@ -138,7 +138,7 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Default: listdefault.StaticValue(
 			types.ListValueMust(
-				types.ObjectType{AttrTypes: RangeOptionsAttrTypes},
+				types.ObjectType{AttrTypes: FiltermacOptionsAttrTypes},
 				[]attr.Value{},
 			),
 		),
