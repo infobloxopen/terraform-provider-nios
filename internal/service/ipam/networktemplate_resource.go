@@ -36,7 +36,7 @@ func (r *NetworktemplateResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *NetworktemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Networktemplate resource object.",
+		MarkdownDescription: "Manages a Network Template.",
 		Attributes:          NetworktemplateResourceSchemaAttributes,
 	}
 }
@@ -75,6 +75,7 @@ func (r *NetworktemplateResource) Create(ctx context.Context, req resource.Creat
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -93,7 +94,8 @@ func (r *NetworktemplateResource) Create(ctx context.Context, req resource.Creat
 	res := apiRes.CreateNetworktemplateResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Networktemplate due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating Networktemplate due to inherited Extensible attributes")
 		return
 	}
 
@@ -163,7 +165,8 @@ func (r *NetworktemplateResource) Read(ctx context.Context, req resource.ReadReq
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Networktemplate due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading Networktemplate due to inherited Extensible attributes")
 		return
 	}
 
@@ -253,13 +256,14 @@ func (r *NetworktemplateResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -287,7 +291,8 @@ func (r *NetworktemplateResource) Update(ctx context.Context, req resource.Updat
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Networktemplate due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating Networktemplate due to inherited Extensible attributes")
 		return
 	}
 
