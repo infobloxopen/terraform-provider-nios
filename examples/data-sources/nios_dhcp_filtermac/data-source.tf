@@ -10,3 +10,7 @@ data "nios_dhcp_filtermac" "get_filtermac_using_extattr_filter" {
     Site = "location-1"
   }
 }
+
+// Retrieve all DHCP Filter MACs
+data "nios_dhcp_filtermac" "get_all_filtermacs" {
+}

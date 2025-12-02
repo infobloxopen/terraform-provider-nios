@@ -13,13 +13,13 @@ Manages a DHCP MAC Address Filter.
 ## Example Usage
 
 ```terraform
-// create a filtermac resource
-resource "nios_dhcp_filtermac" "mac_filter" {
+// Create Filter MAC with Basic Fields
+resource "nios_dhcp_filtermac" "mac_filter_basic_fields" {
   name = "mac_filter_example"
 }
 
 // Create Filter MAC with Additional Fields
-resource "nios_dhcp_filtermac" "mac_filter_update" {
+resource "nios_dhcp_filtermac" "mac_filter_additional_fields" {
   name                           = "mac_filter_example_2"
   lease_time                     = 7200
   enforce_expiration_times       = true
