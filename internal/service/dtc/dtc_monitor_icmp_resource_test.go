@@ -353,7 +353,7 @@ func testAccDtcMonitorIcmpComment(name, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test_comment" {
 	name = %q
-    comment = %q
+	comment = %q
 }
 `, name, comment)
 }
@@ -386,7 +386,7 @@ resource "nios_dtc_monitor_icmp" "test_interval" {
 func testAccDtcMonitorIcmpName(name string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test_name" {
-    name = %q
+	name = %q
 }
 `, name)
 }

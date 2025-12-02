@@ -3,12 +3,12 @@
 page_title: "nios_dtc_monitor_icmp Resource - nios"
 subcategory: "DTC"
 description: |-
-  Manages a ICMP DTC Monitor
+  Manages a DTC ICMP Monitor
 ---
 
 # nios_dtc_monitor_icmp (Resource)
 
-Manages a ICMP DTC Monitor
+Manages a DTC ICMP Monitor
 
 ## Example Usage
 

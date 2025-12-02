@@ -76,7 +76,7 @@ func testAccCheckDtcMonitorIcmpResourceAttrPair(resourceName, dataSourceName str
 func testAccDtcMonitorIcmpDataSourceConfigFilters(name string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test" {
-  name = %q	
+  name = %q
 }
 
 data "nios_dtc_monitor_icmp" "test" {
@@ -93,7 +93,7 @@ resource "nios_dtc_monitor_icmp" "test" {
   name = %q
   extattrs = {
     Site = %q
-  } 
+  }
 }
 
 data "nios_dtc_monitor_icmp" "test" {

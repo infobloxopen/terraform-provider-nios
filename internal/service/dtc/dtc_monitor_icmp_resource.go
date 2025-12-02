@@ -36,7 +36,7 @@ func (r *DtcMonitorIcmpResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *DtcMonitorIcmpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a ICMP DTC Monitor",
+		MarkdownDescription: "Manages a DTC ICMP Monitor",
 		Attributes:          DtcMonitorIcmpResourceSchemaAttributes,
 	}
 }
