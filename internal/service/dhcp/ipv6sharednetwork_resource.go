@@ -343,6 +343,13 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 		}
 	}
 
+	var options []Ipv6sharednetworkOptionsModel
+	diags := data.Options.ElementsAs(ctx, &options, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
 		// Special DHCP option names that require use_option to be set
@@ -364,13 +371,6 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 			28: true,
 			51: true,
 			23: true,
-		}
-
-		var options []Ipv6sharednetworkOptionsModel
-		diags := data.Options.ElementsAs(ctx, &options, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
 		}
 
 		for i, option := range options {
@@ -427,13 +427,6 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 				)
 			}
 		}
-	}
-
-	var options []Ipv6sharednetworkOptionsModel
-	diags := data.Options.ElementsAs(ctx, &options, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
 	}
 
 	// domain_name attribute must match the value of option 'domain-name'
