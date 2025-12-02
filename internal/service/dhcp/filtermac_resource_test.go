@@ -317,6 +317,11 @@ func TestAccFiltermacResource_Options(t *testing.T) {
 			"num":   "51",
 			"value": "1200",
 		},
+		{
+			"name":  "time-offset",
+			"num":   2,
+			"value": "3600",
+		},
 	}
 	updatedOptions := []map[string]any{
 		{
@@ -335,10 +340,13 @@ func TestAccFiltermacResource_Options(t *testing.T) {
 				Config: testAccFiltermacOptions(macFilterName, options),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFiltermacExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "dhcp-lease-time"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.num", "51"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "1200"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.num", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "3600"),
 				),
 			},
 			// Update and Read
