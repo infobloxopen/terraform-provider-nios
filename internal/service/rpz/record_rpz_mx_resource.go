@@ -15,33 +15,33 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForRecordRpzA = "comment,disable,extattrs,ipv4addr,name,rp_zone,ttl,use_ttl,view,zone"
+var readableAttributesForRecordRpzMx = "comment,disable,extattrs,mail_exchanger,name,preference,rp_zone,ttl,use_ttl,view,zone"
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &RecordRpzAResource{}
-var _ resource.ResourceWithImportState = &RecordRpzAResource{}
+var _ resource.Resource = &RecordRpzMxResource{}
+var _ resource.ResourceWithImportState = &RecordRpzMxResource{}
 
-func NewRecordRpzAResource() resource.Resource {
-	return &RecordRpzAResource{}
+func NewRecordRpzMxResource() resource.Resource {
+	return &RecordRpzMxResource{}
 }
 
-// RecordRpzAResource defines the resource implementation.
-type RecordRpzAResource struct {
+// RecordRpzMxResource defines the resource implementation.
+type RecordRpzMxResource struct {
 	client *niosclient.APIClient
 }
 
-func (r *RecordRpzAResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_a"
+func (r *RecordRpzMxResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_mx"
 }
 
-func (r *RecordRpzAResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *RecordRpzMxResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an RPZ A record.",
-		Attributes:          RecordRpzAResourceSchemaAttributes,
+		MarkdownDescription: "Manages a RPZ MX record.",
+		Attributes:          RecordRpzMxResourceSchemaAttributes,
 	}
 }
 
-func (r *RecordRpzAResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *RecordRpzMxResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -61,9 +61,9 @@ func (r *RecordRpzAResource) Configure(ctx context.Context, req resource.Configu
 	r.client = client
 }
 
-func (r *RecordRpzAResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *RecordRpzMxResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
-	var data RecordRpzAModel
+	var data RecordRpzMxModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -75,26 +75,25 @@ func (r *RecordRpzAResource) Create(ctx context.Context, req resource.CreateRequ
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 
 	apiRes, _, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+		RecordRpzMxAPI.
 		Create(ctx).
-		RecordRpzA(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForRecordRpzA).
+		RecordRpzMx(*data.Expand(ctx, &resp.Diagnostics, true)).
+		ReturnFieldsPlus(readableAttributesForRecordRpzMx).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordRpzA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordRpzMx, got error: %s", err))
 		return
 	}
 
-	res := apiRes.CreateRecordRpzAResponseAsObject.GetResult()
+	res := apiRes.CreateRecordRpzMxResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordRpzA due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordRpzMx due inherited Extensible attributes, got error: %s", err))
 		return
 	}
 
@@ -104,9 +103,9 @@ func (r *RecordRpzAResource) Create(ctx context.Context, req resource.CreateRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *RecordRpzMxResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var diags diag.Diagnostics
-	var data RecordRpzAModel
+	var data RecordRpzMxModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -122,9 +121,9 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	apiRes, httpRes, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+		RecordRpzMxAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForRecordRpzA).
+		ReturnFieldsPlus(readableAttributesForRecordRpzMx).
 		ReturnAsObject(1).
 		Execute()
 
@@ -133,11 +132,11 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzMx, got error: %s", err))
 		return
 	}
 
-	res := apiRes.GetRecordRpzAResponseObjectAsResult.GetResult()
+	res := apiRes.GetRecordRpzMxResponseObjectAsResult.GetResult()
 
 	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
@@ -149,7 +148,7 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 		if stateExtAttrs == nil {
 			resp.Diagnostics.AddError(
 				"Missing Internal ID",
-				"Unable to read RecordRpzA because the internal ID (from extattrs_all) is missing or invalid.",
+				"Unable to read RecordRpzMx because the internal ID (from extattrs_all) is missing or invalid.",
 			)
 			return
 		}
@@ -164,7 +163,7 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordRpzA due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordRpzMx due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -174,7 +173,7 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *RecordRpzAResource) ReadByExtAttrs(ctx context.Context, data *RecordRpzAModel, resp *resource.ReadResponse) bool {
+func (r *RecordRpzMxResource) ReadByExtAttrs(ctx context.Context, data *RecordRpzMxModel, resp *resource.ReadResponse) bool {
 	var diags diag.Diagnostics
 
 	if data.ExtAttrsAll.IsNull() {
@@ -196,18 +195,18 @@ func (r *RecordRpzAResource) ReadByExtAttrs(ctx context.Context, data *RecordRpz
 	}
 
 	apiRes, _, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+		RecordRpzMxAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForRecordRpzA).
+		ReturnFieldsPlus(readableAttributesForRecordRpzMx).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzA by extattrs, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzMx by extattrs, got error: %s", err))
 		return true
 	}
 
-	results := apiRes.ListRecordRpzAResponseObject.GetResult()
+	results := apiRes.ListRecordRpzMxResponseObject.GetResult()
 
 	// If the list is empty, the resource no longer exists so remove it from state
 	if len(results) == 0 {
@@ -229,9 +228,9 @@ func (r *RecordRpzAResource) ReadByExtAttrs(ctx context.Context, data *RecordRpz
 	return true
 }
 
-func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *RecordRpzMxResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
-	var data RecordRpzAModel
+	var data RecordRpzMxModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -261,7 +260,6 @@ func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequ
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -274,22 +272,22 @@ func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	apiRes, _, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+		RecordRpzMxAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzA(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForRecordRpzA).
+		RecordRpzMx(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ReturnFieldsPlus(readableAttributesForRecordRpzMx).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordRpzA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordRpzMx, got error: %s", err))
 		return
 	}
 
-	res := apiRes.UpdateRecordRpzAResponseAsObject.GetResult()
+	res := apiRes.UpdateRecordRpzMxResponseAsObject.GetResult()
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordRpzA due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordRpzMx due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -302,8 +300,8 @@ func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 }
 
-func (r *RecordRpzAResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data RecordRpzAModel
+func (r *RecordRpzMxResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data RecordRpzMxModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -313,19 +311,19 @@ func (r *RecordRpzAResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 
 	httpRes, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+		RecordRpzMxAPI.
 		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordRpzA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordRpzMx, got error: %s", err))
 		return
 	}
 }
 
-func (r *RecordRpzAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *RecordRpzMxResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

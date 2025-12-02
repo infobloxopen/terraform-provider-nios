@@ -327,7 +327,7 @@ func TestAccRecordRpzAResource_View(t *testing.T) {
 	var v rpz.RecordRpzA
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	name := acctest.RandomName() + "." + rpZone
-	view := "custom_view"
+	view := acctest.RandomNameWithPrefix("test-view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -534,21 +534,29 @@ resource "nios_rpz_record_a" "test_view" {
     name = %q
 	ipv4addr = %q
 	rp_zone = nios_dns_zone_rp.test.fqdn
-	view = %q
+	view = nios_dns_view.custom_view.name
 }
-`, name, ipV4Addr, view)
+`, name, ipV4Addr)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone, view), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZone(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }
 
 func testAccBaseWithZone(zoneFqdn, view string) string {
 	if view == "" {
-		view = "default"
+		view = `"default"`
 	}
 	return fmt.Sprintf(`
 resource "nios_dns_zone_rp" "test" {
     fqdn = %q
-	view = %q
+	view = %s
 }
 `, zoneFqdn, view)
+}
+
+func testAccBaseWithView(view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "custom_view" {
+	name = %q
+}
+`, view)
 }
