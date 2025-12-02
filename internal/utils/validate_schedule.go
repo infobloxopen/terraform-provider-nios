@@ -41,16 +41,16 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 		return
 	}
 
-	recurringTime, _ := schedule["recurring_time"]
-	repeat, _ := schedule["repeat"]
-	weekdays, _ := schedule["weekdays"]
-	frequency, _ := schedule["frequency"]
-	every, _ := schedule["every"]
-	minutesPastHour, _ := schedule["minutes_past_hour"]
-	month, _ := schedule["month"]
-	dayOfMonth, _ := schedule["day_of_month"]
-	hourOfDay, _ := schedule["hour_of_day"]
-	year, _ := schedule["year"]
+	recurringTime := schedule["recurring_time"]
+	repeat := schedule["repeat"]
+	weekdays := schedule["weekdays"]
+	frequency := schedule["frequency"]
+	every := schedule["every"]
+	minutesPastHour := schedule["minutes_past_hour"]
+	month := schedule["month"]
+	dayOfMonth := schedule["day_of_month"]
+	hourOfDay := schedule["hour_of_day"]
+	year := schedule["year"]
 
 	schedulePath := basePath.AtName(scheduleAttrName)
 
