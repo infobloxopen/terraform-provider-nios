@@ -22,6 +22,8 @@ var readableAttributesForFiltermac = "comment,default_mac_address_expiration,dis
 var _ resource.Resource = &FiltermacResource{}
 var _ resource.ResourceWithImportState = &FiltermacResource{}
 
+var _ resource.ResourceWithValidateConfig = &FiltermacResource{}
+
 func NewFiltermacResource() resource.Resource {
 	return &FiltermacResource{}
 }
