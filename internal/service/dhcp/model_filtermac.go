@@ -82,7 +82,7 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
-		MarkdownDescription: "Determines if the DHCP Fingerprint object is disabled or not.",
+		MarkdownDescription: "Determines if the DHCP MAC Filter object is disabled or not.",
 	},
 	"enforce_expiration_times": schema.BoolAttribute{
 		Optional:            true,
@@ -102,7 +102,7 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"extattrs_all": schema.MapAttribute{
 		Computed:            true,
-		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
 		PlanModifiers: []planmodifier.Map{
 			importmod.AssociateInternalId(),
