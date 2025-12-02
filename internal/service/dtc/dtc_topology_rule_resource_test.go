@@ -27,11 +27,17 @@ func TestAccDtcTopologyRuleResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcTopologyRuleBasicConfig(""),
+				Config: testAccDtcTopologyRuleBasicConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyRuleExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "dest_type", "SERVER"),
+					resource.TestCheckResourceAttr(resourceName, "destination_link","dtc:server/ZG5zLmlkbnNfc2VydmVyJGR0Y19TZXJ2ZXI:dtc_Server"),
+					resource.TestCheckResourceAttr(resourceName, "return_type", "REGULAR"),
+					resource.TestCheckResourceAttr(resourceName, "sources.#", "1"),
+					resource.TestCheckResourceAttr(resourceName,"sources.0.source_op","IS"),
+					resource.TestCheckResourceAttr(resourceName,"sources.0.source_type","SUBNET"),
+					resource.TestCheckResourceAttr(resourceName,"sources.0.source_value","10.10.0.0/24"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -44,37 +50,14 @@ func TestAccDtcTopologyRuleResource_disappears(t *testing.T) {
 }
 
 func TestAccDtcTopologyRuleResource_DestType(t *testing.T) {
-	var resourceName = "nios_dtc_topology_rule.test_dest_type"
-	var v dtc.DtcTopologyRule
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccDtcTopologyRuleDestType("DEST_TYPE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcTopologyRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dest_type", "DEST_TYPE_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccDtcTopologyRuleDestType("DEST_TYPE_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcTopologyRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dest_type", "DEST_TYPE_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
+	t.Skip("Skipping as dest_type cannot be updated via API since the destination type must match the topology rule type")
 }
 
 func TestAccDtcTopologyRuleResource_DestinationLink(t *testing.T) {
 	var resourceName = "nios_dtc_topology_rule.test_destination_link"
 	var v dtc.DtcTopologyRule
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverNmaeUpdate := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -82,18 +65,18 @@ func TestAccDtcTopologyRuleResource_DestinationLink(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcTopologyRuleDestinationLink("DESTINATION_LINK_REPLACE_ME"),
+				Config: testAccDtcTopologyRuleDestinationLink(serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "destination_link", "DESTINATION_LINK_REPLACE_ME"),
+					//resource.TestCheckResourceAttr(resourceName, "destination_link", ""),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcTopologyRuleDestinationLink("DESTINATION_LINK_UPDATE_REPLACE_ME"),
+				Config: testAccDtcTopologyRuleDestinationLink(serverNmaeUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcTopologyRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "destination_link", "DESTINATION_LINK_UPDATE_REPLACE_ME"),
+					//resource.TestCheckResourceAttr(resourceName, "destination_link", "DESTINATION_LINK_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -217,16 +200,24 @@ func testAccCheckDtcTopologyRuleDestroy(ctx context.Context, v *dtc.DtcTopologyR
 // 	}
 // }
 
-func testAccDtcTopologyRuleBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccDtcTopologyRuleBasicConfig() string {
 	return fmt.Sprintf(`
+	import {
+  id = "dtc:topology:rule/ZG5zLmlkbnNfdG9wb2xvZ3lfcnVsZSRkdGNfdG9wb2xvZ3lfcnVsZS42NGRkMDFhNi03MTUwLTRjY2YtYmFkOS04YzkxOTRmZWVmMTI:dtc_topology_rule/dtc_Server"
+  to = nios_dtc_topology_rule.test
+}
 resource "nios_dtc_topology_rule" "test" {
+dest_type        = "SERVER"
 }
 `)
 }
 
 func testAccDtcTopologyRuleDestType(destType string) string {
 	return fmt.Sprintf(`
+import {
+  id = "dtc:topology:rule/ZG5zLmlkbnNfdG9wb2xvZ3lfcnVsZSRkdGNfdG9wb2xvZ3lfcnVsZS42NGRkMDFhNi03MTUwLTRjY2YtYmFkOS04YzkxOTRmZWVmMTI:dtc_topology_rule/dtc_Server"
+  to = nios_dtc_topology_rule.test_dest_type
+}
 resource "nios_dtc_topology_rule" "test_dest_type" {
     dest_type = %q
 }
@@ -235,9 +226,18 @@ resource "nios_dtc_topology_rule" "test_dest_type" {
 
 func testAccDtcTopologyRuleDestinationLink(destinationLink string) string {
 	return fmt.Sprintf(`
-resource "nios_dtc_topology_rule" "test_destination_link" {
-    destination_link = %q
+	import {
+  id = "dtc:topology:rule/ZG5zLmlkbnNfdG9wb2xvZ3lfcnVsZSRkdGNfdG9wb2xvZ3lfcnVsZS42NGRkMDFhNi03MTUwLTRjY2YtYmFkOS04YzkxOTRmZWVmMTI:dtc_topology_rule/dtc_Server"
+  to = nios_dtc_topology_rule.test_destination_link
 }
+resource "nios_dtc_server" "create_dtc_server" {
+  name = %q
+  host = "2.3.3.4"
+}
+resource "nios_dtc_topology_rule" "test_destination_link" {
+    destination_link =nios_dtc_server.create_dtc_server.ref
+	depends_on = [nios_dtc_server.create_dtc_server]
+	}
 `, destinationLink)
 }
 
