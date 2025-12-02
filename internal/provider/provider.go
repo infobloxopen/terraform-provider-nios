@@ -148,7 +148,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewFixedaddresstemplateResource,
 		dhcp.NewIpv6sharednetworkResource,
 		dhcp.NewIpv6rangeResource,
-    dhcp.NewFiltermacResource,
+		dhcp.NewFiltermacResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
