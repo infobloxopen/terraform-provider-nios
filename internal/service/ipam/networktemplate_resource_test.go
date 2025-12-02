@@ -16,6 +16,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+//TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// - Filters - mac_filter(MAC) , option_filter(Option)
+// - Members - infoblox.localdomain , infoblox.member
+
 var readableAttributesForNetworktemplate = "allow_any_netmask,authority,auto_create_reversezone,bootfile,bootserver,cloud_api_compatible,comment,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,delegated_member,deny_bootp,email_list,enable_ddns,enable_dhcp_thresholds,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,extattrs,fixed_address_templates,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ipam_email_addresses,ipam_threshold_settings,ipam_trap_settings,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,members,name,netmask,nextserver,options,pxe_lease_time,range_templates,recycle_leases,rir,rir_organization,rir_registration_action,rir_registration_status,send_rir_request,update_dns_on_lease_renewal,use_authority,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_ignore_dhcp_option_list_request,use_ipam_email_addresses,use_ipam_threshold_settings,use_ipam_trap_settings,use_lease_scavenge_time,use_logic_filter_rules,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_update_dns_on_lease_renewal"
 
 func TestAccNetworktemplateResource_basic(t *testing.T) {
@@ -836,11 +840,10 @@ func TestAccNetworktemplateResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccNetworktemplateResource_FixedAddressTemplates(t *testing.T) {
+	t.Skip("FA Template cannot be cloud compatible. Skipping test for cloud users as we use a EA with cloud compatible enabled.")
 	var resourceName = "nios_ipam_networktemplate.test_fixed_address_templates"
 	var v ipam.Networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
-	fixedAddressTemplatesVal := []string{"FIXED_ADDRESS_TEMPLATES_REPLACE_ME1", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME2"}
-	fixedAddressTemplatesValUpdated := []string{"FIXED_ADDRESS_TEMPLATES_REPLACE_ME1", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME2"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -848,18 +851,18 @@ func TestAccNetworktemplateResource_FixedAddressTemplates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateFixedAddressTemplates(name, 24, fixedAddressTemplatesVal),
+				Config: testAccNetworktemplateFixedAddressTemplates(name, 24, "one"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fixed_address_templates", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "fixed_address_templates.0", "nios_dhcp_fixedaddresstemplate.one", "name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateFixedAddressTemplates(name, 24, fixedAddressTemplatesValUpdated),
+				Config: testAccNetworktemplateFixedAddressTemplates(name, 24, "two"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fixed_address_templates", "FIXED_ADDRESS_TEMPLATES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "fixed_address_templates.0", "nios_dhcp_fixedaddresstemplate.two", "name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1095,19 +1098,20 @@ func TestAccNetworktemplateResource_LeaseScavengeTime(t *testing.T) {
 		},
 	})
 }
+
 func TestAccNetworktemplateResource_LogicFilterRules(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_logic_filter_rules"
 	var v ipam.Networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
 	logicFilterRulesVal := []map[string]any{
 		{
-			"filter": "ipv6_option_filter",
-			"type":   "Option",
+			"filter": "mac_filter",
+			"type":   "MAC",
 		},
 	}
 	logicFilterRulesValUpdated := []map[string]any{
 		{
-			"filter": "ipv6_option_filter1",
+			"filter": "option_filter",
 			"type":   "Option",
 		},
 	}
@@ -1121,8 +1125,8 @@ func TestAccNetworktemplateResource_LogicFilterRules(t *testing.T) {
 				Config: testAccNetworktemplateLogicFilterRules(name, 24, logicFilterRulesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.filter", "ipv6_option_filter"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.type", "Option"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "mac_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "MAC"),
 				),
 			},
 			// Update and Read
@@ -1130,8 +1134,8 @@ func TestAccNetworktemplateResource_LogicFilterRules(t *testing.T) {
 				Config: testAccNetworktemplateLogicFilterRules(name, 24, logicFilterRulesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.filter", "ipv6_option_filter1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.type", "Option"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2387,17 +2391,33 @@ func testAccNetworktemplateImportStateIdFunc(resourceName string) resource.Impor
 func testAccBaseWithRangeTemplates(template1, template2 string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range_template" "one" {
-	name = %q
-	number_of_addresses = 100
-	offset = 50
+    name = %q
+    number_of_addresses = 100
+    offset = 50
     cloud_api_compatible = true
 }
 
 resource "nios_dhcp_range_template" "two" {
-	name = %q
-	number_of_addresses = 100
-	offset = 50
+    name = %q
+    number_of_addresses = 100
+    offset = 50
     cloud_api_compatible = true
+}
+`, template1, template2)
+}
+
+func testAccBaseWithFixedAddressTemplates(template1, template2 string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixedaddresstemplate" "one" {
+    name = %q
+    number_of_addresses = 100
+    offset = 50
+}
+
+resource "nios_dhcp_fixedaddresstemplate" "two" {
+    name = %q
+    number_of_addresses = 100
+    offset = 50
 }
 `, template1, template2)
 }
@@ -2659,15 +2679,16 @@ resource "nios_ipam_networktemplate" "test_extattrs" {
 `, name, netmask, extAttrsStr)
 }
 
-func testAccNetworktemplateFixedAddressTemplates(name string, netmask int, fixedAddressTemplates []string) string {
-	fixedAddressTemplatesStr := utils.ConvertStringSliceToHCL(fixedAddressTemplates)
-	return fmt.Sprintf(`
+func testAccNetworktemplateFixedAddressTemplates(name string, netmask int, fixedAddressTemplate string) string {
+	config := fmt.Sprintf(`
 resource "nios_ipam_networktemplate" "test_fixed_address_templates" {
     name = %q
     netmask = %d
-    fixed_address_templates = %s
+    fixed_address_templates = [nios_dhcp_fixedaddresstemplate.%s.name]
+    cloud_api_compatible = false
 }
-`, name, netmask, fixedAddressTemplatesStr)
+`, name, netmask, fixedAddressTemplate)
+	return strings.Join([]string{testAccBaseWithFixedAddressTemplates(acctest.RandomName(), acctest.RandomName()), config}, "")
 }
 
 func testAccNetworktemplateHighWaterMark(name string, netmask int, highWaterMark int) string {
@@ -2871,7 +2892,7 @@ resource "nios_ipam_networktemplate" "test_rir_organization" {
     name = %q
     netmask = %d
     rir_organization = %q
-	cloud_api_compatible = false
+    cloud_api_compatible = false
 }
 `, name, netmask, rirOrganization)
 }
