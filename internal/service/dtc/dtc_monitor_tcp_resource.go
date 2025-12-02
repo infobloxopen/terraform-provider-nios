@@ -1,4 +1,4 @@
-package rpz
+package dtc
 
 import (
 	"context"
@@ -15,33 +15,33 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForRecordRpzA = "comment,disable,extattrs,ipv4addr,name,rp_zone,ttl,use_ttl,view,zone"
+var readableAttributesForDtcMonitorTcp = "comment,extattrs,interval,name,port,retry_down,retry_up,timeout"
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &RecordRpzAResource{}
-var _ resource.ResourceWithImportState = &RecordRpzAResource{}
+var _ resource.Resource = &DtcMonitorTcpResource{}
+var _ resource.ResourceWithImportState = &DtcMonitorTcpResource{}
 
-func NewRecordRpzAResource() resource.Resource {
-	return &RecordRpzAResource{}
+func NewDtcMonitorTcpResource() resource.Resource {
+	return &DtcMonitorTcpResource{}
 }
 
-// RecordRpzAResource defines the resource implementation.
-type RecordRpzAResource struct {
+// DtcMonitorTcpResource defines the resource implementation.
+type DtcMonitorTcpResource struct {
 	client *niosclient.APIClient
 }
 
-func (r *RecordRpzAResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_a"
+func (r *DtcMonitorTcpResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "dtc_monitor_tcp"
 }
 
-func (r *RecordRpzAResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *DtcMonitorTcpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an RPZ A record.",
-		Attributes:          RecordRpzAResourceSchemaAttributes,
+		MarkdownDescription: "Manages a DTC TCP Monitor.",
+		Attributes:          DtcMonitorTcpResourceSchemaAttributes,
 	}
 }
 
-func (r *RecordRpzAResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *DtcMonitorTcpResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -61,9 +61,9 @@ func (r *RecordRpzAResource) Configure(ctx context.Context, req resource.Configu
 	r.client = client
 }
 
-func (r *RecordRpzAResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *DtcMonitorTcpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
-	var data RecordRpzAModel
+	var data DtcMonitorTcpModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -75,26 +75,25 @@ func (r *RecordRpzAResource) Create(ctx context.Context, req resource.CreateRequ
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	apiRes, _, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+	apiRes, _, err := r.client.DTCAPI.
+		DtcMonitorTcpAPI.
 		Create(ctx).
-		RecordRpzA(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForRecordRpzA).
+		DtcMonitorTcp(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForDtcMonitorTcp).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordRpzA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create DtcMonitorTcp, got error: %s", err))
 		return
 	}
 
-	res := apiRes.CreateRecordRpzAResponseAsObject.GetResult()
+	res := apiRes.CreateDtcMonitorTcpResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordRpzA due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create DtcMonitorTcp due inherited Extensible attributes, got error: %s", err))
 		return
 	}
 
@@ -104,9 +103,9 @@ func (r *RecordRpzAResource) Create(ctx context.Context, req resource.CreateRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *DtcMonitorTcpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var diags diag.Diagnostics
-	var data RecordRpzAModel
+	var data DtcMonitorTcpModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -121,10 +120,10 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	apiRes, httpRes, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+	apiRes, httpRes, err := r.client.DTCAPI.
+		DtcMonitorTcpAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForRecordRpzA).
+		ReturnFieldsPlus(readableAttributesForDtcMonitorTcp).
 		ReturnAsObject(1).
 		Execute()
 
@@ -133,11 +132,11 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcMonitorTcp, got error: %s", err))
 		return
 	}
 
-	res := apiRes.GetRecordRpzAResponseObjectAsResult.GetResult()
+	res := apiRes.GetDtcMonitorTcpResponseObjectAsResult.GetResult()
 
 	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
@@ -149,7 +148,7 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 		if stateExtAttrs == nil {
 			resp.Diagnostics.AddError(
 				"Missing Internal ID",
-				"Unable to read RecordRpzA because the internal ID (from extattrs_all) is missing or invalid.",
+				"Unable to read DtcMonitorTcp because the internal ID (from extattrs_all) is missing or invalid.",
 			)
 			return
 		}
@@ -164,7 +163,7 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordRpzA due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading DtcMonitorTcp due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -174,7 +173,7 @@ func (r *RecordRpzAResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *RecordRpzAResource) ReadByExtAttrs(ctx context.Context, data *RecordRpzAModel, resp *resource.ReadResponse) bool {
+func (r *DtcMonitorTcpResource) ReadByExtAttrs(ctx context.Context, data *DtcMonitorTcpModel, resp *resource.ReadResponse) bool {
 	var diags diag.Diagnostics
 
 	if data.ExtAttrsAll.IsNull() {
@@ -195,19 +194,19 @@ func (r *RecordRpzAResource) ReadByExtAttrs(ctx context.Context, data *RecordRpz
 		terraformInternalIDEA: internalId,
 	}
 
-	apiRes, _, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+	apiRes, _, err := r.client.DTCAPI.
+		DtcMonitorTcpAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForRecordRpzA).
+		ReturnFieldsPlus(readableAttributesForDtcMonitorTcp).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzA by extattrs, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcMonitorTcp by extattrs, got error: %s", err))
 		return true
 	}
 
-	results := apiRes.ListRecordRpzAResponseObject.GetResult()
+	results := apiRes.ListDtcMonitorTcpResponseObject.GetResult()
 
 	// If the list is empty, the resource no longer exists so remove it from state
 	if len(results) == 0 {
@@ -229,9 +228,9 @@ func (r *RecordRpzAResource) ReadByExtAttrs(ctx context.Context, data *RecordRpz
 	return true
 }
 
-func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *DtcMonitorTcpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
-	var data RecordRpzAModel
+	var data DtcMonitorTcpModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -261,7 +260,6 @@ func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequ
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -273,23 +271,23 @@ func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	apiRes, _, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+	apiRes, _, err := r.client.DTCAPI.
+		DtcMonitorTcpAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzA(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForRecordRpzA).
+		DtcMonitorTcp(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForDtcMonitorTcp).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordRpzA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update DtcMonitorTcp, got error: %s", err))
 		return
 	}
 
-	res := apiRes.UpdateRecordRpzAResponseAsObject.GetResult()
+	res := apiRes.UpdateDtcMonitorTcpResponseAsObject.GetResult()
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordRpzA due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update DtcMonitorTcp due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -302,8 +300,8 @@ func (r *RecordRpzAResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 }
 
-func (r *RecordRpzAResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data RecordRpzAModel
+func (r *DtcMonitorTcpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data DtcMonitorTcpModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -312,20 +310,20 @@ func (r *RecordRpzAResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	httpRes, err := r.client.RPZAPI.
-		RecordRpzAAPI.
+	httpRes, err := r.client.DTCAPI.
+		DtcMonitorTcpAPI.
 		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordRpzA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete DtcMonitorTcp, got error: %s", err))
 		return
 	}
 }
 
-func (r *RecordRpzAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *DtcMonitorTcpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
