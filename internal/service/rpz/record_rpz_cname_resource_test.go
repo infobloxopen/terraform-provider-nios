@@ -76,7 +76,9 @@ func TestAccRecordRpzCnameResource_Canonical(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname.test_canonical"
 	var v rpz.RecordRpzCname
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomName() + "." + rpZone
+	baseName := acctest.RandomName()
+	name := baseName + "." + rpZone
+	canonical := acctest.RandomNameWithPrefix("test-canonical")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -90,12 +92,28 @@ func TestAccRecordRpzCnameResource_Canonical(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "canonical", ""),
 				),
 			},
-			// Update and Read
+			// Update to No Data rule
 			{
 				Config: testAccRecordRpzCnameCanonical(name, "*", rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "canonical", "*"),
+				),
+			},
+			// update to Passthru Domain Name Rule
+			{
+				Config: testAccRecordRpzCnameCanonical(name, baseName, rpZone),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordRpzCnameExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "canonical", baseName),
+				),
+			},
+			// update to Substitution rule
+			{
+				Config: testAccRecordRpzCnameCanonical(name, canonical, rpZone),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordRpzCnameExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "canonical", canonical),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -336,7 +354,7 @@ func TestAccRecordRpzCnameResource_View(t *testing.T) {
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	name := acctest.RandomName() + "." + rpZone
 	canonical := ""
-	view := "custom_view"
+	view := acctest.RandomNameWithPrefix("test-view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -533,18 +551,20 @@ resource "nios_rpz_record_cname" "test_use_ttl" {
 	ttl = %d
 	use_ttl = %q
 }
-`, useTtl)
+`, name, canonical, ttl, useTtl)
 
 	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameView(name, canonical, rpZone, view string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname" "test_view" {
 	name = %q
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test.fqdn
-    view = %q
+    view = nios_dns_view.custom_view.name
 }
-`, name, canonical, rpZone, view)
+`, name, canonical)
+
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZone(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }
