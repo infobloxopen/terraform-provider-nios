@@ -3,12 +3,12 @@
 page_title: "nios_ipam_networktemplate Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Manages a Networktemplate resource object.
+  Manages a Network Template.
 ---
 
 # nios_ipam_networktemplate (Resource)
 
-Manages a Networktemplate resource object.
+Manages a Network Template.
 
 ## Example Usage
 
