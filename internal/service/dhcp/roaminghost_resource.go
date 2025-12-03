@@ -75,13 +75,14 @@ func (r *RoaminghostResource) Create(ctx context.Context, req resource.CreateReq
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
 	apiRes, _, err := r.client.DHCPAPI.
 		RoaminghostAPI.
 		Create(ctx).
-		Roaminghost(*data.Expand(ctx, &resp.Diagnostics)).
+		Roaminghost(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForRoaminghost).
 		ReturnAsObject(1).
 		Execute()
@@ -93,7 +94,8 @@ func (r *RoaminghostResource) Create(ctx context.Context, req resource.CreateReq
 	res := apiRes.CreateRoaminghostResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Roaminghost due to inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating Roaminghost due to inherited Extensible attributes")
 		return
 	}
 
@@ -163,7 +165,8 @@ func (r *RoaminghostResource) Read(ctx context.Context, req resource.ReadRequest
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Roaminghost due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading Roaminghost due to inherited Extensible attributes")
 		return
 	}
 
@@ -219,6 +222,7 @@ func (r *RoaminghostResource) ReadByExtAttrs(ctx context.Context, data *Roamingh
 	// Remove inherited external attributes from extattrs
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return true
 	}
 
@@ -253,13 +257,14 @@ func (r *RoaminghostResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -274,7 +279,7 @@ func (r *RoaminghostResource) Update(ctx context.Context, req resource.UpdateReq
 	apiRes, _, err := r.client.DHCPAPI.
 		RoaminghostAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Roaminghost(*data.Expand(ctx, &resp.Diagnostics)).
+		Roaminghost(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRoaminghost).
 		ReturnAsObject(1).
 		Execute()
@@ -287,7 +292,8 @@ func (r *RoaminghostResource) Update(ctx context.Context, req resource.UpdateReq
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating Roaminghost due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating Roaminghost due to inherited Extensible attributes")
 		return
 	}
 

@@ -56,6 +56,7 @@ func TestAccRoaminghostDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_roaminghost.test"
 	resourceName := "nios_dhcp_roaminghost.test"
 	var v dhcp.Roaminghost
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
