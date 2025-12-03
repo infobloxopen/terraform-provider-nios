@@ -124,7 +124,7 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 	// Update it with desired plan
 	apiRes, _, err := r.client.GridAPI.
 		DistributionscheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
+		Update(ctx, data.Uuid.ValueString())).
 		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
 		ReturnAsObject(1).
@@ -152,7 +152,7 @@ func (r *DistributionscheduleResource) Read(ctx context.Context, req resource.Re
 
 	apiRes, httpRes, err := r.client.GridAPI.
 		DistributionscheduleAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
 		ReturnAsObject(1).
 		Execute()
@@ -189,7 +189,7 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -197,7 +197,7 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 
 	apiRes, _, err := r.client.GridAPI.
 		DistributionscheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
 		ReturnAsObject(1).

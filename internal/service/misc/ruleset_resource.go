@@ -103,7 +103,7 @@ func (r *RulesetResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	apiRes, httpRes, err := r.client.MiscAPI.
 		RulesetAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRuleset).
 		ReturnAsObject(1).
 		Execute()
@@ -138,7 +138,7 @@ func (r *RulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -146,7 +146,7 @@ func (r *RulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	apiRes, _, err := r.client.MiscAPI.
 		RulesetAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ruleset(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRuleset).
 		ReturnAsObject(1).
@@ -176,7 +176,7 @@ func (r *RulesetResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	httpRes, err := r.client.MiscAPI.
 		RulesetAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

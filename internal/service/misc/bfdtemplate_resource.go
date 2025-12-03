@@ -103,7 +103,7 @@ func (r *BfdtemplateResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.MiscAPI.
 		BfdtemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForBfdtemplate).
 		ReturnAsObject(1).
 		Execute()
@@ -138,7 +138,7 @@ func (r *BfdtemplateResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -146,7 +146,7 @@ func (r *BfdtemplateResource) Update(ctx context.Context, req resource.UpdateReq
 
 	apiRes, _, err := r.client.MiscAPI.
 		BfdtemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Bfdtemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForBfdtemplate).
 		ReturnAsObject(1).
@@ -176,7 +176,7 @@ func (r *BfdtemplateResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.MiscAPI.
 		BfdtemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
