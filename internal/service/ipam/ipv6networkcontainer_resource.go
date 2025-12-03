@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -418,16 +419,6 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 				continue
 			}
 
-			// dhcp-lease-time (or num = 51) cannot be used with valid_lifetime
-			if optionName == "dhcp-lease-time" || optionName == "with num = 51" {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("options"),
-					"Invalid configuration for DHCP Option",
-					"The Custom option 'dhcp-lease-time' cannot be set for Ipv6 Network Container. "+
-						"Remove the 'dhcp-lease-time' option and set 'valid_lifetime' instead.",
-				)
-			}
-
 			if option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
@@ -453,6 +444,21 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
 						optionName),
 				)
+			}
+		}
+		// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+			for i, option := range options {
+				if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+					if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+						option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("options").AtListIndex(i).AtName("value"),
+							"Invalid configuration for Valid Lifetime",
+							"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+						)
+					}
+				}
 			}
 		}
 	}
