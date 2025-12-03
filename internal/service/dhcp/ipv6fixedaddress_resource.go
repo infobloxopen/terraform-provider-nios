@@ -550,7 +550,7 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 			resp.Diagnostics.AddAttributeError(
 				path.Root("allow_telnet"),
 				"Invalid configuration",
-				"The 'allow_telnet' attribute must be set to false when 'cli_credentials' is not set or does not contain any credentials with 'credentials_type' set to 'TELNET'.",
+				"The 'allow_telnet' attribute must be set to false when 'cli_credentials' does not contain any credentials with 'credentials_type' set to 'TELNET'.",
 			)
 		}
 	}
