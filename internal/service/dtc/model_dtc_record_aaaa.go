@@ -3,15 +3,19 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcRecordAaaaModel struct {
@@ -46,19 +50,27 @@ var DtcRecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Flag that indicates whether this record was automatically created by NIOS.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "Comment for the record; maximum 256 characters.",
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the record is disabled or not. False means that the record is enabled.",
 	},
 	"dtc_server": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The name of the DTC Server object with which the DTC record is associated.",
 	},
 	"ipv6addr": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The IPv6 Address of the domain name.",
 	},
 	"ttl": schema.Int64Attribute{
@@ -69,18 +81,6 @@ var DtcRecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use flag for: ttl",
 	},
-}
-
-func ExpandDtcRecordAaaa(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dtc.DtcRecordAaaa {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m DtcRecordAaaaModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *DtcRecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcRecordAaaa {
