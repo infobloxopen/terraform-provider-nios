@@ -203,6 +203,12 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	// Save original IPv4 function call attributes
 	savedIPv4FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv4addrs)
 
@@ -211,7 +217,7 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
@@ -233,18 +239,20 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read RecordHost because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
 
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
+	if associateInternalId == nil {
+		if stateExtAttrs == nil {
+			resp.Diagnostics.AddError(
+				"Missing Internal ID",
+				"Unable to read RecordHost because the internal ID (from extattrs_all) is missing or invalid.",
+			)
 			return
+		}
+		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
+		if apiTerraformId.Value != stateTerraformId.Value {
+			if r.ReadByExtAttrs(ctx, &data, resp) {
+				return
+			}
 		}
 	}
 
@@ -337,7 +345,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -355,6 +363,18 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+	if associateInternalId != nil {
+		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+		if diags.HasError() {
+			return
+		}
+	}
+
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
 	if diags.HasError() {
@@ -365,7 +385,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	// Read current state from backend to preserve DHCP settings
 	currentApiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
@@ -404,7 +424,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordHost(*updateReq).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
@@ -426,6 +446,10 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	if associateInternalId != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
+	}
 }
 
 func preserveDHCPSettings(updateReq *dns.RecordHost, currentHost *dns.RecordHost) {
@@ -480,7 +504,7 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -498,7 +522,7 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 			// Attempt delete using the foundRef
 			httpResDel, errDel := r.client.DNSAPI.
 				RecordHostAPI.
-				Delete(ctx, utils.ExtractResourceRef(foundRef)).
+				Delete(ctx, data.Uuid.ValueString()).
 				Execute()
 			if errDel != nil {
 				if httpResDel != nil && httpResDel.StatusCode == http.StatusNotFound {
@@ -515,43 +539,8 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 }
 
 func (r *IPAllocationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data IPAllocationModel
-	var goClientData dns.RecordHost
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Update(ctx, resourceRef).
-		RecordHost(goClientData).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update RecordHost for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateRecordHostResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordHost due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs_all"), data.ExtAttrsAll)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("extattrs"), data.ExtAttrs)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
 func (r *IPAllocationResource) findHostByInternalID(ctx context.Context, data *IPAllocationModel) (*dns.RecordHost, string, *http.Response, error) {

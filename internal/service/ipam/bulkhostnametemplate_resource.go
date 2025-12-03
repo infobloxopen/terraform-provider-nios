@@ -103,7 +103,7 @@ func (r *BulkhostnametemplateResource) Read(ctx context.Context, req resource.Re
 
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		BulkhostnametemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForBulkhostnametemplate).
 		ReturnAsObject(1).
 		Execute()
@@ -138,7 +138,7 @@ func (r *BulkhostnametemplateResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -146,7 +146,7 @@ func (r *BulkhostnametemplateResource) Update(ctx context.Context, req resource.
 
 	apiRes, _, err := r.client.IPAMAPI.
 		BulkhostnametemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Bulkhostnametemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForBulkhostnametemplate).
 		ReturnAsObject(1).
@@ -176,7 +176,7 @@ func (r *BulkhostnametemplateResource) Delete(ctx context.Context, req resource.
 
 	httpRes, err := r.client.IPAMAPI.
 		BulkhostnametemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

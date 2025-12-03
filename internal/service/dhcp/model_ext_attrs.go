@@ -83,18 +83,18 @@ func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[
 
 func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dhcp.ExtAttrs) (*map[string]dhcp.ExtAttrs, types.Map, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	var planMap map[string]dhcp.ExtAttrs
 	extAttrsRespMap := make(map[string]dhcp.ExtAttrs, len(planExtAttrs.Elements()))
 	extAttrsAllRespMap := make(map[string]dhcp.ExtAttrs)
 	var extAttrAll types.Map
 
 	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
-		extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &respExtAttrs, &diags)
-		return nil, extAttrAll, nil
-	}
-
-	planMap := *ExpandExtAttrs(ctx, planExtAttrs, &diags)
-	if diags.HasError() {
-		return nil, extAttrAll, diags
+		planMap = make(map[string]dhcp.ExtAttrs)
+	} else {
+		planMap = *ExpandExtAttrs(ctx, planExtAttrs, &diags)
+		if diags.HasError() {
+			return nil, extAttrAll, diags
+		}
 	}
 
 	for k, v := range respExtAttrs {
