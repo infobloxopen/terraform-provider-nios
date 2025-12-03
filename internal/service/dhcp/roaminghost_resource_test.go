@@ -91,68 +91,34 @@ func TestAccRoaminghostResource_basic(t *testing.T) {
 	})
 }
 
-// func TestAccRoaminghostResource_disappears(t *testing.T) {
-// 	resourceName := "nios_dhcp_roaminghost.test"
-// 	var v dhcp.Roaminghost
-
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckRoaminghostDestroy(context.Background(), &v),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccRoaminghostBasicConfig("NAME_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-// 					testAccCheckRoaminghostDisappears(context.Background(), &v),
-// 				),
-// 				ExpectNonEmptyPlan: true,
-// 			},
-// 		},
-// 	})
-// }
-
-// func TestAccRoaminghostResource_Import(t *testing.T) {
-// 	var resourceName = "nios_dhcp_roaminghost.test"
-// 	var v dhcp.Roaminghost
-
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccRoaminghostBasicConfig("NAME_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-// 				),
-// 			},
-// 			// Import with PlanOnly to detect differences
-// 			{
-// 				ResourceName:                         resourceName,
-// 				ImportState:                          true,
-// 				ImportStateIdFunc:                    testAccRoaminghostImportStateIdFunc(resourceName),
-// 				ImportStateVerify:                    true,
-// 				ImportStateVerifyIdentifierAttribute: "ref",
-// 				PlanOnly:                             true,
-// 			},
-// 			// Import and Verify
-// 			{
-// 				ResourceName:                         resourceName,
-// 				ImportState:                          true,
-// 				ImportStateIdFunc:                    testAccRoaminghostImportStateIdFunc(resourceName),
-// 				ImportStateVerify:                    true,
-// 				ImportStateVerifyIgnore:              []string{"extattrs_all"},
-// 				ImportStateVerifyIdentifierAttribute: "ref",
-// 			},
-// 			// Delete testing automatically occurs in TestCase
-// 		},
-// 	})
-// }
-
-func TestAccRoaminghostResource_AddressType(t *testing.T) {
-	var resourceName = "nios_dhcp_roaminghost.test_address_type"
+func TestAccRoaminghostResource_disappears(t *testing.T) {
+	resourceName := "nios_dhcp_roaminghost.test"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckRoaminghostDestroy(context.Background(), &v),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRoaminghostBasicConfig(name, mac, "IPV4", "MAC_ADDRESS"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
+					testAccCheckRoaminghostDisappears(context.Background(), &v),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestAccRoaminghostResource_Import(t *testing.T) {
+	var resourceName = "nios_dhcp_roaminghost.test"
+	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -160,21 +126,61 @@ func TestAccRoaminghostResource_AddressType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostAddressType("ADDRESS_TYPE_REPLACE_ME", "BOTH"),
+				Config: testAccRoaminghostBasicConfig(name, mac, "IPV4", "MAC_ADDRESS"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Import with PlanOnly to detect differences
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateIdFunc:                    testAccRoaminghostImportStateIdFunc(resourceName),
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "ref",
+				PlanOnly:                             true,
+			},
+			// Import and Verify
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateIdFunc:                    testAccRoaminghostImportStateIdFunc(resourceName),
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              []string{"extattrs_all"},
+				ImportStateVerifyIdentifierAttribute: "ref",
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccRoaminghostResource_AddressType(t *testing.T) {
+	var resourceName = "nios_dhcp_roaminghost.test_address_type"
+	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRoaminghostAddressType(name, mac, "IPV4", "MAC_ADDRESS", "BOTH"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "address_type", "BOTH"),
 				),
 			},
 			{
-				Config: testAccRoaminghostAddressType("ADDRESS_TYPE_REPLACE_ME", "IPV4"),
+				Config: testAccRoaminghostAddressType(name, mac, "IPV4", "MAC_ADDRESS", "IPV4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "address_type", "IPV4"),
 				),
 			},
 			{
-				Config: testAccRoaminghostAddressType("ADDRESS_TYPE_REPLACE_ME", "IPV6"),
+				Config: testAccRoaminghostAddressType(name, mac, "IPV4", "MAC_ADDRESS", "IPV6"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "address_type", "IPV6"),
@@ -187,6 +193,8 @@ func TestAccRoaminghostResource_AddressType(t *testing.T) {
 func TestAccRoaminghostResource_Bootfile(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_bootfile"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -194,7 +202,7 @@ func TestAccRoaminghostResource_Bootfile(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostBootfile("NAME_REPLACE_ME", "BOOTFILE_REPLACE_ME"),
+				Config: testAccRoaminghostBootfile(name, mac, "IPV4", "MAC_ADDRESS", "BOOTFILE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "bootfile", "BOOTFILE_REPLACE_ME"),
@@ -202,7 +210,7 @@ func TestAccRoaminghostResource_Bootfile(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostBootfile("NAME_REPLACE_ME", "BOOTFILE_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostBootfile(name, mac, "IPV4", "MAC_ADDRESS", "BOOTFILE_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "bootfile", "BOOTFILE_UPDATE_REPLACE_ME"),
@@ -216,6 +224,8 @@ func TestAccRoaminghostResource_Bootfile(t *testing.T) {
 func TestAccRoaminghostResource_Bootserver(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_bootserver"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -223,7 +233,7 @@ func TestAccRoaminghostResource_Bootserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostBootserver("NAME_REPLACE_ME", "BOOTSERVER_REPLACE_ME"),
+				Config: testAccRoaminghostBootserver(name, mac, "IPV4", "MAC_ADDRESS", "BOOTSERVER_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "bootserver", "BOOTSERVER_REPLACE_ME"),
@@ -231,7 +241,7 @@ func TestAccRoaminghostResource_Bootserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostBootserver("NAME_REPLACE_ME", "BOOTSERVER_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostBootserver(name, mac, "IPV4", "MAC_ADDRESS", "BOOTSERVER_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "bootserver", "BOOTSERVER_UPDATE_REPLACE_ME"),
@@ -245,6 +255,8 @@ func TestAccRoaminghostResource_Bootserver(t *testing.T) {
 func TestAccRoaminghostResource_ClientIdentifierPrependZero(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_client_identifier_prepend_zero"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -252,7 +264,7 @@ func TestAccRoaminghostResource_ClientIdentifierPrependZero(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostClientIdentifierPrependZero("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostClientIdentifierPrependZero(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "client_identifier_prepend_zero", "true"),
@@ -260,7 +272,7 @@ func TestAccRoaminghostResource_ClientIdentifierPrependZero(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostClientIdentifierPrependZero("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostClientIdentifierPrependZero(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "client_identifier_prepend_zero", "false"),
@@ -274,6 +286,8 @@ func TestAccRoaminghostResource_ClientIdentifierPrependZero(t *testing.T) {
 func TestAccRoaminghostResource_Comment(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_comment"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -281,7 +295,7 @@ func TestAccRoaminghostResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostComment("NAME_REPLACE_ME", "Comment for the object"),
+				Config: testAccRoaminghostComment(name, mac, "IPV4", "MAC_ADDRESS", "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -289,7 +303,7 @@ func TestAccRoaminghostResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostComment("NAME_REPLACE_ME", "Updated comment for the object"),
+				Config: testAccRoaminghostComment(name, mac, "IPV4", "MAC_ADDRESS", "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -303,6 +317,8 @@ func TestAccRoaminghostResource_Comment(t *testing.T) {
 func TestAccRoaminghostResource_DdnsDomainname(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ddns_domainname"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -310,7 +326,7 @@ func TestAccRoaminghostResource_DdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostDdnsDomainname("NAME_REPLACE_ME", "DDNS_DOMAINNAME_REPLACE_ME"),
+				Config: testAccRoaminghostDdnsDomainname(name, mac, "IPV4", "MAC_ADDRESS", "DDNS_DOMAINNAME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_REPLACE_ME"),
@@ -318,7 +334,7 @@ func TestAccRoaminghostResource_DdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostDdnsDomainname("NAME_REPLACE_ME", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostDdnsDomainname(name, mac, "IPV4", "MAC_ADDRESS", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
@@ -332,6 +348,8 @@ func TestAccRoaminghostResource_DdnsDomainname(t *testing.T) {
 func TestAccRoaminghostResource_DdnsHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ddns_hostname"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -339,7 +357,7 @@ func TestAccRoaminghostResource_DdnsHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostDdnsHostname("NAME_REPLACE_ME", "DDNS_HOSTNAME_REPLACE_ME"),
+				Config: testAccRoaminghostDdnsHostname(name, mac, "IPV4", "MAC_ADDRESS", "DDNS_HOSTNAME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_hostname", "DDNS_HOSTNAME_REPLACE_ME"),
@@ -347,7 +365,7 @@ func TestAccRoaminghostResource_DdnsHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostDdnsHostname("NAME_REPLACE_ME", "DDNS_HOSTNAME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostDdnsHostname(name, mac, "IPV4", "MAC_ADDRESS", "DDNS_HOSTNAME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_hostname", "DDNS_HOSTNAME_UPDATE_REPLACE_ME"),
@@ -361,6 +379,8 @@ func TestAccRoaminghostResource_DdnsHostname(t *testing.T) {
 func TestAccRoaminghostResource_DenyBootp(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_deny_bootp"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -368,7 +388,7 @@ func TestAccRoaminghostResource_DenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostDenyBootp("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostDenyBootp(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "true"),
@@ -376,7 +396,7 @@ func TestAccRoaminghostResource_DenyBootp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostDenyBootp("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostDenyBootp(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "deny_bootp", "false"),
@@ -390,6 +410,8 @@ func TestAccRoaminghostResource_DenyBootp(t *testing.T) {
 func TestAccRoaminghostResource_DhcpClientIdentifier(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_dhcp_client_identifier"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -397,7 +419,7 @@ func TestAccRoaminghostResource_DhcpClientIdentifier(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostDhcpClientIdentifier("NAME_REPLACE_ME", "DHCP_CLIENT_IDENTIFIER_REPLACE_ME"),
+				Config: testAccRoaminghostDhcpClientIdentifier(name, mac, "IPV4", "MAC_ADDRESS", "DHCP_CLIENT_IDENTIFIER_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dhcp_client_identifier", "DHCP_CLIENT_IDENTIFIER_REPLACE_ME"),
@@ -405,7 +427,7 @@ func TestAccRoaminghostResource_DhcpClientIdentifier(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostDhcpClientIdentifier("NAME_REPLACE_ME", "DHCP_CLIENT_IDENTIFIER_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostDhcpClientIdentifier(name, mac, "IPV4", "MAC_ADDRESS", "DHCP_CLIENT_IDENTIFIER_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dhcp_client_identifier", "DHCP_CLIENT_IDENTIFIER_UPDATE_REPLACE_ME"),
@@ -419,6 +441,8 @@ func TestAccRoaminghostResource_DhcpClientIdentifier(t *testing.T) {
 func TestAccRoaminghostResource_Disable(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_disable"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -426,7 +450,7 @@ func TestAccRoaminghostResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostDisable("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostDisable(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -434,7 +458,7 @@ func TestAccRoaminghostResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostDisable("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostDisable(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -448,6 +472,8 @@ func TestAccRoaminghostResource_Disable(t *testing.T) {
 func TestAccRoaminghostResource_EnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_enable_ddns"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -455,7 +481,7 @@ func TestAccRoaminghostResource_EnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostEnableDdns("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostEnableDdns(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "true"),
@@ -463,7 +489,7 @@ func TestAccRoaminghostResource_EnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostEnableDdns("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostEnableDdns(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ddns", "false"),
@@ -477,6 +503,8 @@ func TestAccRoaminghostResource_EnableDdns(t *testing.T) {
 func TestAccRoaminghostResource_EnablePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_enable_pxe_lease_time"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -484,7 +512,7 @@ func TestAccRoaminghostResource_EnablePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostEnablePxeLeaseTime("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostEnablePxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "true"),
@@ -492,7 +520,7 @@ func TestAccRoaminghostResource_EnablePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostEnablePxeLeaseTime("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostEnablePxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_pxe_lease_time", "false"),
@@ -506,6 +534,8 @@ func TestAccRoaminghostResource_EnablePxeLeaseTime(t *testing.T) {
 func TestAccRoaminghostResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_extattrs"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -515,7 +545,7 @@ func TestAccRoaminghostResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostExtAttrs("NAME_REPLACE_ME", map[string]string{
+				Config: testAccRoaminghostExtAttrs(name, mac, "IPV4", "MAC_ADDRESS", map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -525,7 +555,7 @@ func TestAccRoaminghostResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostExtAttrs("NAME_REPLACE_ME", map[string]string{
+				Config: testAccRoaminghostExtAttrs(name, mac, "IPV4", "MAC_ADDRESS", map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -541,6 +571,8 @@ func TestAccRoaminghostResource_ExtAttrs(t *testing.T) {
 func TestAccRoaminghostResource_ForceRoamingHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_force_roaming_hostname"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -548,7 +580,7 @@ func TestAccRoaminghostResource_ForceRoamingHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostForceRoamingHostname("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostForceRoamingHostname(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "force_roaming_hostname", "true"),
@@ -556,7 +588,7 @@ func TestAccRoaminghostResource_ForceRoamingHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostForceRoamingHostname("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostForceRoamingHostname(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "force_roaming_hostname", "false"),
@@ -570,6 +602,8 @@ func TestAccRoaminghostResource_ForceRoamingHostname(t *testing.T) {
 func TestAccRoaminghostResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ignore_dhcp_option_list_request"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -577,7 +611,7 @@ func TestAccRoaminghostResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIgnoreDhcpOptionListRequest("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostIgnoreDhcpOptionListRequest(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "true"),
@@ -585,7 +619,7 @@ func TestAccRoaminghostResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIgnoreDhcpOptionListRequest("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostIgnoreDhcpOptionListRequest(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_dhcp_option_list_request", "false"),
@@ -599,6 +633,8 @@ func TestAccRoaminghostResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6DdnsDomainname(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_ddns_domainname"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -606,7 +642,7 @@ func TestAccRoaminghostResource_Ipv6DdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6DdnsDomainname("NAME_REPLACE_ME", "IPV6_DDNS_DOMAINNAME_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6DdnsDomainname(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_DDNS_DOMAINNAME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_ddns_domainname", "IPV6_DDNS_DOMAINNAME_REPLACE_ME"),
@@ -614,7 +650,7 @@ func TestAccRoaminghostResource_Ipv6DdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6DdnsDomainname("NAME_REPLACE_ME", "IPV6_DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6DdnsDomainname(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_ddns_domainname", "IPV6_DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
@@ -628,6 +664,8 @@ func TestAccRoaminghostResource_Ipv6DdnsDomainname(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6DdnsHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_ddns_hostname"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -635,7 +673,7 @@ func TestAccRoaminghostResource_Ipv6DdnsHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6DdnsHostname("NAME_REPLACE_ME", "IPV6_DDNS_HOSTNAME_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6DdnsHostname(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_DDNS_HOSTNAME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_ddns_hostname", "IPV6_DDNS_HOSTNAME_REPLACE_ME"),
@@ -643,7 +681,7 @@ func TestAccRoaminghostResource_Ipv6DdnsHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6DdnsHostname("NAME_REPLACE_ME", "IPV6_DDNS_HOSTNAME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6DdnsHostname(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_DDNS_HOSTNAME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_ddns_hostname", "IPV6_DDNS_HOSTNAME_UPDATE_REPLACE_ME"),
@@ -657,6 +695,8 @@ func TestAccRoaminghostResource_Ipv6DdnsHostname(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6DomainName(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_domain_name"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -664,7 +704,7 @@ func TestAccRoaminghostResource_Ipv6DomainName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6DomainName("NAME_REPLACE_ME", "IPV6_DOMAIN_NAME_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6DomainName(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_DOMAIN_NAME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_domain_name", "IPV6_DOMAIN_NAME_REPLACE_ME"),
@@ -672,7 +712,7 @@ func TestAccRoaminghostResource_Ipv6DomainName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6DomainName("NAME_REPLACE_ME", "IPV6_DOMAIN_NAME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6DomainName(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_DOMAIN_NAME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_domain_name", "IPV6_DOMAIN_NAME_UPDATE_REPLACE_ME"),
@@ -686,6 +726,8 @@ func TestAccRoaminghostResource_Ipv6DomainName(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6DomainNameServers(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_domain_name_servers"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 	ipv6DomainNameServersVal := []string{"IPV6_DOMAIN_NAME_SERVERS_REPLACE_ME1", "IPV6_DOMAIN_NAME_SERVERS_REPLACE_ME2"}
 	ipv6DomainNameServersValUpdated := []string{"IPV6_DOMAIN_NAME_SERVERS_REPLACE_ME1", "IPV6_DOMAIN_NAME_SERVERS_REPLACE_ME2"}
 
@@ -695,7 +737,7 @@ func TestAccRoaminghostResource_Ipv6DomainNameServers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6DomainNameServers("NAME_REPLACE_ME", ipv6DomainNameServersVal),
+				Config: testAccRoaminghostIpv6DomainNameServers(name, mac, "IPV4", "MAC_ADDRESS", ipv6DomainNameServersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_domain_name_servers", "IPV6_DOMAIN_NAME_SERVERS_REPLACE_ME"),
@@ -703,7 +745,7 @@ func TestAccRoaminghostResource_Ipv6DomainNameServers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6DomainNameServers("NAME_REPLACE_ME", ipv6DomainNameServersValUpdated),
+				Config: testAccRoaminghostIpv6DomainNameServers(name, mac, "IPV4", "MAC_ADDRESS", ipv6DomainNameServersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_domain_name_servers", "IPV6_DOMAIN_NAME_SERVERS_UPDATE_REPLACE_ME"),
@@ -717,6 +759,8 @@ func TestAccRoaminghostResource_Ipv6DomainNameServers(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6Duid(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_duid"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -724,7 +768,7 @@ func TestAccRoaminghostResource_Ipv6Duid(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6Duid("NAME_REPLACE_ME", "IPV6_DUID_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6Duid(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_DUID_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_duid", "IPV6_DUID_REPLACE_ME"),
@@ -732,7 +776,7 @@ func TestAccRoaminghostResource_Ipv6Duid(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6Duid("NAME_REPLACE_ME", "IPV6_DUID_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6Duid(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_DUID_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_duid", "IPV6_DUID_UPDATE_REPLACE_ME"),
@@ -746,6 +790,8 @@ func TestAccRoaminghostResource_Ipv6Duid(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6EnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_enable_ddns"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -753,7 +799,7 @@ func TestAccRoaminghostResource_Ipv6EnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6EnableDdns("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostIpv6EnableDdns(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_enable_ddns", "true"),
@@ -761,7 +807,7 @@ func TestAccRoaminghostResource_Ipv6EnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6EnableDdns("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostIpv6EnableDdns(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_enable_ddns", "false"),
@@ -775,6 +821,8 @@ func TestAccRoaminghostResource_Ipv6EnableDdns(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6ForceRoamingHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_force_roaming_hostname"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -782,7 +830,7 @@ func TestAccRoaminghostResource_Ipv6ForceRoamingHostname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6ForceRoamingHostname("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostIpv6ForceRoamingHostname(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_force_roaming_hostname", "true"),
@@ -790,7 +838,7 @@ func TestAccRoaminghostResource_Ipv6ForceRoamingHostname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6ForceRoamingHostname("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostIpv6ForceRoamingHostname(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_force_roaming_hostname", "false"),
@@ -804,6 +852,8 @@ func TestAccRoaminghostResource_Ipv6ForceRoamingHostname(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6MacAddress(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_mac_address"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -811,7 +861,7 @@ func TestAccRoaminghostResource_Ipv6MacAddress(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6MacAddress("NAME_REPLACE_ME", "IPV6_MAC_ADDRESS_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6MacAddress(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_MAC_ADDRESS_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_mac_address", "IPV6_MAC_ADDRESS_REPLACE_ME"),
@@ -819,7 +869,7 @@ func TestAccRoaminghostResource_Ipv6MacAddress(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6MacAddress("NAME_REPLACE_ME", "IPV6_MAC_ADDRESS_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6MacAddress(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_MAC_ADDRESS_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_mac_address", "IPV6_MAC_ADDRESS_UPDATE_REPLACE_ME"),
@@ -833,6 +883,8 @@ func TestAccRoaminghostResource_Ipv6MacAddress(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6MatchOption(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_match_option"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -840,14 +892,14 @@ func TestAccRoaminghostResource_Ipv6MatchOption(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6MatchOption("IPV6_MATCH_OPTION_REPLACE_ME", "DUID"),
+				Config: testAccRoaminghostIpv6MatchOption(name, mac, "IPV4", "MAC_ADDRESS", "DUID"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_match_option", "DUID"),
 				),
 			},
 			{
-				Config: testAccRoaminghostIpv6MatchOption("IPV6_MATCH_OPTION_REPLACE_ME", "V6_MAC_ADDRESS"),
+				Config: testAccRoaminghostIpv6MatchOption(name, mac, "IPV4", "MAC_ADDRESS", "V6_MAC_ADDRESS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_match_option", "V6_MAC_ADDRESS"),
@@ -860,6 +912,8 @@ func TestAccRoaminghostResource_Ipv6MatchOption(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6Options(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_options"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 	ipv6OptionsVal := []map[string]any{}
 	ipv6OptionsValUpdated := []map[string]any{}
 
@@ -869,7 +923,7 @@ func TestAccRoaminghostResource_Ipv6Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6Options("NAME_REPLACE_ME", ipv6OptionsVal),
+				Config: testAccRoaminghostIpv6Options(name, mac, "IPV4", "MAC_ADDRESS", ipv6OptionsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_options", "IPV6_OPTIONS_REPLACE_ME"),
@@ -877,7 +931,7 @@ func TestAccRoaminghostResource_Ipv6Options(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostIpv6Options("NAME_REPLACE_ME", ipv6OptionsValUpdated),
+				Config: testAccRoaminghostIpv6Options(name, mac, "IPV4", "MAC_ADDRESS", ipv6OptionsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_options", "IPV6_OPTIONS_UPDATE_REPLACE_ME"),
@@ -891,6 +945,8 @@ func TestAccRoaminghostResource_Ipv6Options(t *testing.T) {
 func TestAccRoaminghostResource_Ipv6Template(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_ipv6_template"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -898,7 +954,7 @@ func TestAccRoaminghostResource_Ipv6Template(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6Template("NAME_REPLACE_ME", "IPV6_TEMPLATE_REPLACE_ME"),
+				Config: testAccRoaminghostIpv6Template(name, mac, "IPV4", "MAC_ADDRESS", "IPV6_TEMPLATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv6_template", "IPV6_TEMPLATE_REPLACE_ME"),
@@ -912,6 +968,8 @@ func TestAccRoaminghostResource_Ipv6Template(t *testing.T) {
 func TestAccRoaminghostResource_Mac(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_mac"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -919,7 +977,7 @@ func TestAccRoaminghostResource_Mac(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostMac("NAME_REPLACE_ME", "MAC_REPLACE_ME"),
+				Config: testAccRoaminghostMac(name, mac, "IPV4", "MAC_ADDRESS", "MAC_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "mac", "MAC_REPLACE_ME"),
@@ -927,7 +985,7 @@ func TestAccRoaminghostResource_Mac(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostMac("NAME_REPLACE_ME", "MAC_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostMac(name, mac, "IPV4", "MAC_ADDRESS", "MAC_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "mac", "MAC_UPDATE_REPLACE_ME"),
@@ -941,6 +999,8 @@ func TestAccRoaminghostResource_Mac(t *testing.T) {
 func TestAccRoaminghostResource_MatchClient(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_match_client"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -948,14 +1008,14 @@ func TestAccRoaminghostResource_MatchClient(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostMatchClient("MATCH_CLIENT_REPLACE_ME", "CLIENT_ID"),
+				Config: testAccRoaminghostMatchClient(name, mac, "IPV4", "MAC_ADDRESS", "CLIENT_ID"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "match_client", "CLIENT_ID"),
 				),
 			},
 			{
-				Config: testAccRoaminghostMatchClient("MATCH_CLIENT_REPLACE_ME", "MAC_ADDRESS"),
+				Config: testAccRoaminghostMatchClient(name, mac, "IPV4", "MAC_ADDRESS", "MAC_ADDRESS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "match_client", "MAC_ADDRESS"),
@@ -968,6 +1028,8 @@ func TestAccRoaminghostResource_MatchClient(t *testing.T) {
 func TestAccRoaminghostResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_name"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -975,7 +1037,7 @@ func TestAccRoaminghostResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostName("NAME_REPLACE_ME"),
+				Config: testAccRoaminghostName(name, mac, "IPV4", "MAC_ADDRESS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
@@ -983,7 +1045,7 @@ func TestAccRoaminghostResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostName("NAME_REPLACE_ME"),
+				Config: testAccRoaminghostName(name, mac, "IPV4", "MAC_ADDRESS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
@@ -997,6 +1059,8 @@ func TestAccRoaminghostResource_Name(t *testing.T) {
 func TestAccRoaminghostResource_NetworkView(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_network_view"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1004,7 +1068,7 @@ func TestAccRoaminghostResource_NetworkView(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostNetworkView("NAME_REPLACE_ME", "NETWORK_VIEW_REPLACE_ME"),
+				Config: testAccRoaminghostNetworkView(name, mac, "IPV4", "MAC_ADDRESS", "NETWORK_VIEW_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network_view", "NETWORK_VIEW_REPLACE_ME"),
@@ -1012,7 +1076,7 @@ func TestAccRoaminghostResource_NetworkView(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostNetworkView("NAME_REPLACE_ME", "NETWORK_VIEW_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostNetworkView(name, mac, "IPV4", "MAC_ADDRESS", "NETWORK_VIEW_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network_view", "NETWORK_VIEW_UPDATE_REPLACE_ME"),
@@ -1026,6 +1090,8 @@ func TestAccRoaminghostResource_NetworkView(t *testing.T) {
 func TestAccRoaminghostResource_Nextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_nextserver"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1033,7 +1099,7 @@ func TestAccRoaminghostResource_Nextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostNextserver("NAME_REPLACE_ME", "NEXTSERVER_REPLACE_ME"),
+				Config: testAccRoaminghostNextserver(name, mac, "IPV4", "MAC_ADDRESS", "NEXTSERVER_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_REPLACE_ME"),
@@ -1041,7 +1107,7 @@ func TestAccRoaminghostResource_Nextserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostNextserver("NAME_REPLACE_ME", "NEXTSERVER_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostNextserver(name, mac, "IPV4", "MAC_ADDRESS", "NEXTSERVER_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_UPDATE_REPLACE_ME"),
@@ -1055,6 +1121,8 @@ func TestAccRoaminghostResource_Nextserver(t *testing.T) {
 func TestAccRoaminghostResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_options"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 	optionsVal := []map[string]any{}
 	optionsValUpdated := []map[string]any{}
 
@@ -1064,7 +1132,7 @@ func TestAccRoaminghostResource_Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostOptions("NAME_REPLACE_ME", optionsVal),
+				Config: testAccRoaminghostOptions(name, mac, "IPV4", "MAC_ADDRESS", optionsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_REPLACE_ME"),
@@ -1072,7 +1140,7 @@ func TestAccRoaminghostResource_Options(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostOptions("NAME_REPLACE_ME", optionsValUpdated),
+				Config: testAccRoaminghostOptions(name, mac, "IPV4", "MAC_ADDRESS", optionsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_UPDATE_REPLACE_ME"),
@@ -1086,6 +1154,8 @@ func TestAccRoaminghostResource_Options(t *testing.T) {
 func TestAccRoaminghostResource_PreferredLifetime(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_preferred_lifetime"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1093,7 +1163,7 @@ func TestAccRoaminghostResource_PreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostPreferredLifetime("NAME_REPLACE_ME", "PREFERRED_LIFETIME_REPLACE_ME"),
+				Config: testAccRoaminghostPreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "PREFERRED_LIFETIME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "PREFERRED_LIFETIME_REPLACE_ME"),
@@ -1101,7 +1171,7 @@ func TestAccRoaminghostResource_PreferredLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostPreferredLifetime("NAME_REPLACE_ME", "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostPreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
@@ -1114,6 +1184,8 @@ func TestAccRoaminghostResource_PreferredLifetime(t *testing.T) {
 func TestAccRoaminghostResource_PxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_pxe_lease_time"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1121,7 +1193,7 @@ func TestAccRoaminghostResource_PxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostPxeLeaseTime("NAME_REPLACE_ME", "PXE_LEASE_TIME_REPLACE_ME"),
+				Config: testAccRoaminghostPxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "PXE_LEASE_TIME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "PXE_LEASE_TIME_REPLACE_ME"),
@@ -1129,7 +1201,7 @@ func TestAccRoaminghostResource_PxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostPxeLeaseTime("NAME_REPLACE_ME", "PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostPxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
@@ -1142,6 +1214,8 @@ func TestAccRoaminghostResource_PxeLeaseTime(t *testing.T) {
 func TestAccRoaminghostResource_Template(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_template"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1149,7 +1223,7 @@ func TestAccRoaminghostResource_Template(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostTemplate("NAME_REPLACE_ME", "TEMPLATE_REPLACE_ME"),
+				Config: testAccRoaminghostTemplate(name, mac, "IPV4", "MAC_ADDRESS", "TEMPLATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "template", "TEMPLATE_REPLACE_ME"),
@@ -1163,6 +1237,8 @@ func TestAccRoaminghostResource_Template(t *testing.T) {
 func TestAccRoaminghostResource_UseBootfile(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_bootfile"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1170,7 +1246,7 @@ func TestAccRoaminghostResource_UseBootfile(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseBootfile("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseBootfile(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "true"),
@@ -1178,7 +1254,7 @@ func TestAccRoaminghostResource_UseBootfile(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseBootfile("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseBootfile(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootfile", "false"),
@@ -1192,6 +1268,8 @@ func TestAccRoaminghostResource_UseBootfile(t *testing.T) {
 func TestAccRoaminghostResource_UseBootserver(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_bootserver"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1199,7 +1277,7 @@ func TestAccRoaminghostResource_UseBootserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseBootserver("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseBootserver(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "true"),
@@ -1207,7 +1285,7 @@ func TestAccRoaminghostResource_UseBootserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseBootserver("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseBootserver(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "false"),
@@ -1221,6 +1299,8 @@ func TestAccRoaminghostResource_UseBootserver(t *testing.T) {
 func TestAccRoaminghostResource_UseDdnsDomainname(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_ddns_domainname"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1228,7 +1308,7 @@ func TestAccRoaminghostResource_UseDdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseDdnsDomainname("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseDdnsDomainname(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "true"),
@@ -1236,7 +1316,7 @@ func TestAccRoaminghostResource_UseDdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseDdnsDomainname("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseDdnsDomainname(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ddns_domainname", "false"),
@@ -1250,6 +1330,8 @@ func TestAccRoaminghostResource_UseDdnsDomainname(t *testing.T) {
 func TestAccRoaminghostResource_UseDenyBootp(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_deny_bootp"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1257,7 +1339,7 @@ func TestAccRoaminghostResource_UseDenyBootp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseDenyBootp("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseDenyBootp(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "true"),
@@ -1265,7 +1347,7 @@ func TestAccRoaminghostResource_UseDenyBootp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseDenyBootp("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseDenyBootp(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_deny_bootp", "false"),
@@ -1279,6 +1361,8 @@ func TestAccRoaminghostResource_UseDenyBootp(t *testing.T) {
 func TestAccRoaminghostResource_UseEnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_enable_ddns"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1286,7 +1370,7 @@ func TestAccRoaminghostResource_UseEnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseEnableDdns("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseEnableDdns(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "true"),
@@ -1294,7 +1378,7 @@ func TestAccRoaminghostResource_UseEnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseEnableDdns("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseEnableDdns(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_ddns", "false"),
@@ -1308,6 +1392,8 @@ func TestAccRoaminghostResource_UseEnableDdns(t *testing.T) {
 func TestAccRoaminghostResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_ignore_dhcp_option_list_request"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1315,7 +1401,7 @@ func TestAccRoaminghostResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseIgnoreDhcpOptionListRequest("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseIgnoreDhcpOptionListRequest(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "true"),
@@ -1323,7 +1409,7 @@ func TestAccRoaminghostResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseIgnoreDhcpOptionListRequest("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseIgnoreDhcpOptionListRequest(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ignore_dhcp_option_list_request", "false"),
@@ -1337,6 +1423,8 @@ func TestAccRoaminghostResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 func TestAccRoaminghostResource_UseIpv6DdnsDomainname(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_ipv6_ddns_domainname"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1344,7 +1432,7 @@ func TestAccRoaminghostResource_UseIpv6DdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseIpv6DdnsDomainname("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseIpv6DdnsDomainname(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_ddns_domainname", "true"),
@@ -1352,7 +1440,7 @@ func TestAccRoaminghostResource_UseIpv6DdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseIpv6DdnsDomainname("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseIpv6DdnsDomainname(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_ddns_domainname", "false"),
@@ -1366,6 +1454,8 @@ func TestAccRoaminghostResource_UseIpv6DdnsDomainname(t *testing.T) {
 func TestAccRoaminghostResource_UseIpv6DomainName(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_ipv6_domain_name"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1373,7 +1463,7 @@ func TestAccRoaminghostResource_UseIpv6DomainName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseIpv6DomainName("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseIpv6DomainName(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_domain_name", "true"),
@@ -1381,7 +1471,7 @@ func TestAccRoaminghostResource_UseIpv6DomainName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseIpv6DomainName("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseIpv6DomainName(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_domain_name", "false"),
@@ -1395,6 +1485,8 @@ func TestAccRoaminghostResource_UseIpv6DomainName(t *testing.T) {
 func TestAccRoaminghostResource_UseIpv6DomainNameServers(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_ipv6_domain_name_servers"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1402,7 +1494,7 @@ func TestAccRoaminghostResource_UseIpv6DomainNameServers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseIpv6DomainNameServers("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseIpv6DomainNameServers(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_domain_name_servers", "true"),
@@ -1410,7 +1502,7 @@ func TestAccRoaminghostResource_UseIpv6DomainNameServers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseIpv6DomainNameServers("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseIpv6DomainNameServers(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_domain_name_servers", "false"),
@@ -1424,6 +1516,8 @@ func TestAccRoaminghostResource_UseIpv6DomainNameServers(t *testing.T) {
 func TestAccRoaminghostResource_UseIpv6EnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_ipv6_enable_ddns"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1431,7 +1525,7 @@ func TestAccRoaminghostResource_UseIpv6EnableDdns(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseIpv6EnableDdns("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseIpv6EnableDdns(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_enable_ddns", "true"),
@@ -1439,7 +1533,7 @@ func TestAccRoaminghostResource_UseIpv6EnableDdns(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseIpv6EnableDdns("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseIpv6EnableDdns(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_enable_ddns", "false"),
@@ -1453,6 +1547,8 @@ func TestAccRoaminghostResource_UseIpv6EnableDdns(t *testing.T) {
 func TestAccRoaminghostResource_UseIpv6Options(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_ipv6_options"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1460,7 +1556,7 @@ func TestAccRoaminghostResource_UseIpv6Options(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseIpv6Options("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseIpv6Options(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_options", "true"),
@@ -1468,7 +1564,7 @@ func TestAccRoaminghostResource_UseIpv6Options(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseIpv6Options("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseIpv6Options(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ipv6_options", "false"),
@@ -1482,6 +1578,8 @@ func TestAccRoaminghostResource_UseIpv6Options(t *testing.T) {
 func TestAccRoaminghostResource_UseNextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_nextserver"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1489,7 +1587,7 @@ func TestAccRoaminghostResource_UseNextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseNextserver("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseNextserver(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "true"),
@@ -1497,7 +1595,7 @@ func TestAccRoaminghostResource_UseNextserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseNextserver("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseNextserver(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_nextserver", "false"),
@@ -1511,6 +1609,8 @@ func TestAccRoaminghostResource_UseNextserver(t *testing.T) {
 func TestAccRoaminghostResource_UseOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_options"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1518,7 +1618,7 @@ func TestAccRoaminghostResource_UseOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseOptions("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseOptions(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "true"),
@@ -1526,7 +1626,7 @@ func TestAccRoaminghostResource_UseOptions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseOptions("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseOptions(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_options", "false"),
@@ -1540,6 +1640,8 @@ func TestAccRoaminghostResource_UseOptions(t *testing.T) {
 func TestAccRoaminghostResource_UsePreferredLifetime(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_preferred_lifetime"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1547,7 +1649,7 @@ func TestAccRoaminghostResource_UsePreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUsePreferredLifetime("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUsePreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "true"),
@@ -1555,7 +1657,7 @@ func TestAccRoaminghostResource_UsePreferredLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUsePreferredLifetime("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUsePreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "false"),
@@ -1569,6 +1671,8 @@ func TestAccRoaminghostResource_UsePreferredLifetime(t *testing.T) {
 func TestAccRoaminghostResource_UsePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_pxe_lease_time"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1576,7 +1680,7 @@ func TestAccRoaminghostResource_UsePxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUsePxeLeaseTime("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUsePxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "true"),
@@ -1584,7 +1688,7 @@ func TestAccRoaminghostResource_UsePxeLeaseTime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUsePxeLeaseTime("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUsePxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "false"),
@@ -1598,6 +1702,8 @@ func TestAccRoaminghostResource_UsePxeLeaseTime(t *testing.T) {
 func TestAccRoaminghostResource_UseValidLifetime(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_use_valid_lifetime"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1605,7 +1711,7 @@ func TestAccRoaminghostResource_UseValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUseValidLifetime("NAME_REPLACE_ME", "true"),
+				Config: testAccRoaminghostUseValidLifetime(name, mac, "IPV4", "MAC_ADDRESS", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
@@ -1613,7 +1719,7 @@ func TestAccRoaminghostResource_UseValidLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUseValidLifetime("NAME_REPLACE_ME", "false"),
+				Config: testAccRoaminghostUseValidLifetime(name, mac, "IPV4", "MAC_ADDRESS", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
@@ -1627,6 +1733,8 @@ func TestAccRoaminghostResource_UseValidLifetime(t *testing.T) {
 func TestAccRoaminghostResource_ValidLifetime(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_valid_lifetime"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1634,7 +1742,7 @@ func TestAccRoaminghostResource_ValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostValidLifetime("NAME_REPLACE_ME", "VALID_LIFETIME_REPLACE_ME"),
+				Config: testAccRoaminghostValidLifetime(name, mac, "IPV4", "MAC_ADDRESS", "VALID_LIFETIME_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_REPLACE_ME"),
@@ -1642,7 +1750,7 @@ func TestAccRoaminghostResource_ValidLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostValidLifetime("NAME_REPLACE_ME", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostValidLifetime(name, mac, "IPV4", "MAC_ADDRESS", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
@@ -1735,120 +1843,155 @@ resource "nios_dhcp_roaminghost" "test" {
 `, name, mac, addressType, matchClient)
 }
 
-func testAccRoaminghostAddressType(name string, addressType string) string {
+func testAccRoaminghostAddressType(name string, mac string, addressType string, matchClient string, addressTypeVal string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_address_type" {
     name = %q
+    mac = %q
     address_type = %q
+    match_client = %q
 }
-`, name, addressType)
+`, name, mac, addressTypeVal, matchClient)
 }
 
-func testAccRoaminghostBootfile(name string, bootfile string) string {
+func testAccRoaminghostBootfile(name string, mac string, addressType string, matchClient string, bootfile string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_bootfile" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     bootfile = %q
     use_bootfile = true
 }
-`, name, bootfile)
+`, name, mac, addressType, matchClient, bootfile)
 }
 
-func testAccRoaminghostBootserver(name string, bootserver string) string {
+func testAccRoaminghostBootserver(name string, mac string, addressType string, matchClient string, bootserver string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_bootserver" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     bootserver = %q
     use_bootserver = true
 }
-`, name, bootserver)
+`, name, mac, addressType, matchClient, bootserver)
 }
 
-func testAccRoaminghostClientIdentifierPrependZero(name string, clientIdentifierPrependZero string) string {
+func testAccRoaminghostClientIdentifierPrependZero(name string, mac string, addressType string, matchClient string, clientIdentifierPrependZero string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_client_identifier_prepend_zero" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     client_identifier_prepend_zero = %q
 }
-`, name, clientIdentifierPrependZero)
+`, name, mac, addressType, matchClient, clientIdentifierPrependZero)
 }
 
-func testAccRoaminghostComment(name string, comment string) string {
+func testAccRoaminghostComment(name string, mac string, addressType string, matchClient string, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_comment" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     comment = %q
 }
-`, name, comment)
+`, name, mac, addressType, matchClient, comment)
 }
 
-func testAccRoaminghostDdnsDomainname(name string, ddnsDomainname string) string {
+func testAccRoaminghostDdnsDomainname(name string, mac string, addressType string, matchClient string, ddnsDomainname string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ddns_domainname" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ddns_domainname = %q
     use_ddns_domainname = true
 }
-`, name, ddnsDomainname)
+`, name, mac, addressType, matchClient, ddnsDomainname)
 }
 
-func testAccRoaminghostDdnsHostname(name string, ddnsHostname string) string {
+func testAccRoaminghostDdnsHostname(name string, mac string, addressType string, matchClient string, ddnsHostname string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ddns_hostname" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ddns_hostname = %q
 }
-`, name, ddnsHostname)
+`, name, mac, addressType, matchClient, ddnsHostname)
 }
 
-func testAccRoaminghostDenyBootp(name string, denyBootp string) string {
+func testAccRoaminghostDenyBootp(name string, mac string, addressType string, matchClient string, denyBootp string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_deny_bootp" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     deny_bootp = %q
     use_deny_bootp = true
 }
-`, name, denyBootp)
+`, name, mac, addressType, matchClient, denyBootp)
 }
 
-func testAccRoaminghostDhcpClientIdentifier(name string, dhcpClientIdentifier string) string {
+func testAccRoaminghostDhcpClientIdentifier(name string, mac string, addressType string, matchClient string, dhcpClientIdentifier string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_dhcp_client_identifier" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     dhcp_client_identifier = %q
 }
-`, name, dhcpClientIdentifier)
+`, name, mac, addressType, matchClient, dhcpClientIdentifier)
 }
 
-func testAccRoaminghostDisable(name string, disable string) string {
+func testAccRoaminghostDisable(name string, mac string, addressType string, matchClient string, disable string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_disable" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     disable = %q
 }
-`, name, disable)
+`, name, mac, addressType, matchClient, disable)
 }
 
-func testAccRoaminghostEnableDdns(name string, enableDdns string) string {
+func testAccRoaminghostEnableDdns(name string, mac string, addressType string, matchClient string, enableDdns string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_enable_ddns" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     enable_ddns = %q
     use_enable_ddns = true
 }
-`, name, enableDdns)
+`, name, mac, addressType, matchClient, enableDdns)
 }
 
-func testAccRoaminghostEnablePxeLeaseTime(name string, enablePxeLeaseTime string) string {
+func testAccRoaminghostEnablePxeLeaseTime(name string, mac string, addressType string, matchClient string, enablePxeLeaseTime string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_enable_pxe_lease_time" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     enable_pxe_lease_time = %q
 }
-`, name, enablePxeLeaseTime)
+`, name, mac, addressType, matchClient, enablePxeLeaseTime)
 }
 
-func testAccRoaminghostExtAttrs(name string, extAttrs map[string]string) string {
+func testAccRoaminghostExtAttrs(name string, mac string, addressType string, matchClient string, extAttrs map[string]string) string {
 	extAttrsStr := "{\n"
 	for k, v := range extAttrs {
 		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
@@ -1857,371 +2000,489 @@ func testAccRoaminghostExtAttrs(name string, extAttrs map[string]string) string 
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_extattrs" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     extattrs = %s
 }
-`, name, extAttrsStr)
+`, name, mac, addressType, matchClient, extAttrsStr)
 }
 
-func testAccRoaminghostForceRoamingHostname(name string, forceRoamingHostname string) string {
+func testAccRoaminghostForceRoamingHostname(name string, mac string, addressType string, matchClient string, forceRoamingHostname string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_force_roaming_hostname" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     force_roaming_hostname = %q
 }
-`, name, forceRoamingHostname)
+`, name, mac, addressType, matchClient, forceRoamingHostname)
 }
 
-func testAccRoaminghostIgnoreDhcpOptionListRequest(name string, ignoreDhcpOptionListRequest string) string {
+func testAccRoaminghostIgnoreDhcpOptionListRequest(name string, mac string, addressType string, matchClient string, ignoreDhcpOptionListRequest string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ignore_dhcp_option_list_request" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ignore_dhcp_option_list_request = %q
     use_ignore_dhcp_option_list_request = true
 }
-`, name, ignoreDhcpOptionListRequest)
+`, name, mac, addressType, matchClient, ignoreDhcpOptionListRequest)
 }
 
-func testAccRoaminghostIpv6DdnsDomainname(name string, ipv6DdnsDomainname string) string {
+func testAccRoaminghostIpv6DdnsDomainname(name string, mac string, addressType string, matchClient string, ipv6DdnsDomainname string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_ddns_domainname" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_ddns_domainname = %q
     use_ipv6_ddns_domainname = true
 }
-`, name, ipv6DdnsDomainname)
+`, name, mac, addressType, matchClient, ipv6DdnsDomainname)
 }
 
-func testAccRoaminghostIpv6DdnsHostname(name string, ipv6DdnsHostname string) string {
+func testAccRoaminghostIpv6DdnsHostname(name string, mac string, addressType string, matchClient string, ipv6DdnsHostname string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_ddns_hostname" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_ddns_hostname = %q
 }
-`, name, ipv6DdnsHostname)
+`, name, mac, addressType, matchClient, ipv6DdnsHostname)
 }
 
-func testAccRoaminghostIpv6DomainName(name string, ipv6DomainName string) string {
+func testAccRoaminghostIpv6DomainName(name string, mac string, addressType string, matchClient string, ipv6DomainName string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_domain_name" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_domain_name = %q
     use_ipv6_domain_name = true
 }
-`, name, ipv6DomainName)
+`, name, mac, addressType, matchClient, ipv6DomainName)
 }
 
-func testAccRoaminghostIpv6DomainNameServers(name string, ipv6DomainNameServers []string) string {
+func testAccRoaminghostIpv6DomainNameServers(name string, mac string, addressType string, matchClient string, ipv6DomainNameServers []string) string {
 	ipv6DomainNameServersStr := utils.ConvertStringSliceToHCL(ipv6DomainNameServers)
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_domain_name_servers" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_domain_name_servers = %s
     use_ipv6_domain_name_servers = true
 }
-`, name, ipv6DomainNameServersStr)
+`, name, mac, addressType, matchClient, ipv6DomainNameServersStr)
 }
 
-func testAccRoaminghostIpv6Duid(name string, ipv6Duid string) string {
+func testAccRoaminghostIpv6Duid(name string, mac string, addressType string, matchClient string, ipv6Duid string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_duid" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_duid = %q
 }
-`, name, ipv6Duid)
+`, name, mac, addressType, matchClient, ipv6Duid)
 }
 
-func testAccRoaminghostIpv6EnableDdns(name string, ipv6EnableDdns string) string {
+func testAccRoaminghostIpv6EnableDdns(name string, mac string, addressType string, matchClient string, ipv6EnableDdns string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_enable_ddns" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_enable_ddns = %q
     use_ipv6_enable_ddns = true
 }
-`, name, ipv6EnableDdns)
+`, name, mac, addressType, matchClient, ipv6EnableDdns)
 }
 
-func testAccRoaminghostIpv6ForceRoamingHostname(name string, ipv6ForceRoamingHostname string) string {
+func testAccRoaminghostIpv6ForceRoamingHostname(name string, mac string, addressType string, matchClient string, ipv6ForceRoamingHostname string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_force_roaming_hostname" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_force_roaming_hostname = %q
 }
-`, name, ipv6ForceRoamingHostname)
+`, name, mac, addressType, matchClient, ipv6ForceRoamingHostname)
 }
 
-func testAccRoaminghostIpv6MacAddress(name string, ipv6MacAddress string) string {
+func testAccRoaminghostIpv6MacAddress(name string, mac string, addressType string, matchClient string, ipv6MacAddress string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_mac_address" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_mac_address = %q
 }
-`, name, ipv6MacAddress)
+`, name, mac, addressType, matchClient, ipv6MacAddress)
 }
 
-func testAccRoaminghostIpv6MatchOption(name string, ipv6MatchOption string) string {
+func testAccRoaminghostIpv6MatchOption(name string, mac string, addressType string, matchClient string, ipv6MatchOption string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_match_option" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_match_option = %q
 }
-`, name, ipv6MatchOption)
+`, name, mac, addressType, matchClient, ipv6MatchOption)
 }
 
-func testAccRoaminghostIpv6Options(name string, ipv6Options []map[string]any) string {
+func testAccRoaminghostIpv6Options(name string, mac string, addressType string, matchClient string, ipv6Options []map[string]any) string {
 	ipv6OptionsStr := utils.ConvertSliceOfMapsToHCL(ipv6Options)
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_options" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_options = %s
     use_ipv6_options = true
 }
-`, name, ipv6OptionsStr)
+`, name, mac, addressType, matchClient, ipv6OptionsStr)
 }
 
-func testAccRoaminghostIpv6Template(name string, ipv6Template string) string {
+func testAccRoaminghostIpv6Template(name string, mac string, addressType string, matchClient string, ipv6Template string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_ipv6_template" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     ipv6_template = %q
 }
-`, name, ipv6Template)
+`, name, mac, addressType, matchClient, ipv6Template)
 }
 
-func testAccRoaminghostMac(name string, mac string) string {
+func testAccRoaminghostMac(name string, mac string, addressType string, matchClient string, macVal string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_mac" {
     name = %q
     mac = %q
+    address_type = %q
+    match_client = %q
 }
-`, name, mac)
+`, name, macVal, addressType, matchClient)
 }
 
-func testAccRoaminghostMatchClient(name string, matchClient string) string {
+func testAccRoaminghostMatchClient(name string, mac string, addressType string, matchClient string, matchClientVal string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_match_client" {
     name = %q
+    mac = %q
+    address_type = %q
     match_client = %q
 }
-`, name, matchClient)
+`, name, mac, addressType, matchClientVal)
 }
 
-func testAccRoaminghostName(name string) string {
+func testAccRoaminghostName(name string, mac string, addressType string, matchClient string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_name" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
 }
-`, name)
+`, name, mac, addressType, matchClient)
 }
 
-func testAccRoaminghostNetworkView(name string, networkView string) string {
+func testAccRoaminghostNetworkView(name string, mac string, addressType string, matchClient string, networkView string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_network_view" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     network_view = %q
 }
-`, name, networkView)
+`, name, mac, addressType, matchClient, networkView)
 }
 
-func testAccRoaminghostNextserver(name string, nextserver string) string {
+func testAccRoaminghostNextserver(name string, mac string, addressType string, matchClient string, nextserver string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_nextserver" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     nextserver = %q
     use_nextserver = true
 }
-`, name, nextserver)
+`, name, mac, addressType, matchClient, nextserver)
 }
 
-func testAccRoaminghostOptions(name string, options []map[string]any) string {
+func testAccRoaminghostOptions(name string, mac string, addressType string, matchClient string, options []map[string]any) string {
 	optionsStr := utils.ConvertSliceOfMapsToHCL(options)
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_options" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     options = %s
     use_options = true
 }
-`, name, optionsStr)
+`, name, mac, addressType, matchClient, optionsStr)
 }
 
-func testAccRoaminghostPreferredLifetime(name string, preferredLifetime string) string {
+func testAccRoaminghostPreferredLifetime(name string, mac string, addressType string, matchClient string, preferredLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_preferred_lifetime" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     preferred_lifetime = %q
     use_preferred_lifetime = true
 }
-`, name, preferredLifetime)
+`, name, mac, addressType, matchClient, preferredLifetime)
 }
 
-func testAccRoaminghostPxeLeaseTime(name string, pxeLeaseTime string) string {
+func testAccRoaminghostPxeLeaseTime(name string, mac string, addressType string, matchClient string, pxeLeaseTime string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_pxe_lease_time" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     pxe_lease_time = %q
     use_pxe_lease_time = true
 }
-`, name, pxeLeaseTime)
+`, name, mac, addressType, matchClient, pxeLeaseTime)
 }
 
-func testAccRoaminghostTemplate(name string, template string) string {
+func testAccRoaminghostTemplate(name string, mac string, addressType string, matchClient string, template string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_template" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     template = %q
 }
-`, name, template)
+`, name, mac, addressType, matchClient, template)
 }
 
-func testAccRoaminghostUseBootfile(name string, useBootfile string) string {
+func testAccRoaminghostUseBootfile(name string, mac string, addressType string, matchClient string, useBootfile string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_bootfile" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_bootfile = %q
 }
-`, name, useBootfile)
+`, name, mac, addressType, matchClient, useBootfile)
 }
 
-func testAccRoaminghostUseBootserver(name string, useBootserver string) string {
+func testAccRoaminghostUseBootserver(name string, mac string, addressType string, matchClient string, useBootserver string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_bootserver" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_bootserver = %q
 }
-`, name, useBootserver)
+`, name, mac, addressType, matchClient, useBootserver)
 }
 
-func testAccRoaminghostUseDdnsDomainname(name string, useDdnsDomainname string) string {
+func testAccRoaminghostUseDdnsDomainname(name string, mac string, addressType string, matchClient string, useDdnsDomainname string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_ddns_domainname" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_ddns_domainname = %q
 }
-`, name, useDdnsDomainname)
+`, name, mac, addressType, matchClient, useDdnsDomainname)
 }
 
-func testAccRoaminghostUseDenyBootp(name string, useDenyBootp string) string {
+func testAccRoaminghostUseDenyBootp(name string, mac string, addressType string, matchClient string, useDenyBootp string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_deny_bootp" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_deny_bootp = %q
 }
-`, name, useDenyBootp)
+`, name, mac, addressType, matchClient, useDenyBootp)
 }
 
-func testAccRoaminghostUseEnableDdns(name string, useEnableDdns string) string {
+func testAccRoaminghostUseEnableDdns(name string, mac string, addressType string, matchClient string, useEnableDdns string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_enable_ddns" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_enable_ddns = %q
 }
-`, name, useEnableDdns)
+`, name, mac, addressType, matchClient, useEnableDdns)
 }
 
-func testAccRoaminghostUseIgnoreDhcpOptionListRequest(name string, useIgnoreDhcpOptionListRequest string) string {
+func testAccRoaminghostUseIgnoreDhcpOptionListRequest(name string, mac string, addressType string, matchClient string, useIgnoreDhcpOptionListRequest string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_ignore_dhcp_option_list_request" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_ignore_dhcp_option_list_request = %q
 }
-`, name, useIgnoreDhcpOptionListRequest)
+`, name, mac, addressType, matchClient, useIgnoreDhcpOptionListRequest)
 }
 
-func testAccRoaminghostUseIpv6DdnsDomainname(name string, useIpv6DdnsDomainname string) string {
+func testAccRoaminghostUseIpv6DdnsDomainname(name string, mac string, addressType string, matchClient string, useIpv6DdnsDomainname string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_ipv6_ddns_domainname" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_ipv6_ddns_domainname = %q
 }
-`, name, useIpv6DdnsDomainname)
+`, name, mac, addressType, matchClient, useIpv6DdnsDomainname)
 }
 
-func testAccRoaminghostUseIpv6DomainName(name string, useIpv6DomainName string) string {
+func testAccRoaminghostUseIpv6DomainName(name string, mac string, addressType string, matchClient string, useIpv6DomainName string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_ipv6_domain_name" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_ipv6_domain_name = %q
 }
-`, name, useIpv6DomainName)
+`, name, mac, addressType, matchClient, useIpv6DomainName)
 }
 
-func testAccRoaminghostUseIpv6DomainNameServers(name string, useIpv6DomainNameServers string) string {
+func testAccRoaminghostUseIpv6DomainNameServers(name string, mac string, addressType string, matchClient string, useIpv6DomainNameServers string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_ipv6_domain_name_servers" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_ipv6_domain_name_servers = %q
 }
-`, name, useIpv6DomainNameServers)
+`, name, mac, addressType, matchClient, useIpv6DomainNameServers)
 }
 
-func testAccRoaminghostUseIpv6EnableDdns(name string, useIpv6EnableDdns string) string {
+func testAccRoaminghostUseIpv6EnableDdns(name string, mac string, addressType string, matchClient string, useIpv6EnableDdns string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_ipv6_enable_ddns" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_ipv6_enable_ddns = %q
 }
-`, name, useIpv6EnableDdns)
+`, name, mac, addressType, matchClient, useIpv6EnableDdns)
 }
 
-func testAccRoaminghostUseIpv6Options(name string, useIpv6Options string) string {
+func testAccRoaminghostUseIpv6Options(name string, mac string, addressType string, matchClient string, useIpv6Options string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_ipv6_options" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_ipv6_options = %q
 }
-`, name, useIpv6Options)
+`, name, mac, addressType, matchClient, useIpv6Options)
 }
 
-func testAccRoaminghostUseNextserver(name string, useNextserver string) string {
+func testAccRoaminghostUseNextserver(name string, mac string, addressType string, matchClient string, useNextserver string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_nextserver" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_nextserver = %q
 }
-`, name, useNextserver)
+`, name, mac, addressType, matchClient, useNextserver)
 }
 
-func testAccRoaminghostUseOptions(name string, useOptions string) string {
+func testAccRoaminghostUseOptions(name string, mac string, addressType string, matchClient string, useOptions string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_options" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_options = %q
 }
-`, name, useOptions)
+`, name, mac, addressType, matchClient, useOptions)
 }
 
-func testAccRoaminghostUsePreferredLifetime(name string, usePreferredLifetime string) string {
+func testAccRoaminghostUsePreferredLifetime(name string, mac string, addressType string, matchClient string, usePreferredLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_preferred_lifetime" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_preferred_lifetime = %q
 }
-`, name, usePreferredLifetime)
+`, name, mac, addressType, matchClient, usePreferredLifetime)
 }
 
-func testAccRoaminghostUsePxeLeaseTime(name string, usePxeLeaseTime string) string {
+func testAccRoaminghostUsePxeLeaseTime(name string, mac string, addressType string, matchClient string, usePxeLeaseTime string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_pxe_lease_time" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_pxe_lease_time = %q
 }
-`, name, usePxeLeaseTime)
+`, name, mac, addressType, matchClient, usePxeLeaseTime)
 }
 
-func testAccRoaminghostUseValidLifetime(name string, useValidLifetime string) string {
+func testAccRoaminghostUseValidLifetime(name string, mac string, addressType string, matchClient string, useValidLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_valid_lifetime" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     use_valid_lifetime = %q
 }
-`, name, useValidLifetime)
+`, name, mac, addressType, matchClient, useValidLifetime)
 }
 
-func testAccRoaminghostValidLifetime(name string, validLifetime string) string {
+func testAccRoaminghostValidLifetime(name string, mac string, addressType string, matchClient string, validLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_valid_lifetime" {
     name = %q
+    mac = %q
+    address_type = %q
+    match_client = %q
     valid_lifetime = %q
     use_valid_lifetime = true
 }
-`, name, validLifetime)
+`, name, mac, addressType, matchClient, validLifetime)
 }
