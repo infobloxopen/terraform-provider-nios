@@ -22,22 +22,23 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordRpzCnameModel struct {
-	Ref         types.String `tfsdk:"ref"`
-	Canonical   types.String `tfsdk:"canonical"`
-	Comment     types.String `tfsdk:"comment"`
-	Disable     types.Bool   `tfsdk:"disable"`
-	ExtAttrs    types.Map    `tfsdk:"extattrs"`
-	Name        types.String `tfsdk:"name"`
-	RpZone      types.String `tfsdk:"rp_zone"`
-	Ttl         types.Int64  `tfsdk:"ttl"`
-	UseTtl      types.Bool   `tfsdk:"use_ttl"`
-	View        types.String `tfsdk:"view"`
-	Zone        types.String `tfsdk:"zone"`
-	ExtAttrsAll types.Map    `tfsdk:"extattrs_all"`
+	Ref         types.String                             `tfsdk:"ref"`
+	Canonical   types.String                             `tfsdk:"canonical"`
+	Comment     types.String                             `tfsdk:"comment"`
+	Disable     types.Bool                               `tfsdk:"disable"`
+	ExtAttrs    types.Map                                `tfsdk:"extattrs"`
+	Name        internaltypes.CaseInsensitiveStringValue `tfsdk:"name"`
+	RpZone      types.String                             `tfsdk:"rp_zone"`
+	Ttl         types.Int64                              `tfsdk:"ttl"`
+	UseTtl      types.Bool                               `tfsdk:"use_ttl"`
+	View        types.String                             `tfsdk:"view"`
+	Zone        types.String                             `tfsdk:"zone"`
+	ExtAttrsAll types.Map                                `tfsdk:"extattrs_all"`
 }
 
 var RecordRpzCnameAttrTypes = map[string]attr.Type{
@@ -46,7 +47,7 @@ var RecordRpzCnameAttrTypes = map[string]attr.Type{
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
-	"name":         types.StringType,
+	"name":         internaltypes.CaseInsensitiveString{},
 	"rp_zone":      types.StringType,
 	"ttl":          types.Int64Type,
 	"use_ttl":      types.BoolType,
@@ -94,7 +95,8 @@ var RecordRpzCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
 	"name": schema.StringAttribute{
-		Required: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Required:   true,
 		Validators: []validator.String{
 			customvalidator.IsValidDomainName(),
 			customvalidator.ValidateTrimmedString(),
@@ -157,7 +159,7 @@ func (m *RecordRpzCnameModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		Comment:   flex.ExpandStringPointer(m.Comment),
 		Disable:   flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:  ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Name:      flex.ExpandStringPointer(m.Name),
+		Name:      flex.ExpandStringPointer(m.Name.StringValue),
 		RpZone:    flex.ExpandStringPointer(m.RpZone),
 		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
@@ -190,7 +192,7 @@ func (m *RecordRpzCnameModel) Flatten(ctx context.Context, from *rpz.RecordRpzCn
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.Name = flex.FlattenStringPointer(from.Name)
+	m.Name.StringValue = flex.FlattenStringPointer(from.Name)
 	m.RpZone = flex.FlattenStringPointer(from.RpZone)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
