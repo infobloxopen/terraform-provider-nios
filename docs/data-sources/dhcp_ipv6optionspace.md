@@ -48,7 +48,7 @@ Required:
 Optional:
 
 - `comment` (String) A descriptive comment of a DHCP IPv6 option space object.
-- `option_definitions` (List of String) The list of DHCP IPv6 option definition objects.
+- `option_definitions` (List of String) The list of DHCP IPv6 option definition objects. To unset all option definitions, set it an empty list `[]`.
 
 Read-Only:
 

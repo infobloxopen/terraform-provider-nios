@@ -28,6 +28,7 @@ var readableAttributesForIpv6dhcpoptionspace = "comment,enterprise_number,name,o
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &Ipv6dhcpoptionspaceResource{}
 var _ resource.ResourceWithImportState = &Ipv6dhcpoptionspaceResource{}
+var _ resource.ResourceWithModifyPlan = &Ipv6dhcpoptionspaceResource{}
 
 func NewIpv6dhcpoptionspaceResource() resource.Resource {
 	return &Ipv6dhcpoptionspaceResource{}
@@ -67,6 +68,59 @@ func (r *Ipv6dhcpoptionspaceResource) Configure(ctx context.Context, req resourc
 	}
 
 	r.client = client
+}
+
+func (r *Ipv6dhcpoptionspaceResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// If this is a destroy operation, no need to modify plan
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	// If this is a create operation, no need to modify plan
+	if req.State.Raw.IsNull() {
+		return
+	}
+
+	var plan Ipv6dhcpoptionspaceModel
+	var state Ipv6dhcpoptionspaceModel
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If option_definitions is Unknown in plan (user didn't set it explicitly)
+	// Fetch the latest state from the api
+	if plan.OptionDefinitions.IsUnknown() {
+		apiRes, _, err := r.client.DHCPAPI.
+			Ipv6dhcpoptionspaceAPI.
+			Read(ctx, utils.ExtractResourceRef(state.Ref.ValueString())).
+			ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
+			ReturnAsObject(1).
+			Execute()
+
+		if err == nil {
+			res := apiRes.GetIpv6dhcpoptionspaceResponseObjectAsResult.GetResult()
+
+			// Create a temporary model to flatten the api response
+			var apiData Ipv6dhcpoptionspaceModel
+			apiData.Flatten(ctx, &res, &resp.Diagnostics)
+
+			if !resp.Diagnostics.HasError() {
+				// Use the api's option_definitions value
+				plan.OptionDefinitions = apiData.OptionDefinitions
+				resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
+			}
+		} else {
+			// In case of error, fallback to state value
+			if !state.OptionDefinitions.IsNull() {
+				plan.OptionDefinitions = state.OptionDefinitions
+				resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
+			}
+		}
+	}
 }
 
 func (r *Ipv6dhcpoptionspaceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
