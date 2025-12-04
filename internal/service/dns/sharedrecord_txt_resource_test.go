@@ -215,6 +215,22 @@ func TestAccSharedrecordTxtResource_Text(t *testing.T) {
 			},
 			// Update and Read
 			{
+				Config: testAccSharedrecordTxtText(name, sharedRecordGroup, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSharedrecordTxtExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "text", ""),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccSharedrecordTxtText(name, sharedRecordGroup, "\"   sample text    \""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSharedrecordTxtExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "text", "\"   sample text    \""),
+				),
+			},
+			// Update and Read
+			{
 				Config: testAccSharedrecordTxtText(name, sharedRecordGroup, text2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordTxtExists(context.Background(), resourceName, &v),
