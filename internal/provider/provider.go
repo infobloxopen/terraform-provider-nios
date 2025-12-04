@@ -248,6 +248,12 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewIpv6dhcpoptionspaceDataSource,
 		dhcp.NewIpv6dhcpoptiondefinitionDataSource,
 		dhcp.NewIpv6fixedaddresstemplateDataSource,
+		dhcp.NewDhcpoptionspaceDataSource,
+		dhcp.NewDhcpoptiondefinitionDataSource,
+		dhcp.NewFixedaddresstemplateDataSource,
+		dhcp.NewIpv6sharednetworkDataSource,
+		dhcp.NewIpv6rangeDataSource,
+		dhcp.NewFiltermacDataSource,
 		dhcp.NewDhcpfailoverDataSource,
 
 		dtc.NewDtcLbdnDataSource,
