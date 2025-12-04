@@ -288,18 +288,18 @@ func TestAccNetworktemplateResource_Bootserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateBootserver(name, 24, "test_bootserver"),
+				Config: testAccNetworktemplateBootserver(name, 24, "test_bootserver.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bootserver", "test_bootserver"),
+					resource.TestCheckResourceAttr(resourceName, "bootserver", "test_bootserver.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateBootserver(name, 24, "updated_test_bootserver"),
+				Config: testAccNetworktemplateBootserver(name, 24, "1.1.1.1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bootserver", "updated_test_bootserver"),
+					resource.TestCheckResourceAttr(resourceName, "bootserver", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -308,8 +308,8 @@ func TestAccNetworktemplateResource_Bootserver(t *testing.T) {
 }
 
 // The testcase will fail, as this is a known issue
-// If the user is a cloud-user, then they need Terraform internal ID with cloud permission and enable cloud delegation for the user to create a range template.
-// if the user is a non cloud-user, they need to have  Terraform internal ID without cloud permission.
+// If the user is a cloud-user, then they need Terraform internal ID with cloud permission and enable cloud delegation for the user to create a network template.
+// If the user is a non cloud-user, they need to have  Terraform internal ID without cloud permission.
 func TestAccNetworktemplateResource_CloudApiCompatible(t *testing.T) {
 	t.Skip("Skipping this test as it is a known issue.")
 	var resourceName = "nios_ipam_networktemplate.test_cloud_api_compatible"
@@ -390,10 +390,10 @@ func TestAccNetworktemplateResource_DdnsDomainname(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateDdnsDomainname(name, 24, "UPDATED_ddns_domain.name"),
+				Config: testAccNetworktemplateDdnsDomainname(name, 24, "updated_ddns_domain.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "UPDATED_ddns_domain.name"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "updated_ddns_domain.name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -555,8 +555,8 @@ func TestAccNetworktemplateResource_DelegatedMember(t *testing.T) {
 	var v ipam.Networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
 	delegatedMemberVal := map[string]any{
-		"name":     "infoblox.172_28_82_250",
-		"ipv4addr": "172.28.82.250",
+		"name":     "infoblox.member",
+		"ipv4addr": "6.6.6.6",
 	}
 	delegatedMemberValUpdated := map[string]any{
 		"name":     "infoblox.localdomain",
@@ -1227,7 +1227,8 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 				Config: testAccNetworktemplateMembers(name, 24, membersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members", "MEMBERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "members.struct", "dhcpmember"),
+					resource.TestCheckResourceAttr(resourceName, "members.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -1235,8 +1236,8 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 				Config: testAccNetworktemplateMembers(name, 24, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members", "MEMBERS_UPDATE_REPLACE_ME"),
-				),
+					resource.TestCheckResourceAttr(resourceName, "members.struct", "dhcpmember"),
+					resource.TestCheckResourceAttr(resourceName, "members.name", "infoblox.member")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -1314,18 +1315,18 @@ func TestAccNetworktemplateResource_Nextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworktemplateNextserver(name, 24, "NEXTSERVER_REPLACE_ME"),
+				Config: testAccNetworktemplateNextserver(name, 24, "example_next_server.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "nextserver", "example_next_server.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworktemplateNextserver(name, 24, "NEXTSERVER_UPDATE_REPLACE_ME"),
+				Config: testAccNetworktemplateNextserver(name, 24, "updated_example_next_server.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "nextserver", "updated_example_next_server.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

@@ -20,6 +20,7 @@ var readableAttributesForNetworktemplate = "allow_any_netmask,authority,auto_cre
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &NetworktemplateResource{}
 var _ resource.ResourceWithImportState = &NetworktemplateResource{}
+var _ resource.ResourceWithValidateConfig = &NetworktemplateResource{}
 
 func NewNetworktemplateResource() resource.Resource {
 	return &NetworktemplateResource{}
@@ -358,7 +359,7 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 			23: true,
 		}
 
-		var options []NetworkOptionsModel
+		var options []NetworktemplateOptionsModel
 		diags := data.Options.ElementsAs(ctx, &options, false)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -418,6 +419,17 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 						optionName),
 				)
 			}
+		}
+	}
+
+	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
+		// Check if ddns_use_option81 is not set to true
+		if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ddns_server_always_updates"),
+				"Invalid Configuration",
+				"ddns_use_option81 must be set to true if ddns_server_always_updates is configured.",
+			)
 		}
 	}
 

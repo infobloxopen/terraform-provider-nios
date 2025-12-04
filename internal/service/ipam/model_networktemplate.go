@@ -272,6 +272,7 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  int64default.StaticInt64(0),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ddns_ttl")),
+			int64validator.Between(0, 4294967295),
 		},
 		MarkdownDescription: "The DNS update Time to Live (TTL) value of a DHCP network object. The TTL is a 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
 	},
@@ -343,9 +344,12 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if DHCP threshold warnings are sent through email.",
 	},
 	"enable_pxe_lease_time": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("pxe_lease_time")),
+		},
 		MarkdownDescription: "Set this to True if you want the DHCP server to use a different lease time for PXE clients.",
 	},
 	"enable_snmp_warnings": schema.BoolAttribute{
@@ -381,10 +385,12 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of fixed address templates assigned to this network template object. When you create a network based on a network template object that contains fixed address templates, the fixed addresses are created based on the associated fixed address templates.",
 	},
 	"high_water_mark": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(95),
-		Validators:          []validator.Int64{},
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(95),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 100),
+		},
 		MarkdownDescription: "The percentage of DHCP network usage threshold above which network usage is not expected and may warrant your attention. When the high watermark is reached, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 	},
 	"high_water_mark_reset": schema.Int64Attribute{
@@ -438,6 +444,7 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  int64default.StaticInt64(-1),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_lease_scavenge_time")),
+			int64validator.Between(86400, 2147472000),
 		},
 		MarkdownDescription: "An integer that specifies the period of time (in seconds) that frees and backs up leases remained in the database before they are automatically deleted. To disable lease scavenging, set the parameter to -1. The minimum positive value must be greater than 86400 seconds (1 day).",
 	},
@@ -454,17 +461,21 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on the this network template. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
 	"low_water_mark": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(0),
-		Validators:          []validator.Int64{},
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(0),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 100),
+		},
 		MarkdownDescription: "The percentage of DHCP network usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
 	},
 	"low_water_mark_reset": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(10),
-		Validators:          []validator.Int64{},
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(10),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 100),
+		},
 		MarkdownDescription: "The percentage of DHCP network usage threshold below which network usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.",
 	},
 	"members": schema.ListNestedAttribute{
