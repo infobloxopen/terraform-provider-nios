@@ -14,6 +14,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -32,61 +33,61 @@ import (
 )
 
 type RoaminghostModel struct {
-	Ref                            types.String                  `tfsdk:"ref"`
-	AddressType                    types.String                  `tfsdk:"address_type"`
-	Bootfile                       types.String                  `tfsdk:"bootfile"`
-	Bootserver                     types.String                  `tfsdk:"bootserver"`
-	ClientIdentifierPrependZero    types.Bool                    `tfsdk:"client_identifier_prepend_zero"`
-	Comment                        types.String                  `tfsdk:"comment"`
-	DdnsDomainname                 types.String                  `tfsdk:"ddns_domainname"`
-	DdnsHostname                   types.String                  `tfsdk:"ddns_hostname"`
-	DenyBootp                      types.Bool                    `tfsdk:"deny_bootp"`
-	DhcpClientIdentifier           types.String                  `tfsdk:"dhcp_client_identifier"`
-	Disable                        types.Bool                    `tfsdk:"disable"`
-	EnableDdns                     types.Bool                    `tfsdk:"enable_ddns"`
-	EnablePxeLeaseTime             types.Bool                    `tfsdk:"enable_pxe_lease_time"`
-	ExtAttrs                       types.Map                     `tfsdk:"extattrs"`
-	ExtAttrsAll                    types.Map                     `tfsdk:"extattrs_all"`
-	ForceRoamingHostname           types.Bool                    `tfsdk:"force_roaming_hostname"`
-	IgnoreDhcpOptionListRequest    types.Bool                    `tfsdk:"ignore_dhcp_option_list_request"`
-	Ipv6ClientHostname             types.String                  `tfsdk:"ipv6_client_hostname"`
-	Ipv6DdnsDomainname             types.String                  `tfsdk:"ipv6_ddns_domainname"`
-	Ipv6DdnsHostname               types.String                  `tfsdk:"ipv6_ddns_hostname"`
-	Ipv6DomainName                 types.String                  `tfsdk:"ipv6_domain_name"`
-	Ipv6DomainNameServers          types.List                    `tfsdk:"ipv6_domain_name_servers"`
-	Ipv6Duid                       internaltypes.DUIDValue       `tfsdk:"ipv6_duid"`
-	Ipv6EnableDdns                 types.Bool                    `tfsdk:"ipv6_enable_ddns"`
-	Ipv6ForceRoamingHostname       types.Bool                    `tfsdk:"ipv6_force_roaming_hostname"`
-	Ipv6MacAddress                 internaltypes.MACAddressValue `tfsdk:"ipv6_mac_address"`
-	Ipv6MatchOption                types.String                  `tfsdk:"ipv6_match_option"`
-	Ipv6Options                    types.List                    `tfsdk:"ipv6_options"`
-	Ipv6Template                   types.String                  `tfsdk:"ipv6_template"`
-	Mac                            internaltypes.MACAddressValue `tfsdk:"mac"`
-	MatchClient                    types.String                  `tfsdk:"match_client"`
-	Name                           types.String                  `tfsdk:"name"`
-	NetworkView                    types.String                  `tfsdk:"network_view"`
-	Nextserver                     types.String                  `tfsdk:"nextserver"`
-	Options                        types.List                    `tfsdk:"options"`
-	PreferredLifetime              types.Int64                   `tfsdk:"preferred_lifetime"`
-	PxeLeaseTime                   types.Int64                   `tfsdk:"pxe_lease_time"`
-	Template                       types.String                  `tfsdk:"template"`
-	UseBootfile                    types.Bool                    `tfsdk:"use_bootfile"`
-	UseBootserver                  types.Bool                    `tfsdk:"use_bootserver"`
-	UseDdnsDomainname              types.Bool                    `tfsdk:"use_ddns_domainname"`
-	UseDenyBootp                   types.Bool                    `tfsdk:"use_deny_bootp"`
-	UseEnableDdns                  types.Bool                    `tfsdk:"use_enable_ddns"`
-	UseIgnoreDhcpOptionListRequest types.Bool                    `tfsdk:"use_ignore_dhcp_option_list_request"`
-	UseIpv6DdnsDomainname          types.Bool                    `tfsdk:"use_ipv6_ddns_domainname"`
-	UseIpv6DomainName              types.Bool                    `tfsdk:"use_ipv6_domain_name"`
-	UseIpv6DomainNameServers       types.Bool                    `tfsdk:"use_ipv6_domain_name_servers"`
-	UseIpv6EnableDdns              types.Bool                    `tfsdk:"use_ipv6_enable_ddns"`
-	UseIpv6Options                 types.Bool                    `tfsdk:"use_ipv6_options"`
-	UseNextserver                  types.Bool                    `tfsdk:"use_nextserver"`
-	UseOptions                     types.Bool                    `tfsdk:"use_options"`
-	UsePreferredLifetime           types.Bool                    `tfsdk:"use_preferred_lifetime"`
-	UsePxeLeaseTime                types.Bool                    `tfsdk:"use_pxe_lease_time"`
-	UseValidLifetime               types.Bool                    `tfsdk:"use_valid_lifetime"`
-	ValidLifetime                  types.Int64                   `tfsdk:"valid_lifetime"`
+	Ref                            types.String                             `tfsdk:"ref"`
+	AddressType                    types.String                             `tfsdk:"address_type"`
+	Bootfile                       types.String                             `tfsdk:"bootfile"`
+	Bootserver                     types.String                             `tfsdk:"bootserver"`
+	ClientIdentifierPrependZero    types.Bool                               `tfsdk:"client_identifier_prepend_zero"`
+	Comment                        types.String                             `tfsdk:"comment"`
+	DdnsDomainname                 internaltypes.CaseInsensitiveStringValue `tfsdk:"ddns_domainname"`
+	DdnsHostname                   types.String                             `tfsdk:"ddns_hostname"`
+	DenyBootp                      types.Bool                               `tfsdk:"deny_bootp"`
+	DhcpClientIdentifier           types.String                             `tfsdk:"dhcp_client_identifier"`
+	Disable                        types.Bool                               `tfsdk:"disable"`
+	EnableDdns                     types.Bool                               `tfsdk:"enable_ddns"`
+	EnablePxeLeaseTime             types.Bool                               `tfsdk:"enable_pxe_lease_time"`
+	ExtAttrs                       types.Map                                `tfsdk:"extattrs"`
+	ExtAttrsAll                    types.Map                                `tfsdk:"extattrs_all"`
+	ForceRoamingHostname           types.Bool                               `tfsdk:"force_roaming_hostname"`
+	IgnoreDhcpOptionListRequest    types.Bool                               `tfsdk:"ignore_dhcp_option_list_request"`
+	Ipv6ClientHostname             types.String                             `tfsdk:"ipv6_client_hostname"`
+	Ipv6DdnsDomainname             types.String                             `tfsdk:"ipv6_ddns_domainname"`
+	Ipv6DdnsHostname               types.String                             `tfsdk:"ipv6_ddns_hostname"`
+	Ipv6DomainName                 types.String                             `tfsdk:"ipv6_domain_name"`
+	Ipv6DomainNameServers          types.List                               `tfsdk:"ipv6_domain_name_servers"`
+	Ipv6Duid                       internaltypes.DUIDValue                  `tfsdk:"ipv6_duid"`
+	Ipv6EnableDdns                 types.Bool                               `tfsdk:"ipv6_enable_ddns"`
+	Ipv6ForceRoamingHostname       types.Bool                               `tfsdk:"ipv6_force_roaming_hostname"`
+	Ipv6MacAddress                 internaltypes.MACAddressValue            `tfsdk:"ipv6_mac_address"`
+	Ipv6MatchOption                types.String                             `tfsdk:"ipv6_match_option"`
+	Ipv6Options                    types.List                               `tfsdk:"ipv6_options"`
+	Ipv6Template                   types.String                             `tfsdk:"ipv6_template"`
+	Mac                            internaltypes.MACAddressValue            `tfsdk:"mac"`
+	MatchClient                    types.String                             `tfsdk:"match_client"`
+	Name                           types.String                             `tfsdk:"name"`
+	NetworkView                    types.String                             `tfsdk:"network_view"`
+	Nextserver                     types.String                             `tfsdk:"nextserver"`
+	Options                        types.List                               `tfsdk:"options"`
+	PreferredLifetime              types.Int64                              `tfsdk:"preferred_lifetime"`
+	PxeLeaseTime                   types.Int64                              `tfsdk:"pxe_lease_time"`
+	Template                       types.String                             `tfsdk:"template"`
+	UseBootfile                    types.Bool                               `tfsdk:"use_bootfile"`
+	UseBootserver                  types.Bool                               `tfsdk:"use_bootserver"`
+	UseDdnsDomainname              types.Bool                               `tfsdk:"use_ddns_domainname"`
+	UseDenyBootp                   types.Bool                               `tfsdk:"use_deny_bootp"`
+	UseEnableDdns                  types.Bool                               `tfsdk:"use_enable_ddns"`
+	UseIgnoreDhcpOptionListRequest types.Bool                               `tfsdk:"use_ignore_dhcp_option_list_request"`
+	UseIpv6DdnsDomainname          types.Bool                               `tfsdk:"use_ipv6_ddns_domainname"`
+	UseIpv6DomainName              types.Bool                               `tfsdk:"use_ipv6_domain_name"`
+	UseIpv6DomainNameServers       types.Bool                               `tfsdk:"use_ipv6_domain_name_servers"`
+	UseIpv6EnableDdns              types.Bool                               `tfsdk:"use_ipv6_enable_ddns"`
+	UseIpv6Options                 types.Bool                               `tfsdk:"use_ipv6_options"`
+	UseNextserver                  types.Bool                               `tfsdk:"use_nextserver"`
+	UseOptions                     types.Bool                               `tfsdk:"use_options"`
+	UsePreferredLifetime           types.Bool                               `tfsdk:"use_preferred_lifetime"`
+	UsePxeLeaseTime                types.Bool                               `tfsdk:"use_pxe_lease_time"`
+	UseValidLifetime               types.Bool                               `tfsdk:"use_valid_lifetime"`
+	ValidLifetime                  types.Int64                              `tfsdk:"valid_lifetime"`
 }
 
 var RoaminghostAttrTypes = map[string]attr.Type{
@@ -96,7 +97,7 @@ var RoaminghostAttrTypes = map[string]attr.Type{
 	"bootserver":                          types.StringType,
 	"client_identifier_prepend_zero":      types.BoolType,
 	"comment":                             types.StringType,
-	"ddns_domainname":                     types.StringType,
+	"ddns_domainname":                     internaltypes.CaseInsensitiveString{},
 	"ddns_hostname":                       types.StringType,
 	"deny_bootp":                          types.BoolType,
 	"dhcp_client_identifier":              types.StringType,
@@ -194,8 +195,9 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Comment for the roaming host; maximum 256 characters.",
 	},
 	"ddns_domainname": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Computed:   true,
+		Optional:   true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
@@ -243,9 +245,12 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The dynamic DNS updates flag of the roaming host object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.",
 	},
 	"enable_pxe_lease_time": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("pxe_lease_time")),
+		},
 		MarkdownDescription: "Set this to True if you want the DHCP server to use a different lease time for PXE clients.",
 	},
 	"extattrs": schema.MapAttribute{
@@ -314,6 +319,8 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv6_domain_name_servers": schema.ListAttribute{
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
+		Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.AlsoRequires(path.MatchRoot("use_ipv6_domain_name_servers")),
@@ -572,7 +579,7 @@ func (m *RoaminghostModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		Bootserver:                     flex.ExpandStringPointer(m.Bootserver),
 		ClientIdentifierPrependZero:    flex.ExpandBoolPointer(m.ClientIdentifierPrependZero),
 		Comment:                        flex.ExpandStringPointer(m.Comment),
-		DdnsDomainname:                 flex.ExpandStringPointer(m.DdnsDomainname),
+		DdnsDomainname:                 flex.ExpandStringPointer(m.DdnsDomainname.StringValue),
 		DdnsHostname:                   flex.ExpandStringPointer(m.DdnsHostname),
 		DenyBootp:                      flex.ExpandBoolPointer(m.DenyBootp),
 		DhcpClientIdentifier:           flex.ExpandStringPointer(m.DhcpClientIdentifier),
@@ -650,7 +657,7 @@ func (m *RoaminghostModel) Flatten(ctx context.Context, from *dhcp.Roaminghost, 
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
 	m.ClientIdentifierPrependZero = types.BoolPointerValue(from.ClientIdentifierPrependZero)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-	m.DdnsDomainname = flex.FlattenStringPointer(from.DdnsDomainname)
+	m.DdnsDomainname.StringValue = flex.FlattenStringPointer(from.DdnsDomainname)
 	m.DdnsHostname = flex.FlattenStringPointer(from.DdnsHostname)
 	m.DenyBootp = types.BoolPointerValue(from.DenyBootp)
 	m.DhcpClientIdentifier = flex.FlattenStringPointer(from.DhcpClientIdentifier)
