@@ -129,6 +129,12 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewIPAssociationResource,
 		dns.NewSharedrecordgroupResource,
 		dns.NewSharedrecordTxtResource,
+		dns.NewSharedrecordMxResource,
+		dns.NewSharedrecordSrvResource,
+		dns.NewSharedrecordAResource,
+		dns.NewSharedrecordCnameResource,
+		dns.NewSharedrecordAaaaResource,
+
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
 		dhcp.NewRangeResource,
