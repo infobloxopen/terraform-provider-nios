@@ -502,42 +502,6 @@ func TestAccDhcpfailoverResource_MsHotstandbyPartnerRole(t *testing.T) {
 	})
 }
 
-// func TestAccDhcpfailoverResource_MsSharedSecret(t *testing.T) {
-// 	var resourceName = "nios_dhcp_dhcpfailover.test_ms_shared_secret"
-// 	var v dhcp.Dhcpfailover
-// 	name := acctest.RandomNameWithPrefix("failover")
-// 	primary := "infoblox.172_28_83_59"
-// 	secondary := "infoblox.172_28_82_171"
-// 	primaryServerType := "GRID"
-// 	secondaryServerType := "GRID"
-// 	sharedSecret := "MS_SHARED_SECRET_REPLACE_ME"
-// 	//sharedSecretUpdate := "MS_SHARED_SECRET_UPDATE_REPLACE_ME"
-
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read
-// 			{
-// 				Config: testAccDhcpfailoverMsSharedSecret(sharedSecret, name, primary, secondary, primaryServerType, secondaryServerType),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
-// 					//resource.TestCheckResourceAttr(resourceName, "ms_shared_secret", "MS_SHARED_SECRET_REPLACE_ME"),
-// 				),
-//},
-// Update and Read
-// {
-// 	Config: testAccDhcpfailoverMsSharedSecret(sharedSecretUpdate, name, primary, secondary, primaryServerType, secondaryServerType),
-// 	Check: resource.ComposeTestCheckFunc(
-// 		testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
-// 		//resource.TestCheckResourceAttr(resourceName, "ms_shared_secret", "MS_SHARED_SECRET_UPDATE_REPLACE_ME"),
-// 	),
-// },
-// Delete testing automatically occurs in TestCase
-//	},
-//})
-//}
-
 func TestAccDhcpfailoverResource_MsSwitchoverInterval(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_ms_switchover_interval"
 	var v dhcp.Dhcpfailover
@@ -1135,19 +1099,6 @@ resource "nios_dhcp_dhcpfailover" "test_ms_hotstandby_partner_role" {
 }
 `, msHotstandbyPartnerRole, msFailoverMode, name, primary, secondary, primaryServerType, secondaryServerType)
 }
-
-// func testAccDhcpfailoverMsSharedSecret(msSharedSecret string, name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
-// 	return fmt.Sprintf(`
-// resource "nios_dhcp_dhcpfailover" "test_ms_shared_secret" {
-//     ms_shared_secret = %q
-// 	name = %q
-// 	primary = %q
-// 	secondary = %q
-// 	primary_server_type = %q
-// 	secondary_server_type = %q
-// }
-// `, msSharedSecret, name, primary, secondary, primaryServerType, secondaryServerType)
-// }
 
 func testAccDhcpfailoverMsSwitchoverInterval(msSwitchoverInterval string, name string, primary string, secondary string, primaryServerType string, secondaryServerType string, useMsSwitchoverInterval bool, msEnableSwitchoverInterval string) string {
 	return fmt.Sprintf(`

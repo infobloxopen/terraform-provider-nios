@@ -29,6 +29,8 @@ resource "nios_dhcp_dhcpfailover" "dhcpfailover_2" {
   secondary             = "10.197.36.31"
   primary_server_type   = "GRID"
   secondary_server_type = "EXTERNAL"
+  failover_port         = 62001
+  use_failover_port     = true
   extattrs = {
     Site = "NewYork"
   }

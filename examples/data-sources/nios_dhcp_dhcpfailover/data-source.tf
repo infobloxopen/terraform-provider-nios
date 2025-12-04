@@ -11,3 +11,8 @@ data "nios_dhcp_dhcpfailover" "dhcpfailover_by_extattrs" {
     Site = "NewYork"
   }
 }
+
+// Retrieve all the DHCP failovers
+data "nios_dhcp_dhcpfailover" "all_dhcpfailovers" {
+  // No filters applied, retrieves all DHCP failovers
+}

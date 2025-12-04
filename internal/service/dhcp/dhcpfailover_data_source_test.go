@@ -116,7 +116,7 @@ resource "nios_dhcp_dhcpfailover" "test" {
 }
 data "nios_dhcp_dhcpfailover" "test" {
   filters = {
-	name = nios_dhcp_dhcpfailover.test.name
+    name = nios_dhcp_dhcpfailover.test.name
   }
 }
 `, name, primary, secondary, primaryServerType, secondaryServerType)
@@ -137,7 +137,7 @@ resource "nios_dhcp_dhcpfailover" "test" {
 
 data "nios_dhcp_dhcpfailover" "test" {
   extattrfilters = {
-	Site = nios_dhcp_dhcpfailover.test.extattrs.Site
+    Site = nios_dhcp_dhcpfailover.test.extattrs.Site
   }
 }
 `, name, primary, secondary, primaryServerType, secondaryServerType, extAttrsValue)
