@@ -25,7 +25,7 @@ func TestAccDhcpfailoverResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test"
 	var v dhcp.Dhcpfailover
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -57,7 +57,7 @@ func TestAccDhcpfailoverResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_dhcpfailover.test"
 	var v dhcp.Dhcpfailover
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckDhcpfailoverDestroy(context.Background(), &v),
@@ -83,7 +83,7 @@ func TestAccDhcpfailoverResource_Comment(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -119,7 +119,7 @@ func TestAccDhcpfailoverResource_ExtAttrs(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -156,7 +156,7 @@ func TestAccDhcpfailoverResource_FailoverPort(t *testing.T) {
 	secondaryServerType := "GRID"
 	useFailoverPort := true
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -191,7 +191,7 @@ func TestAccDhcpfailoverResource_LoadBalanceSplit(t *testing.T) {
 	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -227,7 +227,7 @@ func TestAccDhcpfailoverResource_MaxClientLeadTime(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -263,7 +263,7 @@ func TestAccDhcpfailoverResource_MaxLoadBalanceDelay(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -299,7 +299,7 @@ func TestAccDhcpfailoverResource_MaxResponseDelay(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -335,7 +335,7 @@ func TestAccDhcpfailoverResource_MaxUnackedUpdates(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -371,7 +371,7 @@ func TestAccDhcpfailoverResource_MsEnableAuthentication(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -409,7 +409,7 @@ func TestAccDhcpfailoverResource_MsEnableSwitchoverInterval(t *testing.T) {
 	secondaryServerType := "GRID"
 	useMSSwitchoverInterval := true
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -444,7 +444,7 @@ func TestAccDhcpfailoverResource_MsFailoverMode(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	name := acctest.RandomNameWithPrefix("failover")
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -480,7 +480,7 @@ func TestAccDhcpfailoverResource_MsHotstandbyPartnerRole(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -518,7 +518,7 @@ func TestAccDhcpfailoverResource_MsSwitchoverInterval(t *testing.T) {
 	useMsSwitchoverInterval := true
 	msEnableSwitchoverInterval := "true"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -552,7 +552,7 @@ func TestAccDhcpfailoverResource_Name(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	updateFailoverName := acctest.RandomNameWithPrefix("failover_updated")
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -587,7 +587,7 @@ func TestAccDhcpfailoverResource_Primary(t *testing.T) {
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	updatedPrimary := "infoblox.member2"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -623,7 +623,7 @@ func TestAccDhcpfailoverResource_PrimaryServerType(t *testing.T) {
 	updatedPrimaryServerType := "EXTERNAL"
 	primaryServer := "172.28.82.25"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -661,7 +661,7 @@ func TestAccDhcpfailoverResource_RecycleLeases(t *testing.T) {
 	useRecycleLeases := true
 	useUpdateRecycleLeases := false
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -696,7 +696,7 @@ func TestAccDhcpfailoverResource_Secondary(t *testing.T) {
 	secondaryServerType := "GRID"
 	secondaryUpdate := "infoblox.member2"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -732,7 +732,7 @@ func TestAccDhcpfailoverResource_SecondaryServerType(t *testing.T) {
 	secondaryServer := "10.197.36.31"
 	secondaryServerTypeUpdate := "EXTERNAL"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -768,7 +768,7 @@ func TestAccDhcpfailoverResource_UseFailoverPort(t *testing.T) {
 	useFailoverPort := "true"
 	updateUseFailoverPort := "false"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -806,7 +806,7 @@ func TestAccDhcpfailoverResource_UseMsSwitchoverInterval(t *testing.T) {
 	use_enable_switchover_interval := "true"
 	update_use_enable_switchover_interval := "false"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -842,7 +842,7 @@ func TestAccDhcpfailoverResource_UseRecycleLeases(t *testing.T) {
 	useRecycleLeases := "true"
 	updateUseRecycleLeases := "false"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
