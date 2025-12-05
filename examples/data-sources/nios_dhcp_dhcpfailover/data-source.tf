@@ -8,7 +8,7 @@ data "nios_dhcp_dhcpfailover" "dhcpfailover_by_name" {
 // Retrieve specific DHCP failovers using Extensible Attributes
 data "nios_dhcp_dhcpfailover" "dhcpfailover_by_extattrs" {
   extattrfilters = {
-    Site = "NewYork"
+    Site = "location-1"
   }
 }
 

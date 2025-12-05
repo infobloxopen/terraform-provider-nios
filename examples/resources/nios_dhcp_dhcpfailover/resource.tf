@@ -1,16 +1,16 @@
-// create a dhcp failover with required fields
+// create Dhcp Failover with Basic Fields
 resource "nios_dhcp_dhcpfailover" "dhcpfailover_1" {
   name                  = "dhcp_failover_1"
-  primary               = "infoblox.172_28_83_59"
-  secondary             = "infoblox.172_28_82_171"
+  primary               = "infoblox.localdomain"
+  secondary             = "infoblox.member1"
   primary_server_type   = "GRID"
   secondary_server_type = "GRID"
 }
 
-// create a dhcp failover with ext-attrs
+// create  Dhcp Failover with Additional Fields
 resource "nios_dhcp_dhcpfailover" "dhcpfailover_2" {
   name                  = "dhcp_failover_2"
-  primary               = "infoblox.member"
+  primary               = "infoblox.member2"
   secondary             = "10.197.36.31"
   primary_server_type   = "GRID"
   secondary_server_type = "EXTERNAL"

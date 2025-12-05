@@ -3,6 +3,7 @@ package dhcp
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -110,16 +111,11 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The value indicating whether the failover association is Microsoft or Grid based. This is a read-only attribute.",
 	},
 	"comment": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString(""),
-		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-			stringvalidator.LengthBetween(0, 256),
-		},
+		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The descriptive comment of a DHCP MAC Filter object.",
 	},
-
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -230,6 +226,7 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.ValidateTrimmedString(),
 			stringvalidator.OneOf("ACTIVE", "PASSIVE"),
 		},
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The partner role in the case of HotStandby.",
 	},
 	"ms_is_conflict": schema.BoolAttribute{
@@ -264,10 +261,7 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The time (in seconds) that DHCPv4 server will wait before transitioning the server from the COMMUNICATION-INT state to PARTNER-DOWN state.",
 	},
 	"name": schema.StringAttribute{
-		Required: true,
-		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-		},
+		Required:            true,
 		MarkdownDescription: "The name of a DHCP failover object.",
 	},
 	"primary": schema.StringAttribute{
@@ -290,9 +284,12 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The primary server status of a DHCP failover object.",
 	},
 	"recycle_leases": schema.BoolAttribute{
-		Computed:            true,
-		Optional:            true,
-		Default:             booldefault.StaticBool(true),
+		Computed: true,
+		Optional: true,
+		Default:  booldefault.StaticBool(true),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_recycle_leases")),
+		},
 		MarkdownDescription: "Determines if the leases are kept in recycle bin until one week after expiration or not.",
 	},
 	"secondary": schema.StringAttribute{

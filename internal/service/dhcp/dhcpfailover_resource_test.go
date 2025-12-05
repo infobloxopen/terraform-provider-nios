@@ -15,6 +15,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+/*
+TODO: grid setup to run test cases
+Grid Members - infoblox.localdomain, infoblox.member2 and infoblox.member1
+*/
 var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failover_port,load_balance_split,max_client_lead_time,max_load_balance_delay,max_response_delay,max_unacked_updates,ms_association_mode,ms_enable_authentication,ms_enable_switchover_interval,ms_failover_mode,ms_failover_partner,ms_hotstandby_partner_role,ms_is_conflict,ms_previous_state,ms_server,ms_state,ms_switchover_interval,name,primary,primary_server_type,primary_state,recycle_leases,secondary,secondary_server_type,secondary_state,use_failover_port,use_ms_switchover_interval,use_recycle_leases"
 
 func TestAccDhcpfailoverResource_basic(t *testing.T) {
@@ -27,13 +31,12 @@ func TestAccDhcpfailoverResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDhcpfailoverBasicConfig("dhcp_failover_test", "infoblox.172_28_83_59", "infoblox.172_28_82_171", "GRID", "GRID"),
+				Config: testAccDhcpfailoverBasicConfig("dhcp_failover_test", "infoblox.localdomain", "infoblox.member1", "GRID", "GRID"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "name", "dhcp_failover_test"),
-					resource.TestCheckResourceAttr(resourceName, "primary", "infoblox.172_28_83_59"),
-					resource.TestCheckResourceAttr(resourceName, "secondary", "infoblox.172_28_82_171"),
+					resource.TestCheckResourceAttr(resourceName, "primary", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "secondary", "infoblox.member1"),
 					resource.TestCheckResourceAttr(resourceName, "primary_server_type", "GRID"),
 					resource.TestCheckResourceAttr(resourceName, "secondary_server_type", "GRID"),
 					// Test fields with default value
@@ -60,7 +63,7 @@ func TestAccDhcpfailoverResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDhcpfailoverDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDhcpfailoverBasicConfig("dhcp_failover_test1", "infoblox.172_28_83_59", "infoblox.172_28_82_171", "GRID", "GRID"),
+				Config: testAccDhcpfailoverBasicConfig("dhcp_failover_test1", "infoblox.localdomain", "infoblox.member1", "GRID", "GRID"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
 					testAccCheckDhcpfailoverDisappears(context.Background(), &v),
@@ -75,8 +78,8 @@ func TestAccDhcpfailoverResource_Comment(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_comment"
 	var v dhcp.Dhcpfailover
 	dhcpfailoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -111,8 +114,8 @@ func TestAccDhcpfailoverResource_ExtAttrs(t *testing.T) {
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 	dhcpfailoverName := acctest.RandomNameWithPrefix("dhcp_failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -147,8 +150,8 @@ func TestAccDhcpfailoverResource_FailoverPort(t *testing.T) {
 	failoverPort := "647"
 	updateFailoverPort := "648"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	useFailoverPort := true
@@ -184,8 +187,8 @@ func TestAccDhcpfailoverResource_LoadBalanceSplit(t *testing.T) {
 	loadBalanceSplit := "120"
 	updateLoadBalanceSplit := "121"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	resource.ParallelTest(t, resource.TestCase{
@@ -219,8 +222,8 @@ func TestAccDhcpfailoverResource_MaxClientLeadTime(t *testing.T) {
 	maxClientLeadTime := "4000"
 	updateMaxClientLeadTime := "4001"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -255,8 +258,8 @@ func TestAccDhcpfailoverResource_MaxLoadBalanceDelay(t *testing.T) {
 	maxLoadBalanceDelay := "5000"
 	updateMaxLoadBalanceDelay := "5001"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -291,8 +294,8 @@ func TestAccDhcpfailoverResource_MaxResponseDelay(t *testing.T) {
 	maxResponseDelay := "6000"
 	updateMaxResponseDelay := "6001"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -327,8 +330,8 @@ func TestAccDhcpfailoverResource_MaxUnackedUpdates(t *testing.T) {
 	maxUnackedUpdates := "7000"
 	updateMaxUnackedUpdates := "7001"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -363,8 +366,8 @@ func TestAccDhcpfailoverResource_MsEnableAuthentication(t *testing.T) {
 	msEnableAuthentication := "true"
 	updateMsEnableAuthentication := "false"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -400,8 +403,8 @@ func TestAccDhcpfailoverResource_MsEnableSwitchoverInterval(t *testing.T) {
 	updateMsEnableSwitchoverInterval := "false"
 	useMSSwitchoverIntervalUpdate := false
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	useMSSwitchoverInterval := true
@@ -436,8 +439,8 @@ func TestAccDhcpfailoverResource_MsFailoverMode(t *testing.T) {
 	var v dhcp.Dhcpfailover
 	msFailoverMode := "HOTSTANDBY"
 	updateMsFailoverMode := "LOADBALANCE"
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	name := acctest.RandomNameWithPrefix("failover")
@@ -472,8 +475,8 @@ func TestAccDhcpfailoverResource_MsHotstandbyPartnerRole(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("failover")
 	msHotstandbyPartnerRole := "ACTIVE"
 	msFailoverMode := "HOTSTANDBY"
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -508,8 +511,8 @@ func TestAccDhcpfailoverResource_MsSwitchoverInterval(t *testing.T) {
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	switchOverInterval := "300"
 	changeSwitchOverInterval := "400"
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	useMsSwitchoverInterval := true
@@ -544,8 +547,8 @@ func TestAccDhcpfailoverResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_name"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	updateFailoverName := acctest.RandomNameWithPrefix("failover_updated")
@@ -577,12 +580,12 @@ func TestAccDhcpfailoverResource_Name(t *testing.T) {
 func TestAccDhcpfailoverResource_Primary(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_primary"
 	var v dhcp.Dhcpfailover
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	updatedPrimary := "infoblox.member"
+	updatedPrimary := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -593,7 +596,7 @@ func TestAccDhcpfailoverResource_Primary(t *testing.T) {
 				Config: testAccDhcpfailoverPrimary(failoverName, primary, secondary, primaryServerType, secondaryServerType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "primary", "infoblox.172_28_83_59"),
+					resource.TestCheckResourceAttr(resourceName, "primary", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -601,7 +604,7 @@ func TestAccDhcpfailoverResource_Primary(t *testing.T) {
 				Config: testAccDhcpfailoverPrimary(failoverName, updatedPrimary, secondary, primaryServerType, secondaryServerType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "primary", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "primary", "infoblox.member2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -612,8 +615,8 @@ func TestAccDhcpfailoverResource_Primary(t *testing.T) {
 func TestAccDhcpfailoverResource_PrimaryServerType(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_primary_server_type"
 	var v dhcp.Dhcpfailover
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	secondaryServerType := "GRID"
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primaryServerType := "GRID"
@@ -649,8 +652,8 @@ func TestAccDhcpfailoverResource_RecycleLeases(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_recycle_leases"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	recycleLeases := true
@@ -687,11 +690,11 @@ func TestAccDhcpfailoverResource_Secondary(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_secondary"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
-	secondaryUpdate := "infoblox.member"
+	secondaryUpdate := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -721,8 +724,8 @@ func TestAccDhcpfailoverResource_Secondary(t *testing.T) {
 func TestAccDhcpfailoverResource_SecondaryServerType(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_secondary_server_type"
 	var v dhcp.Dhcpfailover
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	failoverName := acctest.RandomNameWithPrefix("failover")
@@ -758,8 +761,8 @@ func TestAccDhcpfailoverResource_UseFailoverPort(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_use_failover_port"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	useFailoverPort := "true"
@@ -796,8 +799,8 @@ func TestAccDhcpfailoverResource_UseMsSwitchoverInterval(t *testing.T) {
 	useMsSwitchoverInterval := "true"
 	updateUseMsSwitchoverInterval := "false"
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	use_enable_switchover_interval := "true"
@@ -832,8 +835,8 @@ func TestAccDhcpfailoverResource_UseRecycleLeases(t *testing.T) {
 	var resourceName = "nios_dhcp_dhcpfailover.test_use_recycle_leases"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.172_28_83_59"
-	secondary := "infoblox.172_28_82_171"
+	primary := "infoblox.localdomain"
+	secondary := "infoblox.member1"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	useRecycleLeases := "true"
