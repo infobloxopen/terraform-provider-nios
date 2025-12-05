@@ -413,9 +413,12 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of this roaming host.",
 	},
 	"network_view": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
-		Default:             stringdefault.StaticString("default"),
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("default"),
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of the network view in which this roaming host resides.",
 	},
 	"nextserver": schema.StringAttribute{
@@ -561,7 +564,6 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 	"valid_lifetime": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(43200),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},
@@ -602,7 +604,6 @@ func (m *RoaminghostModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		Mac:                            flex.ExpandMACAddr(m.Mac),
 		MatchClient:                    flex.ExpandStringPointer(m.MatchClient),
 		Name:                           flex.ExpandStringPointer(m.Name),
-		NetworkView:                    flex.ExpandStringPointer(m.NetworkView),
 		Nextserver:                     flex.ExpandStringPointer(m.Nextserver),
 		Options:                        flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandRoaminghostOptions),
 		PreferredLifetime:              flex.ExpandInt64Pointer(m.PreferredLifetime),
@@ -628,6 +629,7 @@ func (m *RoaminghostModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 	if isCreate {
 		to.Template = flex.ExpandStringPointer(m.Template)
 		to.Ipv6Template = flex.ExpandStringPointer(m.Ipv6Template)
+		to.NetworkView = flex.ExpandStringPointer(m.NetworkView)
 	}
 	return to
 }

@@ -16,25 +16,6 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-/*
-// Manage dhcp Roaminghost with Basic Fields
-resource "nios_dhcp_roaminghost" "dhcp_roaminghost_basic" {
-    name = "NAME_REPLACE_ME"
-}
-
-// Manage dhcp Roaminghost with Additional Fields
-resource "nios_dhcp_roaminghost" "dhcp_roaminghost_with_additional_fields" {
-    name = "NAME_REPLACE_ME"
-
-// TODO : Add additional optional fields below
-
-    //Extensible Attributes
-    extattrs = {
-        Site = "location-1"
-    }
-}
-*/
-
 var readableAttributesForRoaminghost = "address_type,bootfile,bootserver,client_identifier_prepend_zero,comment,ddns_domainname,ddns_hostname,deny_bootp,dhcp_client_identifier,disable,enable_ddns,enable_pxe_lease_time,extattrs,force_roaming_hostname,ignore_dhcp_option_list_request,ipv6_client_hostname,ipv6_ddns_domainname,ipv6_ddns_hostname,ipv6_domain_name,ipv6_domain_name_servers,ipv6_duid,ipv6_enable_ddns,ipv6_force_roaming_hostname,ipv6_mac_address,ipv6_match_option,ipv6_options,mac,match_client,name,network_view,nextserver,options,preferred_lifetime,pxe_lease_time,use_bootfile,use_bootserver,use_ddns_domainname,use_deny_bootp,use_enable_ddns,use_ignore_dhcp_option_list_request,use_ipv6_ddns_domainname,use_ipv6_domain_name,use_ipv6_domain_name_servers,use_ipv6_enable_ddns,use_ipv6_options,use_nextserver,use_options,use_preferred_lifetime,use_pxe_lease_time,use_valid_lifetime,valid_lifetime"
 
 func TestAccRoaminghostResource_basic(t *testing.T) {
@@ -770,10 +751,10 @@ func TestAccRoaminghostResource_Ipv6Duid(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostIpv6Duid(name, "IPV6", "DUID", "02:03:01:01:00:90:7f:97:ad:95"),
+				Config: testAccRoaminghostIpv6Duid(name, "IPV6", "DUID", "03:03:01:01:00:90:7f:97:ad:95"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_duid", "02:03:01:01:00:90:7f:97:ad:95"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_duid", "03:03:01:01:00:90:7f:97:ad:95"),
 				),
 			},
 			// Update and Read
@@ -1092,18 +1073,10 @@ func TestAccRoaminghostResource_NetworkView(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostNetworkView(name, mac, "IPV4", "MAC_ADDRESS", "NETWORK_VIEW_REPLACE_ME"),
+				Config: testAccRoaminghostNetworkView(name, mac, "IPV4", "MAC_ADDRESS", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network_view", "NETWORK_VIEW_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRoaminghostNetworkView(name, mac, "IPV4", "MAC_ADDRESS", "NETWORK_VIEW_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network_view", "NETWORK_VIEW_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "network_view", "default"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1123,18 +1096,18 @@ func TestAccRoaminghostResource_Nextserver(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostNextserver(name, mac, "IPV4", "MAC_ADDRESS", "NEXTSERVER_REPLACE_ME"),
+				Config: testAccRoaminghostNextserver(name, mac, "IPV4", "MAC_ADDRESS", "1.1.1.1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "nextserver", "1.1.1.1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostNextserver(name, mac, "IPV4", "MAC_ADDRESS", "NEXTSERVER_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostNextserver(name, mac, "IPV4", "MAC_ADDRESS", "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "nextserver", "NEXTSERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "nextserver", "example.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1147,8 +1120,24 @@ func TestAccRoaminghostResource_Options(t *testing.T) {
 	var v dhcp.Roaminghost
 	name := acctest.RandomNameWithPrefix("roaminghost")
 	mac := acctest.RandomMACAddress()
-	optionsVal := []map[string]any{}
-	optionsValUpdated := []map[string]any{}
+	optionsVal := []map[string]any{
+		{
+			"name":  "time-offset",
+			"num":   2,
+			"value": "50",
+		},
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
+	optionsValUpdated := []map[string]any{
+
+		{
+			"name":  "subnet-mask",
+			"value": "1.1.1.1",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1159,7 +1148,12 @@ func TestAccRoaminghostResource_Options(t *testing.T) {
 				Config: testAccRoaminghostOptions(name, mac, "IPV4", "MAC_ADDRESS", optionsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "time-offset"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "50"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "1.1.1.1"),
 				),
 			},
 			// Update and Read
@@ -1167,7 +1161,9 @@ func TestAccRoaminghostResource_Options(t *testing.T) {
 				Config: testAccRoaminghostOptions(name, mac, "IPV4", "MAC_ADDRESS", optionsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "subnet-mask"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1187,18 +1183,18 @@ func TestAccRoaminghostResource_PreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostPreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "PREFERRED_LIFETIME_REPLACE_ME"),
+				Config: testAccRoaminghostPreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "43000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "PREFERRED_LIFETIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "43000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostPreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostPreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "45000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "45000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1217,18 +1213,18 @@ func TestAccRoaminghostResource_PxeLeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostPxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "PXE_LEASE_TIME_REPLACE_ME"),
+				Config: testAccRoaminghostPxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "1000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "PXE_LEASE_TIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "1000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostPxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostPxeLeaseTime(name, mac, "IPV4", "MAC_ADDRESS", "2000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "PXE_LEASE_TIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "pxe_lease_time", "2000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1744,18 +1740,18 @@ func TestAccRoaminghostResource_ValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostValidLifetime(name, mac, "IPV4", "MAC_ADDRESS", "VALID_LIFETIME_REPLACE_ME"),
+				Config: testAccRoaminghostValidLifetime(name, mac, "IPV4", "MAC_ADDRESS", "4000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "4000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostValidLifetime(name, mac, "IPV4", "MAC_ADDRESS", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccRoaminghostValidLifetime(name, mac, "IPV4", "MAC_ADDRESS", "4500"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "4500"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2395,6 +2391,7 @@ resource "nios_dhcp_roaminghost" "test_use_ipv6_domain_name" {
     mac = %q
     address_type = %q
     match_client = %q
+	ipv6_domain_name = "example.com"
     use_ipv6_domain_name = %q
 }
 `, name, mac, addressType, matchClient, useIpv6DomainName)

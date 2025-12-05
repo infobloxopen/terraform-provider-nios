@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -20,6 +21,7 @@ var readableAttributesForRoaminghost = "address_type,bootfile,bootserver,client_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RoaminghostResource{}
 var _ resource.ResourceWithImportState = &RoaminghostResource{}
+var _ resource.ResourceWithValidateConfig = &RoaminghostResource{}
 
 func NewRoaminghostResource() resource.Resource {
 	return &RoaminghostResource{}
@@ -36,7 +38,7 @@ func (r *RoaminghostResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *RoaminghostResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Roaminghost resource object.",
+		MarkdownDescription: "Manages a DHCP Roaminghost.",
 		Attributes:          RoaminghostResourceSchemaAttributes,
 	}
 }
@@ -326,6 +328,232 @@ func (r *RoaminghostResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Roaminghost, got error: %s", err))
 		return
+	}
+}
+
+func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data RoaminghostModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var options []RoaminghostOptionsModel
+	diags := data.Options.ElementsAs(ctx, &options, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if options are defined
+	if !data.Options.IsNull() && !data.Options.IsUnknown() {
+		// Special DHCP option names that require use_option to be set
+		specialOptions := map[string]bool{
+			"routers":                  true,
+			"router-templates":         true,
+			"domain-name-servers":      true,
+			"domain-name":              true,
+			"broadcast-address":        true,
+			"broadcast-address-offset": true,
+			"dhcp-lease-time":          true,
+			"dhcp6.name-servers":       true,
+		}
+
+		specialOptionsNum := map[int64]bool{
+			3:  true,
+			6:  true,
+			15: true,
+			28: true,
+			51: true,
+			23: true,
+		}
+
+		for i, option := range options {
+			isSpecialOption := false
+			optionName := ""
+			if option.Value.IsNull() || option.Value.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("value"),
+					"Invalid configuration for DHCP Option",
+					"The 'value' attribute is a required field and must be set for all DHCP Options.",
+				)
+			}
+			if !option.Name.IsNull() && !option.Name.IsUnknown() {
+				optionName = option.Name.ValueString()
+				isSpecialOption = specialOptions[optionName]
+			} else if !option.Num.IsNull() && !option.Num.IsUnknown() {
+				optionNum := option.Num.ValueInt64()
+				isSpecialOption = specialOptionsNum[optionNum]
+				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("name"),
+					"Invalid configuration for DHCP Option",
+					"Either the 'name' or 'num' attribute must be set for all DHCP Options. "+
+						"Missing both attributes for 'option' at index "+fmt.Sprint(i)+".",
+				)
+				continue
+			}
+
+			if option.Value.ValueString() == "" {
+				if !isSpecialOption {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
+					)
+				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
+					)
+				}
+			}
+
+			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("use_option"),
+					"Invalid configuration",
+					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Option '%s'. "+
+						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
+						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
+						optionName),
+				)
+			}
+		}
+	}
+
+	// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+	if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Valid Lifetime",
+						"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+					)
+				}
+			}
+		}
+	}
+
+	addressType := "IPV4"
+	if !data.AddressType.IsNull() && !data.AddressType.IsUnknown() {
+		addressType = data.AddressType.ValueString()
+	}
+
+	switch addressType {
+	case "IPV4":
+		// When address_type is IPV4, match_client is required
+		if data.MatchClient.IsNull() || data.MatchClient.IsUnknown() || data.MatchClient.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration for Match Client",
+				"When 'address_type' is set to 'IPV4' (default), the 'match_client' attribute is required.",
+			)
+		}
+	case "IPV6":
+		// When address_type is IPV6, ipv6_match_option is required
+		if data.Ipv6MatchOption.IsNull() || data.Ipv6MatchOption.IsUnknown() || data.Ipv6MatchOption.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ipv6_match_option"),
+				"Invalid configuration for IPv6 Match Option",
+				"When 'address_type' is set to 'IPV6', the 'ipv6_match_option' attribute is required.",
+			)
+		}
+	case "BOTH":
+		// When address_type is BOTH, both match_client and ipv6_match_option are required
+		if data.MatchClient.IsNull() || data.MatchClient.IsUnknown() || data.MatchClient.ValueString() == "" ||
+			data.Ipv6MatchOption.IsNull() || data.Ipv6MatchOption.IsUnknown() || data.Ipv6MatchOption.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration for Match Client",
+				"When 'address_type' is set to 'BOTH', both 'match_client' and 'ipv6_match_option' attributes are required.",
+			)
+		}
+	}
+
+	var matchClient string
+	if !data.MatchClient.IsNull() && !data.MatchClient.IsUnknown() {
+		matchClient = data.MatchClient.ValueString()
+	}
+
+	switch matchClient {
+	case "MAC_ADDRESS":
+		// When match_client is MAC_ADDRESS, mac is required and dhcp_identifier should not be set
+		if data.Mac.IsNull() || data.Mac.IsUnknown() || data.Mac.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mac"),
+				"Invalid configuration for MAC Address",
+				"When 'match_client' is set to 'MAC_ADDRESS', the 'mac' attribute is required.",
+			)
+		}
+		if !data.DhcpClientIdentifier.IsNull() && !data.DhcpClientIdentifier.IsUnknown() && data.DhcpClientIdentifier.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dhcp_client_identifier"),
+				"Invalid configuration for DHCP Client Identifier",
+				"When 'match_client' is set to 'MAC_ADDRESS', the 'dhcp_client_identifier' attribute should not be set.",
+			)
+		}
+	case "CLIENT_ID":
+		// When match_client is CLIENT_ID, dhcp_identifier is required and mac should not be set
+		if data.DhcpClientIdentifier.IsNull() || data.DhcpClientIdentifier.IsUnknown() || data.DhcpClientIdentifier.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dhcp_client_identifier"),
+				"Invalid configuration for DHCP Client Identifier",
+				"When 'match_client' is set to 'CLIENT_ID', the 'dhcp_client_identifier' attribute is required.",
+			)
+		}
+		if !data.Mac.IsNull() && !data.Mac.IsUnknown() && data.Mac.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mac"),
+				"Invalid configuration for MAC Address",
+				"When 'match_client' is set to 'DHCP_CLIENT_IDENTIFIER', the 'mac' attribute should not be set.",
+			)
+		}
+	}
+
+	var ipv6MatchOption string
+	if !data.Ipv6MatchOption.IsNull() && !data.Ipv6MatchOption.IsUnknown() {
+		ipv6MatchOption = data.Ipv6MatchOption.ValueString()
+	}
+
+	switch ipv6MatchOption {
+	case "V6_MAC_ADDRESS":
+		// When ipv6_match_option is V6_MAC_ADDRESS, ipv6_mac_address is required and ipv6_duid should not be set
+		if data.Ipv6MacAddress.IsNull() || data.Ipv6MacAddress.IsUnknown() || data.Ipv6MacAddress.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ipv6_mac_address"),
+				"Invalid configuration for IPv6 MAC Address",
+				"When 'ipv6_match_option' is set to 'V6_MAC_ADDRESS', the 'ipv6_mac_address' attribute is required.",
+			)
+		}
+		if !data.Ipv6Duid.IsNull() && !data.Ipv6Duid.IsUnknown() && data.Ipv6Duid.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ipv6_duid"),
+				"Invalid configuration for IPv6 DUID",
+				"When 'ipv6_match_option' is set to 'V6_MAC_ADDRESS', the 'ipv6_duid' attribute should not be set.",
+			)
+		}
+	case "DUID":
+		// When ipv6_match_option is DUID, ipv6_duid is required and ipv6_mac_address should not be set
+		if data.Ipv6Duid.IsNull() || data.Ipv6Duid.IsUnknown() || data.Ipv6Duid.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ipv6_duid"),
+				"Invalid configuration for IPv6 DUID",
+				"When 'ipv6_match_option' is set to 'DUID', the 'ipv6_duid' attribute is required.",
+			)
+		}
+		if !data.Ipv6MacAddress.IsNull() && !data.Ipv6MacAddress.IsUnknown() && data.Ipv6MacAddress.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ipv6_mac_address"),
+				"Invalid configuration for IPv6 MAC Address",
+				"When 'ipv6_match_option' is set to 'DUID', the 'ipv6_mac_address' attribute should not be set.",
+			)
+		}
 	}
 }
 

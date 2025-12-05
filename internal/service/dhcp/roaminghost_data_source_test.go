@@ -12,28 +12,12 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
-/*
-// Retrieve a specific dhcp Roaminghost by filters
-data "nios_dhcp_roaminghost" "get_dhcp_roaminghost_using_filters" {
-  filters = {
-    name = "NAME_REPLACE_ME"
-  }
-}
-// Retrieve specific dhcp Roaminghost using Extensible Attributes
-data "nios_dhcp_roaminghost" "get_dhcp_roaminghost_using_extensible_attributes" {
-  extattrfilters = {
-    Site = "location-1"
-  }
-}
-
-// Retrieve all dhcp Roaminghost
-data "nios_dhcp_roaminghost" "get_all_dhcp_roaminghost" {}
-*/
-
 func TestAccRoaminghostDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_roaminghost.test"
 	resourceName := "nios_dhcp_roaminghost.test"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -41,7 +25,7 @@ func TestAccRoaminghostDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRoaminghostDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRoaminghostDataSourceConfigFilters("NAME_REPLACE_ME"),
+				Config: testAccRoaminghostDataSourceConfigFilters(name, mac, "IPV4", "MAC_ADDRESS"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
@@ -56,6 +40,8 @@ func TestAccRoaminghostDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_dhcp_roaminghost.test"
 	resourceName := "nios_dhcp_roaminghost.test"
 	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -63,7 +49,7 @@ func TestAccRoaminghostDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRoaminghostDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRoaminghostDataSourceConfigExtAttrFilters("NAME_REPLACE_ME", acctest.RandomName()),
+				Config: testAccRoaminghostDataSourceConfigExtAttrFilters(name, mac, "IPV4", "MAC_ADDRESS", acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
@@ -135,10 +121,13 @@ func testAccCheckRoaminghostResourceAttrPair(resourceName, dataSourceName string
 	}
 }
 
-func testAccRoaminghostDataSourceConfigFilters(name string) string {
+func testAccRoaminghostDataSourceConfigFilters(name, mac, addressType, matchClient string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test" {
   name = %q
+  mac = %q
+  address_type = %q
+  match_client = %q
 }
 
 data "nios_dhcp_roaminghost" "test" {
@@ -146,13 +135,16 @@ data "nios_dhcp_roaminghost" "test" {
 	name = nios_dhcp_roaminghost.test.name
   }
 }
-`, name)
+`, name, mac, addressType, matchClient)
 }
 
-func testAccRoaminghostDataSourceConfigExtAttrFilters(name, extAttrsValue string) string {
+func testAccRoaminghostDataSourceConfigExtAttrFilters(name, mac, addressType, matchClient, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test" {
   name = %q
+  mac = %q
+  address_type = %q
+  match_client = %q
   extattrs = {
     Site = %q
   } 
@@ -163,5 +155,5 @@ data "nios_dhcp_roaminghost" "test" {
     Site = nios_dhcp_roaminghost.test.extattrs.Site
   }
 }
-`, name, extAttrsValue)
+`, name, mac, addressType, matchClient, extAttrsValue)
 }
