@@ -370,13 +370,6 @@ func (r *Ipv6networkResource) ImportState(ctx context.Context, req resource.Impo
 }
 
 func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-
-	// _, _ = req.Private.GetKey(ctx, "associate_internal_id")
-	// resp.Diagnostics.Append(diags...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
 	var data Ipv6networkModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
