@@ -36,7 +36,7 @@ func (r *DhcpfailoverResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *DhcpfailoverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DHCP Failover",
 		Attributes:          DhcpfailoverResourceSchemaAttributes,
 	}
 }

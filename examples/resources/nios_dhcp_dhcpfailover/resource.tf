@@ -17,6 +17,6 @@ resource "nios_dhcp_dhcpfailover" "dhcpfailover_2" {
   failover_port         = 62001
   use_failover_port     = true
   extattrs = {
-    Site = "NewYork"
+    Site = "location-1"
   }
 }

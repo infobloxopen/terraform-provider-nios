@@ -71,11 +71,11 @@ resource "nios_dhcp_dhcpfailover" "dhcpfailover_2" {
 
 ### Read-Only
 
-- `association_type` (String) The value indicating whether the failover assoctaion is Microsoft or Grid based. This is a read-only attribute.
+- `association_type` (String) The value indicating whether the failover association is Microsoft or Grid based. This is a read-only attribute.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ms_association_mode` (String) The value that indicates whether the failover association is read-write or read-only. This is a read-only attribute.
 - `ms_failover_partner` (String) Failover partner defined in the association with the Microsoft Server.
-- `ms_is_conflict` (Boolean) Determines if the matching Microsfot failover association (if any) is in synchronization (False) or not (True). If there is no matching failover association the returned values is False. This is a read-only attribute.
+- `ms_is_conflict` (Boolean) Determines if the matching Microsoft failover association (if any) is in synchronization (False) or not (True). If there is no matching failover association the returned values is False. This is a read-only attribute.
 - `ms_previous_state` (String) The previous failover association state. This is a read-only attribute.
 - `ms_server` (String) The primary Microsoft Server.
 - `ms_state` (String) The failover association state. This is a read-only attribute.

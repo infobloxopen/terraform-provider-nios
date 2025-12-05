@@ -107,7 +107,7 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"association_type": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The value indicating whether the failover assoctaion is Microsoft or Grid based. This is a read-only attribute.",
+		MarkdownDescription: "The value indicating whether the failover association is Microsoft or Grid based. This is a read-only attribute.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -234,7 +234,7 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ms_is_conflict": schema.BoolAttribute{
 		Computed:            true,
-		MarkdownDescription: "Determines if the matching Microsfot failover association (if any) is in synchronization (False) or not (True). If there is no matching failover association the returned values is False. This is a read-only attribute.",
+		MarkdownDescription: "Determines if the matching Microsoft failover association (if any) is in synchronization (False) or not (True). If there is no matching failover association the returned values is False. This is a read-only attribute.",
 	},
 	"ms_previous_state": schema.StringAttribute{
 		Computed:            true,
