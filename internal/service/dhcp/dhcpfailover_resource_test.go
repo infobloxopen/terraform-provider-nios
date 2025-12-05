@@ -926,7 +926,6 @@ func testAccCheckDhcpfailoverDisappears(ctx context.Context, v *dhcp.Dhcpfailove
 }
 
 func testAccDhcpfailoverBasicConfig(name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_dhcpfailover" "test" {
     name = %q
