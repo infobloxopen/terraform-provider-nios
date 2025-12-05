@@ -28,12 +28,14 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6networkModel struct {
 	Ref                              types.String         `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AutoCreateReversezone            types.Bool           `tfsdk:"auto_create_reversezone"`
 	CloudInfo                        types.Object         `tfsdk:"cloud_info"`
 	Comment                          types.String         `tfsdk:"comment"`
@@ -121,6 +123,7 @@ type Ipv6networkModel struct {
 
 var Ipv6networkAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+    "uuid":        types.StringType,
 	"auto_create_reversezone":              types.BoolType,
 	"cloud_info":                           types.ObjectType{AttrTypes: Ipv6networkCloudInfoAttrTypes},
 	"comment":                              types.StringType,
@@ -211,6 +214,10 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"auto_create_reversezone": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "This flag controls whether reverse zones are automatically created when the network is added.",
@@ -428,6 +435,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             mapdefault.StaticValue(types.MapNull(types.StringType)),
 		Validators: []validator.Map{
 			mapvalidator.SizeAtLeast(1),
+		},
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
 		},
 	},
 	"extattrs_all": schema.MapAttribute{
@@ -907,6 +917,7 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	}
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudInfo = FlattenIpv6networkCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DdnsDomainname = flex.FlattenStringPointer(from.DdnsDomainname)

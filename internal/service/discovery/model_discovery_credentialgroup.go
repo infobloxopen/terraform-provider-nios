@@ -17,11 +17,13 @@ import (
 
 type DiscoveryCredentialgroupModel struct {
 	Ref  types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Name types.String `tfsdk:"name"`
 }
 
 var DiscoveryCredentialgroupAttrTypes = map[string]attr.Type{
 	"ref":  types.StringType,
+    "uuid":        types.StringType,
 	"name": types.StringType,
 }
 
@@ -30,6 +32,10 @@ var DiscoveryCredentialgroupResourceSchemaAttributes = map[string]schema.Attribu
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
@@ -69,5 +75,6 @@ func (m *DiscoveryCredentialgroupModel) Flatten(ctx context.Context, from *disco
 		*m = DiscoveryCredentialgroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }

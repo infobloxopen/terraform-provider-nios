@@ -20,6 +20,7 @@ import (
 
 type BulkhostnametemplateModel struct {
 	Ref            types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	IsGridDefault  types.Bool   `tfsdk:"is_grid_default"`
 	PreDefined     types.Bool   `tfsdk:"pre_defined"`
 	TemplateFormat types.String `tfsdk:"template_format"`
@@ -28,6 +29,7 @@ type BulkhostnametemplateModel struct {
 
 var BulkhostnametemplateAttrTypes = map[string]attr.Type{
 	"ref":             types.StringType,
+    "uuid":        types.StringType,
 	"is_grid_default": types.BoolType,
 	"pre_defined":     types.BoolType,
 	"template_format": types.StringType,
@@ -39,6 +41,10 @@ var BulkhostnametemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"is_grid_default": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "True if this template is Grid default.",
@@ -108,6 +114,7 @@ func (m *BulkhostnametemplateModel) Flatten(ctx context.Context, from *ipam.Bulk
 		*m = BulkhostnametemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.IsGridDefault = types.BoolPointerValue(from.IsGridDefault)
 	m.PreDefined = types.BoolPointerValue(from.PreDefined)
 	m.TemplateFormat = flex.FlattenStringPointer(from.TemplateFormat)

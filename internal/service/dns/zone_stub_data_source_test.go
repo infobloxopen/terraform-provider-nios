@@ -64,6 +64,7 @@ func TestAccZoneStubDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckZoneStubResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "address", dataSourceName, "result.0.address"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),

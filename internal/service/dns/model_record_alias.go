@@ -12,17 +12,20 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordAliasModel struct {
 	Ref                types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AwsRte53RecordInfo types.Object `tfsdk:"aws_rte53_record_info"`
 	CloudInfo          types.Object `tfsdk:"cloud_info"`
 	Comment            types.String `tfsdk:"comment"`
@@ -44,6 +47,7 @@ type RecordAliasModel struct {
 
 var RecordAliasAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
+    "uuid":        types.StringType,
 	"aws_rte53_record_info": types.ObjectType{AttrTypes: RecordAliasAwsRte53RecordInfoAttrTypes},
 	"cloud_info":            types.ObjectType{AttrTypes: RecordAliasCloudInfoAttrTypes},
 	"comment":               types.StringType,
@@ -68,6 +72,10 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
 		Attributes:          RecordAliasAwsRte53RecordInfoResourceSchemaAttributes,
 		Computed:            true,
@@ -120,6 +128,9 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
@@ -207,6 +218,7 @@ func (m *RecordAliasModel) Flatten(ctx context.Context, from *dns.RecordAlias, d
 		*m = RecordAliasModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AwsRte53RecordInfo = FlattenRecordAliasAwsRte53RecordInfo(ctx, from.AwsRte53RecordInfo, diags)
 	m.CloudInfo = FlattenRecordAliasCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

@@ -21,6 +21,7 @@ import (
 
 type BfdtemplateModel struct {
 	Ref                 types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AuthenticationKey   types.String `tfsdk:"authentication_key"`
 	AuthenticationKeyId types.Int64  `tfsdk:"authentication_key_id"`
 	AuthenticationType  types.String `tfsdk:"authentication_type"`
@@ -32,6 +33,7 @@ type BfdtemplateModel struct {
 
 var BfdtemplateAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
+    "uuid":        types.StringType,
 	"authentication_key":    types.StringType,
 	"authentication_key_id": types.Int64Type,
 	"authentication_type":   types.StringType,
@@ -46,6 +48,10 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"authentication_key": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -142,6 +148,7 @@ func (m *BfdtemplateModel) Flatten(ctx context.Context, from *misc.Bfdtemplate, 
 		*m = BfdtemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AuthenticationKeyId = flex.FlattenInt64Pointer(from.AuthenticationKeyId)
 	m.AuthenticationType = flex.FlattenStringPointer(from.AuthenticationType)
 	m.DetectionMultiplier = flex.FlattenInt64Pointer(from.DetectionMultiplier)

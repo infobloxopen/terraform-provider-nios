@@ -40,6 +40,7 @@ func TestAccBulkhostnametemplateDataSource_Filters(t *testing.T) {
 func testAccCheckBulkhostnametemplateResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "is_grid_default", dataSourceName, "result.0.is_grid_default"),
 		resource.TestCheckResourceAttrPair(resourceName, "pre_defined", dataSourceName, "result.0.pre_defined"),
 		resource.TestCheckResourceAttrPair(resourceName, "template_format", dataSourceName, "result.0.template_format"),

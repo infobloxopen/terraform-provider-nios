@@ -62,6 +62,7 @@ func TestAccNetworkDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckNetworkResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "authority", dataSourceName, "result.0.authority"),
 		resource.TestCheckResourceAttrPair(resourceName, "auto_create_reversezone", dataSourceName, "result.0.auto_create_reversezone"),
 		resource.TestCheckResourceAttrPair(resourceName, "bootfile", dataSourceName, "result.0.bootfile"),
