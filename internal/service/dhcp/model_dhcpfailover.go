@@ -213,7 +213,6 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Default:  stringdefault.StaticString("LOADBALANCE"),
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
 			stringvalidator.OneOf("LOADBALANCE", "HOTSTANDBY"),
 		},
 		MarkdownDescription: "The mode for the failover association.",
@@ -226,7 +225,6 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
 			stringvalidator.OneOf("ACTIVE", "PASSIVE"),
 		},
 		Default:             stringdefault.StaticString(""),
@@ -277,7 +275,6 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 	"primary_server_type": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
 			stringvalidator.OneOf("EXTERNAL", "GRID"),
 		},
 		MarkdownDescription: "The type of the primary server of DHCP Failover association object.",
@@ -305,7 +302,6 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 	"secondary_server_type": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
 			stringvalidator.OneOf("EXTERNAL", "GRID"),
 		},
 		MarkdownDescription: "The type of the secondary server of DHCP Failover association object.",
