@@ -200,9 +200,12 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the authentication for the failover association is enabled or not.",
 	},
 	"ms_enable_switchover_interval": schema.BoolAttribute{
-		Computed:            true,
-		Optional:            true,
-		Default:             booldefault.StaticBool(false),
+		Computed: true,
+		Optional: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ms_switchover_interval")),
+		},
 		MarkdownDescription: "Determines if the switchover interval is enabled or not.",
 	},
 	"ms_failover_mode": schema.StringAttribute{
