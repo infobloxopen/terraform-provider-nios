@@ -22,25 +22,26 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordRpzSrvModel struct {
-	Ref         types.String `tfsdk:"ref"`
-	Comment     types.String `tfsdk:"comment"`
-	Disable     types.Bool   `tfsdk:"disable"`
-	ExtAttrs    types.Map    `tfsdk:"extattrs"`
-	Name        types.String `tfsdk:"name"`
-	Port        types.Int64  `tfsdk:"port"`
-	Priority    types.Int64  `tfsdk:"priority"`
-	RpZone      types.String `tfsdk:"rp_zone"`
-	Target      types.String `tfsdk:"target"`
-	Ttl         types.Int64  `tfsdk:"ttl"`
-	UseTtl      types.Bool   `tfsdk:"use_ttl"`
-	View        types.String `tfsdk:"view"`
-	Weight      types.Int64  `tfsdk:"weight"`
-	Zone        types.String `tfsdk:"zone"`
-	ExtAttrsAll types.Map    `tfsdk:"extattrs_all"`
+	Ref         types.String                             `tfsdk:"ref"`
+	Comment     types.String                             `tfsdk:"comment"`
+	Disable     types.Bool                               `tfsdk:"disable"`
+	ExtAttrs    types.Map                                `tfsdk:"extattrs"`
+	Name        internaltypes.CaseInsensitiveStringValue `tfsdk:"name"`
+	Port        types.Int64                              `tfsdk:"port"`
+	Priority    types.Int64                              `tfsdk:"priority"`
+	RpZone      types.String                             `tfsdk:"rp_zone"`
+	Target      types.String                             `tfsdk:"target"`
+	Ttl         types.Int64                              `tfsdk:"ttl"`
+	UseTtl      types.Bool                               `tfsdk:"use_ttl"`
+	View        types.String                             `tfsdk:"view"`
+	Weight      types.Int64                              `tfsdk:"weight"`
+	Zone        types.String                             `tfsdk:"zone"`
+	ExtAttrsAll types.Map                                `tfsdk:"extattrs_all"`
 }
 
 var RecordRpzSrvAttrTypes = map[string]attr.Type{
@@ -48,7 +49,7 @@ var RecordRpzSrvAttrTypes = map[string]attr.Type{
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
-	"name":         types.StringType,
+	"name":         internaltypes.CaseInsensitiveString{},
 	"port":         types.Int64Type,
 	"priority":     types.Int64Type,
 	"rp_zone":      types.StringType,
@@ -93,7 +94,8 @@ var RecordRpzSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
 	"name": schema.StringAttribute{
-		Required: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Required:   true,
 		Validators: []validator.String{
 			customvalidator.IsValidDomainName(),
 			customvalidator.ValidateTrimmedString(),
@@ -125,6 +127,7 @@ var RecordRpzSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			customvalidator.StringNotEmpty(),
 		},
 		MarkdownDescription: "The target of the Substitute (SRV Record) Rule in FQDN format. This value can be in unicode format.",
 	},
@@ -183,7 +186,7 @@ func (m *RecordRpzSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Comment:  flex.ExpandStringPointer(m.Comment),
 		Disable:  flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs: ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Name:     flex.ExpandStringPointer(m.Name),
+		Name:     flex.ExpandStringPointer(m.Name.StringValue),
 		Port:     flex.ExpandInt64Pointer(m.Port),
 		Priority: flex.ExpandInt64Pointer(m.Priority),
 		RpZone:   flex.ExpandStringPointer(m.RpZone),
@@ -219,7 +222,7 @@ func (m *RecordRpzSrvModel) Flatten(ctx context.Context, from *rpz.RecordRpzSrv,
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.Name = flex.FlattenStringPointer(from.Name)
+	m.Name.StringValue = flex.FlattenStringPointer(from.Name)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.Priority = flex.FlattenInt64Pointer(from.Priority)
 	m.RpZone = flex.FlattenStringPointer(from.RpZone)
