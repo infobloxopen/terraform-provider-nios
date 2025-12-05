@@ -144,7 +144,7 @@ var RecordUnknownResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The Unknown record name in FQDN format. This value can be in unicode format.",
 	},

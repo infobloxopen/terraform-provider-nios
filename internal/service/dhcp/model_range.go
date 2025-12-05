@@ -262,6 +262,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The bootserver address for the range. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
+			customvalidator.IsValidIPOrFQDN(),
 		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
@@ -658,7 +659,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidIPOrFQDN(),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
 		},
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
