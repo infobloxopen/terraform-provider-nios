@@ -3,6 +3,7 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -23,14 +24,14 @@ import (
 )
 
 type DtcRecordAModel struct {
-	Ref         types.String `tfsdk:"ref"`
-	AutoCreated types.Bool   `tfsdk:"auto_created"`
-	Comment     types.String `tfsdk:"comment"`
-	Disable     types.Bool   `tfsdk:"disable"`
-	DtcServer   types.String `tfsdk:"dtc_server"`
-	Ipv4addr    types.String `tfsdk:"ipv4addr"`
-	Ttl         types.Int64  `tfsdk:"ttl"`
-	UseTtl      types.Bool   `tfsdk:"use_ttl"`
+	Ref         types.String        `tfsdk:"ref"`
+	AutoCreated types.Bool          `tfsdk:"auto_created"`
+	Comment     types.String        `tfsdk:"comment"`
+	Disable     types.Bool          `tfsdk:"disable"`
+	DtcServer   types.String        `tfsdk:"dtc_server"`
+	Ipv4addr    iptypes.IPv4Address `tfsdk:"ipv4addr"`
+	Ttl         types.Int64         `tfsdk:"ttl"`
+	UseTtl      types.Bool          `tfsdk:"use_ttl"`
 }
 
 var DtcRecordAAttrTypes = map[string]attr.Type{
@@ -39,7 +40,7 @@ var DtcRecordAAttrTypes = map[string]attr.Type{
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
 	"dtc_server":   types.StringType,
-	"ipv4addr":     types.StringType,
+	"ipv4addr":     iptypes.IPv6AddressType{},
 	"ttl":          types.Int64Type,
 	"use_ttl":      types.BoolType,
 }
@@ -77,11 +78,12 @@ var DtcRecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of the DTC Server object with which the DTC record is associated.",
 	},
 	"ipv4addr": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Required:            true,
 		MarkdownDescription: "The IPv4 Address of the domain name.",
 	},
 	"ttl": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
 		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
@@ -101,13 +103,13 @@ func (m *DtcRecordAModel) Expand(ctx context.Context, diags *diag.Diagnostics, i
 		return nil
 	}
 	to := &dtc.DtcRecordA{
-		Comment:   flex.ExpandStringPointer(m.Comment),
-		Disable:   flex.ExpandBoolPointer(m.Disable),
-		Ipv4addr:  flex.ExpandStringPointer(m.Ipv4addr),
-		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
+		Comment:  flex.ExpandStringPointer(m.Comment),
+		Disable:  flex.ExpandBoolPointer(m.Disable),
+		Ipv4addr: flex.ExpandIPv4Address(m.Ipv4addr),
+		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
 	}
-	if isCreate{
+	if isCreate {
 		to.DtcServer = flex.ExpandStringPointer(m.DtcServer)
 	}
 	return to
@@ -136,7 +138,7 @@ func (m *DtcRecordAModel) Flatten(ctx context.Context, from *dtc.DtcRecordA, dia
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DtcServer = flex.FlattenStringPointer(from.DtcServer)
-	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
+	m.Ipv4addr = flex.FlattenIPv4Address(from.Ipv4addr)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
 }
