@@ -36,7 +36,7 @@ func (r *RecordRpzAResource) Metadata(ctx context.Context, req resource.Metadata
 
 func (r *RecordRpzAResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a RPZ A record.",
+		MarkdownDescription: "Manages an RPZ A record.",
 		Attributes:          RecordRpzAResourceSchemaAttributes,
 	}
 }
