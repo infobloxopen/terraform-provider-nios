@@ -13,7 +13,7 @@ resource "nios_dtc_record_aaaa" "record_aaaa_with_basic_fields" {
 // Create a DTC Record A with additional fields
 resource "nios_dtc_record_aaaa" "record_a_with_additional_fields" {
   dtc_server = nios_dtc_server.create_dtc_server.name
-  ipv6addr   = "2001:db8:85a3::8a2e:370:7335"
+  ipv6addr   = "2001:db8:85a3::8a2e:370:7337"
   comment    = "Creating DTC Record AAAA"
   disable    = false
   ttl        = 20
