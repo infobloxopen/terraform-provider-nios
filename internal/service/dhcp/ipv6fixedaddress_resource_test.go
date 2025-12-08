@@ -1578,16 +1578,6 @@ resource "nios_dhcp_ipv6fixedaddress" "test_allow_telnet" {
 	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
-func setCLICredentials(telnetConfig string, cliCredComment string, cliCredUser string, cliCredPassword string, cliCredType string, cliCredGroup string) string {
-	return fmt.Sprintf(`{
-		comment          = %q
-		user             = %q
-		password         = %q
-		credential_type  = %q
-		credential_group = %q
-	}`, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup)
-}
-
 func testAccIpv6fixedaddressCliCredentialsSSH(ipv6addr, duid, networkView, ipv6Network, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup, useCLICredentials string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddress" "test_cli_credentials" {
