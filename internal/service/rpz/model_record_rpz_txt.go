@@ -164,7 +164,6 @@ func (m *RecordRpzTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		Text:     flex.ExpandStringPointer(m.Text),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
-		View:     flex.ExpandStringPointer(m.View),
 	}
 	if isCreate {
 		to.View = flex.ExpandStringPointer(m.View)
