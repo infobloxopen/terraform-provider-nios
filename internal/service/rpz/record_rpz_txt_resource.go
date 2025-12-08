@@ -75,13 +75,14 @@ func (r *RecordRpzTxtResource) Create(ctx context.Context, req resource.CreateRe
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzTxtAPI.
 		Create(ctx).
-		RecordRpzTxt(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordRpzTxt(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzTxt).
 		ReturnAsObject(1).
 		Execute()
@@ -260,6 +261,7 @@ func (r *RecordRpzTxtResource) Update(ctx context.Context, req resource.UpdateRe
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -274,7 +276,7 @@ func (r *RecordRpzTxtResource) Update(ctx context.Context, req resource.UpdateRe
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzTxtAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzTxt(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordRpzTxt(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzTxt).
 		ReturnAsObject(1).
 		Execute()
