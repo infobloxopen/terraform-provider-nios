@@ -74,7 +74,7 @@ func (r *DtcRecordAaaaResource) Create(ctx context.Context, req resource.CreateR
 	apiRes, _, err := r.client.DTCAPI.
 		DtcRecordAaaaAPI.
 		Create(ctx).
-		DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics)).
+		DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
 		ReturnAsObject(1).
 		Execute()
@@ -147,7 +147,7 @@ func (r *DtcRecordAaaaResource) Update(ctx context.Context, req resource.UpdateR
 	apiRes, _, err := r.client.DTCAPI.
 		DtcRecordAaaaAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics)).
+		DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
 		ReturnAsObject(1).
 		Execute()

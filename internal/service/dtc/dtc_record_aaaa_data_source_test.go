@@ -3,6 +3,7 @@ package dtc_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,6 +16,8 @@ func TestAccDtcRecordAaaaDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_record_aaaa.test"
 	resourceName := "nios_dtc_record_aaaa.test"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +25,7 @@ func TestAccDtcRecordAaaaDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcRecordAaaaDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcRecordAaaaDataSourceConfigFilters(),
+				Config: testAccDtcRecordAaaaDataSourceConfigFilters(ipv6Addr, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
@@ -48,15 +51,19 @@ func testAccCheckDtcRecordAaaaResourceAttrPair(resourceName, dataSourceName stri
 	}
 }
 
-func testAccDtcRecordAaaaDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_aaaa" "test" {
+func testAccDtcRecordAaaaDataSourceConfigFilters(ipv4Addr string, serverName string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_aaaa" "test" {
+	ipv6addr = %q
+	dtc_server = nios_dtc_server.test.name
 }
 
 data "nios_dtc_record_aaaa" "test" {
   filters = {
-	 = nios_dtc_record_aaaa.test.
+	dtc_server = nios_dtc_server.test.name
+	ipv6addr = nios_dtc_record_aaaa.test.ipv6addr
   }
 }
-`)
+	`, ipv4Addr)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }

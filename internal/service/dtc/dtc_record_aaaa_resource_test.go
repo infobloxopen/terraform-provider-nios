@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -20,6 +21,8 @@ var readableAttributesForDtcRecordAaaa = "auto_created,comment,disable,dtc_serve
 func TestAccDtcRecordAaaaResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_record_aaaa.test"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +30,14 @@ func TestAccDtcRecordAaaaResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAaaaBasicConfig(""),
+				Config: testAccDtcRecordAaaaBasicConfig(ipv6Addr, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "ipv6addr", ipv6Addr),
+					resource.TestCheckResourceAttr(resourceName, "dtc_server", serverName),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +48,8 @@ func TestAccDtcRecordAaaaResource_basic(t *testing.T) {
 func TestAccDtcRecordAaaaResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_record_aaaa.test"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +57,7 @@ func TestAccDtcRecordAaaaResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcRecordAaaaDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcRecordAaaaBasicConfig(""),
+				Config: testAccDtcRecordAaaaBasicConfig(ipv6Addr, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
 					testAccCheckDtcRecordAaaaDisappears(context.Background(), &v),
@@ -63,6 +71,8 @@ func TestAccDtcRecordAaaaResource_disappears(t *testing.T) {
 func TestAccDtcRecordAaaaResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_record_aaaa.test_comment"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -70,18 +80,18 @@ func TestAccDtcRecordAaaaResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAaaaComment("COMMENT_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaComment(ipv6Addr, serverName, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordAaaaComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaComment(ipv6Addr, serverName, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -92,6 +102,8 @@ func TestAccDtcRecordAaaaResource_Comment(t *testing.T) {
 func TestAccDtcRecordAaaaResource_Disable(t *testing.T) {
 	var resourceName = "nios_dtc_record_aaaa.test_disable"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +111,18 @@ func TestAccDtcRecordAaaaResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAaaaDisable("DISABLE_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaDisable(ipv6Addr, serverName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordAaaaDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaDisable(ipv6Addr, serverName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +133,8 @@ func TestAccDtcRecordAaaaResource_Disable(t *testing.T) {
 func TestAccDtcRecordAaaaResource_DtcServer(t *testing.T) {
 	var resourceName = "nios_dtc_record_aaaa.test_dtc_server"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,20 +142,13 @@ func TestAccDtcRecordAaaaResource_DtcServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAaaaDtcServer("DTC_SERVER_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaDtcServer(ipv6Addr, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dtc_server", "DTC_SERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dtc_server", serverName),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccDtcRecordAaaaDtcServer("DTC_SERVER_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dtc_server", "DTC_SERVER_UPDATE_REPLACE_ME"),
-				),
-			},
+			// Removed update step as dtc_server is immutable
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -150,6 +157,9 @@ func TestAccDtcRecordAaaaResource_DtcServer(t *testing.T) {
 func TestAccDtcRecordAaaaResource_Ipv6addr(t *testing.T) {
 	var resourceName = "nios_dtc_record_aaaa.test_ipv6addr"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	ipv6AddrUpdate := "2001:db8:85a3::8a2e:370:7336"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,18 +167,18 @@ func TestAccDtcRecordAaaaResource_Ipv6addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAaaaIpv6addr("IPV6ADDR_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaIpv6addr(ipv6Addr, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "IPV6ADDR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6addr", ipv6Addr),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordAaaaIpv6addr("IPV6ADDR_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaIpv6addr(ipv6AddrUpdate, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6addr", "IPV6ADDR_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6addr", ipv6AddrUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -179,6 +189,8 @@ func TestAccDtcRecordAaaaResource_Ipv6addr(t *testing.T) {
 func TestAccDtcRecordAaaaResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dtc_record_aaaa.test_ttl"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,18 +198,18 @@ func TestAccDtcRecordAaaaResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAaaaTtl("TTL_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaTtl(ipv6Addr, serverName, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "30"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordAaaaTtl("TTL_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaTtl(ipv6Addr, serverName, 60),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "60"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -208,6 +220,8 @@ func TestAccDtcRecordAaaaResource_Ttl(t *testing.T) {
 func TestAccDtcRecordAaaaResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dtc_record_aaaa.test_use_ttl"
 	var v dtc.DtcRecordAaaa
+	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,18 +229,18 @@ func TestAccDtcRecordAaaaResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAaaaUseTtl("USE_TTL_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaUseTtl(ipv6Addr, serverName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordAaaaUseTtl("USE_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordAaaaUseTtl(ipv6Addr, serverName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAaaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -292,58 +306,87 @@ func testAccCheckDtcRecordAaaaDisappears(ctx context.Context, v *dtc.DtcRecordAa
 	}
 }
 
-func testAccDtcRecordAaaaBasicConfig(string) string {
-	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
-resource "nios_dtc_record_aaaa" "test" {
-}
-`)
-}
-
-func testAccDtcRecordAaaaComment(comment string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_aaaa" "test_comment" {
-    comment = %q
-}
-`, comment)
+func testAccDtcRecordAaaaBasicConfig(ipv6Addr, serverName string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_aaaa" "test" {
+	ipv6addr = %q
+	dtc_server = nios_dtc_server.test.name
+	}
+	`, ipv6Addr)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordAaaaDisable(disable string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_aaaa" "test_disable" {
-    disable = %q
-}
-`, disable)
-}
-
-func testAccDtcRecordAaaaDtcServer(dtcServer string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_aaaa" "test_dtc_server" {
-    dtc_server = %q
-}
-`, dtcServer)
+func testAccDtcRecordAaaaComment(ipv6Addr, serverName, comment string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_aaaa" "test_comment" {
+	ipv6addr = %q
+	comment = %q
+	dtc_server = nios_dtc_server.test.name
+	}
+	`, ipv6Addr, comment)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordAaaaIpv6addr(ipv6addr string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_aaaa" "test_ipv6addr" {
-    ipv6addr = %q
-}
-`, ipv6addr)
-}
-
-func testAccDtcRecordAaaaTtl(ttl string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_aaaa" "test_ttl" {
-    ttl = %q
-}
-`, ttl)
+func testAccDtcRecordAaaaDisable(ipv6Addr, serverName string, disable bool) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_aaaa" "test_disable" {
+	ipv6addr = %q
+	disable = %t
+	dtc_server = nios_dtc_server.test.name
+	}
+	`, ipv6Addr, disable)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordAaaaUseTtl(useTtl string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_aaaa" "test_use_ttl" {
-    use_ttl = %q
+func testAccDtcRecordAaaaDtcServer(ipv6Addr, serverName string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_aaaa" "test_dtc_server" {
+	ipv6addr = %q
+	dtc_server = nios_dtc_server.test.name
+	}
+	`, ipv6Addr)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
-`, useTtl)
+
+func testAccDtcRecordAaaaIpv6addr(ipv6Addr, serverName string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_aaaa" "test_ipv6addr" {
+	ipv6addr = %q
+	dtc_server = nios_dtc_server.test.name
+	}
+	`, ipv6Addr)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
+}
+
+func testAccDtcRecordAaaaTtl(ipv6Addr, serverName string, ttl int) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_aaaa" "test_ttl" {
+	ipv6addr = %q
+	dtc_server = nios_dtc_server.test.name
+	ttl = %d
+	use_ttl = true
+	}
+	`, ipv6Addr, ttl)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
+}
+
+func testAccDtcRecordAaaaUseTtl(ipv4addr, serverName string, useTtl bool) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_aaaa" "test_use_ttl" {
+	ipv6addr = %q
+	dtc_server = nios_dtc_server.test.name
+	use_ttl = %t
+	ttl = 30
+	}
+	`, ipv4addr, useTtl)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
+}
+
+func testAccBaseWithDtcServer(name, host string) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_server" "test" {
+  name = %q
+  host = %q
+}
+`, name, host)
 }
