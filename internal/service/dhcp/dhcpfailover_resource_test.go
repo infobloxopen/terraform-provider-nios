@@ -24,6 +24,7 @@ var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failo
 func TestAccDhcpfailoverResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_failover.test"
 	var v dhcp.Dhcpfailover
+	dhcpfailoverName := acctest.RandomNameWithPrefix("failover")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -31,10 +32,10 @@ func TestAccDhcpfailoverResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDhcpfailoverBasicConfig("dhcp_failover_test", "infoblox.localdomain", "infoblox.member1", "GRID", "GRID"),
+				Config: testAccDhcpfailoverBasicConfig(dhcpfailoverName, "infoblox.localdomain", "infoblox.member1", "GRID", "GRID"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "dhcp_failover_test"),
+					resource.TestCheckResourceAttr(resourceName, "name", dhcpfailoverName),
 					resource.TestCheckResourceAttr(resourceName, "primary", "infoblox.localdomain"),
 					resource.TestCheckResourceAttr(resourceName, "secondary", "infoblox.member1"),
 					resource.TestCheckResourceAttr(resourceName, "primary_server_type", "GRID"),
@@ -56,6 +57,7 @@ func TestAccDhcpfailoverResource_basic(t *testing.T) {
 func TestAccDhcpfailoverResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_failover.test"
 	var v dhcp.Dhcpfailover
+	dhcpfailoverName := acctest.RandomNameWithPrefix("failover")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -63,7 +65,7 @@ func TestAccDhcpfailoverResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDhcpfailoverDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDhcpfailoverBasicConfig("dhcp_failover_test1", "infoblox.localdomain", "infoblox.member1", "GRID", "GRID"),
+				Config: testAccDhcpfailoverBasicConfig(dhcpfailoverName, "infoblox.localdomain", "infoblox.member1", "GRID", "GRID"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
 					testAccCheckDhcpfailoverDisappears(context.Background(), &v),
