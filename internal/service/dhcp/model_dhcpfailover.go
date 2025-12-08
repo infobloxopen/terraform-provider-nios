@@ -111,9 +111,12 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The value indicating whether the failover association is Microsoft or Grid based. This is a read-only attribute.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+		},
 		MarkdownDescription: "The descriptive comment of a DHCP MAC Filter object.",
 	},
 	"extattrs": schema.MapAttribute{
