@@ -1,4 +1,4 @@
-package ipam
+package dhcp
 
 import (
 	"context"
@@ -10,40 +10,41 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,domain_name_servers,enable_ddns,enable_discovery,endpoint_sources,extattrs,last_rir_registration_update_sent,last_rir_registration_update_status,logic_filter_rules,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,options,port_control_blackout_setting,preferred_lifetime,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_blackout_setting,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_discovery_basic_polling_settings,use_domain_name_servers,use_enable_ddns,use_enable_discovery,use_logic_filter_rules,use_mgm_private,use_options,use_preferred_lifetime,use_subscribe_settings,use_update_dns_on_lease_renewal,use_valid_lifetime,use_zone_associations,utilization,valid_lifetime,zone_associations"
+var readableAttributesForFiltermac = "comment,default_mac_address_expiration,disable,enforce_expiration_times,extattrs,lease_time,name,never_expires,options,reserved_for_infoblox"
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &Ipv6networkcontainerResource{}
-var _ resource.ResourceWithImportState = &Ipv6networkcontainerResource{}
+var _ resource.Resource = &FiltermacResource{}
+var _ resource.ResourceWithImportState = &FiltermacResource{}
 
-func NewIpv6networkcontainerResource() resource.Resource {
-	return &Ipv6networkcontainerResource{}
+var _ resource.ResourceWithValidateConfig = &FiltermacResource{}
+
+func NewFiltermacResource() resource.Resource {
+	return &FiltermacResource{}
 }
 
-// Ipv6networkcontainerResource defines the resource implementation.
-type Ipv6networkcontainerResource struct {
+// FiltermacResource defines the resource implementation.
+type FiltermacResource struct {
 	client *niosclient.APIClient
 }
 
-func (r *Ipv6networkcontainerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "ipam_ipv6network_container"
+func (r *FiltermacResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_filtermac"
 }
 
-func (r *Ipv6networkcontainerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *FiltermacResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an IPv6 Network Container",
-		Attributes:          Ipv6networkcontainerResourceSchemaAttributes,
+		MarkdownDescription: "Manages a DHCP MAC Address Filter.",
+		Attributes:          FiltermacResourceSchemaAttributes,
 	}
 }
 
-func (r *Ipv6networkcontainerResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *FiltermacResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -63,9 +64,9 @@ func (r *Ipv6networkcontainerResource) Configure(ctx context.Context, req resour
 	r.client = client
 }
 
-func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *FiltermacResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
-	var data Ipv6networkcontainerModel
+	var data FiltermacModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -80,45 +81,34 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	// If the function call attributes are set, update the attribute name to match tfsdk tag
-	origFunCallAttrs := data.FuncCall.Attributes()
-	if len(origFunCallAttrs) > 0 {
-		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
-	}
-
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
+	apiRes, _, err := r.client.DHCPAPI.
+		FiltermacAPI.
 		Create(ctx).
-		Ipv6networkcontainer(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
+		Filtermac(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForFiltermac).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6networkcontainer, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Filtermac, got error: %s", err))
 		return
 	}
 
-	res := apiRes.CreateIpv6networkcontainerResponseAsObject.GetResult()
+	res := apiRes.CreateFiltermacResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Ipv6networkcontainer due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Filtermac due inherited Extensible attributes, got error: %s", err))
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	// Retain the original function call attributes
-	if len(origFunCallAttrs) > 0 {
-		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
-	}
-
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *FiltermacResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var diags diag.Diagnostics
-	var data Ipv6networkcontainerModel
+	var data FiltermacModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -133,10 +123,10 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
+	apiRes, httpRes, err := r.client.DHCPAPI.
+		FiltermacAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
+		ReturnFieldsPlus(readableAttributesForFiltermac).
 		ReturnAsObject(1).
 		Execute()
 
@@ -145,11 +135,11 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networkcontainer, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Filtermac, got error: %s", err))
 		return
 	}
 
-	res := apiRes.GetIpv6networkcontainerResponseObjectAsResult.GetResult()
+	res := apiRes.GetFiltermacResponseObjectAsResult.GetResult()
 
 	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
@@ -161,7 +151,7 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 		if stateExtAttrs == nil {
 			resp.Diagnostics.AddError(
 				"Missing Internal ID",
-				"Unable to read Ipv6networkcontainer because the internal ID (from extattrs_all) is missing or invalid.",
+				"Unable to read Filtermac because the internal ID (from extattrs_all) is missing or invalid.",
 			)
 			return
 		}
@@ -176,7 +166,7 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Ipv6networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Filtermac due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -186,7 +176,7 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *Ipv6networkcontainerResource) ReadByExtAttrs(ctx context.Context, data *Ipv6networkcontainerModel, resp *resource.ReadResponse) bool {
+func (r *FiltermacResource) ReadByExtAttrs(ctx context.Context, data *FiltermacModel, resp *resource.ReadResponse) bool {
 	var diags diag.Diagnostics
 
 	if data.ExtAttrsAll.IsNull() {
@@ -207,19 +197,19 @@ func (r *Ipv6networkcontainerResource) ReadByExtAttrs(ctx context.Context, data 
 		terraformInternalIDEA: internalId,
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
+	apiRes, _, err := r.client.DHCPAPI.
+		FiltermacAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
+		ReturnFieldsPlus(readableAttributesForFiltermac).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networkcontainer by extattrs, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Filtermac by extattrs, got error: %s", err))
 		return true
 	}
 
-	results := apiRes.ListIpv6networkcontainerResponseObject.GetResult()
+	results := apiRes.ListFiltermacResponseObject.GetResult()
 
 	// If the list is empty, the resource no longer exists so remove it from state
 	if len(results) == 0 {
@@ -241,9 +231,9 @@ func (r *Ipv6networkcontainerResource) ReadByExtAttrs(ctx context.Context, data 
 	return true
 }
 
-func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *FiltermacResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
-	var data Ipv6networkcontainerModel
+	var data FiltermacModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -264,6 +254,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
@@ -283,23 +274,23 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
+	apiRes, _, err := r.client.DHCPAPI.
+		FiltermacAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ipv6networkcontainer(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
+		Filtermac(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForFiltermac).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ipv6networkcontainer, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Filtermac, got error: %s", err))
 		return
 	}
 
-	res := apiRes.UpdateIpv6networkcontainerResponseAsObject.GetResult()
+	res := apiRes.UpdateFiltermacResponseAsObject.GetResult()
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Ipv6networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Filtermac due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -307,14 +298,13 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
 }
 
-func (r *Ipv6networkcontainerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data Ipv6networkcontainerModel
+func (r *FiltermacResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data FiltermacModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -323,41 +313,34 @@ func (r *Ipv6networkcontainerResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
+	httpRes, err := r.client.DHCPAPI.
+		FiltermacAPI.
 		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ipv6networkcontainer, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Filtermac, got error: %s", err))
 		return
 	}
 }
 
-func (r *Ipv6networkcontainerResource) UpdateFuncCallAttributeName(ctx context.Context, data Ipv6networkcontainerModel, diags *diag.Diagnostics) types.Object {
-
-	updatedFuncCallAttrs := data.FuncCall.Attributes()
-	attrVal := updatedFuncCallAttrs["attribute_name"].(types.String).ValueString()
-	pathVar, err := utils.FindModelFieldByTFSdkTag(data, attrVal)
-	if !err {
-		diags.AddError("Client Error", fmt.Sprintf("Unable to find attribute '%s' in Ipv6networkcontainer model, got error", attrVal))
-		return types.ObjectNull(FuncCallAttrTypes)
-	}
-	updatedFuncCallAttrs["attribute_name"] = types.StringValue(pathVar)
-
-	return types.ObjectValueMust(FuncCallAttrTypes, updatedFuncCallAttrs)
-}
-
-func (r *Ipv6networkcontainerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *FiltermacResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
-func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var data Ipv6networkcontainerModel
+func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data FiltermacModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var options []FiltermacOptionsModel
+	diags := data.Options.ElementsAs(ctx, &options, false)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -384,14 +367,6 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 			51: true,
 			23: true,
 		}
-
-		var options []Ipv6networkcontainerOptionsModel
-		diags := data.Options.ElementsAs(ctx, &options, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
@@ -446,18 +421,19 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 				)
 			}
 		}
-		// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
-		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-			for i, option := range options {
-				if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
-					if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-						option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
-						resp.Diagnostics.AddAttributeError(
-							path.Root("options").AtListIndex(i).AtName("value"),
-							"Invalid configuration for Valid Lifetime",
-							"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
-						)
-					}
+	}
+
+	// When dhcp-lease-time option is set, lease_time attribute must have the same value as option value
+	if !data.LeaseTime.IsNull() && !data.LeaseTime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != strconv.FormatInt(data.LeaseTime.ValueInt64(), 10) {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Lease Time",
+						"lease_time attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+					)
 				}
 			}
 		}

@@ -1,0 +1,17 @@
+// Create a DTC monitor ICMP with Basic Fields 
+resource "nios_dtc_monitor_icmp" "dtc_monitor_icmp_basic_fields" {
+  name = "example_icmp_monitor"
+}
+
+// Create a DTC monitor ICMP with Additional Fields
+resource "nios_dtc_monitor_icmp" "dtc_monitor_icmp_additional_fields" {
+  name    = "example_icmp_monitor2"
+  comment = "DTC ICMP monitor creation"
+  extattrs = {
+    Site = "location-1"
+  }
+  interval   = 45
+  timeout    = 10
+  retry_up   = 2
+  retry_down = 3
+}
