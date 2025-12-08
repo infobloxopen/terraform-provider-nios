@@ -19,7 +19,7 @@ resource "nios_dtc_monitor_sip" "dtc_monitor_sip_basic_fields" {
 }
 
 // Create a DTC Monitor SIP with Additional Fields
-resource "nios_dtc_monitor_sip" "dtc_monitor_http_additional_fields" {
+resource "nios_dtc_monitor_sip" "dtc_monitor_sip_additional_fields" {
   name        = "example-monitor-sip-all-fields"
   ciphers     = "DHE-RSA-AES256-SHA"
   client_cert = "dtc:certificate/"

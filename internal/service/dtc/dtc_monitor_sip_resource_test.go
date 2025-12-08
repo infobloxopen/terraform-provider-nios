@@ -144,7 +144,7 @@ func TestAccDtcMonitorSipResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorSipComment(name, "This is a sip monitor comment"),
+				Config: testAccDtcMonitorSipComment(name, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorSipExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
