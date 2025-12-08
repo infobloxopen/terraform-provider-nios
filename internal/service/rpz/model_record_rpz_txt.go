@@ -105,6 +105,8 @@ var RecordRpzTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"text": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
+			customvalidator.ValidateTXT(),
+			customvalidator.StringNotEmpty(),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Text associated with the record. It can contain up to 255 bytes per substring, up to a total of 512 bytes. To enter leading, trailing, or embedded spaces in the text, add quotes around the text to preserve the spaces.",
