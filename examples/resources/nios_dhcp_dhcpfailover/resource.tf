@@ -7,8 +7,8 @@ resource "nios_dhcp_dhcpfailover" "dhcpfailover_basic_fields" {
   secondary_server_type = "GRID"
 }
 
-// Create  DHCP Failover with Additional Fields
-resource "nios_dhcp_dhcpfailover" "dhcpfailover_2" {
+// Create a DHCP Failover with Additional Fields
+resource "nios_dhcp_dhcpfailover" "dhcpfailover_additional_fields" {
   name                  = "dhcp_failover_2"
   primary               = "infoblox.member2"
   secondary             = "10.197.36.31"
