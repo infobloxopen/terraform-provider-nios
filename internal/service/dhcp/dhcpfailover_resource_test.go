@@ -804,7 +804,7 @@ func TestAccDhcpfailoverResource_UseMsSwitchoverInterval(t *testing.T) {
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	useSwitchoverInterval := "true"
-	useUpdateSwitchoverInterval := "false"
+	useSwitchoverIntervalUpdated := "false"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -820,7 +820,7 @@ func TestAccDhcpfailoverResource_UseMsSwitchoverInterval(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDhcpfailoverUseMsSwitchoverInterval(failoverName, primary, secondary, primaryServerType, secondaryServerType, updateUseMsSwitchoverInterval, useUpdateSwitchoverInterval),
+				Config: testAccDhcpfailoverUseMsSwitchoverInterval(failoverName, primary, secondary, primaryServerType, secondaryServerType, updateUseMsSwitchoverInterval, useSwitchoverIntervalUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ms_switchover_interval", updateUseMsSwitchoverInterval),
