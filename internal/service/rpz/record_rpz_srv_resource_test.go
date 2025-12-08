@@ -39,6 +39,7 @@ func TestAccRecordRpzSrvResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "port", "80"),
 					resource.TestCheckResourceAttr(resourceName, "priority", "10"),
 					resource.TestCheckResourceAttr(resourceName, "weight", "360"),
+					resource.TestCheckResourceAttr(resourceName, "target", target),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),

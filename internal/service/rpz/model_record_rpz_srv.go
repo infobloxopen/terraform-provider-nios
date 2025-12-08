@@ -128,6 +128,7 @@ var RecordRpzSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 			customvalidator.StringNotEmpty(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The target of the Substitute (SRV Record) Rule in FQDN format. This value can be in unicode format.",
 	},
@@ -178,7 +179,7 @@ var RecordRpzSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordRpzSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics) *rpz.RecordRpzSrv {
+func (m *RecordRpzSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *rpz.RecordRpzSrv {
 	if m == nil {
 		return nil
 	}
@@ -193,8 +194,10 @@ func (m *RecordRpzSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Target:   flex.ExpandStringPointer(m.Target),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
-		View:     flex.ExpandStringPointer(m.View),
 		Weight:   flex.ExpandInt64Pointer(m.Weight),
+	}
+	if isCreate {
+		to.View = flex.ExpandStringPointer(m.View)
 	}
 	return to
 }
