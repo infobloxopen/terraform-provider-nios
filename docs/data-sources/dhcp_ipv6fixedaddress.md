@@ -13,21 +13,21 @@ Retrieves information about existing DHCP IPV6 Fixed Addresses.
 ## Example Usage
 
 ```terraform
-// Retrieve a specific IPV6 Fixed Addresses by filters
+// Retrieve a specific IPv6 Fixed Address by filters
 data "nios_dhcp_ipv6fixedaddress" "get_ipv6_fixed_address_using_filters" {
   filters = {
     ipv6addr = "2001:db8:abcd:1234::1"
   }
 }
 
-// Retrieve specific IPV6 Fixed Addresses using Extensible Attributes
+// Retrieve specific IPv6 Fixed Addresses using Extensible Attributes
 data "nios_dhcp_ipv6fixedaddress" "get_ipv6_fixed_address_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }
 }
 
-// Retrieve all IPV6 Fixed Addresses
+// Retrieve all IPv6 Fixed Addresses
 data "nios_dhcp_ipv6fixedaddress" "get_all_ipv6_fixed_address" {}
 ```
 
@@ -66,7 +66,7 @@ Optional:
 - `enable_immediate_discovery` (Boolean) Determines if the discovery for the IPv6 fixed address should be immediately enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for IPV6 Fixed Address. (see [below for nested schema](#nestedatt--result--func_call))
-- `ipv6addr` (String)
+- `ipv6addr` (String) The IPv6 Address of the DHCP IPv6 fixed address.
 - `ipv6prefix` (String) The IPv6 Address prefix of the DHCP IPv6 fixed address.
 - `ipv6prefix_bits` (Number) Prefix bits of the DHCP IPv6 fixed address.
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied to this IPv6 fixed address. This list corresponds to the match rules that are written to the DHCPv6 configuration file. (see [below for nested schema](#nestedatt--result--logic_filter_rules))
@@ -79,8 +79,8 @@ Optional:
 - `preferred_lifetime` (Number) The preferred lifetime value for this DHCP IPv6 fixed address object.
 - `reserved_interface` (String) The reference to the reserved interface to which the device belongs.
 - `restart_if_needed` (Boolean) Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.
-- `snmp3_credential` (Attributes) (see [below for nested schema](#nestedatt--result--snmp3_credential))
-- `snmp_credential` (Attributes) (see [below for nested schema](#nestedatt--result--snmp_credential))
+- `snmp3_credential` (Attributes) The SNMPv3 credential for this IPv6 fixed address. (see [below for nested schema](#nestedatt--result--snmp3_credential))
+- `snmp_credential` (Attributes) The SNMPv1 or SNMPv2 credential for this IPv6 fixed address. (see [below for nested schema](#nestedatt--result--snmp_credential))
 - `template` (String) If set on creation, the IPv6 fixed address will be created according to the values specified in the named template.
 - `use_cli_credentials` (Boolean) If set to true, the CLI credential will override member-level settings.
 - `use_domain_name` (Boolean) Use flag for: domain_name
@@ -95,11 +95,11 @@ Optional:
 
 Read-Only:
 
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info))
+- `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--result--cloud_info))
 - `discover_now_status` (String) The discovery status of this IPv6 fixed address.
-- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--result--discovered_data))
+- `discovered_data` (Attributes) The discovered data for this IPv6 fixed address. (see [below for nested schema](#nestedatt--result--discovered_data))
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
+- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--result--cli_credentials"></a>
@@ -110,7 +110,7 @@ Optional:
 - `comment` (String) The commment for the credential.
 - `credential_group` (String) Group for the CLI credential.
 - `credential_type` (String) The type of the credential.
-- `password` (String) The CLI password.
+- `password` (String, Sensitive) The CLI password.
 - `user` (String) The CLI user name.
 
 Read-Only:
@@ -137,7 +137,7 @@ Optional:
 <a id="nestedatt--result--logic_filter_rules"></a>
 ### Nested Schema for `result.logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -151,7 +151,7 @@ Optional:
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
-- `value` (String) Value of the DHCP option
+- `value` (String) Value of the DHCP option. Required to be set for all options.
 - `vendor_class` (String) The name of the space this DHCP option is associated to.
 
 
@@ -188,13 +188,10 @@ Optional:
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`
 
-Optional:
-
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
-
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
+- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--result--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.
@@ -205,7 +202,7 @@ Read-Only:
 <a id="nestedatt--result--cloud_info--delegated_member"></a>
 ### Nested Schema for `result.cloud_info.delegated_member`
 
-Optional:
+Read-Only:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.

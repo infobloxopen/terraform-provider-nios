@@ -13,39 +13,32 @@ Manages a DHCP IPV6 Fixed Address.
 ## Example Usage
 
 ```terraform
-// Create an IPV6 Network (Required as Parent)
+// Create an IPv6 Network (Required as Parent)
 resource "nios_ipam_ipv6network" "parent_network" {
   network      = "2001:db8:abcd:1231::/64"
   network_view = "default"
   comment      = "Parent network for DHCP fixed addresses"
 }
 
-// Create an IPV6 Fixed Address with Basic Fields
+// Create an IPv6 Fixed Address with Basic Fields
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_basic" {
-  ipv6addr = "2001:db8:abcd:1231::1"
+  ipv6addr = "2001:db8:abcd:1231::2"
   duid     = "01:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
   network  = nios_ipam_ipv6network.parent_network.network
 }
 
-// Create an IPV6 Network (Required as Parent)
-resource "nios_ipam_ipv6network" "parent_network1" {
-  network      = "2001:db8:abcd:1235::/64"
-  network_view = "default"
-  comment      = "Parent network for DHCP fixed addresses"
-}
-
-// Create an IPV6 Fixed Address with Additional Fields with PREFIX address type
+// Create an IPv6 Fixed Address with Additional Fields with PREFIX address type
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   // Basic Fields
   address_type    = "PREFIX"
-  ipv6prefix      = "2001:db8:abcd:1235::"
+  ipv6prefix      = "2001:db8:abcd:1232::"
   ipv6prefix_bits = 64
   match_client    = "MAC_ADDRESS"
   mac_address     = "01:6a:7b:8c:9d:5e"
   network_view    = "default"
 
   // Additional Fields
-  comment = "IPV6 Fixed Address created with additional fields"
+  comment = "IPv6 Fixed Address created with additional fields"
 
   options = [
     {
@@ -64,25 +57,18 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   extattrs = {
     Site = "location-2"
   }
-  depends_on = [nios_ipam_ipv6network.parent_network1]
+  network = nios_ipam_ipv6network.parent_network.network
 }
 
-// Create an IPV6 Network (Required as Parent)
-resource "nios_ipam_ipv6network" "parent_network2" {
-  network      = "2001:db8:abcd:1233::/64"
-  network_view = "default"
-  comment      = "Parent network for DHCP fixed addresses"
-}
-
-// Create an IPV6 Fixed Address with Additional Fields with BOTH address type
+// Create an IPv6 Fixed Address with Additional Fields with BOTH address type
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional2" {
   // Basic Fields
   address_type    = "BOTH"
-  ipv6addr        = "2001:db8:abcd:1233::3"
-  ipv6prefix      = "2001:db8:abcd:1233::"
+  ipv6addr        = "2001:db8:abcd:1231::3"
+  ipv6prefix      = "2001:db8:abcd:1231::"
   ipv6prefix_bits = 64
   match_client    = "MAC_ADDRESS"
-  mac_address     = "00:6a:7b:8c:9d:5e"
+  mac_address     = "00:6a:7b:8c:9d:6e"
   network_view    = "default"
 
   // Additional Fields
@@ -95,23 +81,10 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional2" {
   domain_name_servers     = ["2001:4860:4860::8888", "2001:4860:4860::8844"]
   use_domain_name_servers = true
   use_logic_filter_rules  = true
-  logic_filter_rules = [
-    {
-      filter = "ipv6_option_filter"
-      type   = "Option"
-    }
-  ]
-  network = nios_ipam_ipv6network.parent_network2.network
+  network                 = nios_ipam_ipv6network.parent_network.network
 }
 
-// Create an IPV6 Network (Required as Parent)
-resource "nios_ipam_ipv6network" "parent_network3" {
-  network      = "2001:db8:abcd:1236::/64"
-  network_view = "default"
-  comment      = "Parent network for DHCP fixed addresses"
-}
-
-// Create an IPV6 Fixed Address using function call to retrieve ipv4addr
+// Create an IPv6 Fixed Address using function call to retrieve ipv4addr
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call" {
   duid = "00:01:01:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
   func_call = {
@@ -120,12 +93,12 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
     result_field    = "ips"
     object          = "ipv6network"
     object_parameters = {
-      network      = nios_ipam_ipv6network.parent_network3.network
+      network      = nios_ipam_ipv6network.parent_network.network
       network_view = "default"
     }
   }
-  comment    = "Fixed Address created with ipv4addr retrieved via function call"
-  depends_on = [nios_ipam_ipv6network.parent_network]
+  comment = "Fixed Address created with ipv4addr retrieved via function call"
+  network = nios_ipam_ipv6network.parent_network.network
 }
 ```
 
@@ -150,7 +123,7 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
 - `enable_immediate_discovery` (Boolean) Determines if the discovery for the IPv6 fixed address should be immediately enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for IPV6 Fixed Address. (see [below for nested schema](#nestedatt--func_call))
-- `ipv6addr` (String)
+- `ipv6addr` (String) The IPv6 Address of the DHCP IPv6 fixed address.
 - `ipv6prefix` (String) The IPv6 Address prefix of the DHCP IPv6 fixed address.
 - `ipv6prefix_bits` (Number) Prefix bits of the DHCP IPv6 fixed address.
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied to this IPv6 fixed address. This list corresponds to the match rules that are written to the DHCPv6 configuration file. (see [below for nested schema](#nestedatt--logic_filter_rules))
@@ -163,8 +136,8 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
 - `preferred_lifetime` (Number) The preferred lifetime value for this DHCP IPv6 fixed address object.
 - `reserved_interface` (String) The reference to the reserved interface to which the device belongs.
 - `restart_if_needed` (Boolean) Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.
-- `snmp3_credential` (Attributes) (see [below for nested schema](#nestedatt--snmp3_credential))
-- `snmp_credential` (Attributes) (see [below for nested schema](#nestedatt--snmp_credential))
+- `snmp3_credential` (Attributes) The SNMPv3 credential for this IPv6 fixed address. (see [below for nested schema](#nestedatt--snmp3_credential))
+- `snmp_credential` (Attributes) The SNMPv1 or SNMPv2 credential for this IPv6 fixed address. (see [below for nested schema](#nestedatt--snmp_credential))
 - `template` (String) If set on creation, the IPv6 fixed address will be created according to the values specified in the named template.
 - `use_cli_credentials` (Boolean) If set to true, the CLI credential will override member-level settings.
 - `use_domain_name` (Boolean) Use flag for: domain_name
@@ -179,11 +152,11 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
 
 ### Read-Only
 
-- `cloud_info` (Attributes) (see [below for nested schema](#nestedatt--cloud_info))
+- `cloud_info` (Attributes) Structure containing all cloud API related information for this object. (see [below for nested schema](#nestedatt--cloud_info))
 - `discover_now_status` (String) The discovery status of this IPv6 fixed address.
-- `discovered_data` (Attributes) (see [below for nested schema](#nestedatt--discovered_data))
+- `discovered_data` (Attributes) The discovered data for this IPv6 fixed address. (see [below for nested schema](#nestedatt--discovered_data))
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
-- `ms_ad_user_data` (Attributes) (see [below for nested schema](#nestedatt--ms_ad_user_data))
+- `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--cli_credentials"></a>
@@ -194,7 +167,7 @@ Optional:
 - `comment` (String) The commment for the credential.
 - `credential_group` (String) Group for the CLI credential.
 - `credential_type` (String) The type of the credential.
-- `password` (String) The CLI password.
+- `password` (String, Sensitive) The CLI password.
 - `user` (String) The CLI user name.
 
 Read-Only:
@@ -221,7 +194,7 @@ Optional:
 <a id="nestedatt--logic_filter_rules"></a>
 ### Nested Schema for `logic_filter_rules`
 
-Optional:
+Required:
 
 - `filter` (String) The filter name.
 - `type` (String) The filter type. Valid values are: * MAC * NAC * Option
@@ -235,7 +208,7 @@ Optional:
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
-- `value` (String) Value of the DHCP option
+- `value` (String) Value of the DHCP option. Required to be set for all options.
 - `vendor_class` (String) The name of the space this DHCP option is associated to.
 
 
@@ -272,13 +245,10 @@ Optional:
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`
 
-Optional:
-
-- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
-
 Read-Only:
 
 - `authority_type` (String) Type of authority over the object.
+- `delegated_member` (Attributes) (see [below for nested schema](#nestedatt--cloud_info--delegated_member))
 - `delegated_root` (String) Indicates the root of the delegation if delegated_scope is SUBTREE or RECLAIMING. This is not set otherwise.
 - `delegated_scope` (String) Indicates the scope of delegation for the object. This can be one of the following: NONE (outside any delegation), ROOT (the delegation point), SUBTREE (within the scope of a delegation), RECLAIMING (within the scope of a delegation being reclaimed, either as the delegation point or in the subtree).
 - `mgmt_platform` (String) Indicates the specified cloud management platform.
@@ -289,7 +259,7 @@ Read-Only:
 <a id="nestedatt--cloud_info--delegated_member"></a>
 ### Nested Schema for `cloud_info.delegated_member`
 
-Optional:
+Read-Only:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.

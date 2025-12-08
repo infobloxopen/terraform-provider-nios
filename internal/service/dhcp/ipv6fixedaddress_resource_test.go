@@ -18,6 +18,9 @@ import (
 
 var readableAttributesForIpv6fixedaddress = "address_type,allow_telnet,cli_credentials,cloud_info,comment,device_description,device_location,device_type,device_vendor,disable,disable_discovery,discover_now_status,discovered_data,domain_name,domain_name_servers,duid,extattrs,ipv6addr,ipv6prefix,ipv6prefix_bits,logic_filter_rules,mac_address,match_client,ms_ad_user_data,name,network,network_view,options,preferred_lifetime,reserved_interface,snmp3_credential,snmp_credential,use_cli_credentials,use_domain_name,use_domain_name_servers,use_logic_filter_rules,use_options,use_preferred_lifetime,use_snmp3_credential,use_snmp_credential,use_valid_lifetime,valid_lifetime"
 
+// Objects to be present on GRID for tests
+// filteroption - ipv6_option_filter and ipv6_option_filter1
+
 // TODO: Add tests:
 // The following require additional resource/data source objects to be supported.
 // - Logic Filter Rules
@@ -32,8 +35,6 @@ func TestAccIpv6fixedaddressResource_basic(t *testing.T) {
 	ipv6addr := "2001:db8:abcd:1231::1"
 	networkView := acctest.RandomNameWithPrefix("network-view")
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
-	//macAddr := "00:0c:29:AB:CD:EF"
-	//matchClient := "MAC_ADDRESS"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -111,7 +112,6 @@ func TestAccIpv6fixedaddressResource_AddressType(t *testing.T) {
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
 	ipv6Prefix := "2001:db8:abcd:1231::"
 	ipv6Prefix1 := "2001:db8:abcd:1232::"
-	//ipv6Prefix2 := "2001:db8:abcd:1231::"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -481,8 +481,8 @@ func TestAccIpv6fixedaddressResource_DomainName(t *testing.T) {
 	ipv6addr := "2001:db8:abcd:1231::1"
 	networkView := acctest.RandomNameWithPrefix("network-view")
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
-	domainName1 := acctest.RandomName()
-	domainName2 := acctest.RandomName()
+	domainName1 := acctest.RandomName() + ".com"
+	domainName2 := acctest.RandomName() + ".com"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -515,8 +515,8 @@ func TestAccIpv6fixedaddressResource_DomainNameServers(t *testing.T) {
 	ipv6addr := "2001:db8:abcd:1231::1"
 	networkView := acctest.RandomNameWithPrefix("network-view")
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
-	domainNameServers1 := `["2001:4860:4860::8888","2001:4860:4860::8844"]`
-	domainNameServers2 := `["2620:fe::9","2001:4860:4860::6844"]`
+	domainNameServers1 := []string{"2001:4860:4860::8888", "2001:4860:4860::8844"}
+	domainNameServers2 := []string{"2620:fe::9", "2001:4860:4860::6844"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -653,7 +653,6 @@ func TestAccIpv6fixedaddressResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_func_call"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
-	//ipv6addr := "2001:db8:abcd:1231::1"
 	networkView := acctest.RandomNameWithPrefix("network-view")
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
 	resource.ParallelTest(t, resource.TestCase{
@@ -942,11 +941,19 @@ func TestAccIpv6fixedaddressResource_Options(t *testing.T) {
 			"num":   "15",
 			"value": "aa.bb.com",
 		},
+		{
+			"num":   "6",
+			"value": "2001:4860:4860::8888,2001:4860:4860::8844",
+		},
 	}
 	optionsUpdated := []map[string]any{
 		{
 			"name":  "domain-name",
 			"value": "bb.cc.com",
+		},
+		{
+			"num":   "6",
+			"value": "2001:4860:4860::8008,2001:4860:4860::2244",
 		},
 	}
 	resource.ParallelTest(t, resource.TestCase{
@@ -958,7 +965,7 @@ func TestAccIpv6fixedaddressResource_Options(t *testing.T) {
 				Config: testAccIpv6fixedaddressOptions(ipv6addr, duid, networkView, ipv6Network, options),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "aa.bb.com"),
 				),
@@ -968,7 +975,7 @@ func TestAccIpv6fixedaddressResource_Options(t *testing.T) {
 				Config: testAccIpv6fixedaddressOptions(ipv6addr, duid, networkView, ipv6Network, optionsUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.value", "bb.cc.com"),
 					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
 				),
@@ -1514,7 +1521,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test" {
  network = nios_ipam_ipv6network.test_ipv6_network.network
  network_view = nios_ipam_network_view.parent_network_view.name
 }`, ipv6addr, duid)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressAddressType(ipv6addr, duid, networkView, ipv6Network, addressType string, ipv6Prefix string, ipv6PrefixBits int32) string {
@@ -1539,7 +1546,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_address_type" {
     address_type = %q
 }
 `, ipv6Config, duid, addressType)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressAllowTelnet(ipv6addr, duid, networkView, ipv6Network string, allowTelnet bool, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup string) string {
@@ -1568,7 +1575,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_allow_telnet" {
 	use_cli_credentials = true
 }
 `, ipv6addr, duid, allowTelnet, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func setCLICredentials(telnetConfig string, cliCredComment string, cliCredUser string, cliCredPassword string, cliCredType string, cliCredGroup string) string {
@@ -1600,7 +1607,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_cli_credentials" {
 	use_cli_credentials = %q
 }
 `, ipv6addr, duid, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup, useCLICredentials)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressCliCredentials(ipv6addr, duid, networkView, ipv6Network, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup, useCLICredentials string) string {
@@ -1628,7 +1635,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_cli_credentials" {
 	use_cli_credentials = %q
 }
 `, ipv6addr, duid, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup, useCLICredentials)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressComment(ipv6addr, duid, networkView, ipv6Network, comment string) string {
@@ -1641,7 +1648,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_comment" {
     comment = %q
 }
 `, ipv6addr, duid, comment)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDeviceDescription(ipv6addr, duid, networkView, ipv6Network, deviceDescription string) string {
@@ -1654,7 +1661,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_device_description" {
     device_description = %q
 }
 `, ipv6addr, duid, deviceDescription)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDeviceLocation(ipv6addr, duid, networkView, ipv6Network, deviceLocation string) string {
@@ -1667,7 +1674,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_device_location" {
     device_location = %q
 }
 `, ipv6addr, duid, deviceLocation)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDeviceType(ipv6addr, duid, networkView, ipv6Network, deviceType string) string {
@@ -1680,7 +1687,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_device_type" {
     device_type = %q
 }
 `, ipv6addr, duid, deviceType)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDeviceVendor(ipv6addr, duid, networkView, ipv6Network, deviceVendor string) string {
@@ -1693,7 +1700,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_device_vendor" {
     device_vendor = %q
 }
 `, ipv6addr, duid, deviceVendor)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDisable(ipv6addr, duid, networkView, ipv6Network string, disable bool) string {
@@ -1706,7 +1713,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_disable" {
     disable = %t
 }
 `, ipv6addr, duid, disable)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDisableDiscovery(ipv6addr, duid, networkView, ipv6Network string, disableDiscovery bool) string {
@@ -1719,7 +1726,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_disable_discovery" {
     disable_discovery = %t
 }
 `, ipv6addr, duid, disableDiscovery)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDomainName(ipv6addr, duid, networkView, ipv6Network, domainName string) string {
@@ -1733,10 +1740,11 @@ resource "nios_dhcp_ipv6fixedaddress" "test_domain_name" {
     use_domain_name = true
 }
 `, ipv6addr, duid, domainName)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
-func testAccIpv6fixedaddressDomainNameServers(ipv6addr, duid, networkView, ipv6Network, domainNameServers string) string {
+func testAccIpv6fixedaddressDomainNameServers(ipv6addr, duid, networkView, ipv6Network string, domainNameServers []string) string {
+	domainNameServersStr := utils.ConvertStringSliceToHCL(domainNameServers)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddress" "test_domain_name_servers" {
     ipv6addr = %q
@@ -1746,8 +1754,8 @@ resource "nios_dhcp_ipv6fixedaddress" "test_domain_name_servers" {
     domain_name_servers = %s
     use_domain_name_servers = true
 }
-`, ipv6addr, duid, domainNameServers)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+`, ipv6addr, duid, domainNameServersStr)
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDuid(ipv6addr, duid, networkView, ipv6Network string) string {
@@ -1759,7 +1767,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_duid" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressExtAttrs(ipv6addr, duid, networkView, ipv6Network string, extAttrs map[string]any) string {
@@ -1773,7 +1781,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_extattrs" {
     extattrs = %s
 }
 `, ipv6addr, duid, extAttrsStr)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressIpv6addr(ipv6addr, duid, networkView, ipv6Network string) string {
@@ -1785,7 +1793,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_ipv6addr" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressFuncCall(duid, networkView, ipv6Network, attributeName, objFunc, resultField, object, comment string) string {
@@ -1805,7 +1813,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_func_call" {
 	}
 }
 `, duid, comment, attributeName, objFunc, resultField, object)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressIpv6prefix(duid, networkView, ipv6Network, addressType, ipv6prefix string, ipv6PrefixBits int) string {
@@ -1819,7 +1827,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_ipv6prefix" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, duid, addressType, ipv6prefix, ipv6PrefixBits)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressIpv6prefixBits(duid, networkView, ipv6Network, addressType, ipv6addr, ipv6prefix string, ipv6prefixBits int32) string {
@@ -1834,7 +1842,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_ipv6prefix_bits" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, duid, addressType, ipv6addr, ipv6prefix, ipv6prefixBits)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressLogicFilterRules(ipv6addr, duid, networkView, ipv6Network string, logicFilterRules []map[string]any) string {
@@ -1849,7 +1857,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_logic_filter_rules" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, logicFilterRulesStr)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressMacAddress(ipv6addr, matchClient, macAddress, networkView, ipv6Network string) string {
@@ -1862,7 +1870,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_mac_address" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, matchClient, macAddress)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressMatchClient(ipv6addr, duid, macAddress, networkView, ipv6Network, matchClient string) string {
@@ -1882,7 +1890,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_match_client" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, extraConfig, matchClient)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressName(ipv6addr, duid, networkView, ipv6Network, name string) string {
@@ -1895,7 +1903,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_name" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, name)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressNetwork(ipv6addr, duid, networkView, ipv6Network1, ipv6Network2, networkName string) string {
@@ -1907,7 +1915,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_network" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, networkName)
-	return strings.Join([]string{testAccBaseNetworkViewCreateTwoNetworks(networkView, ipv6Network1, ipv6Network2), config}, "")
+	return strings.Join([]string{testAccBaseWithTwoIPv6Networks(networkView, ipv6Network1, ipv6Network2), config}, "")
 }
 
 func testAccIpv6fixedaddressOptions(ipv6addr, duid, networkView, ipv6Network string, options []map[string]any) string {
@@ -1922,7 +1930,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_options" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, optionsStr)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressPreferredLifetime(ipv6addr, duid, networkView, ipv6Network string, preferredLifetime int) string {
@@ -1936,7 +1944,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_preferred_lifetime" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, preferredLifetime)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressReservedInterface(ipv6addr, duid, networkView, ipv6Network string, reservedInterface string) string {
@@ -1949,7 +1957,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_reserved_interface" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, reservedInterface)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup, useSnmp3Credentials string) string {
@@ -1972,7 +1980,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_snmp3_credential" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressSnmpCredential(ipv6addr, duid, networkView, ipv6Network, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials string) string {
@@ -1990,7 +1998,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_snmp_credential" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUseCliCredentials(ipv6addr, duid, networkView, ipv6Network string, useCliCredentials bool) string {
@@ -2003,7 +2011,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_cli_credentials" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, useCliCredentials)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUseDomainName(ipv6addr, duid, networkView, ipv6Network string, useDomainName bool, domainName string) string {
@@ -2017,7 +2025,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_domain_name" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, useDomainName, domainName)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUseDomainNameServers(ipv6addr, duid, networkView, ipv6Network string, useDomainNameServers bool) string {
@@ -2030,7 +2038,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_domain_name_servers" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, useDomainNameServers)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUseLogicFilterRules(ipv6addr, duid, networkView, ipv6Network string, useLogicFilterRules bool) string {
@@ -2043,7 +2051,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_logic_filter_rules" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, useLogicFilterRules)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUseOptions(ipv6addr, duid, networkView, ipv6Network string, useOptions bool) string {
@@ -2056,7 +2064,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_options" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, useOptions)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUsePreferredLifetime(ipv6addr, duid, networkView, ipv6Network string, usePreferredLifetime bool) string {
@@ -2069,7 +2077,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_preferred_lifetime" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, usePreferredLifetime)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network string, useSnmp3Credential, useCliCredentials bool, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup string) string {
@@ -2097,7 +2105,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_snmp3_credential" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, useSnmp3Credential, useCliCredentials, snmp3Config)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUseSnmpCredential(ipv6addr, duid, networkView, ipv6Network string, useSnmpCredential bool, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup string) string {
@@ -2120,7 +2128,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_snmp_credential" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, useSnmpCredential, snmpConfig)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressUseValidLifetime(ipv6addr, duid, networkView, ipv6Network string, useValidLifetime bool) string {
@@ -2133,7 +2141,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_valid_lifetime" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, useValidLifetime)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressValidLifetime(ipv6addr, duid, networkView, ipv6Network string, validLifetime int) string {
@@ -2147,10 +2155,10 @@ resource "nios_dhcp_ipv6fixedaddress" "test_valid_lifetime" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, validLifetime)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
-func testAccBaseNetworkViewCreateTwoNetworks(networkView, ipv6Network1, ipv6Network2 string) string {
+func testAccBaseWithTwoIPv6Networks(networkView, ipv6Network1, ipv6Network2 string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_ipv6network1" {
   network      = %q

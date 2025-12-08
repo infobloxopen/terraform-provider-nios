@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -39,7 +38,7 @@ var Ipv6fixedaddressCloudInfoAttrTypes = map[string]attr.Type{
 var Ipv6fixedaddressCloudInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"delegated_member": schema.SingleNestedAttribute{
 		Attributes: Ipv6fixedaddresscloudinfoDelegatedMemberResourceSchemaAttributes,
-		Optional:   true,
+		Computed:   true,
 	},
 	"delegated_scope": schema.StringAttribute{
 		Computed:            true,
@@ -87,9 +86,7 @@ func (m *Ipv6fixedaddressCloudInfoModel) Expand(ctx context.Context, diags *diag
 	if m == nil {
 		return nil
 	}
-	to := &dhcp.Ipv6fixedaddressCloudInfo{
-		DelegatedMember: ExpandIpv6fixedaddresscloudinfoDelegatedMember(ctx, m.DelegatedMember, diags),
-	}
+	to := &dhcp.Ipv6fixedaddressCloudInfo{}
 	return to
 }
 

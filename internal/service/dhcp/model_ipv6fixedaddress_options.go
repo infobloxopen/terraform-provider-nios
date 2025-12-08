@@ -2,18 +2,17 @@ package dhcp
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6fixedaddressOptionsModel struct {
@@ -60,7 +59,7 @@ var Ipv6fixedaddressOptionsResourceSchemaAttributes = map[string]schema.Attribut
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
-		MarkdownDescription: "Value of the DHCP option",
+		MarkdownDescription: "Value of the DHCP option. Required to be set for all options.",
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,

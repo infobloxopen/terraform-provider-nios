@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -12,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -362,11 +362,8 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 		return
 	}
 
-	// Check if func_call is set
-	funcCallSet := !data.FuncCall.IsNull() && !data.FuncCall.IsUnknown()
-
 	// Validate based on address_type only if func_call is not set
-	if !funcCallSet {
+	if data.FuncCall.IsNull() || data.FuncCall.IsUnknown() {
 		addressType := data.AddressType.ValueString()
 		if addressType == "" || data.AddressType.IsNull() || data.AddressType.IsUnknown() {
 			addressType = "ADDRESS"
@@ -418,12 +415,6 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 					"When address_type is set to 'BOTH', the 'ipv6prefix_bits' attribute must be specified.",
 				)
 			}
-		default:
-			resp.Diagnostics.AddAttributeError(
-				path.Root("address_type"),
-				"Invalid Value",
-				"The 'address_type' attribute must be one of 'ADDRESS', 'PREFIX', or 'BOTH'.",
-			)
 		}
 	}
 
@@ -595,6 +586,45 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 				"The 'snmp3_credential' attribute is set, but 'use_cli_credentials' is false. "+
 					"Please set 'use_cli_credentials' to true to use SNMP3 Credentials.",
 			)
+		}
+	}
+
+	var options []Ipv6fixedaddressOptionsModel
+	diags := data.Options.ElementsAs(ctx, &options, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// domain_name attribute must match the value of option 'domain-name'
+	if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "domain-name" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != data.DomainName.ValueString() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Domain Name",
+						"domain_name attribute must match the 'value' attribute for DHCP Option 'domain-name'.",
+					)
+				}
+			}
+		}
+	}
+
+	// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+	if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Valid Lifetime",
+						"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+					)
+				}
+			}
 		}
 	}
 }

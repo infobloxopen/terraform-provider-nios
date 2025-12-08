@@ -131,10 +131,12 @@ resource "nios_dhcp_ipv6fixedaddress" "test" {
 data "nios_dhcp_ipv6fixedaddress" "test" {
  filters = {
 	 ipv6addr = nios_dhcp_ipv6fixedaddress.test.ipv6addr
+     mac_address = nios_dhcp_ipv6fixedaddress.test.mac_address
+     match_client = nios_dhcp_ipv6fixedaddress.test.match_client
  }
 }
 `, ipv6addr, matchClient, macAddress)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressDataSourceConfigExtAttrFilters(ipv6addr, matchClient, macAddress, extAttrsValue, networkView, ipv6Network string) string {
@@ -156,10 +158,10 @@ data "nios_dhcp_ipv6fixedaddress" "test" {
  }
 }
 `, ipv6addr, matchClient, macAddress, extAttrsValue)
-	return strings.Join([]string{testAccBaseNetworkView(networkView, ipv6Network), config}, "")
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
-func testAccBaseNetworkView(networkView, ipv6Network string) string {
+func testAccBaseNetworkWithView(networkView, ipv6Network string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_ipv6_network" {
   network      = %q

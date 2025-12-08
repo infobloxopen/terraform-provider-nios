@@ -2,86 +2,86 @@ package dhcp
 
 import (
 	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/cidrtypes"
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 )
 
 type Ipv6fixedaddressModel struct {
-	Ref                      types.String                  `tfsdk:"ref"`
-	AddressType              types.String                  `tfsdk:"address_type"`
-	AllowTelnet              types.Bool                    `tfsdk:"allow_telnet"`
-	CliCredentials           types.List                    `tfsdk:"cli_credentials"`
-	CloudInfo                types.Object                  `tfsdk:"cloud_info"`
-	Comment                  types.String                  `tfsdk:"comment"`
-	DeviceDescription        types.String                  `tfsdk:"device_description"`
-	DeviceLocation           types.String                  `tfsdk:"device_location"`
-	DeviceType               types.String                  `tfsdk:"device_type"`
-	DeviceVendor             types.String                  `tfsdk:"device_vendor"`
-	Disable                  types.Bool                    `tfsdk:"disable"`
-	DisableDiscovery         types.Bool                    `tfsdk:"disable_discovery"`
-	DiscoverNowStatus        types.String                  `tfsdk:"discover_now_status"`
-	DiscoveredData           types.Object                  `tfsdk:"discovered_data"`
-	DomainName               types.String                  `tfsdk:"domain_name"`
-	DomainNameServers        types.List                    `tfsdk:"domain_name_servers"`
-	Duid                     types.String                  `tfsdk:"duid"`
-	EnableImmediateDiscovery types.Bool                    `tfsdk:"enable_immediate_discovery"`
-	ExtAttrs                 types.Map                     `tfsdk:"extattrs"`
-	Ipv6addr                 iptypes.IPv6Address           `tfsdk:"ipv6addr"`
-	FuncCall                 types.Object                  `tfsdk:"func_call"`
-	Ipv6prefix               types.String                  `tfsdk:"ipv6prefix"`
-	Ipv6prefixBits           types.Int64                   `tfsdk:"ipv6prefix_bits"`
-	LogicFilterRules         types.List                    `tfsdk:"logic_filter_rules"`
-	MacAddress               internaltypes.MACAddressValue `tfsdk:"mac_address"`
-	MatchClient              types.String                  `tfsdk:"match_client"`
-	MsAdUserData             types.Object                  `tfsdk:"ms_ad_user_data"`
-	Name                     types.String                  `tfsdk:"name"`
-	Network                  types.String                  `tfsdk:"network"`
-	NetworkView              types.String                  `tfsdk:"network_view"`
-	Options                  types.List                    `tfsdk:"options"`
-	PreferredLifetime        types.Int64                   `tfsdk:"preferred_lifetime"`
-	ReservedInterface        types.String                  `tfsdk:"reserved_interface"`
-	RestartIfNeeded          types.Bool                    `tfsdk:"restart_if_needed"`
-	Snmp3Credential          types.Object                  `tfsdk:"snmp3_credential"`
-	SnmpCredential           types.Object                  `tfsdk:"snmp_credential"`
-	Template                 types.String                  `tfsdk:"template"`
-	UseCliCredentials        types.Bool                    `tfsdk:"use_cli_credentials"`
-	UseDomainName            types.Bool                    `tfsdk:"use_domain_name"`
-	UseDomainNameServers     types.Bool                    `tfsdk:"use_domain_name_servers"`
-	UseLogicFilterRules      types.Bool                    `tfsdk:"use_logic_filter_rules"`
-	UseOptions               types.Bool                    `tfsdk:"use_options"`
-	UsePreferredLifetime     types.Bool                    `tfsdk:"use_preferred_lifetime"`
-	UseSnmp3Credential       types.Bool                    `tfsdk:"use_snmp3_credential"`
-	UseSnmpCredential        types.Bool                    `tfsdk:"use_snmp_credential"`
-	UseValidLifetime         types.Bool                    `tfsdk:"use_valid_lifetime"`
-	ValidLifetime            types.Int64                   `tfsdk:"valid_lifetime"`
-	ExtAttrsAll              types.Map                     `tfsdk:"extattrs_all"`
+	Ref                      types.String                             `tfsdk:"ref"`
+	AddressType              types.String                             `tfsdk:"address_type"`
+	AllowTelnet              types.Bool                               `tfsdk:"allow_telnet"`
+	CliCredentials           types.List                               `tfsdk:"cli_credentials"`
+	CloudInfo                types.Object                             `tfsdk:"cloud_info"`
+	Comment                  types.String                             `tfsdk:"comment"`
+	DeviceDescription        types.String                             `tfsdk:"device_description"`
+	DeviceLocation           types.String                             `tfsdk:"device_location"`
+	DeviceType               types.String                             `tfsdk:"device_type"`
+	DeviceVendor             types.String                             `tfsdk:"device_vendor"`
+	Disable                  types.Bool                               `tfsdk:"disable"`
+	DisableDiscovery         types.Bool                               `tfsdk:"disable_discovery"`
+	DiscoverNowStatus        types.String                             `tfsdk:"discover_now_status"`
+	DiscoveredData           types.Object                             `tfsdk:"discovered_data"`
+	DomainName               internaltypes.CaseInsensitiveStringValue `tfsdk:"domain_name"`
+	DomainNameServers        types.List                               `tfsdk:"domain_name_servers"`
+	Duid                     internaltypes.DUIDValue                  `tfsdk:"duid"`
+	EnableImmediateDiscovery types.Bool                               `tfsdk:"enable_immediate_discovery"`
+	ExtAttrs                 types.Map                                `tfsdk:"extattrs"`
+	Ipv6addr                 iptypes.IPv6Address                      `tfsdk:"ipv6addr"`
+	FuncCall                 types.Object                             `tfsdk:"func_call"`
+	Ipv6prefix               types.String                             `tfsdk:"ipv6prefix"`
+	Ipv6prefixBits           types.Int64                              `tfsdk:"ipv6prefix_bits"`
+	LogicFilterRules         types.List                               `tfsdk:"logic_filter_rules"`
+	MacAddress               internaltypes.MACAddressValue            `tfsdk:"mac_address"`
+	MatchClient              types.String                             `tfsdk:"match_client"`
+	MsAdUserData             types.Object                             `tfsdk:"ms_ad_user_data"`
+	Name                     types.String                             `tfsdk:"name"`
+	Network                  cidrtypes.IPv6Prefix                     `tfsdk:"network"`
+	NetworkView              types.String                             `tfsdk:"network_view"`
+	Options                  types.List                               `tfsdk:"options"`
+	PreferredLifetime        types.Int64                              `tfsdk:"preferred_lifetime"`
+	ReservedInterface        types.String                             `tfsdk:"reserved_interface"`
+	RestartIfNeeded          types.Bool                               `tfsdk:"restart_if_needed"`
+	Snmp3Credential          types.Object                             `tfsdk:"snmp3_credential"`
+	SnmpCredential           types.Object                             `tfsdk:"snmp_credential"`
+	Template                 types.String                             `tfsdk:"template"`
+	UseCliCredentials        types.Bool                               `tfsdk:"use_cli_credentials"`
+	UseDomainName            types.Bool                               `tfsdk:"use_domain_name"`
+	UseDomainNameServers     types.Bool                               `tfsdk:"use_domain_name_servers"`
+	UseLogicFilterRules      types.Bool                               `tfsdk:"use_logic_filter_rules"`
+	UseOptions               types.Bool                               `tfsdk:"use_options"`
+	UsePreferredLifetime     types.Bool                               `tfsdk:"use_preferred_lifetime"`
+	UseSnmp3Credential       types.Bool                               `tfsdk:"use_snmp3_credential"`
+	UseSnmpCredential        types.Bool                               `tfsdk:"use_snmp_credential"`
+	UseValidLifetime         types.Bool                               `tfsdk:"use_valid_lifetime"`
+	ValidLifetime            types.Int64                              `tfsdk:"valid_lifetime"`
+	ExtAttrsAll              types.Map                                `tfsdk:"extattrs_all"`
 }
 
 var Ipv6fixedaddressAttrTypes = map[string]attr.Type{
@@ -99,9 +99,9 @@ var Ipv6fixedaddressAttrTypes = map[string]attr.Type{
 	"disable_discovery":          types.BoolType,
 	"discover_now_status":        types.StringType,
 	"discovered_data":            types.ObjectType{AttrTypes: Ipv6fixedaddressDiscoveredDataAttrTypes},
-	"domain_name":                types.StringType,
+	"domain_name":                internaltypes.CaseInsensitiveString{},
 	"domain_name_servers":        types.ListType{ElemType: types.StringType},
-	"duid":                       types.StringType,
+	"duid":                       internaltypes.DUIDType{},
 	"enable_immediate_discovery": types.BoolType,
 	"extattrs":                   types.MapType{ElemType: types.StringType},
 	"ipv6addr":                   iptypes.IPv6AddressType{},
@@ -113,7 +113,7 @@ var Ipv6fixedaddressAttrTypes = map[string]attr.Type{
 	"match_client":               types.StringType,
 	"ms_ad_user_data":            types.ObjectType{AttrTypes: Ipv6fixedaddressMsAdUserDataAttrTypes},
 	"name":                       types.StringType,
-	"network":                    types.StringType,
+	"network":                    cidrtypes.IPv6PrefixType{},
 	"network_view":               types.StringType,
 	"options":                    types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6fixedaddressOptionsAttrTypes}},
 	"preferred_lifetime":         types.Int64Type,
@@ -168,8 +168,9 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The CLI credentials for the IPv6 fixed address.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: Ipv6fixedaddressCloudInfoResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          Ipv6fixedaddressCloudInfoResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "Structure containing all cloud API related information for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -177,6 +178,7 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
 		},
 		MarkdownDescription: "Comment for the fixed address; maximum 256 characters.",
 	},
@@ -233,12 +235,14 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The discovery status of this IPv6 fixed address.",
 	},
 	"discovered_data": schema.SingleNestedAttribute{
-		Attributes: Ipv6fixedaddressDiscoveredDataResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          Ipv6fixedaddressDiscoveredDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The discovered data for this IPv6 fixed address.",
 	},
 	"domain_name": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_domain_name")),
@@ -256,10 +260,11 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The IPv6 addresses of DNS recursive name servers to which the DHCP client can send name resolution requests. The DHCP server includes this information in the DNS Recursive Name Server option in Advertise, Rebind, Information-Request, and Reply messages.",
 	},
 	"duid": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: internaltypes.DUIDType{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidDUID(),
 		},
 		MarkdownDescription: "The DUID value for this IPv6 fixed address.",
 	},
@@ -279,9 +284,10 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
 	"ipv6addr": schema.StringAttribute{
-		CustomType: iptypes.IPv6AddressType{},
-		Optional:   true,
-		Computed:   true,
+		CustomType:          iptypes.IPv6AddressType{},
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The IPv6 Address of the DHCP IPv6 fixed address.",
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
@@ -332,8 +338,9 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The match_client value for this fixed address. Valid values are: \"DUID\": The fixed IP address is leased to the matching DUID. \"MAC_ADDRESS\": The fixed IP address is leased to the matching MAC address.",
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
-		Attributes: Ipv6fixedaddressMsAdUserDataResourceSchemaAttributes,
-		Computed:   true,
+		Attributes:          Ipv6fixedaddressMsAdUserDataResourceSchemaAttributes,
+		Computed:            true,
+		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"name": schema.StringAttribute{
 		Optional: true,
@@ -345,8 +352,9 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the name of this IPv6 fixed address.",
 	},
 	"network": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		CustomType: cidrtypes.IPv6PrefixType{},
+		Optional:   true,
+		Computed:   true,
 		Validators: []validator.String{
 			customvalidator.IsValidIPCIDR(),
 		},
@@ -392,6 +400,8 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"restart_if_needed": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.",
 	},
 	"snmp3_credential": schema.SingleNestedAttribute{
@@ -402,6 +412,7 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
 			objectvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
 		},
+		MarkdownDescription: "The SNMPv3 credential for this IPv6 fixed address.",
 	},
 	"snmp_credential": schema.SingleNestedAttribute{
 		Attributes: Ipv6fixedaddressSnmpCredentialResourceSchemaAttributes,
@@ -410,6 +421,7 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp_credential")),
 		},
+		MarkdownDescription: "The SNMPv1 or SNMPv2 credential for this IPv6 fixed address.",
 	},
 	"template": schema.StringAttribute{
 		Optional: true,
@@ -509,9 +521,9 @@ func (m *Ipv6fixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnost
 		Disable:                  flex.ExpandBoolPointer(m.Disable),
 		DisableDiscovery:         flex.ExpandBoolPointer(m.DisableDiscovery),
 		DiscoveredData:           ExpandIpv6fixedaddressDiscoveredData(ctx, m.DiscoveredData, diags),
-		DomainName:               flex.ExpandStringPointer(m.DomainName),
+		DomainName:               flex.ExpandStringPointer(m.DomainName.StringValue),
 		DomainNameServers:        flex.ExpandFrameworkListString(ctx, m.DomainNameServers, diags),
-		Duid:                     flex.ExpandStringPointer(m.Duid),
+		Duid:                     flex.ExpandDUID(m.Duid),
 		EnableImmediateDiscovery: flex.ExpandBoolPointer(m.EnableImmediateDiscovery),
 		ExtAttrs:                 ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FuncCall:                 ExpandFuncCall(ctx, m.FuncCall, diags),
@@ -522,7 +534,7 @@ func (m *Ipv6fixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnost
 		MatchClient:              flex.ExpandStringPointer(m.MatchClient),
 		MsAdUserData:             ExpandIpv6fixedaddressMsAdUserData(ctx, m.MsAdUserData, diags),
 		Name:                     flex.ExpandStringPointer(m.Name),
-		Network:                  flex.ExpandStringPointer(m.Network),
+		Network:                  flex.ExpandIPv6CIDR(m.Network),
 		NetworkView:              flex.ExpandStringPointer(m.NetworkView),
 		Options:                  flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6fixedaddressOptions),
 		PreferredLifetime:        flex.ExpandInt64Pointer(m.PreferredLifetime),
@@ -594,13 +606,12 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	m.DisableDiscovery = types.BoolPointerValue(from.DisableDiscovery)
 	m.DiscoverNowStatus = flex.FlattenStringPointer(from.DiscoverNowStatus)
 	m.DiscoveredData = FlattenIpv6fixedaddressDiscoveredData(ctx, from.DiscoveredData, diags)
-	m.DomainName = flex.FlattenStringPointer(from.DomainName)
+	m.DomainName.StringValue = flex.FlattenStringPointer(from.DomainName)
 	m.DomainNameServers = flex.FlattenFrameworkListString(ctx, from.DomainNameServers, diags)
-	m.Duid = flex.FlattenStringPointer(from.Duid)
+	m.Duid = flex.FlattenDUID(from.Duid)
 	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Ipv6addr = FlattenIpv6fixedaddressIpv6addr(from.Ipv6addr)
-	m.FuncCall = FlattenFuncCall(ctx, from.FuncCall, diags)
 	m.Ipv6prefix = flex.FlattenStringPointer(from.Ipv6prefix)
 	m.Ipv6prefixBits = flex.FlattenInt64Pointer(from.Ipv6prefixBits)
 	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, Ipv6fixedaddressLogicFilterRulesAttrTypes, diags, FlattenIpv6fixedaddressLogicFilterRules)
@@ -608,7 +619,7 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	m.MatchClient = flex.FlattenStringPointer(from.MatchClient)
 	m.MsAdUserData = FlattenIpv6fixedaddressMsAdUserData(ctx, from.MsAdUserData, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Network = flex.FlattenStringPointer(from.Network)
+	m.Network = flex.FlattenIPv6CIDR(from.Network)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	planOptions := m.Options
 	m.Options = flex.FlattenFrameworkListNestedBlock(ctx, from.Options, Ipv6fixedaddressOptionsAttrTypes, diags, FlattenIpv6fixedaddressOptions)
@@ -620,7 +631,6 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	}
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
-	m.RestartIfNeeded = types.BoolPointerValue(from.RestartIfNeeded)
 	planSnmp3Credential := m.Snmp3Credential
 	m.Snmp3Credential = FlattenIpv6fixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
 	if !planSnmp3Credential.IsUnknown() {
@@ -645,6 +655,9 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	m.UseSnmpCredential = types.BoolPointerValue(from.UseSnmpCredential)
 	m.UseValidLifetime = types.BoolPointerValue(from.UseValidLifetime)
 	m.ValidLifetime = flex.FlattenInt64Pointer(from.ValidLifetime)
+	if m.FuncCall.IsNull() || m.FuncCall.IsUnknown() {
+		m.FuncCall = FlattenFuncCall(ctx, from.FuncCall, diags)
+	}
 }
 func ExpandIpv6fixedaddressIpv6addr(ipv6addr iptypes.IPv6Address) *dhcp.Ipv6fixedaddressIpv6addr {
 	if ipv6addr.IsNull() {
