@@ -17,7 +17,7 @@ import (
 
 /*
 TODO: grid setup to run test cases
-Grid Members - infoblox.localdomain, infoblox.member2 and infoblox.member1
+Grid Members - infoblox.localdomain, infoblox.member1 and infoblox.member2
 */
 var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failover_port,load_balance_split,max_client_lead_time,max_load_balance_delay,max_response_delay,max_unacked_updates,ms_association_mode,ms_enable_authentication,ms_enable_switchover_interval,ms_failover_mode,ms_failover_partner,ms_hotstandby_partner_role,ms_is_conflict,ms_previous_state,ms_server,ms_state,ms_switchover_interval,name,primary,primary_server_type,primary_state,recycle_leases,secondary,secondary_server_type,secondary_state,use_failover_port,use_ms_switchover_interval,use_recycle_leases"
 
@@ -621,7 +621,7 @@ func TestAccDhcpfailoverResource_PrimaryServerType(t *testing.T) {
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primaryServerType := "GRID"
 	updatedPrimaryServerType := "EXTERNAL"
-	primaryServer := "172.28.82.25"
+	primaryServer := "10.197.36.31"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

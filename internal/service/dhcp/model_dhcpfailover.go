@@ -227,7 +227,6 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.OneOf("ACTIVE", "PASSIVE"),
 		},
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The partner role in the case of HotStandby.",
 	},
 	"ms_is_conflict": schema.BoolAttribute{
