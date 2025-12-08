@@ -147,6 +147,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewDhcpoptiondefinitionResource,
 		dhcp.NewFixedaddresstemplateResource,
 		dhcp.NewIpv6sharednetworkResource,
+		dhcp.NewIpv6rangeResource,
+		dhcp.NewFiltermacResource,
 		dhcp.NewIpv6fixedaddressResource,
 
 		dtc.NewDtcLbdnResource,
@@ -157,6 +159,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcMonitorHttpResource,
 		dtc.NewDtcMonitorTcpResource,
 		dtc.NewDtcMonitorPdpResource,
+		dtc.NewDtcMonitorIcmpResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworkcontainerResource,
@@ -255,6 +258,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewDhcpoptiondefinitionDataSource,
 		dhcp.NewFixedaddresstemplateDataSource,
 		dhcp.NewIpv6sharednetworkDataSource,
+		dhcp.NewIpv6rangeDataSource,
+		dhcp.NewFiltermacDataSource,
 		dhcp.NewIpv6fixedaddressDataSource,
 
 		dtc.NewDtcLbdnDataSource,
@@ -265,6 +270,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcMonitorHttpDataSource,
 		dtc.NewDtcMonitorTcpDataSource,
 		dtc.NewDtcMonitorPdpDataSource,
+		dtc.NewDtcMonitorIcmpDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworkcontainerDataSource,
