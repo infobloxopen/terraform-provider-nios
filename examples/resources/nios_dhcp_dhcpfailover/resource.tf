@@ -1,5 +1,5 @@
-// Create DHCP Failover with Basic Fields
-resource "nios_dhcp_dhcpfailover" "dhcpfailover_1" {
+// Create a DHCP Failover with Basic Fields
+resource "nios_dhcp_dhcpfailover" "dhcpfailover_basic_fields" {
   name                  = "dhcp_failover_1"
   primary               = "infoblox.localdomain"
   secondary             = "infoblox.member1"
