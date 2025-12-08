@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccDhcpfailoverDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_dhcpfailover.test"
-	resourceName := "nios_dhcp_dhcpfailover.test"
+	dataSourceName := "data.nios_dhcp_failover.test"
+	resourceName := "nios_dhcp_failover.test"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primary := "infoblox.localdomain"
@@ -39,8 +39,8 @@ func TestAccDhcpfailoverDataSource_Filters(t *testing.T) {
 }
 
 func TestAccDhcpfailoverDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_dhcp_dhcpfailover.test"
-	resourceName := "nios_dhcp_dhcpfailover.test"
+	dataSourceName := "data.nios_dhcp_failover.test"
+	resourceName := "nios_dhcp_failover.test"
 	var v dhcp.Dhcpfailover
 	extAttrValue := acctest.RandomNameWithPrefix("Site")
 	primary := "infoblox.localdomain"
@@ -107,16 +107,16 @@ func testAccCheckDhcpfailoverResourceAttrPair(resourceName, dataSourceName strin
 
 func testAccDhcpfailoverDataSourceConfigFilters(name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test" {
+resource "nios_dhcp_failover" "test" {
   name = %q
   primary = %q
   secondary = %q
   primary_server_type = %q
   secondary_server_type = %q
 }
-data "nios_dhcp_dhcpfailover" "test" {
+data "nios_dhcp_failover" "test" {
   filters = {
-    name = nios_dhcp_dhcpfailover.test.name
+    name = nios_dhcp_failover.test.name
   }
 }
 `, name, primary, secondary, primaryServerType, secondaryServerType)
@@ -124,7 +124,7 @@ data "nios_dhcp_dhcpfailover" "test" {
 
 func testAccDhcpfailoverDataSourceConfigExtAttrFilters(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, extAttrsValue string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test" {
+resource "nios_dhcp_failover" "test" {
   name = %q
   primary = %q
   secondary = %q
@@ -135,9 +135,9 @@ resource "nios_dhcp_dhcpfailover" "test" {
   } 
 }
 
-data "nios_dhcp_dhcpfailover" "test" {
+data "nios_dhcp_failover" "test" {
   extattrfilters = {
-    Site = nios_dhcp_dhcpfailover.test.extattrs.Site
+    Site = nios_dhcp_failover.test.extattrs.Site
   }
 }
 `, name, primary, secondary, primaryServerType, secondaryServerType, extAttrsValue)

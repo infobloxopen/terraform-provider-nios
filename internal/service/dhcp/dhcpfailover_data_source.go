@@ -31,7 +31,7 @@ type DhcpfailoverDataSource struct {
 }
 
 func (d *DhcpfailoverDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_dhcpfailover"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_failover"
 }
 
 type DhcpfailoverModelWithFilter struct {

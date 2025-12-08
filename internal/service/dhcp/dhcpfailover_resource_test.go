@@ -22,7 +22,7 @@ Grid Members - infoblox.localdomain, infoblox.member1 and infoblox.member2
 var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failover_port,load_balance_split,max_client_lead_time,max_load_balance_delay,max_response_delay,max_unacked_updates,ms_association_mode,ms_enable_authentication,ms_enable_switchover_interval,ms_failover_mode,ms_failover_partner,ms_hotstandby_partner_role,ms_is_conflict,ms_previous_state,ms_server,ms_state,ms_switchover_interval,name,primary,primary_server_type,primary_state,recycle_leases,secondary,secondary_server_type,secondary_state,use_failover_port,use_ms_switchover_interval,use_recycle_leases"
 
 func TestAccDhcpfailoverResource_basic(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test"
+	var resourceName = "nios_dhcp_failover.test"
 	var v dhcp.Dhcpfailover
 
 	resource.Test(t, resource.TestCase{
@@ -54,7 +54,7 @@ func TestAccDhcpfailoverResource_basic(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_disappears(t *testing.T) {
-	resourceName := "nios_dhcp_dhcpfailover.test"
+	resourceName := "nios_dhcp_failover.test"
 	var v dhcp.Dhcpfailover
 
 	resource.Test(t, resource.TestCase{
@@ -75,7 +75,7 @@ func TestAccDhcpfailoverResource_disappears(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_Comment(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_comment"
+	var resourceName = "nios_dhcp_failover.test_comment"
 	var v dhcp.Dhcpfailover
 	dhcpfailoverName := acctest.RandomNameWithPrefix("failover")
 	primary := "infoblox.localdomain"
@@ -109,7 +109,7 @@ func TestAccDhcpfailoverResource_Comment(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_extattrs"
+	var resourceName = "nios_dhcp_failover.test_extattrs"
 	var v dhcp.Dhcpfailover
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -145,7 +145,7 @@ func TestAccDhcpfailoverResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_FailoverPort(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_failover_port"
+	var resourceName = "nios_dhcp_failover.test_failover_port"
 	var v dhcp.Dhcpfailover
 	failoverPort := "647"
 	updateFailoverPort := "648"
@@ -182,7 +182,7 @@ func TestAccDhcpfailoverResource_FailoverPort(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_LoadBalanceSplit(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_load_balance_split"
+	var resourceName = "nios_dhcp_failover.test_load_balance_split"
 	var v dhcp.Dhcpfailover
 	loadBalanceSplit := "120"
 	updateLoadBalanceSplit := "121"
@@ -217,7 +217,7 @@ func TestAccDhcpfailoverResource_LoadBalanceSplit(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MaxClientLeadTime(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_max_client_lead_time"
+	var resourceName = "nios_dhcp_failover.test_max_client_lead_time"
 	var v dhcp.Dhcpfailover
 	maxClientLeadTime := "4000"
 	updateMaxClientLeadTime := "4001"
@@ -253,7 +253,7 @@ func TestAccDhcpfailoverResource_MaxClientLeadTime(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MaxLoadBalanceDelay(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_max_load_balance_delay"
+	var resourceName = "nios_dhcp_failover.test_max_load_balance_delay"
 	var v dhcp.Dhcpfailover
 	maxLoadBalanceDelay := "5000"
 	updateMaxLoadBalanceDelay := "5001"
@@ -289,7 +289,7 @@ func TestAccDhcpfailoverResource_MaxLoadBalanceDelay(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MaxResponseDelay(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_max_response_delay"
+	var resourceName = "nios_dhcp_failover.test_max_response_delay"
 	var v dhcp.Dhcpfailover
 	maxResponseDelay := "6000"
 	updateMaxResponseDelay := "6001"
@@ -325,7 +325,7 @@ func TestAccDhcpfailoverResource_MaxResponseDelay(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MaxUnackedUpdates(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_max_unacked_updates"
+	var resourceName = "nios_dhcp_failover.test_max_unacked_updates"
 	var v dhcp.Dhcpfailover
 	maxUnackedUpdates := "7000"
 	updateMaxUnackedUpdates := "7001"
@@ -361,7 +361,7 @@ func TestAccDhcpfailoverResource_MaxUnackedUpdates(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MsEnableAuthentication(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_ms_enable_authentication"
+	var resourceName = "nios_dhcp_failover.test_ms_enable_authentication"
 	var v dhcp.Dhcpfailover
 	msEnableAuthentication := "true"
 	updateMsEnableAuthentication := "false"
@@ -397,7 +397,7 @@ func TestAccDhcpfailoverResource_MsEnableAuthentication(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MsEnableSwitchoverInterval(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_ms_enable_switchover_interval"
+	var resourceName = "nios_dhcp_failover.test_ms_enable_switchover_interval"
 	var v dhcp.Dhcpfailover
 	msEnableSwitchoverInterval := "true"
 	updateMsEnableSwitchoverInterval := "false"
@@ -435,7 +435,7 @@ func TestAccDhcpfailoverResource_MsEnableSwitchoverInterval(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MsFailoverMode(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_ms_failover_mode"
+	var resourceName = "nios_dhcp_failover.test_ms_failover_mode"
 	var v dhcp.Dhcpfailover
 	msFailoverMode := "HOTSTANDBY"
 	updateMsFailoverMode := "LOADBALANCE"
@@ -470,7 +470,7 @@ func TestAccDhcpfailoverResource_MsFailoverMode(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MsHotstandbyPartnerRole(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_ms_hotstandby_partner_role"
+	var resourceName = "nios_dhcp_failover.test_ms_hotstandby_partner_role"
 	var v dhcp.Dhcpfailover
 	name := acctest.RandomNameWithPrefix("failover")
 	msHotstandbyPartnerRole := "ACTIVE"
@@ -506,7 +506,7 @@ func TestAccDhcpfailoverResource_MsHotstandbyPartnerRole(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_MsSwitchoverInterval(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_ms_switchover_interval"
+	var resourceName = "nios_dhcp_failover.test_ms_switchover_interval"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	switchOverInterval := "300"
@@ -544,7 +544,7 @@ func TestAccDhcpfailoverResource_MsSwitchoverInterval(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_Name(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_name"
+	var resourceName = "nios_dhcp_failover.test_name"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primary := "infoblox.localdomain"
@@ -578,7 +578,7 @@ func TestAccDhcpfailoverResource_Name(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_Primary(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_primary"
+	var resourceName = "nios_dhcp_failover.test_primary"
 	var v dhcp.Dhcpfailover
 	primary := "infoblox.localdomain"
 	secondary := "infoblox.member1"
@@ -613,7 +613,7 @@ func TestAccDhcpfailoverResource_Primary(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_PrimaryServerType(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_primary_server_type"
+	var resourceName = "nios_dhcp_failover.test_primary_server_type"
 	var v dhcp.Dhcpfailover
 	primary := "infoblox.localdomain"
 	secondary := "infoblox.member1"
@@ -649,7 +649,7 @@ func TestAccDhcpfailoverResource_PrimaryServerType(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_RecycleLeases(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_recycle_leases"
+	var resourceName = "nios_dhcp_failover.test_recycle_leases"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primary := "infoblox.localdomain"
@@ -687,7 +687,7 @@ func TestAccDhcpfailoverResource_RecycleLeases(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_Secondary(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_secondary"
+	var resourceName = "nios_dhcp_failover.test_secondary"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primary := "infoblox.localdomain"
@@ -722,7 +722,7 @@ func TestAccDhcpfailoverResource_Secondary(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_SecondaryServerType(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_secondary_server_type"
+	var resourceName = "nios_dhcp_failover.test_secondary_server_type"
 	var v dhcp.Dhcpfailover
 	primary := "infoblox.localdomain"
 	secondary := "infoblox.member1"
@@ -758,7 +758,7 @@ func TestAccDhcpfailoverResource_SecondaryServerType(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_UseFailoverPort(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_use_failover_port"
+	var resourceName = "nios_dhcp_failover.test_use_failover_port"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primary := "infoblox.localdomain"
@@ -794,7 +794,7 @@ func TestAccDhcpfailoverResource_UseFailoverPort(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_UseMsSwitchoverInterval(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_use_ms_switchover_interval"
+	var resourceName = "nios_dhcp_failover.test_use_ms_switchover_interval"
 	var v dhcp.Dhcpfailover
 	useMsSwitchoverInterval := "true"
 	updateUseMsSwitchoverInterval := "false"
@@ -832,7 +832,7 @@ func TestAccDhcpfailoverResource_UseMsSwitchoverInterval(t *testing.T) {
 }
 
 func TestAccDhcpfailoverResource_UseRecycleLeases(t *testing.T) {
-	var resourceName = "nios_dhcp_dhcpfailover.test_use_recycle_leases"
+	var resourceName = "nios_dhcp_failover.test_use_recycle_leases"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primary := "infoblox.localdomain"
@@ -927,7 +927,7 @@ func testAccCheckDhcpfailoverDisappears(ctx context.Context, v *dhcp.Dhcpfailove
 
 func testAccDhcpfailoverBasicConfig(name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test" {
+resource "nios_dhcp_failover" "test" {
     name = %q
     primary = %q
     secondary = %q
@@ -939,7 +939,7 @@ resource "nios_dhcp_dhcpfailover" "test" {
 
 func testAccDhcpfailoverComment(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, comment string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_comment" {
+resource "nios_dhcp_failover" "test_comment" {
     comment = %q
 	name = %q
 	primary = %q
@@ -958,7 +958,7 @@ func testAccDhcpfailoverExtAttrs(name string, primary string, secondary string, 
 	extattrsStr += "}"
 
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_extattrs" {
+resource "nios_dhcp_failover" "test_extattrs" {
 	name = %q
 	primary = %q
 	secondary = %q
@@ -971,7 +971,7 @@ resource "nios_dhcp_dhcpfailover" "test_extattrs" {
 
 func testAccDhcpfailoverFailoverPort(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, failoverPort string, useFailoverPort bool) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_failover_port" {
+resource "nios_dhcp_failover" "test_failover_port" {
     failover_port = %q
 	name = %q
 	primary = %q
@@ -985,7 +985,7 @@ resource "nios_dhcp_dhcpfailover" "test_failover_port" {
 
 func testAccDhcpfailoverLoadBalanceSplit(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, loadBalanceSplit string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_load_balance_split" {
+resource "nios_dhcp_failover" "test_load_balance_split" {
 	name = %q
 	primary = %q
 	secondary = %q
@@ -998,7 +998,7 @@ resource "nios_dhcp_dhcpfailover" "test_load_balance_split" {
 
 func testAccDhcpfailoverMaxClientLeadTime(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, maxClientLeadTime string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_max_client_lead_time" {
+resource "nios_dhcp_failover" "test_max_client_lead_time" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1011,7 +1011,7 @@ resource "nios_dhcp_dhcpfailover" "test_max_client_lead_time" {
 
 func testAccDhcpfailoverMaxLoadBalanceDelay(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, maxLoadBalanceDelay string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_max_load_balance_delay" {
+resource "nios_dhcp_failover" "test_max_load_balance_delay" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1024,7 +1024,7 @@ resource "nios_dhcp_dhcpfailover" "test_max_load_balance_delay" {
 
 func testAccDhcpfailoverMaxResponseDelay(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, maxResponseDelay string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_max_response_delay" {
+resource "nios_dhcp_failover" "test_max_response_delay" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1037,7 +1037,7 @@ resource "nios_dhcp_dhcpfailover" "test_max_response_delay" {
 
 func testAccDhcpfailoverMaxUnackedUpdates(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, maxUnackedUpdates string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_max_unacked_updates" {
+resource "nios_dhcp_failover" "test_max_unacked_updates" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1050,7 +1050,7 @@ resource "nios_dhcp_dhcpfailover" "test_max_unacked_updates" {
 
 func testAccDhcpfailoverMsEnableAuthentication(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, msEnableAuthentication string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_ms_enable_authentication" {
+resource "nios_dhcp_failover" "test_ms_enable_authentication" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1063,7 +1063,7 @@ resource "nios_dhcp_dhcpfailover" "test_ms_enable_authentication" {
 
 func testAccDhcpfailoverMsEnableSwitchoverInterval(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, msEnableSwitchoverInterval string, useMSSwitchoverInterval bool) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_ms_enable_switchover_interval" {
+resource "nios_dhcp_failover" "test_ms_enable_switchover_interval" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1077,7 +1077,7 @@ resource "nios_dhcp_dhcpfailover" "test_ms_enable_switchover_interval" {
 
 func testAccDhcpfailoverMsFailoverMode(msFailoverMode string, name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_ms_failover_mode" {
+resource "nios_dhcp_failover" "test_ms_failover_mode" {
     ms_failover_mode = %q
 	primary = %q
 	secondary = %q
@@ -1090,7 +1090,7 @@ resource "nios_dhcp_dhcpfailover" "test_ms_failover_mode" {
 
 func testAccDhcpfailoverMsHotstandbyPartnerRole(msHotstandbyPartnerRole string, msFailoverMode string, name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_ms_hotstandby_partner_role" {
+resource "nios_dhcp_failover" "test_ms_hotstandby_partner_role" {
     ms_hotstandby_partner_role = %q
 	ms_failover_mode = %q
 	name = %q
@@ -1104,7 +1104,7 @@ resource "nios_dhcp_dhcpfailover" "test_ms_hotstandby_partner_role" {
 
 func testAccDhcpfailoverMsSwitchoverInterval(msSwitchoverInterval string, name string, primary string, secondary string, primaryServerType string, secondaryServerType string, useMsSwitchoverInterval bool, msEnableSwitchoverInterval string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_ms_switchover_interval" {
+resource "nios_dhcp_failover" "test_ms_switchover_interval" {
     ms_switchover_interval = %q
 	name = %q
 	primary = %q
@@ -1119,7 +1119,7 @@ resource "nios_dhcp_dhcpfailover" "test_ms_switchover_interval" {
 
 func testAccDhcpfailoverName(name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_name" {
+resource "nios_dhcp_failover" "test_name" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1131,7 +1131,7 @@ resource "nios_dhcp_dhcpfailover" "test_name" {
 
 func testAccDhcpfailoverPrimary(name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_primary" {
+resource "nios_dhcp_failover" "test_primary" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1143,7 +1143,7 @@ resource "nios_dhcp_dhcpfailover" "test_primary" {
 
 func testAccDhcpfailoverPrimaryServerType(name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_primary_server_type" {
+resource "nios_dhcp_failover" "test_primary_server_type" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1155,7 +1155,7 @@ resource "nios_dhcp_dhcpfailover" "test_primary_server_type" {
 
 func testAccDhcpfailoverRecycleLeases(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, recycleLeases bool, useRecycleLeases bool) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_recycle_leases" {
+resource "nios_dhcp_failover" "test_recycle_leases" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1169,7 +1169,7 @@ resource "nios_dhcp_dhcpfailover" "test_recycle_leases" {
 
 func testAccDhcpfailoverSecondary(name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_secondary" {
+resource "nios_dhcp_failover" "test_secondary" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1181,7 +1181,7 @@ resource "nios_dhcp_dhcpfailover" "test_secondary" {
 
 func testAccDhcpfailoverSecondaryServerType(name string, primary string, secondary string, primaryServerType string, secondaryServerType string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_secondary_server_type" {
+resource "nios_dhcp_failover" "test_secondary_server_type" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1193,7 +1193,7 @@ resource "nios_dhcp_dhcpfailover" "test_secondary_server_type" {
 
 func testAccDhcpfailoverUseFailoverPort(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, useFailoverPort string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_use_failover_port" {
+resource "nios_dhcp_failover" "test_use_failover_port" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1206,7 +1206,7 @@ resource "nios_dhcp_dhcpfailover" "test_use_failover_port" {
 
 func testAccDhcpfailoverUseMsSwitchoverInterval(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, useMsSwitchoverInterval string, useEnableSwitchoverInterval string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_use_ms_switchover_interval" {
+resource "nios_dhcp_failover" "test_use_ms_switchover_interval" {
     name = %q
 	primary = %q
 	secondary = %q
@@ -1220,7 +1220,7 @@ resource "nios_dhcp_dhcpfailover" "test_use_ms_switchover_interval" {
 
 func testAccDhcpfailoverUseRecycleLeases(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, useRecycleLeases string) string {
 	return fmt.Sprintf(`
-resource "nios_dhcp_dhcpfailover" "test_use_recycle_leases" {
+resource "nios_dhcp_failover" "test_use_recycle_leases" {
     name = %q
 	primary = %q
 	secondary = %q

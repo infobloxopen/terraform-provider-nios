@@ -31,7 +31,7 @@ type DhcpfailoverResource struct {
 }
 
 func (r *DhcpfailoverResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_dhcpfailover"
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_failover"
 }
 
 func (r *DhcpfailoverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
