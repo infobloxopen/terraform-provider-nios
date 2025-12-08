@@ -49,6 +49,6 @@ resource "nios_rpz_record_cname" "create_record_rpz_cname_passthru" {
 // For wildcard names, canonical must be 'infoblox-passthru'
 resource "nios_rpz_record_cname" "create_record_rpz_cname_wildcard" {
   name      = "*.record6.${nios_dns_zone_rp.parent_zone.fqdn}"
-  canonical = "infoblox-passthr"
+  canonical = "infoblox-passthru"
   rp_zone   = nios_dns_zone_rp.parent_zone.fqdn
 }
