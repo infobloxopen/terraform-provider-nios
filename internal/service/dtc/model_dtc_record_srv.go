@@ -134,7 +134,6 @@ func (m *DtcRecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 	to := &dtc.DtcRecordSrv{
 		Comment:   flex.ExpandStringPointer(m.Comment),
 		Disable:   flex.ExpandBoolPointer(m.Disable),
-		DtcServer: flex.ExpandStringPointer(m.DtcServer),
 		Name:      flex.ExpandStringPointer(m.Name),
 		Port:      flex.ExpandInt64Pointer(m.Port),
 		Priority:  flex.ExpandInt64Pointer(m.Priority),

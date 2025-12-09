@@ -107,18 +107,18 @@ func TestAccDtcRecordSrvResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvDisable("DISABLE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvDisable(21, 10, "infoblox.com", 3, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvDisable(21, 10, "infoblox.com", 3, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -136,7 +136,7 @@ func TestAccDtcRecordSrvResource_DtcServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvDtcServer("DTC_SERVER_REPLACE_ME"),
+				Config: testAccDtcRecordSrvDtcServer(21, 10, "infoblox.com", 3,),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dtc_server", "DTC_SERVER_REPLACE_ME"),
@@ -451,12 +451,18 @@ func testAccDtcRecordSrvComment(port, priority int, target string, weight int, c
 	return strings.Join([]string{testAccBaseWithDtcServer("dtc_server1", "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordSrvDisable(disable string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_disable" {
-    disable = %q
-}
-`, disable)
+func testAccDtcRecordSrvDisable(port, priority int, target string, weight int, disable bool) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_srv" "test_disable" {
+		port     = %d
+		priority = %d
+		target   = %q
+		weight   = %d
+		dtc_server = nios_dtc_server.test.name
+    	disable = %t
+	}
+	`, port, priority, target, weight, disable)
+	return strings.Join([]string{testAccBaseWithDtcServer("dtc_server1", "2.2.2.2"), config}, "")
 }
 
 func testAccDtcRecordSrvDtcServer(dtcServer string) string {
