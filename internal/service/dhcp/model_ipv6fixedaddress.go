@@ -488,7 +488,6 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"valid_lifetime": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(43200),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},

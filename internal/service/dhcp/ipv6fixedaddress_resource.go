@@ -418,6 +418,45 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 		}
 	}
 
+	var options []Ipv6fixedaddressOptionsModel
+	diags := data.Options.ElementsAs(ctx, &options, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// domain_name attribute must match the value of option 'domain-name'
+	if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "domain-name" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != data.DomainName.ValueString() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Domain Name",
+						"domain_name attribute must match the 'value' attribute for DHCP Option 'domain-name'.",
+					)
+				}
+			}
+		}
+	}
+
+	// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+	if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Valid Lifetime",
+						"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+					)
+				}
+			}
+		}
+	}
+
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
 		// Special DHCP option names that require use_option to be set
@@ -439,13 +478,6 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 			28: true,
 			51: true,
 			23: true,
-		}
-
-		var options []Ipv6fixedaddressOptionsModel
-		diags := data.Options.ElementsAs(ctx, &options, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
 		}
 
 		for i, option := range options {
@@ -586,45 +618,6 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 				"The 'snmp3_credential' attribute is set, but 'use_cli_credentials' is false. "+
 					"Please set 'use_cli_credentials' to true to use SNMP3 Credentials.",
 			)
-		}
-	}
-
-	var options []Ipv6fixedaddressOptionsModel
-	diags := data.Options.ElementsAs(ctx, &options, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// domain_name attribute must match the value of option 'domain-name'
-	if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-		for i, option := range options {
-			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "domain-name" {
-				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-					option.Value.ValueString() != data.DomainName.ValueString() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for Domain Name",
-						"domain_name attribute must match the 'value' attribute for DHCP Option 'domain-name'.",
-					)
-				}
-			}
-		}
-	}
-
-	// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
-	if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-		for i, option := range options {
-			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
-				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-					option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for Valid Lifetime",
-						"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
-					)
-				}
-			}
 		}
 	}
 }
