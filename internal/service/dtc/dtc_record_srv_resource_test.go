@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -31,7 +32,14 @@ func TestAccDtcRecordSrvResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "port", "21"),
+					resource.TestCheckResourceAttr(resourceName, "priority", "10"),
+					resource.TestCheckResourceAttr(resourceName, "target", "infoblox.com"),
+					resource.TestCheckResourceAttr(resourceName, "weight", "3"),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -49,7 +57,7 @@ func TestAccDtcRecordSrvResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcRecordSrvDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcRecordSrvBasicConfig(""),
+				Config: testAccDtcRecordSrvBasicConfig(21, 10, "infoblox.com", 3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					testAccCheckDtcRecordSrvDisappears(context.Background(), &v),
@@ -70,18 +78,18 @@ func TestAccDtcRecordSrvResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvComment("COMMENT_REPLACE_ME"),
+				Config: testAccDtcRecordSrvComment(21, 10, "infoblox.com", 3, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvComment(21, 10, "infoblox.com", 3, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -408,19 +416,39 @@ func testAccCheckDtcRecordSrvDisappears(ctx context.Context, v *dtc.DtcRecordSrv
 	}
 }
 
-func testAccDtcRecordSrvBasicConfig(string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test" {
+func testAccDtcRecordSrvBasicConfig(port, priority int, target string, weight int) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_srv" "test" {
+		port     = %d
+		priority = %d
+		target   = %q
+		weight   = %d
+		dtc_server = nios_dtc_server.test.name
+	}		
+	`, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseWithDtcServer("dtc_server1", "2.2.2.2"), config}, "")
 }
-`)
+func testAccBaseWithDtcServer(name, host string) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_server" "test" {
+  name = %q
+  host = %q
+}
+`, name, host)
 }
 
-func testAccDtcRecordSrvComment(comment string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_comment" {
+func testAccDtcRecordSrvComment(port, priority int, target string, weight int, comment string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_srv" "test_comment" {
+		port     = %d
+		priority = %d
+		target   = %q
+		weight   = %d
+		dtc_server = nios_dtc_server.test.name
     comment = %q
 }
-`, comment)
+	`, port, priority, target, weight, comment)
+	return strings.Join([]string{testAccBaseWithDtcServer("dtc_server1", "2.2.2.2"), config}, "")
 }
 
 func testAccDtcRecordSrvDisable(disable string) string {

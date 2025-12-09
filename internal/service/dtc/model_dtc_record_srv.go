@@ -17,7 +17,9 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 )
 
 type DtcRecordSrvModel struct {
@@ -70,11 +72,15 @@ var DtcRecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the record is disabled or not. False means that the record is enabled.",
 	},
 	"dtc_server": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of the DTC Server object with which the DTC record is associated.",
 	},
 	"name": schema.StringAttribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -121,7 +127,7 @@ var DtcRecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *DtcRecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcRecordSrv {
+func (m *DtcRecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dtc.DtcRecordSrv {
 	if m == nil {
 		return nil
 	}
@@ -136,6 +142,9 @@ func (m *DtcRecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
 		Weight:    flex.ExpandInt64Pointer(m.Weight),
+	}
+	if isCreate {
+		to.DtcServer = flex.ExpandStringPointer(m.DtcServer)
 	}
 	return to
 }
