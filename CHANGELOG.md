@@ -9,7 +9,7 @@
 - `nios_dhcp_ipv6dhcpoptionspace` : Manage DHCP IPv6 option space and retrieve existing IPv6 option space. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
 - `nios_dhcp_ipv6fixedaddresstemplate` : Manage DHCP IPV6 fixed address template and retrieve existing IPv6 fixed address template. ([#247](https://github.com/infobloxopen/terraform-provider-nios/pull/247))
 
-#### SharedRecord
+#### DNS
 
 - `nios_dns_sharedrecordgroup` : Manage Shared Record Group and retrieve existing Shared Record Groups. ([#244](https://github.com/infobloxopen/terraform-provider-nios/pull/244))
 - `nios_dns_sharedrecord_txt` : Manage Shared TXT Record and retrieve existing Shared TXT Records. ([#248](https://github.com/infobloxopen/terraform-provider-nios/pull/248))
@@ -24,7 +24,6 @@
 - Fixed `ExtractResourceRef` to gracefully handle malformed refs lacking /, eliminating index-out-of-bounds crashes. ([#284](https://github.com/infobloxopen/terraform-provider-nios/pull/284))
 - DHCP: Fixed inconsistent behavior in `ipv6fixedaddresstemplate` when modifying offset and number_of_addresses. ([#285](https://github.com/infobloxopen/terraform-provider-nios/pull/285))
 - DISCOVERY/IPAM: Fixed error handling for `ipv6networkcontainer` imports and added proper diagnostics for invalid HTTPS ports in `openstack_vdiscoverytask`. ([#290](https://github.com/infobloxopen/terraform-provider-nios/pull/290))
-- DNS: Fixed the outdated sharedrecordgroup example in the `nios_dns_sharedrecord_txt` docs. ([#293](https://github.com/infobloxopen/terraform-provider-nios/pull/293))
 
 ## Version 1.0.0
 
