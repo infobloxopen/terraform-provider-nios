@@ -57,8 +57,8 @@ func (v ConditionalArpaOrFQDNValidator) ValidateString(ctx context.Context, requ
 	}
 }
 
-// ConditionalArpaOrFQDN creates a new instance of the validator.
-func ConditionalArpaOrFQDN(ipv4, ipv6, fqdn validator.String) validator.String {
+// IsValidArpaOrFQDN creates a new instance of the validator.
+func IsValidArpaOrFQDN(ipv4, ipv6, fqdn validator.String) validator.String {
 	return ConditionalArpaOrFQDNValidator{
 		IPv4Validator: ipv4,
 		IPv6Validator: ipv6,

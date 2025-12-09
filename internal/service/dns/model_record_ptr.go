@@ -218,7 +218,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.ConditionalArpaOrFQDN(
+			customvalidator.IsValidArpaOrFQDN(
 				customvalidator.IsValidArpaIPv4(),
 				customvalidator.IsValidArpaIPv6(),
 				customvalidator.IsValidFQDN(),
