@@ -22,7 +22,7 @@
 
 - DNS/DTC: Fixed inconsistent TTL behavior during modification for record PTR and DTC Pool. ([#253](https://github.com/infobloxopen/terraform-provider-nios/pull/253))
 - Fixed `ExtractResourceRef` to gracefully handle malformed refs lacking /, eliminating index-out-of-bounds crashes. ([#284](https://github.com/infobloxopen/terraform-provider-nios/pull/284))
-- DISCOVERY/IPAM: Fixed error handling for `ipv6networkcontainer` imports and added proper diagnostics for invalid HTTPS ports in `nios_discovery_vdiscovery_task`. ([#290](https://github.com/infobloxopen/terraform-provider-nios/pull/290))
+- DISCOVERY/IPAM: Added validations to ensure valid_lifetime matches dhcp-lease-time option value for `nios_ipam_ipv6network` and `nios_ipam_ipv6network_container` and added port validations for `nios_discovery_vdiscovery_task`. ([#290](https://github.com/infobloxopen/terraform-provider-nios/pull/290))
 
 ## Version 1.0.0
 
