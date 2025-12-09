@@ -71,7 +71,7 @@ This section demonstrates how to create and manage resources using the NIOS Terr
 
 In this example, you will use the following resources to create an authoritative zone.
 
-- [nios_dns_zone_auth](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/nios_dns_zone_auth)
+- [nios_dns_zone_auth](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/dns_zone_auth)
 
 Add the following to the `main.tf` file:
 
@@ -91,8 +91,8 @@ Here the `view` attribute has not been set, so the default view will be used.
 Further, you will create an A record and a CNAME record within the zone.
 
 You will use the following resources to create these
-- [nios_dns_record_a](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/nios_dns_record_a)
-- [nios_dns_record_cname](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/nios_dns_record_cname)
+- [nios_dns_record_a](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/dns_record_a)
+- [nios_dns_record_cname](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/dns_record_cname)
 
 Add the following code to your main.tf:
 
@@ -119,8 +119,8 @@ resource "nios_dns_record_cname" "create_record_cname" {
 ## IPAM Resources
 In this example, you will use the following resources to create a Network View and a Network
 
-- [nios_ipam_network_view](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/nios_ipam_network_view)
-- [nios_ipam_network](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/nios_ipam_network)
+- [nios_ipam_network_view](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/ipam_network_view)
+- [nios_ipam_network](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/ipam_network)
 
 Add the following to your main.tf:
 
@@ -144,7 +144,7 @@ resource "nios_ipam_network" "create_network" {
 ## DHCP Resources
 In this example, you will use the following resources to create a Fixed Address within the Network created above. 
 
-- [nios_dhcp_fixed_address](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/nios_dhcp_fixed_address)
+- [nios_dhcp_fixed_address](https://registry.terraform.io/providers/infobloxopen/nios/latest/docs/resources/dhcp_fixed_address)
 
 Add the following to your main.tf:
 
