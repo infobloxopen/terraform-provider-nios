@@ -35,7 +35,7 @@ func (v ConditionalArpaOrFQDNValidator) ValidateString(ctx context.Context, requ
 		response.Diagnostics.AddAttributeError(request.Path, "Invalid Value", "An empty value is not allowed for the zone name.")
 	}
 
-	if strings.Contains(lowerValue, "arpa") {
+	if strings.HasSuffix(lowerValue, ".ip6.arpa") || strings.HasSuffix(lowerValue, ".in-addr.arpa") {
 		// Run both ARPA validators and collect errors
 		ipv4Resp := &validator.StringResponse{}
 		ipv6Resp := &validator.StringResponse{}
