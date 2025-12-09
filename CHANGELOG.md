@@ -1,4 +1,5 @@
 # Changelog
+
 ## Version 1.1.0
 
 ### Newly Supported Resources and Datasources
