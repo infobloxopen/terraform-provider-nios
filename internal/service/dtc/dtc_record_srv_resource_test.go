@@ -409,7 +409,6 @@ func testAccCheckDtcRecordSrvDisappears(ctx context.Context, v *dtc.DtcRecordSrv
 }
 
 func testAccDtcRecordSrvBasicConfig(string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dtc_record_srv" "test" {
 }
