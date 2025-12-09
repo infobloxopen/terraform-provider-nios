@@ -205,8 +205,6 @@ Some Configuration written as dict will have to be rewritten as list values. Thi
   ]
 ```
 
-## Important Note
-
 **Migration Complexity**: If you want to replace existing resource names and field mappings, the migration can become complicated because:
 - The Terraform Internal ID structure has changed
 - The extensible attributes are segregated into `extattrs` and `extattrs_all`. Where `extattrs_all` is just for internal use.

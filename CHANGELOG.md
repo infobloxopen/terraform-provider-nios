@@ -5,9 +5,9 @@
 
 #### DHCP
 
-- `nios_dhcp_ipv6dhcpoptiondefinition` : Manage DHCP IPv6 option definition and retrieve existing IPv6 option definition. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
-- `nios_dhcp_ipv6dhcpoptionspace` : Manage DHCP IPv6 option space and retrieve existing IPv6 option space. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
-- `nios_dhcp_ipv6fixedaddresstemplate` : Manage DHCP IPV6 fixed address template and retrieve existing IPv6 fixed address template. ([#247](https://github.com/infobloxopen/terraform-provider-nios/pull/247))
+- `nios_dhcp_ipv6dhcpoptiondefinition` : Manage DHCP IPv6 option definition and retrieve existing IPv6 option definitions. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
+- `nios_dhcp_ipv6dhcpoptionspace` : Manage DHCP IPv6 option space and retrieve existing IPv6 option spaces. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
+- `nios_dhcp_ipv6fixedaddresstemplate` : Manage DHCP IPv6 fixed address template and retrieve existing IPv6 fixed address templates. ([#247](https://github.com/infobloxopen/terraform-provider-nios/pull/247))
 
 #### DNS
 
@@ -16,14 +16,13 @@
 
 ### Enhancements
 
-- Enhanced import workflow by eliminating Update API calls during terraform plan; ensuring updates occur only during apply. ([#241](https://github.com/infobloxopen/terraform-provider-nios/pull/241))
+- Enhanced import workflow by eliminating Update API calls during terraform plan ensuring updates occur only after apply. ([#241](https://github.com/infobloxopen/terraform-provider-nios/pull/241))
 
 ### Fixes
 
 - DNS/DTC: Fixed inconsistent TTL behavior during modification for record PTR and DTC Pool. ([#253](https://github.com/infobloxopen/terraform-provider-nios/pull/253))
 - Fixed `ExtractResourceRef` to gracefully handle malformed refs lacking /, eliminating index-out-of-bounds crashes. ([#284](https://github.com/infobloxopen/terraform-provider-nios/pull/284))
-- DHCP: Fixed inconsistent behavior in `ipv6fixedaddresstemplate` when modifying offset and number_of_addresses. ([#285](https://github.com/infobloxopen/terraform-provider-nios/pull/285))
-- DISCOVERY/IPAM: Fixed error handling for `ipv6networkcontainer` imports and added proper diagnostics for invalid HTTPS ports in `openstack_vdiscoverytask`. ([#290](https://github.com/infobloxopen/terraform-provider-nios/pull/290))
+- DISCOVERY/IPAM: Fixed error handling for `ipv6networkcontainer` imports and added proper diagnostics for invalid HTTPS ports in `nios_discovery_vdiscovery_task`. ([#290](https://github.com/infobloxopen/terraform-provider-nios/pull/290))
 
 ## Version 1.0.0
 
