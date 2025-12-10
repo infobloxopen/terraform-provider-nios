@@ -21,6 +21,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -77,6 +78,9 @@ var NamedaclResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Computed:            true,
 		MarkdownDescription: "The exploded access list for the named ACL. This list displays all the access control entries in a named ACL and its nested named ACLs, if applicable.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,

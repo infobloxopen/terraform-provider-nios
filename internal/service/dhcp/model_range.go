@@ -30,6 +30,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -315,10 +316,16 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"dhcp_utilization": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The percentage of the total DHCP utilization of the range multiplied by 1000. This is the percentage of the total number of available IP addresses belonging to the range versus the total number of all IP addresses in the range.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"dhcp_utilization_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "A string describing the utilization level of the range.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
@@ -329,6 +336,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this range.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: RangeDiscoveryBasicPollSettingsResourceSchemaAttributes,
@@ -359,6 +369,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"dynamic_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The total number of DHCP leases issued for the range.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"email_list": schema.ListAttribute{
 		CustomType:          internaltypes.UnorderedListOfStringType,
@@ -437,6 +450,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The endpoints that provides data for the DHCP Range object.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"exclude": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -531,6 +547,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"is_split_scope": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This field will be 'true' if this particular range is part of a split scope.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"known_clients": schema.StringAttribute{
 		Optional: true,
@@ -606,6 +625,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RangeMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "This field contains the Microsoft AD user data for this range. This data is used to create a user in the Microsoft AD when a lease is assigned to a host in this range.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"ms_options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -771,6 +793,9 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"static_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The number of static DHCP addresses configured in the range.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"subscribe_settings": schema.SingleNestedAttribute{
 		Attributes: RangeSubscribeSettingsResourceSchemaAttributes,
@@ -786,11 +811,15 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If set on creation, the range will be created according to the values specified in the named template.",
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
+			plancontrol.UseStateForUnknownString(),
 		},
 	},
 	"total_hosts": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The total number of DHCP addresses configured in the range.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"unknown_clients": schema.StringAttribute{
 		Optional: true,

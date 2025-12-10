@@ -21,6 +21,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -77,6 +78,9 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 	"all_members": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines whether the notification rule is applied on all members or not. When this is set to False, the notification rule is applied only on selected_members.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -197,6 +201,9 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The list of the members on which the notification rule is applied. This field is deprecated.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"template_instance": schema.SingleNestedAttribute{
 		Attributes:          NotificationRuleTemplateInstanceResourceSchemaAttributes,
