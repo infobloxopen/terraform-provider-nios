@@ -20,7 +20,7 @@ resource "nios_dtc_server" "create_dtc_server" {
 }
 
 // Create a DTC Record A with basic fields
-resource "nios_dtc_record_a" "record_a" {
+resource "nios_dtc_record_a" "record_a_basic_fields" {
   dtc_server = nios_dtc_server.create_dtc_server.name
   ipv4addr   = "2.2.2.2"
 }
