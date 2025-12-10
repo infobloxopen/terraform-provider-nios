@@ -21,6 +21,7 @@ var readableAttributesForDtcRecordSrv = "comment,disable,dtc_server,name,port,pr
 func TestAccDtcRecordSrvResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -28,7 +29,7 @@ func TestAccDtcRecordSrvResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvBasicConfig(21, 10, "infoblox.com", 3),
+				Config: testAccDtcRecordSrvBasicConfig(21, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
@@ -50,6 +51,7 @@ func TestAccDtcRecordSrvResource_basic(t *testing.T) {
 func TestAccDtcRecordSrvResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_record_srv.test"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -57,7 +59,7 @@ func TestAccDtcRecordSrvResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcRecordSrvDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcRecordSrvBasicConfig(21, 10, "infoblox.com", 3),
+				Config: testAccDtcRecordSrvBasicConfig(21, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					testAccCheckDtcRecordSrvDisappears(context.Background(), &v),
@@ -71,6 +73,7 @@ func TestAccDtcRecordSrvResource_disappears(t *testing.T) {
 func TestAccDtcRecordSrvResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_comment"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -78,7 +81,7 @@ func TestAccDtcRecordSrvResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvComment(21, 10, "infoblox.com", 3, "This is a comment"),
+				Config: testAccDtcRecordSrvComment(21, 10, "infoblox.com", 3, serverName, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -86,7 +89,7 @@ func TestAccDtcRecordSrvResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvComment(21, 10, "infoblox.com", 3, "This is an updated comment"),
+				Config: testAccDtcRecordSrvComment(21, 10, "infoblox.com", 3, serverName, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
@@ -100,6 +103,7 @@ func TestAccDtcRecordSrvResource_Comment(t *testing.T) {
 func TestAccDtcRecordSrvResource_Disable(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_disable"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -107,7 +111,7 @@ func TestAccDtcRecordSrvResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvDisable(21, 10, "infoblox.com", 3, false),
+				Config: testAccDtcRecordSrvDisable(21, 10, "infoblox.com", 3, false, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -115,7 +119,7 @@ func TestAccDtcRecordSrvResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvDisable(21, 10, "infoblox.com", 3, true),
+				Config: testAccDtcRecordSrvDisable(21, 10, "infoblox.com", 3, true, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -129,6 +133,7 @@ func TestAccDtcRecordSrvResource_Disable(t *testing.T) {
 func TestAccDtcRecordSrvResource_DtcServer(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_dtc_server"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -136,18 +141,10 @@ func TestAccDtcRecordSrvResource_DtcServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvDtcServer(21, 10, "infoblox.com", 3,),
+				Config: testAccDtcRecordSrvDtcServer(21, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dtc_server", "DTC_SERVER_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccDtcRecordSrvDtcServer("DTC_SERVER_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dtc_server", "DTC_SERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dtc_server", serverName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -158,6 +155,9 @@ func TestAccDtcRecordSrvResource_DtcServer(t *testing.T) {
 func TestAccDtcRecordSrvResource_Name(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_name"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	name := acctest.RandomNameWithPrefix("srv-record")
+	nameUpdate := acctest.RandomNameWithPrefix("srv-record-updated")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -165,18 +165,18 @@ func TestAccDtcRecordSrvResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvName("NAME_REPLACE_ME"),
+				Config: testAccDtcRecordSrvName(21, 10, "infoblox.com", 3, name, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvName(21, 10, "infoblox.com", 3, nameUpdate, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -187,6 +187,7 @@ func TestAccDtcRecordSrvResource_Name(t *testing.T) {
 func TestAccDtcRecordSrvResource_Port(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_port"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -194,18 +195,18 @@ func TestAccDtcRecordSrvResource_Port(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvPort("PORT_REPLACE_ME"),
+				Config: testAccDtcRecordSrvPort(24, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port", "PORT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "port", "24"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvPort("PORT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvPort(21, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port", "PORT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "port", "21"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -216,6 +217,7 @@ func TestAccDtcRecordSrvResource_Port(t *testing.T) {
 func TestAccDtcRecordSrvResource_Priority(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_priority"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -223,18 +225,18 @@ func TestAccDtcRecordSrvResource_Priority(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvPriority("PRIORITY_REPLACE_ME"),
+				Config: testAccDtcRecordSrvPriority(24, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "priority", "PRIORITY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "priority", "10"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvPriority("PRIORITY_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvPriority(24, 20, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "priority", "PRIORITY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "priority", "20"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -245,6 +247,7 @@ func TestAccDtcRecordSrvResource_Priority(t *testing.T) {
 func TestAccDtcRecordSrvResource_Target(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_target"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -252,18 +255,18 @@ func TestAccDtcRecordSrvResource_Target(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvTarget("TARGET_REPLACE_ME"),
+				Config: testAccDtcRecordSrvTarget(24, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "target", "TARGET_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "target", "infoblox.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvTarget("TARGET_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvTarget(24, 10, "uddiinfoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "target", "TARGET_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "target", "uddiinfoblox.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -274,6 +277,7 @@ func TestAccDtcRecordSrvResource_Target(t *testing.T) {
 func TestAccDtcRecordSrvResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_ttl"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -281,7 +285,7 @@ func TestAccDtcRecordSrvResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvTtl("TTL_REPLACE_ME"),
+				Config: testAccDtcRecordSrvTtl(24, 10, "infoblox.com", 3, serverName , ),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_REPLACE_ME"),
@@ -289,7 +293,7 @@ func TestAccDtcRecordSrvResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvTtl("TTL_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvTtl(24, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_UPDATE_REPLACE_ME"),
@@ -416,7 +420,7 @@ func testAccCheckDtcRecordSrvDisappears(ctx context.Context, v *dtc.DtcRecordSrv
 	}
 }
 
-func testAccDtcRecordSrvBasicConfig(port, priority int, target string, weight int) string {
+func testAccDtcRecordSrvBasicConfig(port, priority int, target string, weight int, serverName string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_srv" "test" {
 		port     = %d
@@ -426,7 +430,7 @@ func testAccDtcRecordSrvBasicConfig(port, priority int, target string, weight in
 		dtc_server = nios_dtc_server.test.name
 	}		
 	`, port, priority, target, weight)
-	return strings.Join([]string{testAccBaseWithDtcServer("dtc_server1", "2.2.2.2"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 func testAccBaseWithDtcServer(name, host string) string {
 	return fmt.Sprintf(`
@@ -437,7 +441,7 @@ resource "nios_dtc_server" "test" {
 `, name, host)
 }
 
-func testAccDtcRecordSrvComment(port, priority int, target string, weight int, comment string) string {
+func testAccDtcRecordSrvComment(port, priority int, target string, weight int, serverName, comment string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_srv" "test_comment" {
 		port     = %d
@@ -448,10 +452,10 @@ func testAccDtcRecordSrvComment(port, priority int, target string, weight int, c
     comment = %q
 }
 	`, port, priority, target, weight, comment)
-	return strings.Join([]string{testAccBaseWithDtcServer("dtc_server1", "2.2.2.2"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordSrvDisable(port, priority int, target string, weight int, disable bool) string {
+func testAccDtcRecordSrvDisable(port, priority int, target string, weight int, disable bool, serverName string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_srv" "test_disable" {
 		port     = %d
@@ -462,55 +466,86 @@ func testAccDtcRecordSrvDisable(port, priority int, target string, weight int, d
     	disable = %t
 	}
 	`, port, priority, target, weight, disable)
-	return strings.Join([]string{testAccBaseWithDtcServer("dtc_server1", "2.2.2.2"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordSrvDtcServer(dtcServer string) string {
-	return fmt.Sprintf(`
+func testAccDtcRecordSrvDtcServer(port, priority int, target string, weight int, serverName string) string {
+	config := fmt.Sprintf(`
 resource "nios_dtc_record_srv" "test_dtc_server" {
-    dtc_server = %q
+		port     = %d
+		priority = %d
+		target   = %q
+		weight   = %d
+		dtc_server = nios_dtc_server.test.name
 }
-`, dtcServer)
+`, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordSrvName(name string) string {
-	return fmt.Sprintf(`
+func testAccDtcRecordSrvName(port, priority int, target string, weight int, name string, serverName string) string {
+	config := fmt.Sprintf(`
 resource "nios_dtc_record_srv" "test_name" {
     name = %q
-}
-`, name)
-}
-
-func testAccDtcRecordSrvPort(port string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_port" {
-    port = %q
-}
-`, port)
-}
-
-func testAccDtcRecordSrvPriority(priority string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_priority" {
-    priority = %q
-}
-`, priority)
-}
-
-func testAccDtcRecordSrvTarget(target string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_target" {
+    port = %d
+    priority = %d
     target = %q
+    weight = %d
+    dtc_server = nios_dtc_server.test.name
 }
-`, target)
+`, name, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordSrvTtl(ttl string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_ttl" {
-    ttl = %q
+func testAccDtcRecordSrvPort(port, priority int, target string, weight int, serverName string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_srv" "test_port" {
+    	port     = %d
+		priority = %d
+		target   = %q
+		weight   = %d
+		dtc_server = nios_dtc_server.test.name
 }
-`, ttl)
+`, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
+}
+
+func testAccDtcRecordSrvPriority(port, priority int, target string, weight int, serverName string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_srv" "test_priority" {
+   port     = %d
+		priority = %d
+		target   = %q
+		weight   = %d
+		dtc_server = nios_dtc_server.test.name
+	}
+	`, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
+}
+
+func testAccDtcRecordSrvTarget(port, priority int, target string, weight int, serverName string) string {
+	config := fmt.Sprintf(`
+resource "nios_dtc_record_srv" "test_target" {
+    port     = %d
+    priority = %d
+    target   = %q
+    weight   = %d
+	dtc_server = nios_dtc_server.test.name
+}
+`, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
+}
+
+func testAccDtcRecordSrvTtl(port, priority int, target string, weight int, serverName string) string {
+	config := fmt.Sprintf(`
+resource "nios_dtc_record_srv" "test_ttl" {
+    port     = %d
+    priority = %d
+    target   = %q
+    weight   = %d
+	dtc_server = nios_dtc_server.test.name
+}
+`, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
 func testAccDtcRecordSrvUseTtl(useTtl string) string {
