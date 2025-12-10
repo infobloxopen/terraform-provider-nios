@@ -40,7 +40,7 @@ func (v nacFilterExpressionValidator) ValidateString(ctx context.Context, req va
 	if !strings.HasPrefix(trimmed, "(") || !strings.HasSuffix(trimmed, ")") {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
 			req.Path,
-			"expression must begin with '(' and end with ')', for example :\n (Radius.ServerError=\"false\" AND Sophos.ComplianceState=\"NonCompliant\" AND Radius.ServerResponse=\"accept\" AND (Radius.ServerState=\"disabled\" OR Sophos.UserClass=\"yghu\" OR ()))",
+			"Expression must begin with '(' and end with ')', for example :\n (Radius.ServerError=\"false\" AND Sophos.ComplianceState=\"NonCompliant\" AND Radius.ServerResponse=\"accept\" AND (Radius.ServerState=\"disabled\" OR Sophos.UserClass=\"example_user_class\" OR ()))",
 			value,
 		))
 		return
