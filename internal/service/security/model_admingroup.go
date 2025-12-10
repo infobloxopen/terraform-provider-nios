@@ -22,6 +22,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/admin_group"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -358,6 +359,9 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes: AdmingroupPasswordSettingResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		PlanModifiers: []planmodifier.Object{
+			admin_group.PasswordSettingPlanModifier(),
+		},
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_password_setting")),
 		},
