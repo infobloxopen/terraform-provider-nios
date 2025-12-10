@@ -3,6 +3,7 @@ package dtc_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,6 +16,7 @@ func TestAccDtcRecordSrvDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_record_srv.test"
 	resourceName := "nios_dtc_record_srv.test"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +24,7 @@ func TestAccDtcRecordSrvDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcRecordSrvDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcRecordSrvDataSourceConfigFilters(),
+				Config: testAccDtcRecordSrvDataSourceConfigFilters(24, 10, "infoblox.com", 30, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
@@ -51,15 +53,26 @@ func testAccCheckDtcRecordSrvResourceAttrPair(resourceName, dataSourceName strin
 	}
 }
 
-func testAccDtcRecordSrvDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
+func testAccDtcRecordSrvDataSourceConfigFilters(port, priority int, target string, weight int, serverName string) string {
+    config := fmt.Sprintf(`
 resource "nios_dtc_record_srv" "test" {
+    port       = %d
+    priority   = %d
+    target     = %q
+    weight     = %d
+    dtc_server = nios_dtc_server.test.name
 }
 
 data "nios_dtc_record_srv" "test" {
-  filters = {
-	 = nios_dtc_record_srv.test.
-  }
+    filters = {
+        dtc_server = nios_dtc_server.test.name
+        port       = %d
+        priority   = %d
+        target     = %q
+        weight     = %d
+    }
+    depends_on = [nios_dtc_record_srv.test]
 }
-`)
+`, port, priority, target, weight, port, priority, target, weight)
+    return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }

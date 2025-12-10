@@ -285,18 +285,18 @@ func TestAccDtcRecordSrvResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvTtl(24, 10, "infoblox.com", 3, serverName , ),
+				Config: testAccDtcRecordSrvTtl(24, 10, "infoblox.com", 3, serverName, 4),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "4"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvTtl(24, 10, "infoblox.com", 3, serverName),
+				Config: testAccDtcRecordSrvTtl(24, 10, "infoblox.com", 3, serverName, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -307,6 +307,7 @@ func TestAccDtcRecordSrvResource_Ttl(t *testing.T) {
 func TestAccDtcRecordSrvResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_use_ttl"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -314,18 +315,18 @@ func TestAccDtcRecordSrvResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvUseTtl("USE_TTL_REPLACE_ME"),
+				Config: testAccDtcRecordSrvUseTtl(24, 10, "infoblox.com", 3, serverName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvUseTtl("USE_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvUseTtl(24, 10, "infoblox.com", 3, serverName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -336,6 +337,7 @@ func TestAccDtcRecordSrvResource_UseTtl(t *testing.T) {
 func TestAccDtcRecordSrvResource_Weight(t *testing.T) {
 	var resourceName = "nios_dtc_record_srv.test_weight"
 	var v dtc.DtcRecordSrv
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -343,18 +345,18 @@ func TestAccDtcRecordSrvResource_Weight(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordSrvWeight("WEIGHT_REPLACE_ME"),
+				Config: testAccDtcRecordSrvWeight(24, 10, "infoblox.com", 30, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "weight", "WEIGHT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "weight", "30"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordSrvWeight("WEIGHT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordSrvWeight(24, 10, "infoblox.com", 34, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "weight", "WEIGHT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "weight", "34"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -535,31 +537,44 @@ resource "nios_dtc_record_srv" "test_target" {
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordSrvTtl(port, priority int, target string, weight int, serverName string) string {
+func testAccDtcRecordSrvTtl(port, priority int, target string, weight int, serverName string, ttl int) string {
 	config := fmt.Sprintf(`
 resource "nios_dtc_record_srv" "test_ttl" {
     port     = %d
     priority = %d
     target   = %q
     weight   = %d
+	ttl      = %d
+	use_ttl  = true
 	dtc_server = nios_dtc_server.test.name
 }
-`, port, priority, target, weight)
+`, port, priority, target, weight, ttl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordSrvUseTtl(useTtl string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_use_ttl" {
-    use_ttl = %q
-}
-`, useTtl)
+func testAccDtcRecordSrvUseTtl(port, priority int, target string, weight int, serverName string, useTtl bool) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_srv" "test_use_ttl" {
+	 port     = %d
+    priority = %d
+    target   = %q
+    weight   = %d
+	ttl = 20
+    use_ttl = %t
+	dtc_server = nios_dtc_server.test.name
+}`, port, priority, target, weight, useTtl)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccDtcRecordSrvWeight(weight string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_weight" {
-    weight = %q
-}
-`, weight)
+func testAccDtcRecordSrvWeight(port, priority int, target string, weight int, serverName string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_srv" "test_weight" {
+     port     = %d
+    priority = %d
+    target   = %q
+    weight   = %d
+	dtc_server = nios_dtc_server.test.name
+	}
+	`, port, priority, target, weight)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
