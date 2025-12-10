@@ -3,12 +3,12 @@
 page_title: "nios_dtc_record_srv Data Source - nios"
 subcategory: "DTC"
 description: |-
-  
+  Retrieves information about existing DTC SRV Records.
 ---
 
 # nios_dtc_record_srv (Data Source)
 
-
+Retrieves information about existing DTC SRV Records.
 
 ## Example Usage
 

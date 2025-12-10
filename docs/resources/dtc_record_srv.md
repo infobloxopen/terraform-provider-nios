@@ -3,12 +3,12 @@
 page_title: "nios_dtc_record_srv Resource - nios"
 subcategory: "DTC"
 description: |-
-  
+  Manages a DTC SRV Record.
 ---
 
 # nios_dtc_record_srv (Resource)
 
-
+Manages a DTC SRV Record.
 
 ## Example Usage
 
