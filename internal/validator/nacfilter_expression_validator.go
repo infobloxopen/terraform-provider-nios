@@ -16,7 +16,7 @@ var _ validator.String = nacFilterExpressionValidator{}
 type nacFilterExpressionValidator struct{}
 
 func (v nacFilterExpressionValidator) Description(ctx context.Context) string {
-	return "value must be a valid NAC filter expression containing at least one of: Radius.ServerError, Sophos.ComplianceState, Radius.ServerState, Sophos.UserClass, Radius.ServerResponse"
+	return "A NAC filter Expression should start and end with parenthesis and should contain field and values with AND/OR."
 }
 
 func (v nacFilterExpressionValidator) MarkdownDescription(ctx context.Context) string {
