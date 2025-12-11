@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,7 +20,6 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 )
 
 type DtcRecordSrvModel struct {
@@ -132,15 +132,15 @@ func (m *DtcRecordSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		return nil
 	}
 	to := &dtc.DtcRecordSrv{
-		Comment:   flex.ExpandStringPointer(m.Comment),
-		Disable:   flex.ExpandBoolPointer(m.Disable),
-		Name:      flex.ExpandStringPointer(m.Name),
-		Port:      flex.ExpandInt64Pointer(m.Port),
-		Priority:  flex.ExpandInt64Pointer(m.Priority),
-		Target:    flex.ExpandStringPointer(m.Target),
-		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
-		Weight:    flex.ExpandInt64Pointer(m.Weight),
+		Comment:  flex.ExpandStringPointer(m.Comment),
+		Disable:  flex.ExpandBoolPointer(m.Disable),
+		Name:     flex.ExpandStringPointer(m.Name),
+		Port:     flex.ExpandInt64Pointer(m.Port),
+		Priority: flex.ExpandInt64Pointer(m.Priority),
+		Target:   flex.ExpandStringPointer(m.Target),
+		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
+		Weight:   flex.ExpandInt64Pointer(m.Weight),
 	}
 	if isCreate {
 		to.DtcServer = flex.ExpandStringPointer(m.DtcServer)
