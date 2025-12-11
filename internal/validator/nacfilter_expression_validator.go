@@ -11,8 +11,6 @@ import (
 var _ validator.String = nacFilterExpressionValidator{}
 
 // nacFilterExpressionValidator validates that the provided string is a valid NAC filter expression
-// containing at least one of the allowed fields: Radius.ServerError, Sophos.ComplianceState,
-// Radius.ServerState, Sophos.UserClass, Radius.ServerResponse
 type nacFilterExpressionValidator struct{}
 
 func (v nacFilterExpressionValidator) Description(ctx context.Context) string {
