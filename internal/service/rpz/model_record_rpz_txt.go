@@ -92,6 +92,7 @@ var RecordRpzTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:   true,
 		Validators: []validator.String{
 			customvalidator.IsValidDomainName(),
+			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name for a record in FQDN format. This value cannot be in unicode format.",
 	},
