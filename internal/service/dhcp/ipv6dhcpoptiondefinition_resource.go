@@ -149,7 +149,7 @@ func (r *Ipv6dhcpoptiondefinitionResource) Update(ctx context.Context, req resou
 
 	// Update ref if space has changed
 	if !data.Space.Equal(stateData.Space) {
-		r.updateRefIfSpaceChanged(ctx, resp, &data)
+		r.updateRefIfSpaceChanged(ctx, resp, &data, &stateData)
 		if resp.Diagnostics.HasError() {
 			return
 		}
@@ -204,7 +204,7 @@ func (r *Ipv6dhcpoptiondefinitionResource) ImportState(ctx context.Context, req 
 
 // updateRefIfSpaceChanged updates the ref if the option space name changes by
 // finding the option definition with the new space name and updating the data model accordingly.
-func (r *Ipv6dhcpoptiondefinitionResource) updateRefIfSpaceChanged(ctx context.Context, resp *resource.UpdateResponse, data *Ipv6dhcpoptiondefinitionModel) {
+func (r *Ipv6dhcpoptiondefinitionResource) updateRefIfSpaceChanged(ctx context.Context, resp *resource.UpdateResponse, data *Ipv6dhcpoptiondefinitionModel, stateData *Ipv6dhcpoptiondefinitionModel) {
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -214,10 +214,10 @@ func (r *Ipv6dhcpoptiondefinitionResource) updateRefIfSpaceChanged(ctx context.C
 		Ipv6dhcpoptiondefinitionAPI.
 		List(ctx).
 		Filters(map[string]interface{}{
-			"name":  data.Name.ValueString(),
+			"name":  stateData.Name.ValueString(),
 			"space": data.Space.ValueString(),
-			"code":  data.Code.ValueInt64(),
-			"type":  data.Type.ValueString(),
+			"code":  stateData.Code.ValueInt64(),
+			"type":  stateData.Type.ValueString(),
 		}).
 		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptiondefinition).
 		ReturnAsObject(1).
@@ -232,7 +232,6 @@ func (r *Ipv6dhcpoptiondefinitionResource) updateRefIfSpaceChanged(ctx context.C
 	results := listApiRes.ListIpv6dhcpoptiondefinitionResponseObject.GetResult()
 
 	if len(results) == 0 {
-		resp.Diagnostics.AddError("Not Found", "No Ipv6dhcpoptiondefinition found with the given name, space and code.")
 		return
 	}
 
