@@ -198,6 +198,7 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType: internaltypes.CaseInsensitiveString{},
 		Computed:   true,
 		Optional:   true,
+		Default:    stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
@@ -207,6 +208,7 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 	"ddns_hostname": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -293,6 +295,7 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv6_ddns_domainname": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ipv6_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),

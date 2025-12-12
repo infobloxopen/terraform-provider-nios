@@ -52,7 +52,7 @@ func (m *RoaminghostModelWithFilter) FlattenResults(ctx context.Context, from []
 
 func (d *RoaminghostDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing DHCP Roaminghosts.",
+		MarkdownDescription: "Retrieves information about existing DHCP Roaming Hosts.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

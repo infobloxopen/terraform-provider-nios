@@ -3,24 +3,24 @@
 page_title: "nios_dhcp_roaminghost Resource - nios"
 subcategory: "DHCP"
 description: |-
-  Manages a DHCP Roaminghost.
+  Manages a DHCP Roaming Host.
 ---
 
 # nios_dhcp_roaminghost (Resource)
 
-Manages a DHCP Roaminghost.
+Manages a DHCP Roaming Host.
 
 ## Example Usage
 
 ```terraform
-// Create a DHCP Roaminghost with Basic Fields
+// Create a DHCP Roaming Host with Basic Fields
 resource "nios_dhcp_roaminghost" "dhcp_roaminghost_basic" {
   name         = "roaming-host-1"
   match_client = "MAC_ADDRESS"
   mac          = "00:11:22:33:44:55"
 }
 
-// Create a DHCP Roaminghost with Address Type set to IPv6 and ipv6_match_option as V6_MAC_ADDRESS
+// Create a DHCP Roaming Host with Address Type set to IPv6 and ipv6_match_option as V6_MAC_ADDRESS
 resource "nios_dhcp_roaminghost" "dhcp_roaminghost_with_additional_fields" {
   name              = "roaming-host-2"
   address_type      = "IPV6"
@@ -28,7 +28,7 @@ resource "nios_dhcp_roaminghost" "dhcp_roaminghost_with_additional_fields" {
   ipv6_mac_address  = "00:a1:b2:c3:44:55"
 }
 
-// Create a DHCP Roaminghost with Address Type IPv4 and match_client as CLIENT_ID
+// Create a DHCP Roaming Host with Address Type IPv4 and match_client as CLIENT_ID
 resource "nios_dhcp_roaminghost" "dhcp_roaminghost_ipv4_client_id" {
   name                   = "roaming-host-3"
   address_type           = "IPV4"
@@ -36,7 +36,7 @@ resource "nios_dhcp_roaminghost" "dhcp_roaminghost_ipv4_client_id" {
   dhcp_client_identifier = "client-identifier-123"
 }
 
-// Create a DHCP Roaminghost with Address Type IPv6 and ipv6_match_option as DUID
+// Create a DHCP Roaming Host with Address Type IPv6 and ipv6_match_option as DUID
 resource "nios_dhcp_roaminghost" "dhcp_roaminghost_ipv6_duid" {
   name              = "roaming-host-4"
   address_type      = "IPV6"
@@ -44,7 +44,7 @@ resource "nios_dhcp_roaminghost" "dhcp_roaminghost_ipv6_duid" {
   ipv6_duid         = "00:03:00:01:26:9e:5b:4c:00:11:22:33:44:55"
 }
 
-// Create a DHCP Roaminghost with Address Type set to BOTH and various additional fields
+// Create a DHCP Roaming Host with Address Type set to BOTH and various additional fields
 resource "nios_dhcp_roaminghost" "dhcp_roaminghost_address_type_both" {
   name              = "roaming-host-5"
   address_type      = "BOTH"

@@ -38,7 +38,7 @@ func (r *RoaminghostResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *RoaminghostResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DHCP Roaminghost.",
+		MarkdownDescription: "Manages a DHCP Roaming Host.",
 		Attributes:          RoaminghostResourceSchemaAttributes,
 	}
 }
