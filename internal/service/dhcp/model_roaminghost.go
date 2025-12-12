@@ -357,6 +357,7 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:   true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidMacAddress(),
 		},
 		MarkdownDescription: "The MAC address for this roaming host.",
 	},
@@ -394,6 +395,7 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:   true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidMacAddress(),
 		},
 		MarkdownDescription: "The MAC address for this roaming host.",
 	},
