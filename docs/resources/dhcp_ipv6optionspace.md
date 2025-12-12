@@ -46,5 +46,5 @@ resource "nios_dhcp_ipv6optiondefinition" "ipv6_dhcp_option_definition" {
 
 ### Read-Only
 
-- `option_definitions` (List of String) The list of DHCP IPv6 option definition objects. To unset all option definitions, set it an empty list `[]`.
+- `option_definitions` (List of String) The list of DHCP IPv6 option definition objects.
 - `ref` (String) The reference to the object.

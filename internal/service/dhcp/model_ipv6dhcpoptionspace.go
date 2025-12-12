@@ -61,7 +61,7 @@ var Ipv6dhcpoptionspaceResourceSchemaAttributes = map[string]schema.Attribute{
 	"option_definitions": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Computed:            true,
-		MarkdownDescription: "The list of DHCP IPv6 option definition objects. To unset all option definitions, set it an empty list `[]`.",
+		MarkdownDescription: "The list of DHCP IPv6 option definition objects.",
 	},
 }
 
