@@ -1,5 +1,30 @@
 # Changelog
 
+## Version 1.1.0
+
+### Newly Supported Resources and Datasources
+
+#### DHCP
+
+- `nios_dhcp_ipv6dhcpoptiondefinition` : Manage DHCP IPv6 option definition and retrieve existing IPv6 option definitions. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
+- `nios_dhcp_ipv6dhcpoptionspace` : Manage DHCP IPv6 option space and retrieve existing IPv6 option spaces. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
+- `nios_dhcp_ipv6fixedaddresstemplate` : Manage DHCP IPv6 fixed address template and retrieve existing IPv6 fixed address templates. ([#247](https://github.com/infobloxopen/terraform-provider-nios/pull/247))
+
+#### DNS
+
+- `nios_dns_sharedrecordgroup` : Manage Shared Record Group and retrieve existing Shared Record Groups. ([#244](https://github.com/infobloxopen/terraform-provider-nios/pull/244))
+- `nios_dns_sharedrecord_txt` : Manage Shared TXT Record and retrieve existing Shared TXT Records. ([#248](https://github.com/infobloxopen/terraform-provider-nios/pull/248))
+
+### Enhancements
+
+- Enhanced import workflow by eliminating Update API calls during terraform plan ensuring updates occur only after apply. ([#241](https://github.com/infobloxopen/terraform-provider-nios/pull/241))
+
+### Fixes
+
+- DNS/DTC: Fixed inconsistent TTL behavior during modification for record PTR and DTC Pool. ([#253](https://github.com/infobloxopen/terraform-provider-nios/pull/253))
+- Fixed `ExtractResourceRef` to gracefully handle malformed refs lacking /, eliminating index-out-of-bounds crashes. ([#284](https://github.com/infobloxopen/terraform-provider-nios/pull/284))
+- DISCOVERY/IPAM: Added validations to ensure valid_lifetime matches dhcp-lease-time option value for `nios_ipam_ipv6network` and `nios_ipam_ipv6network_container` and added port validations for `nios_discovery_vdiscovery_task`. ([#290](https://github.com/infobloxopen/terraform-provider-nios/pull/290))
+
 ## Version 1.0.0
 
 ### Newly Supported Resources and Datasources
