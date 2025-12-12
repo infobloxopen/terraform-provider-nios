@@ -32,7 +32,23 @@ func TestAccMacfilteraddressResource_basic(t *testing.T) {
 				Config: testAccMacfilteraddressBasicConfig(filter, mac),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMacfilteraddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "filter", filter),
+					resource.TestCheckResourceAttr(resourceName, "mac", "00:1A:2B:3C:3D:5E"),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "never_expires", "true"),
+					resource.TestCheckResourceAttr(resourceName, "is_registered_user", "false"),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_email", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_first_name", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_last_name", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_middle_name", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_phone", ""),
+					resource.TestCheckResourceAttr(resourceName, "reserved_for_infoblox", ""),
+					resource.TestCheckResourceAttr(resourceName, "username", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_custom_field1", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_custom_field2", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_custom_field3", ""),
+					resource.TestCheckResourceAttr(resourceName, "guest_custom_field4", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -671,7 +687,7 @@ resource "nios_dhcp_macfilteraddress" "test" {
     filter = nios_dhcp_filtermac.parent_filter_mac.name
 }
 `, mac)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressAuthenticationTime(filter, mac string, authenticationTime int32) string {
@@ -682,7 +698,7 @@ resource "nios_dhcp_macfilteraddress" "test_authentication_time" {
     authentication_time = %d
 }
 `, mac, authenticationTime)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressComment(filter, mac, comment string) string {
@@ -693,7 +709,7 @@ resource "nios_dhcp_macfilteraddress" "test_comment" {
     comment = %q
 }
 `, mac, comment)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressExpirationTime(filter, mac string, expirationTime int32) string {
@@ -704,7 +720,7 @@ resource "nios_dhcp_macfilteraddress" "test_expiration_time" {
     expiration_time = %d
 }
 `, mac, expirationTime)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressExtAttrs(filter, mac string, extAttrs map[string]any) string {
@@ -716,7 +732,7 @@ resource "nios_dhcp_macfilteraddress" "test_extattrs" {
     extattrs = %s
 }
 `, mac, extAttrsStr)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressFilter(filter1, filter2, mac, parentFilterName string) string {
@@ -737,7 +753,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_custom_field1" {
     guest_custom_field1 = %q
 }
 `, mac, guestCustomField1)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressGuestCustomField2(filter, mac, guestCustomField2 string) string {
@@ -748,7 +764,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_custom_field2" {
     guest_custom_field2 = %q
 }
 `, mac, guestCustomField2)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressGuestCustomField3(filter, mac, guestCustomField3 string) string {
@@ -759,7 +775,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_custom_field3" {
     guest_custom_field3 = %q
 }
 `, mac, guestCustomField3)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressGuestCustomField4(filter, mac, guestCustomField4 string) string {
@@ -770,7 +786,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_custom_field4" {
     guest_custom_field4 = %q
 }
 `, mac, guestCustomField4)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressGuestEmail(filter, mac, guestEmail string) string {
@@ -781,7 +797,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_email" {
     guest_email = %q
 }
 `, mac, guestEmail)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressGuestFirstName(filter, mac, guestFirstName string) string {
@@ -792,7 +808,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_first_name" {
     guest_first_name = %q
 }
 `, mac, guestFirstName)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressGuestLastName(filter, mac, guestLastName string) string {
@@ -803,7 +819,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_last_name" {
     guest_last_name = %q
 }
 `, mac, guestLastName)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressGuestMiddleName(filter, mac, guestMiddleName string) string {
@@ -814,7 +830,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_middle_name" {
     guest_middle_name = %q
 }
 `, mac, guestMiddleName)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressGuestPhone(filter, mac, guestPhone string) string {
@@ -825,7 +841,7 @@ resource "nios_dhcp_macfilteraddress" "test_guest_phone" {
     guest_phone = %q
 }
 `, mac, guestPhone)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressMac(filter, mac string) string {
@@ -835,7 +851,7 @@ resource "nios_dhcp_macfilteraddress" "test_mac" {
     filter = nios_dhcp_filtermac.parent_filter_mac.name
 }
 `, mac)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressNeverExpires(filter, mac string, neverExpires bool, expirationTime int32) string {
@@ -847,7 +863,7 @@ resource "nios_dhcp_macfilteraddress" "test_never_expires" {
     expiration_time = %d
 }
 `, mac, neverExpires, expirationTime)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressReservedForInfoblox(filter, mac, reservedForInfoblox string) string {
@@ -858,7 +874,7 @@ resource "nios_dhcp_macfilteraddress" "test_reserved_for_infoblox" {
     reserved_for_infoblox = %q
 }
 `, mac, reservedForInfoblox)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressUsername(filter, mac, username string) string {
@@ -869,10 +885,10 @@ resource "nios_dhcp_macfilteraddress" "test_username" {
     username = %q
 }
 `, mac, username)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
-func testAccBaseMacFilter(name string) string {
+func testAccBaseWithMacFilter(name string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_filtermac" "parent_filter_mac" {
     name = %q

@@ -19,7 +19,7 @@ data "nios_dhcp_macfilteraddress" "get_mac_filter_address_using_filters" {
     filter = "mac_filter_example"
   }
 }
-// Retrieve specific DHCP MAC Filter Address using extensible attributes
+// Retrieve specific DHCP MAC Filter Addresses using extensible attributes
 data "nios_dhcp_macfilteraddress" "get_mac_filter_address_using_extattr_filter" {
   extattrfilters = {
     Site = "location-1"
@@ -27,7 +27,7 @@ data "nios_dhcp_macfilteraddress" "get_mac_filter_address_using_extattr_filter" 
 }
 
 // Retrieve all DHCP MAC Filter Addresses
-data "nios_dhcp_macfilteraddress" "get_all_mac_filter_address" {
+data "nios_dhcp_macfilteraddress" "get_all_mac_filter_addresses" {
 }
 ```
 

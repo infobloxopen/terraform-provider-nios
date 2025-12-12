@@ -99,7 +99,7 @@ data "nios_dhcp_macfilteraddress" "test" {
   }
 }
 `, mac)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
 
 func testAccMacfilteraddressDataSourceConfigExtAttrFilters(filter, mac, extAttrsValue string) string {
@@ -118,5 +118,5 @@ data "nios_dhcp_macfilteraddress" "test" {
   }
 }
 `, mac, extAttrsValue)
-	return strings.Join([]string{testAccBaseMacFilter(filter), config}, "")
+	return strings.Join([]string{testAccBaseWithMacFilter(filter), config}, "")
 }
