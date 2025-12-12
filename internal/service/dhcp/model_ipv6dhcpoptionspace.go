@@ -60,7 +60,6 @@ var Ipv6dhcpoptionspaceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"option_definitions": schema.ListAttribute{
 		ElementType:         types.StringType,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The list of DHCP IPv6 option definition objects. To unset all option definitions, set it an empty list `[]`.",
 	},
@@ -71,10 +70,9 @@ func (m *Ipv6dhcpoptionspaceModel) Expand(ctx context.Context, diags *diag.Diagn
 		return nil
 	}
 	to := &dhcp.Ipv6dhcpoptionspace{
-		Comment:           flex.ExpandStringPointer(m.Comment),
-		EnterpriseNumber:  flex.ExpandInt64Pointer(m.EnterpriseNumber),
-		Name:              flex.ExpandStringPointer(m.Name),
-		OptionDefinitions: flex.ExpandFrameworkListStringEmptyAsNil(ctx, m.OptionDefinitions, diags),
+		Comment:          flex.ExpandStringPointer(m.Comment),
+		EnterpriseNumber: flex.ExpandInt64Pointer(m.EnterpriseNumber),
+		Name:             flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -130,9 +131,11 @@ func (r *Ipv6dhcpoptiondefinitionResource) Read(ctx context.Context, req resourc
 func (r *Ipv6dhcpoptiondefinitionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
 	var data Ipv6dhcpoptiondefinitionModel
+	var stateData Ipv6dhcpoptiondefinitionModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -142,6 +145,14 @@ func (r *Ipv6dhcpoptiondefinitionResource) Update(ctx context.Context, req resou
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	// Update ref if space has changed
+	if !data.Space.Equal(stateData.Space) {
+		r.updateRefIfSpaceChanged(ctx, resp, &data)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	apiRes, _, err := r.client.DHCPAPI.
@@ -189,4 +200,42 @@ func (r *Ipv6dhcpoptiondefinitionResource) Delete(ctx context.Context, req resou
 
 func (r *Ipv6dhcpoptiondefinitionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// updateRefIfSpaceChanged updates the ref if the option space name changes by
+// finding the option definition with the new space name and updating the data model accordingly.
+func (r *Ipv6dhcpoptiondefinitionResource) updateRefIfSpaceChanged(ctx context.Context, resp *resource.UpdateResponse, data *Ipv6dhcpoptiondefinitionModel) {
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Search for the option definition with the new space
+	listApiRes, _, err := r.client.DHCPAPI.
+		Ipv6dhcpoptiondefinitionAPI.
+		List(ctx).
+		Filters(map[string]interface{}{
+			"name":  data.Name.ValueString(),
+			"space": data.Space.ValueString(),
+			"code":  data.Code.ValueInt64(),
+			"type":  data.Type.ValueString(),
+		}).
+		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptiondefinition).
+		ReturnAsObject(1).
+		Execute()
+
+	if err != nil {
+		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6dhcpoptiondefinition list, got error: %s", err))
+		return
+	}
+
+	results := listApiRes.ListIpv6dhcpoptiondefinitionResponseObject.GetResult()
+
+	if len(results) == 0 {
+		resp.Diagnostics.AddError("Not Found", "No Ipv6dhcpoptiondefinition found with the given name, space and code.")
+		return
+	}
+
+	data.Ref = types.StringValue(*results[0].Ref)
+
 }
