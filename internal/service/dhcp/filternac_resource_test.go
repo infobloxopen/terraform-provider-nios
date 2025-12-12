@@ -98,8 +98,8 @@ func TestAccFilternacResource_Expression(t *testing.T) {
 	var resourceName = "nios_dhcp_filternac.test_expression"
 	var v dhcp.Filternac
 	name := acctest.RandomNameWithPrefix("tf-filternac-")
-	expression := `(Radius.ServerError="false")`
-	updatedExpression := `(Sophos.ComplianceState="NonCompliant")`
+	expression := `(Radius.ServerError= "false")`
+	updatedExpression := `(Radius.ServerError= "true" AND Sophos.ComplianceState = "NonCompliant")`
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
