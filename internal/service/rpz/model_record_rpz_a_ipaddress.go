@@ -96,7 +96,7 @@ var RecordRpzAIpaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "The name for a record in FQDN format. This value cannot be in unicode format.",
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidRPZAIPv4(),
 		},
 	},
 	"rp_zone": schema.StringAttribute{
