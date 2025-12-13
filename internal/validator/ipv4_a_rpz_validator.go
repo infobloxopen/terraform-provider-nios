@@ -12,11 +12,11 @@ import (
 type RPZAIPv4Validator struct{}
 
 func (v RPZAIPv4Validator) Description(ctx context.Context) string {
-	return "Validator to check if string is in the RPZ A IPv4 format '<ipv4>.<rp-zone>' or '<ipv4>/<prefix>.<rp-zone>'"
+	return "Validator to check if string is in the RPZ A IPv4 format '<ipv4>.<rp-zone>' or '<ipv4-cidr>.<rp-zone>'"
 }
 
 func (v RPZAIPv4Validator) MarkdownDescription(ctx context.Context) string {
-	return "Validator to check if string is in the RPZ A IPv4 format '<ipv4>.<rp-zone>' or '<ipv4>/<prefix>.<rp-zone>'"
+	return "Validator to check if string is in the RPZ A IPv4 format '<ipv4>.<rp-zone>' or '<ipv4-cidr>.<rp-zone>'"
 }
 
 func (v RPZAIPv4Validator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
