@@ -74,7 +74,7 @@ func (r *DtcRecordNaptrResource) Create(ctx context.Context, req resource.Create
 	apiRes, _, err := r.client.DTCAPI.
 		DtcRecordNaptrAPI.
 		Create(ctx).
-		DtcRecordNaptr(*data.Expand(ctx, &resp.Diagnostics)).
+		DtcRecordNaptr(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForDtcRecordNaptr).
 		ReturnAsObject(1).
 		Execute()
@@ -147,7 +147,7 @@ func (r *DtcRecordNaptrResource) Update(ctx context.Context, req resource.Update
 	apiRes, _, err := r.client.DTCAPI.
 		DtcRecordNaptrAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		DtcRecordNaptr(*data.Expand(ctx, &resp.Diagnostics)).
+		DtcRecordNaptr(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForDtcRecordNaptr).
 		ReturnAsObject(1).
 		Execute()
