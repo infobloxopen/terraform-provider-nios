@@ -18,6 +18,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+var readableAttributesForDtcTopologyRule = "dest_type,destination_link,return_type,sources,topology,valid"
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ datasource.DataSource = &DtcTopologyRuleDataSource{}
 
