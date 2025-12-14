@@ -184,7 +184,10 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
-			customvalidator.IsValidIPOrFQDN(),
+			customvalidator.IsValidIPv4OrFQDN(
+				customvalidator.IsValidIPCIDR(),
+				customvalidator.IsValidDomainName(),
+			),
 		},
 		MarkdownDescription: "The bootserver address for the range. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
@@ -461,7 +464,10 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
-			customvalidator.IsValidIPOrFQDN(),
+			customvalidator.IsValidIPv4OrFQDN(
+				customvalidator.IsValidIPCIDR(),
+				customvalidator.IsValidDomainName(),
+			),
 		},
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address format of the next server that the host needs to boot.",
 	},

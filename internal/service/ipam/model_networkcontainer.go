@@ -266,7 +266,10 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The boot server IPv4 Address or name in FQDN format for the network container. You can specify the name and/or IP address of the boot server that the host needs to boot.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootfile")),
-			customvalidator.IsValidIPOrFQDN(),
+			customvalidator.IsValidIPv4OrFQDN(
+				customvalidator.IsValidIPCIDR(),
+				customvalidator.IsValidDomainName(),
+			),
 		},
 		Default:  stringdefault.StaticString(""),
 		Computed: true,
@@ -276,7 +279,10 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The bootserver address for the network container. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
-			customvalidator.IsValidIPOrFQDN(),
+			customvalidator.IsValidIPv4OrFQDN(
+				customvalidator.IsValidIPCIDR(),
+				customvalidator.IsValidDomainName(),
+			),
 		},
 		Computed: true,
 	},
@@ -664,7 +670,10 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
-			customvalidator.IsValidIPOrFQDN(),
+			customvalidator.IsValidIPv4OrFQDN(
+				customvalidator.IsValidIPCIDR(),
+				customvalidator.IsValidDomainName(),
+			),
 		},
 		Computed: true,
 	},
