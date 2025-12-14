@@ -35,7 +35,7 @@ resource "nios_dhcp_filterfingerprint" "dhcp_filterfingerprint_basic" {
   ]
 }
 
-// Manage dhcp Filterfingerprint with Additional Fields
+// Create a DHCP Fingerprint Filter with Additional Fields
 resource "nios_dhcp_filterfingerprint" "dhcp_filterfingerprint_with_additional_fields" {
   name = "example_filterfingerprint_2"
   fingerprint = [
