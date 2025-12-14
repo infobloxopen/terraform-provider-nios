@@ -22,6 +22,7 @@ func TestAccDtcRecordAResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_record_a.test"
 	var v dtc.DtcRecordA
 	ipv4addr := acctest.RandomIP()
+	ipv4addrServer := acctest.RandomIP()
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -30,7 +31,7 @@ func TestAccDtcRecordAResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordABasicConfig(serverName, ipv4addr),
+				Config: testAccDtcRecordABasicConfig(serverName, ipv4addr, ipv4addrServer),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", ipv4addr),
@@ -48,6 +49,7 @@ func TestAccDtcRecordAResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_record_a.test"
 	var v dtc.DtcRecordA
 	ipv4addr := acctest.RandomIP()
+	ipv4addrServer := acctest.RandomIP()
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -56,7 +58,7 @@ func TestAccDtcRecordAResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcRecordADestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcRecordABasicConfig(serverName, ipv4addr),
+				Config: testAccDtcRecordABasicConfig(serverName, ipv4addr, ipv4addrServer),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					testAccCheckDtcRecordADisappears(context.Background(), &v),
@@ -71,6 +73,7 @@ func TestAccDtcRecordAResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_record_a.test_comment"
 	var v dtc.DtcRecordA
 	ipv4addr := acctest.RandomIP()
+	ipv4addrServer := acctest.RandomIP()
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -79,7 +82,7 @@ func TestAccDtcRecordAResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAComment(serverName, ipv4addr, "This is a comment"),
+				Config: testAccDtcRecordAComment(serverName, ipv4addr, ipv4addrServer, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -87,7 +90,7 @@ func TestAccDtcRecordAResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordAComment(serverName, ipv4addr, "This is an updated comment"),
+				Config: testAccDtcRecordAComment(serverName, ipv4addr, ipv4addrServer, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
@@ -102,6 +105,7 @@ func TestAccDtcRecordAResource_Disable(t *testing.T) {
 	var resourceName = "nios_dtc_record_a.test_disable"
 	var v dtc.DtcRecordA
 	ipv4addr := acctest.RandomIP()
+	ipv4addrServer := acctest.RandomIP()
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -110,18 +114,18 @@ func TestAccDtcRecordAResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordADisable(serverName, ipv4addr, false),
+				Config: testAccDtcRecordADisable(serverName, ipv4addr, ipv4addrServer, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordADisable(serverName, ipv4addr, true),
+				Config: testAccDtcRecordADisable(serverName, ipv4addr, ipv4addrServer, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -133,6 +137,7 @@ func TestAccDtcRecordAResource_DtcServer(t *testing.T) {
 	var resourceName = "nios_dtc_record_a.test_dtc_server"
 	var v dtc.DtcRecordA
 	ipv4addr := acctest.RandomIP()
+	ipv4addrServer := acctest.RandomIP()
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -141,7 +146,7 @@ func TestAccDtcRecordAResource_DtcServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordADtcServer(ipv4addr, serverName),
+				Config: testAccDtcRecordADtcServer(ipv4addr, serverName, ipv4addrServer),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dtc_server", serverName),
@@ -157,6 +162,7 @@ func TestAccDtcRecordAResource_Ipv4addr(t *testing.T) {
 	var v dtc.DtcRecordA
 	ipv4addr := acctest.RandomIP()
 	ipv4addrUpdate := acctest.RandomIP()
+	ipv4addrServer := acctest.RandomIP()
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -165,7 +171,7 @@ func TestAccDtcRecordAResource_Ipv4addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAIpv4addr(serverName, ipv4addr),
+				Config: testAccDtcRecordAIpv4addr(serverName, ipv4addr, ipv4addrServer),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", ipv4addr),
@@ -173,7 +179,7 @@ func TestAccDtcRecordAResource_Ipv4addr(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordAIpv4addr(serverName, ipv4addrUpdate),
+				Config: testAccDtcRecordAIpv4addr(serverName, ipv4addrUpdate, ipv4addrServer),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", ipv4addrUpdate),
@@ -188,6 +194,7 @@ func TestAccDtcRecordAResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dtc_record_a.test_ttl"
 	var v dtc.DtcRecordA
 	ipv4addr := acctest.RandomIP()
+	ipv4addrServer := acctest.RandomIP()
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -196,7 +203,7 @@ func TestAccDtcRecordAResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordATtl(ipv4addr, serverName, 30),
+				Config: testAccDtcRecordATtl(ipv4addr, serverName, ipv4addrServer, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "30"),
@@ -204,7 +211,7 @@ func TestAccDtcRecordAResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordATtl(ipv4addr, serverName, 20),
+				Config: testAccDtcRecordATtl(ipv4addr, serverName, ipv4addrServer, 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "20"),
@@ -219,6 +226,7 @@ func TestAccDtcRecordAResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dtc_record_a.test_use_ttl"
 	var v dtc.DtcRecordA
 	ipv4addr := acctest.RandomIP()
+	ipv4addrServer := acctest.RandomIP()
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -227,7 +235,7 @@ func TestAccDtcRecordAResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordAUseTtl(ipv4addr, serverName, true),
+				Config: testAccDtcRecordAUseTtl(ipv4addr, serverName, ipv4addrServer, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
@@ -235,7 +243,7 @@ func TestAccDtcRecordAResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordAUseTtl(ipv4addr, serverName, false),
+				Config: testAccDtcRecordAUseTtl(ipv4addr, serverName, ipv4addrServer, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordAExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -304,14 +312,14 @@ func testAccCheckDtcRecordADisappears(ctx context.Context, v *dtc.DtcRecordA) re
 	}
 }
 
-func testAccDtcRecordABasicConfig(serverName, ipv4addr string) string {
+func testAccDtcRecordABasicConfig(serverName, ipv4addr, ipv4addrString string) string {
 	config := fmt.Sprintf(`
 resource "nios_dtc_record_a" "test" {
   dtc_server = nios_dtc_server.test.name
   ipv4addr   = %q
 }
 `, ipv4addr)
-	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.3.3.4"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrString), config}, "")
 }
 func testAccBaseWithDtcServer(name, host string) string {
 	return fmt.Sprintf(`
@@ -322,7 +330,7 @@ resource "nios_dtc_server" "test" {
 `, name, host)
 }
 
-func testAccDtcRecordAComment(serverName, ipv4addr, comment string) string {
+func testAccDtcRecordAComment(serverName, ipv4addr, ipv4addrServer, comment string) string {
 	config := fmt.Sprintf(`
 resource "nios_dtc_record_a" "test_comment" {
     dtc_server = nios_dtc_server.test.name
@@ -330,10 +338,10 @@ resource "nios_dtc_record_a" "test_comment" {
     comment = %q
 }
 `, ipv4addr, comment)
-	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.3.3.4"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }
 
-func testAccDtcRecordADisable(serverName, ipv4addr string, disable bool) string {
+func testAccDtcRecordADisable(serverName, ipv4addr, ipv4addrServer string, disable bool) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_a" "test_disable" {
     disable = %t
@@ -341,30 +349,30 @@ func testAccDtcRecordADisable(serverName, ipv4addr string, disable bool) string 
     ipv4addr   = %q
 }
 `, disable, ipv4addr)
-	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.3.3.2"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }
 
-func testAccDtcRecordADtcServer(ipv4addr, dtcServer string) string {
+func testAccDtcRecordADtcServer(ipv4addr, dtcServer, ipv4addrServer string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_a" "test_dtc_server" {
     dtc_server = nios_dtc_server.test.name
     ipv4addr   = %q
 }
 `, ipv4addr)
-	return strings.Join([]string{testAccBaseWithDtcServer(dtcServer, "2.2.2.2"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(dtcServer, ipv4addrServer), config}, "")
 }
 
-func testAccDtcRecordAIpv4addr(serverName, ipv4addr string) string {
+func testAccDtcRecordAIpv4addr(serverName, ipv4addr, ipv4addrServer string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_a" "test_ipv4addr" {
     ipv4addr = %q
 	dtc_server = nios_dtc_server.test.name
 }
 	`, ipv4addr)
-	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.3.3.4"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }
 
-func testAccDtcRecordATtl(ipv4addr, serverName string, ttl int) string {
+func testAccDtcRecordATtl(ipv4addr, serverName, ipv4addrServer string, ttl int) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_a" "test_ttl" {
 		ipv4addr = %q
@@ -373,10 +381,10 @@ func testAccDtcRecordATtl(ipv4addr, serverName string, ttl int) string {
 		use_ttl = true 
 }`, ipv4addr, ttl)
 
-	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.3.3.4"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }
 
-func testAccDtcRecordAUseTtl(ipv4addr, serverName string, useTtl bool) string {
+func testAccDtcRecordAUseTtl(ipv4addr, serverName, ipv4addrServer string, useTtl bool) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_a" "test_use_ttl" {
     ipv4addr = %q
@@ -385,5 +393,5 @@ func testAccDtcRecordAUseTtl(ipv4addr, serverName string, useTtl bool) string {
     use_ttl = %t
 }
 	`, ipv4addr, useTtl)
-	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }

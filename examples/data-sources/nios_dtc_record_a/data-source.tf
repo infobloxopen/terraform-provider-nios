@@ -1,13 +1,15 @@
-// Retrieve a specific DTC record A in a DTC server using filters 
+// Note: DTC A Record cannot be retrieved without filters. The dtc_server filter is mandatory for all queries.
+
+// Retrieve a specific DTC A Record in a DTC server using filters 
 data "nios_dtc_record_a" "get_dtc_record_a_in_dtc_server_using_filters" {
   filters = {
     dtc_server = "example-server"
-    ipv4addr   = "2.21.2.3"
+    ipv4addr   = "2.2.2.2"
   }
 }
 
 
-// Retrieve all DTC record A in a DTC server
+// Retrieve all DTC A Records in a DTC server
 data "nios_dtc_record_a" "get_all_dtc_record_a_in_dtc_server" {
   filters = {
     dtc_server = "example-server"

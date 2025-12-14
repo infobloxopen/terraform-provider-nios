@@ -36,7 +36,7 @@ func (r *DtcRecordAResource) Metadata(ctx context.Context, req resource.Metadata
 
 func (r *DtcRecordAResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DTC Record A.",
+		MarkdownDescription: "Manages a DTC A Record.",
 		Attributes:          DtcRecordAResourceSchemaAttributes,
 	}
 }
