@@ -154,7 +154,6 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
 		dtc.NewDtcPoolResource,
-		dtc.NewDtcTopologyRuleResource,
 		dtc.NewDtcTopologyResource,
 		dtc.NewDtcMonitorSnmpResource,
 		dtc.NewDtcMonitorHttpResource,
