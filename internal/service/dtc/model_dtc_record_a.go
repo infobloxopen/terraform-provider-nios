@@ -40,7 +40,7 @@ var DtcRecordAAttrTypes = map[string]attr.Type{
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
 	"dtc_server":   types.StringType,
-	"ipv4addr":     iptypes.IPv6AddressType{},
+	"ipv4addr":     iptypes.IPv4AddressType{},
 	"ttl":          types.Int64Type,
 	"use_ttl":      types.BoolType,
 }
