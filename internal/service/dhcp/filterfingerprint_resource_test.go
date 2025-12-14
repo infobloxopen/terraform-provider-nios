@@ -17,27 +17,6 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-/*
-// Manage dhcp Filterfingerprint with Basic Fields
-resource "nios_dhcp_filterfingerprint" "dhcp_filterfingerprint_basic" {
-    fingerprint = "FINGERPRINT_REPLACE_ME"
-    name = name
-}
-
-// Manage dhcp Filterfingerprint with Additional Fields
-resource "nios_dhcp_filterfingerprint" "dhcp_filterfingerprint_with_additional_fields" {
-    fingerprint = "FINGERPRINT_REPLACE_ME"
-    name = name
-
-// TODO : Add additional optional fields below
-
-    //Extensible Attributes
-    extattrs = {
-        Site = "location-1"
-    }
-}
-*/
-
 var readableAttributesForFilterfingerprint = "comment,extattrs,fingerprint,name"
 
 func TestAccFilterfingerprintResource_basic(t *testing.T) {
@@ -46,6 +25,10 @@ func TestAccFilterfingerprintResource_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("filter-fingerprint")
 	fingerprint1 := acctest.RandomNameWithPrefix("fingerprint")
 	fingerprint2 := acctest.RandomNameWithPrefix("fingerprint")
+	fingerprints := []string{
+		"${nios_dhcp_fingerprint.test1.name}",
+		"${nios_dhcp_fingerprint.test2.name}",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -53,14 +36,14 @@ func TestAccFilterfingerprintResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterfingerprintBasicConfig(fingerprint1, fingerprint2, name),
+				Config: testAccFilterfingerprintBasicConfig(fingerprint1, fingerprint2, fingerprints, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "fingerprint.0", fingerprint1),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint.1", fingerprint2),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -74,6 +57,10 @@ func TestAccFilterfingerprintResource_disappears(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("filter-fingerprint")
 	fingerprint1 := acctest.RandomNameWithPrefix("fingerprint")
 	fingerprint2 := acctest.RandomNameWithPrefix("fingerprint")
+	fingerprints := []string{
+		"${nios_dhcp_fingerprint.test1.name}",
+		"${nios_dhcp_fingerprint.test2.name}",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -81,7 +68,7 @@ func TestAccFilterfingerprintResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckFilterfingerprintDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFilterfingerprintBasicConfig(fingerprint1, fingerprint2, name),
+				Config: testAccFilterfingerprintBasicConfig(fingerprint1, fingerprint2, fingerprints, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
 					testAccCheckFilterfingerprintDisappears(context.Background(), &v),
@@ -98,6 +85,10 @@ func TestAccFilterfingerprintResource_Import(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("filter-fingerprint")
 	fingerprint1 := acctest.RandomNameWithPrefix("fingerprint")
 	fingerprint2 := acctest.RandomNameWithPrefix("fingerprint")
+	fingerprints := []string{
+		"${nios_dhcp_fingerprint.test1.name}",
+		"${nios_dhcp_fingerprint.test2.name}",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -105,7 +96,7 @@ func TestAccFilterfingerprintResource_Import(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterfingerprintBasicConfig(fingerprint1, fingerprint2, name),
+				Config: testAccFilterfingerprintBasicConfig(fingerprint1, fingerprint2, fingerprints, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
 				),
@@ -139,6 +130,10 @@ func TestAccFilterfingerprintResource_Comment(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("filter-fingerprint")
 	fingerprint1 := acctest.RandomNameWithPrefix("fingerprint")
 	fingerprint2 := acctest.RandomNameWithPrefix("fingerprint")
+	fingerprints := []string{
+		"${nios_dhcp_fingerprint.test1.name}",
+		"${nios_dhcp_fingerprint.test2.name}",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -146,7 +141,7 @@ func TestAccFilterfingerprintResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterfingerprintComment(fingerprint1, fingerprint2, name, "Comment for the object"),
+				Config: testAccFilterfingerprintComment(fingerprint1, fingerprint2, fingerprints, name, "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -154,7 +149,7 @@ func TestAccFilterfingerprintResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFilterfingerprintComment(fingerprint1, fingerprint2, name, "Updated comment for the object"),
+				Config: testAccFilterfingerprintComment(fingerprint1, fingerprint2, fingerprints, name, "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -173,6 +168,10 @@ func TestAccFilterfingerprintResource_ExtAttrs(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("filter-fingerprint")
 	fingerprint1 := acctest.RandomNameWithPrefix("fingerprint")
 	fingerprint2 := acctest.RandomNameWithPrefix("fingerprint")
+	fingerprints := []string{
+		"${nios_dhcp_fingerprint.test1.name}",
+		"${nios_dhcp_fingerprint.test2.name}",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -180,7 +179,7 @@ func TestAccFilterfingerprintResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterfingerprintExtAttrs(fingerprint1, fingerprint2, name, map[string]string{
+				Config: testAccFilterfingerprintExtAttrs(fingerprint1, fingerprint2, fingerprints, name, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -190,7 +189,7 @@ func TestAccFilterfingerprintResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFilterfingerprintExtAttrs(fingerprint1, fingerprint2, name, map[string]string{
+				Config: testAccFilterfingerprintExtAttrs(fingerprint1, fingerprint2, fingerprints, name, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -210,6 +209,14 @@ func TestAccFilterfingerprintResource_Fingerprint(t *testing.T) {
 	fingerprint1 := acctest.RandomNameWithPrefix("fingerprint")
 	fingerprint2 := acctest.RandomNameWithPrefix("fingerprint")
 	fingerprint3 := acctest.RandomNameWithPrefix("fingerprint")
+	fingerprints := []string{
+		"${nios_dhcp_fingerprint.test1.name}",
+		"${nios_dhcp_fingerprint.test2.name}",
+	}
+	fingerprintsUpdated := []string{
+		"${nios_dhcp_fingerprint.test1.name}",
+		"${nios_dhcp_fingerprint.test2.name}",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -217,7 +224,7 @@ func TestAccFilterfingerprintResource_Fingerprint(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterfingerprintFingerprint(fingerprint1, fingerprint2, name),
+				Config: testAccFilterfingerprintFingerprint(fingerprint1, fingerprint2, fingerprints, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint.#", "2"),
@@ -227,7 +234,7 @@ func TestAccFilterfingerprintResource_Fingerprint(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFilterfingerprintFingerprintUpdate(fingerprint3, fingerprint2, name),
+				Config: testAccFilterfingerprintFingerprintUpdate(fingerprint3, fingerprint2, fingerprintsUpdated, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint.#", "2"),
@@ -247,6 +254,10 @@ func TestAccFilterfingerprintResource_Name(t *testing.T) {
 	nameUpdated := acctest.RandomNameWithPrefix("filter-fingerprint-updated")
 	fingerprint1 := acctest.RandomNameWithPrefix("fingerprint")
 	fingerprint2 := acctest.RandomNameWithPrefix("fingerprint")
+	fingerprints := []string{
+		"${nios_dhcp_fingerprint.test1.name}",
+		"${nios_dhcp_fingerprint.test2.name}",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -254,7 +265,7 @@ func TestAccFilterfingerprintResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterfingerprintName(fingerprint1, fingerprint2, name),
+				Config: testAccFilterfingerprintName(fingerprint1, fingerprint2, fingerprints, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -262,7 +273,7 @@ func TestAccFilterfingerprintResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFilterfingerprintName(fingerprint1, fingerprint2, nameUpdated),
+				Config: testAccFilterfingerprintName(fingerprint1, fingerprint2, fingerprints, nameUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterfingerprintExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", nameUpdated),
@@ -344,34 +355,31 @@ func testAccFilterfingerprintImportStateIdFunc(resourceName string) resource.Imp
 	}
 }
 
-func testAccFilterfingerprintBasicConfig(fingerprint1, fingerprint2, name string) string {
+func testAccFilterfingerprintBasicConfig(fingerprint1, fingerprint2 string, fingerprints []string, name string) string {
+	fingerprintsStr := utils.ConvertStringSliceToHCL(fingerprints)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_filterfingerprint" "test" {
-    fingerprint = [
-		nios_dhcp_fingerprint.test1.name,
-		nios_dhcp_fingerprint.test2.name,
-	]
+    fingerprint = %s
     name = %q
 }
-`, name)
+`, fingerprintsStr, name)
 	return strings.Join([]string{testAccBaseWithFingerprint(fingerprint1, fingerprint2), config}, "")
 }
 
-func testAccFilterfingerprintComment(fingerprint1, fingerprint2, name string, comment string) string {
+func testAccFilterfingerprintComment(fingerprint1, fingerprint2 string, fingerprints []string, name string, comment string) string {
+	fingerprintsStr := utils.ConvertStringSliceToHCL(fingerprints)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_filterfingerprint" "test_comment" {
-    fingerprint = [
-		nios_dhcp_fingerprint.test1.name,
-		nios_dhcp_fingerprint.test2.name,
-	]
+    fingerprint = %s
     name = %q
     comment = %q
 }
-`, name, comment)
+`, fingerprintsStr, name, comment)
 	return strings.Join([]string{testAccBaseWithFingerprint(fingerprint1, fingerprint2), config}, "")
 }
 
-func testAccFilterfingerprintExtAttrs(fingerprint1, fingerprint2 string, name string, extAttrs map[string]string) string {
+func testAccFilterfingerprintExtAttrs(fingerprint1, fingerprint2 string, fingerprints []string, name string, extAttrs map[string]string) string {
+	fingerprintsStr := utils.ConvertStringSliceToHCL(fingerprints)
 	extAttrsStr := "{\n"
 	for k, v := range extAttrs {
 		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
@@ -379,53 +387,44 @@ func testAccFilterfingerprintExtAttrs(fingerprint1, fingerprint2 string, name st
 	extAttrsStr += "  }"
 	config := fmt.Sprintf(`
 resource "nios_dhcp_filterfingerprint" "test_extattrs" {
-    fingerprint = [
-		nios_dhcp_fingerprint.test1.name,
-		nios_dhcp_fingerprint.test2.name,
-	]
+    fingerprint = %s
     name = %q
     extattrs = %s
 }
-`, name, extAttrsStr)
+`, fingerprintsStr, name, extAttrsStr)
 	return strings.Join([]string{testAccBaseWithFingerprint(fingerprint1, fingerprint2), config}, "")
 }
 
-func testAccFilterfingerprintFingerprint(fingerprint1, fingerprint2, name string) string {
+func testAccFilterfingerprintFingerprint(fingerprint1, fingerprint2 string, fingerprints []string, name string) string {
+	fingerprintsStr := utils.ConvertStringSliceToHCL(fingerprints)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_filterfingerprint" "test_fingerprint" {
-    fingerprint = [
-        nios_dhcp_fingerprint.test1.name,
-        nios_dhcp_fingerprint.test2.name,
-    ]
+    fingerprint = %s
     name = %q
 }
-`, name)
+`, fingerprintsStr, name)
 	return strings.Join([]string{testAccBaseWithFingerprint(fingerprint1, fingerprint2), config}, "")
 }
 
-func testAccFilterfingerprintFingerprintUpdate(fingerprint1, fingerprint2, name string) string {
+func testAccFilterfingerprintFingerprintUpdate(fingerprint1, fingerprint2 string, fingerprints []string, name string) string {
+	fingerprintsStr := utils.ConvertStringSliceToHCL(fingerprints)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_filterfingerprint" "test_fingerprint" {
-    fingerprint = [
-        nios_dhcp_fingerprint.test1.name,
-		nios_dhcp_fingerprint.test2.name,
-    ]
+    fingerprint = %s
     name = %q
 }
-`, name)
+`, fingerprintsStr, name)
 	return strings.Join([]string{testAccBaseWithFingerprint(fingerprint1, fingerprint2), config}, "")
 }
 
-func testAccFilterfingerprintName(fingerprint1, fingerprint2, name string) string {
+func testAccFilterfingerprintName(fingerprint1, fingerprint2 string, fingerprints []string, name string) string {
+	fingerprintsStr := utils.ConvertStringSliceToHCL(fingerprints)
 	config := fmt.Sprintf(`
 resource "nios_dhcp_filterfingerprint" "test_name" {
-    fingerprint = [
-		nios_dhcp_fingerprint.test1.name,
-		nios_dhcp_fingerprint.test2.name,
-	]
+    fingerprint = %s
     name = %q
 }
-`, name)
+`, fingerprintsStr, name)
 	return strings.Join([]string{testAccBaseWithFingerprint(fingerprint1, fingerprint2), config}, "")
 }
 

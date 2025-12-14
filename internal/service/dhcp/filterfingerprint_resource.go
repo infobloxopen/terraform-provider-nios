@@ -36,7 +36,7 @@ func (r *FilterfingerprintResource) Metadata(ctx context.Context, req resource.M
 
 func (r *FilterfingerprintResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Filterfingerprint resource object.",
+		MarkdownDescription: "Manages a DHCP Fingerprint Filter resource.",
 		Attributes:          FilterfingerprintResourceSchemaAttributes,
 	}
 }
