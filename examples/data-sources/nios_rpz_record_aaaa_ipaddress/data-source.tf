@@ -14,3 +14,4 @@ data "nios_rpz_record_aaaa_ipaddress" "get_record_using_extensible_attributes" {
 
 // Retrieve all RPZ AAAA IPADDRESS records
 data "nios_rpz_record_aaaa_ipaddress" "get_all_rpz_aaaa_ipaddress_records" {}
+
