@@ -25,7 +25,7 @@ data "nios_dhcp_filternac" "get_filternac_using_extattr_filter" {
     Site = "location-1"
   }
 }
-// Retrieve all DHCP Filter NACs
+// Retrieve all DHCP NAC Filters
 data "nios_dhcp_filternac" "get_all_filternacs" {
 }
 ```
@@ -72,5 +72,5 @@ Optional:
 - `name` (String) Name of the DHCP option.
 - `num` (Number) The code of the DHCP option.
 - `use_option` (Boolean) Only applies to special options that are displayed separately from other options and have a use flag. These options are: * routers * router-templates * domain-name-servers * domain-name * broadcast-address * broadcast-address-offset * dhcp-lease-time * dhcp6.name-servers
-- `value` (String) Value of the DHCP option
+- `value` (String) Value of the DHCP option. Required to be set for all options.
 - `vendor_class` (String) The name of the space this DHCP option is associated to.
