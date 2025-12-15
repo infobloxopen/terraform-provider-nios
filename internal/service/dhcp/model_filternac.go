@@ -59,12 +59,9 @@ var FilternacResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The descriptive comment of a DHCP NAC Filter object.",
 	},
 	"expression": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Default:  stringdefault.StaticString(""),
-		Validators: []validator.String{
-			customvalidator.ValidateNACFilterExpression(),
-		},
+		Computed:            true,
+		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The conditional expression of a DHCP NAC Filter object.",
 	},
 	"extattrs": schema.MapAttribute{
