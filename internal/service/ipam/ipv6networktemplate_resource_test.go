@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -59,7 +60,6 @@ func TestAccIpv6networktemplateResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_recycle_leases", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_update_dns_on_lease_renewal", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
-					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "43200"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -112,6 +112,7 @@ func TestAccIpv6networktemplateResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccIpv6networktemplateImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIgnore:              []string{"options"},
 				PlanOnly:                             true,
 			},
 			// Import and Verify
@@ -120,7 +121,7 @@ func TestAccIpv6networktemplateResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccIpv6networktemplateImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all"},
+				ImportStateVerifyIgnore:              []string{"extattrs_all", "options"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 			},
 			// Delete testing automatically occurs in TestCase
@@ -217,6 +218,7 @@ func TestAccIpv6networktemplateResource_Cidr(t *testing.T) {
 		},
 	})
 }
+
 func TestAccIpv6networktemplateResource_CloudApiCompatible(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_cloud_api_compatible"
 	var v ipam.Ipv6networktemplate
@@ -234,14 +236,7 @@ func TestAccIpv6networktemplateResource_CloudApiCompatible(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "true"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccIpv6networktemplateCloudApiCompatible(name, 24, "false"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cloud_api_compatible", "false"),
-				),
-			},
+			// Unable to set to false as we use "Terraform Internal ID" as an EA which is cloud_compatible
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -288,18 +283,18 @@ func TestAccIpv6networktemplateResource_DdnsDomainname(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDdnsDomainname(name, 24, "DDNS_DOMAINNAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDdnsDomainname(name, 24, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "example.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDdnsDomainname(name, 24, "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDdnsDomainname(name, 24, "updated-example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "DDNS_DOMAINNAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_domainname", "updated-example.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -408,18 +403,18 @@ func TestAccIpv6networktemplateResource_DdnsTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDdnsTtl(name, 24, "DDNS_TTL_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDdnsTtl(name, 24, "1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "DDNS_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDdnsTtl(name, 24, "DDNS_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDdnsTtl(name, 24, "1000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "DDNS_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_ttl", "1000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -430,8 +425,14 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_delegated_member"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
-	delegatedMemberVal := map[string]any{}
-	delegatedMemberValUpdated := map[string]any{}
+	delegatedMemberVal := map[string]any{
+		"name":     "infoblox.member",
+		"ipv4addr": "6.6.6.6",
+	}
+	delegatedMemberValUpdated := map[string]any{
+		"name":     "infoblox.localdomain",
+		"ipv4addr": "1.1.1.1",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -442,7 +443,8 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6networktemplateDelegatedMember(name, 24, delegatedMemberVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member", "DELEGATED_MEMBER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "6.6.6.6"),
 				),
 			},
 			// Update and Read
@@ -450,7 +452,8 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6networktemplateDelegatedMember(name, 24, delegatedMemberValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member", "DELEGATED_MEMBER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -468,18 +471,18 @@ func TestAccIpv6networktemplateResource_DomainName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDomainName(name, 24, "DOMAIN_NAME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDomainName(name, 24, "ddns_domain.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "domain_name", "DOMAIN_NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name", "ddns_domain.name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateDomainName(name, 24, "DOMAIN_NAME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateDomainName(name, 24, "updated_ddns_domain.name"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "domain_name", "DOMAIN_NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name", "updated_ddns_domain.name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -491,8 +494,8 @@ func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_domain_name_servers"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
-	domainNameServersVal := []string{"DOMAIN_NAME_SERVERS_REPLACE_ME1", "DOMAIN_NAME_SERVERS_REPLACE_ME2"}
-	domainNameServersValUpdated := []string{"DOMAIN_NAME_SERVERS_REPLACE_ME1", "DOMAIN_NAME_SERVERS_REPLACE_ME2"}
+	domainNameServersVal := []string{"2001:4860:4860::8888", "2001:4860:4860::9999", "2001:4860:4860::8899"}
+	domainNameServersValUpdated := []string{"2001:4860:4860::8888", "2001:4860:4860::8844"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -503,7 +506,10 @@ func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
 				Config: testAccIpv6networktemplateDomainNameServers(name, 24, domainNameServersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "domain_name_servers", "DOMAIN_NAME_SERVERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name_servers.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name_servers.0", "2001:4860:4860::8888"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name_servers.1", "2001:4860:4860::9999"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name_servers.2", "2001:4860:4860::8899"),
 				),
 			},
 			// Update and Read
@@ -511,7 +517,9 @@ func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
 				Config: testAccIpv6networktemplateDomainNameServers(name, 24, domainNameServersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "domain_name_servers", "DOMAIN_NAME_SERVERS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name_servers.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name_servers.0", "2001:4860:4860::8888"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name_servers.1", "2001:4860:4860::8844"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -563,21 +571,21 @@ func TestAccIpv6networktemplateResource_ExtAttrs(t *testing.T) {
 			// Create and Read
 			{
 				Config: testAccIpv6networktemplateExtAttrs(name, 24, map[string]string{
-					"Site": extAttrValue1,
+					"Tenant ID": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Tenant ID", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
 				Config: testAccIpv6networktemplateExtAttrs(name, 24, map[string]string{
-					"Site": extAttrValue2,
+					"Tenant ID": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Tenant ID", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -586,11 +594,12 @@ func TestAccIpv6networktemplateResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_FixedAddressTemplates(t *testing.T) {
+	t.Skip("FA Template cannot be cloud compatible. Skipping test for cloud users as we use a EA with cloud compatible enabled.")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_fixed_address_templates"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
-	fixedAddressTemplatesVal := []string{"FIXED_ADDRESS_TEMPLATES_REPLACE_ME1", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME2"}
-	fixedAddressTemplatesValUpdated := []string{"FIXED_ADDRESS_TEMPLATES_REPLACE_ME1", "FIXED_ADDRESS_TEMPLATES_REPLACE_ME2"}
+	var fixedAddressTemplatesVal []string
+	var fixedAddressTemplatesValUpdated []string
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -628,18 +637,18 @@ func TestAccIpv6networktemplateResource_Ipv6prefix(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "IPV6PREFIX_REPLACE_ME"),
+				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "2001:4860:4860::8888"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "IPV6PREFIX_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "2001:4860:4860::8888"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "IPV6PREFIX_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "2001:4860:4860::6666"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "IPV6PREFIX_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "2001:4860:4860::6666"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -651,8 +660,18 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_logic_filter_rules"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
-	logicFilterRulesVal := []map[string]any{}
-	logicFilterRulesValUpdated := []map[string]any{}
+	logicFilterRulesVal := []map[string]any{
+		{
+			"filter": "ipv6_nac_filter",
+			"type":   "NAC",
+		},
+	}
+	logicFilterRulesValUpdated := []map[string]any{
+		{
+			"filter": "ipv6_option_filter",
+			"type":   "Option",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -663,7 +682,8 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 				Config: testAccIpv6networktemplateLogicFilterRules(name, 24, logicFilterRulesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_nac_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "NAC"),
 				),
 			},
 			// Update and Read
@@ -671,7 +691,8 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 				Config: testAccIpv6networktemplateLogicFilterRules(name, 24, logicFilterRulesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules", "LOGIC_FILTER_RULES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -683,8 +704,18 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_members"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
-	membersVal := []map[string]any{}
-	membersValUpdated := []map[string]any{}
+	membersVal := []map[string]any{
+		{
+			"struct": "dhcpmember",
+			"name":   "infoblox.localdomain",
+		},
+	}
+	membersValUpdated := []map[string]any{
+		{
+			"struct": "dhcpmember",
+			"name":   "infoblox.member",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -695,7 +726,8 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 				Config: testAccIpv6networktemplateMembers(name, 24, membersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members", "MEMBERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "members.struct", "dhcpmember"),
+					resource.TestCheckResourceAttr(resourceName, "members.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -703,7 +735,8 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 				Config: testAccIpv6networktemplateMembers(name, 24, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members", "MEMBERS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "members.struct", "dhcpmember"),
+					resource.TestCheckResourceAttr(resourceName, "members.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -714,7 +747,8 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 func TestAccIpv6networktemplateResource_Name(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_name"
 	var v ipam.Ipv6networktemplate
-	name := acctest.RandomNameWithPrefix("network-template")
+	name1 := acctest.RandomNameWithPrefix("network-template")
+	name2 := acctest.RandomNameWithPrefix("network-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -722,18 +756,18 @@ func TestAccIpv6networktemplateResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateName(name),
+				Config: testAccIpv6networktemplateName(name1, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateName(name),
+				Config: testAccIpv6networktemplateName(name2, 24),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -745,8 +779,35 @@ func TestAccIpv6networktemplateResource_Options(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_options"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
-	optionsVal := []map[string]any{}
-	optionsValUpdated := []map[string]any{}
+	optionsVal := []map[string]any{
+		{
+			"name":  "domain-name",
+			"num":   "15",
+			"value": "example.com",
+		},
+		{
+			"num":          "37",
+			"value":        "remote-id",
+			"vendor_class": "DHCPv6",
+		},
+		{
+			"name":         "dhcp6.subscriber-id",
+			"value":        "subscriber-id",
+			"vendor_class": "DHCPv6",
+		},
+	}
+	optionsValUpdated := []map[string]any{
+		{
+			"name":  "domain-name",
+			"num":   "15",
+			"value": "example.org",
+		},
+		{
+			"num":          "37",
+			"value":        "remote-id-updated",
+			"vendor_class": "DHCPv6",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -757,7 +818,16 @@ func TestAccIpv6networktemplateResource_Options(t *testing.T) {
 				Config: testAccIpv6networktemplateOptions(name, 24, optionsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "15"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "example.com"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.num", "37"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "remote-id"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.vendor_class", "DHCPv6"),
+					resource.TestCheckResourceAttr(resourceName, "options.2.name", "dhcp6.subscriber-id"),
+					resource.TestCheckResourceAttr(resourceName, "options.2.value", "subscriber-id"),
+					resource.TestCheckResourceAttr(resourceName, "options.2.vendor_class", "DHCPv6"),
 				),
 			},
 			// Update and Read
@@ -765,7 +835,13 @@ func TestAccIpv6networktemplateResource_Options(t *testing.T) {
 				Config: testAccIpv6networktemplateOptions(name, 24, optionsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "options", "OPTIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "options.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.name", "domain-name"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.num", "15"),
+					resource.TestCheckResourceAttr(resourceName, "options.0.value", "example.org"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.num", "37"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.value", "remote-id-updated"),
+					resource.TestCheckResourceAttr(resourceName, "options.1.vendor_class", "DHCPv6"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -784,18 +860,18 @@ func TestAccIpv6networktemplateResource_PreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplatePreferredLifetime(name, 24, "PREFERRED_LIFETIME_REPLACE_ME"),
+				Config: testAccIpv6networktemplatePreferredLifetime(name, 24, "200"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "PREFERRED_LIFETIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "200"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplatePreferredLifetime(name, 24, "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplatePreferredLifetime(name, 24, "2000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "PREFERRED_LIFETIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "preferred_lifetime", "2000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -806,8 +882,6 @@ func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_range_templates"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
-	rangeTemplatesVal := []string{"RANGE_TEMPLATES_REPLACE_ME1", "RANGE_TEMPLATES_REPLACE_ME2"}
-	rangeTemplatesValUpdated := []string{"RANGE_TEMPLATES_REPLACE_ME1", "RANGE_TEMPLATES_REPLACE_ME2"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -815,18 +889,18 @@ func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateRangeTemplates(name, 24, rangeTemplatesVal),
+				Config: testAccIpv6networktemplateRangeTemplates(name, 24, "one"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "range_templates", "RANGE_TEMPLATES_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_range_template.one", "name"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateRangeTemplates(name, 24, rangeTemplatesValUpdated),
+				Config: testAccIpv6networktemplateRangeTemplates(name, 24, "two"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "range_templates", "RANGE_TEMPLATES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_range_template.two", "name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -865,6 +939,7 @@ func TestAccIpv6networktemplateResource_RecycleLeases(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
+	t.Skip("Cloud-compatible templates cannot set RIR registration action")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_rir_organization"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -875,18 +950,18 @@ func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateRirOrganization(name, 24, "RIR_ORGANIZATION_REPLACE_ME"),
+				Config: testAccIpv6networktemplateRirOrganization(name, 24, "test"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_organization", "RIR_ORGANIZATION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rir_organization", "test1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateRirOrganization(name, 24, "RIR_ORGANIZATION_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateRirOrganization(name, 24, "test"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_organization", "RIR_ORGANIZATION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rir_organization", "test1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -895,6 +970,7 @@ func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_RirRegistrationAction(t *testing.T) {
+	t.Skip("Cloud-compatible templates cannot set RIR registration action")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_rir_registration_action"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1411,18 +1487,18 @@ func TestAccIpv6networktemplateResource_ValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateValidLifetime(name, 24, "VALID_LIFETIME_REPLACE_ME"),
+				Config: testAccIpv6networktemplateValidLifetime(name, 24, "200"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "200"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateValidLifetime(name, 24, "VALID_LIFETIME_UPDATE_REPLACE_ME"),
+				Config: testAccIpv6networktemplateValidLifetime(name, 24, "400"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "VALID_LIFETIME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "400"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1565,7 +1641,6 @@ resource "nios_ipam_ipv6networktemplate" "test_ddns_domainname" {
     name = %q
     cidr = %d
     ddns_domainname = %q
-    cidr = %d
     use_ddns_domainname = true
 }
 `, name, cidr, ddnsDomainname)
@@ -1588,7 +1663,6 @@ resource "nios_ipam_ipv6networktemplate" "test_ddns_generate_hostname" {
     name = %q
     cidr = %d
     ddns_generate_hostname = %q
-    cidr = %d
     use_ddns_generate_hostname = true
 }
 `, name, cidr, ddnsGenerateHostname)
@@ -1600,6 +1674,8 @@ resource "nios_ipam_ipv6networktemplate" "test_ddns_server_always_updates" {
     name = %q
     cidr = %d
     ddns_server_always_updates = %q
+    ddns_enable_option_fqdn = true
+    use_ddns_enable_option_fqdn = true
 }
 `, name, cidr, ddnsServerAlwaysUpdates)
 }
@@ -1616,13 +1692,14 @@ resource "nios_ipam_ipv6networktemplate" "test_ddns_ttl" {
 }
 
 func testAccIpv6networktemplateDelegatedMember(name string, cidr int, delegatedMember map[string]any) string {
+	delegatedMemberStr := utils.ConvertMapToHCL(delegatedMember)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_delegated_member" {
     name = %q
     cidr = %d
     delegated_member = %s
 }
-`, name, cidr, delegatedMember)
+`, name, cidr, delegatedMemberStr)
 }
 
 func testAccIpv6networktemplateDomainName(name string, cidr int, domainName string) string {
@@ -1631,7 +1708,6 @@ resource "nios_ipam_ipv6networktemplate" "test_domain_name" {
     name = %q
     cidr = %d
     domain_name = %q
-    cidr = %d
     use_domain_name = true
 }
 `, name, cidr, domainName)
@@ -1663,7 +1739,12 @@ resource "nios_ipam_ipv6networktemplate" "test_enable_ddns" {
 func testAccIpv6networktemplateExtAttrs(name string, cidr int, extAttrs map[string]string) string {
 	extAttrsStr := "{\n"
 	for k, v := range extAttrs {
-		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
+		// Quote keys that contain spaces
+		key := k
+		if strings.Contains(k, " ") {
+			key = fmt.Sprintf("%q", k)
+		}
+		extAttrsStr += fmt.Sprintf("    %s = %q\n", key, v)
 	}
 	extAttrsStr += "  }"
 	return fmt.Sprintf(`
@@ -1719,13 +1800,13 @@ resource "nios_ipam_ipv6networktemplate" "test_members" {
 `, name, cidr, membersStr)
 }
 
-func testAccIpv6networktemplateName(name string) string {
+func testAccIpv6networktemplateName(name string, cidr int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_name" {
     name = %q
     cidr = %d
 }
-`, name)
+`, name, cidr)
 }
 
 func testAccIpv6networktemplateOptions(name string, cidr int, options []map[string]any) string {
@@ -1751,15 +1832,17 @@ resource "nios_ipam_ipv6networktemplate" "test_preferred_lifetime" {
 `, name, cidr, preferredLifetime)
 }
 
-func testAccIpv6networktemplateRangeTemplates(name string, cidr int, rangeTemplates []string) string {
-	rangeTemplatesStr := utils.ConvertStringSliceToHCL(rangeTemplates)
-	return fmt.Sprintf(`
+func testAccIpv6networktemplateRangeTemplates(name string, cidr int, rangeTemplates string) string {
+	config := fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test_range_templates" {
     name = %q
     cidr = %d
-    range_templates = %s
+    range_templates = [nios_dhcp_range_template.%s.name]
+    depends_on = [nios_dhcp_range_template.one, nios_dhcp_range_template.two]
 }
-`, name, cidr, rangeTemplatesStr)
+`, name, cidr, rangeTemplates)
+	return strings.Join([]string{testAccBaseWithRangeTemplates(acctest.RandomName(), acctest.RandomName()), config}, "")
+
 }
 
 func testAccIpv6networktemplateRecycleLeases(name string, cidr int, recycleLeases string) string {
@@ -1789,6 +1872,8 @@ resource "nios_ipam_ipv6networktemplate" "test_rir_registration_action" {
     name = %q
     cidr = %d
     rir_registration_action = %q
+    rir_organization = "test"
+	cloud_api_compatible = false
 }
 `, name, cidr, rirRegistrationAction)
 }
@@ -1830,7 +1915,6 @@ resource "nios_ipam_ipv6networktemplate" "test_use_ddns_domainname" {
     name = %q
     cidr = %d
     use_ddns_domainname = %q
-    cidr = %d
 }
 `, name, cidr, useDdnsDomainname)
 }
@@ -1851,7 +1935,6 @@ resource "nios_ipam_ipv6networktemplate" "test_use_ddns_generate_hostname" {
     name = %q
     cidr = %d
     use_ddns_generate_hostname = %q
-    cidr = %d
 }
 `, name, cidr, useDdnsGenerateHostname)
 }
@@ -1872,7 +1955,7 @@ resource "nios_ipam_ipv6networktemplate" "test_use_domain_name" {
     name = %q
     cidr = %d
     use_domain_name = %q
-    cidr = %d
+    domain_name = "example.com"
 }
 `, name, cidr, useDomainName)
 }

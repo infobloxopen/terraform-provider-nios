@@ -24,7 +24,7 @@ func TestAccIpv6networktemplateDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6networktemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6networktemplateDataSourceConfigFilters(name),
+				Config: testAccIpv6networktemplateDataSourceConfigFilters(name, 24),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
@@ -47,7 +47,7 @@ func TestAccIpv6networktemplateDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckIpv6networktemplateDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6networktemplateDataSourceConfigExtAttrFilters(name, acctest.RandomName()),
+				Config: testAccIpv6networktemplateDataSourceConfigExtAttrFilters(name, 24, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
@@ -110,10 +110,11 @@ func testAccCheckIpv6networktemplateResourceAttrPair(resourceName, dataSourceNam
 	}
 }
 
-func testAccIpv6networktemplateDataSourceConfigFilters(name string) string {
+func testAccIpv6networktemplateDataSourceConfigFilters(name string, cidr int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test" {
   name = %q
+  cidr = %d
 }
 
 data "nios_ipam_ipv6networktemplate" "test" {
@@ -121,22 +122,23 @@ data "nios_ipam_ipv6networktemplate" "test" {
     name = nios_ipam_ipv6networktemplate.test.name
   }
 }
-`, name)
+`, name, cidr)
 }
 
-func testAccIpv6networktemplateDataSourceConfigExtAttrFilters(name, extAttrsValue string) string {
+func testAccIpv6networktemplateDataSourceConfigExtAttrFilters(name string, cidr int, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test" {
   name = %q
+  cidr = %d
   extattrs = {
-    Site = %q
+    "Tenant ID" = %q
   } 
 }
 
 data "nios_ipam_ipv6networktemplate" "test" {
   extattrfilters = {
-    Site = nios_ipam_ipv6networktemplate.test.extattrs.Site
+    Site = nios_ipam_ipv6networktemplate.test.extattrs["Tenant ID"]
   }
 }
-`, name, extAttrsValue)
+`, name, cidr, extAttrsValue)
 }

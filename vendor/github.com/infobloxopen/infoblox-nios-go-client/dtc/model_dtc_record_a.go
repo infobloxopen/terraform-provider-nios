@@ -22,7 +22,7 @@ type DtcRecordA struct {
 	// The reference to the object.
 	Ref *string `json:"_ref,omitempty"`
 	// Flag that indicates whether this record was automatically created by NIOS.
-	AutoCreated *bool `json:"auto_created,omitempty"`
+	AutoCreated *string `json:"auto_created,omitempty"`
 	// Comment for the record; maximum 256 characters.
 	Comment *string `json:"comment,omitempty"`
 	// Determines if the record is disabled or not. False means that the record is enabled.
@@ -87,9 +87,9 @@ func (o *DtcRecordA) SetRef(v string) {
 }
 
 // GetAutoCreated returns the AutoCreated field value if set, zero value otherwise.
-func (o *DtcRecordA) GetAutoCreated() bool {
+func (o *DtcRecordA) GetAutoCreated() string {
 	if o == nil || IsNil(o.AutoCreated) {
-		var ret bool
+		var ret string
 		return ret
 	}
 	return *o.AutoCreated
@@ -97,7 +97,7 @@ func (o *DtcRecordA) GetAutoCreated() bool {
 
 // GetAutoCreatedOk returns a tuple with the AutoCreated field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DtcRecordA) GetAutoCreatedOk() (*bool, bool) {
+func (o *DtcRecordA) GetAutoCreatedOk() (*string, bool) {
 	if o == nil || IsNil(o.AutoCreated) {
 		return nil, false
 	}
@@ -113,8 +113,8 @@ func (o *DtcRecordA) HasAutoCreated() bool {
 	return false
 }
 
-// SetAutoCreated gets a reference to the given bool and assigns it to the AutoCreated field.
-func (o *DtcRecordA) SetAutoCreated(v bool) {
+// SetAutoCreated gets a reference to the given string and assigns it to the AutoCreated field.
+func (o *DtcRecordA) SetAutoCreated(v string) {
 	o.AutoCreated = &v
 }
 

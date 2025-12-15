@@ -36,7 +36,7 @@ func (r *Ipv6networktemplateResource) Metadata(ctx context.Context, req resource
 
 func (r *Ipv6networktemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Ipv6networktemplate resource object.",
+		MarkdownDescription: "Manages an IPv6 Network Template.",
 		Attributes:          Ipv6networktemplateResourceSchemaAttributes,
 	}
 }
