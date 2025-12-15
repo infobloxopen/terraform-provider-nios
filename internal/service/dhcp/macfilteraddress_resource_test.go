@@ -302,10 +302,10 @@ func TestAccMacfilteraddressResource_GuestCustomField3(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMacfilteraddressGuestCustomField3(filter, mac, "guest-user-fields3"),
+				Config: testAccMacfilteraddressGuestCustomField3(filter, mac, "guest-user-field3"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMacfilteraddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "guest_custom_field3", "guest-user-fields3"),
+					resource.TestCheckResourceAttr(resourceName, "guest_custom_field3", "guest-user-field3"),
 				),
 			},
 			// Update and Read

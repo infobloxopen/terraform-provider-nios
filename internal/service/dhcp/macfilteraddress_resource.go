@@ -20,6 +20,7 @@ var readableAttributesForMacfilteraddress = "authentication_time,comment,expirat
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &MacfilteraddressResource{}
 var _ resource.ResourceWithImportState = &MacfilteraddressResource{}
+var _resourceResourceWithValidateConfig = &MacfilteraddressResource{}
 
 func NewMacfilteraddressResource() resource.Resource {
 	return &MacfilteraddressResource{}
