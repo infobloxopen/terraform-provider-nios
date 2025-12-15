@@ -161,8 +161,8 @@ func TestAccFilternacResource_LeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_filternac.test_lease_time"
 	var v dhcp.Filternac
 	name := acctest.RandomNameWithPrefix("tf-filternac-")
-	lease_time := "3600"
-	updated_lease_time := "7200"
+	leaseTime := "3600"
+	updatedLeaseTime := "7200"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -170,18 +170,18 @@ func TestAccFilternacResource_LeaseTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilternacLeaseTime(name, lease_time),
+				Config: testAccFilternacLeaseTime(name, leaseTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilternacExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lease_time", lease_time),
+					resource.TestCheckResourceAttr(resourceName, "lease_time", leaseTime),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFilternacLeaseTime(name, updated_lease_time),
+				Config: testAccFilternacLeaseTime(name, updatedLeaseTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilternacExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lease_time", updated_lease_time),
+					resource.TestCheckResourceAttr(resourceName, "lease_time", updatedLeaseTime),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
