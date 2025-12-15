@@ -174,6 +174,10 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
+			customvalidator.IsValidIPv4OrFQDN(
+				customvalidator.IsValidIPCIDR(),
+				customvalidator.IsValidDomainName(),
+			),
 		},
 		MarkdownDescription: "The bootserver address for the shared network. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
@@ -385,6 +389,10 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
+			customvalidator.IsValidIPv4OrFQDN(
+				customvalidator.IsValidIPCIDR(),
+				customvalidator.IsValidDomainName(),
+			),
 		},
 		MarkdownDescription: "The name in FQDN and/or IPv4 Address of the next server that the host needs to boot.",
 	},

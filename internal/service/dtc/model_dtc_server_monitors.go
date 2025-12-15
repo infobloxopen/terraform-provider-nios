@@ -6,12 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcServerMonitorsModel struct {
@@ -26,7 +28,13 @@ var DtcServerMonitorsAttrTypes = map[string]attr.Type{
 
 var DtcServerMonitorsResourceSchemaAttributes = map[string]schema.Attribute{
 	"monitor": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidIPv4OrFQDN(
+				customvalidator.IsValidIPCIDR(),
+				customvalidator.IsValidDomainName(),
+			),
+		},
 		MarkdownDescription: "The monitor related to server.",
 	},
 	"host": schema.StringAttribute{
