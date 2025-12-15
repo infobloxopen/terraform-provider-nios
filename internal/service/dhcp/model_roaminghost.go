@@ -175,7 +175,6 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
-			customvalidator.IsValidFQDN(),
 		},
 		MarkdownDescription: "The boot server address for the roaming host. You can specify the name and/or IP address of the boot server that the host needs to boot. The boot server IPv4 Address or name in FQDN format.",
 	},
