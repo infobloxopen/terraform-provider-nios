@@ -1,30 +1,29 @@
 // Manage an IPAM IPv6 Network Template with Basic Fields
-resource "nios_ipam_ipv6networktemplate" "example_network" {
-  name      = "example-network-template"
+resource "nios_ipam_ipv6networktemplate" "ipam_ipv6_network_template_basic" {
+  name = "example-network-template"
   cidr = 24
 
+  // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
+  cloud_api_compatible = false
 }
 
 // Manage an IPAM IPv6 Network Template with Additional Fields
-resource "nios_ipam_ipv6network" "complete_example" {
+resource "nios_ipam_ipv6networktemplate" "ipam_ipv6_network_template_with_additional_fields" {
   // Required attributes
-  name      = "example-network-template2"
+  name = "example-network-template2"
   cidr = 24
 
   // Basic configuration
-  network_view = "default"
-  comment      = "Example IPv6 network template"
+  comment = "Example IPv6 network template"
 
   ddns_enable_option_fqdn    = true
   ddns_generate_hostname     = true
   ddns_server_always_updates = true
-  ddns_ttl                   = 0
-  disable                    = true
+  ddns_ttl                   = 100
 
-  enable_ddns             = true
-  enable_ifmap_publishing = true
+  enable_ddns = true
   extattrs = {
-    Site = "location-1"
+    "Tenant ID" = "location-1"
   }
 
   options = [
@@ -35,19 +34,17 @@ resource "nios_ipam_ipv6network" "complete_example" {
       vendor_class = "DHCPv6"
     }
   ]
-  port_control_blackout_setting = {
-    enable_blackout = false
-  }
   preferred_lifetime          = 27000
   recycle_leases              = true
   update_dns_on_lease_renewal = true
 
+  // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
+  cloud_api_compatible = true
+
   use_ddns_enable_option_fqdn     = true
   use_ddns_generate_hostname      = true
-  use_blackout_setting            = true
   use_ddns_ttl                    = true
   use_enable_ddns                 = true
-  use_enable_ifmap_publishing     = true
   use_options                     = true
   use_preferred_lifetime          = true
   use_recycle_leases              = true
