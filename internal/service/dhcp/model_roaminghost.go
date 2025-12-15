@@ -305,6 +305,7 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv6_ddns_hostname": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -457,6 +458,7 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"pxe_lease_time": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_pxe_lease_time")),
 		},
