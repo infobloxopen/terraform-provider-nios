@@ -10,6 +10,6 @@ data "nios_dhcp_filternac" "get_filternac_using_extattr_filter" {
     Site = "location-1"
   }
 }
-// Retrieve all DHCP Filter NACs
+// Retrieve all DHCP NAC Filters
 data "nios_dhcp_filternac" "get_all_filternacs" {
 }

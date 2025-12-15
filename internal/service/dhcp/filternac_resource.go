@@ -21,7 +21,7 @@ var readableAttributesForFilternac = "comment,expression,extattrs,lease_time,nam
 var _ resource.Resource = &FilternacResource{}
 var _ resource.ResourceWithImportState = &FilternacResource{}
 
-var _ resource.ResourceWithValidateConfig = &FiltermacResource{}
+var _ resource.ResourceWithValidateConfig = &FilternacResource{}
 
 func NewFilternacResource() resource.Resource {
 	return &FilternacResource{}
@@ -38,7 +38,7 @@ func (r *FilternacResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *FilternacResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DHCP NAC Filter.",
 		Attributes:          FilternacResourceSchemaAttributes,
 	}
 }
