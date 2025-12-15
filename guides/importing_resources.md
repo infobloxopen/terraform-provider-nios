@@ -33,6 +33,5 @@ Once the config is generated you can execute the `terraform apply` command to im
 
 Refer the terraform link [here](https://developer.hashicorp.com/terraform/language/v1.14.x/import/generating-configuration).
 
-
-> **Note**:
-When using the import block, terraform plan triggers an update call to reconcile the resource state. During this update, Terraform adds the Extensible Attribute Terraform Internal ID to the resource.
+> [!IMPORTANT]
+> When using the import block, terraform plan triggers an update call to reconcile the resource state. During this update, Terraform adds the Extensible Attribute Terraform Internal ID to the resource.

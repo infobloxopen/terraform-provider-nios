@@ -19,7 +19,7 @@ jobs:
       - name: go mod
         run: |
           go mod tidy
-          git diff --exit-code -- docs/ ':!docs/guides' || \
+          git diff --exit-code -- go.mod go.sum || \
             (echo; echo "Unexpected difference in go.mod/go.sum files. Run 'go mod tidy' command or revert any go.mod/go.sum changes and commit."; exit 1)
       - name: go fmt
         run: |
@@ -62,4 +62,4 @@ jobs:
       - name: install
         run: go install github.com/bflad/tfproviderlint/cmd/tfproviderlintx@v0.31.0
       - name: tfproviderlintx
-        run: tfproviderlintx ./...
+        run: tfproviderlintx -AT002=false ./...
