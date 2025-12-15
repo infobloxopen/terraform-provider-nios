@@ -32,7 +32,6 @@ func TestAccFilternacResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilternacExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					// Test fields with default value
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -338,7 +337,6 @@ func testAccCheckFilternacDisappears(ctx context.Context, v *dhcp.Filternac) res
 }
 
 func testAccFilternacBasicConfig(name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_filternac" "test" {
     name = %q
