@@ -43,29 +43,16 @@ func (v iPOrFQDNValidator) ValidateString(ctx context.Context, req validator.Str
 		return
 	}
 
-	if strings.TrimSpace(value) != value {
+	validFQDN := fqdnValidator{}
+	fqdnResp := &validator.StringResponse{}
+	validFQDN.ValidateString(ctx, req, fqdnResp)
+
+	if fqdnResp.Diagnostics.HasError() {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
 			req.Path,
-			"FQDN must not have leading or trailing whitespace",
+			"Invalid FQDN. Must be a valid DNS record name in FQDN format without leading/trailing whitespace or trailing dot or uppercase characters.",
 			value,
 		))
-		return
-	}
-	if strings.HasSuffix(value, ".") {
-		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
-			req.Path,
-			"FQDN must not have a trailing dot",
-			value,
-		))
-		return
-	}
-	if value != strings.ToLower(value) {
-		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
-			req.Path,
-			"FQDN must not contain uppercase characters",
-			value,
-		))
-		return
 	}
 }
 
@@ -79,6 +66,11 @@ func looksLikeIPv4(s string) bool {
 		if (c < '0' || c > '9') && c != '.' {
 			return false
 		}
+	}
+	// Between 1 and 3 dots to catch incomplete IPv4 like "10.0.0"
+	dots := strings.Count(s, ".")
+	if dots < 1 || dots > 3 {
+		return false
 	}
 	return true
 }
