@@ -511,7 +511,7 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 			resp.Diagnostics.AddAttributeError(
 				path.Root("mac"),
 				"Invalid configuration for MAC Address",
-				"When 'match_client' is set to 'DHCP_CLIENT_IDENTIFIER', the 'mac' attribute should not be set.",
+				"When 'match_client' is set to 'CLIENT_ID', the 'mac' attribute should not be set.",
 			)
 		}
 	}

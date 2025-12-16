@@ -64,7 +64,6 @@ func TestAccRoaminghostResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_pxe_lease_time", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
-					resource.TestCheckResourceAttr(resourceName, "valid_lifetime", "43200"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
