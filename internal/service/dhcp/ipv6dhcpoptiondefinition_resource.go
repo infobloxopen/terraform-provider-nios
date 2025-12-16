@@ -13,6 +13,8 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"strings"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -195,6 +197,49 @@ func (r *Ipv6dhcpoptiondefinitionResource) Delete(ctx context.Context, req resou
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ipv6dhcpoptiondefinition, got error: %s", err))
 		return
+	}
+}
+
+func (r *Ipv6dhcpoptiondefinitionResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+
+	var data Ipv6dhcpoptiondefinitionModel
+	// Read Terraform prior state data into the model.
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var space string
+	if !data.Space.IsNull() {
+		space = data.Space.ValueString()
+	} else if data.Space.IsNull() || data.Space.IsUnknown() {
+		space = "DHCPv6"
+	}
+
+	var name string
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		name = data.Name.ValueString()
+	}
+	// If space value defaults to "DHCPv6", then name should start with "dhcp6."
+	if space == "DHCPv6" {
+		if !data.Name.IsNull() && !data.Name.IsUnknown() {
+			if strings.HasPrefix(name, "dhcp6.") != true {
+				resp.Diagnostics.AddError(
+					"Invalid Name for DHCPv6 Option Definition",
+					"The name of a DHCP IPv6 option definition object in the default space (DHCPv6) must start with 'dhcp6.'.",
+				)
+			}
+		}
+	} else {
+		// If space is custom, then name should not start with "dhcp6."
+		if !data.Name.IsNull() && !data.Name.IsUnknown() {
+			if strings.HasPrefix(name, "dhcp6.") {
+				resp.Diagnostics.AddError(
+					"Invalid Name for Custom DHCPv6 Option Definition",
+					"The name of a DHCP IPv6 option definition object in a custom space must not start with 'dhcp6.'.",
+				)
+			}
+		}
 	}
 }
 
