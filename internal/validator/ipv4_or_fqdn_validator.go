@@ -9,20 +9,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-var _ validator.String = iPOrFQDNValidator{}
+var _ validator.String = iPv4OrFQDNValidator{}
 
-// iPOrFQDNValidator validates if the provided value is a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters.
-type iPOrFQDNValidator struct{}
+// iPv4OrFQDNValidator validates if the provided value is a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters.
+type iPv4OrFQDNValidator struct{}
 
-func (v iPOrFQDNValidator) Description(ctx context.Context) string {
+func (v iPv4OrFQDNValidator) Description(ctx context.Context) string {
 	return "value must be a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters"
 }
 
-func (v iPOrFQDNValidator) MarkdownDescription(ctx context.Context) string {
+func (v iPv4OrFQDNValidator) MarkdownDescription(ctx context.Context) string {
 	return v.Description(ctx)
 }
 
-func (v iPOrFQDNValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+func (v iPv4OrFQDNValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
 		return
 	}
@@ -76,5 +76,5 @@ func looksLikeIPv4(s string) bool {
 }
 
 func IsValidIPv4OrFQDN() validator.String {
-	return iPOrFQDNValidator{}
+	return iPv4OrFQDNValidator{}
 }
