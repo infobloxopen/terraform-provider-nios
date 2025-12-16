@@ -56,7 +56,6 @@ var DhcpoptionspaceResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The list of DHCP option definition objects.",
 	},
@@ -71,9 +70,8 @@ func (m *DhcpoptionspaceModel) Expand(ctx context.Context, diags *diag.Diagnosti
 		return nil
 	}
 	to := &dhcp.Dhcpoptionspace{
-		Comment:           flex.ExpandStringPointer(m.Comment),
-		Name:              flex.ExpandStringPointer(m.Name),
-		OptionDefinitions: flex.ExpandFrameworkListString(ctx, m.OptionDefinitions, diags),
+		Comment: flex.ExpandStringPointer(m.Comment),
+		Name:    flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }
