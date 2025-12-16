@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -66,6 +68,8 @@ func (r *DtcRecordAaaaResource) Create(ctx context.Context, req resource.CreateR
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	addr, err := netip.ParseAddr(data.Ipv6addr.ValueString())
+	data.Ipv6addr = iptypes.NewIPv6AddressValue(addr.String())
 
 	if resp.Diagnostics.HasError() {
 		return
