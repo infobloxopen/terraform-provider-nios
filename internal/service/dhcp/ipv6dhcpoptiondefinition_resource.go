@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -12,8 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"strings"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
