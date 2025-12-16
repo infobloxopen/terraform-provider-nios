@@ -13,19 +13,19 @@ Retrieves information about existing DTC SRV Records.
 ## Example Usage
 
 ```terraform
-// Retrieve a specific DTC record SRV in a DTC server using filters 
+// Retrieve a specific DTC SRV Record in a DTC server using filters 
 data "nios_dtc_record_srv" "get_dtc_record_srv_in_dtc_server_using_filters" {
   filters = {
-    dtc_server = "example-server2326763"
+    dtc_server = "example-server"
     name       = "_example._tcp.example.com"
   }
 }
 
 
-// Retrieve all DTC record SRV in a DTC server
+// Retrieve all DTC SRV Records in a DTC server
 data "nios_dtc_record_srv" "get_all_dtc_record_srv_in_dtc_server" {
   filters = {
-    dtc_server = "example-server2326763"
+    dtc_server = "example-server"
   }
 }
 ```

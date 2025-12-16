@@ -101,7 +101,10 @@ var DtcRecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The priority of the SRV record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.",
 	},
 	"target": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "The target of the SRV record in FQDN format. This value can be in unicode format.",
 	},
 	"ttl": schema.Int64Attribute{

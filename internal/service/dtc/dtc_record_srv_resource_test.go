@@ -32,7 +32,6 @@ func TestAccDtcRecordSrvResource_basic(t *testing.T) {
 				Config: testAccDtcRecordSrvBasicConfig(21, 10, "infoblox.com", 3, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordSrvExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "port", "21"),
 					resource.TestCheckResourceAttr(resourceName, "priority", "10"),
 					resource.TestCheckResourceAttr(resourceName, "target", "infoblox.com"),
@@ -451,7 +450,7 @@ func testAccDtcRecordSrvComment(port, priority int, target string, weight int, s
 		target   = %q
 		weight   = %d
 		dtc_server = nios_dtc_server.test.name
-    comment = %q
+    	comment = %q
 }
 	`, port, priority, target, weight, comment)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
@@ -514,7 +513,7 @@ func testAccDtcRecordSrvPort(port, priority int, target string, weight int, serv
 func testAccDtcRecordSrvPriority(port, priority int, target string, weight int, serverName string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_srv" "test_priority" {
-   port     = %d
+   		port     = %d
 		priority = %d
 		target   = %q
 		weight   = %d
@@ -526,27 +525,27 @@ func testAccDtcRecordSrvPriority(port, priority int, target string, weight int, 
 
 func testAccDtcRecordSrvTarget(port, priority int, target string, weight int, serverName string) string {
 	config := fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_target" {
-    port     = %d
-    priority = %d
-    target   = %q
-    weight   = %d
-	dtc_server = nios_dtc_server.test.name
-}
+	resource "nios_dtc_record_srv" "test_target" {
+    	port     = %d
+    	priority = %d
+    	target   = %q
+    	weight   = %d
+		dtc_server = nios_dtc_server.test.name
+	}
 `, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
 func testAccDtcRecordSrvTtl(port, priority int, target string, weight int, serverName string, ttl int) string {
 	config := fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_ttl" {
-    port     = %d
-    priority = %d
-    target   = %q
-    weight   = %d
-	ttl      = %d
-	use_ttl  = true
-	dtc_server = nios_dtc_server.test.name
+	resource "nios_dtc_record_srv" "test_ttl" {
+    	port     = %d
+    	priority = %d
+    	target   = %q
+    	weight   = %d
+		ttl      = %d
+		use_ttl  = true
+		dtc_server = nios_dtc_server.test.name
 }
 `, port, priority, target, weight, ttl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
@@ -555,13 +554,13 @@ resource "nios_dtc_record_srv" "test_ttl" {
 func testAccDtcRecordSrvUseTtl(port, priority int, target string, weight int, serverName string, useTtl bool) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_srv" "test_use_ttl" {
-	 port     = %d
-    priority = %d
-    target   = %q
-    weight   = %d
-	ttl = 20
-    use_ttl = %t
-	dtc_server = nios_dtc_server.test.name
+		port     = %d
+    	priority = %d
+    	target   = %q
+    	weight   = %d
+		ttl = 20
+    	use_ttl = %t
+		dtc_server = nios_dtc_server.test.name
 }`, port, priority, target, weight, useTtl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
@@ -569,11 +568,11 @@ func testAccDtcRecordSrvUseTtl(port, priority int, target string, weight int, se
 func testAccDtcRecordSrvWeight(port, priority int, target string, weight int, serverName string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_srv" "test_weight" {
-     port     = %d
-    priority = %d
-    target   = %q
-    weight   = %d
-	dtc_server = nios_dtc_server.test.name
+    	port     = %d
+    	priority = %d
+    	target   = %q
+    	weight   = %d
+		dtc_server = nios_dtc_server.test.name
 	}
 	`, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")

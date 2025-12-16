@@ -4,7 +4,7 @@ resource "nios_dtc_server" "create_dtc_server" {
   host = "2.3.3.4"
 }
 
-// Create a DTC Record SRV with basic fields
+// Create a DTC SRV Record with basic fields
 resource "nios_dtc_record_srv" "srv_recprd_basic_fields" {
   dtc_server = nios_dtc_server.create_dtc_server.name
   port       = 8081
@@ -13,7 +13,7 @@ resource "nios_dtc_record_srv" "srv_recprd_basic_fields" {
   weight     = 10
 }
 
-// Create a DTC Record SRV with additional fields
+// Create a DTC SRV Record with additional fields
 resource "nios_dtc_record_srv" "srv_record_with_additional_fields" {
   dtc_server = nios_dtc_server.create_dtc_server.name
   port       = 8080
