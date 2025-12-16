@@ -148,6 +148,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewFixedaddresstemplateResource,
 		dhcp.NewIpv6sharednetworkResource,
 		dhcp.NewIpv6rangeResource,
+		dhcp.NewFiltermacResource,
+		dhcp.NewDhcpfailoverResource,
+		dhcp.NewMacfilteraddressResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -158,9 +161,12 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcMonitorTcpResource,
 		dtc.NewDtcMonitorPdpResource,
 		dtc.NewDtcMonitorIcmpResource,
+		dtc.NewDtcMonitorSipResource,
+		dtc.NewDtcRecordAResource,
 		dtc.NewDtcRecordAaaaResource,
 
 		ipam.NewNetworkResource,
+		ipam.NewNetworktemplateResource,
 		ipam.NewNetworkcontainerResource,
 		ipam.NewIpv6networkcontainerResource,
 		ipam.NewIpv6networkResource,
@@ -205,6 +211,10 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzNaptrResource,
 		rpz.NewRecordRpzPtrResource,
 		rpz.NewRecordRpzMxResource,
+		rpz.NewRecordRpzSrvResource,
+		rpz.NewRecordRpzCnameResource,
+		rpz.NewRecordRpzAaaaResource,
+		rpz.NewRecordRpzTxtResource,
 	}
 }
 
@@ -258,6 +268,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewFixedaddresstemplateDataSource,
 		dhcp.NewIpv6sharednetworkDataSource,
 		dhcp.NewIpv6rangeDataSource,
+		dhcp.NewFiltermacDataSource,
+		dhcp.NewDhcpfailoverDataSource,
+		dhcp.NewMacfilteraddressDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
@@ -268,9 +281,12 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcMonitorTcpDataSource,
 		dtc.NewDtcMonitorPdpDataSource,
 		dtc.NewDtcMonitorIcmpDataSource,
+		dtc.NewDtcMonitorSipDataSource,
+		dtc.NewDtcRecordADataSource,
 		dtc.NewDtcRecordAaaaDataSource,
 
 		ipam.NewNetworkDataSource,
+		ipam.NewNetworktemplateDataSource,
 		ipam.NewNetworkcontainerDataSource,
 		ipam.NewIpv6networkcontainerDataSource,
 		ipam.NewIpv6networkDataSource,
@@ -316,6 +332,10 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzNaptrDataSource,
 		rpz.NewRecordRpzPtrDataSource,
 		rpz.NewRecordRpzMxDataSource,
+		rpz.NewRecordRpzSrvDataSource,
+		rpz.NewRecordRpzCnameDataSource,
+		rpz.NewRecordRpzAaaaDataSource,
+		rpz.NewRecordRpzTxtDataSource,
 	}
 }
 
