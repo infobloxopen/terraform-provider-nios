@@ -433,14 +433,6 @@ func testAccDtcRecordSrvBasicConfig(port, priority int, target string, weight in
 	`, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
-func testAccBaseWithDtcServer(name, host string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_server" "test" {
-  name = %q
-  host = %q
-}
-`, name, host)
-}
 
 func testAccDtcRecordSrvComment(port, priority int, target string, weight int, serverName, comment string) string {
 	config := fmt.Sprintf(`
