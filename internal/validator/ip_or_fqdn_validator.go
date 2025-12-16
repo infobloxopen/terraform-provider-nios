@@ -14,15 +14,15 @@ var _ validator.String = iPOrFQDNValidator{}
 // iPOrFQDNValidator validates if the provided value is a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters.
 type iPOrFQDNValidator struct{}
 
-func (v iPOrFQDNValidator) Description(_ context.Context) string {
+func (v iPOrFQDNValidator) Description(ctx context.Context) string {
 	return "value must be a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters"
 }
 
-func (v iPOrFQDNValidator) MarkdownDescription(_ context.Context) string {
-	return v.Description(nil)
+func (v iPOrFQDNValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
 }
 
-func (v iPOrFQDNValidator) ValidateString(_ context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+func (v iPOrFQDNValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
 		return
 	}
@@ -42,7 +42,7 @@ func (v iPOrFQDNValidator) ValidateString(_ context.Context, req validator.Strin
 		))
 		return
 	}
-	
+
 	if strings.TrimSpace(value) != value {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
 			req.Path,
