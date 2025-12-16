@@ -222,7 +222,7 @@ func (r *Ipv6dhcpoptiondefinitionResource) ValidateConfig(ctx context.Context, r
 	// If space value defaults to "DHCPv6", then name should start with "dhcp6."
 	if space == "DHCPv6" {
 		if !data.Name.IsNull() && !data.Name.IsUnknown() {
-			if strings.HasPrefix(name, "dhcp6.") != true {
+			if !strings.HasPrefix(name, "dhcp6.") {
 				resp.Diagnostics.AddError(
 					"Invalid Name for DHCPv6 Option Definition",
 					"The name of a DHCP IPv6 option definition object in the default space (DHCPv6) must start with 'dhcp6.'.",
