@@ -1079,7 +1079,7 @@ func TestAccFixedaddressResource_MsOptions(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_MsServer(t *testing.T) {
-	t.Skip("Skipping test as MS Server is supposed to be set up on the GRID")
+	//t.Skip("Skipping test as MS Server is supposed to be set up on the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_ms_server"
 	var v dhcp.Fixedaddress
 	ip := "50.0.0.132"
@@ -1090,7 +1090,7 @@ func TestAccFixedaddressResource_MsServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressMsServer(ip, "MAC_ADDRESS", "00:1a:6b:3c:4d:5e", "10.34.98.68", "ms_server", "example_fixed_address"),
+				Config: testAccFixedaddressMsServer(ip, "MAC_ADDRESS", "00:1a:6b:3c:4d:5e", "10.34.98", "ms_server", "example_fixed_address"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ms_server", "10.34.98.68"),

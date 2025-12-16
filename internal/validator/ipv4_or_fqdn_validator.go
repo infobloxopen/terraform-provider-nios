@@ -58,9 +58,6 @@ func (v iPv4OrFQDNValidator) ValidateString(ctx context.Context, req validator.S
 
 // looksLikeIPv4 returns true if the string resembles an IPv4 address (N.N.N.N with digits only)
 func looksLikeIPv4(s string) bool {
-	if strings.Count(s, ".") != 3 {
-		return false
-	}
 	for i := 0; i < len(s); i++ {
 		c := s[i]
 		if (c < '0' || c > '9') && c != '.' {
