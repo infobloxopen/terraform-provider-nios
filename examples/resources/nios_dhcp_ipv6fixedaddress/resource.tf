@@ -69,7 +69,7 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional2" {
   network                 = nios_ipam_ipv6network.parent_network.network
 }
 
-// Create an IPv6 Fixed Address using function call to retrieve ipv4addr
+// Create an IPv6 Fixed Address using function call to retrieve ipv6addr
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call" {
   duid = "00:01:01:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
   func_call = {
@@ -82,6 +82,6 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
       network_view = "default"
     }
   }
-  comment = "Fixed Address created with ipv4addr retrieved via function call"
+  comment = "Fixed Address created with ipv6addr retrieved via function call"
   network = nios_ipam_ipv6network.parent_network.network
 }

@@ -84,7 +84,7 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional2" {
   network                 = nios_ipam_ipv6network.parent_network.network
 }
 
-// Create an IPv6 Fixed Address using function call to retrieve ipv4addr
+// Create an IPv6 Fixed Address using function call to retrieve ipv6addr
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call" {
   duid = "00:01:01:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
   func_call = {
@@ -97,7 +97,7 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
       network_view = "default"
     }
   }
-  comment = "Fixed Address created with ipv4addr retrieved via function call"
+  comment = "Fixed Address created with ipv6addr retrieved via function call"
   network = nios_ipam_ipv6network.parent_network.network
 }
 ```
@@ -164,7 +164,7 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
 
 Optional:
 
-- `comment` (String) The commment for the credential.
+- `comment` (String) The comment for the credential.
 - `credential_group` (String) Group for the CLI credential.
 - `credential_type` (String) The type of the credential.
 - `password` (String, Sensitive) The CLI password.
@@ -353,7 +353,7 @@ Read-Only:
 - `vrf_description` (String) Description of the VRF.
 - `vrf_name` (String) The name of the VRF.
 - `vrf_rd` (String) Route distinguisher of the VRF.
-- `vswitch_available_ports_count` (Number) Numer of available ports reported by the virtual switch on which the virtual machine/vport connected to.
+- `vswitch_available_ports_count` (Number) Number of available ports reported by the virtual switch on which the virtual machine/vport connected to.
 - `vswitch_id` (String) ID of the virtual switch.
 - `vswitch_ipv6_enabled` (Boolean) Indicates the virtual switch has IPV6 enabled.
 - `vswitch_name` (String) Name of the virtual switch.
@@ -363,7 +363,7 @@ Read-Only:
 - `vswitch_segment_type` (String) Type of the network segment on which the current virtual machine/vport connected to.
 - `vswitch_tep_dhcp_server` (String) DHCP server of the virtual tunnel endpoint (VTEP) in the virtual switch.
 - `vswitch_tep_ip` (String) IP address of the virtual tunnel endpoint (VTEP) in the virtual switch.
-- `vswitch_tep_multicast` (String) Muticast address of the virtual tunnel endpoint (VTEP) in the virtual swtich.
+- `vswitch_tep_multicast` (String) Multicast address of the virtual tunnel endpoint (VTEP) in the virtual swtich.
 - `vswitch_tep_port_group` (String) Port group of the virtual tunnel endpoint (VTEP) in the virtual switch.
 - `vswitch_tep_type` (String) Type of virtual tunnel endpoint (VTEP) in the virtual switch.
 - `vswitch_tep_vlan` (String) VLAN of the virtual tunnel endpoint (VTEP) in the virtual switch.

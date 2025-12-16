@@ -455,7 +455,7 @@ var Ipv6fixedaddressDiscoveredDataResourceSchemaAttributes = map[string]schema.A
 	},
 	"vswitch_available_ports_count": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Numer of available ports reported by the virtual switch on which the virtual machine/vport connected to.",
+		MarkdownDescription: "Number of available ports reported by the virtual switch on which the virtual machine/vport connected to.",
 	},
 	"vswitch_tep_type": schema.StringAttribute{
 		Computed:            true,
@@ -479,7 +479,7 @@ var Ipv6fixedaddressDiscoveredDataResourceSchemaAttributes = map[string]schema.A
 	},
 	"vswitch_tep_multicast": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "Muticast address of the virtual tunnel endpoint (VTEP) in the virtual swtich.",
+		MarkdownDescription: "Multicast address of the virtual tunnel endpoint (VTEP) in the virtual swtich.",
 	},
 	"vmhost_ip_address": schema.StringAttribute{
 		Computed:            true,
