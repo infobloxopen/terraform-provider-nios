@@ -3,7 +3,6 @@ package validator
 import (
 	"context"
 	"net"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -63,11 +62,6 @@ func looksLikeIPv4(s string) bool {
 		if (c < '0' || c > '9') && c != '.' {
 			return false
 		}
-	}
-	// Between 1 and 3 dots to catch incomplete IPv4 like "10.0.0"
-	dots := strings.Count(s, ".")
-	if dots < 1 || dots > 3 {
-		return false
 	}
 	return true
 }
