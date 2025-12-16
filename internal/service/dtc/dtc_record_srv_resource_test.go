@@ -464,27 +464,27 @@ func testAccDtcRecordSrvDisable(port, priority int, target string, weight int, d
 
 func testAccDtcRecordSrvDtcServer(port, priority int, target string, weight int, serverName string) string {
 	config := fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_dtc_server" {
+	resource "nios_dtc_record_srv" "test_dtc_server" {
 		port     = %d
 		priority = %d
 		target   = %q
 		weight   = %d
 		dtc_server = nios_dtc_server.test.name
-}
+	}
 `, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
 func testAccDtcRecordSrvName(port, priority int, target string, weight int, name string, serverName string) string {
 	config := fmt.Sprintf(`
-resource "nios_dtc_record_srv" "test_name" {
-    name = %q
-    port = %d
-    priority = %d
-    target = %q
-    weight = %d
-    dtc_server = nios_dtc_server.test.name
-}
+	resource "nios_dtc_record_srv" "test_name" {
+    	name = %q
+    	port = %d
+    	priority = %d
+    	target = %q
+    	weight = %d
+    	dtc_server = nios_dtc_server.test.name
+	}
 `, name, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
@@ -538,7 +538,7 @@ func testAccDtcRecordSrvTtl(port, priority int, target string, weight int, serve
 		ttl      = %d
 		use_ttl  = true
 		dtc_server = nios_dtc_server.test.name
-}
+	}
 `, port, priority, target, weight, ttl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
@@ -553,7 +553,8 @@ func testAccDtcRecordSrvUseTtl(port, priority int, target string, weight int, se
 		ttl = 20
     	use_ttl = %t
 		dtc_server = nios_dtc_server.test.name
-}`, port, priority, target, weight, useTtl)
+	}
+`, port, priority, target, weight, useTtl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
@@ -566,6 +567,6 @@ func testAccDtcRecordSrvWeight(port, priority int, target string, weight int, se
     	weight   = %d
 		dtc_server = nios_dtc_server.test.name
 	}
-	`, port, priority, target, weight)
+`, port, priority, target, weight)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
