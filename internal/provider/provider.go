@@ -213,6 +213,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzSrvResource,
 		rpz.NewRecordRpzCnameResource,
 		rpz.NewRecordRpzAaaaResource,
+		rpz.NewRecordRpzTxtResource,
 	}
 }
 
@@ -332,6 +333,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzSrvDataSource,
 		rpz.NewRecordRpzCnameDataSource,
 		rpz.NewRecordRpzAaaaDataSource,
+		rpz.NewRecordRpzTxtDataSource,
 	}
 }
 
