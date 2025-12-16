@@ -1,0 +1,88 @@
+package validator
+
+import (
+	"context"
+	"net"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+)
+
+var _ validator.String = iPOrFQDNValidator{}
+
+// iPOrFQDNValidator validates if the provided value is a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters.
+type iPOrFQDNValidator struct{}
+
+func (v iPOrFQDNValidator) Description(_ context.Context) string {
+	return "value must be a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters"
+}
+
+func (v iPOrFQDNValidator) MarkdownDescription(_ context.Context) string {
+	return v.Description(nil)
+}
+
+func (v iPOrFQDNValidator) ValidateString(_ context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	value := req.ConfigValue.ValueString()
+
+	if ip := net.ParseIP(value); ip != nil {
+		return // valid IP address
+	}
+
+	// If it looks like an IP address but failed to parse, surface an error.
+	if looksLikeIPv4(value) {
+		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
+			req.Path,
+			"Invalid IP address",
+			value,
+		))
+		return
+	}
+	
+	if strings.TrimSpace(value) != value {
+		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
+			req.Path,
+			"FQDN must not have leading or trailing whitespace",
+			value,
+		))
+		return
+	}
+	if strings.HasSuffix(value, ".") {
+		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
+			req.Path,
+			"FQDN must not have a trailing dot",
+			value,
+		))
+		return
+	}
+	if value != strings.ToLower(value) {
+		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
+			req.Path,
+			"FQDN must not contain uppercase characters",
+			value,
+		))
+		return
+	}
+}
+
+// looksLikeIPv4 returns true if the string resembles an IPv4 address (N.N.N.N with digits only)
+func looksLikeIPv4(s string) bool {
+	if strings.Count(s, ".") != 3 {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if (c < '0' || c > '9') && c != '.' {
+			return false
+		}
+	}
+	return true
+}
+
+func IsValidIPv4OrFQDN() validator.String {
+	return iPOrFQDNValidator{}
+}
