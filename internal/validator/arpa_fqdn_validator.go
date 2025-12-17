@@ -48,7 +48,7 @@ func (v ConditionalArpaOrFQDNValidator) ValidateString(ctx context.Context, requ
 			response.Diagnostics.AddAttributeError(
 				request.Path,
 				"Invalid ARPA Format",
-				fmt.Sprintf("The value '%s' must be a valid IPv4 ARPA (x.x.x.x.in-addr.arpa) or IPv6 ARPA (nibbles.ip6.arpa) notation.", value),
+				fmt.Sprintf("The value '%s' must be a valid IPv4 ARPA (format: x.x.x.x.in-addr.arpa) or IPv6 ARPA (format: 32 hexadecimal digits separated by dots, ending with .ip6.arpa).", value),
 			)
 		}
 	} else {
