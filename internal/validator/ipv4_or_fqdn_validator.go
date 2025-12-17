@@ -14,7 +14,7 @@ var _ validator.String = iPv4OrFQDNValidator{}
 type iPv4OrFQDNValidator struct{}
 
 func (v iPv4OrFQDNValidator) Description(ctx context.Context) string {
-	return "value must be a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters"
+	return "value must be a valid IPv4 address or a string without leading/trailing whitespace, trailing dot, or uppercase characters"
 }
 
 func (v iPv4OrFQDNValidator) MarkdownDescription(ctx context.Context) string {
@@ -49,7 +49,7 @@ func (v iPv4OrFQDNValidator) ValidateString(ctx context.Context, req validator.S
 	if fqdnResp.Diagnostics.HasError() {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
 			req.Path,
-			"Invalid FQDN. Must be a valid DNS record name in FQDN format without leading/trailing whitespace or trailing dot or uppercase characters.",
+			"Invalid FQDN. Must be a valid FQDN without leading/trailing whitespace, trailing dot or uppercase characters.",
 			value,
 		))
 	}
