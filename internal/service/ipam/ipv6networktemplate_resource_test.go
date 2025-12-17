@@ -637,18 +637,18 @@ func TestAccIpv6networktemplateResource_Ipv6prefix(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "2001:4860:4860::8888"),
+				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "2001:db8:abcd:12::/64"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "2001:4860:4860::8888"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "2001:db8:abcd:12::/64"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "2001:4860:4860::6666"),
+				Config: testAccIpv6networktemplateIpv6prefix(name, 24, "2001:db8:cdef:12::/64"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "2001:4860:4860::6666"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6prefix", "2001:db8:cdef:12::/64"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -892,7 +892,7 @@ func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 				Config: testAccIpv6networktemplateRangeTemplates(name, 24, "one"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_range_template.one", "name"),
+					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_ipv6_range_template.one", "name"),
 				),
 			},
 			// Update and Read
@@ -900,7 +900,7 @@ func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 				Config: testAccIpv6networktemplateRangeTemplates(name, 24, "two"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_range_template.two", "name"),
+					resource.TestCheckResourceAttrPair(resourceName, "range_templates.0", "nios_dhcp_ipv6_range_template.two", "name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1577,6 +1577,24 @@ func testAccIpv6networktemplateImportStateIdFunc(resourceName string) resource.I
 	}
 }
 
+func testAccBaseWithIPv6RangeTemplates(template1, template2 string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_ipv6_range_template" "one" {
+    name = %q
+    number_of_addresses = 100
+    offset = 50
+    cloud_api_compatible = true
+}
+
+resource "nios_dhcp_ipv6_range_template" "two" {
+    name = %q
+    number_of_addresses = 100
+    offset = 50
+    cloud_api_compatible = true
+}
+`, template1, template2)
+}
+
 func testAccIpv6networktemplateBasicConfig(name string, cidr int) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6networktemplate" "test" {
@@ -1837,11 +1855,11 @@ func testAccIpv6networktemplateRangeTemplates(name string, cidr int, rangeTempla
 resource "nios_ipam_ipv6networktemplate" "test_range_templates" {
     name = %q
     cidr = %d
-    range_templates = [nios_dhcp_range_template.%s.name]
-    depends_on = [nios_dhcp_range_template.one, nios_dhcp_range_template.two]
+    range_templates = [nios_dhcp_ipv6_range_template.%s.name]
+    depends_on = [nios_dhcp_ipv6_range_template.one, nios_dhcp_ipv6_range_template.two]
 }
 `, name, cidr, rangeTemplates)
-	return strings.Join([]string{testAccBaseWithRangeTemplates(acctest.RandomName(), acctest.RandomName()), config}, "")
+	return strings.Join([]string{testAccBaseWithIPv6RangeTemplates(acctest.RandomName(), acctest.RandomName()), config}, "")
 
 }
 

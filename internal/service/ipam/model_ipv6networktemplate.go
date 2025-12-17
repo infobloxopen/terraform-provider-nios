@@ -3,7 +3,6 @@ package ipam
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -32,52 +31,52 @@ import (
 )
 
 type Ipv6networktemplateModel struct {
-	Ref                        types.String        `tfsdk:"ref"`
-	AllowAnyNetmask            types.Bool          `tfsdk:"allow_any_netmask"`
-	AutoCreateReversezone      types.Bool          `tfsdk:"auto_create_reversezone"`
-	Cidr                       types.Int64         `tfsdk:"cidr"`
-	CloudApiCompatible         types.Bool          `tfsdk:"cloud_api_compatible"`
-	Comment                    types.String        `tfsdk:"comment"`
-	DdnsDomainname             types.String        `tfsdk:"ddns_domainname"`
-	DdnsEnableOptionFqdn       types.Bool          `tfsdk:"ddns_enable_option_fqdn"`
-	DdnsGenerateHostname       types.Bool          `tfsdk:"ddns_generate_hostname"`
-	DdnsServerAlwaysUpdates    types.Bool          `tfsdk:"ddns_server_always_updates"`
-	DdnsTtl                    types.Int64         `tfsdk:"ddns_ttl"`
-	DelegatedMember            types.Object        `tfsdk:"delegated_member"`
-	DomainName                 types.String        `tfsdk:"domain_name"`
-	DomainNameServers          types.List          `tfsdk:"domain_name_servers"`
-	EnableDdns                 types.Bool          `tfsdk:"enable_ddns"`
-	ExtAttrs                   types.Map           `tfsdk:"extattrs"`
-	ExtAttrsAll                types.Map           `tfsdk:"extattrs_all"`
-	FixedAddressTemplates      types.List          `tfsdk:"fixed_address_templates"`
-	Ipv6prefix                 iptypes.IPv6Address `tfsdk:"ipv6prefix"`
-	LogicFilterRules           types.List          `tfsdk:"logic_filter_rules"`
-	Members                    types.List          `tfsdk:"members"`
-	Name                       types.String        `tfsdk:"name"`
-	Options                    types.List          `tfsdk:"options"`
-	PreferredLifetime          types.Int64         `tfsdk:"preferred_lifetime"`
-	RangeTemplates             types.List          `tfsdk:"range_templates"`
-	RecycleLeases              types.Bool          `tfsdk:"recycle_leases"`
-	Rir                        types.String        `tfsdk:"rir"`
-	RirOrganization            types.String        `tfsdk:"rir_organization"`
-	RirRegistrationAction      types.String        `tfsdk:"rir_registration_action"`
-	RirRegistrationStatus      types.String        `tfsdk:"rir_registration_status"`
-	SendRirRequest             types.Bool          `tfsdk:"send_rir_request"`
-	UpdateDnsOnLeaseRenewal    types.Bool          `tfsdk:"update_dns_on_lease_renewal"`
-	UseDdnsDomainname          types.Bool          `tfsdk:"use_ddns_domainname"`
-	UseDdnsEnableOptionFqdn    types.Bool          `tfsdk:"use_ddns_enable_option_fqdn"`
-	UseDdnsGenerateHostname    types.Bool          `tfsdk:"use_ddns_generate_hostname"`
-	UseDdnsTtl                 types.Bool          `tfsdk:"use_ddns_ttl"`
-	UseDomainName              types.Bool          `tfsdk:"use_domain_name"`
-	UseDomainNameServers       types.Bool          `tfsdk:"use_domain_name_servers"`
-	UseEnableDdns              types.Bool          `tfsdk:"use_enable_ddns"`
-	UseLogicFilterRules        types.Bool          `tfsdk:"use_logic_filter_rules"`
-	UseOptions                 types.Bool          `tfsdk:"use_options"`
-	UsePreferredLifetime       types.Bool          `tfsdk:"use_preferred_lifetime"`
-	UseRecycleLeases           types.Bool          `tfsdk:"use_recycle_leases"`
-	UseUpdateDnsOnLeaseRenewal types.Bool          `tfsdk:"use_update_dns_on_lease_renewal"`
-	UseValidLifetime           types.Bool          `tfsdk:"use_valid_lifetime"`
-	ValidLifetime              types.Int64         `tfsdk:"valid_lifetime"`
+	Ref                        types.String `tfsdk:"ref"`
+	AllowAnyNetmask            types.Bool   `tfsdk:"allow_any_netmask"`
+	AutoCreateReversezone      types.Bool   `tfsdk:"auto_create_reversezone"`
+	Cidr                       types.Int64  `tfsdk:"cidr"`
+	CloudApiCompatible         types.Bool   `tfsdk:"cloud_api_compatible"`
+	Comment                    types.String `tfsdk:"comment"`
+	DdnsDomainname             types.String `tfsdk:"ddns_domainname"`
+	DdnsEnableOptionFqdn       types.Bool   `tfsdk:"ddns_enable_option_fqdn"`
+	DdnsGenerateHostname       types.Bool   `tfsdk:"ddns_generate_hostname"`
+	DdnsServerAlwaysUpdates    types.Bool   `tfsdk:"ddns_server_always_updates"`
+	DdnsTtl                    types.Int64  `tfsdk:"ddns_ttl"`
+	DelegatedMember            types.Object `tfsdk:"delegated_member"`
+	DomainName                 types.String `tfsdk:"domain_name"`
+	DomainNameServers          types.List   `tfsdk:"domain_name_servers"`
+	EnableDdns                 types.Bool   `tfsdk:"enable_ddns"`
+	ExtAttrs                   types.Map    `tfsdk:"extattrs"`
+	ExtAttrsAll                types.Map    `tfsdk:"extattrs_all"`
+	FixedAddressTemplates      types.List   `tfsdk:"fixed_address_templates"`
+	Ipv6prefix                 types.String `tfsdk:"ipv6prefix"`
+	LogicFilterRules           types.List   `tfsdk:"logic_filter_rules"`
+	Members                    types.List   `tfsdk:"members"`
+	Name                       types.String `tfsdk:"name"`
+	Options                    types.List   `tfsdk:"options"`
+	PreferredLifetime          types.Int64  `tfsdk:"preferred_lifetime"`
+	RangeTemplates             types.List   `tfsdk:"range_templates"`
+	RecycleLeases              types.Bool   `tfsdk:"recycle_leases"`
+	Rir                        types.String `tfsdk:"rir"`
+	RirOrganization            types.String `tfsdk:"rir_organization"`
+	RirRegistrationAction      types.String `tfsdk:"rir_registration_action"`
+	RirRegistrationStatus      types.String `tfsdk:"rir_registration_status"`
+	SendRirRequest             types.Bool   `tfsdk:"send_rir_request"`
+	UpdateDnsOnLeaseRenewal    types.Bool   `tfsdk:"update_dns_on_lease_renewal"`
+	UseDdnsDomainname          types.Bool   `tfsdk:"use_ddns_domainname"`
+	UseDdnsEnableOptionFqdn    types.Bool   `tfsdk:"use_ddns_enable_option_fqdn"`
+	UseDdnsGenerateHostname    types.Bool   `tfsdk:"use_ddns_generate_hostname"`
+	UseDdnsTtl                 types.Bool   `tfsdk:"use_ddns_ttl"`
+	UseDomainName              types.Bool   `tfsdk:"use_domain_name"`
+	UseDomainNameServers       types.Bool   `tfsdk:"use_domain_name_servers"`
+	UseEnableDdns              types.Bool   `tfsdk:"use_enable_ddns"`
+	UseLogicFilterRules        types.Bool   `tfsdk:"use_logic_filter_rules"`
+	UseOptions                 types.Bool   `tfsdk:"use_options"`
+	UsePreferredLifetime       types.Bool   `tfsdk:"use_preferred_lifetime"`
+	UseRecycleLeases           types.Bool   `tfsdk:"use_recycle_leases"`
+	UseUpdateDnsOnLeaseRenewal types.Bool   `tfsdk:"use_update_dns_on_lease_renewal"`
+	UseValidLifetime           types.Bool   `tfsdk:"use_valid_lifetime"`
+	ValidLifetime              types.Int64  `tfsdk:"valid_lifetime"`
 }
 
 var Ipv6networktemplateAttrTypes = map[string]attr.Type{
@@ -99,7 +98,7 @@ var Ipv6networktemplateAttrTypes = map[string]attr.Type{
 	"extattrs":                        types.MapType{ElemType: types.StringType},
 	"extattrs_all":                    types.MapType{ElemType: types.StringType},
 	"fixed_address_templates":         types.ListType{ElemType: types.StringType},
-	"ipv6prefix":                      iptypes.IPv6AddressType{},
+	"ipv6prefix":                      types.StringType,
 	"logic_filter_rules":              types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6networktemplateLogicFilterRulesAttrTypes}},
 	"members":                         types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6networktemplateMembersAttrTypes}},
 	"name":                            types.StringType,
@@ -274,7 +273,6 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of IPv6 fixed address templates assigned to this IPv6 network template object. When you create an IPv6 network based on an IPv6 network template object that contains IPv6 fixed address templates, the IPv6 fixed addresses are created based on the associated IPv6 fixed address templates.",
 	},
 	"ipv6prefix": schema.StringAttribute{
-		CustomType:          iptypes.IPv6AddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The IPv6 Address prefix of the DHCP IPv6 network.",
@@ -506,7 +504,7 @@ func (m *Ipv6networktemplateModel) Expand(ctx context.Context, diags *diag.Diagn
 		EnableDdns:                 flex.ExpandBoolPointer(m.EnableDdns),
 		ExtAttrs:                   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FixedAddressTemplates:      flex.ExpandFrameworkListString(ctx, m.FixedAddressTemplates, diags),
-		Ipv6prefix:                 flex.ExpandIPv6Address(m.Ipv6prefix),
+		Ipv6prefix:                 flex.ExpandStringPointer(m.Ipv6prefix),
 		LogicFilterRules:           flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6networktemplateLogicFilterRules),
 		Members:                    flex.ExpandFrameworkListNestedBlock(ctx, m.Members, diags, ExpandIpv6networktemplateMembers),
 		Name:                       flex.ExpandStringPointer(m.Name),
@@ -573,7 +571,7 @@ func (m *Ipv6networktemplateModel) Flatten(ctx context.Context, from *ipam.Ipv6n
 	m.EnableDdns = types.BoolPointerValue(from.EnableDdns)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FixedAddressTemplates = flex.FlattenFrameworkListString(ctx, from.FixedAddressTemplates, diags)
-	m.Ipv6prefix = flex.FlattenIPv6Address(from.Ipv6prefix)
+	m.Ipv6prefix = flex.FlattenStringPointer(from.Ipv6prefix)
 	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, Ipv6networktemplateLogicFilterRulesAttrTypes, diags, FlattenIpv6networktemplateLogicFilterRules)
 	m.Members = flex.FlattenFrameworkListNestedBlock(ctx, from.Members, Ipv6networktemplateMembersAttrTypes, diags, FlattenIpv6networktemplateMembers)
 	m.Name = flex.FlattenStringPointer(from.Name)

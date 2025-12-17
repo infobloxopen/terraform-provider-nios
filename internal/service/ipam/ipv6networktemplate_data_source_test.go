@@ -137,7 +137,7 @@ resource "nios_ipam_ipv6networktemplate" "test" {
 
 data "nios_ipam_ipv6networktemplate" "test" {
   extattrfilters = {
-    Site = nios_ipam_ipv6networktemplate.test.extattrs["Tenant ID"]
+    "Tenant ID" = nios_ipam_ipv6networktemplate.test.extattrs["Tenant ID"]
   }
 }
 `, name, cidr, extAttrsValue)
