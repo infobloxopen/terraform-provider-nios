@@ -219,7 +219,7 @@ func (r *DhcpoptiondefinitionResource) updateRefIfOptionSpaceChanged(ctx context
 			"code":  stateData.Code.ValueInt64(),
 			"type":  stateData.Type.ValueString(),
 		}).
-		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptiondefinition).
+		ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
 		ReturnAsObject(1).
 		Execute()
 
