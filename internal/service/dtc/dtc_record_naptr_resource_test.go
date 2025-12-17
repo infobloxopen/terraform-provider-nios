@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -20,6 +21,8 @@ var readableAttributesForDtcRecordNaptr = "comment,disable,dtc_server,flags,orde
 func TestAccDtcRecordNaptrResource_basic(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +30,17 @@ func TestAccDtcRecordNaptrResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrBasicConfig(""),
+				Config: testAccDtcRecordNaptrBasicConfig(serverName, serverIp, 2, 5, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "order", "2"),
+					resource.TestCheckResourceAttr(resourceName, "preference", "5"),
+					resource.TestCheckResourceAttr(resourceName, "replacement", "example.com"),
+					resource.TestCheckResourceAttr(resourceName, "dtc_server", serverName),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +51,8 @@ func TestAccDtcRecordNaptrResource_basic(t *testing.T) {
 func TestAccDtcRecordNaptrResource_disappears(t *testing.T) {
 	resourceName := "nios_dtc_record_naptr.test"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +60,7 @@ func TestAccDtcRecordNaptrResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcRecordNaptrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcRecordNaptrBasicConfig(""),
+				Config: testAccDtcRecordNaptrBasicConfig(serverName, serverIp, 2, 5, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
 					testAccCheckDtcRecordNaptrDisappears(context.Background(), &v),
@@ -63,6 +74,8 @@ func TestAccDtcRecordNaptrResource_disappears(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Comment(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_comment"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -70,18 +83,18 @@ func TestAccDtcRecordNaptrResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrComment("COMMENT_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrComment(serverName, serverIp, 2, 5, "example.com", "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrComment(serverName, serverIp, 2, 5, "example.com", "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -92,6 +105,8 @@ func TestAccDtcRecordNaptrResource_Comment(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Disable(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_disable"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +114,18 @@ func TestAccDtcRecordNaptrResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrDisable("DISABLE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrDisable(serverName, serverIp, 2, 5, "example.com", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrDisable(serverName, serverIp, 2, 5, "example.com", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +136,8 @@ func TestAccDtcRecordNaptrResource_Disable(t *testing.T) {
 func TestAccDtcRecordNaptrResource_DtcServer(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_dtc_server"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,20 +145,13 @@ func TestAccDtcRecordNaptrResource_DtcServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrDtcServer("DTC_SERVER_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrDtcServer(serverName, serverIp, 2, 5, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dtc_server", "DTC_SERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dtc_server", serverName),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccDtcRecordNaptrDtcServer("DTC_SERVER_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dtc_server", "DTC_SERVER_UPDATE_REPLACE_ME"),
-				),
-			},
+			// Removed Update and Read step as dtc_server is required and cannot be updated
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -150,6 +160,8 @@ func TestAccDtcRecordNaptrResource_DtcServer(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Flags(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_flags"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,18 +169,32 @@ func TestAccDtcRecordNaptrResource_Flags(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrFlags("FLAGS_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrFlags(serverName, serverIp, 2, 5, "example.com", "U"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "flags", "FLAGS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "flags", "U"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrFlags("FLAGS_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrFlags(serverName, serverIp, 2, 5, "example.com", "S"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "flags", "FLAGS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "flags", "S"),
+				),
+			},
+			{
+				Config: testAccDtcRecordNaptrFlags(serverName, serverIp, 2, 5, "example.com", "P"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "flags", "P"),
+				),
+			},
+			{
+				Config: testAccDtcRecordNaptrFlags(serverName, serverIp, 2, 5, "example.com", "A"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "flags", "A"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -179,6 +205,8 @@ func TestAccDtcRecordNaptrResource_Flags(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Order(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_order"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,18 +214,18 @@ func TestAccDtcRecordNaptrResource_Order(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrOrder("ORDER_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrOrder(serverName, serverIp, 2, 5, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "order", "ORDER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "order", "2"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrOrder("ORDER_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrOrder(serverName, serverIp, 10, 5, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "order", "ORDER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "order", "10"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -208,6 +236,8 @@ func TestAccDtcRecordNaptrResource_Order(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Preference(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_preference"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,18 +245,18 @@ func TestAccDtcRecordNaptrResource_Preference(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrPreference("PREFERENCE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrPreference(serverName, serverIp, 2, 5, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "preference", "PREFERENCE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "preference", "5"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrPreference("PREFERENCE_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrPreference(serverName, serverIp, 2, 10, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "preference", "PREFERENCE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "preference", "10"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -237,6 +267,8 @@ func TestAccDtcRecordNaptrResource_Preference(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Regexp(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_regexp"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -244,18 +276,18 @@ func TestAccDtcRecordNaptrResource_Regexp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrRegexp("REGEXP_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrRegexp(serverName, serverIp, 2, 5, "example.com", "!^.*$!sip:info@example.com!"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "regexp", "REGEXP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "regexp", "!^.*$!sip:info@example.com!"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrRegexp("REGEXP_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrRegexp(serverName, serverIp, 2, 5, "example.com", "!^.*$!sip:updated@example.com!"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "regexp", "REGEXP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "regexp", "!^.*$!sip:updated@example.com!"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -266,6 +298,8 @@ func TestAccDtcRecordNaptrResource_Regexp(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Replacement(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_replacement"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -273,18 +307,18 @@ func TestAccDtcRecordNaptrResource_Replacement(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrReplacement("REPLACEMENT_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrReplacement(serverName, serverIp, 2, 5, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "replacement", "REPLACEMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "replacement", "example.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrReplacement("REPLACEMENT_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrReplacement(serverName, serverIp, 2, 5, "infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "replacement", "REPLACEMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "replacement", "infoblox.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -295,6 +329,8 @@ func TestAccDtcRecordNaptrResource_Replacement(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Services(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_services"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -302,18 +338,18 @@ func TestAccDtcRecordNaptrResource_Services(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrServices("SERVICES_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrServices(serverName, serverIp, 2, 5, "example.com", "E2U+email"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "services", "SERVICES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "services", "E2U+email"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrServices("SERVICES_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrServices(serverName, serverIp, 2, 5, "example.com", "E2U+sip"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "services", "SERVICES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "services", "E2U+sip"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -324,6 +360,8 @@ func TestAccDtcRecordNaptrResource_Services(t *testing.T) {
 func TestAccDtcRecordNaptrResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_ttl"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -331,18 +369,18 @@ func TestAccDtcRecordNaptrResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrTtl("TTL_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrTtl(serverName, serverIp, 2, 5, "example.com", "30"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "30"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrTtl("TTL_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrTtl(serverName, serverIp, 2, 5, "example.com", "60"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "60"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -353,6 +391,8 @@ func TestAccDtcRecordNaptrResource_Ttl(t *testing.T) {
 func TestAccDtcRecordNaptrResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_dtc_record_naptr.test_use_ttl"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -360,18 +400,18 @@ func TestAccDtcRecordNaptrResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcRecordNaptrUseTtl("USE_TTL_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrUseTtl(serverName, serverIp, 2, 5, "example.com", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcRecordNaptrUseTtl("USE_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccDtcRecordNaptrUseTtl(serverName, serverIp, 2, 5, "example.com", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ttl", "USE_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -437,98 +477,154 @@ func testAccCheckDtcRecordNaptrDisappears(ctx context.Context, v *dtc.DtcRecordN
 	}
 }
 
-func testAccDtcRecordNaptrBasicConfig(string) string {
-	// TODO: create basic resource with required fields
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test" {
-}
-`)
-}
-
-func testAccDtcRecordNaptrComment(comment string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_comment" {
-    comment = %q
-}
-`, comment)
+func testAccDtcRecordNaptrBasicConfig(serverName, serverIP string, order, preference int, replacement string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+	}
+	`, order, preference, replacement)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
 
-func testAccDtcRecordNaptrDisable(disable string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_disable" {
-    disable = %q
-}
-`, disable)
-}
-
-func testAccDtcRecordNaptrDtcServer(dtcServer string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_dtc_server" {
-    dtc_server = %q
-}
-`, dtcServer)
+func testAccDtcRecordNaptrComment(serverName, serverIP string, order, preference int, replacement, comment string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_comment" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+		comment = %q
+	}
+	`, order, preference, replacement, comment)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
 
-func testAccDtcRecordNaptrFlags(flags string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_flags" {
-    flags = %q
-}
-`, flags)
-}
-
-func testAccDtcRecordNaptrOrder(order string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_order" {
-    order = %q
-}
-`, order)
+func testAccDtcRecordNaptrDisable(serverName, serverIP string, order, preference int, replacement string, disable bool) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_disable" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+		disable = %t
+	}
+	`, order, preference, replacement, disable)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
 
-func testAccDtcRecordNaptrPreference(preference string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_preference" {
-    preference = %q
-}
-`, preference)
-}
-
-func testAccDtcRecordNaptrRegexp(regexp string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_regexp" {
-    regexp = %q
-}
-`, regexp)
+func testAccDtcRecordNaptrDtcServer(serverName, serverIP string, order, preference int, replacement string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_dtc_server" {
+    	dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+	}
+	`, order, preference, replacement)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
 
-func testAccDtcRecordNaptrReplacement(replacement string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_replacement" {
-    replacement = %q
+func testAccDtcRecordNaptrFlags(serverName, serverIP string, order, preference int, replacement, flags string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_flags" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+		flags = %q
+	}
+	`, order, preference, replacement, flags)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
-`, replacement)
+func testAccDtcRecordNaptrOrder(serverName, serverIP string, order, preference int, replacement string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_order" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+	}
+	`, order, preference, replacement)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
 
-func testAccDtcRecordNaptrServices(services string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_services" {
-    services = %q
-}
-`, services)
-}
-
-func testAccDtcRecordNaptrTtl(ttl string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_ttl" {
-    ttl = %q
-}
-`, ttl)
+func testAccDtcRecordNaptrPreference(serverName, serverIP string, order, preference int, replacement string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_preference" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+	}
+	`, order, preference, replacement)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
 
-func testAccDtcRecordNaptrUseTtl(useTtl string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test_use_ttl" {
-    use_ttl = %q
+func testAccDtcRecordNaptrRegexp(serverName, serverIP string, order, preference int, replacement, regexp string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_regexp" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+		regexp = %q
+	}
+	`, order, preference, replacement, regexp)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
-`, useTtl)
+
+func testAccDtcRecordNaptrReplacement(serverName, serverIP string, order, preference int, replacement string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_replacement" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+	}
+	`, order, preference, replacement)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
+}
+
+func testAccDtcRecordNaptrServices(serverName, serverIP string, order, preference int, replacement, services string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_services" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+		services = %q
+	}
+	`, order, preference, replacement, services)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
+}
+
+func testAccDtcRecordNaptrTtl(serverName, serverIP string, order, preference int, replacement, ttl string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_ttl" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+		ttl = %q
+		use_ttl = false
+	}
+	`, order, preference, replacement, ttl)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
+}
+
+func testAccDtcRecordNaptrUseTtl(serverName, serverIP string, order, preference int, replacement string, useTtl bool) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test_use_ttl" {
+		dtc_server = nios_dtc_server.test.name
+		order      = %d
+		preference = %d
+		replacement = %q
+		use_ttl = %t
+		ttl = 30
+	}
+	`, order, preference, replacement, useTtl)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }

@@ -3,6 +3,7 @@ package dtc_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,6 +16,8 @@ func TestAccDtcRecordNaptrDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_dtc_record_naptr.test"
 	resourceName := "nios_dtc_record_naptr.test"
 	var v dtc.DtcRecordNaptr
+	serverName := acctest.RandomNameWithPrefix("dtc-server")
+	serverIp := acctest.RandomIP()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +25,7 @@ func TestAccDtcRecordNaptrDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcRecordNaptrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcRecordNaptrDataSourceConfigFilters(),
+				Config: testAccDtcRecordNaptrDataSourceConfigFilters(serverName, serverIp, 2, 5, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
@@ -52,15 +55,20 @@ func testAccCheckDtcRecordNaptrResourceAttrPair(resourceName, dataSourceName str
 	}
 }
 
-func testAccDtcRecordNaptrDataSourceConfigFilters() string {
-	return fmt.Sprintf(`
-resource "nios_dtc_record_naptr" "test" {
+func testAccDtcRecordNaptrDataSourceConfigFilters(serverName, serverIP string, order, preference int, replacement string) string {
+	config := fmt.Sprintf(`
+	resource "nios_dtc_record_naptr" "test" {
+  		dtc_server = nios_dtc_server.test.name
+		order	  = %d
+		preference = %d
+		replacement = "%s"
+	}
+	data "nios_dtc_record_naptr" "test" {
+  	filters = {
+		dtc_server = nios_dtc_server.test.name
+		replacement = nios_dtc_record_naptr.test.replacement
+	}
 }
-
-data "nios_dtc_record_naptr" "test" {
-  filters = {
-	 = nios_dtc_record_naptr.test.
-  }
-}
-`)
+  	`, order, preference, replacement)
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
 }
