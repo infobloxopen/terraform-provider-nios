@@ -61,12 +61,12 @@ resource "nios_security_admin_group" "admin_group_with_additional_fields" {
     reminder_days                        = 10
   }
   use_account_inactivity_lockout_enable = true
-#  password_setting = {
-#    expire_days   = 90
-#    expire_enable = true
-#    reminder_days = 15
-#  }
-  use_password_setting = false
+  password_setting = {
+    expire_days   = 90
+    expire_enable = true
+    reminder_days = 15
+  }
+  use_password_setting = true
   roles                = ["DHCP Admin", "DNS Admin", "Grid Admin"]
   saml_setting = {
     auto_create_user          = true
@@ -167,20 +167,4 @@ resource "nios_security_admin_group" "admin_group_with_additional_fields2" {
     }
   ]
   depends_on = [nios_acl_namedacl.namedacl_with_basic_fields]
-}
-
-
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "0.0.1"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "https://172.28.82.213"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
 }
