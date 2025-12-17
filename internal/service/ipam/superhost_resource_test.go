@@ -233,6 +233,7 @@ func TestAccSuperhostResource_DnsAssociatedObjects(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("super-host")
 	dnsAssociatedObjectsVal := []string{"${nios_dns_record_a.record_a.ref}", "${nios_dns_record_aaaa.record_aaaa.ref}"}
 	dnsAssociatedObjectsValUpdated := []string{"${nios_dns_record_ptr.record_ptr.ref}", "${nios_ip_association.association.ref}"}
+	authZoneFQDN := acctest.RandomNameWithPrefix("auth-zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -240,7 +241,7 @@ func TestAccSuperhostResource_DnsAssociatedObjects(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostDnsAssociatedObjects(name, dnsAssociatedObjectsVal),
+				Config: testAccSuperhostDnsAssociatedObjects(name, dnsAssociatedObjectsVal, authZoneFQDN),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrPair(resourceName, "dns_associated_objects.0", "nios_dns_record_a.record_a", "ref"),
@@ -249,7 +250,7 @@ func TestAccSuperhostResource_DnsAssociatedObjects(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSuperhostDnsAssociatedObjects(name, dnsAssociatedObjectsValUpdated),
+				Config: testAccSuperhostDnsAssociatedObjects(name, dnsAssociatedObjectsValUpdated, authZoneFQDN),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrPair(resourceName, "dns_associated_objects.0", "nios_dns_record_ptr.record_ptr", "ref"),
@@ -399,7 +400,7 @@ func testAccSuperhostImportStateIdFunc(resourceName string) resource.ImportState
 	}
 }
 
-func testAccBaseWithDNSObjects() string {
+func testAccBaseWithDNSObjects(fqdn string) string {
 	ipv4addr := []map[string]any{
 		{
 			"ipv4addr": "192.168.1.10",
@@ -443,7 +444,7 @@ resource "nios_ip_association" "association" {
 	mac = %q
 	configure_for_dhcp = %q
 }
-`, acctest.RandomName()+".com", "23.10.168.192.in-addr.arpa", ipv4addrHCL, "12:00:43:fe:9a:8c", "true")
+`, fqdn, "23.10.168.192.in-addr.arpa", ipv4addrHCL, "12:00:43:fe:9a:8c", "true")
 }
 
 func testAccBaseWithDHCPObjects() string {
@@ -518,7 +519,7 @@ resource "nios_ipam_superhost" "test_disabled" {
 `, name, disabled)
 }
 
-func testAccSuperhostDnsAssociatedObjects(name string, dnsAssociatedObjects []string) string {
+func testAccSuperhostDnsAssociatedObjects(name string, dnsAssociatedObjects []string, authZoneFQDN string) string {
 	dnsAssociatedObjectsStr := utils.ConvertStringSliceToHCL(dnsAssociatedObjects)
 	config := fmt.Sprintf(`
 resource "nios_ipam_superhost" "test_dns_associated_objects" {
@@ -526,7 +527,7 @@ resource "nios_ipam_superhost" "test_dns_associated_objects" {
     dns_associated_objects = %s
 }
 `, name, dnsAssociatedObjectsStr)
-	return strings.Join([]string{testAccBaseWithDNSObjects(), config}, "")
+	return strings.Join([]string{testAccBaseWithDNSObjects(authZoneFQDN), config}, "")
 
 }
 
