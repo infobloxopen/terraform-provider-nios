@@ -1,7 +1,7 @@
 // Retrieve a specific DHCP Fingerprint Filter by filters
 data "nios_dhcp_filterfingerprint" "get_dhcp_filterfingerprint_using_filters" {
   filters = {
-    name = "example_filterfingerprint_1"
+    name = "example_filter_fingerprint_1"
   }
 }
 // Retrieve specific DHCP Fingerprint Filters using Extensible Attributes
