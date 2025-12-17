@@ -36,7 +36,7 @@ var FilterfingerprintAttrTypes = map[string]attr.Type{
 	"comment":      types.StringType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
 	"extattrs_all": types.MapType{ElemType: types.StringType},
-	"fingerprint":  types.ListType{ElemType: types.StringType},
+	"fingerprint":  internaltypes.UnorderedListOfStringType,
 	"name":         types.StringType,
 }
 

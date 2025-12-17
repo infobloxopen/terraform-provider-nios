@@ -28,7 +28,7 @@ resource "nios_dhcp_fingerprint" "dhcp_fingerprint_parent_2" {
 }
 // Create a DHCP Fingerprint Filter with Basic Fields
 resource "nios_dhcp_filterfingerprint" "dhcp_filterfingerprint_basic" {
-  name = "example_filterfingerprint_1"
+  name = "example_filter_fingerprint_1"
   fingerprint = [
     nios_dhcp_fingerprint.dhcp_fingerprint_parent.name,
     nios_dhcp_fingerprint.dhcp_fingerprint_parent_2.name
@@ -37,13 +37,14 @@ resource "nios_dhcp_filterfingerprint" "dhcp_filterfingerprint_basic" {
 
 // Create a DHCP Fingerprint Filter with Additional Fields
 resource "nios_dhcp_filterfingerprint" "dhcp_filterfingerprint_with_additional_fields" {
-  name = "example_filterfingerprint_2"
+  name = "example_filter_fingerprint_2"
   fingerprint = [
     nios_dhcp_fingerprint.dhcp_fingerprint_parent.name,
     nios_dhcp_fingerprint.dhcp_fingerprint_parent_2.name
   ]
   comment = "Fingerprint Filter created by Terraform."
-  //Extensible Attributes
+
+  // Extensible Attributes
   extattrs = {
     Site = "location-1"
   }

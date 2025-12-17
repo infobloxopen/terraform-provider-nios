@@ -5,7 +5,7 @@ data "nios_dhcp_filterfingerprint" "get_dhcp_filterfingerprint_using_filters" {
   }
 }
 // Retrieve specific DHCP Fingerprint Filters using Extensible Attributes
-data "nios_dhcp_filterfingerprint" "get_dhcp_filterfingerprins_using_extensible_attributes" {
+data "nios_dhcp_filterfingerprint" "get_dhcp_filterfingerprints_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }
