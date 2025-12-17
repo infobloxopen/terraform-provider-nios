@@ -1,16 +1,6 @@
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "1.0.0"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "https://172.28.83.35"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
+// Create Parent RP Zone
+resource "nios_dns_zone_rp" "parent_zone" {
+  fqdn = "rpzip.example.com"
 }
 
 // Create an IPV4 network if not present (Required as Parent)
@@ -19,11 +9,6 @@ provider "nios" {
 #   network_view = "default"
 #   comment      = "Parent network for DHCP ranges"
 # }
-
-// Create Parent RP Zone
-resource "nios_dns_zone_rp" "parent_zone" {
-  fqdn = "rpzip.example.com"
-}
 
 // Create Record RPZ CNAME ipaddress with Basic Fields
 resource "nios_rpz_record_rpz_cname_ipaddress" "create_record_rpz_cname_ipaddress" {
