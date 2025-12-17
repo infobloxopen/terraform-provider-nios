@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,30 +16,12 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-/*
-// Manage ipam Superhost with Basic Fields
-resource "nios_ipam_superhost" "ipam_superhost_basic" {
-    name = "NAME_REPLACE_ME"
-}
-
-// Manage ipam Superhost with Additional Fields
-resource "nios_ipam_superhost" "ipam_superhost_with_additional_fields" {
-    name = "NAME_REPLACE_ME"
-
-// TODO : Add additional optional fields below
-
-    //Extensible Attributes
-    extattrs = {
-        Site = "location-1"
-    }
-}
-*/
-
 var readableAttributesForSuperhost = "comment,dhcp_associated_objects,disabled,dns_associated_objects,extattrs,name"
 
 func TestAccSuperhostResource_basic(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -46,11 +29,10 @@ func TestAccSuperhostResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccSuperhostBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "delete_associated_objects", "false"),
 					resource.TestCheckResourceAttr(resourceName, "disabled", "false"),
@@ -64,6 +46,7 @@ func TestAccSuperhostResource_basic(t *testing.T) {
 func TestAccSuperhostResource_disappears(t *testing.T) {
 	resourceName := "nios_ipam_superhost.test"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -71,7 +54,7 @@ func TestAccSuperhostResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckSuperhostDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSuperhostBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccSuperhostBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					testAccCheckSuperhostDisappears(context.Background(), &v),
@@ -85,6 +68,7 @@ func TestAccSuperhostResource_disappears(t *testing.T) {
 func TestAccSuperhostResource_Import(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -92,7 +76,7 @@ func TestAccSuperhostResource_Import(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostBasicConfig("NAME_REPLACE_ME"),
+				Config: testAccSuperhostBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 				),
@@ -104,6 +88,7 @@ func TestAccSuperhostResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccSuperhostImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIgnore:              []string{"delete_associated_objects"},
 				PlanOnly:                             true,
 			},
 			// Import and Verify
@@ -112,7 +97,7 @@ func TestAccSuperhostResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccSuperhostImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all"},
+				ImportStateVerifyIgnore:              []string{"extattrs_all", "delete_associated_objects"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 			},
 			// Delete testing automatically occurs in TestCase
@@ -123,6 +108,7 @@ func TestAccSuperhostResource_Import(t *testing.T) {
 func TestAccSuperhostResource_Comment(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test_comment"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -130,7 +116,7 @@ func TestAccSuperhostResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostComment("NAME_REPLACE_ME", "Comment for the object"),
+				Config: testAccSuperhostComment(name, "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -138,7 +124,7 @@ func TestAccSuperhostResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSuperhostComment("NAME_REPLACE_ME", "Updated comment for the object"),
+				Config: testAccSuperhostComment(name, "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -152,6 +138,7 @@ func TestAccSuperhostResource_Comment(t *testing.T) {
 func TestAccSuperhostResource_DeleteAssociatedObjects(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test_delete_associated_objects"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -159,7 +146,7 @@ func TestAccSuperhostResource_DeleteAssociatedObjects(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostDeleteAssociatedObjects("NAME_REPLACE_ME", "true"),
+				Config: testAccSuperhostDeleteAssociatedObjects(name, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delete_associated_objects", "true"),
@@ -167,7 +154,7 @@ func TestAccSuperhostResource_DeleteAssociatedObjects(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSuperhostDeleteAssociatedObjects("NAME_REPLACE_ME", "false"),
+				Config: testAccSuperhostDeleteAssociatedObjects(name, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delete_associated_objects", "false"),
@@ -181,8 +168,9 @@ func TestAccSuperhostResource_DeleteAssociatedObjects(t *testing.T) {
 func TestAccSuperhostResource_DhcpAssociatedObjects(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test_dhcp_associated_objects"
 	var v ipam.Superhost
-	dhcpAssociatedObjectsVal := []string{"DHCP_ASSOCIATED_OBJECTS_REPLACE_ME1", "DHCP_ASSOCIATED_OBJECTS_REPLACE_ME2"}
-	dhcpAssociatedObjectsValUpdated := []string{"DHCP_ASSOCIATED_OBJECTS_REPLACE_ME1", "DHCP_ASSOCIATED_OBJECTS_REPLACE_ME2"}
+	name := acctest.RandomNameWithPrefix("super-host")
+	dhcpAssociatedObjectsVal := []string{"${nios_dhcp_fixed_address.fixed_address.ref}"}
+	dhcpAssociatedObjectsValUpdated := []string{"${nios_dhcp_fixed_address.fixed_address2.ref}"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -190,18 +178,18 @@ func TestAccSuperhostResource_DhcpAssociatedObjects(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostDhcpAssociatedObjects("NAME_REPLACE_ME", dhcpAssociatedObjectsVal),
+				Config: testAccSuperhostDhcpAssociatedObjects(name, dhcpAssociatedObjectsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_associated_objects", "DHCP_ASSOCIATED_OBJECTS_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "dhcp_associated_objects.0", "nios_dhcp_fixed_address.fixed_address", "ref"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSuperhostDhcpAssociatedObjects("NAME_REPLACE_ME", dhcpAssociatedObjectsValUpdated),
+				Config: testAccSuperhostDhcpAssociatedObjects(name, dhcpAssociatedObjectsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_associated_objects", "DHCP_ASSOCIATED_OBJECTS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "dhcp_associated_objects.0", "nios_dhcp_fixed_address.fixed_address2", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -212,6 +200,7 @@ func TestAccSuperhostResource_DhcpAssociatedObjects(t *testing.T) {
 func TestAccSuperhostResource_Disabled(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test_disabled"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -219,7 +208,7 @@ func TestAccSuperhostResource_Disabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostDisabled("NAME_REPLACE_ME", "true"),
+				Config: testAccSuperhostDisabled(name, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disabled", "true"),
@@ -227,7 +216,7 @@ func TestAccSuperhostResource_Disabled(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSuperhostDisabled("NAME_REPLACE_ME", "false"),
+				Config: testAccSuperhostDisabled(name, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disabled", "false"),
@@ -241,8 +230,9 @@ func TestAccSuperhostResource_Disabled(t *testing.T) {
 func TestAccSuperhostResource_DnsAssociatedObjects(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test_dns_associated_objects"
 	var v ipam.Superhost
-	dnsAssociatedObjectsVal := []string{"DNS_ASSOCIATED_OBJECTS_REPLACE_ME1", "DNS_ASSOCIATED_OBJECTS_REPLACE_ME2"}
-	dnsAssociatedObjectsValUpdated := []string{"DNS_ASSOCIATED_OBJECTS_REPLACE_ME1", "DNS_ASSOCIATED_OBJECTS_REPLACE_ME2"}
+	name := acctest.RandomNameWithPrefix("super-host")
+	dnsAssociatedObjectsVal := []string{"${nios_dns_record_a.record_a.ref}", "${nios_dns_record_aaaa.record_aaaa.ref}"}
+	dnsAssociatedObjectsValUpdated := []string{"${nios_dns_record_ptr.record_ptr.ref}", "${nios_ip_association.association.ref}"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -250,18 +240,20 @@ func TestAccSuperhostResource_DnsAssociatedObjects(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostDnsAssociatedObjects("NAME_REPLACE_ME", dnsAssociatedObjectsVal),
+				Config: testAccSuperhostDnsAssociatedObjects(name, dnsAssociatedObjectsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_associated_objects", "DNS_ASSOCIATED_OBJECTS_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "dns_associated_objects.0", "nios_dns_record_a.record_a", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "dns_associated_objects.1", "nios_dns_record_aaaa.record_aaaa", "ref"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSuperhostDnsAssociatedObjects("NAME_REPLACE_ME", dnsAssociatedObjectsValUpdated),
+				Config: testAccSuperhostDnsAssociatedObjects(name, dnsAssociatedObjectsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_associated_objects", "DNS_ASSOCIATED_OBJECTS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "dns_associated_objects.0", "nios_dns_record_ptr.record_ptr", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "dns_associated_objects.1", "nios_ip_association.association", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -272,6 +264,7 @@ func TestAccSuperhostResource_DnsAssociatedObjects(t *testing.T) {
 func TestAccSuperhostResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test_extattrs"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -281,7 +274,7 @@ func TestAccSuperhostResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostExtAttrs("NAME_REPLACE_ME", map[string]string{
+				Config: testAccSuperhostExtAttrs(name, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -291,7 +284,7 @@ func TestAccSuperhostResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSuperhostExtAttrs("NAME_REPLACE_ME", map[string]string{
+				Config: testAccSuperhostExtAttrs(name, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -307,6 +300,8 @@ func TestAccSuperhostResource_ExtAttrs(t *testing.T) {
 func TestAccSuperhostResource_Name(t *testing.T) {
 	var resourceName = "nios_ipam_superhost.test_name"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
+	name2 := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -314,18 +309,18 @@ func TestAccSuperhostResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSuperhostName("NAME_REPLACE_ME"),
+				Config: testAccSuperhostName(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSuperhostName("NAME_REPLACE_ME"),
+				Config: testAccSuperhostName(name2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -404,6 +399,79 @@ func testAccSuperhostImportStateIdFunc(resourceName string) resource.ImportState
 	}
 }
 
+func testAccBaseWithDNSObjects() string {
+	ipv4addr := []map[string]any{
+		{
+			"ipv4addr": "192.168.1.10",
+		},
+	}
+	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
+	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" "parent_auth_zone" {
+  fqdn        = %q
+  view        = "default"
+}
+
+resource "nios_dns_record_a" "record_a" {
+	name = "parent-record_a.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
+	ipv4addr = "10.0.0.20"
+	view = "default"
+
+	depends_on = [nios_dns_zone_auth.parent_auth_zone]
+}
+
+resource "nios_dns_record_aaaa" "record_aaaa" {
+   name     = "parent-record_aaaa.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
+   ipv6addr = "2002:1111::1401"
+   view     = "default"
+}
+
+resource "nios_dns_record_ptr" "record_ptr" {
+	name = %q
+	ptrdname = "test.example.com"
+	view = "default"
+}
+
+resource "nios_ip_allocation" "allocation" {
+	name = "parent-record_host.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
+	ipv4addrs = %s
+	view = "default"
+}
+
+resource "nios_ip_association" "association" {
+	ref = nios_ip_allocation.allocation.ref
+	mac = %q
+	configure_for_dhcp = %q
+}
+`, acctest.RandomName()+".com", "23.10.168.192.in-addr.arpa", ipv4addrHCL, "12:00:43:fe:9a:8c", "true")
+}
+
+func testAccBaseWithDHCPObjects() string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network" "parent_network" {
+  network      = "22.0.0.0/24"
+  network_view = "default"
+  comment      = "Parent network for DHCP fixed addresses"
+}
+
+resource "nios_dhcp_fixed_address" "fixed_address" {
+	ipv4addr = "22.0.0.20"
+	match_client = "CIRCUIT_ID"
+	agent_circuit_id = 23
+
+	depends_on = [nios_ipam_network.parent_network]
+}
+
+resource "nios_dhcp_fixed_address" "fixed_address2" {
+	ipv4addr = "22.0.0.21"
+	match_client = "CIRCUIT_ID"
+	agent_circuit_id = 24
+
+	depends_on = [nios_ipam_network.parent_network]
+}
+`)
+}
+
 func testAccSuperhostBasicConfig(name string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_superhost" "test" {
@@ -432,12 +500,13 @@ resource "nios_ipam_superhost" "test_delete_associated_objects" {
 
 func testAccSuperhostDhcpAssociatedObjects(name string, dhcpAssociatedObjects []string) string {
 	dhcpAssociatedObjectsStr := utils.ConvertStringSliceToHCL(dhcpAssociatedObjects)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_ipam_superhost" "test_dhcp_associated_objects" {
     name = %q
     dhcp_associated_objects = %s
 }
 `, name, dhcpAssociatedObjectsStr)
+	return strings.Join([]string{testAccBaseWithDHCPObjects(), config}, "")
 }
 
 func testAccSuperhostDisabled(name string, disabled string) string {
@@ -451,12 +520,14 @@ resource "nios_ipam_superhost" "test_disabled" {
 
 func testAccSuperhostDnsAssociatedObjects(name string, dnsAssociatedObjects []string) string {
 	dnsAssociatedObjectsStr := utils.ConvertStringSliceToHCL(dnsAssociatedObjects)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_ipam_superhost" "test_dns_associated_objects" {
     name = %q
     dns_associated_objects = %s
 }
 `, name, dnsAssociatedObjectsStr)
+	return strings.Join([]string{testAccBaseWithDNSObjects(), config}, "")
+
 }
 
 func testAccSuperhostExtAttrs(name string, extAttrs map[string]string) string {

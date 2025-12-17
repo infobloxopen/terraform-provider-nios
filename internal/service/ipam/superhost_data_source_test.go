@@ -12,28 +12,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
-/*
-// Retrieve a specific ipam Superhost by filters
-data "nios_ipam_superhost" "get_ipam_superhost_using_filters" {
-  filters = {
-    name = "NAME_REPLACE_ME"
-  }
-}
-// Retrieve specific ipam Superhost using Extensible Attributes
-data "nios_ipam_superhost" "get_ipam_superhost_using_extensible_attributes" {
-  extattrfilters = {
-    Site = "location-1"
-  }
-}
-
-// Retrieve all ipam Superhost
-data "nios_ipam_superhost" "get_all_ipam_superhost" {}
-*/
-
 func TestAccSuperhostDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_superhost.test"
 	resourceName := "nios_ipam_superhost.test"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -41,7 +24,7 @@ func TestAccSuperhostDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckSuperhostDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSuperhostDataSourceConfigFilters("NAME_REPLACE_ME"),
+				Config: testAccSuperhostDataSourceConfigFilters(name),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckSuperhostExists(context.Background(), resourceName, &v),
@@ -56,13 +39,15 @@ func TestAccSuperhostDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_ipam_superhost.test"
 	resourceName := "nios_ipam_superhost.test"
 	var v ipam.Superhost
+	name := acctest.RandomNameWithPrefix("super-host")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckSuperhostDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSuperhostDataSourceConfigExtAttrFilters("NAME_REPLACE_ME", acctest.RandomName()),
+				Config: testAccSuperhostDataSourceConfigExtAttrFilters(name, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckSuperhostExists(context.Background(), resourceName, &v),
@@ -79,7 +64,6 @@ func testAccCheckSuperhostResourceAttrPair(resourceName, dataSourceName string) 
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-		resource.TestCheckResourceAttrPair(resourceName, "delete_associated_objects", dataSourceName, "result.0.delete_associated_objects"),
 		resource.TestCheckResourceAttrPair(resourceName, "dhcp_associated_objects", dataSourceName, "result.0.dhcp_associated_objects"),
 		resource.TestCheckResourceAttrPair(resourceName, "disabled", dataSourceName, "result.0.disabled"),
 		resource.TestCheckResourceAttrPair(resourceName, "dns_associated_objects", dataSourceName, "result.0.dns_associated_objects"),

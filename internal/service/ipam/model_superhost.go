@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
@@ -24,24 +25,24 @@ import (
 )
 
 type SuperhostModel struct {
-	Ref                     types.String `tfsdk:"ref"`
-	Comment                 types.String `tfsdk:"comment"`
-	DeleteAssociatedObjects types.Bool   `tfsdk:"delete_associated_objects"`
-	DhcpAssociatedObjects   types.List   `tfsdk:"dhcp_associated_objects"`
-	Disabled                types.Bool   `tfsdk:"disabled"`
-	DnsAssociatedObjects    types.List   `tfsdk:"dns_associated_objects"`
-	ExtAttrs                types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll             types.Map    `tfsdk:"extattrs_all"`
-	Name                    types.String `tfsdk:"name"`
+	Ref                     types.String                     `tfsdk:"ref"`
+	Comment                 types.String                     `tfsdk:"comment"`
+	DeleteAssociatedObjects types.Bool                       `tfsdk:"delete_associated_objects"`
+	DhcpAssociatedObjects   internaltypes.UnorderedListValue `tfsdk:"dhcp_associated_objects"`
+	Disabled                types.Bool                       `tfsdk:"disabled"`
+	DnsAssociatedObjects    internaltypes.UnorderedListValue `tfsdk:"dns_associated_objects"`
+	ExtAttrs                types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll             types.Map                        `tfsdk:"extattrs_all"`
+	Name                    types.String                     `tfsdk:"name"`
 }
 
 var SuperhostAttrTypes = map[string]attr.Type{
 	"ref":                       types.StringType,
 	"comment":                   types.StringType,
 	"delete_associated_objects": types.BoolType,
-	"dhcp_associated_objects":   types.ListType{ElemType: types.StringType},
+	"dhcp_associated_objects":   internaltypes.UnorderedListOfStringType,
 	"disabled":                  types.BoolType,
-	"dns_associated_objects":    types.ListType{ElemType: types.StringType},
+	"dns_associated_objects":    internaltypes.UnorderedListOfStringType,
 	"extattrs":                  types.MapType{ElemType: types.StringType},
 	"extattrs_all":              types.MapType{ElemType: types.StringType},
 	"name":                      types.StringType,
@@ -69,8 +70,10 @@ var SuperhostResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "True if we have to delete all DNS/DHCP associated objects with Super Host, false by default.",
 	},
 	"dhcp_associated_objects": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -83,8 +86,10 @@ var SuperhostResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Disable all DNS/DHCP associated objects with Super Host if True, False by default.",
 	},
 	"dns_associated_objects": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -113,7 +118,7 @@ var SuperhostResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
-		MarkdownDescription: "Name of the Superhost.",
+		MarkdownDescription: "Name of the Super Host.",
 	},
 }
 
@@ -154,9 +159,9 @@ func (m *SuperhostModel) Flatten(ctx context.Context, from *ipam.Superhost, diag
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-	m.DhcpAssociatedObjects = flex.FlattenFrameworkListString(ctx, from.DhcpAssociatedObjects, diags)
+	m.DhcpAssociatedObjects = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.DhcpAssociatedObjects, diags)
 	m.Disabled = types.BoolPointerValue(from.Disabled)
-	m.DnsAssociatedObjects = flex.FlattenFrameworkListString(ctx, from.DnsAssociatedObjects, diags)
+	m.DnsAssociatedObjects = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.DnsAssociatedObjects, diags)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }

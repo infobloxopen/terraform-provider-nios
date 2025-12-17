@@ -36,7 +36,7 @@ func (r *SuperhostResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *SuperhostResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Superhost resource object.",
+		MarkdownDescription: "Manages a Super Host",
 		Attributes:          SuperhostResourceSchemaAttributes,
 	}
 }
