@@ -10,7 +10,7 @@ import (
 
 var _ validator.String = iPv4OrFQDNValidator{}
 
-// iPv4OrFQDNValidator validates if the provided value is a valid IP address or a string without leading/trailing whitespace, trailing dot, or uppercase characters.
+// iPv4OrFQDNValidator validates if the provided value is a valid IPv4 address or a string without leading/trailing whitespace, trailing dot, or uppercase characters.
 type iPv4OrFQDNValidator struct{}
 
 func (v iPv4OrFQDNValidator) Description(ctx context.Context) string {
