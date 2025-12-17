@@ -17,8 +17,9 @@ func TestAccRecordRpzCnameIpaddressDataSource_Filters(t *testing.T) {
 	resourceName := "nios_rpz_record_rpz_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomName() + "." + rpZone
-	canonical := ""
+	nameIp := "11.0.0.30"
+	canonical := "11.0.0.30"
+	view := acctest.RandomNameWithPrefix("view")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -26,7 +27,7 @@ func TestAccRecordRpzCnameIpaddressDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzCnameIpaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzCnameIpaddressDataSourceConfigFilters(name, canonical, rpZone),
+				Config: testAccRecordRpzCnameIpaddressDataSourceConfigFilters(nameIp, canonical, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
@@ -42,8 +43,9 @@ func TestAccRecordRpzCnameIpaddressDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_rpz_record_rpz_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomName() + "." + rpZone
+	nameIp := "11.0.0.31"
 	canonical := ""
+	view := acctest.RandomNameWithPrefix("view")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -51,7 +53,7 @@ func TestAccRecordRpzCnameIpaddressDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzCnameIpaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(name, canonical, rpZone, acctest.RandomName()),
+				Config: testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIp, canonical, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
@@ -81,12 +83,12 @@ func testAccCheckRecordRpzCnameIpaddressResourceAttrPair(resourceName, dataSourc
 	}
 }
 
-func testAccRecordRpzCnameIpaddressDataSourceConfigFilters(name, canonical, rpZone string) string {
+func testAccRecordRpzCnameIpaddressDataSourceConfigFilters(nameIp, canonical, rpZone, view string) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_rpz_cname_ipaddress" "test" {
-	name = %q
+	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
-	rp_zone = nios_dns_zone_rp.test.fqdn
+	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
 
 data "nios_rpz_record_rpz_cname_ipaddress" "test" {
@@ -94,16 +96,16 @@ data "nios_rpz_record_rpz_cname_ipaddress" "test" {
 	name = nios_rpz_record_rpz_cname_ipaddress.test.name
   }
 }
-`, name, canonical)
-	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
+`, nameIp, canonical)
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(name, canonical, rpZone, extAttrsValue string) string {
+func testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIp, canonical, rpZone, extAttrsValue string) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_rpz_cname_ipaddress" "test" {
-	name = %q
+	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
-	rp_zone = nios_dns_zone_rp.test.fqdn
+	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 	extattrs = {
 		Site = %q
 	}
@@ -114,6 +116,6 @@ data "nios_rpz_record_rpz_cname_ipaddress" "test" {
 	Site = nios_rpz_record_rpz_cname_ipaddress.test.extattrs.Site
   }
 }
-`, name, canonical, extAttrsValue)
-	return strings.Join([]string{testAccBaseWithZone(rpZone, ""), config}, "")
+`, nameIp, canonical, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
 }

@@ -13,12 +13,12 @@ provider "nios" {
   nios_password = "Infoblox@123"
 }
 
-// Create an IPV4 network (Required as Parent)
-resource "nios_ipam_network" "range_parent_network" {
-  network      = "11.0.0.0/8"
-  network_view = "default"
-  comment      = "Parent network for DHCP ranges"
-}
+// Create an IPV4 network if not present (Required as Parent)
+# resource "nios_ipam_network" "range_parent_network" {
+#   network      = "11.0.0.0/8"
+#   network_view = "default"
+#   comment      = "Parent network for DHCP ranges"
+# }
 
 // Create Parent RP Zone
 resource "nios_dns_zone_rp" "parent_zone" {
