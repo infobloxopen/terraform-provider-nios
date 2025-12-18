@@ -448,7 +448,7 @@ resource "nios_ip_association" "association" {
 }
 
 func testAccBaseWithDHCPObjects() string {
-	return fmt.Sprintf(`
+	return fmt.Sprint(`
 resource "nios_ipam_network" "parent_network" {
   network      = "22.0.0.0/24"
   network_view = "default"
