@@ -308,8 +308,8 @@ func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 	}
 	externalPrimaries := []map[string]any{
 		{
-			"name": "external,primaries",
-			"address":"2.3.3.4",
+			"name":    "external,primaries",
+			"address": "2.3.3.4",
 		},
 	}
 	gridSecondariesUpdate := []map[string]any{
@@ -667,7 +667,7 @@ resource "nios_dns_nsgroup" "test_name" {
 `, name, gridPrimaryStr)
 }
 
-func testAccNsgroupUseExternalPrimary(name string ,  gridPrimary []map[string]any, useExternalPrimary bool) string {
+func testAccNsgroupUseExternalPrimary(name string, gridPrimary []map[string]any, useExternalPrimary bool) string {
 	gridPrimaryStr := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup" "test_use_external_primary" {

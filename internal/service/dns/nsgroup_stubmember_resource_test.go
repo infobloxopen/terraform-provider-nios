@@ -32,7 +32,7 @@ func TestAccNsgroupStubmemberResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupStubmemberBasicConfig(name,stubMember),
+				Config: testAccNsgroupStubmemberBasicConfig(name, stubMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -63,7 +63,7 @@ func TestAccNsgroupStubmemberResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupStubmemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupStubmemberBasicConfig(name,stubMember),
+				Config: testAccNsgroupStubmemberBasicConfig(name, stubMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					testAccCheckNsgroupStubmemberDisappears(context.Background(), &v),
@@ -90,7 +90,7 @@ func TestAccNsgroupStubmemberResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupStubmemberComment(name , stubMember , "This is a comment"),
+				Config: testAccNsgroupStubmemberComment(name, stubMember, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -127,7 +127,7 @@ func TestAccNsgroupStubmemberResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupStubmemberExtAttrs(name , stubMember ,  map[string]string{
+				Config: testAccNsgroupStubmemberExtAttrs(name, stubMember, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -137,8 +137,8 @@ func TestAccNsgroupStubmemberResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupStubmemberExtAttrs(name , stubMember , map[string]string{
-					"Site":    extAttrValue2}),
+				Config: testAccNsgroupStubmemberExtAttrs(name, stubMember, map[string]string{
+					"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
@@ -166,7 +166,7 @@ func TestAccNsgroupStubmemberResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupStubmemberName(name , stubMember),
+				Config: testAccNsgroupStubmemberName(name, stubMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -174,7 +174,7 @@ func TestAccNsgroupStubmemberResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupStubmemberName(nameUpdate,stubMember),
+				Config: testAccNsgroupStubmemberName(nameUpdate, stubMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
@@ -205,7 +205,7 @@ func TestAccNsgroupStubmemberResource_StubMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNsgroupStubmemberStubMembers(name , stubMember ),
+				Config: testAccNsgroupStubmemberStubMembers(name, stubMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "member.com"),
@@ -213,7 +213,7 @@ func TestAccNsgroupStubmemberResource_StubMembers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNsgroupStubmemberStubMembers(name , stubMemberUpdate ),
+				Config: testAccNsgroupStubmemberStubMembers(name, stubMemberUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "infoblox.localdomain"),
@@ -282,7 +282,7 @@ func testAccCheckNsgroupStubmemberDisappears(ctx context.Context, v *dns.Nsgroup
 	}
 }
 
-func testAccNsgroupStubmemberBasicConfig(name string , stubMember []map[string]any) string {
+func testAccNsgroupStubmemberBasicConfig(name string, stubMember []map[string]any) string {
 	stubMemberStr := utils.ConvertSliceOfMapsToHCL(stubMember)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_stubmember" "test" {
@@ -292,7 +292,7 @@ resource "nios_dns_nsgroup_stubmember" "test" {
 `, name, stubMemberStr)
 }
 
-func testAccNsgroupStubmemberComment(name string , stubMember []map[string]any, comment string) string {
+func testAccNsgroupStubmemberComment(name string, stubMember []map[string]any, comment string) string {
 	stubMemberStr := utils.ConvertSliceOfMapsToHCL(stubMember)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_stubmember" "test_comment" {
@@ -303,7 +303,7 @@ resource "nios_dns_nsgroup_stubmember" "test_comment" {
 `, name, stubMemberStr, comment)
 }
 
-func testAccNsgroupStubmemberExtAttrs(name string , stubMember []map[string]any,extAttrs map[string]string) string {
+func testAccNsgroupStubmemberExtAttrs(name string, stubMember []map[string]any, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf("    %q = %q\n", k, v)
@@ -319,7 +319,7 @@ resource "nios_dns_nsgroup_stubmember" "test_extattrs" {
 `, name, extattrsStr, stubMemberStr)
 }
 
-func testAccNsgroupStubmemberName(name string,stubMember []map[string]any) string {
+func testAccNsgroupStubmemberName(name string, stubMember []map[string]any) string {
 	stubMemberStr := utils.ConvertSliceOfMapsToHCL(stubMember)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_stubmember" "test_name" {
@@ -329,7 +329,7 @@ resource "nios_dns_nsgroup_stubmember" "test_name" {
 `, name, stubMemberStr)
 }
 
-func testAccNsgroupStubmemberStubMembers(name string,stubMember []map[string]any) string {
+func testAccNsgroupStubmemberStubMembers(name string, stubMember []map[string]any) string {
 	stubMemberStr := utils.ConvertSliceOfMapsToHCL(stubMember)
 	return fmt.Sprintf(`
 resource "nios_dns_nsgroup_stubmember" "test_stub_members" {

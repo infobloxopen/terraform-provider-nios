@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -14,8 +16,6 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
-	"os"
-	"path/filepath"
 )
 
 // OBJECTS TO BE PRESENT IN GRID FOR TESTS
@@ -221,7 +221,7 @@ func TestAccNotificationRestEndpointResource_ClientCertificateFile(t *testing.T)
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRestEndpointClientCertificateFile(name, outboundMemberType, uri , clientCertificateFile),
+				Config: testAccNotificationRestEndpointClientCertificateFile(name, outboundMemberType, uri, clientCertificateFile),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
 				),
@@ -690,7 +690,7 @@ resource "nios_notification_rest_endpoint" "test_name" {
 `, name, outboundMemberType, uri)
 }
 
-func testAccNotificationRestEndpointClientCertificateFile(name string, outboundMemberType string, uri string , clientCertificateFile string) string {
+func testAccNotificationRestEndpointClientCertificateFile(name string, outboundMemberType string, uri string, clientCertificateFile string) string {
 	return fmt.Sprintf(`
 resource "nios_notification_rest_endpoint" "test_client_certificate_file" {
     name = %q

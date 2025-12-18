@@ -9,6 +9,9 @@ The tables below list all available resources and data sources
 | `nios_dhcp_range_template` | Manages DHCP Range Template (IPv4) resources | Retrieves information about existing DHCP range templates      |
 | `nios_dhcp_shared_network` | Manages DHCP Shared Network (IPv4) resources | Retrieves information about existing DHCP shared networks      |
 | `nios_dhcp_ipv6_range_template` | Manages DHCP IPV6 Range Template resources   | Retrieves information about existing DHCP IPV6 Range Templates |                           |                                              |                                                           |
+| `nios_dhcp_ipv6dhcpoptiondefinition` | Manages DHCP IPv6 option definition | Retrieves information about existing IPv6 option definitions      |
+| `nios_dhcp_ipv6dhcpoptionspace` | Manages DHCP IPv6 option space | Retrieves information about existing IPv6 option spaces      |
+| `nios_dhcp_ipv6fixedaddresstemplate` | Manages DHCP IPv6 fixed address template | Retrieves information about existing IPv6 fixed address templates      |
 
 ### DNS
 
@@ -42,6 +45,8 @@ The tables below list all available resources and data sources
 | `nios_ip_allocation`                 | Manages an IP allocation                  |                                                                      |
 | `nios-ip_association`                | Manages an IP association                 |                                                                      |
 | `nios_host_record`                   |                                           | Retrieves information about existing Host Records                    |
+| `nios_dns_sharedrecordgroup`         | Manages Shared Record Group               | Retrieves information about existing Shared Record Groups            |
+| `nios_dns_sharedrecord_txt`          | Manages Shared Record TXT                 | Retrieves information about existing DNS Shared TXT Records          |
 
 
 ### DTC
