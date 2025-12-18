@@ -32,6 +32,3 @@ terraform plan -generate-config-out=generated.tf
 Once the config is generated you can execute the `terraform apply` command to import the resource and you can then update the configuration as needed.
 
 Refer the terraform link [here](https://developer.hashicorp.com/terraform/language/v1.14.x/import/generating-configuration).
-
-> [!IMPORTANT]
-> When using the import block, terraform plan triggers an update call to reconcile the resource state. During this update, Terraform adds the Extensible Attribute Terraform Internal ID to the resource.
