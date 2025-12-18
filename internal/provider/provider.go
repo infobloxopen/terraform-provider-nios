@@ -150,6 +150,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewIpv6rangeResource,
 		dhcp.NewFiltermacResource,
 		dhcp.NewDhcpfailoverResource,
+		dhcp.NewMacfilteraddressResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -161,6 +162,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcMonitorPdpResource,
 		dtc.NewDtcMonitorIcmpResource,
 		dtc.NewDtcMonitorSipResource,
+		dtc.NewDtcRecordAResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworktemplateResource,
@@ -210,6 +212,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzMxResource,
 		rpz.NewRecordRpzSrvResource,
 		rpz.NewRecordRpzCnameResource,
+		rpz.NewRecordRpzAaaaResource,
+		rpz.NewRecordRpzTxtResource,
 		rpz.NewRecordRpzCnameIpaddressResource,
 	}
 }
@@ -266,6 +270,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewIpv6rangeDataSource,
 		dhcp.NewFiltermacDataSource,
 		dhcp.NewDhcpfailoverDataSource,
+		dhcp.NewMacfilteraddressDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
@@ -277,6 +282,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcMonitorPdpDataSource,
 		dtc.NewDtcMonitorIcmpDataSource,
 		dtc.NewDtcMonitorSipDataSource,
+		dtc.NewDtcRecordADataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworktemplateDataSource,
@@ -327,6 +333,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzMxDataSource,
 		rpz.NewRecordRpzSrvDataSource,
 		rpz.NewRecordRpzCnameDataSource,
+		rpz.NewRecordRpzAaaaDataSource,
+		rpz.NewRecordRpzTxtDataSource,
 		rpz.NewRecordRpzCnameIpaddressDataSource,
 	}
 }
