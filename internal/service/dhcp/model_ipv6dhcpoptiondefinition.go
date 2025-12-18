@@ -3,11 +3,11 @@ package dhcp
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -38,7 +38,10 @@ var Ipv6dhcpoptiondefinitionResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "The reference to the object.",
 	},
 	"code": schema.Int64Attribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 65535),
+		},
 		MarkdownDescription: "The code of a DHCP IPv6 option definition object. An option code number is used to identify the DHCP option.",
 	},
 	"name": schema.StringAttribute{
@@ -46,9 +49,7 @@ var Ipv6dhcpoptiondefinitionResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "The name of a DHCP IPv6 option definition object.",
 	},
 	"space": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("DHCPv6"),
+		Required:            true,
 		MarkdownDescription: "The space of a DHCP option definition object.",
 	},
 	"type": schema.StringAttribute{

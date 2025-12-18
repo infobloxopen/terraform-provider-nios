@@ -87,6 +87,7 @@ var SharedrecordgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
+			stringvalidator.OneOf("Strict Hostname Checking", "Allow Underscore", "Allow Any"),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_record_name_policy")),
 		},
 		MarkdownDescription: "The record name policy of this shared record group.",
