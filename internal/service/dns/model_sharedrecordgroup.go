@@ -156,9 +156,9 @@ func (m *SharedrecordgroupModel) Flatten(ctx context.Context, from *dns.Sharedre
 	planZoneAssociations := m.ZoneAssociations
 	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, SharedrecordgroupZoneAssociationsAttrTypes, diags, FlattenSharedrecordgroupZoneAssociations)
 	if !planZoneAssociations.IsUnknown() {
-		reOrderedOptions, diags := utils.ReorderAndFilterNestedListResponse(ctx, planZoneAssociations, m.ZoneAssociations, "fqdn")
+		reOrderedZoneAssociations, diags := utils.ReorderAndFilterNestedListResponse(ctx, planZoneAssociations, m.ZoneAssociations, "fqdn")
 		if !diags.HasError() {
-			m.ZoneAssociations = reOrderedOptions.(basetypes.ListValue)
+			m.ZoneAssociations = reOrderedZoneAssociations.(basetypes.ListValue)
 		}
 	}
 }
