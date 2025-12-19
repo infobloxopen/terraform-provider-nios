@@ -73,6 +73,25 @@ func (r *SuperhostResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	// Validate that no host records are associated with DHCP Associated Objects when record ref is not provided in plan
+	if !data.DhcpAssociatedObjects.IsUnknown() && !data.DhcpAssociatedObjects.IsNull() {
+		var dhcpAssociatedObjects []string
+		resp.Diagnostics.Append(data.DhcpAssociatedObjects.ElementsAs(ctx, &dhcpAssociatedObjects, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for _, obj := range dhcpAssociatedObjects {
+			if strings.HasPrefix(obj, "record:host") {
+				resp.Diagnostics.AddError(
+					"Invalid DHCP Associated Object",
+					"Host record can only be associated with DNS Associated Objects, not DHCP Associated Objects.",
+				)
+				return
+			}
+		}
+	}
+
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
@@ -244,6 +263,25 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
+	// Validate that no host records are associated with DHCP Associated Objects when record ref is not provided in plan
+	if !data.DhcpAssociatedObjects.IsUnknown() && !data.DhcpAssociatedObjects.IsNull() {
+		var dhcpAssociatedObjects []string
+		resp.Diagnostics.Append(data.DhcpAssociatedObjects.ElementsAs(ctx, &dhcpAssociatedObjects, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for _, obj := range dhcpAssociatedObjects {
+			if strings.HasPrefix(obj, "record:host") {
+				resp.Diagnostics.AddError(
+					"Invalid DHCP Associated Object",
+					"Host record can only be associated with DNS Associated Objects, not DHCP Associated Objects.",
+				)
+				return
+			}
+		}
+	}
+
 	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
@@ -349,6 +387,7 @@ func (r *SuperhostResource) ValidateConfig(ctx context.Context, req resource.Val
 		return
 	}
 
+	// Validate that no host records are associated with DHCP Associated Objects when record ref is provided in plan
 	for _, obj := range dhcpAssociatedObjects {
 		if obj == "" {
 			continue
@@ -360,7 +399,6 @@ func (r *SuperhostResource) ValidateConfig(ctx context.Context, req resource.Val
 			)
 		}
 	}
-
 }
 
 func (r *SuperhostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
