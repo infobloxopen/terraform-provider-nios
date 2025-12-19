@@ -55,7 +55,7 @@ func (d *SuperhostDataSource) Schema(ctx context.Context, req datasource.SchemaR
 		MarkdownDescription: "Retrieves information about existing Super Hosts",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
-				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
+				Description: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType: types.StringType,
 				Optional:    true,
 			},
@@ -148,7 +148,7 @@ func (d *SuperhostDataSource) Read(ctx context.Context, req datasource.ReadReque
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Superhost by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Superhost, got error: %s", err))
 				return nil, "", err
 			}
 

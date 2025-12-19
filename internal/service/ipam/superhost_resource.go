@@ -75,6 +75,7 @@ func (r *SuperhostResource) Create(ctx context.Context, req resource.CreateReque
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -93,7 +94,8 @@ func (r *SuperhostResource) Create(ctx context.Context, req resource.CreateReque
 	res := apiRes.CreateSuperhostResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Superhost due to inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating Superhost due to inherited Extensible attributes")
 		return
 	}
 
@@ -163,7 +165,8 @@ func (r *SuperhostResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Superhost due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading Superhost due to inherited Extensible attributes")
 		return
 	}
 
@@ -219,6 +222,7 @@ func (r *SuperhostResource) ReadByExtAttrs(ctx context.Context, data *SuperhostM
 	// Remove inherited external attributes from extattrs
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return true
 	}
 
@@ -253,13 +257,14 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -287,7 +292,8 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating Superhost due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating Superhost due to inherited Extensible attributes")
 		return
 	}
 
