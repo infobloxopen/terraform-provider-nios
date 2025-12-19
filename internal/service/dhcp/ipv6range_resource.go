@@ -404,7 +404,7 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 
 	// discovery_basic_poll_settings can be set only when use_discovery_basic_polling_settings is true
 	if !data.DiscoveryBasicPollSettings.IsNull() && !data.DiscoveryBasicPollSettings.IsUnknown() {
-		if data.UseDiscoveryBasicPollingSettings.IsNull() || data.UseDiscoveryBasicPollingSettings.IsUnknown() || !data.UseDiscoveryBasicPollingSettings.ValueBool() {
+		if !data.UseDiscoveryBasicPollingSettings.IsNull() && !data.UseDiscoveryBasicPollingSettings.IsUnknown() && !data.UseDiscoveryBasicPollingSettings.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Discovery Basic Poll Settings Not Allowed",
 				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings cannot be configured. Either set use_discovery_basic_polling_settings to true or remove the discovery_basic_poll_settings block.",
