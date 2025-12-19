@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -327,6 +328,39 @@ func (r *SuperhostResource) Delete(ctx context.Context, req resource.DeleteReque
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Superhost, got error: %s", err))
 		return
 	}
+}
+
+func (r *SuperhostResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data SuperhostModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if data.DhcpAssociatedObjects.IsUnknown() || data.DhcpAssociatedObjects.IsNull() {
+		return
+	}
+
+	var dhcpAssociatedObjects []string
+
+	resp.Diagnostics.Append(data.DhcpAssociatedObjects.ElementsAs(ctx, &dhcpAssociatedObjects, true)...)
+	if resp.Diagnostics.HasError() || dhcpAssociatedObjects == nil {
+		return
+	}
+
+	for _, obj := range dhcpAssociatedObjects {
+		if obj == "" {
+			continue
+		}
+		if strings.HasPrefix(obj, "record:host") {
+			resp.Diagnostics.AddError(
+				"Invalid DHCP Associated Object",
+				"Host record can only be associated with DNS Associated Objects, not DHCP Associated Objects.",
+			)
+		}
+	}
+
 }
 
 func (r *SuperhostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
