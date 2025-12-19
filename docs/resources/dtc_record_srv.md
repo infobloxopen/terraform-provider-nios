@@ -20,7 +20,7 @@ resource "nios_dtc_server" "create_dtc_server" {
 }
 
 // Create a DTC SRV Record with basic fields
-resource "nios_dtc_record_srv" "srv_recprd_basic_fields" {
+resource "nios_dtc_record_srv" "srv_record_basic_fields" {
   dtc_server = nios_dtc_server.create_dtc_server.name
   port       = 8081
   priority   = 5
