@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
@@ -87,7 +86,6 @@ var FilterrelayagentResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthBetween(0, 256),
 		},
 		MarkdownDescription: "A descriptive comment of a DHCP relay agent filter object.",
@@ -131,7 +129,10 @@ var FilterrelayagentResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the substring of remote ID, instead of the full remote ID, is matched.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The name of a DHCP relay agent filter object.",
 	},
 	"remote_id_name": schema.StringAttribute{
@@ -161,18 +162,6 @@ var FilterrelayagentResourceSchemaAttributes = map[string]schema.Attribute{
 			importmod.AssociateInternalId(),
 		},
 	},
-}
-
-func ExpandFilterrelayagent(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dhcp.Filterrelayagent {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m FilterrelayagentModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *FilterrelayagentModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Filterrelayagent {

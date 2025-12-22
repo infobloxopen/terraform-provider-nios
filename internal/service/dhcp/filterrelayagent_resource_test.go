@@ -20,7 +20,7 @@ var readableAttributesForFilterrelayagent = "circuit_id_name,circuit_id_substrin
 func TestAccFilterrelayagentResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_filterrelayagent.test"
 	var v dhcp.Filterrelayagent
-	name := "TEST_FILTERRELAYAGENT_RESOURCE_BASIC"
+	name := acctest.RandomNameWithPrefix("filterrelayagent")
 	isCircuitID := "NOT_SET"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -32,7 +32,6 @@ func TestAccFilterrelayagentResource_basic(t *testing.T) {
 				Config: testAccFilterrelayagentBasicConfig(name, isCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterrelayagentExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "is_circuit_id", isCircuitID),
 					// Test fields with default value
@@ -47,7 +46,7 @@ func TestAccFilterrelayagentResource_basic(t *testing.T) {
 func TestAccFilterrelayagentResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_filterrelayagent.test"
 	var v dhcp.Filterrelayagent
-	name := "TEST_FILTERRELAYAGENT_RESOURCE_DISAPPEARS"
+	name := acctest.RandomNameWithPrefix("filterrelayagent")
 	isCircuitID := "NOT_SET"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -578,7 +577,6 @@ func testAccCheckFilterrelayagentDisappears(ctx context.Context, v *dhcp.Filterr
 }
 
 func testAccFilterrelayagentBasicConfig(name string, isCircuitID string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_dhcp_filterrelayagent" "test" {
     name = %q
