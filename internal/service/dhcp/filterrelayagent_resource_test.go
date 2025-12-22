@@ -109,9 +109,9 @@ func TestAccFilterrelayagentResource_CircuitIdSubstringLength(t *testing.T) {
 	isCircuitIdSubstring := "true"
 	circuitIdSubstringOffset := "0"
 	circuitIdName := "CIRCUIT_ID_NAME_TEST"
-	isCircuitIdSubstringLength := fmt.Sprintf("%d", len(circuitIdName))
+	circuitIdSubstringLength := fmt.Sprintf("%d", len(circuitIdName))
 	updatedCircuitIDName := "CIRCUIT_ID_NAME_TEST_UPDATED"
-	updateIsCircuitIdSubstringLength := fmt.Sprintf("%d", len(updatedCircuitIDName))
+	updatedCircuitIdSubstringLength := fmt.Sprintf("%d", len(updatedCircuitIDName))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -119,18 +119,18 @@ func TestAccFilterrelayagentResource_CircuitIdSubstringLength(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterrelayagentCircuitIdSubstringLength(name, isCircuitID, circuitIdName, isCircuitIdSubstringLength, circuitIdSubstringOffset, isCircuitIdSubstring),
+				Config: testAccFilterrelayagentCircuitIdSubstringLength(name, isCircuitID, circuitIdName, circuitIdSubstringLength, circuitIdSubstringOffset, isCircuitIdSubstring),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterrelayagentExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "circuit_id_substring_length", isCircuitIdSubstringLength),
+					resource.TestCheckResourceAttr(resourceName, "circuit_id_substring_length", circuitIdSubstringLength),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFilterrelayagentCircuitIdSubstringLength(name, isCircuitID, updatedCircuitIDName, updateIsCircuitIdSubstringLength, circuitIdSubstringOffset, isCircuitIdSubstring),
+				Config: testAccFilterrelayagentCircuitIdSubstringLength(name, isCircuitID, updatedCircuitIDName, updatedCircuitIdSubstringLength, circuitIdSubstringOffset, isCircuitIdSubstring),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterrelayagentExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "circuit_id_substring_length", updateIsCircuitIdSubstringLength),
+					resource.TestCheckResourceAttr(resourceName, "circuit_id_substring_length", updatedCircuitIdSubstringLength),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
