@@ -38,7 +38,7 @@ func (r *RecordRpzCnameIpaddressResource) Metadata(ctx context.Context, req reso
 
 func (r *RecordRpzCnameIpaddressResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages RPZ CNAME IP address record.",
 		Attributes:          RecordRpzCnameIpaddressResourceSchemaAttributes,
 	}
 }

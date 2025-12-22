@@ -17,7 +17,7 @@ func TestAccRecordRpzCnameIpaddressDataSource_Filters(t *testing.T) {
 	resourceName := "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp := "11.0.0.30"
+	nameIP := "11.0.0.30"
 	canonical := "11.0.0.30"
 	view := acctest.RandomNameWithPrefix("view")
 
@@ -27,7 +27,7 @@ func TestAccRecordRpzCnameIpaddressDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzCnameIpaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzCnameIpaddressDataSourceConfigFilters(nameIp, canonical, rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressDataSourceConfigFilters(nameIP, canonical, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
@@ -43,7 +43,7 @@ func TestAccRecordRpzCnameIpaddressDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp := "11.0.0.31"
+	nameIP := "11.0.0.31"
 	canonical := ""
 	view := acctest.RandomNameWithPrefix("view")
 
@@ -53,7 +53,7 @@ func TestAccRecordRpzCnameIpaddressDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzCnameIpaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIp, canonical, rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIP, canonical, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),

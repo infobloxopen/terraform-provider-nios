@@ -22,8 +22,8 @@ func TestAccRecordRpzCnameIpaddressResource_basic(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp := "11.0.0.1"
-	name := nameIp + "." + rpZone
+	nameIP := "11.0.0.1"
+	name := nameIP + "." + rpZone
 	canonical := "11.0.0.1"
 	view := acctest.RandomNameWithPrefix("view")
 
@@ -33,7 +33,7 @@ func TestAccRecordRpzCnameIpaddressResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIp, canonical, rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIP, canonical, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -55,7 +55,7 @@ func TestAccRecordRpzCnameIpaddressResource_disappears(t *testing.T) {
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	canonical := ""
-	nameIp := "11.0.0.2"
+	nameIP := "11.0.0.2"
 	view := acctest.RandomNameWithPrefix("view")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -64,7 +64,7 @@ func TestAccRecordRpzCnameIpaddressResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzCnameIpaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIp, canonical, rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIP, canonical, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					testAccCheckRecordRpzCnameIpaddressDisappears(context.Background(), &v),
@@ -79,7 +79,7 @@ func TestAccRecordRpzCnameIpaddressResource_Canonical(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp := "11.0.0.3"
+	nameIP := "11.0.0.3"
 	view := acctest.RandomNameWithPrefix("view")
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -88,15 +88,15 @@ func TestAccRecordRpzCnameIpaddressResource_Canonical(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIp, nameIp, rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIP, nameIP, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "canonical", nameIp),
+					resource.TestCheckResourceAttr(resourceName, "canonical", nameIP),
 				),
 			},
 			// Update to No Data rule
 			{
-				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIp, "*", rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIP, "*", rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "canonical", "*"),
@@ -104,7 +104,7 @@ func TestAccRecordRpzCnameIpaddressResource_Canonical(t *testing.T) {
 			},
 			// Update to Passthru Domain Name Rule
 			{
-				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIp, "", rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIP, "", rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "canonical", ""),
@@ -112,10 +112,10 @@ func TestAccRecordRpzCnameIpaddressResource_Canonical(t *testing.T) {
 			},
 			// update to Substitution rule
 			{
-				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIp, nameIp, rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressBasicConfig(nameIP, nameIP, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "canonical", nameIp),
+					resource.TestCheckResourceAttr(resourceName, "canonical", nameIP),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -127,7 +127,7 @@ func TestAccRecordRpzCnameIpaddressResource_Comment(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test_comment"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp := "11.0.0.4"
+	nameIP := "11.0.0.4"
 	canonical := ""
 	comment1 := "This is a new rpz cname record"
 	comment2 := "This is an updated rpz cname record"
@@ -138,7 +138,7 @@ func TestAccRecordRpzCnameIpaddressResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressComment(nameIp, canonical, rpZone, comment1),
+				Config: testAccRecordRpzCnameIpaddressComment(nameIP, canonical, rpZone, comment1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", comment1),
@@ -146,7 +146,7 @@ func TestAccRecordRpzCnameIpaddressResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressComment(nameIp, canonical, rpZone, comment2),
+				Config: testAccRecordRpzCnameIpaddressComment(nameIP, canonical, rpZone, comment2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", comment2),
@@ -161,7 +161,7 @@ func TestAccRecordRpzCnameIpaddressResource_Disable(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test_disable"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp := "11.0.0.5"
+	nameIP := "11.0.0.5"
 	canonical := ""
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -170,7 +170,7 @@ func TestAccRecordRpzCnameIpaddressResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressDisable(nameIp, canonical, rpZone, "false"),
+				Config: testAccRecordRpzCnameIpaddressDisable(nameIP, canonical, rpZone, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -178,7 +178,7 @@ func TestAccRecordRpzCnameIpaddressResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressDisable(nameIp, canonical, rpZone, "true"),
+				Config: testAccRecordRpzCnameIpaddressDisable(nameIP, canonical, rpZone, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -193,7 +193,7 @@ func TestAccRecordRpzCnameIpaddressResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test_extattrs"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp := "11.0.0.6"
+	nameIP := "11.0.0.6"
 	canonical := ""
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -204,7 +204,7 @@ func TestAccRecordRpzCnameIpaddressResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressExtAttrs(nameIp, canonical, rpZone, map[string]string{
+				Config: testAccRecordRpzCnameIpaddressExtAttrs(nameIP, canonical, rpZone, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -214,7 +214,7 @@ func TestAccRecordRpzCnameIpaddressResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressExtAttrs(nameIp, canonical, rpZone, map[string]string{
+				Config: testAccRecordRpzCnameIpaddressExtAttrs(nameIP, canonical, rpZone, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -231,8 +231,8 @@ func TestAccRecordRpzCnameIpaddressResource_Name(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test_name"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp1 := "11.0.0.7"
-	nameIp2 := "11.0.0.8"
+	nameIP1 := "11.0.0.7"
+	nameIP2 := "11.0.0.8"
 	canonical := ""
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -241,18 +241,18 @@ func TestAccRecordRpzCnameIpaddressResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressName(nameIp1, canonical, rpZone),
+				Config: testAccRecordRpzCnameIpaddressName(nameIP1, canonical, rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", nameIp1+"."+rpZone),
+					resource.TestCheckResourceAttr(resourceName, "name", nameIP1+"."+rpZone),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressName(nameIp2, canonical, rpZone),
+				Config: testAccRecordRpzCnameIpaddressName(nameIP2, canonical, rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", nameIp2+"."+rpZone),
+					resource.TestCheckResourceAttr(resourceName, "name", nameIP2+"."+rpZone),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -264,7 +264,7 @@ func TestAccRecordRpzCnameIpaddressResource_RpZone(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test_rp_zone"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp1 := "11.0.0.9"
+	nameIP := "11.0.0.9"
 	canonical := ""
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -273,7 +273,7 @@ func TestAccRecordRpzCnameIpaddressResource_RpZone(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressRpZone(nameIp1, canonical, rpZone),
+				Config: testAccRecordRpzCnameIpaddressRpZone(nameIP, canonical, rpZone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rp_zone", rpZone),
@@ -290,7 +290,7 @@ func TestAccRecordRpzCnameIpaddressResource_Ttl(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test_ttl"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp1 := "11.0.0.10"
+	nameIP := "11.0.0.10"
 	canonical := ""
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -299,7 +299,7 @@ func TestAccRecordRpzCnameIpaddressResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressTtl(nameIp1, canonical, rpZone, "true", 10),
+				Config: testAccRecordRpzCnameIpaddressTtl(nameIP, canonical, rpZone, "true", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
@@ -307,7 +307,7 @@ func TestAccRecordRpzCnameIpaddressResource_Ttl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressTtl(nameIp1, canonical, rpZone, "true", 0),
+				Config: testAccRecordRpzCnameIpaddressTtl(nameIP, canonical, rpZone, "true", 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ttl", "0"),
@@ -322,7 +322,7 @@ func TestAccRecordRpzCnameIpaddressResource_UseTtl(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test_use_ttl"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp1 := "11.0.0.11"
+	nameIP := "11.0.0.11"
 	canonical := ""
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -331,7 +331,7 @@ func TestAccRecordRpzCnameIpaddressResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressUseTtl(nameIp1, canonical, rpZone, "true", 10),
+				Config: testAccRecordRpzCnameIpaddressUseTtl(nameIP, canonical, rpZone, "true", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
@@ -339,7 +339,7 @@ func TestAccRecordRpzCnameIpaddressResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressUseTtl(nameIp1, canonical, rpZone, "false", 10),
+				Config: testAccRecordRpzCnameIpaddressUseTtl(nameIP, canonical, rpZone, "false", 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -354,7 +354,7 @@ func TestAccRecordRpzCnameIpaddressResource_View(t *testing.T) {
 	var resourceName = "nios_rpz_record_cname_ipaddress.test_view"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	nameIp1 := "11.0.0.12"
+	nameIP := "11.0.0.12"
 	canonical := ""
 	view := acctest.RandomNameWithPrefix("view")
 
@@ -364,7 +364,7 @@ func TestAccRecordRpzCnameIpaddressResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzCnameIpaddressView(nameIp1, canonical, rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressView(nameIP, canonical, rpZone, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", view),
@@ -435,7 +435,7 @@ func testAccCheckRecordRpzCnameIpaddressDisappears(ctx context.Context, v *rpz.R
 	}
 }
 
-func testAccRecordRpzCnameIpaddressBasicConfig(nameIp, canonical, rpZone, view string) string {
+func testAccRecordRpzCnameIpaddressBasicConfig(nameIP, canonical, rpZone, view string) string {
 	// create basic resource with required fields
 	config := fmt.Sprintf(`
 data "nios_ipam_network" "check_network" {
@@ -457,7 +457,7 @@ resource "nios_rpz_record_cname_ipaddress" "test" {
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
-`, nameIp, canonical)
+`, nameIP, canonical)
 
 	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
@@ -486,7 +486,7 @@ resource "nios_rpz_record_cname_ipaddress" "test_comment" {
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressDisable(nameIp, canonical, rpZone, disable string) string {
+func testAccRecordRpzCnameIpaddressDisable(nameIP, canonical, rpZone, disable string) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_ipaddress" "test_disable" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
@@ -494,11 +494,11 @@ resource "nios_rpz_record_cname_ipaddress" "test_disable" {
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
     disable = %q
 }
-`, nameIp, canonical, disable)
+`, nameIP, canonical, disable)
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressExtAttrs(nameIp, canonical, rpZone string, extAttrs map[string]string) string {
+func testAccRecordRpzCnameIpaddressExtAttrs(nameIP, canonical, rpZone string, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf(`
@@ -514,33 +514,33 @@ resource "nios_rpz_record_cname_ipaddress" "test_extattrs" {
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
     extattrs = %s
 }
-`, nameIp, canonical, extattrsStr)
+`, nameIP, canonical, extattrsStr)
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressName(nameIp, canonical, rpZone string) string {
+func testAccRecordRpzCnameIpaddressName(nameIP, canonical, rpZone string) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_ipaddress" "test_name" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
-`, nameIp, canonical)
+`, nameIP, canonical)
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressRpZone(nameIp, canonical, rpZone string) string {
+func testAccRecordRpzCnameIpaddressRpZone(nameIP, canonical, rpZone string) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_ipaddress" "test_rp_zone" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
-`, nameIp, canonical)
+`, nameIP, canonical)
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressTtl(nameIp, canonical, rpZone, useTtl string, ttl int32) string {
+func testAccRecordRpzCnameIpaddressTtl(nameIP, canonical, rpZone, useTtl string, ttl int32) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_ipaddress" "test_ttl" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
@@ -549,11 +549,11 @@ resource "nios_rpz_record_cname_ipaddress" "test_ttl" {
 	ttl = %d
 	use_ttl = %q
 }
-`, nameIp, canonical, ttl, useTtl)
+`, nameIP, canonical, ttl, useTtl)
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressUseTtl(nameIp, canonical, rpZone, useTtl string, ttl int32) string {
+func testAccRecordRpzCnameIpaddressUseTtl(nameIP, canonical, rpZone, useTtl string, ttl int32) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_ipaddress" "test_use_ttl" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
@@ -562,11 +562,11 @@ resource "nios_rpz_record_cname_ipaddress" "test_use_ttl" {
     use_ttl = %q
 	ttl = %d
 }
-`, nameIp, canonical, useTtl, ttl)
+`, nameIP, canonical, useTtl, ttl)
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressView(nameIp, canonical, rpZone, view string) string {
+func testAccRecordRpzCnameIpaddressView(nameIP, canonical, rpZone, view string) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_ipaddress" "test_view" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
@@ -574,6 +574,6 @@ resource "nios_rpz_record_cname_ipaddress" "test_view" {
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
     view = nios_dns_view.custom_view.name
 }
-`, nameIp, canonical)
+`, nameIP, canonical)
 	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }
