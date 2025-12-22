@@ -21,6 +21,7 @@ var readableAttributesForSuperhost = "comment,dhcp_associated_objects,disabled,d
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &SuperhostResource{}
 var _ resource.ResourceWithImportState = &SuperhostResource{}
+var _ resource.ResourceWithValidateConfig = &SuperhostResource{}
 
 func NewSuperhostResource() resource.Resource {
 	return &SuperhostResource{}

@@ -413,6 +413,12 @@ resource "nios_dns_zone_auth" "parent_auth_zone" {
   view        = "default"
 }
 
+resource "nios_dns_zone_auth" "parent_reverse_zone" {
+  fqdn        = "192.168.252.0/24"
+  view        = "default"
+  zone_format = "IPV4"
+}
+
 resource "nios_dns_record_a" "record_a" {
 	name = "parent-record_a.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
 	ipv4addr = "10.0.0.20"
@@ -431,6 +437,7 @@ resource "nios_dns_record_ptr" "record_ptr" {
 	name = %q
 	ptrdname = "test.example.com"
 	view = "default"
+	depends_on = [nios_dns_zone_auth.parent_reverse_zone]
 }
 
 resource "nios_ip_allocation" "allocation" {
@@ -444,7 +451,7 @@ resource "nios_ip_association" "association" {
 	mac = %q
 	configure_for_dhcp = %q
 }
-`, fqdn, "23.10.168.192.in-addr.arpa", ipv4addrHCL, "12:00:43:fe:9a:8c", "true")
+`, fqdn, "23.252.168.192.in-addr.arpa", ipv4addrHCL, "12:00:43:fe:9a:8c", "true")
 }
 
 func testAccBaseWithDHCPObjects() string {
