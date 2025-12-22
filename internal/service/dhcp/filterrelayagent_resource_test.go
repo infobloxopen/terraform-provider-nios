@@ -70,7 +70,7 @@ func TestAccFilterrelayagentResource_CircuitIdName(t *testing.T) {
 	var resourceName = "nios_dhcp_filterrelayagent.test_circuit_id_name"
 	var v dhcp.Filterrelayagent
 	name := acctest.RandomNameWithPrefix("filterrelayagent")
-	cicuitIdName := "CIRCUIT_ID_NAME_TEST"
+	circuitIdName := "CIRCUIT_ID_NAME_TEST"
 	isCircuitId := "MATCHES_VALUE"
 	updateCircuitIdName := "CIRCUIT_ID_NAME_TEST_UPDATED"
 	isCircuitIdSubstring := "false"
@@ -81,10 +81,10 @@ func TestAccFilterrelayagentResource_CircuitIdName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterrelayagentCircuitIdName(name, cicuitIdName, isCircuitId, isCircuitIdSubstring),
+				Config: testAccFilterrelayagentCircuitIdName(name, circuitIdName, isCircuitId, isCircuitIdSubstring),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterrelayagentExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "circuit_id_name", cicuitIdName),
+					resource.TestCheckResourceAttr(resourceName, "circuit_id_name", circuitIdName),
 				),
 			},
 			// Update and Read
@@ -596,7 +596,7 @@ resource "nios_dhcp_filterrelayagent" "test_circuit_id_name" {
 `, name, circuitIdName, isCircuitId, isCircuitIdSubstring)
 }
 
-func testAccFilterrelayagentCircuitIdSubstringLength(name, isCircuitID, circuitIdName string, circuitIdSubstringLength string, circuit_id_substring_offset string, isCircuitIdSubstring string) string {
+func testAccFilterrelayagentCircuitIdSubstringLength(name, isCircuitID, circuitIdName string, circuitIdSubstringLength string, circuitIdSubstringOffset string, isCircuitIdSubstring string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_filterrelayagent" "test_circuit_id_substring_length" {
     name = %q
@@ -606,10 +606,10 @@ resource "nios_dhcp_filterrelayagent" "test_circuit_id_substring_length" {
 	circuit_id_substring_offset = %q
     is_circuit_id_substring = %q
 }
-`, name, isCircuitID, circuitIdName, circuitIdSubstringLength, circuit_id_substring_offset, isCircuitIdSubstring)
+`, name, isCircuitID, circuitIdName, circuitIdSubstringLength, circuitIdSubstringOffset, isCircuitIdSubstring)
 }
 
-func testAccFilterrelayagentCircuitIdSubstringOffset(name, isCircuitID, circuitIdName string, circuitIdSubstringLength string, circuit_id_substring_offset string, isCircuitIdSubstring string) string {
+func testAccFilterrelayagentCircuitIdSubstringOffset(name, isCircuitID, circuitIdName string, circuitIdSubstringLength string, circuitIdSubstringOffset string, isCircuitIdSubstring string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_filterrelayagent" "test_circuit_id_substring_offset" {
 	name = %q
@@ -619,7 +619,7 @@ resource "nios_dhcp_filterrelayagent" "test_circuit_id_substring_offset" {
 	circuit_id_substring_offset = %q
 	is_circuit_id_substring = %q
 }
-`, name, isCircuitID, circuitIdName, circuitIdSubstringLength, circuit_id_substring_offset, isCircuitIdSubstring)
+`, name, isCircuitID, circuitIdName, circuitIdSubstringLength, circuitIdSubstringOffset, isCircuitIdSubstring)
 }
 
 func testAccFilterrelayagentComment(name, isCircuitID, comment string) string {

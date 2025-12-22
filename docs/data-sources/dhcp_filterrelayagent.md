@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_filterrelayagent Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  
+  Retrieves information about existing Filter Relay Agents.
 ---
 
 # nios_dhcp_filterrelayagent (Data Source)
 
-
+Retrieves information about existing Filter Relay Agents.
 
 ## Example Usage
 
