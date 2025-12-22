@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -19,6 +20,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -119,6 +121,9 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"configure_for_dhcp": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Set this to True to enable the DHCP configuration for this host address.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"deny_bootp": schema.BoolAttribute{
 		Optional: true,
@@ -131,10 +136,16 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The discovery status of this Host Address.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_data": schema.SingleNestedAttribute{
 		Attributes: RecordHostIpv4addrDiscoveredDataResourceSchemaAttributes,
 		Computed:   true,
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"enable_pxe_lease_time": schema.BoolAttribute{
 		Optional:            true,
@@ -143,6 +154,9 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"host": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The host to which the host address belongs, in FQDN format. It is only present when the host address object is not returned as part of a host.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ignore_client_requested_options": schema.BoolAttribute{
 		Optional:            true,
@@ -165,10 +179,16 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"is_invalid_mac": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This flag reflects whether the MAC address for this host address is invalid.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -184,6 +204,9 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"mac": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The MAC address for this host address.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"match_client": schema.StringAttribute{
 		Optional:            true,
@@ -197,10 +220,16 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"network": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network of the host address, in FQDN/CIDR format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"network_view": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the network view in which the host address resides.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"nextserver": schema.StringAttribute{
 		Optional: true,

@@ -39,3 +39,4 @@ provider "nios" {
 - `nios_host_url` (String)
 - `nios_password` (String)
 - `nios_username` (String)
+- `suppress_computed_plan` (Boolean)

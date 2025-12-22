@@ -7,12 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type ZoneAuthGridPrimaryModel struct {
@@ -47,10 +49,16 @@ var ZoneAuthGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 	"grid_replicate": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "The flag represents DNS zone transfers if set to False, and ID Grid Replication if set to True. This flag is ignored if the struct is specified as part of a stub zone or if it is set as grid_member in an authoritative zone.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"lead": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This flag controls whether the Grid lead secondary server performs zone transfers to non lead secondaries. This flag is ignored if the struct is specified as grid_member in an authoritative zone.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"preferred_primaries": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -58,10 +66,16 @@ var ZoneAuthGridPrimaryResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Computed:            true,
 		MarkdownDescription: "The primary preference list with Grid member names and\\or External Server extserver structs for this member.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"enable_preferred_primaries": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This flag represents whether the preferred_primaries field values of this member are used.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 }
 

@@ -22,6 +22,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -138,6 +139,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          DtcPoolHealthResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The health status of DTC Pool",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"lb_alternate_method": schema.StringAttribute{
 		Optional: true,

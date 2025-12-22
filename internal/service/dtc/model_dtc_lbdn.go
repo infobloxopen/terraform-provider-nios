@@ -21,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -121,6 +122,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          DtcLbdnHealthResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The LBDN health information.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"lb_method": schema.StringAttribute{
 		Required: true,

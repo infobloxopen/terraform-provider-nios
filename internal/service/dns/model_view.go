@@ -26,6 +26,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -258,6 +259,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          ViewCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -525,6 +529,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	"is_default": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "The NIOS appliance provides one default DNS view. You can rename the default view and change its settings, but you cannot delete it. There must always be at least one DNS view in the appliance.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"last_queried_acl": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
