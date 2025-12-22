@@ -1,6 +1,6 @@
 // Manage an IPAM IPv6 Network Template with Basic Fields
 resource "nios_ipam_ipv6networktemplate" "ipam_ipv6_network_template_basic" {
-  name = "example-network-template"
+  name = "example-ipv6-network-template"
   cidr = 24
 
   // add cloud_api_compatible = true if Terraform Internal ID extensible attribute has cloud access
@@ -10,7 +10,7 @@ resource "nios_ipam_ipv6networktemplate" "ipam_ipv6_network_template_basic" {
 // Manage an IPAM IPv6 Network Template with Additional Fields
 resource "nios_ipam_ipv6networktemplate" "ipam_ipv6_network_template_with_additional_fields" {
   // Required attributes
-  name = "example-network-template2"
+  name = "example-ipv6-network-template2"
   cidr = 24
 
   // Basic configuration

@@ -323,6 +323,140 @@ func (r *Ipv6networktemplateResource) Delete(ctx context.Context, req resource.D
 	}
 }
 
+func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data Ipv6networktemplateModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if options are defined
+	if !data.Options.IsNull() && !data.Options.IsUnknown() {
+		// Special DHCP option names that require use_option to be set
+		specialOptions := map[string]bool{
+			"routers":                  true,
+			"router-templates":         true,
+			"domain-name-servers":      true,
+			"domain-name":              true,
+			"broadcast-address":        true,
+			"broadcast-address-offset": true,
+			"dhcp-lease-time":          true,
+			"dhcp6.name-servers":       true,
+		}
+
+		specialOptionsNum := map[int64]bool{
+			3:  true,
+			6:  true,
+			15: true,
+			28: true,
+			51: true,
+			23: true,
+		}
+
+		var options []Ipv6networktemplateOptionsModel
+		diags := data.Options.ElementsAs(ctx, &options, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for i, option := range options {
+			isSpecialOption := false
+			optionName := ""
+			if option.Value.IsNull() || option.Value.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("value"),
+					"Invalid configuration for DHCP Option",
+					"The 'value' attribute is a required field and must be set for all DHCP Options.",
+				)
+			}
+			if !option.Name.IsNull() && !option.Name.IsUnknown() {
+				optionName = option.Name.ValueString()
+				isSpecialOption = specialOptions[optionName]
+			} else if !option.Num.IsNull() && !option.Num.IsUnknown() {
+				optionNum := option.Num.ValueInt64()
+				isSpecialOption = specialOptionsNum[optionNum]
+				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("name"),
+					"Invalid configuration for DHCP Option",
+					"Either the 'name' or 'num' attribute must be set for all DHCP Options. "+
+						"Missing both attributes for 'option' at index "+fmt.Sprint(i)+".",
+				)
+				continue
+			}
+
+			if option.Value.ValueString() == "" {
+				if !isSpecialOption {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
+					)
+				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
+					)
+				}
+			}
+
+			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("use_option"),
+					"Invalid configuration",
+					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Option '%s'. "+
+						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
+						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
+						optionName),
+				)
+			}
+		}
+	}
+
+	// Members validation
+	//if !data.Members.IsNull() && !data.Members.IsUnknown() {
+	//	var members []NetworkMembersModel
+	//	diags := data.Members.ElementsAs(ctx, &members, false)
+	//	resp.Diagnostics.Append(diags...)
+	//	if resp.Diagnostics.HasError() {
+	//		return
+	//	}
+	//
+	//	for i, member := range members {
+	//		if member.Struct.ValueString() == "msdhcpserver" {
+	//			if !member.Ipv6addr.IsNull() && !member.Ipv6addr.IsUnknown() {
+	//				resp.Diagnostics.AddAttributeError(
+	//					path.Root("members").AtListIndex(i).AtName("ipv6addr"),
+	//					"Invalid Configuration",
+	//					"ipv6addr cannot be set when struct is 'msdhcpserver'. Only ipv4addr is supported for msdhcpserver.",
+	//				)
+	//			}
+	//
+	//			if !member.Name.IsNull() && !member.Name.IsUnknown() {
+	//				resp.Diagnostics.AddAttributeError(
+	//					path.Root("members").AtListIndex(i).AtName("name"),
+	//					"Invalid Configuration",
+	//					"name cannot be set when struct is 'msdhcpserver'. Only ipv4addr is supported for msdhcpserver.",
+	//				)
+	//			}
+	//		}
+	//	}
+	//}
+
+	if !data.AllowAnyNetmask.IsNull() && !data.AllowAnyNetmask.IsUnknown() && !data.AllowAnyNetmask.ValueBool() {
+		if data.Cidr.IsNull() || data.Cidr.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("netmask"),
+				"Invalid Configuration",
+				"cidr needs to be set when allow_any_netmask is set to false.",
+			)
+		}
+	}
+}
+
 func (r *Ipv6networktemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
