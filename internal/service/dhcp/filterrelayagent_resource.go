@@ -386,13 +386,14 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 		}
 	}
 
-	// Validate circuit_id_substring_length is required when is_circuit_id_substring == true
+	// Validate circuit_id_substring_length, circuit_id_substring_offset is required when is_circuit_id_substring == true
 	if !data.IsCircuitIdSubstring.IsNull() && data.IsCircuitIdSubstring.ValueBool() {
-		if data.CircuitIdSubstringLength.IsUnknown() || data.CircuitIdSubstringLength.IsNull() {
+		if (data.CircuitIdSubstringLength.IsUnknown() || data.CircuitIdSubstringLength.IsNull()) ||
+			(data.CircuitIdSubstringOffset.IsNull() || data.CircuitIdSubstringOffset.IsUnknown()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("circuit_id_substring_length"),
 				"Missing Required Attribute",
-				"Attribute circuit_id_substring_length is required when is_circuit_id_substring is set to true.",
+				"Attribute circuit_id_substring_length and circuit_id_substring_offset are required when is_circuit_id_substring is set to true.",
 			)
 		}
 		// Validate the circuit_id_substring_length is equal to the length of circuit_id_name
@@ -408,11 +409,12 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate remote_id_substring_length is required when is_remote_id_substring == true
 	if !data.IsRemoteIdSubstring.IsNull() && data.IsRemoteIdSubstring.ValueBool() {
-		if data.RemoteIdSubstringLength.IsUnknown() || data.RemoteIdSubstringLength.IsNull() {
+		if (data.RemoteIdSubstringLength.IsUnknown() || data.RemoteIdSubstringLength.IsNull()) ||
+			(data.RemoteIdSubstringOffset.IsNull() || data.RemoteIdSubstringOffset.IsUnknown()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("remote_id_substring_length"),
 				"Missing Required Attribute",
-				"Attribute remote_id_substring_length is required when is_remote_id_substring is set to true.",
+				"Attribute remote_id_substring_length and remote_id_substring_offset are required when is_remote_id_substring is set to true.",
 			)
 		}
 
@@ -423,28 +425,6 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 				path.Root("remote_id_substring_length"),
 				"Invalid Attribute Value",
 				"Attribute remote_id_substring_length must be equal to the length of remote_id_name when is_remote_id_substring is set to true.",
-			)
-		}
-	}
-
-	// Validate circuit_id_substring_offset is required when is_circuit_id_substring == true
-	if !data.IsCircuitIdSubstring.IsNull() && data.IsCircuitIdSubstring.ValueBool() {
-		if data.CircuitIdSubstringOffset.IsUnknown() || data.CircuitIdSubstringOffset.IsNull() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("circuit_id_substring_offset"),
-				"Missing Required Attribute",
-				"Attribute circuit_id_substring_offset is required when is_circuit_id_substring is set to true.",
-			)
-		}
-	}
-
-	// Validate remote_id_substring_offset is required when is_remote_id_substring == true
-	if !data.IsRemoteIdSubstring.IsNull() && data.IsRemoteIdSubstring.ValueBool() {
-		if data.RemoteIdSubstringOffset.IsUnknown() || data.RemoteIdSubstringOffset.IsNull() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("remote_id_substring_offset"),
-				"Missing Required Attribute",
-				"Attribute remote_id_substring_offset is required when is_remote_id_substring is set to true.",
 			)
 		}
 	}
