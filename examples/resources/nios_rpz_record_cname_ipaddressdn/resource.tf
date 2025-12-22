@@ -25,14 +25,14 @@ resource "nios_rpz_record_cname_ipaddressdn" "create_record_rpz_cname_ipaddressd
 }
 
 // Create Record RPZ CNAME IP Address DN with IPV6 Address
-resource "nios_rpz_record_cname_ipaddressdn" "create_record_rpz_cname_ipaddressdn_with_additional_fields" {
+resource "nios_rpz_record_cname_ipaddressdn" "create_record_rpz_cname_ipaddressdn_with_ipv6_address" {
   name      = "2001:db9::1.${nios_dns_zone_rp.parent_zone.fqdn}"
   canonical = "canonical3.${nios_dns_zone_rp.parent_zone.fqdn}"
   rp_zone   = nios_dns_zone_rp.parent_zone.fqdn
 }
 
 // Create Record RPZ CNAME IP Address DN with IPV6 Network
-resource "nios_rpz_record_cname_ipaddressdn" "create_record_rpz_cname_ipaddressdn_with_additional_fields" {
+resource "nios_rpz_record_cname_ipaddressdn" "create_record_rpz_cname_ipaddressdn_with_ipv6_network" {
   name      = "2001:db8::/64.${nios_dns_zone_rp.parent_zone.fqdn}"
   canonical = "canonical4.${nios_dns_zone_rp.parent_zone.fqdn}"
   rp_zone   = nios_dns_zone_rp.parent_zone.fqdn

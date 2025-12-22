@@ -1,7 +1,7 @@
 // Retrieve a specific RPZ CNAME IP Address DN record by filters
 data "nios_rpz_record_cname_ipaddressdn" "get_record_using_filters" {
   filters = {
-    name = "record1.rpz.example.com"
+    name = "10.10.0.1.rpz.example.com"
   }
 }
 
