@@ -1,12 +1,12 @@
 // Retrieve a specific IPAM IPv6 Network Template using filters
 data "nios_ipam_ipv6networktemplate" "get_ipam_ipv6network_template_using_filters" {
   filters = {
-    name = "example_ipv6_network_template"
+    name = "example-ipv6-network-template"
   }
 }
 
 // Retrieve specific IPAM IPv6 Network Templates using Extensible Attributes
-data "nios_ipam_ipv6networktemplate" "get_ipam_ipv6network_template_using_extensible_attributes" {
+data "nios_ipam_ipv6networktemplate" "get_ipam_ipv6network_templates_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
   }

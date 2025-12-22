@@ -146,7 +146,10 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This flag controls whether reverse zones are automatically created when the network is added.",
 	},
 	"cidr": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 128),
+		},
 		MarkdownDescription: "The CIDR of the network in CIDR format.",
 	},
 	"cloud_api_compatible": schema.BoolAttribute{
@@ -168,6 +171,7 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"ddns_domainname": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
 			customvalidator.ValidateTrimmedString(),
