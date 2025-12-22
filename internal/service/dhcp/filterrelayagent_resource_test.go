@@ -654,6 +654,7 @@ func testAccFilterrelayagentIsCircuitId(name, isCircuitId string) string {
 resource "nios_dhcp_filterrelayagent" "test_is_circuit_id" {
     name = %q
     is_circuit_id = %q
+}
 `, name, isCircuitId)
 }
 
