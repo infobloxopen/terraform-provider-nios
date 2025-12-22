@@ -3,30 +3,33 @@ package dhcp
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type FixedaddressMsServerModel struct {
-	Ipv4addr iptypes.IPAddress `tfsdk:"ipv4addr"`
+	Ipv4addr types.String `tfsdk:"ipv4addr"`
 }
 
 var FixedaddressMsServerAttrTypes = map[string]attr.Type{
-	"ipv4addr": iptypes.IPAddressType{},
+	"ipv4addr": types.StringType,
 }
 
 var FixedaddressMsServerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ipv4addr": schema.StringAttribute{
-		CustomType:          iptypes.IPAddressType{},
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidIPv4OrFQDN(),
+		},
 		MarkdownDescription: "The IPv4 Address or FQDN of the Microsoft server.",
 	},
 }
@@ -48,7 +51,7 @@ func (m *FixedaddressMsServerModel) Expand(ctx context.Context, diags *diag.Diag
 		return nil
 	}
 	to := &dhcp.FixedaddressMsServer{
-		Ipv4addr: flex.ExpandIPAddress(m.Ipv4addr),
+		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
 	}
 	return to
 }
@@ -71,5 +74,5 @@ func (m *FixedaddressMsServerModel) Flatten(ctx context.Context, from *dhcp.Fixe
 	if m == nil {
 		*m = FixedaddressMsServerModel{}
 	}
-	m.Ipv4addr = flex.FlattenIPAddress(from.Ipv4addr)
+	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 }

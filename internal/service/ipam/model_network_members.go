@@ -14,6 +14,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NetworkMembersModel struct {
@@ -39,7 +40,10 @@ var NetworkMembersResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The struct type of the object. The value must be one of 'dhcpmember' or 'msdhcpserver'.",
 	},
 	"ipv4addr": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.IsValidIPv4OrFQDN(),
+		},
 		MarkdownDescription: "The IPv4 Address or FQDN of the Microsoft server.",
 		Computed:            true,
 	},
