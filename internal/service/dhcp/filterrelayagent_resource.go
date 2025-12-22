@@ -398,7 +398,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 		}
 		// Validate the circuit_id_substring_length is equal to the length of circuit_id_name
 		circuitIdLength := len(data.CircuitIdName.ValueString())
-		if !data.CircuitIdName.IsNull() && !(data.CircuitIdSubstringLength.ValueInt64() == int64(circuitIdLength)) {
+		if !data.CircuitIdName.IsNull() && data.CircuitIdSubstringLength.ValueInt64() != int64(circuitIdLength) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("circuit_id_substring_length"),
 				"Invalid Attribute Value",
@@ -420,7 +420,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 		// Validate the remote_id_substring_length is equal to the length of remote_id_name
 		remoteIdLength := len(data.RemoteIdName.ValueString())
-		if !data.RemoteIdName.IsNull() && !(data.RemoteIdSubstringLength.ValueInt64() == int64(remoteIdLength)) {
+		if !data.RemoteIdName.IsNull() && data.RemoteIdSubstringLength.ValueInt64() != int64(remoteIdLength) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("remote_id_substring_length"),
 				"Invalid Attribute Value",
