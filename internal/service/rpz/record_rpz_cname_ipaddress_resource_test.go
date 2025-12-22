@@ -19,10 +19,9 @@ import (
 var readableAttributesForRecordRpzCnameIpaddress = "canonical,comment,disable,extattrs,is_ipv4,name,rp_zone,ttl,use_ttl,view,zone"
 
 func TestAccRecordRpzCnameIpaddressResource_basic(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	// NOTE: Ensure the name IP must be within a network defined in NIOS for the RPZ to be created successfully for all test cases
 	nameIp := "11.0.0.1"
 	name := nameIp + "." + rpZone
 	canonical := "11.0.0.1"
@@ -52,7 +51,7 @@ func TestAccRecordRpzCnameIpaddressResource_basic(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_disappears(t *testing.T) {
-	resourceName := "nios_rpz_record_rpz_cname_ipaddress.test"
+	resourceName := "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	canonical := ""
@@ -77,7 +76,7 @@ func TestAccRecordRpzCnameIpaddressResource_disappears(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_Canonical(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp := "11.0.0.3"
@@ -125,7 +124,7 @@ func TestAccRecordRpzCnameIpaddressResource_Canonical(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_Comment(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test_comment"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test_comment"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp := "11.0.0.4"
@@ -159,7 +158,7 @@ func TestAccRecordRpzCnameIpaddressResource_Comment(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_Disable(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test_disable"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test_disable"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp := "11.0.0.5"
@@ -191,7 +190,7 @@ func TestAccRecordRpzCnameIpaddressResource_Disable(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test_extattrs"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test_extattrs"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp := "11.0.0.6"
@@ -229,7 +228,7 @@ func TestAccRecordRpzCnameIpaddressResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_Name(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test_name"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test_name"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp1 := "11.0.0.7"
@@ -262,7 +261,7 @@ func TestAccRecordRpzCnameIpaddressResource_Name(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_RpZone(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test_rp_zone"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test_rp_zone"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp1 := "11.0.0.9"
@@ -288,7 +287,7 @@ func TestAccRecordRpzCnameIpaddressResource_RpZone(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_Ttl(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test_ttl"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test_ttl"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp1 := "11.0.0.10"
@@ -320,7 +319,7 @@ func TestAccRecordRpzCnameIpaddressResource_Ttl(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_UseTtl(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test_use_ttl"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test_use_ttl"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp1 := "11.0.0.11"
@@ -352,7 +351,7 @@ func TestAccRecordRpzCnameIpaddressResource_UseTtl(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressResource_View(t *testing.T) {
-	var resourceName = "nios_rpz_record_rpz_cname_ipaddress.test_view"
+	var resourceName = "nios_rpz_record_cname_ipaddress.test_view"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp1 := "11.0.0.12"
@@ -439,17 +438,31 @@ func testAccCheckRecordRpzCnameIpaddressDisappears(ctx context.Context, v *rpz.R
 func testAccRecordRpzCnameIpaddressBasicConfig(nameIp, canonical, rpZone, view string) string {
 	// create basic resource with required fields
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test" {
+data "nios_ipam_network" "check_network" {
+  filters = {
+    "network" = "11.0.0.0/8"
+    "network_view" = "default"
+    }
+}
+
+resource "nios_ipam_network" "range_parent_network" {
+  count        = length(try(data.nios_ipam_network.check_network.result, null) != null ? data.nios_ipam_network.check_network.result : []) == 0 ? 1 : 0
+  network      = "11.0.0.0/8"
+  network_view = "default"
+  comment      = "Parent network for DHCP ranges"
+}
+
+resource "nios_rpz_record_cname_ipaddress" "test" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
 `, nameIp, canonical)
 
-	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
-func testAccBaseWithZoneNetworkZone(rpZone, view string) string {
+func testAccBaseWithZoneRPNetwork(rpZone, view string) string {
 	if view == "" {
 		view = `"default"`
 	}
@@ -463,26 +476,26 @@ resource "nios_dns_zone_rp" "test_zone" {
 
 func testAccRecordRpzCnameIpaddressComment(nameIp, canonical, rpZone, comment string) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test_comment" {
+resource "nios_rpz_record_cname_ipaddress" "test_comment" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
     comment = %q
 }
 `, nameIp, canonical, comment)
-	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameIpaddressDisable(nameIp, canonical, rpZone, disable string) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test_disable" {
+resource "nios_rpz_record_cname_ipaddress" "test_disable" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
     disable = %q
 }
 `, nameIp, canonical, disable)
-	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameIpaddressExtAttrs(nameIp, canonical, rpZone string, extAttrs map[string]string) string {
@@ -495,41 +508,41 @@ func testAccRecordRpzCnameIpaddressExtAttrs(nameIp, canonical, rpZone string, ex
 	extattrsStr += "\t}"
 
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test_extattrs" {
+resource "nios_rpz_record_cname_ipaddress" "test_extattrs" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
     extattrs = %s
 }
 `, nameIp, canonical, extattrsStr)
-	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameIpaddressName(nameIp, canonical, rpZone string) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test_name" {
+resource "nios_rpz_record_cname_ipaddress" "test_name" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
 `, nameIp, canonical)
-	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameIpaddressRpZone(nameIp, canonical, rpZone string) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test_rp_zone" {
+resource "nios_rpz_record_cname_ipaddress" "test_rp_zone" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
 `, nameIp, canonical)
-	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameIpaddressTtl(nameIp, canonical, rpZone, useTtl string, ttl int32) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test_ttl" {
+resource "nios_rpz_record_cname_ipaddress" "test_ttl" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
@@ -537,12 +550,12 @@ resource "nios_rpz_record_rpz_cname_ipaddress" "test_ttl" {
 	use_ttl = %q
 }
 `, nameIp, canonical, ttl, useTtl)
-	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameIpaddressUseTtl(nameIp, canonical, rpZone, useTtl string, ttl int32) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test_use_ttl" {
+resource "nios_rpz_record_cname_ipaddress" "test_use_ttl" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
@@ -550,17 +563,17 @@ resource "nios_rpz_record_rpz_cname_ipaddress" "test_use_ttl" {
 	ttl = %d
 }
 `, nameIp, canonical, useTtl, ttl)
-	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameIpaddressView(nameIp, canonical, rpZone, view string) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test_view" {
+resource "nios_rpz_record_cname_ipaddress" "test_view" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
     view = nios_dns_view.custom_view.name
 }
 `, nameIp, canonical)
-	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneNetworkZone(rpZone, "nios_dns_view.custom_view.name"), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }

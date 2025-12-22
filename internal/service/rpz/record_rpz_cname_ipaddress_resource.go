@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -20,6 +21,7 @@ var readableAttributesForRecordRpzCnameIpaddress = "canonical,comment,disable,ex
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RecordRpzCnameIpaddressResource{}
 var _ resource.ResourceWithImportState = &RecordRpzCnameIpaddressResource{}
+var _ resource.ResourceWithValidateConfig = &RecordRpzCnameIpaddressResource{}
 
 func NewRecordRpzCnameIpaddressResource() resource.Resource {
 	return &RecordRpzCnameIpaddressResource{}
@@ -31,7 +33,7 @@ type RecordRpzCnameIpaddressResource struct {
 }
 
 func (r *RecordRpzCnameIpaddressResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_rpz_cname_ipaddress"
+	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_cname_ipaddress"
 }
 
 func (r *RecordRpzCnameIpaddressResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -325,6 +327,28 @@ func (r *RecordRpzCnameIpaddressResource) Delete(ctx context.Context, req resour
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordRpzCnameIpaddress, got error: %s", err))
 		return
+	}
+}
+
+func (r *RecordRpzCnameIpaddressResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data RecordRpzCnameIpaddressModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if data.Canonical.IsNull() || data.Canonical.IsUnknown() {
+		return
+	}
+
+	canonical := data.Canonical.ValueString()
+	if canonical != "*" && canonical != "" {
+		if _, err := netip.ParseAddr(canonical); err != nil {
+			resp.Diagnostics.AddError(
+				"Invalid Canonical Value",
+				fmt.Sprintf("The canonical value must be '*', empty, or a valid IP address. Got: %s", canonical),
+			)
+		}
 	}
 }
 

@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccRecordRpzCnameIpaddressDataSource_Filters(t *testing.T) {
-	dataSourceName := "data.nios_rpz_record_rpz_cname_ipaddress.test"
-	resourceName := "nios_rpz_record_rpz_cname_ipaddress.test"
+	dataSourceName := "data.nios_rpz_record_cname_ipaddress.test"
+	resourceName := "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp := "11.0.0.30"
@@ -39,8 +39,8 @@ func TestAccRecordRpzCnameIpaddressDataSource_Filters(t *testing.T) {
 }
 
 func TestAccRecordRpzCnameIpaddressDataSource_ExtAttrFilters(t *testing.T) {
-	dataSourceName := "data.nios_rpz_record_rpz_cname_ipaddress.test"
-	resourceName := "nios_rpz_record_rpz_cname_ipaddress.test"
+	dataSourceName := "data.nios_rpz_record_cname_ipaddress.test"
+	resourceName := "nios_rpz_record_cname_ipaddress.test"
 	var v rpz.RecordRpzCnameIpaddress
 	rpZone := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	nameIp := "11.0.0.31"
@@ -85,24 +85,24 @@ func testAccCheckRecordRpzCnameIpaddressResourceAttrPair(resourceName, dataSourc
 
 func testAccRecordRpzCnameIpaddressDataSourceConfigFilters(nameIp, canonical, rpZone, view string) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test" {
+resource "nios_rpz_record_cname_ipaddress" "test" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
 
-data "nios_rpz_record_rpz_cname_ipaddress" "test" {
+data "nios_rpz_record_cname_ipaddress" "test" {
   filters = {
-	name = nios_rpz_record_rpz_cname_ipaddress.test.name
+	name = nios_rpz_record_cname_ipaddress.test.name
   }
 }
 `, nameIp, canonical)
-	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }
 
 func testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIp, canonical, rpZone, extAttrsValue string) string {
 	config := fmt.Sprintf(`
-resource "nios_rpz_record_rpz_cname_ipaddress" "test" {
+resource "nios_rpz_record_cname_ipaddress" "test" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
@@ -111,11 +111,11 @@ resource "nios_rpz_record_rpz_cname_ipaddress" "test" {
 	}
 }
 
-data "nios_rpz_record_rpz_cname_ipaddress" "test" {
+data "nios_rpz_record_cname_ipaddress" "test" {
   extattrfilters = {
-	Site = nios_rpz_record_rpz_cname_ipaddress.test.extattrs.Site
+	Site = nios_rpz_record_cname_ipaddress.test.extattrs.Site
   }
 }
 `, nameIp, canonical, extAttrsValue)
-	return strings.Join([]string{testAccBaseWithZoneNetworkZone(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
 }

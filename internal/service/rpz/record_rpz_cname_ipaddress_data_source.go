@@ -31,7 +31,7 @@ type RecordRpzCnameIpaddressDataSource struct {
 }
 
 func (d *RecordRpzCnameIpaddressDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_rpz_cname_ipaddress"
+	resp.TypeName = req.ProviderTypeName + "_" + "rpz_record_cname_ipaddress"
 }
 
 type RecordRpzCnameIpaddressModelWithFilter struct {
