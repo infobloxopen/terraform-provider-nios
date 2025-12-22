@@ -16,6 +16,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// Objects to be present in the grid for tests
+// filters - ipv6_nac_filter ,ipv6_option_filter
+// GRID Members - infoblox.localdomain , infoblox.member2
+
 var readableAttributesForIpv6networktemplate = "allow_any_netmask,auto_create_reversezone,cidr,cloud_api_compatible,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,delegated_member,domain_name,domain_name_servers,enable_ddns,extattrs,fixed_address_templates,ipv6prefix,logic_filter_rules,members,name,options,preferred_lifetime,range_templates,recycle_leases,rir,rir_organization,rir_registration_action,rir_registration_status,send_rir_request,update_dns_on_lease_renewal,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_domain_name,use_domain_name_servers,use_enable_ddns,use_logic_filter_rules,use_options,use_preferred_lifetime,use_recycle_leases,use_update_dns_on_lease_renewal,use_valid_lifetime,valid_lifetime"
 
 func TestAccIpv6networktemplateResource_basic(t *testing.T) {
@@ -706,14 +710,12 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("network-template")
 	membersVal := []map[string]any{
 		{
-			"struct": "dhcpmember",
-			"name":   "infoblox.localdomain",
+			"name": "infoblox.localdomain",
 		},
 	}
 	membersValUpdated := []map[string]any{
 		{
-			"struct": "dhcpmember",
-			"name":   "infoblox.member",
+			"name": "infoblox.member2",
 		},
 	}
 
@@ -726,8 +728,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 				Config: testAccIpv6networktemplateMembers(name, 24, membersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.struct", "dhcpmember"),
-					resource.TestCheckResourceAttr(resourceName, "members.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -735,8 +736,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 				Config: testAccIpv6networktemplateMembers(name, 24, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.struct", "dhcpmember"),
-					resource.TestCheckResourceAttr(resourceName, "members.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
