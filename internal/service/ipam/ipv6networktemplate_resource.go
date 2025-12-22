@@ -416,36 +416,6 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 		}
 	}
 
-	// Members validation
-	//if !data.Members.IsNull() && !data.Members.IsUnknown() {
-	//	var members []NetworkMembersModel
-	//	diags := data.Members.ElementsAs(ctx, &members, false)
-	//	resp.Diagnostics.Append(diags...)
-	//	if resp.Diagnostics.HasError() {
-	//		return
-	//	}
-	//
-	//	for i, member := range members {
-	//		if member.Struct.ValueString() == "msdhcpserver" {
-	//			if !member.Ipv6addr.IsNull() && !member.Ipv6addr.IsUnknown() {
-	//				resp.Diagnostics.AddAttributeError(
-	//					path.Root("members").AtListIndex(i).AtName("ipv6addr"),
-	//					"Invalid Configuration",
-	//					"ipv6addr cannot be set when struct is 'msdhcpserver'. Only ipv4addr is supported for msdhcpserver.",
-	//				)
-	//			}
-	//
-	//			if !member.Name.IsNull() && !member.Name.IsUnknown() {
-	//				resp.Diagnostics.AddAttributeError(
-	//					path.Root("members").AtListIndex(i).AtName("name"),
-	//					"Invalid Configuration",
-	//					"name cannot be set when struct is 'msdhcpserver'. Only ipv4addr is supported for msdhcpserver.",
-	//				)
-	//			}
-	//		}
-	//	}
-	//}
-
 	if !data.AllowAnyNetmask.IsNull() && !data.AllowAnyNetmask.IsUnknown() && !data.AllowAnyNetmask.ValueBool() {
 		if data.Cidr.IsNull() || data.Cidr.IsUnknown() {
 			resp.Diagnostics.AddAttributeError(
