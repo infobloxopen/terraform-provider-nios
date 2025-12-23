@@ -387,7 +387,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 	}
 
 	// Validate circuit_id_substring_length, circuit_id_substring_offset is required when is_circuit_id_substring == true
-	if !data.IsCircuitIdSubstring.IsUnknown() && !data.IsCircuitIdSubstring.IsNull() && data.IsCircuitIdSubstring.ValueBool() {
+	if (!data.IsCircuitIdSubstring.IsUnknown() || !data.IsCircuitIdSubstring.IsNull()) && data.IsCircuitIdSubstring.ValueBool() {
 		if (data.CircuitIdSubstringLength.IsUnknown() && data.CircuitIdSubstringLength.IsNull()) ||
 			(data.CircuitIdSubstringOffset.IsUnknown() && data.CircuitIdSubstringOffset.IsNull()) {
 			resp.Diagnostics.AddAttributeError(
@@ -408,7 +408,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 	}
 
 	// Validate remote_id_substring_length is required when is_remote_id_substring == true
-	if !data.IsRemoteIdSubstring.IsUnknown() && !data.IsRemoteIdSubstring.IsNull() && data.IsRemoteIdSubstring.ValueBool() {
+	if (!data.IsRemoteIdSubstring.IsUnknown() || !data.IsRemoteIdSubstring.IsNull()) && data.IsRemoteIdSubstring.ValueBool() {
 		if (data.RemoteIdSubstringLength.IsUnknown() && data.RemoteIdSubstringLength.IsNull()) ||
 			(data.RemoteIdSubstringOffset.IsUnknown() && data.RemoteIdSubstringOffset.IsNull()) {
 			resp.Diagnostics.AddAttributeError(
