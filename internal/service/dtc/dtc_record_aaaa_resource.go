@@ -17,6 +17,21 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// ParseAndNormalizeIPv6 parses an IPv6 address string and returns a normalized IPv6AddressValue.
+// It adds a diagnostic error if the address cannot be parsed.
+func ParseAndNormalizeIPv6(ipv6Str string, diags *diag.Diagnostics) iptypes.IPv6Address {
+	addr, err := netip.ParseAddr(ipv6Str)
+	if err != nil {
+		diags.AddError(
+			"Invalid IPv6 Address",
+			fmt.Sprintf("Unable to parse IPv6 address '%s': %s", ipv6Str, err),
+		)
+		return iptypes.NewIPv6AddressNull()
+	}
+
+	return iptypes.NewIPv6AddressValue(addr.String())
+}
+
 var readableAttributesForDtcRecordAaaa = "auto_created,comment,disable,dtc_server,ipv6addr,ttl,use_ttl"
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -68,8 +83,11 @@ func (r *DtcRecordAaaaResource) Create(ctx context.Context, req resource.CreateR
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	addr, err := netip.ParseAddr(data.Ipv6addr.ValueString())
-	data.Ipv6addr = iptypes.NewIPv6AddressValue(addr.String())
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	data.Ipv6addr = ParseAndNormalizeIPv6(data.Ipv6addr.ValueString(), &resp.Diagnostics)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -137,6 +155,12 @@ func (r *DtcRecordAaaaResource) Update(ctx context.Context, req resource.UpdateR
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	data.Ipv6addr = ParseAndNormalizeIPv6(data.Ipv6addr.ValueString(), &resp.Diagnostics)
 
 	if resp.Diagnostics.HasError() {
 		return
