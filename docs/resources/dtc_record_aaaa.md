@@ -3,12 +3,12 @@
 page_title: "nios_dtc_record_aaaa Resource - nios"
 subcategory: "DTC"
 description: |-
-  
+  Manages a DTC AAAA Record.
 ---
 
 # nios_dtc_record_aaaa (Resource)
 
-
+Manages a DTC AAAA Record.
 
 ## Example Usage
 

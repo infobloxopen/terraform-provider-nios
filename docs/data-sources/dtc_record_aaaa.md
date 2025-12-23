@@ -3,12 +3,12 @@
 page_title: "nios_dtc_record_aaaa Data Source - nios"
 subcategory: "DTC"
 description: |-
-  
+  Retrieves information about existing DTC AAAA Records.
 ---
 
 # nios_dtc_record_aaaa (Data Source)
 
-
+Retrieves information about existing DTC AAAA Records.
 
 ## Example Usage
 
