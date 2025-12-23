@@ -366,7 +366,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate circuit_id_name is required when is_circuit_id == "MATCHES_VALUE"
 	if isCircuitId == "MATCHES_VALUE" {
-		if data.CircuitIdName.IsUnknown() || data.CircuitIdName.IsNull() || data.CircuitIdName.ValueString() == "" {
+		if data.CircuitIdName.IsUnknown() && data.CircuitIdName.IsNull() || data.CircuitIdName.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("circuit_id_name"),
 				"Missing Required Attribute",
@@ -377,7 +377,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate remote_id_name is required when is_remote_id == "MATCHES_VALUE"
 	if isRemoteId == "MATCHES_VALUE" {
-		if data.RemoteIdName.IsUnknown() || data.RemoteIdName.IsNull() || data.RemoteIdName.ValueString() == "" {
+		if data.RemoteIdName.IsUnknown() && data.RemoteIdName.IsNull() || data.RemoteIdName.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("remote_id_name"),
 				"Missing Required Attribute",
@@ -387,9 +387,9 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 	}
 
 	// Validate circuit_id_substring_length, circuit_id_substring_offset is required when is_circuit_id_substring == true
-	if (!data.IsCircuitIdSubstring.IsNull() || !data.IsCircuitIdSubstring.IsUnknown()) && data.IsCircuitIdSubstring.ValueBool() {
-		if (data.CircuitIdSubstringLength.IsUnknown() || data.CircuitIdSubstringLength.IsNull()) ||
-			(data.CircuitIdSubstringOffset.IsNull() || data.CircuitIdSubstringOffset.IsUnknown()) {
+	if !data.IsCircuitIdSubstring.IsUnknown() && !data.IsCircuitIdSubstring.IsNull() && data.IsCircuitIdSubstring.ValueBool() {
+		if (data.CircuitIdSubstringLength.IsUnknown() && data.CircuitIdSubstringLength.IsNull()) ||
+			(data.CircuitIdSubstringOffset.IsUnknown() && data.CircuitIdSubstringOffset.IsNull()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("circuit_id_substring_length"),
 				"Missing Required Attribute",
@@ -408,9 +408,9 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 	}
 
 	// Validate remote_id_substring_length is required when is_remote_id_substring == true
-	if (!data.IsRemoteIdSubstring.IsNull() || !data.IsRemoteIdSubstring.IsUnknown()) && data.IsRemoteIdSubstring.ValueBool() {
-		if (data.RemoteIdSubstringLength.IsUnknown() || data.RemoteIdSubstringLength.IsNull()) ||
-			(data.RemoteIdSubstringOffset.IsNull() || data.RemoteIdSubstringOffset.IsUnknown()) {
+	if !data.IsRemoteIdSubstring.IsUnknown() && !data.IsRemoteIdSubstring.IsNull() && data.IsRemoteIdSubstring.ValueBool() {
+		if (data.RemoteIdSubstringLength.IsUnknown() && data.RemoteIdSubstringLength.IsNull()) ||
+			(data.RemoteIdSubstringOffset.IsUnknown() && data.RemoteIdSubstringOffset.IsNull()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("remote_id_substring_length"),
 				"Missing Required Attribute",
@@ -431,7 +431,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate is_circuit_id_substring is required when is_circuit_id == "MATCHES_VALUE"
 	if isCircuitId == "MATCHES_VALUE" {
-		if data.IsCircuitIdSubstring.IsUnknown() || data.IsCircuitIdSubstring.IsNull() {
+		if data.IsCircuitIdSubstring.IsUnknown() && data.IsCircuitIdSubstring.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("is_circuit_id_substring"),
 				"Missing Required Attribute",
@@ -442,7 +442,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate is_remote_id_substring is required when is_remote_id == "MATCHES_VALUE"
 	if isRemoteId == "MATCHES_VALUE" {
-		if data.IsRemoteIdSubstring.IsUnknown() || data.IsRemoteIdSubstring.IsNull() {
+		if data.IsRemoteIdSubstring.IsUnknown() && data.IsRemoteIdSubstring.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("is_remote_id_substring"),
 				"Missing Required Attribute",
