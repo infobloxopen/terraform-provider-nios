@@ -145,7 +145,7 @@ func TestAccFilterrelayagentResource_CircuitIdSubstringOffset(t *testing.T) {
 	isCircuitIdSubstring := "true"
 	circuitIdSubstringOffset := "0"
 	circuitIdName := "CIRCUIT_ID_NAME_TEST"
-	isCircuitIdSubstringLength := fmt.Sprintf("%d", len(circuitIdName))
+	circuitIdSubstringLength := fmt.Sprintf("%d", len(circuitIdName))
 	updatedCircuitIdSubstringOffset := "1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -154,7 +154,7 @@ func TestAccFilterrelayagentResource_CircuitIdSubstringOffset(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFilterrelayagentCircuitIdSubstringOffset(name, isCircuitID, circuitIdName, isCircuitIdSubstringLength, circuitIdSubstringOffset, isCircuitIdSubstring),
+				Config: testAccFilterrelayagentCircuitIdSubstringOffset(name, isCircuitID, circuitIdName, circuitIdSubstringLength, circuitIdSubstringOffset, isCircuitIdSubstring),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterrelayagentExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "circuit_id_substring_offset", "0"),
@@ -162,7 +162,7 @@ func TestAccFilterrelayagentResource_CircuitIdSubstringOffset(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFilterrelayagentCircuitIdSubstringOffset(name, isCircuitID, circuitIdName, isCircuitIdSubstringLength, updatedCircuitIdSubstringOffset, isCircuitIdSubstring),
+				Config: testAccFilterrelayagentCircuitIdSubstringOffset(name, isCircuitID, circuitIdName, circuitIdSubstringLength, updatedCircuitIdSubstringOffset, isCircuitIdSubstring),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilterrelayagentExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "circuit_id_substring_offset", "1"),
