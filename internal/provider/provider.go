@@ -151,6 +151,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewFiltermacResource,
 		dhcp.NewDhcpfailoverResource,
 		dhcp.NewMacfilteraddressResource,
+		dhcp.NewFilternacResource,
 		dhcp.NewRoaminghostResource,
 
 		dtc.NewDtcLbdnResource,
@@ -271,6 +272,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewFiltermacDataSource,
 		dhcp.NewDhcpfailoverDataSource,
 		dhcp.NewMacfilteraddressDataSource,
+		dhcp.NewFilternacDataSource,
 		dhcp.NewRoaminghostDataSource,
 
 		dtc.NewDtcLbdnDataSource,
