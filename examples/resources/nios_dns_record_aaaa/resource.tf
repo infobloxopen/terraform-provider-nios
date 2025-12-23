@@ -1,18 +1,3 @@
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "1.0.0"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "https://172.28.82.33"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
-}
-
 // Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example.com"
@@ -31,7 +16,7 @@ resource "nios_ipam_ipv6network" "example_ipv6_network" {
 // Create Record AAAA with Basic Fields
 resource "nios_dns_record_aaaa" "create_record_aaaa_with_basic_fields" {
   name       = "example_record.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
-  ipv6addr   = "2001:db8:85a3:0000:0000:8a2e:370:7335"
+  ipv6addr   = "2002:1111::1401"
   view       = "default"
   depends_on = [nios_dns_zone_auth.parent_auth_zone]
 }
