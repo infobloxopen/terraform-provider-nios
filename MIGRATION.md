@@ -33,7 +33,7 @@ terraform {
   required_providers {
     nios = {
       source  = "infobloxopen/nios"
-      version = "1.0.0"
+      version = "1.1.0"
     }
   }
 }
@@ -204,12 +204,6 @@ Some Configuration written as dict will have to be rewritten as list values. Thi
     nios_dns_zone_auth.parent_zone2.ref
   ]
 ```
-
-## Important Note
-
-> The new NIOS provider uses a unique identifier called **"Terraform Internal ID"** under extensible attributes (`extattrs_all`) that is updated during the Terraform plan phase of a Terraform import.  
->  
-> If you generate a plan for import and it fails, this unique identifier will be updated, and you will **NOT** be able to use the legacy Infoblox provider anymore for those resources.
 
 **Migration Complexity**: If you want to replace existing resource names and field mappings, the migration can become complicated because:
 - The Terraform Internal ID structure has changed
