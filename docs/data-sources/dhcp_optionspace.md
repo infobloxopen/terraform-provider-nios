@@ -47,9 +47,9 @@ Required:
 Optional:
 
 - `comment` (String) A descriptive comment of a DHCP option space object.
-- `option_definitions` (List of String) The list of DHCP option definition objects.
 
 Read-Only:
 
+- `option_definitions` (List of String) The list of DHCP option definition objects.
 - `ref` (String) The reference to the object.
 - `space_type` (String) The type of a DHCP option space object.
