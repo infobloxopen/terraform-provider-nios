@@ -48,8 +48,8 @@ Required:
 Optional:
 
 - `comment` (String) A descriptive comment of a DHCP IPv6 option space object.
-- `option_definitions` (List of String) The list of DHCP IPv6 option definition objects.
 
 Read-Only:
 
+- `option_definitions` (List of String) The list of DHCP IPv6 option definition objects.
 - `ref` (String) The reference to the object.
