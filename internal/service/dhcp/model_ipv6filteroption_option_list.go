@@ -59,7 +59,7 @@ var Ipv6filteroptionOptionListResourceSchemaAttributes = map[string]schema.Attri
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
-		MarkdownDescription: "Value of the DHCP option.Required to be set for all options.",
+		MarkdownDescription: "Value of the DHCP option. Required to be set for all options.",
 	},
 	"use_option": schema.BoolAttribute{
 		Optional:            true,

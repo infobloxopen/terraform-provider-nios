@@ -72,7 +72,7 @@ Read-Only:
 
 Required:
 
-- `value` (String) Value of the DHCP option.Required to be set for all options.
+- `value` (String) Value of the DHCP option. Required to be set for all options.
 
 Optional:
 

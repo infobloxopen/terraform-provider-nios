@@ -8,7 +8,7 @@ resource "nios_dhcp_ipv6filteroption" "dhcp_ipv6filteroption_with_additional_fie
   name = "example_ipv6_filter_option_2"
 
   // Additional Fields
-  comment    = "IPv6  Filter Option created via Terraform"
+  comment    = "IPv6 Filter Option created via Terraform"
   expression = "(option dhcp6.server-id=\"server-id\" AND option dhcp6.vendor-class=\"DHCPv6\")"
   lease_time = 7200
   option_list = [
