@@ -37,6 +37,8 @@ func TestAccIpv6filteroptionResource_basic(t *testing.T) {
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "apply_as_class", "true"),
 					resource.TestCheckResourceAttr(resourceName, "option_space", "DHCPv6"),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "expression", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

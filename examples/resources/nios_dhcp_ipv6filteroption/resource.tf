@@ -1,5 +1,5 @@
 // Create a DHCP IPv6 Filter Option with Basic Fields
-resource "nios_dhcp_ipv6filteroption" "dhcp_ipv6filteroption_basic" {
+resource "nios_dhcp_ipv6filteroption" "dhcp_ipv6filteroption_with_basic_fields" {
   name = "example_ipv6_filter_option_1"
 }
 
