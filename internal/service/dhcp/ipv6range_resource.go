@@ -411,6 +411,18 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 			)
 		}
 	}
+
+	// Check if server_association_type is MEMBER
+	if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() && data.ServerAssociationType.ValueString() == "MEMBER" {
+		// Ensure the member field is not empty
+		if data.Member.IsNull() || data.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+			)
+		}
+	}
 }
 
 func (r *Ipv6rangeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
