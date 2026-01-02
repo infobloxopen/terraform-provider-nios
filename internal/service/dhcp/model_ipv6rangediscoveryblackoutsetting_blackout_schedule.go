@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -76,7 +75,6 @@ var Ipv6rangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = 
 	"time_zone": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
-		Default:             stringdefault.StaticString("UTC"),
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
@@ -115,6 +113,7 @@ var Ipv6rangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = 
 	},
 	"year": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The year for the scheduled task.",
 	},
 	"month": schema.Int64Attribute{
@@ -136,7 +135,6 @@ var Ipv6rangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = 
 	"repeat": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
-		Default:  stringdefault.StaticString("ONCE"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ONCE", "RECUR"),
 		},
