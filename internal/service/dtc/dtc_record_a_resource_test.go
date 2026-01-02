@@ -321,14 +321,6 @@ resource "nios_dtc_record_a" "test" {
 `, ipv4addr)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrString), config}, "")
 }
-func testAccBaseWithDtcServer(name, host string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_server" "test" {
-  name = %q
-  host = %q
-}
-`, name, host)
-}
 
 func testAccDtcRecordAComment(serverName, ipv4addr, ipv4addrServer, comment string) string {
 	config := fmt.Sprintf(`
