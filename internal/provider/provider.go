@@ -152,6 +152,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewDhcpfailoverResource,
 		dhcp.NewMacfilteraddressResource,
 		dhcp.NewFilternacResource,
+		dhcp.NewRoaminghostResource,
+		dhcp.NewFingerprintResource,
+		dhcp.NewFilterfingerprintResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -175,6 +178,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewVlanviewResource,
 		ipam.NewVlanResource,
 		ipam.NewVlanrangeResource,
+		ipam.NewSuperhostResource,
 
 		cloud.NewAwsrte53taskgroupResource,
 		cloud.NewAwsuserResource,
@@ -273,6 +277,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewDhcpfailoverDataSource,
 		dhcp.NewMacfilteraddressDataSource,
 		dhcp.NewFilternacDataSource,
+		dhcp.NewRoaminghostDataSource,
+		dhcp.NewFingerprintDataSource,
+		dhcp.NewFilterfingerprintDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
@@ -296,6 +303,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewVlanviewDataSource,
 		ipam.NewVlanDataSource,
 		ipam.NewVlanrangeDataSource,
+		ipam.NewSuperhostDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
 		cloud.NewAwsuserDataSource,
