@@ -168,6 +168,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcMonitorIcmpResource,
 		dtc.NewDtcMonitorSipResource,
 		dtc.NewDtcRecordAResource,
+		dtc.NewDtcRecordNaptrResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworktemplateResource,
@@ -293,6 +294,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcMonitorIcmpDataSource,
 		dtc.NewDtcMonitorSipDataSource,
 		dtc.NewDtcRecordADataSource,
+		dtc.NewDtcRecordNaptrDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworktemplateDataSource,
