@@ -24,5 +24,5 @@ resource "nios_dtc_record_srv" "srv_record_with_additional_fields" {
   disable    = false
   ttl        = 3600
   use_ttl    = true
-  name       = "_example._tcp.example.com"
+  name       = "example_record._tcp.example.com"
 }

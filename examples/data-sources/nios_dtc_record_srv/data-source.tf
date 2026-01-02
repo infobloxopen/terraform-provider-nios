@@ -2,7 +2,7 @@
 data "nios_dtc_record_srv" "get_dtc_record_srv_in_dtc_server_using_filters" {
   filters = {
     dtc_server = "example-server"
-    name       = "_example._tcp.example.com"
+    name       = "example_record._tcp.example.com"
   }
 }
 
