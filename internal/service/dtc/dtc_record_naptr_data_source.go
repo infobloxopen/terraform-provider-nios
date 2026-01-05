@@ -55,7 +55,7 @@ func (d *DtcRecordNaptrDataSource) Schema(ctx context.Context, req datasource.Sc
 			"filters": schema.MapAttribute{
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType: types.StringType,
-				Optional:    true,
+				Required:    true,
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{

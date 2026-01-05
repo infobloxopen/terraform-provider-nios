@@ -78,6 +78,7 @@ var DtcRecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"flags": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -100,6 +101,7 @@ var DtcRecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"regexp": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -115,6 +117,7 @@ var DtcRecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"services": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthBetween(0, 128),

@@ -41,6 +41,9 @@ func TestAccDtcRecordNaptrResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
+					resource.TestCheckResourceAttr(resourceName, "flags", ""),
+					resource.TestCheckResourceAttr(resourceName, "regexp", ""),
+					resource.TestCheckResourceAttr(resourceName, "services", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -195,6 +198,13 @@ func TestAccDtcRecordNaptrResource_Flags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "flags", "A"),
+				),
+			},
+			{
+				Config: testAccDtcRecordNaptrFlags(serverName, serverIp, 2, 5, "example.com", ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDtcRecordNaptrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "flags", ""),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -609,7 +619,7 @@ func testAccDtcRecordNaptrTtl(serverName, serverIP string, order, preference int
 		preference = %d
 		replacement = %q
 		ttl = %q
-		use_ttl = false
+		use_ttl = true
 	}
 	`, order, preference, replacement, ttl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, serverIP), config}, "\n")
