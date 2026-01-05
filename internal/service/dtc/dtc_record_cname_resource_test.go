@@ -307,7 +307,7 @@ func testAccCheckDtcRecordCnameDisappears(ctx context.Context, v *dtc.DtcRecordC
 
 func testAccDtcRecordCnameBasicConfig(name, serverName string) string {
 	config := fmt.Sprintf(`
-	resource "nios_dtc_record_cname" "test" {
+resource "nios_dtc_record_cname" "test" {
 	canonical = %q
 	dtc_server = nios_dtc_server.test.name
 }
@@ -327,7 +327,7 @@ resource "nios_dtc_server" "test" {
 
 func testAccDtcRecordCnameCanonical(canonical, serverName string) string {
 	config := fmt.Sprintf(`
-	resource "nios_dtc_record_cname" "test_canonical" {
+resource "nios_dtc_record_cname" "test_canonical" {
     canonical = %q
     dtc_server = nios_dtc_server.test.name
 }
@@ -337,7 +337,7 @@ func testAccDtcRecordCnameCanonical(canonical, serverName string) string {
 
 func testAccDtcRecordCnameComment(canonical, serverName, comment string) string {
 	config := fmt.Sprintf(`
-	resource "nios_dtc_record_cname" "test_comment" {
+resource "nios_dtc_record_cname" "test_comment" {
 	canonical = %q
 	dtc_server = nios_dtc_server.test.name
     comment = %q
@@ -348,7 +348,7 @@ func testAccDtcRecordCnameComment(canonical, serverName, comment string) string 
 
 func testAccDtcRecordCnameDisable(canonical, serverName string, disable bool) string {
 	config := fmt.Sprintf(`
-	resource "nios_dtc_record_cname" "test_disable" {
+resource "nios_dtc_record_cname" "test_disable" {
 	canonical = %q
 	dtc_server = nios_dtc_server.test.name
     disable = %t
@@ -359,7 +359,7 @@ func testAccDtcRecordCnameDisable(canonical, serverName string, disable bool) st
 
 func testAccDtcRecordCnameDtcServer(canonical, serverName string) string {
 	config := fmt.Sprintf(`
-	resource "nios_dtc_record_cname" "test_dtc_server" {
+resource "nios_dtc_record_cname" "test_dtc_server" {
 	canonical = %q
 	dtc_server = nios_dtc_server.test.name
 	}
@@ -369,7 +369,7 @@ func testAccDtcRecordCnameDtcServer(canonical, serverName string) string {
 
 func testAccDtcRecordCnameTtl(canonical, serverName string, ttl int) string {
 	config := fmt.Sprintf(`
-	resource "nios_dtc_record_cname" "test_ttl" {
+resource "nios_dtc_record_cname" "test_ttl" {
 	canonical = %q
 	dtc_server = nios_dtc_server.test.name
     ttl = %d
@@ -381,7 +381,7 @@ func testAccDtcRecordCnameTtl(canonical, serverName string, ttl int) string {
 
 func testAccDtcRecordCnameUseTtl(canonical, serverName string, useTtl bool) string {
 	config := fmt.Sprintf(`
-	resource "nios_dtc_record_cname" "test_use_ttl" {
+resource "nios_dtc_record_cname" "test_use_ttl" {
 	canonical = %q
 	dtc_server = nios_dtc_server.test.name
     use_ttl = %t

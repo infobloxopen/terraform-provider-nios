@@ -32,10 +32,11 @@ resource "nios_dtc_server" "create_dtc_server2" {
   host                    = "2.3.3.4"
   auto_create_host_record = false
 }
+
 // Create a DTC CNAME Record with additional fields
 resource "nios_dtc_record_cname" "record_cname_additional_fields" {
   dtc_server = nios_dtc_server.create_dtc_server2.name
-  canonical  = "example-a.com"
+  canonical  = "example_canonical_name.com"
   comment    = "Creating DTC CNAME Record"
   disable    = false
   ttl        = 20

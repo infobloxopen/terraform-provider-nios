@@ -4,7 +4,7 @@
 data "nios_dtc_record_cname" "get_dtc_cname_record_in_dtc_server_using_filters" {
   filters = {
     dtc_server = "example-dtc-server"
-    canonical  = "example.com"
+    canonical  = "example_canonical_name.com"
   }
 }
 
