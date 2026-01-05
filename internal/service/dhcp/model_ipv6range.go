@@ -333,6 +333,7 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"server_association_type": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
+		Default:  stringdefault.StaticString("NONE"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("MEMBER", "NONE"),
 		},
