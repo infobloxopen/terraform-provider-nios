@@ -24,7 +24,7 @@ type IPv6Name struct {
 	basetypes.StringValue
 }
 
-// Type returns an IPv6AddressType.
+// Type returns an IPv6NameType.
 func (v IPv6Name) Type(_ context.Context) attr.Type {
 	return IPv6NameType{}
 }
@@ -115,7 +115,7 @@ func (v IPv6Name) ValidateAttribute(ctx context.Context, req xattr.ValidateAttri
 			req.Path,
 			"Invalid IPv6 Name Value",
 			"A string value was provided that is not a valid IPv6 name. "+
-				"Expected format '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
+				"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
 				"Given Value: "+v.ValueString(),
 		)
 		return
@@ -129,7 +129,7 @@ func (v IPv6Name) ValidateAttribute(ctx context.Context, req xattr.ValidateAttri
 				req.Path,
 				"Invalid IPv6 Name Value",
 				"A string value was provided that is not a valid IPv6 name. "+
-					"Expected format '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
+					"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
 					"Given Value: "+v.ValueString(),
 			)
 
@@ -144,9 +144,8 @@ func (v IPv6Name) ValidateAttribute(ctx context.Context, req xattr.ValidateAttri
 				req.Path,
 				"Invalid IPv6 Name Value",
 				"A string value was provided that is not a valid IPv6 name. "+
-					"Expected format '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
-					"Given Value: "+v.ValueString()+"\n"+
-					"Error: "+err.Error(),
+					"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
+					"Given Value: "+v.ValueString()+"\n",
 			)
 
 			return
@@ -198,7 +197,7 @@ func (v IPv6Name) ValidateParameter(ctx context.Context, req function.ValidatePa
 			req.Position,
 			"Invalid IPv6 Name Value: "+
 				"A string value was provided that is not a valid IPv6 name. "+
-				"Expected format '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
+				"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
 				"Given Value: "+v.ValueString(),
 		)
 		return

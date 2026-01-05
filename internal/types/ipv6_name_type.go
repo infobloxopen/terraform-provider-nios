@@ -20,7 +20,7 @@ type IPv6NameType struct {
 
 // String returns a human readable string of the type name.
 func (t IPv6NameType) String() string {
-	return "iptypes.IPv6AddressType"
+	return "iptypes.IPv6NameType"
 }
 
 // ValueType returns the Value type.
