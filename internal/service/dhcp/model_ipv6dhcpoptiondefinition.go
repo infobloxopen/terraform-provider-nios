@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -49,7 +50,9 @@ var Ipv6dhcpoptiondefinitionResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "The name of a DHCP IPv6 option definition object.",
 	},
 	"space": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString("DHCPv6"),
 		MarkdownDescription: "The space of a DHCP option definition object.",
 	},
 	"type": schema.StringAttribute{

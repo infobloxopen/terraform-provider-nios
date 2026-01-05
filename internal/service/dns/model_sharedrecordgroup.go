@@ -16,9 +16,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -150,5 +153,12 @@ func (m *SharedrecordgroupModel) Flatten(ctx context.Context, from *dns.Sharedre
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.RecordNamePolicy = flex.FlattenStringPointer(from.RecordNamePolicy)
 	m.UseRecordNamePolicy = types.BoolPointerValue(from.UseRecordNamePolicy)
+	planZoneAssociations := m.ZoneAssociations
 	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, SharedrecordgroupZoneAssociationsAttrTypes, diags, FlattenSharedrecordgroupZoneAssociations)
+	if !planZoneAssociations.IsUnknown() {
+		reOrderedZoneAssociations, diags := utils.ReorderAndFilterNestedListResponse(ctx, planZoneAssociations, m.ZoneAssociations, "fqdn")
+		if !diags.HasError() {
+			m.ZoneAssociations = reOrderedZoneAssociations.(basetypes.ListValue)
+		}
+	}
 }
