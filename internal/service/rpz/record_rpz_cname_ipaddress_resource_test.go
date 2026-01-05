@@ -440,8 +440,8 @@ func testAccRecordRpzCnameIpaddressBasicConfig(nameIP, canonical, rpZone, view s
 	config := fmt.Sprintf(`
 data "nios_ipam_network" "check_network" {
   filters = {
-    "network" = "11.0.0.0/8"
-    "network_view" = "default"
+    network = "11.0.0.0/8"
+    network_view = "default"
     }
 }
 
