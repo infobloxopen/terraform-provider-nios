@@ -3,33 +3,35 @@
 page_title: "nios_rpz_record_cname_ipaddress Resource - nios"
 subcategory: "RPZ"
 description: |-
-  
+  Manages RPZ CNAME IP address record.
 ---
 
 # nios_rpz_record_cname_ipaddress (Resource)
 
-
+Manages RPZ CNAME IP address record.
 
 ## Example Usage
 
 ```terraform
-// Create Parent RP Zone
-resource "nios_dns_zone_rp" "parent_zone" {
-  fqdn = "rpzip.example.com"
-}
-
-// Create an IPV4 network if not present (Required as Parent)
-// Check if network exists, create only if not present
+// Get network
 data "nios_ipam_network" "check_network" {
-  cidr         = "11.0.0.0/8"
-  network_view = "default"
+  filters = {
+    "network"      = "11.0.0.0/8"
+    "network_view" = "default"
+  }
 }
 
+// Create Parent Network if not exists
 resource "nios_ipam_network" "range_parent_network" {
-  count        = length(data.nios_ipam_network.check_network.id) == 0 ? 1 : 0
+  count        = length(try(data.nios_ipam_network.check_network.result, null) != null ? data.nios_ipam_network.check_network.result : []) == 0 ? 1 : 0
   network      = "11.0.0.0/8"
   network_view = "default"
   comment      = "Parent network for DHCP ranges"
+}
+
+// Create Parent RP Zone
+resource "nios_dns_zone_rp" "parent_zone" {
+  fqdn = "rpzip.example.com"
 }
 
 // Create Record RPZ CNAME IP address with Basic Fields

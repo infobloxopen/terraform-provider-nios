@@ -3,12 +3,12 @@
 page_title: "nios_rpz_record_cname_ipaddress Data Source - nios"
 subcategory: "RPZ"
 description: |-
-  
+  Retrieve RPZ CNAME IP address record.
 ---
 
 # nios_rpz_record_cname_ipaddress (Data Source)
 
-
+Retrieve RPZ CNAME IP address record.
 
 ## Example Usage
 

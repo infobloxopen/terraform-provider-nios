@@ -1,9 +1,9 @@
 // Get network
 data "nios_ipam_network" "check_network" {
   filters = {
-    "network" = "11.0.0.0/8"
+    "network"      = "11.0.0.0/8"
     "network_view" = "default"
-    }
+  }
 }
 
 // Create Parent Network if not exists
