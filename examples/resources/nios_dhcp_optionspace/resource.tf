@@ -3,6 +3,10 @@ resource "nios_dhcp_optionspace" "dhcp_option_space_with_basic_fields" {
   name = "example_option_space_1"
 }
 
+//  NOTE: option_definitions is a computed (read-only) field and cannot be set here.
+//  It will be automatically populated when option definitions are created that
+//  reference this space (nios_dhcp_ioptiondefinition.dhcp_option_space_with_basic_fields) as shown below.
+
 // Create a DHCP Option Definition
 resource "nios_dhcp_optiondefinition" "dhcp_option_definition" {
   code  = 30
@@ -11,11 +15,3 @@ resource "nios_dhcp_optiondefinition" "dhcp_option_definition" {
   space = nios_dhcp_optionspace.dhcp_option_space_with_basic_fields.name
 }
 
-// Create a DHCP Option Space with Additional Fields using the pre-created Option Definition
-resource "nios_dhcp_optionspace" "dhcp_option_space_with_additional_fields" {
-  name    = "example_option_space_2"
-  comment = "DHCP Option Space created by Terraform"
-  option_definitions = [
-    nios_dhcp_optiondefinition.dhcp_option_definition.name
-  ]
-}
