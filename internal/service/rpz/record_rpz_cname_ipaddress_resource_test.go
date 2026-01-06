@@ -438,20 +438,6 @@ func testAccCheckRecordRpzCnameIpaddressDisappears(ctx context.Context, v *rpz.R
 func testAccRecordRpzCnameIpaddressBasicConfig(nameIP, canonical, rpZone, view string) string {
 	// create basic resource with required fields
 	config := fmt.Sprintf(`
-data "nios_ipam_network" "check_network" {
-  filters = {
-    network = "11.0.0.0/8"
-    network_view = "default"
-    }
-}
-
-resource "nios_ipam_network" "range_parent_network" {
-  count        = length(try(data.nios_ipam_network.check_network.result, null) != null ? data.nios_ipam_network.check_network.result : []) == 0 ? 1 : 0
-  network      = "11.0.0.0/8"
-  network_view = "default"
-  comment      = "Parent network for DHCP ranges"
-}
-
 resource "nios_rpz_record_cname_ipaddress" "test" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
