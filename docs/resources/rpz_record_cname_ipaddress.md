@@ -13,22 +13,6 @@ Manages RPZ CNAME IP address record.
 ## Example Usage
 
 ```terraform
-// Get network
-data "nios_ipam_network" "check_network" {
-  filters = {
-    "network"      = "11.0.0.0/8"
-    "network_view" = "default"
-  }
-}
-
-// Create Parent Network if not exists
-resource "nios_ipam_network" "range_parent_network" {
-  count        = length(try(data.nios_ipam_network.check_network.result, null) != null ? data.nios_ipam_network.check_network.result : []) == 0 ? 1 : 0
-  network      = "11.0.0.0/8"
-  network_view = "default"
-  comment      = "Parent network for DHCP ranges"
-}
-
 // Create Parent RP Zone
 resource "nios_dns_zone_rp" "parent_zone" {
   fqdn = "rpzip.example.com"
