@@ -83,9 +83,12 @@ var DtcMonitorTcpResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"interval": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(5),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(5),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 4294967295),
+		},
 		MarkdownDescription: "The interval for TCP health check.",
 	},
 	"name": schema.StringAttribute{
@@ -96,32 +99,40 @@ var DtcMonitorTcpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The display name for this DTC monitor.",
 	},
 	"port": schema.Int64Attribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.Int64{
 			int64validator.Between(1, 65535),
 		},
 		MarkdownDescription: "The port value for TCP requests.",
 	},
 	"retry_down": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(1),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 4294967295),
+		},
 		MarkdownDescription: "The value of how many times the server should appear as down to be treated as dead after it was alive.",
 	},
 	"retry_up": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(1),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 4294967295),
+		},
 		MarkdownDescription: "The value of how many times the server should appear as up to be treated as alive after it was dead.",
 	},
 	"timeout": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(15),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(15),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 4294967295),
+		},
 		MarkdownDescription: "The timeout for TCP health check in seconds.",
 	},
 }
-
 
 func (m *DtcMonitorTcpModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dtc.DtcMonitorTcp {
 	if m == nil {
