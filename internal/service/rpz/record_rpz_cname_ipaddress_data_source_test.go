@@ -46,6 +46,7 @@ func TestAccRecordRpzCnameIpaddressDataSource_ExtAttrFilters(t *testing.T) {
 	nameIP := "11.0.0.31"
 	canonical := ""
 	view := acctest.RandomNameWithPrefix("view")
+	site := view
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -53,7 +54,7 @@ func TestAccRecordRpzCnameIpaddressDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordRpzCnameIpaddressDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIP, canonical, rpZone, view),
+				Config: testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIP, canonical, rpZone, view, site),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordRpzCnameIpaddressExists(context.Background(), resourceName, &v),
@@ -89,6 +90,7 @@ resource "nios_rpz_record_cname_ipaddress" "test" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+	view = nios_dns_view.custom_view.name
 }
 
 data "nios_rpz_record_cname_ipaddress" "test" {
@@ -97,15 +99,16 @@ data "nios_rpz_record_cname_ipaddress" "test" {
   }
 }
 `, nameIp, canonical)
-	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }
 
-func testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIp, canonical, rpZone, extAttrsValue string) string {
+func testAccRecordRpzCnameIpaddressDataSourceConfigExtAttrFilters(nameIp, canonical, rpZone, view, site string) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_ipaddress" "test" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+	view = nios_dns_view.custom_view.name
 	extattrs = {
 		Site = %q
 	}
@@ -116,6 +119,6 @@ data "nios_rpz_record_cname_ipaddress" "test" {
 	Site = nios_rpz_record_cname_ipaddress.test.extattrs.Site
   }
 }
-`, nameIp, canonical, extAttrsValue)
-	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
+`, nameIp, canonical, site)
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }

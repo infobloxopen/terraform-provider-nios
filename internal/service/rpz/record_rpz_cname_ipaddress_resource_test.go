@@ -40,7 +40,7 @@ func TestAccRecordRpzCnameIpaddressResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "canonical", canonical),
 					resource.TestCheckResourceAttr(resourceName, "rp_zone", rpZone),
 					// Test fields with default value
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "view", view),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
@@ -441,11 +441,11 @@ func testAccRecordRpzCnameIpaddressBasicConfig(nameIP, canonical, rpZone, view s
 resource "nios_rpz_record_cname_ipaddress" "test" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
+	view = nios_dns_view.custom_view.name
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 }
 `, nameIP, canonical)
-
-	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZoneRPNetwork(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }
 
 func testAccBaseWithZoneRPNetwork(rpZone, view string) string {
@@ -466,6 +466,7 @@ resource "nios_rpz_record_cname_ipaddress" "test_comment" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+    view = "default"
     comment = %q
 }
 `, nameIp, canonical, comment)
@@ -478,6 +479,7 @@ resource "nios_rpz_record_cname_ipaddress" "test_disable" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+	view = "default"
     disable = %q
 }
 `, nameIP, canonical, disable)
@@ -498,6 +500,7 @@ resource "nios_rpz_record_cname_ipaddress" "test_extattrs" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+	view = "default"
     extattrs = %s
 }
 `, nameIP, canonical, extattrsStr)
@@ -510,6 +513,7 @@ resource "nios_rpz_record_cname_ipaddress" "test_name" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+	view = "default"
 }
 `, nameIP, canonical)
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
@@ -521,6 +525,7 @@ resource "nios_rpz_record_cname_ipaddress" "test_rp_zone" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+	view = "default"
 }
 `, nameIP, canonical)
 	return strings.Join([]string{testAccBaseWithZoneRPNetwork(rpZone, ""), config}, "")
@@ -532,6 +537,7 @@ resource "nios_rpz_record_cname_ipaddress" "test_ttl" {
 	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+	view = "default"
 	ttl = %d
 	use_ttl = %q
 }
@@ -545,6 +551,7 @@ resource "nios_rpz_record_cname_ipaddress" "test_use_ttl" {
     name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
+	view = "default"
     use_ttl = %q
 	ttl = %d
 }
