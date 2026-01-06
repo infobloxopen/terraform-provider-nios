@@ -25,7 +25,7 @@ resource "nios_rpz_record_cname_ipaddress" "create_record_rpz_cname_ipaddress_wi
   }
 }
 
-// Create Record RPZ CNAME IP address - Block Domain (No Such Domain Rule)
+// Create Record RPZ CNAME IP address - Block IP Address (No Such Domain) Rule.
 resource "nios_rpz_record_cname_ipaddress" "create_record_rpz_cname_no_domain" {
   name      = "11.0.0.2.${nios_dns_zone_rp.parent_zone.fqdn}"
   canonical = ""
@@ -33,7 +33,7 @@ resource "nios_rpz_record_cname_ipaddress" "create_record_rpz_cname_no_domain" {
   rp_zone   = nios_dns_zone_rp.parent_zone.fqdn
 }
 
-// Create Record RPZ CNAME IP address - Block Domain (No Data Rule)
+// Create Record RPZ CNAME IP address - Block IP Address (No Data) Rule.
 resource "nios_rpz_record_cname_ipaddress" "create_record_rpz_cname_no_data" {
   name      = "11.0.0.3.${nios_dns_zone_rp.parent_zone.fqdn}"
   canonical = "*"
@@ -41,7 +41,7 @@ resource "nios_rpz_record_cname_ipaddress" "create_record_rpz_cname_no_data" {
   rp_zone   = nios_dns_zone_rp.parent_zone.fqdn
 }
 
-// Create Record RPZ CNAME IP address - Passthru Domain Name Rule
+// Create Record RPZ CNAME IP address - Passthru IP Address Rule.
 resource "nios_rpz_record_cname_ipaddress" "create_record_rpz_cname_passthru" {
   name      = "11.0.0.4.${nios_dns_zone_rp.parent_zone.fqdn}"
   canonical = "11.0.0.4"
