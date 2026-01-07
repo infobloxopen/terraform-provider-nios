@@ -538,6 +538,16 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			&resp.Diagnostics,
 		)
 	}
+
+	// same_port_control_discovery_blackout can be set only when use_blackout_setting is true
+	if !data.SamePortControlDiscoveryBlackout.IsNull() && !data.SamePortControlDiscoveryBlackout.IsUnknown() {
+		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Same Port Control Discovery Blackout Not Allowed",
+				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+			)
+		}
+	}
 }
 
 func (r *Ipv6networkResource) isIpv6NetworkConvertedToContainer(ctx context.Context, data *Ipv6networkModel) bool {
