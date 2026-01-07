@@ -22,7 +22,6 @@ resource "nios_dns_zone_rp" "parent_zone" {
 resource "nios_rpz_record_cname_ipaddress" "create_record_rpz_cname_ipaddress" {
   name      = "11.0.0.0.${nios_dns_zone_rp.parent_zone.fqdn}"
   canonical = "11.0.0.0"
-  view      = "default"
   rp_zone   = nios_dns_zone_rp.parent_zone.fqdn
 }
 
