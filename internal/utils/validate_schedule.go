@@ -80,7 +80,12 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 			return
 		}
 
-		switch repeatStr.ValueString() {
+		repeatValue := repeatStr.ValueString()
+		if repeatValue == "" {
+			repeatValue = "ONCE"
+		}
+
+		switch repeatValue {
 		case "ONCE":
 			// For ONCE: cannot set weekdays, frequency, every
 			if (!weekdays.IsNull() && !weekdays.IsUnknown()) ||
@@ -91,6 +96,7 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 					"Invalid Configuration for Repeat",
 					"Cannot set frequency, weekdays and every if repeat is set to ONCE",
 				)
+				return
 			}
 
 			// For ONCE: must set month, day_of_month, hour_of_day, minutes_past_hour
@@ -115,6 +121,7 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 					"Invalid Configuration for Repeat",
 					"Cannot set month, day_of_month and year if repeat is set to RECUR",
 				)
+				return
 			}
 
 			// For RECUR: must set frequency, hour_of_day, minutes_past_hour
@@ -126,6 +133,7 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 					"Invalid Configuration for Schedule",
 					"If repeat is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
 				)
+				return
 			}
 
 			// Handle weekdays validation based on frequency for RECUR only
