@@ -38,7 +38,7 @@ func (r *FilteroptionResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *FilteroptionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a DHCP Filteroption Resource.",
 		Attributes:          FilteroptionResourceSchemaAttributes,
 	}
 }
