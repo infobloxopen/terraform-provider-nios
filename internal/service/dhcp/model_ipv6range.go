@@ -352,11 +352,7 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The DHCP IPv6 Range Cisco ISE subscribe settings.",
 	},
 	"template": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		PlanModifiers: []planmodifier.String{
-			planmodifiers.ImmutableString(),
-		},
+		Computed:            true,
 		MarkdownDescription: "If set on creation, the range will be created according to the values specified in the named template.",
 	},
 	"use_blackout_setting": schema.BoolAttribute{
@@ -397,7 +393,7 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Ipv6range {
+func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Ipv6range {
 	if m == nil {
 		return nil
 	}
@@ -436,9 +432,6 @@ func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, is
 		UseRecycleLeases:                 flex.ExpandBoolPointer(m.UseRecycleLeases),
 		UseSubscribeSettings:             flex.ExpandBoolPointer(m.UseSubscribeSettings),
 		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
-	}
-	if isCreate {
-		to.Template = flex.ExpandStringPointer(m.Template)
 	}
 	return to
 }

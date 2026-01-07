@@ -83,7 +83,6 @@ Optional:
 - `server_association_type` (String) The type of server that is going to serve the range. Valid values are: * MEMBER * NONE
 - `start_addr` (String) The IPv6 Address starting address of the DHCP IPv6 range.
 - `subscribe_settings` (Attributes) The DHCP IPv6 Range Cisco ISE subscribe settings. (see [below for nested schema](#nestedatt--result--subscribe_settings))
-- `template` (String) If set on creation, the range will be created according to the values specified in the named template.
 - `use_blackout_setting` (Boolean) Use flag for: discovery_blackout_setting , port_control_blackout_setting, same_port_control_discovery_blackout
 - `use_discovery_basic_polling_settings` (Boolean) Use flag for: discovery_basic_poll_settings
 - `use_enable_discovery` (Boolean) Use flag for: discovery_member , enable_discovery
@@ -96,6 +95,7 @@ Read-Only:
 - `discover_now_status` (String) Discover now status for this range.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default and internal attributes.
 - `ref` (String) The reference to the object.
+- `template` (String) If set on creation, the range will be created according to the values specified in the named template.
 
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`
