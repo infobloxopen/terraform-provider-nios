@@ -421,6 +421,33 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 		}
 	}
 
+	serverAssociationType := "NONE"
+	if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
+		serverAssociationType = data.ServerAssociationType.ValueString()
+	}
+
+	// If server_association_type is MEMBER, member field must be set
+	if serverAssociationType == "MEMBER" {
+		if data.Member.IsNull() || data.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+			)
+		}
+	}
+
+	// If server_association_type is NONE, member field cannot be set
+	if serverAssociationType == "NONE" {
+		if !data.Member.IsNull() && !data.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
+			)
+		}
+	}
+
 	// Validate discovery_blackout_setting blackout_schedule
 	if !data.DiscoveryBlackoutSetting.IsNull() && !data.DiscoveryBlackoutSetting.IsUnknown() {
 		utils.ValidateScheduleConfig(
