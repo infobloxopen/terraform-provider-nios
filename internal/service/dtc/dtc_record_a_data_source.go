@@ -53,9 +53,9 @@ func (d *DtcRecordADataSource) Schema(ctx context.Context, req datasource.Schema
 		MarkdownDescription: "Retrieves information about existing DTC A Records.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
-				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters. The `dtc_server` filter is a required and must be specified for searching DTC AAAA records.",
+				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType: types.StringType,
-				Required:    true,
+				Optional:    true,
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
