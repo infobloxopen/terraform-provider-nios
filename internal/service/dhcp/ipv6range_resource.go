@@ -82,7 +82,7 @@ func (r *Ipv6rangeResource) Create(ctx context.Context, req resource.CreateReque
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6rangeAPI.
 		Create(ctx).
-		Ipv6range(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Ipv6range(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6range).
 		ReturnAsObject(1).
 		Execute()
@@ -275,7 +275,7 @@ func (r *Ipv6rangeResource) Update(ctx context.Context, req resource.UpdateReque
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6rangeAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ipv6range(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Ipv6range(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6range).
 		ReturnAsObject(1).
 		Execute()
@@ -408,6 +408,33 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 			resp.Diagnostics.AddError(
 				"Discovery Basic Poll Settings Not Allowed",
 				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings cannot be configured. Either set use_discovery_basic_polling_settings to true or remove the discovery_basic_poll_settings block.",
+			)
+		}
+	}
+
+	serverAssociationType := "NONE"
+	if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
+		serverAssociationType = data.ServerAssociationType.ValueString()
+	}
+
+	// If server_association_type is MEMBER, member field must be set
+	if serverAssociationType == "MEMBER" {
+		if data.Member.IsNull() || data.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+			)
+		}
+	}
+
+	// If server_association_type is NONE, member field cannot be set
+	if serverAssociationType == "NONE" {
+		if !data.Member.IsNull() && !data.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
 			)
 		}
 	}
