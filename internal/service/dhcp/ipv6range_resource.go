@@ -82,7 +82,7 @@ func (r *Ipv6rangeResource) Create(ctx context.Context, req resource.CreateReque
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6rangeAPI.
 		Create(ctx).
-		Ipv6range(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Ipv6range(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6range).
 		ReturnAsObject(1).
 		Execute()
@@ -275,7 +275,7 @@ func (r *Ipv6rangeResource) Update(ctx context.Context, req resource.UpdateReque
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6rangeAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ipv6range(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Ipv6range(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6range).
 		ReturnAsObject(1).
 		Execute()
