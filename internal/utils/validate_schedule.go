@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -12,24 +14,33 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 		return
 	}
 
-	attrs := settingObj.Attributes()
-	if attrs == nil {
-		return
-	}
+	var scheduleObj types.Object
+	var schedulePath path.Path
 
-	scheduleAttr, ok := attrs[scheduleAttrName]
-	if !ok || scheduleAttr.IsNull() || scheduleAttr.IsUnknown() {
-		return
-	}
+	if scheduleAttrName == "" {
+		// Direct schedule at root level (e.g., vdiscoverytask.scheduled_run)
+		scheduleObj = settingObj
+		schedulePath = basePath
+	} else {
+		// Nested schedule (e.g., discovery_blackout_setting.blackout_schedule)
+		attrs := settingObj.Attributes()
+		scheduleAttr, exists := attrs[scheduleAttrName]
 
-	scheduleObj, ok := scheduleAttr.(types.Object)
-	if !ok {
-		diagnostics.AddAttributeError(
-			basePath.AtName(scheduleAttrName),
-			"Invalid Schedule Attribute",
-			"Expected "+scheduleAttrName+" to be an object but got different type",
-		)
-		return
+		if !exists || scheduleAttr.IsNull() || scheduleAttr.IsUnknown() {
+			return
+		}
+
+		var ok bool
+		scheduleObj, ok = scheduleAttr.(types.Object)
+		if !ok {
+			diagnostics.AddAttributeError(
+				basePath.AtName(scheduleAttrName),
+				"Invalid Schedule Attribute",
+				fmt.Sprintf("Expected %s to be an object but got different type", scheduleAttrName),
+			)
+			return
+		}
+		schedulePath = basePath.AtName(scheduleAttrName)
 	}
 
 	if scheduleObj.IsNull() || scheduleObj.IsUnknown() {
@@ -51,8 +62,6 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 	dayOfMonth := schedule["day_of_month"]
 	hourOfDay := schedule["hour_of_day"]
 	year := schedule["year"]
-
-	schedulePath := basePath.AtName(scheduleAttrName)
 
 	// Validate recurring_time conflicts
 	if !recurringTime.IsNull() && !recurringTime.IsUnknown() {

@@ -491,6 +491,27 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 			}
 		}
 	}
+
+	// Validate discovery_blackout_setting blackout_schedule
+	if !data.DiscoveryBlackoutSetting.IsNull() && !data.DiscoveryBlackoutSetting.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.DiscoveryBlackoutSetting,
+			"blackout_schedule",
+			path.Root("discovery_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
+	// Validate port_control_blackout_setting blackout_schedule
+	if !data.PortControlBlackoutSetting.IsNull() && !data.PortControlBlackoutSetting.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.PortControlBlackoutSetting,
+			"blackout_schedule",
+			path.Root("port_control_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
 }
 
 func (r *NetworkResource) isNetworkConvertedToContainer(ctx context.Context, data *NetworkModel) bool {

@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -72,15 +71,8 @@ var GridservicerestartgrouprecurringscheduleScheduleResourceSchemaAttributes = m
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.Int64{
-			int64validator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("hour_of_day"),
-				path.MatchRelative().AtParent().AtName("year"),
-				path.MatchRelative().AtParent().AtName("minutes_past_hour"),
-			),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The recurring time for the schedule in Epoch seconds format. This field is obsolete and is preserved only for backward compatibility purposes. Please use other applicable fields to define the recurring schedule. DO NOT use recurring_time together with these fields. If you use recurring_time with other fields to define the recurring schedule, recurring_time has priority over year, hour_of_day, and minutes_past_hour and will override the values of these fields, although it does not override month and day_of_month. In this case, the recurring time value might be different than the intended value that you define.",
 	},
 	"frequency": schema.StringAttribute{
