@@ -156,6 +156,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewFingerprintResource,
 		dhcp.NewFilterfingerprintResource,
 		dhcp.NewIpv6fixedaddressResource,
+		dhcp.NewIpv6filteroptionResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -281,6 +282,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewFingerprintDataSource,
 		dhcp.NewFilterfingerprintDataSource,
 		dhcp.NewIpv6fixedaddressDataSource,
+		dhcp.NewIpv6filteroptionDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
