@@ -7,7 +7,7 @@ data "nios_dtc_record_aaaa" "get_dtc_record_aaaa_in_dtc_server_using_filters" {
 }
 
 
-// Retrieve all DTC record AAAA in a DTC server
+// Retrieve all DTC AAAA records in a DTC server
 data "nios_dtc_record_aaaa" "get_all_dtc_record_aaaa_in_dtc_server" {
   filters = {
     dtc_server = "example-server"

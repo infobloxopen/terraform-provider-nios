@@ -2,6 +2,7 @@ package dtc
 
 import (
 	"context"
+	"net/netip"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -105,7 +106,7 @@ func (m *DtcRecordAaaaModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	to := &dtc.DtcRecordAaaa{
 		Comment:  flex.ExpandStringPointer(m.Comment),
 		Disable:  flex.ExpandBoolPointer(m.Disable),
-		Ipv6addr: flex.ExpandIPv6Address(m.Ipv6addr),
+		Ipv6addr: ExpandAndNormalizeIPv6(m.Ipv6addr),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
 	}
@@ -141,4 +142,13 @@ func (m *DtcRecordAaaaModel) Flatten(ctx context.Context, from *dtc.DtcRecordAaa
 	m.Ipv6addr = flex.FlattenIPv6Address(from.Ipv6addr)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
+}
+
+func ExpandAndNormalizeIPv6(ipv6Addr iptypes.IPv6Address) *string {
+	if ipv6Addr.IsNull() || ipv6Addr.IsUnknown() {
+		return nil
+	}
+	addr, _ := netip.ParseAddr(ipv6Addr.ValueString())
+	normalized := addr.String()
+	return &normalized
 }
