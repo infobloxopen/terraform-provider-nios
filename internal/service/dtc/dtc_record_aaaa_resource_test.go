@@ -309,8 +309,8 @@ func testAccCheckDtcRecordAaaaDisappears(ctx context.Context, v *dtc.DtcRecordAa
 func testAccDtcRecordAaaaBasicConfig(ipv6Addr, serverName string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_aaaa" "test" {
-	ipv6addr = %q
-	dtc_server = nios_dtc_server.test.name
+		ipv6addr = %q
+		dtc_server = nios_dtc_server.test.name
 	}
 	`, ipv6Addr)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
@@ -319,9 +319,9 @@ func testAccDtcRecordAaaaBasicConfig(ipv6Addr, serverName string) string {
 func testAccDtcRecordAaaaComment(ipv6Addr, serverName, comment string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_aaaa" "test_comment" {
-	ipv6addr = %q
-	comment = %q
-	dtc_server = nios_dtc_server.test.name
+		ipv6addr = %q
+		comment = %q
+		dtc_server = nios_dtc_server.test.name
 	}
 	`, ipv6Addr, comment)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
@@ -330,9 +330,9 @@ func testAccDtcRecordAaaaComment(ipv6Addr, serverName, comment string) string {
 func testAccDtcRecordAaaaDisable(ipv6Addr, serverName string, disable bool) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_aaaa" "test_disable" {
-	ipv6addr = %q
-	disable = %t
-	dtc_server = nios_dtc_server.test.name
+		ipv6addr = %q
+		disable = %t
+		dtc_server = nios_dtc_server.test.name
 	}
 	`, ipv6Addr, disable)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
@@ -341,8 +341,8 @@ func testAccDtcRecordAaaaDisable(ipv6Addr, serverName string, disable bool) stri
 func testAccDtcRecordAaaaDtcServer(ipv6Addr, serverName string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_aaaa" "test_dtc_server" {
-	ipv6addr = %q
-	dtc_server = nios_dtc_server.test.name
+		ipv6addr = %q
+		dtc_server = nios_dtc_server.test.name
 	}
 	`, ipv6Addr)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
@@ -351,8 +351,8 @@ func testAccDtcRecordAaaaDtcServer(ipv6Addr, serverName string) string {
 func testAccDtcRecordAaaaIpv6addr(ipv6Addr, serverName string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_aaaa" "test_ipv6addr" {
-	ipv6addr = %q
-	dtc_server = nios_dtc_server.test.name
+		ipv6addr = %q
+		dtc_server = nios_dtc_server.test.name
 	}
 	`, ipv6Addr)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
@@ -361,10 +361,10 @@ func testAccDtcRecordAaaaIpv6addr(ipv6Addr, serverName string) string {
 func testAccDtcRecordAaaaTtl(ipv6Addr, serverName string, ttl int) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_aaaa" "test_ttl" {
-	ipv6addr = %q
-	dtc_server = nios_dtc_server.test.name
-	ttl = %d
-	use_ttl = true
+		ipv6addr = %q
+		dtc_server = nios_dtc_server.test.name
+		ttl = %d
+		use_ttl = true
 	}
 	`, ipv6Addr, ttl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
@@ -373,20 +373,12 @@ func testAccDtcRecordAaaaTtl(ipv6Addr, serverName string, ttl int) string {
 func testAccDtcRecordAaaaUseTtl(ipv4addr, serverName string, useTtl bool) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_aaaa" "test_use_ttl" {
-	ipv6addr = %q
-	dtc_server = nios_dtc_server.test.name
-	use_ttl = %t
-	ttl = 30
+		ipv6addr = %q
+		dtc_server = nios_dtc_server.test.name
+		use_ttl = %t
+		ttl = %d
 	}
-	`, ipv4addr, useTtl)
+	`, ipv4addr, useTtl, 30)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
 
-func testAccBaseWithDtcServer(name, host string) string {
-	return fmt.Sprintf(`
-resource "nios_dtc_server" "test" {
-  name = %q
-  host = %q
-}
-`, name, host)
-}

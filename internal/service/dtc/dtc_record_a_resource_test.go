@@ -314,33 +314,33 @@ func testAccCheckDtcRecordADisappears(ctx context.Context, v *dtc.DtcRecordA) re
 
 func testAccDtcRecordABasicConfig(serverName, ipv4addr, ipv4addrString string) string {
 	config := fmt.Sprintf(`
-resource "nios_dtc_record_a" "test" {
-  dtc_server = nios_dtc_server.test.name
-  ipv4addr   = %q
-}
-`, ipv4addr)
+	resource "nios_dtc_record_a" "test" {
+  		dtc_server = nios_dtc_server.test.name
+  		ipv4addr   = %q
+	}
+	`, ipv4addr)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrString), config}, "")
 }
 
 func testAccDtcRecordAComment(serverName, ipv4addr, ipv4addrServer, comment string) string {
 	config := fmt.Sprintf(`
-resource "nios_dtc_record_a" "test_comment" {
-    dtc_server = nios_dtc_server.test.name
-    ipv4addr   = %q
-    comment = %q
-}
-`, ipv4addr, comment)
+	resource "nios_dtc_record_a" "test_comment" {
+    	dtc_server = nios_dtc_server.test.name
+    	ipv4addr   = %q
+    	comment = %q
+	}
+	`, ipv4addr, comment)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }
 
 func testAccDtcRecordADisable(serverName, ipv4addr, ipv4addrServer string, disable bool) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_a" "test_disable" {
-    disable = %t
-    dtc_server = nios_dtc_server.test.name
-    ipv4addr   = %q
-}
-`, disable, ipv4addr)
+    	disable = %t
+    	dtc_server = nios_dtc_server.test.name
+    	ipv4addr   = %q
+	}
+	`, disable, ipv4addr)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }
 
@@ -349,17 +349,17 @@ func testAccDtcRecordADtcServer(ipv4addr, dtcServer, ipv4addrServer string) stri
 	resource "nios_dtc_record_a" "test_dtc_server" {
     dtc_server = nios_dtc_server.test.name
     ipv4addr   = %q
-}
-`, ipv4addr)
+	}
+	`, ipv4addr)
 	return strings.Join([]string{testAccBaseWithDtcServer(dtcServer, ipv4addrServer), config}, "")
 }
 
 func testAccDtcRecordAIpv4addr(serverName, ipv4addr, ipv4addrServer string) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_a" "test_ipv4addr" {
-    ipv4addr = %q
-	dtc_server = nios_dtc_server.test.name
-}
+    	ipv4addr = %q
+		dtc_server = nios_dtc_server.test.name
+	}
 	`, ipv4addr)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }
@@ -371,19 +371,28 @@ func testAccDtcRecordATtl(ipv4addr, serverName, ipv4addrServer string, ttl int) 
 		dtc_server = nios_dtc_server.test.name
 		ttl = %d
 		use_ttl = true 
-}`, ipv4addr, ttl)
-
+	}
+	`, ipv4addr, ttl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
 }
 
 func testAccDtcRecordAUseTtl(ipv4addr, serverName, ipv4addrServer string, useTtl bool) string {
 	config := fmt.Sprintf(`
 	resource "nios_dtc_record_a" "test_use_ttl" {
-    ipv4addr = %q
-    dtc_server = nios_dtc_server.test.name
-	ttl = 20
-    use_ttl = %t
-}
+    	ipv4addr = %q
+    	dtc_server = nios_dtc_server.test.name
+		ttl = 20
+    	use_ttl = %t
+	}
 	`, ipv4addr, useTtl)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, ipv4addrServer), config}, "")
+}
+
+func testAccBaseWithDtcServer(name, host string) string {
+	return fmt.Sprintf(`
+	resource "nios_dtc_server" "test" {
+		name = %q
+		host = %q
+	}
+	`, name, host)
 }
