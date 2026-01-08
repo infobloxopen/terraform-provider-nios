@@ -90,10 +90,10 @@ func (v IPv6Name) StringSemanticEquals(_ context.Context, newValuable basetypes.
 		return currentPrefix == newPrefix && zone == newZone, diags
 	} else {
 		// Plain address
-		newIpAddr, _ := netip.ParseAddr(newIPv6)
-		currentIpAddr, _ := netip.ParseAddr(ipv6)
+		newIPAddr, _ := netip.ParseAddr(newIPv6)
+		currentIPAddr, _ := netip.ParseAddr(ipv6)
 
-		return currentIpAddr == newIpAddr && zone == newZone, diags
+		return currentIPAddr == newIPAddr && zone == newZone, diags
 	}
 }
 
@@ -145,7 +145,7 @@ func (v IPv6Name) ValidateAttribute(ctx context.Context, req xattr.ValidateAttri
 				"Invalid IPv6 Name Value",
 				"A string value was provided that is not a valid IPv6 name. "+
 					"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
-					"Given Value: "+v.ValueString()+"\n",
+					"Given Value: "+v.ValueString(),
 			)
 
 			return
@@ -255,7 +255,7 @@ func (v IPv6Name) ValidateParameter(ctx context.Context, req function.ValidatePa
 			"Invalid IPv6 Name Value: "+
 				"A string value was provided that is not a valid IPv6 name.\n\n"+
 				"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
-				"Given Value: "+v.ValueString()+"\n",
+				"Given Value: "+v.ValueString(),
 		)
 
 		return
