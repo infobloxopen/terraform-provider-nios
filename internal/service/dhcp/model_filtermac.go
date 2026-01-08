@@ -28,6 +28,7 @@ import (
 
 type FiltermacModel struct {
 	Ref                         types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment                     types.String `tfsdk:"comment"`
 	DefaultMacAddressExpiration types.Int64  `tfsdk:"default_mac_address_expiration"`
 	Disable                     types.Bool   `tfsdk:"disable"`
@@ -43,6 +44,7 @@ type FiltermacModel struct {
 
 var FiltermacAttrTypes = map[string]attr.Type{
 	"ref":                            types.StringType,
+    "uuid":        types.StringType,
 	"comment":                        types.StringType,
 	"default_mac_address_expiration": types.Int64Type,
 	"disable":                        types.BoolType,
@@ -61,6 +63,10 @@ var FiltermacResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -195,6 +201,7 @@ func (m *FiltermacModel) Flatten(ctx context.Context, from *dhcp.Filtermac, diag
 		*m = FiltermacModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DefaultMacAddressExpiration = flex.FlattenInt64Pointer(from.DefaultMacAddressExpiration)
 	m.Disable = types.BoolPointerValue(from.Disable)

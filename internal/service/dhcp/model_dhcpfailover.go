@@ -28,6 +28,7 @@ import (
 
 type DhcpfailoverModel struct {
 	Ref                        types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AssociationType            types.String `tfsdk:"association_type"`
 	Comment                    types.String `tfsdk:"comment"`
 	ExtAttrs                   types.Map    `tfsdk:"extattrs"`
@@ -65,6 +66,7 @@ type DhcpfailoverModel struct {
 
 var DhcpfailoverAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
+    "uuid":        types.StringType,
 	"association_type":              types.StringType,
 	"comment":                       types.StringType,
 	"extattrs":                      types.MapType{ElemType: types.StringType},
@@ -105,6 +107,10 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"association_type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The value indicating whether the failover association is Microsoft or Grid based. This is a read-only attribute.",
@@ -397,6 +403,7 @@ func (m *DhcpfailoverModel) Flatten(ctx context.Context, from *dhcp.Dhcpfailover
 		*m = DhcpfailoverModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AssociationType = flex.FlattenStringPointer(from.AssociationType)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)

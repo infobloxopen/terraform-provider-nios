@@ -20,6 +20,7 @@ import (
 
 type SmartfolderGlobalModel struct {
 	Ref        types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment    types.String `tfsdk:"comment"`
 	GroupBys   types.List   `tfsdk:"group_bys"`
 	Name       types.String `tfsdk:"name"`
@@ -28,6 +29,7 @@ type SmartfolderGlobalModel struct {
 
 var SmartfolderGlobalAttrTypes = map[string]attr.Type{
 	"ref":         types.StringType,
+    "uuid":        types.StringType,
 	"comment":     types.StringType,
 	"group_bys":   types.ListType{ElemType: types.ObjectType{AttrTypes: SmartfolderGlobalGroupBysAttrTypes}},
 	"name":        types.StringType,
@@ -39,6 +41,10 @@ var SmartfolderGlobalResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -122,6 +128,7 @@ func (m *SmartfolderGlobalModel) Flatten(ctx context.Context, from *smartfolder.
 		*m = SmartfolderGlobalModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.GroupBys = flex.FlattenFrameworkListNestedBlock(ctx, from.GroupBys, SmartfolderGlobalGroupBysAttrTypes, diags, FlattenSmartfolderGlobalGroupBys)
 	m.Name = flex.FlattenStringPointer(from.Name)

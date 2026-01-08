@@ -27,6 +27,7 @@ import (
 
 type FingerprintModel struct {
 	Ref                types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment            types.String `tfsdk:"comment"`
 	DeviceClass        types.String `tfsdk:"device_class"`
 	Disable            types.Bool   `tfsdk:"disable"`
@@ -41,6 +42,7 @@ type FingerprintModel struct {
 
 var FingerprintAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+    "uuid":        types.StringType,
 	"comment":              types.StringType,
 	"device_class":         types.StringType,
 	"disable":              types.BoolType,
@@ -58,6 +60,10 @@ var FingerprintResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
@@ -192,6 +198,7 @@ func (m *FingerprintModel) Flatten(ctx context.Context, from *dhcp.Fingerprint, 
 		*m = FingerprintModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DeviceClass = flex.FlattenStringPointer(from.DeviceClass)
 	m.Disable = types.BoolPointerValue(from.Disable)

@@ -37,6 +37,7 @@ import (
 
 type SharednetworkModel struct {
 	Ref                            types.String                     `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Authority                      types.Bool                       `tfsdk:"authority"`
 	Bootfile                       types.String                     `tfsdk:"bootfile"`
 	Bootserver                     types.String                     `tfsdk:"bootserver"`
@@ -93,6 +94,7 @@ type SharednetworkModel struct {
 
 var SharednetworkAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+    "uuid":        types.StringType,
 	"authority":                           types.BoolType,
 	"bootfile":                            types.StringType,
 	"bootserver":                          types.StringType,
@@ -152,6 +154,10 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"authority": schema.BoolAttribute{
 		Optional: true,
 		Computed: true,
@@ -616,6 +622,7 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 		*m = SharednetworkModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)

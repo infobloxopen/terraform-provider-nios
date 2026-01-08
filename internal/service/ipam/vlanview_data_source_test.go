@@ -63,6 +63,7 @@ func TestAccVlanviewDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckVlanviewResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "allow_range_overlapping", dataSourceName, "result.0.allow_range_overlapping"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "end_vlan_id", dataSourceName, "result.0.end_vlan_id"),

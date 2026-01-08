@@ -5,15 +5,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
@@ -23,6 +23,7 @@ import (
 
 type DtcTopologyModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	Comment     types.String `tfsdk:"comment"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll types.Map    `tfsdk:"extattrs_all"`
@@ -32,6 +33,7 @@ type DtcTopologyModel struct {
 
 var DtcTopologyAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"comment":      types.StringType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
 	"extattrs_all": types.MapType{ElemType: types.StringType},
@@ -43,6 +45,10 @@ var DtcTopologyResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -123,6 +129,7 @@ func (m *DtcTopologyModel) Flatten(ctx context.Context, from *dtc.DtcTopology, d
 		*m = DtcTopologyModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)

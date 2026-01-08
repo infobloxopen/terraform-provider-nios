@@ -34,6 +34,7 @@ import (
 
 type NetworktemplateModel struct {
 	Ref                            types.String                             `tfsdk:"ref"`
+	Uuid                           types.String                             `tfsdk:"uuid"`
 	AllowAnyNetmask                types.Bool                               `tfsdk:"allow_any_netmask"`
 	Authority                      types.Bool                               `tfsdk:"authority"`
 	AutoCreateReversezone          types.Bool                               `tfsdk:"auto_create_reversezone"`
@@ -109,6 +110,7 @@ type NetworktemplateModel struct {
 
 var NetworktemplateAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"allow_any_netmask":                   types.BoolType,
 	"authority":                           types.BoolType,
 	"auto_create_reversezone":             types.BoolType,
@@ -186,6 +188,10 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"allow_any_netmask": schema.BoolAttribute{
 		Optional:            true,
@@ -838,6 +844,7 @@ func (m *NetworktemplateModel) Flatten(ctx context.Context, from *ipam.Networkte
 		*m = NetworktemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowAnyNetmask = types.BoolPointerValue(from.AllowAnyNetmask)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.AutoCreateReversezone = types.BoolPointerValue(from.AutoCreateReversezone)

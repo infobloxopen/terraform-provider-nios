@@ -28,6 +28,7 @@ import (
 
 type NsgroupModel struct {
 	Ref                 types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment             types.String `tfsdk:"comment"`
 	ExtAttrs            types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll         types.Map    `tfsdk:"extattrs_all"`
@@ -43,6 +44,7 @@ type NsgroupModel struct {
 
 var NsgroupAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+    "uuid":        types.StringType,
 	"comment":              types.StringType,
 	"extattrs":             types.MapType{ElemType: types.StringType},
 	"extattrs_all":         types.MapType{ElemType: types.StringType},
@@ -61,6 +63,10 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -208,6 +214,7 @@ func (m *NsgroupModel) Flatten(ctx context.Context, from *dns.Nsgroup, diags *di
 		*m = NsgroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	planExternalPrimaries := m.ExternalPrimaries

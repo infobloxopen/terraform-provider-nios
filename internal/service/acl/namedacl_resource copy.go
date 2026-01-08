@@ -13,9 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
-    "time"
-    "errors"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
 var readableAttributesForNamedacl = "access_list,comment,exploded_access_list,extattrs,name"
@@ -67,18 +64,11 @@ func (r *NamedaclResource) Configure(ctx context.Context, req resource.Configure
 func (r *NamedaclResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data NamedaclModel
-    var timeout time.Duration
-    var httpRes *http.Response
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-
-    // Set timeout from the resource if available
-    if !data.TimeInSeconds.IsNull() && !data.TimeInSeconds.IsUnknown() {
-        timeout = time.Duration(data.TimeInSeconds.ValueInt64()) * time.Second
-    }
 		return
 	}
 
@@ -88,19 +78,13 @@ func (r *NamedaclResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	var apiRes *A
-
-    err := r.retryOperation(ctx, timeout, func() error {
-        var err error
-        apiRes, httpRes, err = r.client.
+	apiRes, _, err := r.client.ACLAPI.
 		NamedaclAPI.
 		Create(ctx).
 		Namedacl(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForNamedacl).
 		ReturnAsObject(1).
 		Execute()
-        return err
-    })
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Namedacl, got error: %s", err))
 		return
@@ -122,44 +106,26 @@ func (r *NamedaclResource) Create(ctx context.Context, req resource.CreateReques
 func (r *NamedaclResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var diags diag.Diagnostics
 	var data NamedaclModel
-    var timeout time.Duration
-    var httpRes *http.Response
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-
-    // Set timeout from the resource if available
-    if !data.TimeInSeconds.IsNull() && !data.TimeInSeconds.IsUnknown() {
-        timeout = time.Duration(data.TimeInSeconds.ValueInt64()) * time.Second
-    }
 		return
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-
-    // Set timeout from the resource if available
-    if !data.TimeInSeconds.IsNull() && !data.TimeInSeconds.IsUnknown() {
-        timeout = time.Duration(data.TimeInSeconds.ValueInt64()) * time.Second
-    }
 		return
 	}
 
-	var apiRes *ACLAPI.
-
-    err := r.retryOperation(ctx, timeout, func() error {
-        var err error
-        apiRes, httpRes, err = r.client.
+	apiRes, httpRes, err := r.client.ACLAPI.
 		NamedaclAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForNamedacl).
 		ReturnAsObject(1).
 		Execute()
-        return err
-    })
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -209,12 +175,7 @@ func (r *NamedaclResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 func (r *NamedaclResource) ReadByExtAttrs(ctx context.Context, data *NamedaclModel, resp *resource.ReadResponse) bool {
 	var diags diag.Diagnostics
-    var timeout time.Duration
 
-    // Set timeout from the resource if available
-    if !data.TimeInSeconds.IsNull() && !data.TimeInSeconds.IsUnknown() {
-        timeout = time.Duration(data.TimeInSeconds.ValueInt64()) * time.Second
-    }
 	if data.ExtAttrsAll.IsNull() {
 		return false
 	}
@@ -233,19 +194,13 @@ func (r *NamedaclResource) ReadByExtAttrs(ctx context.Context, data *NamedaclMod
 		terraformInternalIDEA: internalId,
 	}
 
-	var apiRes *ACLAPI.
-
-    err := r.retryOperation(ctx, timeout, func() error {
-        var err error
-        apiRes, httpRes, err = r.client.
+	apiRes, _, err := r.client.ACLAPI.
 		NamedaclAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNamedacl).
 		Execute()
-        return err
-    })
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Namedacl by extattrs, got error: %s", err))
 		return true
@@ -276,18 +231,11 @@ func (r *NamedaclResource) ReadByExtAttrs(ctx context.Context, data *NamedaclMod
 func (r *NamedaclResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
 	var data NamedaclModel
-    var timeout time.Duration
-    var httpRes *http.Response
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-
-    // Set timeout from the resource if available
-    if !data.TimeInSeconds.IsNull() && !data.TimeInSeconds.IsUnknown() {
-        timeout = time.Duration(data.TimeInSeconds.ValueInt64()) * time.Second
-    }
 		return
 	}
 
@@ -322,19 +270,13 @@ func (r *NamedaclResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	var apiRes *ACLAPI.
-
-    err := r.retryOperation(ctx, timeout, func() error {
-        var err error
-        apiRes, httpRes, err = r.client.
+	apiRes, _, err := r.client.ACLAPI.
 		NamedaclAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		Namedacl(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForNamedacl).
 		ReturnAsObject(1).
 		Execute()
-        return err
-    })
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Namedacl, got error: %s", err))
 		return
@@ -360,31 +302,18 @@ func (r *NamedaclResource) Update(ctx context.Context, req resource.UpdateReques
 
 func (r *NamedaclResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data NamedaclModel
-    var timeout time.Duration
-    var httpRes *http.Response
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-
-    // Set timeout from the resource if available
-    if !data.TimeInSeconds.IsNull() && !data.TimeInSeconds.IsUnknown() {
-        timeout = time.Duration(data.TimeInSeconds.ValueInt64()) * time.Second
-    }
 		return
 	}
 
 	httpRes, err := r.client.ACLAPI.
-
-    err := r.retryOperation(ctx, timeout, func() error {
-        var err error
-        httpRes, err = r.client.
 		NamedaclAPI.
 		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		Execute()
-        return err
-    })
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
@@ -397,58 +326,4 @@ func (r *NamedaclResource) Delete(ctx context.Context, req resource.DeleteReques
 func (r *NamedaclResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
-}
-
-func (r *NamedaclResource) retryOperation(
-    ctx context.Context,
-    timeout time.Duration,
-    operation func() error,
-) error {
-
-    // If timeout is not set, execute once and return
-    if timeout <= 0 {
-        return operation()
-    }
-
-    return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-        err := operation()
-
-        // ---- SUCCESS ----
-        if err == nil {
-            return nil
-        }
-
-        // ---- CONTEXT / TERRAFORM TIMEOUT HANDLING ----
-        // Never retry these, otherwise plugin can hang
-        if errors.Is(err, context.DeadlineExceeded) ||
-            errors.Is(ctx.Err(), context.DeadlineExceeded) ||
-            errors.Is(ctx.Err(), context.Canceled) {
-
-            return retry.NonRetryableError(
-                fmt.Errorf("operation stopped due to Terraform timeout or cancellation: %w", err),
-            )
-        }
-
-        // ---- PLACEHOLDER FOR FUTURE RETRY LOGIC ----
-        // Currently disabled intentionally
-        if isRetryableErrorPlaceholder(err) {
-            return retry.RetryableError(err)
-        }
-
-        // ---- DEFAULT: FAIL FAST ----
-        return retry.NonRetryableError(err)
-    })
-}
-
-func isRetryableErrorPlaceholder(err error) bool {
-    // IMPORTANT:
-    // This function is intentionally conservative.
-    // It always returns false today.
-    //
-    // Purpose:
-    // - Acts as a safe extension point
-    // - Allows retry logic to be added later
-    // - Prevents accidental infinite retries
-
-    return false
 }

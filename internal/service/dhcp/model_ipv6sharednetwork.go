@@ -33,6 +33,7 @@ import (
 
 type Ipv6sharednetworkModel struct {
 	Ref                        types.String                             `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment                    types.String                             `tfsdk:"comment"`
 	DdnsDomainname             internaltypes.CaseInsensitiveStringValue `tfsdk:"ddns_domainname"`
 	DdnsGenerateHostname       types.Bool                               `tfsdk:"ddns_generate_hostname"`
@@ -69,6 +70,7 @@ type Ipv6sharednetworkModel struct {
 
 var Ipv6sharednetworkAttrTypes = map[string]attr.Type{
 	"ref":                             types.StringType,
+    "uuid":        types.StringType,
 	"comment":                         types.StringType,
 	"ddns_domainname":                 internaltypes.CaseInsensitiveString{},
 	"ddns_generate_hostname":          types.BoolType,
@@ -108,6 +110,10 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
@@ -430,6 +436,7 @@ func (m *Ipv6sharednetworkModel) Flatten(ctx context.Context, from *dhcp.Ipv6sha
 		*m = Ipv6sharednetworkModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DdnsDomainname.StringValue = flex.FlattenStringPointer(from.DdnsDomainname)
 	m.DdnsGenerateHostname = types.BoolPointerValue(from.DdnsGenerateHostname)

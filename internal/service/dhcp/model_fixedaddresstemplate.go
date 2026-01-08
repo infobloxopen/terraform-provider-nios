@@ -33,6 +33,7 @@ import (
 
 type FixedaddresstemplateModel struct {
 	Ref                            types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Bootfile                       types.String `tfsdk:"bootfile"`
 	Bootserver                     types.String `tfsdk:"bootserver"`
 	Comment                        types.String `tfsdk:"comment"`
@@ -65,6 +66,7 @@ type FixedaddresstemplateModel struct {
 
 var FixedaddresstemplateAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+    "uuid":        types.StringType,
 	"bootfile":                            types.StringType,
 	"bootserver":                          types.StringType,
 	"comment":                             types.StringType,
@@ -100,6 +102,10 @@ var FixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"bootfile": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -384,6 +390,7 @@ func (m *FixedaddresstemplateModel) Flatten(ctx context.Context, from *dhcp.Fixe
 		*m = FixedaddresstemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

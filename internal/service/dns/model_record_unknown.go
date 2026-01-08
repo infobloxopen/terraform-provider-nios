@@ -28,6 +28,7 @@ import (
 
 type RecordUnknownModel struct {
 	Ref                  types.String `tfsdk:"ref"`
+	Uuid                 types.String `tfsdk:"uuid"`
 	CloudInfo            types.Object `tfsdk:"cloud_info"`
 	Comment              types.String `tfsdk:"comment"`
 	Creator              types.String `tfsdk:"creator"`
@@ -50,6 +51,7 @@ type RecordUnknownModel struct {
 
 var RecordUnknownAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"cloud_info":              types.ObjectType{AttrTypes: RecordUnknownCloudInfoAttrTypes},
 	"comment":                 types.StringType,
 	"creator":                 types.StringType,
@@ -74,6 +76,10 @@ var RecordUnknownResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          RecordUnknownCloudInfoResourceSchemaAttributes,
@@ -240,6 +246,7 @@ func (m *RecordUnknownModel) Flatten(ctx context.Context, from *dns.RecordUnknow
 		*m = RecordUnknownModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudInfo = FlattenRecordUnknownCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Creator = flex.FlattenStringPointer(from.Creator)
