@@ -115,6 +115,7 @@ var Ipv6rangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = 
 	},
 	"year": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The year for the scheduled task.",
 	},
 	"month": schema.Int64Attribute{

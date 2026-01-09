@@ -438,6 +438,26 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 			)
 		}
 	}
+
+	// discovery_blackout_setting can be set only when use_blackout_setting is true
+	if !data.DiscoveryBlackoutSetting.IsNull() && !data.DiscoveryBlackoutSetting.IsUnknown() {
+		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Discovery Blackout Setting Not Allowed",
+				"When use_blackout_setting is set to false, discovery_blackout_setting cannot be configured. Either set use_blackout_setting to true or remove the discovery_blackout_setting block.",
+			)
+		}
+	}
+
+	// same_port_control_discovery_blackout can be set only when use_blackout_setting is true
+	if !data.SamePortControlDiscoveryBlackout.IsNull() && !data.SamePortControlDiscoveryBlackout.IsUnknown() {
+		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Same Port Control Discovery Blackout Not Allowed",
+				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+			)
+		}
+	}
 }
 
 func (r *Ipv6rangeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

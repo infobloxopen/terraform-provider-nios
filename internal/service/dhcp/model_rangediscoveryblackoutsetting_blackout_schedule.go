@@ -3,33 +3,36 @@ package dhcp
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 )
 
 type RangediscoveryblackoutsettingBlackoutScheduleModel struct {
-	Weekdays        types.List   `tfsdk:"weekdays"`
-	TimeZone        types.String `tfsdk:"time_zone"`
-	RecurringTime   types.Int64  `tfsdk:"recurring_time"`
-	Frequency       types.String `tfsdk:"frequency"`
-	Every           types.Int64  `tfsdk:"every"`
-	MinutesPastHour types.Int64  `tfsdk:"minutes_past_hour"`
-	HourOfDay       types.Int64  `tfsdk:"hour_of_day"`
-	Year            types.Int64  `tfsdk:"year"`
-	Month           types.Int64  `tfsdk:"month"`
-	DayOfMonth      types.Int64  `tfsdk:"day_of_month"`
-	Repeat          types.String `tfsdk:"repeat"`
-	Disable         types.Bool   `tfsdk:"disable"`
+	Weekdays        internaltypes.UnorderedListValue `tfsdk:"weekdays"`
+	TimeZone        types.String                     `tfsdk:"time_zone"`
+	RecurringTime   types.Int64                      `tfsdk:"recurring_time"`
+	Frequency       types.String                     `tfsdk:"frequency"`
+	Every           types.Int64                      `tfsdk:"every"`
+	MinutesPastHour types.Int64                      `tfsdk:"minutes_past_hour"`
+	HourOfDay       types.Int64                      `tfsdk:"hour_of_day"`
+	Year            types.Int64                      `tfsdk:"year"`
+	Month           types.Int64                      `tfsdk:"month"`
+	DayOfMonth      types.Int64                      `tfsdk:"day_of_month"`
+	Repeat          types.String                     `tfsdk:"repeat"`
+	Disable         types.Bool                       `tfsdk:"disable"`
 }
 
 var RangediscoveryblackoutsettingBlackoutScheduleAttrTypes = map[string]attr.Type{
@@ -50,6 +53,7 @@ var RangediscoveryblackoutsettingBlackoutScheduleAttrTypes = map[string]attr.Typ
 var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[string]schema.Attribute{
 	"weekdays": schema.ListAttribute{
 		ElementType: types.StringType,
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		Optional:    true,
 		Computed:    true,
 		Validators: []validator.List{
@@ -63,6 +67,7 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 	"time_zone": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("UTC"),
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
@@ -84,13 +89,19 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 		MarkdownDescription: "The number of frequency to wait before repeating the scheduled task.",
 	},
 	"minutes_past_hour": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 59),
+		},
 		MarkdownDescription: "The minutes past the hour for the scheduled task.",
 	},
 	"hour_of_day": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 23),
+		},
 		MarkdownDescription: "The hour of day for the scheduled task.",
 	},
 	"year": schema.Int64Attribute{
@@ -99,18 +110,25 @@ var RangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = map[
 		MarkdownDescription: "The year for the scheduled task.",
 	},
 	"month": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 12),
+		},
 		MarkdownDescription: "The month for the scheduled task.",
 	},
 	"day_of_month": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 31),
+		},
 		MarkdownDescription: "The day of the month for the scheduled task.",
 	},
 	"repeat": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString("ONCE"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("ONCE", "RECUR"),
 		},
@@ -175,7 +193,7 @@ func (m *RangediscoveryblackoutsettingBlackoutScheduleModel) Flatten(ctx context
 	if m == nil {
 		*m = RangediscoveryblackoutsettingBlackoutScheduleModel{}
 	}
-	m.Weekdays = flex.FlattenFrameworkListString(ctx, from.Weekdays, diags)
+	m.Weekdays = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Weekdays, diags)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.RecurringTime = flex.FlattenInt64Pointer(from.RecurringTime)
 	m.Frequency = flex.FlattenStringPointer(from.Frequency)
