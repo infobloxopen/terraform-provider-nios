@@ -70,14 +70,29 @@ func (r *Ipv6rangetemplateResource) ValidateConfig(ctx context.Context, req reso
 		return
 	}
 
-	// Check if server_association_type is MEMBER
-	if config.ServerAssociationType.ValueString() == "MEMBER" {
-		// Ensure the member field is not empty
+	serverAssociationType := "NONE"
+	if !config.ServerAssociationType.IsNull() && !config.ServerAssociationType.IsUnknown() {
+		serverAssociationType = config.ServerAssociationType.ValueString()
+	}
+
+	// If server_association_type is MEMBER, member field must be set
+	if serverAssociationType == "MEMBER" {
 		if config.Member.IsNull() || config.Member.IsUnknown() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("member"),
 				"Invalid Configuration",
 				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+			)
+		}
+	}
+
+	// If server_association_type is NONE, member field cannot be set
+	if serverAssociationType == "NONE" {
+		if !config.Member.IsNull() && !config.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
 			)
 		}
 	}
