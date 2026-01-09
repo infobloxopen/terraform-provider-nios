@@ -20,41 +20,41 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &DtcRecordADataSource{}
+var _ datasource.DataSource = &DtcRecordCnameDataSource{}
 
-func NewDtcRecordADataSource() datasource.DataSource {
-	return &DtcRecordADataSource{}
+func NewDtcRecordCnameDataSource() datasource.DataSource {
+	return &DtcRecordCnameDataSource{}
 }
 
-// DtcRecordADataSource defines the data source implementation.
-type DtcRecordADataSource struct {
+// DtcRecordCnameDataSource defines the data source implementation.
+type DtcRecordCnameDataSource struct {
 	client *niosclient.APIClient
 }
 
-func (d *DtcRecordADataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dtc_record_a"
+func (d *DtcRecordCnameDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "dtc_record_cname"
 }
 
-type DtcRecordAModelWithFilter struct {
+type DtcRecordCnameModelWithFilter struct {
 	Filters    types.Map   `tfsdk:"filters"`
 	Result     types.List  `tfsdk:"result"`
 	MaxResults types.Int32 `tfsdk:"max_results"`
 	Paging     types.Int32 `tfsdk:"paging"`
 }
 
-func (m *DtcRecordAModelWithFilter) FlattenResults(ctx context.Context, from []dtc.DtcRecordA, diags *diag.Diagnostics) {
+func (m *DtcRecordCnameModelWithFilter) FlattenResults(ctx context.Context, from []dtc.DtcRecordCname, diags *diag.Diagnostics) {
 	if len(from) == 0 {
 		return
 	}
-	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, DtcRecordAAttrTypes, diags, FlattenDtcRecordA)
+	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, DtcRecordCnameAttrTypes, diags, FlattenDtcRecordCname)
 }
 
-func (d *DtcRecordADataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *DtcRecordCnameDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing DTC A Records.",
+		MarkdownDescription: "Retrieves information about existing DTC CNAME Records.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
-				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters. The `dtc_server` filter is a required and must be specified for searching DTC A records.",
+				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters. The `dtc_server` filter is a required filter and must be specified for searching DTC CNAME records.",
 				ElementType: types.StringType,
 				Required:    true,
 				Validators: []validator.Map{
@@ -63,7 +63,7 @@ func (d *DtcRecordADataSource) Schema(ctx context.Context, req datasource.Schema
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: utils.DataSourceAttributeMap(DtcRecordAResourceSchemaAttributes, &resp.Diagnostics),
+					Attributes: utils.DataSourceAttributeMap(DtcRecordCnameResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
 			},
@@ -82,7 +82,7 @@ func (d *DtcRecordADataSource) Schema(ctx context.Context, req datasource.Schema
 	}
 }
 
-func (d *DtcRecordADataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *DtcRecordCnameDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -102,8 +102,8 @@ func (d *DtcRecordADataSource) Configure(ctx context.Context, req datasource.Con
 	d.client = client
 }
 
-func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data DtcRecordAModelWithFilter
+func (d *DtcRecordCnameDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data DtcRecordCnameModelWithFilter
 	pageCount := 0
 
 	// Read Terraform prior state data into the model
@@ -114,7 +114,7 @@ func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	allResults, err := utils.ReadWithPages(
-		func(pageID string, maxResults int32) ([]dtc.DtcRecordA, string, error) {
+		func(pageID string, maxResults int32) ([]dtc.DtcRecordCname, string, error) {
 
 			if !data.MaxResults.IsNull() {
 				maxResults = data.MaxResults.ValueInt32()
@@ -128,11 +128,11 @@ func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequ
 			pageCount++
 
 			request := d.client.DTCAPI.
-				DtcRecordAAPI.
+				DtcRecordCnameAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
 				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForDtcRecordA).
+				ReturnFieldsPlus(readableAttributesForDtcRecordCname).
 				Paging(paging).
 				MaxResults(maxResults)
 
@@ -144,15 +144,15 @@ func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequ
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcRecordA by filter, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcRecordCname by filter, got error: %s", err))
 				return nil, "", err
 			}
 
-			res := apiRes.ListDtcRecordAResponseObject.GetResult()
+			res := apiRes.ListDtcRecordCnameResponseObject.GetResult()
 			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
 
 			// Check for next page ID in additional properties
-			additionalProperties := apiRes.ListDtcRecordAResponseObject.AdditionalProperties
+			additionalProperties := apiRes.ListDtcRecordCnameResponseObject.AdditionalProperties
 			var nextPageID string
 			npId, ok := additionalProperties["next_page_id"]
 			if ok {
@@ -167,7 +167,7 @@ func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequ
 	)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcRecordA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcRecordCname, got error: %s", err))
 		return
 	}
 	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))

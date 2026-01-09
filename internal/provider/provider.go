@@ -156,6 +156,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewFingerprintResource,
 		dhcp.NewFilterfingerprintResource,
 		dhcp.NewIpv6fixedaddressResource,
+		dhcp.NewIpv6filteroptionResource,
+		dhcp.NewFilterrelayagentResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -168,6 +170,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcMonitorIcmpResource,
 		dtc.NewDtcMonitorSipResource,
 		dtc.NewDtcRecordAResource,
+		dtc.NewDtcRecordSrvResource,
+		dtc.NewDtcRecordNaptrResource,
+		dtc.NewDtcRecordCnameResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworktemplateResource,
@@ -220,6 +225,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameResource,
 		rpz.NewRecordRpzAaaaResource,
 		rpz.NewRecordRpzTxtResource,
+		rpz.NewRecordRpzCnameIpaddressResource,
+		rpz.NewRecordRpzAIpaddressResource,
+		rpz.NewRecordRpzAaaaIpaddressResource,
 	}
 }
 
@@ -281,6 +289,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewFingerprintDataSource,
 		dhcp.NewFilterfingerprintDataSource,
 		dhcp.NewIpv6fixedaddressDataSource,
+		dhcp.NewIpv6filteroptionDataSource,
+		dhcp.NewFilterrelayagentDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
@@ -293,6 +303,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcMonitorIcmpDataSource,
 		dtc.NewDtcMonitorSipDataSource,
 		dtc.NewDtcRecordADataSource,
+		dtc.NewDtcRecordSrvDataSource,
+		dtc.NewDtcRecordNaptrDataSource,
+		dtc.NewDtcRecordCnameDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworktemplateDataSource,
@@ -346,6 +359,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameDataSource,
 		rpz.NewRecordRpzAaaaDataSource,
 		rpz.NewRecordRpzTxtDataSource,
+		rpz.NewRecordRpzCnameIpaddressDataSource,
+		rpz.NewRecordRpzAIpaddressDataSource,
+		rpz.NewRecordRpzAaaaIpaddressDataSource,
 	}
 }
 
