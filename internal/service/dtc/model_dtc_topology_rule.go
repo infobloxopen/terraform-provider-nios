@@ -117,3 +117,19 @@ func (m *DtcTopologyRuleModel) Flatten(ctx context.Context, from *dtc.DtcTopolog
 	m.Topology = flex.FlattenStringPointer(from.Topology)
 	m.Valid = types.BoolPointerValue(from.Valid)
 }
+
+func ExpandDtcTopologyRuleDestinationLink(ctx context.Context, o types.String, diags *diag.Diagnostics) *dtc.DtcTopologyRuleDestinationLink {
+	if o.IsNull() || o.IsUnknown() {
+		return nil
+	}
+	return &dtc.DtcTopologyRuleDestinationLink{
+		String: flex.ExpandStringPointer(o),
+	}
+}
+
+func FlattenDtcTopologyRuleDestinationLink(ctx context.Context, from *dtc.DtcTopologyRuleDestinationLink, diags *diag.Diagnostics) types.String {
+	if from == nil {
+		return types.StringNull()
+	}
+	return flex.FlattenStringPointer(from.DtcTopologyRuleDestinationLinkOneOf.Ref)
+}
