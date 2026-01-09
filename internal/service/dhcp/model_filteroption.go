@@ -145,7 +145,7 @@ var FilteroptionResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.Int64{
-			int64validator.Between(0, 399999999),
+			int64validator.Between(0, 2147483647),
 		},
 		MarkdownDescription: "Determines the PXE (Preboot Execution Environment) lease time of a DHCP filter option object. To specify the duration of time it takes a host to connect to a boot server, such as a TFTP server, and download the file it needs to boot.",
 	},

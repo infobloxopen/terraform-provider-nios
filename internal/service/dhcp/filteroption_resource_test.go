@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -402,7 +403,7 @@ func TestAccFilteroptionResource_OptionSpace(t *testing.T) {
 	var v dhcp.Filteroption
 	name := acctest.RandomNameWithPrefix("filteroption")
 	optionSpace := "DHCP"
-	updatedOptionSpace := "option3"
+	updatedOptionSpace := acctest.RandomNameWithPrefix("optionspace")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -418,10 +419,10 @@ func TestAccFilteroptionResource_OptionSpace(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFilteroptionOptionSpace(name, updatedOptionSpace),
+				Config: testAccFilteroptionOptionSpaceUpdated(name, updatedOptionSpace),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFilteroptionExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_space", "option3"),
+					resource.TestCheckResourceAttr(resourceName, "option_space", updatedOptionSpace),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -639,4 +640,14 @@ resource "nios_dhcp_filteroption" "test_pxe_lease_time" {
     pxe_lease_time = %q
 }
 `, name, pxeLeaseTime)
+}
+
+func testAccFilteroptionOptionSpaceUpdated(name string, optionSpace string) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_filteroption" "test_option_space" {
+    name = %q
+    option_space = nios_dhcp_optionspace.test.name
+}
+`, name)
+	return strings.Join([]string{testAccBaseWithDHCPOptionSpace(optionSpace), config}, "")
 }
