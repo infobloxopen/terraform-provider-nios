@@ -4,7 +4,7 @@ data "nios_dhcp_filteroption" "get_filteroption_using_filters" {
     name = "filteroption_example"
   }
 }
-// Retrieve specific DHCP Filteroption using extensible attributes
+// Retrieve specific DHCP Filteroptions using extensible attributes
 data "nios_dhcp_filteroption" "get_filteroption_using_extattr_filter" {
   extattrfilters = {
     Site = "location-1"
