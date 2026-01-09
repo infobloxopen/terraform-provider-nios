@@ -1,5 +1,3 @@
-// Note: DTC CNAME Record cannot be retrieved without filters. The dtc_server filter is mandatory for all queries.
-
 // Retrieve a specific DTC CNAME Record in a DTC server using filters 
 data "nios_dtc_record_cname" "get_dtc_cname_record_in_dtc_server_using_filters" {
   filters = {
