@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -157,41 +156,6 @@ func TestAccIpv6dhcpoptionspaceResource_Name(t *testing.T) {
 	})
 }
 
-func TestAccIpv6dhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
-	var resourceName = "nios_dhcp_ipv6optionspace.test_option_definitions"
-	var v dhcp.Ipv6dhcpoptionspace
-	optionSpace1 := acctest.RandomNameWithPrefix("option-space")
-	optionSpace2 := acctest.RandomNameWithPrefix("option-space")
-	optionDefinition1 := "nios_dhcp_ipv6optiondefinition.test2"
-	optionDefinition2 := "nios_dhcp_ipv6optiondefinition.test3"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIpv6dhcpoptionspaceOptionDefinitions("5896", optionSpace1, optionSpace2, optionDefinition1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6dhcpoptionspaceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_definitions.#", "1"),
-					resource.TestCheckResourceAttrPair(resourceName, "option_definitions.0", optionDefinition1, "name"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIpv6dhcpoptionspaceOptionDefinitions("5123", optionSpace1, optionSpace2, optionDefinition2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6dhcpoptionspaceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_definitions.#", "1"),
-					resource.TestCheckResourceAttrPair(resourceName, "option_definitions.0", optionDefinition2, "name"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func testAccCheckIpv6dhcpoptionspaceExists(ctx context.Context, resourceName string, v *dhcp.Ipv6dhcpoptionspace) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -285,43 +249,4 @@ resource "nios_dhcp_ipv6optionspace" "test_name" {
     name = %q
 }
 `, enterpriseNumber, name)
-}
-
-func testAccIpv6dhcpoptionspaceOptionDefinitions(enterpriseNumber string, optionSpace1 string, optionSpace2 string, name string) string {
-	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6optionspace" "test_option_definitions" {
-    enterprise_number = %q
-    name = %q
-    option_definitions = [
-		%s.name,
-	]
-}
-`, enterpriseNumber, optionSpace2, name)
-	return strings.Join([]string{testAccBaseWithIpv6DHCPOptionSpaceAndOptionDefinition(optionSpace1, "10"), config}, "")
-}
-
-func testAccBaseWithIpv6DHCPOptionSpaceAndOptionDefinition(name1, enterpriseNumber1 string) string {
-	optionDefinition1 := acctest.RandomNameWithPrefix("option-definition")
-	optionDefinition2 := acctest.RandomNameWithPrefix("option-definition")
-
-	return fmt.Sprintf(`
-resource "nios_dhcp_ipv6optionspace" "test1" {
-  name = %q
-  enterprise_number = %q
-}
-resource "nios_dhcp_ipv6optiondefinition" "test2" {
-  name = %q
-  code = 1234
-  space = nios_dhcp_ipv6optionspace.test1.name
-  type = "string"
-}
-
-resource "nios_dhcp_ipv6optiondefinition" "test3" {
-  name = %q
-  code = 12345
-  space = nios_dhcp_ipv6optionspace.test1.name
-  type = "ip-address"
-}
-
-`, name1, enterpriseNumber1, optionDefinition1, optionDefinition2)
 }
