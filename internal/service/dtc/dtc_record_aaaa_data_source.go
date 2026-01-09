@@ -16,6 +16,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -56,6 +57,9 @@ func (d *DtcRecordAaaaDataSource) Schema(ctx context.Context, req datasource.Sch
 				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters. The `dtc_server` filter is a required and must be specified for searching DTC AAAA records.",
 				ElementType: types.StringType,
 				Required:    true,
+				Validators: []validator.Map{
+					customvalidator.MapContainsKey("dtc_server"),
+				},
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
