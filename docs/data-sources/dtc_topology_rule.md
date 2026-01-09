@@ -38,19 +38,21 @@ resource "nios_dtc_topology" "create_dtc_topology" {
         }
       ]
     }
-
   ]
   extattrs = {
     Site = "location-1"
   }
 }
 
-
 // Retrieve all DTC Topology rule in a DTC Topology 
 data "nios_dtc_topology_rule" "get_topology_rules_using_filters" {
   filters = {
     topology = nios_dtc_topology.create_dtc_topology.ref
   }
+}
+
+// Retrieve all DTC Topology rule 
+data "nios_dtc_topology_rule" "get_all_topology_rules" {
 }
 ```
 
