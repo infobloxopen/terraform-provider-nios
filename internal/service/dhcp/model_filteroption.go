@@ -73,11 +73,13 @@ var FilteroptionResourceSchemaAttributes = map[string]schema.Attribute{
 	"bootfile": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "A name of boot file of a DHCP filter option object.",
 	},
 	"bootserver": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Determines the boot server of a DHCP filter option object. You can specify the name and/or IP address of the boot server that host needs to boot.",
 	},
 	"comment": schema.StringAttribute{
@@ -116,6 +118,7 @@ var FilteroptionResourceSchemaAttributes = map[string]schema.Attribute{
 	"next_server": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Determines the next server of a DHCP filter option object. You can specify the name and/or IP address of the next server that the host needs to boot.",
 	},
 	"option_list": schema.ListNestedAttribute{
