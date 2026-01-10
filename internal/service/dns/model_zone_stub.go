@@ -170,7 +170,7 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			stringvalidator.Any(
-				customvalidator.IsValidFQDN(),
+				customvalidator.IsValidDomainName(),
 				customvalidator.IsValidIPCIDR(),
 			),
 			customvalidator.IsNotArpa(),

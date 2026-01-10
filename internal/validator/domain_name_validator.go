@@ -92,6 +92,11 @@ func isDomainName(s string, allowMultiLabel bool, checkPrintableChars bool) erro
 		return fmt.Errorf("domain name cannot be empty or have leading/trailing dots")
 	}
 
+	// Check for leading or trailing whitespace
+	if strings.TrimSpace(s) != s {
+		return fmt.Errorf("domain name cannot have leading or trailing whitespaces")
+	}
+
 	// Check printable characters (ASCII 32-126)
 	if checkPrintableChars {
 		for _, ch := range s {
