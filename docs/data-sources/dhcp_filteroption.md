@@ -3,12 +3,12 @@
 page_title: "nios_dhcp_filteroption Data Source - nios"
 subcategory: "DHCP"
 description: |-
-  Manages a DHCP Filter Option.
+  Retrieves information about existing Filteroptions
 ---
 
 # nios_dhcp_filteroption (Data Source)
 
-Manages a DHCP Filter Option.
+Retrieves information about existing Filteroptions
 
 ## Example Usage
 

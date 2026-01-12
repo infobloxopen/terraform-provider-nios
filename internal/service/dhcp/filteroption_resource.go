@@ -402,7 +402,7 @@ func (r *FilteroptionResource) ValidateConfig(ctx context.Context, req resource.
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("option_list").AtListIndex(i).AtName("value"),
