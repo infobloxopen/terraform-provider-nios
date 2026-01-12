@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -78,6 +77,13 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 			"Invalid Configuration",
 			"`use_disable_concurrent_login` must be set to true when `disable_concurrent_login` is used.",
 		)
+	}
+
+	// Check if password_setting is set and use_password_setting is false
+	if !config.PasswordSetting.IsNull() && !config.PasswordSetting.IsUnknown() && !config.UsePasswordSetting.ValueBool() {
+		resp.Diagnostics.AddAttributeError(path.Root("password_setting"),
+			"Invalid Configuration",
+			"`use_password_setting` must be set to true when `password_setting` is used.")
 	}
 
 	// Skip validation if UserAccess is not provided
