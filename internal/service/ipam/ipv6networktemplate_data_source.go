@@ -1,4 +1,4 @@
-package dtc
+package ipam
 
 import (
 	"context"
@@ -13,57 +13,60 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &DtcRecordADataSource{}
+var _ datasource.DataSource = &Ipv6networktemplateDataSource{}
 
-func NewDtcRecordADataSource() datasource.DataSource {
-	return &DtcRecordADataSource{}
+func NewIpv6networktemplateDataSource() datasource.DataSource {
+	return &Ipv6networktemplateDataSource{}
 }
 
-// DtcRecordADataSource defines the data source implementation.
-type DtcRecordADataSource struct {
+// Ipv6networktemplateDataSource defines the data source implementation.
+type Ipv6networktemplateDataSource struct {
 	client *niosclient.APIClient
 }
 
-func (d *DtcRecordADataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dtc_record_a"
+func (d *Ipv6networktemplateDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "ipam_ipv6networktemplate"
 }
 
-type DtcRecordAModelWithFilter struct {
-	Filters    types.Map   `tfsdk:"filters"`
-	Result     types.List  `tfsdk:"result"`
-	MaxResults types.Int32 `tfsdk:"max_results"`
-	Paging     types.Int32 `tfsdk:"paging"`
+type Ipv6networktemplateModelWithFilter struct {
+	Filters        types.Map   `tfsdk:"filters"`
+	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
+	Result         types.List  `tfsdk:"result"`
+	MaxResults     types.Int32 `tfsdk:"max_results"`
+	Paging         types.Int32 `tfsdk:"paging"`
 }
 
-func (m *DtcRecordAModelWithFilter) FlattenResults(ctx context.Context, from []dtc.DtcRecordA, diags *diag.Diagnostics) {
+func (m *Ipv6networktemplateModelWithFilter) FlattenResults(ctx context.Context, from []ipam.Ipv6networktemplate, diags *diag.Diagnostics) {
 	if len(from) == 0 {
 		return
 	}
-	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, DtcRecordAAttrTypes, diags, FlattenDtcRecordA)
+	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, Ipv6networktemplateAttrTypes, diags, FlattenIpv6networktemplate)
 }
 
-func (d *DtcRecordADataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *Ipv6networktemplateDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing DTC A Records.",
+		MarkdownDescription: "Retrieves information about existing IPv6 Network Templates.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
-				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters. The `dtc_server` filter is a required and must be specified for searching DTC A records.",
+				Description: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType: types.StringType,
-				Required:    true,
-				Validators: []validator.Map{
-					customvalidator.MapContainsKey("dtc_server"),
-				},
+				Optional:    true,
+			},
+			"extattrfilters": schema.MapAttribute{
+				Description: "External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
+				ElementType: types.StringType,
+				Optional:    true,
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: utils.DataSourceAttributeMap(DtcRecordAResourceSchemaAttributes, &resp.Diagnostics),
+					Attributes: utils.DataSourceAttributeMap(Ipv6networktemplateResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
 			},
@@ -82,7 +85,7 @@ func (d *DtcRecordADataSource) Schema(ctx context.Context, req datasource.Schema
 	}
 }
 
-func (d *DtcRecordADataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *Ipv6networktemplateDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -102,8 +105,8 @@ func (d *DtcRecordADataSource) Configure(ctx context.Context, req datasource.Con
 	d.client = client
 }
 
-func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data DtcRecordAModelWithFilter
+func (d *Ipv6networktemplateDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data Ipv6networktemplateModelWithFilter
 	pageCount := 0
 
 	// Read Terraform prior state data into the model
@@ -114,7 +117,7 @@ func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	allResults, err := utils.ReadWithPages(
-		func(pageID string, maxResults int32) ([]dtc.DtcRecordA, string, error) {
+		func(pageID string, maxResults int32) ([]ipam.Ipv6networktemplate, string, error) {
 
 			if !data.MaxResults.IsNull() {
 				maxResults = data.MaxResults.ValueInt32()
@@ -127,12 +130,13 @@ func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequ
 			//Increment the page count
 			pageCount++
 
-			request := d.client.DTCAPI.
-				DtcRecordAAPI.
+			request := d.client.IPAMAPI.
+				Ipv6networktemplateAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
+				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForDtcRecordA).
+				ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 				Paging(paging).
 				MaxResults(maxResults)
 
@@ -144,15 +148,15 @@ func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequ
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcRecordA by filter, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networktemplate by extattrs, got error: %s", err))
 				return nil, "", err
 			}
 
-			res := apiRes.ListDtcRecordAResponseObject.GetResult()
+			res := apiRes.ListIpv6networktemplateResponseObject.GetResult()
 			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
 
 			// Check for next page ID in additional properties
-			additionalProperties := apiRes.ListDtcRecordAResponseObject.AdditionalProperties
+			additionalProperties := apiRes.ListIpv6networktemplateResponseObject.AdditionalProperties
 			var nextPageID string
 			npId, ok := additionalProperties["next_page_id"]
 			if ok {
@@ -167,7 +171,7 @@ func (d *DtcRecordADataSource) Read(ctx context.Context, req datasource.ReadRequ
 	)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcRecordA, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networktemplate, got error: %s", err))
 		return
 	}
 	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
