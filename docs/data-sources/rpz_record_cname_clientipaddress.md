@@ -13,21 +13,6 @@ Retrives a list of RPZ CNAME Client IP Address records from Infoblox NIOS based 
 ## Example Usage
 
 ```terraform
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "1.0.0"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "https://172.28.83.72"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
-}
-
 // Retrieve a specific RPZ CNAME client IP address record by filters
 data "nios_rpz_record_cname_clientipaddress" "get_record_using_filters" {
   filters = {

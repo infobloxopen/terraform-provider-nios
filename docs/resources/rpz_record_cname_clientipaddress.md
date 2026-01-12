@@ -13,21 +13,6 @@ Manages an RPZ CNAME Client IP Address record in Infoblox NIOS.
 ## Example Usage
 
 ```terraform
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "1.0.0"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "https://172.28.83.72"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
-}
-
 // Create Parent RP Zone
 resource "nios_dns_zone_rp" "parent_zone" {
   fqdn = "rpzclientipaddress.example.com"
