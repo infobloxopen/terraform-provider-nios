@@ -186,6 +186,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewVlanResource,
 		ipam.NewVlanrangeResource,
 		ipam.NewSuperhostResource,
+		ipam.NewIpv6networktemplateResource,
 
 		cloud.NewAwsrte53taskgroupResource,
 		cloud.NewAwsuserResource,
@@ -320,6 +321,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewVlanDataSource,
 		ipam.NewVlanrangeDataSource,
 		ipam.NewSuperhostDataSource,
+		ipam.NewIpv6networktemplateDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
 		cloud.NewAwsuserDataSource,
