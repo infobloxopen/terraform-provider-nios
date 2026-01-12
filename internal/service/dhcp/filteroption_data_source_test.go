@@ -96,7 +96,7 @@ resource "nios_dhcp_filteroption" "test" {
   name = %q
   extattrs = {
     Site = %q
-  } 
+  }
 }
 
 data "nios_dhcp_filteroption" "test" {
