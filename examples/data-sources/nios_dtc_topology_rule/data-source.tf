@@ -29,13 +29,13 @@ resource "nios_dtc_topology" "create_dtc_topology" {
   }
 }
 
-// Retrieve all DTC Topology rule in a DTC Topology 
+// Retrieve all DTC Topology rules in a DTC Topology 
 data "nios_dtc_topology_rule" "get_topology_rules_using_filters" {
   filters = {
     topology = nios_dtc_topology.create_dtc_topology.ref
   }
 }
 
-// Retrieve all DTC Topology rule 
+// Retrieve all DTC Topology rules
 data "nios_dtc_topology_rule" "get_all_topology_rules" {
 }
