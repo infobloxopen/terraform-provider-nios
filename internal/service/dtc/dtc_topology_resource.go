@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -326,4 +327,52 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 func (r *DtcTopologyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
+}
+
+func (r *DtcTopologyResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data DtcTopologyModel
+
+	// Read Terraform configuration data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if data.Rules.IsNull() || data.Rules.IsUnknown() {
+		return
+	}
+
+	rules := data.Rules.Elements()
+	if len(rules) == 0 {
+		return
+	}
+
+	firstDestType := ""
+
+	for _, rule := range rules {
+		ruleObj, ok := rule.(types.Object)
+		if !ok {
+			resp.Diagnostics.AddError("Type Assertion Error", fmt.Sprintf("Expected types.Object, got: %T", rule))
+			return
+		}
+
+		destTypeAttr, exists := ruleObj.Attributes()["dest_type"]
+		if !exists {
+			continue
+		}
+
+		if destValue, ok := destTypeAttr.(types.String); ok {
+			destType := destValue.ValueString()
+
+			if firstDestType == "" {
+				firstDestType = destType
+			}
+
+			if firstDestType != destType {
+				resp.Diagnostics.AddError("The Topology resource cannot have rules with different dest_type values", fmt.Sprintf("Found different dest_type values: %s and %s.", firstDestType, destType))
+				return
+			}
+		}
+	}
 }
