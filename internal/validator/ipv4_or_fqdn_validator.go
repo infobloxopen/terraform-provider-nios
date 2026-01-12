@@ -3,6 +3,7 @@ package validator
 import (
 	"context"
 	"net"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -57,6 +58,10 @@ func (v iPv4OrFQDNValidator) ValidateString(ctx context.Context, req validator.S
 
 // looksLikeIPv4 returns true if the string resembles an IPv4 address (N.N.N.N with digits only)
 func looksLikeIPv4(s string) bool {
+	// Check if string contains at least one dot
+	if !strings.Contains(s, ".") {
+		return false
+	}
 	for i := 0; i < len(s); i++ {
 		c := s[i]
 		if (c < '0' || c > '9') && c != '.' {
