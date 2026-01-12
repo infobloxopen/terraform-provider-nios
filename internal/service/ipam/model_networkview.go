@@ -21,6 +21,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -76,6 +77,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The list of DNS views associated with this network view.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"associated_members": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -83,6 +87,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Computed:            true,
 		MarkdownDescription: "The list of members associated with a network view.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          NetworkviewCloudInfoResourceSchemaAttributes,
@@ -157,6 +164,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 	"is_default": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "The NIOS appliance provides one default network view. You can rename the default view and change its settings, but you cannot delete it. There must always be at least one network view in the appliance.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"mgm_private": schema.BoolAttribute{
 		Optional:            true,
@@ -168,6 +178,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          NetworkviewMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required: true,

@@ -9,6 +9,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/discovery"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -136,6 +138,9 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The AWS Account IDs or GCP Project IDs list associated with this task.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"allow_unsecured_connection": schema.BoolAttribute{
 		Optional:            true,
@@ -184,6 +189,9 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 	"cdiscovery_file_token": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The AWS account IDs or GCP Project IDs file's token.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -264,6 +272,9 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_run": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "Timestamp of last run.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"member": schema.StringAttribute{
 		Required:            true,
@@ -395,10 +406,16 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 	"state": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Current state of this task.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"state_msg": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "State message of the complete discovery process.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"sync_child_accounts": schema.BoolAttribute{
 		Optional:            true,

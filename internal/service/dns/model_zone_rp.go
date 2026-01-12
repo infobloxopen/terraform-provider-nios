@@ -27,6 +27,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -149,6 +150,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		MarkdownDescription: "The IP address of the server that is serving this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -169,10 +173,16 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"display_domain": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The displayed name of the DNS zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"dns_soa_email": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The SOA email for the zone in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		ElementType: types.StringType,
@@ -275,6 +285,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"locked_by": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of a superuser or the administrator who locked this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"log_rpz": schema.BoolAttribute{
 		Optional: true,
@@ -288,6 +301,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"mask_prefix": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "IPv4 Netmask or IPv6 prefix for this zone.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"member_soa_mnames": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -306,10 +322,16 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Computed:            true,
 		MarkdownDescription: "The list of per-member SOA serial information.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"network_view": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the network view in which this zone resides.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ns_group": schema.StringAttribute{
 		Optional: true,
@@ -323,6 +345,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"parent": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The parent zone of this zone. Note that when searching for reverse zones, the \"in-addr.arpa\" notation should be used.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"prefix": schema.StringAttribute{
 		CustomType: internaltypes.CaseInsensitiveString{},
@@ -336,6 +361,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"primary_type": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The type of the primary server.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"record_name_policy": schema.StringAttribute{
 		Optional: true,
@@ -376,6 +404,9 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"rpz_last_updated_time": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp of the last update for zone data.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"rpz_policy": schema.StringAttribute{
 		Optional: true,
@@ -389,10 +420,16 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"rpz_priority": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The priority of this response policy zone.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"rpz_priority_end": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "This number is for UI to identify the end of qualified zone list.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"rpz_severity": schema.StringAttribute{
 		Optional: true,

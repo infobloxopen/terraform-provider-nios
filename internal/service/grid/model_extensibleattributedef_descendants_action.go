@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -14,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type ExtensibleattributedefDescendantsActionModel struct {
@@ -35,6 +37,9 @@ var ExtensibleattributedefDescendantsActionResourceSchemaAttributes = map[string
 			stringvalidator.OneOf("CONVERT", "INHERIT", "RETAIN"),
 		},
 		MarkdownDescription: "This option describes which action must be taken if the extensible attribute exists for both the parent and descendant objects: * INHERIT: inherit the extensible attribute from the parent object. * RETAIN: retain the value of an extensible attribute that was set for the child object. * CONVERT: the value of the extensible attribute must be copied from the parent object.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"option_without_ea": schema.StringAttribute{
 		Computed: true,
@@ -42,6 +47,9 @@ var ExtensibleattributedefDescendantsActionResourceSchemaAttributes = map[string
 			stringvalidator.OneOf("INHERIT", "NOT_INHERIT"),
 		},
 		MarkdownDescription: "This option describes which action must be taken if the extensible attribute exists for the parent, but is absent from the descendant object: * INHERIT: inherit the extensible attribute from the parent object. * NOT_INHERIT: do nothing.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"option_delete_ea": schema.StringAttribute{
 		Computed: true,
@@ -49,6 +57,9 @@ var ExtensibleattributedefDescendantsActionResourceSchemaAttributes = map[string
 			stringvalidator.OneOf("REMOVE", "RETAIN"),
 		},
 		MarkdownDescription: "This option describes which action must be taken if the extensible attribute exists for the descendant, but is absent for the parent object: * RETAIN: retain the extensible attribute value for the descendant object. * REMOVE: remove this extensible attribute from the descendant object.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 

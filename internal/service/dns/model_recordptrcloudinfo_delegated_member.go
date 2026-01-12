@@ -6,10 +6,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type RecordptrcloudinfoDelegatedMemberModel struct {
@@ -28,14 +30,23 @@ var RecordptrcloudinfoDelegatedMemberResourceSchemaAttributes = map[string]schem
 	"ipv4addr": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ipv6addr": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The IPv6 Address of the Grid Member.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The Grid member name",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 
