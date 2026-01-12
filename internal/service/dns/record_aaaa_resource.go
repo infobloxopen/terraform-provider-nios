@@ -134,7 +134,7 @@ func (r *RecordAaaaResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordAaaaAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRecordAaaa).
 		ReturnAsObject(1).
 		Execute()
@@ -252,7 +252,7 @@ func (r *RecordAaaaResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -284,7 +284,7 @@ func (r *RecordAaaaResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordAaaaAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordAaaa(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordAaaa).
 		ReturnAsObject(1).
@@ -324,7 +324,7 @@ func (r *RecordAaaaResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	httpRes, err := r.client.DNSAPI.
 		RecordAaaaAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -350,6 +350,6 @@ func (r *RecordAaaaResource) UpdateFuncCallAttributeName(ctx context.Context, da
 }
 
 func (r *RecordAaaaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
