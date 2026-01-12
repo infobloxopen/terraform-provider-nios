@@ -37,7 +37,7 @@ func (v iPv4OrFQDNValidator) ValidateString(ctx context.Context, req validator.S
 	if looksLikeIPv4(value) {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
 			req.Path,
-			"Invalid IP address",
+			"Invalid IPv4 address",
 			value,
 		))
 		return
