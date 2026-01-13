@@ -176,7 +176,7 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "A name in FQDN format. This value can be in unicode format.",
 	},
@@ -206,6 +206,7 @@ var RecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The target of the SRV record in FQDN format. This value can be in unicode format.",
 	},
