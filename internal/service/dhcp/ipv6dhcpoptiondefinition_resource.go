@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -130,9 +132,11 @@ func (r *Ipv6dhcpoptiondefinitionResource) Read(ctx context.Context, req resourc
 func (r *Ipv6dhcpoptiondefinitionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
 	var data Ipv6dhcpoptiondefinitionModel
+	var stateData Ipv6dhcpoptiondefinitionModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -142,6 +146,14 @@ func (r *Ipv6dhcpoptiondefinitionResource) Update(ctx context.Context, req resou
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	// Update ref if space has changed
+	if !data.Space.Equal(stateData.Space) {
+		r.updateRefIfSpaceChanged(ctx, resp, &data, &stateData)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	apiRes, _, err := r.client.DHCPAPI.
@@ -187,6 +199,81 @@ func (r *Ipv6dhcpoptiondefinitionResource) Delete(ctx context.Context, req resou
 	}
 }
 
+func (r *Ipv6dhcpoptiondefinitionResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+
+	var data Ipv6dhcpoptiondefinitionModel
+	// Read Terraform prior state data into the model.
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var space string
+	if !data.Space.IsNull() {
+		space = data.Space.ValueString()
+	} else {
+		space = "DHCPv6"
+	}
+
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		name := data.Name.ValueString()
+		// If space defaults to "DHCPv6", then name should start with "dhcp6."
+		if space == "DHCPv6" {
+			if !strings.HasPrefix(name, "dhcp6.") {
+				resp.Diagnostics.AddError(
+					"Invalid Name for DHCPv6 Option Definition",
+					"The name of a DHCP IPv6 option definition object in the default space (DHCPv6) must start with 'dhcp6.'.",
+				)
+			}
+		} else {
+			// If space is custom, then name should not start with "dhcp6."
+			if strings.HasPrefix(name, "dhcp6.") {
+				resp.Diagnostics.AddError(
+					"Invalid Name for Custom DHCPv6 Option Definition",
+					"The name of a DHCP IPv6 option definition object in a custom space must not start with 'dhcp6.'.",
+				)
+			}
+		}
+	}
+}
+
 func (r *Ipv6dhcpoptiondefinitionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// updateRefIfSpaceChanged updates the ref if the option space name changes by
+// finding the option definition with the new space name and updating the data model accordingly.
+func (r *Ipv6dhcpoptiondefinitionResource) updateRefIfSpaceChanged(ctx context.Context, resp *resource.UpdateResponse, data *Ipv6dhcpoptiondefinitionModel, stateData *Ipv6dhcpoptiondefinitionModel) {
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Search for the option definition with the new space
+	listApiRes, _, err := r.client.DHCPAPI.
+		Ipv6dhcpoptiondefinitionAPI.
+		List(ctx).
+		Filters(map[string]interface{}{
+			"name":  stateData.Name.ValueString(),
+			"space": data.Space.ValueString(),
+			"code":  stateData.Code.ValueInt64(),
+			"type":  stateData.Type.ValueString(),
+		}).
+		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptiondefinition).
+		ReturnAsObject(1).
+		Execute()
+
+	if err != nil {
+		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6dhcpoptiondefinition list, got error: %s", err))
+		return
+	}
+
+	results := listApiRes.ListIpv6dhcpoptiondefinitionResponseObject.GetResult()
+
+	if len(results) == 0 {
+		return
+	}
+
+	data.Ref = types.StringValue(*results[0].Ref)
+
 }
