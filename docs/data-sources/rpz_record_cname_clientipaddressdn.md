@@ -66,6 +66,6 @@ Optional:
 Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
-- `is_ipv4` (Boolean) Indicates whether the record is an IPv4 record. If the return value is "true", it is an IPv4 record. Ohterwise, it is an IPv6 record.
+- `is_ipv4` (Boolean) Indicates whether the record is an IPv4 record. If the return value is "true", it is an IPv4 record. Otherwise, it is an IPv6 record.
 - `ref` (String) The reference to the object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.

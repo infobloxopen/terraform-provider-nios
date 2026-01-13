@@ -24,7 +24,7 @@ type IPName struct {
 	basetypes.StringValue
 }
 
-// Type returns an IPv6AddressType.
+// Type returns an IPNameType.
 func (v IPName) Type(_ context.Context) attr.Type {
 	return IPNameType{}
 }
@@ -153,31 +153,7 @@ func (v IPName) ValidateAttribute(ctx context.Context, req xattr.ValidateAttribu
 		}
 	}
 
-	if ipAddr.Is4() {
-		if !ipAddr.IsValid() {
-			resp.Diagnostics.AddAttributeError(
-				req.Path,
-				"Invalid IP Name Value",
-				"A string value was provided that is not a valid IPv4 Name. "+
-					"The IP portion must be a valid IPv4 address or IPv4 CIDR prefix.\n\n"+
-					"Expected format: '<ipv4>.<rp-zone>' or '<ipv4>/<prefix>.<rp-zone>'.\n\n"+
-					"Given Value: "+v.ValueString(),
-			)
-			return
-		}
-	} else if ipAddr.Is6() {
-		if !ipAddr.IsValid() {
-			resp.Diagnostics.AddAttributeError(
-				req.Path,
-				"Invalid IP Name Value",
-				"A string value was provided that is not a valid IPv6 Name. "+
-					"The IP portion must be a valid IPv6 address or IPv6 CIDR prefix.\n\n"+
-					"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
-					"Given Value: "+v.ValueString(),
-			)
-			return
-		}
-	} else {
+	if !ipAddr.Is4() && !ipAddr.Is6() {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Invalid IP Name Value",
@@ -190,7 +166,7 @@ func (v IPName) ValidateAttribute(ctx context.Context, req xattr.ValidateAttribu
 }
 
 // ValidateParameter implements provider-defined function parameter value validation. This type requires the value provided
-// to be a String value that is a valid IPv6 name.
+// to be a String value that is a valid IP name (IPv4 or IPv6).
 func (v IPName) ValidateParameter(ctx context.Context, req function.ValidateParameterRequest, resp *function.ValidateParameterResponse) {
 	var (
 		ipAddr netip.Addr
@@ -246,31 +222,7 @@ func (v IPName) ValidateParameter(ctx context.Context, req function.ValidatePara
 		}
 	}
 
-	if ipAddr.Is4() {
-		if !ipAddr.IsValid() {
-			resp.Error = function.NewArgumentFuncError(
-				req.Position,
-				"Invalid IP Name Value: "+
-					"A string value was provided that is not a valid IPv4 Name. "+
-					"The IP portion must be a valid IPv4 address or IPv4 CIDR prefix.\n\n"+
-					"Expected format: '<ipv4>.<rp-zone>' or '<ipv4>/<prefix>.<rp-zone>'.\n\n"+
-					"Given Value: "+v.ValueString(),
-			)
-			return
-		}
-	} else if ipAddr.Is6() {
-		if !ipAddr.IsValid() {
-			resp.Error = function.NewArgumentFuncError(
-				req.Position,
-				"Invalid IP Name Value: "+
-					"A string value was provided that is not a valid IPv6 Name. "+
-					"The IP portion must be a valid IPv6 address or IPv6 CIDR prefix.\n\n"+
-					"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
-					"Given Value: "+v.ValueString(),
-			)
-			return
-		}
-	} else {
+	if !ipAddr.Is4() && !ipAddr.Is6() {
 		resp.Error = function.NewArgumentFuncError(
 			req.Position,
 			"Invalid IP Name Value: "+

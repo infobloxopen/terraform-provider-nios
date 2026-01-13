@@ -98,7 +98,7 @@ var RecordRpzCnameClientipaddressdnResourceSchemaAttributes = map[string]schema.
 	},
 	"is_ipv4": schema.BoolAttribute{
 		Computed:            true,
-		MarkdownDescription: "Indicates whether the record is an IPv4 record. If the return value is \"true\", it is an IPv4 record. Ohterwise, it is an IPv6 record.",
+		MarkdownDescription: "Indicates whether the record is an IPv4 record. If the return value is \"true\", it is an IPv4 record. Otherwise, it is an IPv6 record.",
 	},
 	"name": schema.StringAttribute{
 		CustomType: internaltypes.IPNameType{},
