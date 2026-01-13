@@ -108,7 +108,8 @@ var SharedrecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"text": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
+			customvalidator.ValidateTXT(false),
+			customvalidator.NoLeadingTrailingWhitespaceUnlessQuoted(),
 		},
 		MarkdownDescription: "Text associated with the shared record. It can contain up to 255 bytes per substring and up a total of 512 bytes. To enter leading, trailing or embedded spaces in the text, add quotes (\" \") around the text to preserve the spaces.",
 	},
@@ -174,7 +175,16 @@ func (m *SharedrecordTxtModel) Flatten(ctx context.Context, from *dns.Sharedreco
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedRecordGroup = flex.FlattenStringPointer(from.SharedRecordGroup)
-	m.Text = flex.FlattenStringPointer(from.Text)
+	m.Text = normalizeAPIToState(*from.Text)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
+}
+
+// apiVal is exactly what WAPI returns: "\"\"" or "\"    hello\"" or "hello world", etc.
+func normalizeAPIToState(apiVal string) types.String {
+	if apiVal == "\"\"" || apiVal == "" {
+		return types.StringValue("") // canonical empty
+	} else {
+		return types.StringValue(apiVal) // preserve as-is
+	}
 }
