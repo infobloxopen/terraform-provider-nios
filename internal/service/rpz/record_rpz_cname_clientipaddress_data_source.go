@@ -51,7 +51,7 @@ func (m *RecordRpzCnameClientipaddressModelWithFilter) FlattenResults(ctx contex
 
 func (d *RecordRpzCnameClientipaddressDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrives a list of RPZ CNAME Client IP Address records from Infoblox NIOS based on specified filters.",
+		MarkdownDescription: "Retrieves information about existing DNS RPZ CNAME Client IP Address Records.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

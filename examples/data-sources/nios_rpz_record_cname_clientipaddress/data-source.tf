@@ -5,10 +5,6 @@ data "nios_rpz_record_cname_clientipaddress" "get_record_using_filters" {
   }
 }
 
-output "rpz_record_cname_clientipaddress" {
-  value = data.nios_rpz_record_cname_clientipaddress.get_record_using_filters
-}
-
 // Retrieve specific RPZ CNAME client IP address records using Extensible Attributes
 data "nios_rpz_record_cname_clientipaddress" "get_record_using_extensible_attributes" {
   extattrfilters = {
@@ -17,4 +13,4 @@ data "nios_rpz_record_cname_clientipaddress" "get_record_using_extensible_attrib
 }
 
 // Retrieve all RPZ CNAME client IP address records
-data "nios_rpz_record_cname_clientipaddress" "get_all_rpz_cname_records" {}
+data "nios_rpz_record_cname_clientipaddress" "get_all_rpz_cname_clientipaddress_records" {}

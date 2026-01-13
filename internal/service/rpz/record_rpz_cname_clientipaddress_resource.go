@@ -37,7 +37,7 @@ func (r *RecordRpzCnameClientipaddressResource) Metadata(ctx context.Context, re
 
 func (r *RecordRpzCnameClientipaddressResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an RPZ CNAME Client IP Address record in Infoblox NIOS.",
+		MarkdownDescription: "Manages an RPZ CNAME Client IP Address Record.",
 		Attributes:          RecordRpzCnameClientipaddressResourceSchemaAttributes,
 	}
 }

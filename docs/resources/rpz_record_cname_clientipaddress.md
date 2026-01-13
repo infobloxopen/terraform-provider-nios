@@ -3,12 +3,12 @@
 page_title: "nios_rpz_record_cname_clientipaddress Resource - nios"
 subcategory: "RPZ"
 description: |-
-  Manages an RPZ CNAME Client IP Address record in Infoblox NIOS.
+  Manages an RPZ CNAME Client IP Address Record.
 ---
 
 # nios_rpz_record_cname_clientipaddress (Resource)
 
-Manages an RPZ CNAME Client IP Address record in Infoblox NIOS.
+Manages an RPZ CNAME Client IP Address Record.
 
 ## Example Usage
 

@@ -495,7 +495,7 @@ func testAccRecordRpzCnameClientipaddressExtAttrs(nameIP, canonical, rpZone stri
 
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_clientipaddress" "test_extattrs" {
-name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
+	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 	view = "default"
@@ -546,7 +546,7 @@ resource "nios_rpz_record_cname_clientipaddress" "test_ttl" {
 func testAccRecordRpzCnameClientipaddressUseTtl(nameIP, canonical, rpZone, useTtl string, ttl int) string {
 	config := fmt.Sprintf(`
 resource "nios_rpz_record_cname_clientipaddress" "test_use_ttl" {
-name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
+	name = "%s.${nios_dns_zone_rp.test_zone.fqdn}"
 	canonical = %q
 	rp_zone = nios_dns_zone_rp.test_zone.fqdn
 	view = "default"
