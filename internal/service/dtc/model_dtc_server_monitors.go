@@ -30,10 +30,7 @@ var DtcServerMonitorsResourceSchemaAttributes = map[string]schema.Attribute{
 	"monitor": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidIPv4OrFQDN(
-				customvalidator.IsValidIPCIDR(),
-				customvalidator.IsValidDomainName(),
-			),
+			customvalidator.IsValidIPv4OrFQDN(),
 		},
 		MarkdownDescription: "The monitor related to server.",
 	},
