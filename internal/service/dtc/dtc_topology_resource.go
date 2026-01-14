@@ -344,9 +344,6 @@ func (r *DtcTopologyResource) ValidateConfig(ctx context.Context, req resource.V
 	}
 
 	rules := data.Rules.Elements()
-	if len(rules) == 0 {
-		return
-	}
 
 	firstDestType := ""
 
@@ -367,9 +364,7 @@ func (r *DtcTopologyResource) ValidateConfig(ctx context.Context, req resource.V
 
 			if firstDestType == "" {
 				firstDestType = destType
-			}
-
-			if firstDestType != destType {
+			}else if firstDestType != destType {
 				resp.Diagnostics.AddError("The Topology resource cannot have rules with different dest_type values", fmt.Sprintf("Found different dest_type values: %s and %s.", firstDestType, destType))
 				return
 			}
