@@ -21,12 +21,13 @@ var _ MappedNullable = &Extensibleattributedef{}
 type Extensibleattributedef struct {
 	// The reference to the object.
 	Ref *string `json:"_ref,omitempty"`
+	// Universally Unique ID assigned for this object
+	Uuid *string `json:"uuid,omitempty"`
 	// The object types this extensible attribute is allowed to associate with.
 	AllowedObjectTypes []string `json:"allowed_object_types,omitempty"`
 	// Comment for the Extensible Attribute Definition; maximum 256 characters.
-	Comment *string `json:"comment,omitempty"`
-	// Default value used to pre-populate the attribute value in the GUI. For email, URL, and string types, the value is a string with a maximum of 256 characters. For an integer, the value is an integer from -2147483648 through 2147483647. For a date, the value is the number of seconds that have elapsed since January 1st, 1970 UTC.
-	DefaultValue      *string                                  `json:"default_value,omitempty"`
+	Comment           *string                                  `json:"comment,omitempty"`
+	DefaultValue      *ExtensibleattributedefDefaultValue      `json:"default_value,omitempty"`
 	DescendantsAction *ExtensibleattributedefDescendantsAction `json:"descendants_action,omitempty"`
 	// This field contains extensible attribute flags. Possible values: (A)udited, (C)loud API, Cloud (G)master, (I)nheritable, (L)isted, (M)andatory value, MGM (P)rivate, (R)ead Only, (S)ort enum values, Multiple (V)alues If there are two or more flags in the field, you must list them according to the order they are listed above. For example, 'CR' is a valid value for the 'flags' field because C = Cloud API is listed before R = Read only. However, the value 'RC' is invalid because the order for the 'flags' field is broken.
 	Flags *string `json:"flags,omitempty"`
@@ -42,8 +43,6 @@ type Extensibleattributedef struct {
 	Namespace *string `json:"namespace,omitempty"`
 	// Type for the Extensible Attribute Definition.
 	Type *string `json:"type,omitempty"`
-	// Universally Unique ID assigned for this object
-	Uuid *string `json:"uuid,omitempty"`
 }
 
 // NewExtensibleattributedef instantiates a new Extensibleattributedef object
@@ -93,6 +92,38 @@ func (o *Extensibleattributedef) HasRef() bool {
 // SetRef gets a reference to the given string and assigns it to the Ref field.
 func (o *Extensibleattributedef) SetRef(v string) {
 	o.Ref = &v
+}
+
+// GetUuid returns the Uuid field value if set, zero value otherwise.
+func (o *Extensibleattributedef) GetUuid() string {
+	if o == nil || IsNil(o.Uuid) {
+		var ret string
+		return ret
+	}
+	return *o.Uuid
+}
+
+// GetUuidOk returns a tuple with the Uuid field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Extensibleattributedef) GetUuidOk() (*string, bool) {
+	if o == nil || IsNil(o.Uuid) {
+		return nil, false
+	}
+	return o.Uuid, true
+}
+
+// HasUuid returns a boolean if a field has been set.
+func (o *Extensibleattributedef) HasUuid() bool {
+	if o != nil && !IsNil(o.Uuid) {
+		return true
+	}
+
+	return false
+}
+
+// SetUuid gets a reference to the given string and assigns it to the Uuid field.
+func (o *Extensibleattributedef) SetUuid(v string) {
+	o.Uuid = &v
 }
 
 // GetAllowedObjectTypes returns the AllowedObjectTypes field value if set, zero value otherwise.
@@ -160,9 +191,9 @@ func (o *Extensibleattributedef) SetComment(v string) {
 }
 
 // GetDefaultValue returns the DefaultValue field value if set, zero value otherwise.
-func (o *Extensibleattributedef) GetDefaultValue() string {
+func (o *Extensibleattributedef) GetDefaultValue() ExtensibleattributedefDefaultValue {
 	if o == nil || IsNil(o.DefaultValue) {
-		var ret string
+		var ret ExtensibleattributedefDefaultValue
 		return ret
 	}
 	return *o.DefaultValue
@@ -170,7 +201,7 @@ func (o *Extensibleattributedef) GetDefaultValue() string {
 
 // GetDefaultValueOk returns a tuple with the DefaultValue field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Extensibleattributedef) GetDefaultValueOk() (*string, bool) {
+func (o *Extensibleattributedef) GetDefaultValueOk() (*ExtensibleattributedefDefaultValue, bool) {
 	if o == nil || IsNil(o.DefaultValue) {
 		return nil, false
 	}
@@ -186,8 +217,8 @@ func (o *Extensibleattributedef) HasDefaultValue() bool {
 	return false
 }
 
-// SetDefaultValue gets a reference to the given string and assigns it to the DefaultValue field.
-func (o *Extensibleattributedef) SetDefaultValue(v string) {
+// SetDefaultValue gets a reference to the given ExtensibleattributedefDefaultValue and assigns it to the DefaultValue field.
+func (o *Extensibleattributedef) SetDefaultValue(v ExtensibleattributedefDefaultValue) {
 	o.DefaultValue = &v
 }
 
@@ -447,38 +478,6 @@ func (o *Extensibleattributedef) SetType(v string) {
 	o.Type = &v
 }
 
-// GetUuid returns the Uuid field value if set, zero value otherwise.
-func (o *Extensibleattributedef) GetUuid() string {
-	if o == nil || IsNil(o.Uuid) {
-		var ret string
-		return ret
-	}
-	return *o.Uuid
-}
-
-// GetUuidOk returns a tuple with the Uuid field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Extensibleattributedef) GetUuidOk() (*string, bool) {
-	if o == nil || IsNil(o.Uuid) {
-		return nil, false
-	}
-	return o.Uuid, true
-}
-
-// HasUuid returns a boolean if a field has been set.
-func (o *Extensibleattributedef) HasUuid() bool {
-	if o != nil && !IsNil(o.Uuid) {
-		return true
-	}
-
-	return false
-}
-
-// SetUuid gets a reference to the given string and assigns it to the Uuid field.
-func (o *Extensibleattributedef) SetUuid(v string) {
-	o.Uuid = &v
-}
-
 func (o Extensibleattributedef) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -491,6 +490,9 @@ func (o Extensibleattributedef) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Ref) {
 		toSerialize["_ref"] = o.Ref
+	}
+	if !IsNil(o.Uuid) {
+		toSerialize["uuid"] = o.Uuid
 	}
 	if !IsNil(o.AllowedObjectTypes) {
 		toSerialize["allowed_object_types"] = o.AllowedObjectTypes
@@ -524,9 +526,6 @@ func (o Extensibleattributedef) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Type) {
 		toSerialize["type"] = o.Type
-	}
-	if !IsNil(o.Uuid) {
-		toSerialize["uuid"] = o.Uuid
 	}
 	return toSerialize, nil
 }
