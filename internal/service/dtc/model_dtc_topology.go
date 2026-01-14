@@ -16,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -129,6 +131,13 @@ func (m *DtcTopologyModel) Flatten(ctx context.Context, from *dtc.DtcTopology, d
 	m.Rules = FlattenDtcTopologyRulesWithPlan(ctx, from.Rules, m.Rules, DtcTopologyRulesInnerAttrTypes, diags)
 }
 
+func FlattenDtcTopologyRules(ctx context.Context , from []dtc.DtcTopologyRulesInner, diags *diag.Diagnostics) types.List {
+	to := make([]DtcTopologyRulesInnerModel, 0, len(from))
+	for i , rule := range from {
+		ruleRef := to.
+	}
+	return types.ListNull(types.ObjectType{AttrTypes: DtcTopologyRulesInnerAttrTypes})
+}
 func FlattenDtcTopologyRulesWithPlan(ctx context.Context, from []dtc.DtcTopologyRulesInner, planRules types.List, attrTypes map[string]attr.Type, diags *diag.Diagnostics) types.List {
 	if from == nil {
 		return types.ListNull(types.ObjectType{AttrTypes: attrTypes})
