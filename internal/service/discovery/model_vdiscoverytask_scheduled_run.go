@@ -36,7 +36,7 @@ type VdiscoverytaskScheduledRunModel struct {
 }
 
 var VdiscoverytaskScheduledRunAttrTypes = map[string]attr.Type{
-	"weekdays":          types.ListType{ElemType: types.StringType},
+	"weekdays":          internaltypes.UnorderedListOfStringType,
 	"time_zone":         types.StringType,
 	"recurring_time":    types.Int64Type,
 	"frequency":         types.StringType,

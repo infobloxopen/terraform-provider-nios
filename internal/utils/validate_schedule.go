@@ -118,6 +118,7 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 					"Invalid Configuration for Schedule",
 					"If repeat is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
 				)
+				return
 			}
 
 		case "RECUR":
