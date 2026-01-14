@@ -376,6 +376,13 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 		return
 	}
 
+	var options []Ipv6networkOptionsModel
+	diags := data.Options.ElementsAs(ctx, &options, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
 		// Special DHCP option names that require use_option to be set
@@ -397,13 +404,6 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			28: true,
 			51: true,
 			23: true,
-		}
-
-		var options []Ipv6networkOptionsModel
-		diags := data.Options.ElementsAs(ctx, &options, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
 		}
 
 		for i, option := range options {
@@ -517,6 +517,31 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			"Invalid DDNS Configuration",
 			"You cannot set 'ddns_server_always_updates' to false when 'ddns_enable_option_fqdn' is false.",
 		)
+	}
+
+	// Preferred lifetime must be less than or equal to valid lifetime
+	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() &&
+		!data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
+		if data.PreferredLifetime.ValueInt64() > data.ValidLifetime.ValueInt64() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("preferred_lifetime"),
+				"Invalid configuration",
+				"The 'preferred_lifetime' must be less than or equal to 'valid_lifetime'.",
+			)
+		}
+	} else if !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for _, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					strconv.FormatInt(data.PreferredLifetime.ValueInt64(), 10) > option.Value.ValueString() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("preferred_lifetime"),
+						"Invalid configuration",
+						"The 'preferred_lifetime' must be less than or equal to 'dhcp-lease-time' (valid_lifetime) option value.",
+					)
+				}
+			}
+		}
 	}
 }
 
