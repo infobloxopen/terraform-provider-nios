@@ -37,7 +37,7 @@ type Ipv6rangediscoveryblackoutsettingBlackoutScheduleModel struct {
 }
 
 var Ipv6rangediscoveryblackoutsettingBlackoutScheduleAttrTypes = map[string]attr.Type{
-	"weekdays":          types.ListType{ElemType: types.StringType},
+	"weekdays":          internaltypes.UnorderedListOfStringType,
 	"time_zone":         types.StringType,
 	"recurring_time":    types.Int64Type,
 	"frequency":         types.StringType,
@@ -115,6 +115,7 @@ var Ipv6rangediscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes = 
 	},
 	"year": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The year for the scheduled task.",
 	},
 	"month": schema.Int64Attribute{

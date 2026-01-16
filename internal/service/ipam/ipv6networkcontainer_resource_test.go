@@ -338,6 +338,27 @@ func TestAccIpv6networkcontainerResource_DiscoveryBasicPollSettings(t *testing.T
 	var resourceName = "nios_ipam_ipv6network_container.test_discovery_basic_poll_settings"
 	var v ipam.Ipv6networkcontainer
 	network := acctest.RandomIPv6Network()
+	discoveryBasicPollSettings := map[string]any{
+		"auto_arp_refresh_before_switch_port_polling": true,
+		"cli_collection":                      false,
+		"complete_ping_sweep":                 false,
+		"device_profile":                      false,
+		"switch_port_data_collection_polling": "PERIODIC",
+	}
+	discoveryBasicPollSettingsUpdate1 := map[string]any{
+		"auto_arp_refresh_before_switch_port_polling": true,
+		"cli_collection":                      true,
+		"complete_ping_sweep":                 false,
+		"device_profile":                      false,
+		"switch_port_data_collection_polling": "SCHEDULED",
+	}
+	discoveryBasicPollSettingsUpdate2 := map[string]any{
+		"auto_arp_refresh_before_switch_port_polling": true,
+		"cli_collection":                      true,
+		"complete_ping_sweep":                 false,
+		"device_profile":                      false,
+		"switch_port_data_collection_polling": "DISABLED",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -345,46 +366,38 @@ func TestAccIpv6networkcontainerResource_DiscoveryBasicPollSettings(t *testing.T
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerDiscoveryBasicPollSettings(network, "true", "true", "false", "default", "false", "false", "1", "false", "false", "true", "PERIODIC", "3600", "true", "true"),
+				Config: testAccIpv6networkcontainerDiscoveryBasicPollSettings(network, discoveryBasicPollSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.credential_group", "default"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.netbios_scanning", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.polling_frequency_modifier", "1"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.port_scanning", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.smart_subnet_ping_sweep", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.snmp_collection", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "PERIODIC"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling_interval", "3600"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.use_global_polling_frequency_modifier", "true"),
-					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "true"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerDiscoveryBasicPollSettings(network, "false", "true", "false", "default", "false", "false", "1", "false", "false", "true", "PERIODIC", "3600", "true", "true"),
+				Config: testAccIpv6networkcontainerDiscoveryBasicPollSettings(network, discoveryBasicPollSettingsUpdate1, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "SCHEDULED"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.credential_group", "default"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.netbios_scanning", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.polling_frequency_modifier", "1"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.port_scanning", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.smart_subnet_ping_sweep", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.snmp_collection", "true"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "PERIODIC"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling_interval", "3600"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.use_global_polling_frequency_modifier", "true"),
-					resource.TestCheckResourceAttr(resourceName, "use_discovery_basic_polling_settings", "true"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerDiscoveryBasicPollSettings(network, discoveryBasicPollSettingsUpdate2, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "DISABLED"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -396,6 +409,31 @@ func TestAccIpv6networkcontainerResource_DiscoveryBlackoutSetting(t *testing.T) 
 	var resourceName = "nios_ipam_ipv6network_container.test_discovery_blackout_setting"
 	var v ipam.Ipv6networkcontainer
 	network := acctest.RandomIPv6Network()
+	discoveryBlackoutSetting := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 100,
+		"blackout_schedule": map[string]any{
+			"weekdays":          []string{"TUESDAY", "MONDAY", "FRIDAY"},
+			"frequency":         "WEEKLY",
+			"every":             15,
+			"minutes_past_hour": 6,
+			"disable":           false,
+			"repeat":            "RECUR",
+			"hour_of_day":       20,
+		},
+	}
+	discoveryBlackoutSettingUpdated := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 200,
+		"blackout_schedule": map[string]any{
+			"minutes_past_hour": 6,
+			"repeat":            "ONCE",
+			"day_of_month":      30,
+			"month":             1,
+			"year":              2026,
+			"hour_of_day":       20,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -403,12 +441,33 @@ func TestAccIpv6networkcontainerResource_DiscoveryBlackoutSetting(t *testing.T) 
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerDiscoveryBlackoutSetting(network, "false", "false"),
+				Config: testAccIpv6networkcontainerDiscoveryBlackoutSetting(network, discoveryBlackoutSetting, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "false"),
-					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "false"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_duration", "100"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.0", "TUESDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.1", "MONDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.2", "FRIDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.repeat", "RECUR"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerDiscoveryBlackoutSetting(network, discoveryBlackoutSettingUpdated, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_duration", "200"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.repeat", "ONCE"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.day_of_month", "30"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.month", "1"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.year", "2026"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -665,6 +724,31 @@ func TestAccIpv6networkcontainerResource_PortControlBlackoutSetting(t *testing.T
 	var resourceName = "nios_ipam_ipv6network_container.test_port_control_blackout_setting"
 	var v ipam.Ipv6networkcontainer
 	network := acctest.RandomIPv6Network()
+	portControlBlackoutSetting := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 100,
+		"blackout_schedule": map[string]any{
+			"weekdays":          []string{"TUESDAY", "MONDAY", "FRIDAY"},
+			"frequency":         "WEEKLY",
+			"every":             15,
+			"minutes_past_hour": 6,
+			"disable":           false,
+			"repeat":            "RECUR",
+			"hour_of_day":       20,
+		},
+	}
+	portControlBlackoutSettingUpdated := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 200,
+		"blackout_schedule": map[string]any{
+			"minutes_past_hour": 6,
+			"repeat":            "ONCE",
+			"day_of_month":      30,
+			"month":             1,
+			"year":              2026,
+			"hour_of_day":       20,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -672,12 +756,33 @@ func TestAccIpv6networkcontainerResource_PortControlBlackoutSetting(t *testing.T
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerPortControlBlackoutSetting(network, "false", "true"),
+				Config: testAccIpv6networkcontainerPortControlBlackoutSetting(network, portControlBlackoutSetting, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "false"),
-					resource.TestCheckResourceAttr(resourceName, "use_blackout_setting", "true"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_duration", "100"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.0", "TUESDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.1", "MONDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.2", "FRIDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.repeat", "RECUR"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerPortControlBlackoutSetting(network, portControlBlackoutSettingUpdated, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_duration", "200"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.repeat", "ONCE"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.day_of_month", "30"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.month", "1"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.year", "2026"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1515,40 +1620,26 @@ resource "nios_ipam_ipv6network_container" "test_ddns_ttl" {
 `, network, ddnsTtl, useDdnsTtl)
 }
 
-func testAccIpv6networkcontainerDiscoveryBasicPollSettings(network, autoArpRefreshBeforeSwitchPortPolling, cliCollection, completePingSweep, credentialGroup, deviceProfile, netbiosScanning, pollingFrequencyModifier, portScanning, smartSubnetPingSweep, snmpCollection, switchPortDataCollectionPolling, switchPortDataCollectionPollingInterval, useGlobalPollingFrequencyModifier, useDiscoveryBasicPollSettings string) string {
+func testAccIpv6networkcontainerDiscoveryBasicPollSettings(network string, discoveryBasicPollSettings map[string]any, useDiscoveryBasicPollSettings string) string {
+	discoveryBasicPollSettingsStr := utils.ConvertMapToHCL(discoveryBasicPollSettings)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_discovery_basic_poll_settings" {
     network = %q
-    discovery_basic_poll_settings = {
-        auto_arp_refresh_before_switch_port_polling = %s
-        cli_collection = %s
-        complete_ping_sweep = %s
-        credential_group = %q
-        device_profile = %s
-        netbios_scanning = %s
-        polling_frequency_modifier = %q
-        port_scanning = %s
-        smart_subnet_ping_sweep = %s
-        snmp_collection = %s
-        switch_port_data_collection_polling = %q
-        switch_port_data_collection_polling_interval = %s
-        use_global_polling_frequency_modifier = %s
-    }
-    use_discovery_basic_polling_settings = %s
+    discovery_basic_poll_settings = %s
+    use_discovery_basic_polling_settings = %q
 }
-`, network, autoArpRefreshBeforeSwitchPortPolling, cliCollection, completePingSweep, credentialGroup, deviceProfile, netbiosScanning, pollingFrequencyModifier, portScanning, smartSubnetPingSweep, snmpCollection, switchPortDataCollectionPolling, switchPortDataCollectionPollingInterval, useGlobalPollingFrequencyModifier, useDiscoveryBasicPollSettings)
+`, network, discoveryBasicPollSettingsStr, useDiscoveryBasicPollSettings)
 }
 
-func testAccIpv6networkcontainerDiscoveryBlackoutSetting(network, enabledBlackout, useBlackoutSetting string) string {
+func testAccIpv6networkcontainerDiscoveryBlackoutSetting(network string, discoveryBlackoutSetting map[string]any, useBlackoutSetting string) string {
+	discoveryBlackoutSettingStr := utils.ConvertMapToHCL(discoveryBlackoutSetting)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_discovery_blackout_setting" {
     network = %q
-    discovery_blackout_setting = {
-        enabled = %q
-    }
+    discovery_blackout_setting = %s
     use_blackout_setting = %q
 }
-`, network, enabledBlackout, useBlackoutSetting)
+`, network, discoveryBlackoutSettingStr, useBlackoutSetting)
 }
 
 func testAccIpv6networkcontainerDomainNameServers(network, domainNameServers, useDomainNameServers string) string {
@@ -1659,16 +1750,15 @@ resource "nios_ipam_ipv6network_container" "test_options" {
 `, network, name, num, value, vendorClass, useOptions)
 }
 
-func testAccIpv6networkcontainerPortControlBlackoutSetting(network, portControlBlackoutSetting, useBlackoutSetting string) string {
+func testAccIpv6networkcontainerPortControlBlackoutSetting(network string, portControlBlackoutSetting map[string]any, useBlackoutSetting string) string {
+	portControlBlackoutSettingStr := utils.ConvertMapToHCL(portControlBlackoutSetting)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_port_control_blackout_setting" {
     network = %q
-    port_control_blackout_setting = {
-        enable_blackout = %q
-    }
+    port_control_blackout_setting = %s
     use_blackout_setting = %q
 }
-`, network, portControlBlackoutSetting, useBlackoutSetting)
+`, network, portControlBlackoutSettingStr, useBlackoutSetting)
 }
 
 func testAccIpv6networkcontainerPreferredLifetime(network, preferredLifetime, usePreferredLifetime string) string {

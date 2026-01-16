@@ -442,6 +442,27 @@ func TestAccRangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.35"
 	endAddr := "10.0.0.36"
+	discoveryBasicPollSettings := map[string]any{
+		"auto_arp_refresh_before_switch_port_polling": true,
+		"cli_collection":                      false,
+		"complete_ping_sweep":                 false,
+		"device_profile":                      false,
+		"switch_port_data_collection_polling": "PERIODIC",
+	}
+	discoveryBasicPollSettingsUpdate1 := map[string]any{
+		"auto_arp_refresh_before_switch_port_polling": true,
+		"cli_collection":                      true,
+		"complete_ping_sweep":                 false,
+		"device_profile":                      false,
+		"switch_port_data_collection_polling": "SCHEDULED",
+	}
+	discoveryBasicPollSettingsUpdate2 := map[string]any{
+		"auto_arp_refresh_before_switch_port_polling": true,
+		"cli_collection":                      true,
+		"complete_ping_sweep":                 false,
+		"device_profile":                      false,
+		"switch_port_data_collection_polling": "DISABLED",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -449,34 +470,37 @@ func TestAccRangeResource_DiscoveryBasicPollSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, true, false, false, false, false, false, false, false, "PERIODIC"),
+				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, discoveryBasicPollSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "PERIODIC"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.netbios_scanning", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.port_scanning", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.smart_subnet_ping_sweep", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.snmp_collection", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "PERIODIC"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, true, true, false, true, false, true, false, false, "SCHEDULED"),
+				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, discoveryBasicPollSettingsUpdate1, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "true"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.netbios_scanning", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.port_scanning", "true"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.smart_subnet_ping_sweep", "false"),
-					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.snmp_collection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "SCHEDULED"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
+				),
+			},
+			{
+				Config: testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr, discoveryBasicPollSettingsUpdate2, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.cli_collection", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.switch_port_data_collection_polling", "DISABLED"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.auto_arp_refresh_before_switch_port_polling", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.complete_ping_sweep", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_basic_poll_settings.device_profile", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -489,6 +513,31 @@ func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.37"
 	endAddr := "10.0.0.38"
+	discoveryBlackoutSetting := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 100,
+		"blackout_schedule": map[string]any{
+			"weekdays":          []string{"TUESDAY", "MONDAY", "FRIDAY"},
+			"frequency":         "WEEKLY",
+			"every":             15,
+			"minutes_past_hour": 6,
+			"disable":           false,
+			"repeat":            "RECUR",
+			"hour_of_day":       20,
+		},
+	}
+	discoveryBlackoutSettingUpdated := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 200,
+		"blackout_schedule": map[string]any{
+			"minutes_past_hour": 6,
+			"repeat":            "ONCE",
+			"day_of_month":      30,
+			"month":             1,
+			"year":              2026,
+			"hour_of_day":       20,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -496,10 +545,33 @@ func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDiscoveryBlackoutSetting(startAddr, endAddr, false),
+				Config: testAccRangeDiscoveryBlackoutSetting(startAddr, endAddr, discoveryBlackoutSetting, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_duration", "100"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.0", "TUESDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.1", "MONDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.weekdays.2", "FRIDAY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.repeat", "RECUR"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRangeDiscoveryBlackoutSetting(startAddr, endAddr, discoveryBlackoutSettingUpdated, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_duration", "200"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.repeat", "ONCE"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.day_of_month", "30"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.month", "1"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_blackout_setting.blackout_schedule.year", "2026"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1787,13 +1859,30 @@ func TestAccRangeResource_PortControlBlackoutSetting(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.111"
 	endAddr := "10.0.0.112"
-
 	portControlBlackoutSetting := map[string]any{
-		"enable_blackout": false,
+		"enable_blackout":   true,
+		"blackout_duration": 100,
+		"blackout_schedule": map[string]any{
+			"weekdays":          []string{"TUESDAY", "MONDAY", "FRIDAY"},
+			"frequency":         "WEEKLY",
+			"every":             15,
+			"minutes_past_hour": 6,
+			"disable":           false,
+			"repeat":            "RECUR",
+			"hour_of_day":       20,
+		},
 	}
-
-	portControlBlackoutSettingUpdate := map[string]any{
-		"enable_blackout": false,
+	portControlBlackoutSettingUpdated := map[string]any{
+		"enable_blackout":   true,
+		"blackout_duration": 200,
+		"blackout_schedule": map[string]any{
+			"minutes_past_hour": 6,
+			"repeat":            "ONCE",
+			"day_of_month":      30,
+			"month":             1,
+			"year":              2026,
+			"hour_of_day":       20,
+		},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1802,18 +1891,33 @@ func TestAccRangeResource_PortControlBlackoutSetting(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangePortControlBlackoutSetting(startAddr, endAddr, portControlBlackoutSetting),
+				Config: testAccRangePortControlBlackoutSetting(startAddr, endAddr, portControlBlackoutSetting, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "false"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_duration", "100"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.0", "TUESDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.1", "MONDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.weekdays.2", "FRIDAY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.repeat", "RECUR"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangePortControlBlackoutSetting(startAddr, endAddr, portControlBlackoutSettingUpdate),
+				Config: testAccRangePortControlBlackoutSetting(startAddr, endAddr, portControlBlackoutSettingUpdated, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "false"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.enable_blackout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_duration", "200"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.repeat", "ONCE"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.day_of_month", "30"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.month", "1"),
+					resource.TestCheckResourceAttr(resourceName, "port_control_blackout_setting.blackout_schedule.year", "2026"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3078,41 +3182,28 @@ resource "nios_dhcp_range" "test_disable" {
 `, startAddr, endAddr, disable)
 }
 
-func testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr string, autoArpRefreshBeforeSwitchPortPolling, cliCollection, completePingSweep, deviceProfile, netbiosScanning, portScanning, smartSubnetPingSweep, snmpCollection bool, switchPortDataCollectionPolling string) string {
+func testAccRangeDiscoveryBasicPollSettings(startAddr, endAddr string, discoveryBasicPollSettings map[string]any, useDiscoveryBasicPollingSettings string) string {
+	discoveryBasicPollSettingsStr := utils.ConvertMapToHCL(discoveryBasicPollSettings)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_discovery_basic_poll_settings" {
 	start_addr = %q
 	end_addr = %q
-	discovery_basic_poll_settings = {
-		auto_arp_refresh_before_switch_port_polling = %t
-		cli_collection = %t
-		complete_ping_sweep = %t
-		device_profile = %t
-		netbios_scanning = %t
-		port_scanning = %t
-		smart_subnet_ping_sweep = %t
-		snmp_collection = %t
-		switch_port_data_collection_polling = %q
-	}
-		use_discovery_basic_polling_settings = true
+	discovery_basic_poll_settings = %s
+	use_discovery_basic_polling_settings = %q
 }
-`, startAddr, endAddr,
-		autoArpRefreshBeforeSwitchPortPolling, cliCollection, completePingSweep, deviceProfile,
-		netbiosScanning, portScanning, smartSubnetPingSweep, snmpCollection,
-		switchPortDataCollectionPolling)
+`, startAddr, endAddr, discoveryBasicPollSettingsStr, useDiscoveryBasicPollingSettings)
 }
 
-func testAccRangeDiscoveryBlackoutSetting(startAddr, endAddr string, enableBlackout bool) string {
+func testAccRangeDiscoveryBlackoutSetting(startAddr, endAddr string, discoveryBlackoutSetting map[string]any, enableBlackout string) string {
+	discoveryBlackoutSettingStr := utils.ConvertMapToHCL(discoveryBlackoutSetting)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_discovery_blackout_setting" {
 	start_addr = %q
 	end_addr = %q
-    discovery_blackout_setting = {
-		enable_blackout = %t
-		}
-		use_blackout_setting = true
+    discovery_blackout_setting = %s
+	use_blackout_setting = %q
 }
-`, startAddr, endAddr, enableBlackout)
+`, startAddr, endAddr, discoveryBlackoutSettingStr, enableBlackout)
 }
 
 func testAccRangeDiscoveryMember(startAddr, endAddr, discoveryMember string) string {
@@ -3503,16 +3594,16 @@ resource "nios_dhcp_range" "test_options" {
 `, startAddr, endAddr, cOptions, useOptions)
 }
 
-func testAccRangePortControlBlackoutSetting(startAddr, endAddr string, portControlBlackoutSetting map[string]any) string {
+func testAccRangePortControlBlackoutSetting(startAddr, endAddr string, portControlBlackoutSetting map[string]any, enableBlackout string) string {
 	portControlBlackoutSettingStr := utils.ConvertMapToHCL(portControlBlackoutSetting)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_port_control_blackout_setting" {
 	start_addr = %q
 	end_addr = %q
     port_control_blackout_setting = %s
-	use_blackout_setting = true
+	use_blackout_setting = %q
 }
-`, startAddr, endAddr, portControlBlackoutSettingStr)
+`, startAddr, endAddr, portControlBlackoutSettingStr, enableBlackout)
 }
 
 func testAccRangePxeLeaseTime(startAddr, endAddr, pxeLeaseTime string) string {

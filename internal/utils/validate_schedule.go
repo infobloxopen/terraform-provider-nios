@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -12,24 +14,33 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 		return
 	}
 
-	attrs := settingObj.Attributes()
-	if attrs == nil {
-		return
-	}
+	var scheduleObj types.Object
+	var schedulePath path.Path
 
-	scheduleAttr, ok := attrs[scheduleAttrName]
-	if !ok || scheduleAttr.IsNull() || scheduleAttr.IsUnknown() {
-		return
-	}
+	if scheduleAttrName == "" {
+		// Direct schedule at root level (e.g., vdiscoverytask.scheduled_run)
+		scheduleObj = settingObj
+		schedulePath = basePath
+	} else {
+		// Nested schedule (e.g., discovery_blackout_setting.blackout_schedule)
+		attrs := settingObj.Attributes()
+		scheduleAttr, exists := attrs[scheduleAttrName]
 
-	scheduleObj, ok := scheduleAttr.(types.Object)
-	if !ok {
-		diagnostics.AddAttributeError(
-			basePath.AtName(scheduleAttrName),
-			"Invalid Schedule Attribute",
-			"Expected "+scheduleAttrName+" to be an object but got different type",
-		)
-		return
+		if !exists || scheduleAttr.IsNull() || scheduleAttr.IsUnknown() {
+			return
+		}
+
+		var ok bool
+		scheduleObj, ok = scheduleAttr.(types.Object)
+		if !ok {
+			diagnostics.AddAttributeError(
+				basePath.AtName(scheduleAttrName),
+				"Invalid Schedule Attribute",
+				fmt.Sprintf("Expected %s to be an object but got different type", scheduleAttrName),
+			)
+			return
+		}
+		schedulePath = basePath.AtName(scheduleAttrName)
 	}
 
 	if scheduleObj.IsNull() || scheduleObj.IsUnknown() {
@@ -51,8 +62,6 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 	dayOfMonth := schedule["day_of_month"]
 	hourOfDay := schedule["hour_of_day"]
 	year := schedule["year"]
-
-	schedulePath := basePath.AtName(scheduleAttrName)
 
 	// Validate recurring_time conflicts
 	if !recurringTime.IsNull() && !recurringTime.IsUnknown() {
@@ -80,7 +89,12 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 			return
 		}
 
-		switch repeatStr.ValueString() {
+		repeatValue := repeatStr.ValueString()
+		if repeatValue == "" {
+			repeatValue = "ONCE"
+		}
+
+		switch repeatValue {
 		case "ONCE":
 			// For ONCE: cannot set weekdays, frequency, every
 			if (!weekdays.IsNull() && !weekdays.IsUnknown()) ||
@@ -91,6 +105,7 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 					"Invalid Configuration for Repeat",
 					"Cannot set frequency, weekdays and every if repeat is set to ONCE",
 				)
+				return
 			}
 
 			// For ONCE: must set month, day_of_month, hour_of_day, minutes_past_hour
@@ -103,6 +118,7 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 					"Invalid Configuration for Schedule",
 					"If repeat is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
 				)
+				return
 			}
 
 		case "RECUR":
@@ -115,6 +131,7 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 					"Invalid Configuration for Repeat",
 					"Cannot set month, day_of_month and year if repeat is set to RECUR",
 				)
+				return
 			}
 
 			// For RECUR: must set frequency, hour_of_day, minutes_past_hour
@@ -126,6 +143,7 @@ func ValidateScheduleConfig(settingObj types.Object, scheduleAttrName string, ba
 					"Invalid Configuration for Schedule",
 					"If repeat is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
 				)
+				return
 			}
 
 			// Handle weekdays validation based on frequency for RECUR only

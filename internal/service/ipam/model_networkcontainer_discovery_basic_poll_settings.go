@@ -109,6 +109,7 @@ var NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes = map[str
 	"switch_port_data_collection_polling_schedule": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerdiscoverybasicpollsettingsSwitchPortDataCollectionPollingScheduleResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 	"switch_port_data_collection_polling_interval": schema.Int64Attribute{
 		Optional:            true,
