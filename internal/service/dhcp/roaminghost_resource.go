@@ -555,6 +555,31 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 			)
 		}
 	}
+
+	// Preferred lifetime must be less than or equal to valid lifetime
+	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() &&
+		!data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
+		if data.PreferredLifetime.ValueInt64() > data.ValidLifetime.ValueInt64() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("preferred_lifetime"),
+				"Invalid configuration",
+				"The 'preferred_lifetime' must be less than or equal to 'valid_lifetime'.",
+			)
+		}
+	} else if !data.Options.IsNull() && !data.Options.IsUnknown() {
+		for _, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					strconv.FormatInt(data.PreferredLifetime.ValueInt64(), 10) > option.Value.ValueString() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("preferred_lifetime"),
+						"Invalid configuration",
+						"The 'preferred_lifetime' must be less than or equal to 'dhcp-lease-time' (valid_lifetime) option value.",
+					)
+				}
+			}
+		}
+	}
 }
 
 func (r *RoaminghostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
