@@ -377,7 +377,7 @@ func TestAccIpv6networktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networktemplateDdnsServerAlwaysUpdates(name, 24, "true"),
+				Config: testAccIpv6networktemplateDdnsServerAlwaysUpdates(name, 24, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_server_always_updates", "true"),
