@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -75,10 +76,12 @@ func (r *RecordRpzCnameClientipaddressResource) ValidateConfig(ctx context.Conte
 
 	canonical := data.Canonical.ValueString()
 	if canonical != "*" && canonical != "" && canonical != "rpz-passthru" {
-		resp.Diagnostics.AddError(
-			"Invalid Canonical Value",
-			fmt.Sprintf("The canonical value must be '*', empty, or 'rpz-passthru'. Got: %s", canonical),
-		)
+		if _, err := netip.ParseAddr(canonical); err != nil {
+			resp.Diagnostics.AddError(
+				"Invalid Canonical Value",
+				fmt.Sprintf("The canonical value must be '*', empty, 'rpz-passthru', or a valid IP address. Got: %s", canonical),
+			)
+		}
 	}
 }
 
