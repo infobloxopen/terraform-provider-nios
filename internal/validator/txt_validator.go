@@ -11,7 +11,9 @@ import (
 var _ validator.String = txtValidator{}
 
 // txtValidator validates TXT record text field constraints.
-type txtValidator struct{}
+type txtValidator struct {
+	checkIfEmpty bool
+}
 
 func (v txtValidator) Description(ctx context.Context) string {
 	return "value must not exceed 512 bytes total, with each substring limited to 255 bytes"
@@ -61,7 +63,7 @@ func (v txtValidator) ValidateString(ctx context.Context, req validator.StringRe
 	}
 
 	// Check for empty text even with quotes
-	if isEmpty {
+	if v.checkIfEmpty && isEmpty {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Invalid Text Value",
@@ -138,6 +140,6 @@ func parseTXTSubstrings(s string) ([]string, error) {
 }
 
 // ValidateTXT returns a validator for TXT record text fields.
-func ValidateTXT() validator.String {
-	return txtValidator{}
+func ValidateTXT(checkIfEmpty bool) validator.String {
+	return txtValidator{checkIfEmpty: checkIfEmpty}
 }

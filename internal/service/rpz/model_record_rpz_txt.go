@@ -106,7 +106,7 @@ var RecordRpzTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"text": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTXT(),
+			customvalidator.ValidateTXT(true),
 			customvalidator.StringNotEmpty(),
 			customvalidator.ValidateTrimmedString(),
 		},
