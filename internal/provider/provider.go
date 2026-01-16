@@ -298,6 +298,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+		dtc.NewDtcTopologyRuleDataSource,
 		dtc.NewDtcTopologyDataSource,
 		dtc.NewDtcMonitorSnmpDataSource,
 		dtc.NewDtcMonitorHttpDataSource,
