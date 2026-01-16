@@ -23,22 +23,23 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordRpzAIpaddressModel struct {
-	Ref         types.String        `tfsdk:"ref"`
-	Comment     types.String        `tfsdk:"comment"`
-	Disable     types.Bool          `tfsdk:"disable"`
-	ExtAttrs    types.Map           `tfsdk:"extattrs"`
-	Ipv4addr    iptypes.IPv4Address `tfsdk:"ipv4addr"`
-	Name        types.String        `tfsdk:"name"`
-	RpZone      types.String        `tfsdk:"rp_zone"`
-	Ttl         types.Int64         `tfsdk:"ttl"`
-	UseTtl      types.Bool          `tfsdk:"use_ttl"`
-	View        types.String        `tfsdk:"view"`
-	Zone        types.String        `tfsdk:"zone"`
-	ExtAttrsAll types.Map           `tfsdk:"extattrs_all"`
+	Ref         types.String           `tfsdk:"ref"`
+	Comment     types.String           `tfsdk:"comment"`
+	Disable     types.Bool             `tfsdk:"disable"`
+	ExtAttrs    types.Map              `tfsdk:"extattrs"`
+	Ipv4addr    iptypes.IPv4Address    `tfsdk:"ipv4addr"`
+	Name        internaltypes.IPv4Name `tfsdk:"name"`
+	RpZone      types.String           `tfsdk:"rp_zone"`
+	Ttl         types.Int64            `tfsdk:"ttl"`
+	UseTtl      types.Bool             `tfsdk:"use_ttl"`
+	View        types.String           `tfsdk:"view"`
+	Zone        types.String           `tfsdk:"zone"`
+	ExtAttrsAll types.Map              `tfsdk:"extattrs_all"`
 }
 
 var RecordRpzAIpaddressAttrTypes = map[string]attr.Type{
@@ -47,7 +48,7 @@ var RecordRpzAIpaddressAttrTypes = map[string]attr.Type{
 	"disable":      types.BoolType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
 	"ipv4addr":     iptypes.IPv4AddressType{},
-	"name":         types.StringType,
+	"name":         internaltypes.IPv4NameType{},
 	"rp_zone":      types.StringType,
 	"ttl":          types.Int64Type,
 	"use_ttl":      types.BoolType,
@@ -93,10 +94,11 @@ var RecordRpzAIpaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The IPv4 Address of the substitute rule.",
 	},
 	"name": schema.StringAttribute{
+		CustomType:          internaltypes.IPv4NameType{},
 		Required:            true,
 		MarkdownDescription: "The name for a record in FQDN format. This value cannot be in unicode format.",
 		Validators: []validator.String{
-			customvalidator.IsValidRPZAIPv4(),
+			customvalidator.IsValidDomainName(),
 		},
 	},
 	"rp_zone": schema.StringAttribute{
@@ -155,7 +157,7 @@ func (m *RecordRpzAIpaddressModel) Expand(ctx context.Context, diags *diag.Diagn
 		Disable:  flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs: ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Ipv4addr: flex.ExpandIPv4Address(m.Ipv4addr),
-		Name:     flex.ExpandStringPointer(m.Name),
+		Name:     flex.ExpandStringPointer(m.Name.StringValue),
 		RpZone:   flex.ExpandStringPointer(m.RpZone),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
@@ -190,7 +192,7 @@ func (m *RecordRpzAIpaddressModel) Flatten(ctx context.Context, from *rpz.Record
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Ipv4addr = flex.FlattenIPv4Address(from.Ipv4addr)
-	m.Name = flex.FlattenStringPointer(from.Name)
+	m.Name.StringValue = flex.FlattenStringPointer(from.Name)
 	m.RpZone = flex.FlattenStringPointer(from.RpZone)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)

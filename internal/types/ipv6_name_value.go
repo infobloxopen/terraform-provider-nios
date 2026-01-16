@@ -152,20 +152,7 @@ func (v IPv6Name) ValidateAttribute(ctx context.Context, req xattr.ValidateAttri
 		}
 	}
 
-	if ipAddr.Is4() {
-		resp.Diagnostics.AddAttributeError(
-			req.Path,
-			"Invalid IPv6 Name Value",
-			"A string value was provided with an IPv4 address, but an IPv6 address or IPv6 CIDR "+
-				"is required for an IPv6 name.\n\n"+
-				"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
-				"Given Value: "+v.ValueString(),
-		)
-
-		return
-	}
-
-	if !ipAddr.IsValid() || !ipAddr.Is6() {
+	if !ipAddr.Is6() {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Invalid IPv6 Name Value",
@@ -174,7 +161,6 @@ func (v IPv6Name) ValidateAttribute(ctx context.Context, req xattr.ValidateAttri
 				"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
 				"Given Value: "+v.ValueString(),
 		)
-
 		return
 	}
 }
@@ -236,20 +222,7 @@ func (v IPv6Name) ValidateParameter(ctx context.Context, req function.ValidatePa
 		}
 	}
 
-	if ipAddr.Is4() {
-		resp.Error = function.NewArgumentFuncError(
-			req.Position,
-			"Invalid IPv6 Name Value: "+
-				"A string value was provided with an IPv4 address, but an IPv6 address or IPv6 CIDR "+
-				"is required for an IPv6 name.\n\n"+
-				"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
-				"Given Value: "+v.ValueString(),
-		)
-
-		return
-	}
-
-	if !ipAddr.IsValid() || !ipAddr.Is6() {
+	if !ipAddr.Is6() {
 		resp.Error = function.NewArgumentFuncError(
 			req.Position,
 			"Invalid IPv6 Name Value: "+
@@ -257,7 +230,6 @@ func (v IPv6Name) ValidateParameter(ctx context.Context, req function.ValidatePa
 				"Expected format: '<ipv6>.<rp-zone>' or '<ipv6>/<prefix>.<rp-zone>'.\n\n"+
 				"Given Value: "+v.ValueString(),
 		)
-
 		return
 	}
 }
