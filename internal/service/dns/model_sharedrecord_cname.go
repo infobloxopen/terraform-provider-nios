@@ -63,6 +63,7 @@ var SharedrecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.IsValidFQDN(),
+			stringvalidator.NoneOf(""),
 		},
 		MarkdownDescription: "Canonical name in FQDN format. This value can be in unicode format.",
 	},
@@ -104,6 +105,7 @@ var SharedrecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.NoneOf(""),
 		},
 		MarkdownDescription: "Name for this shared record. This value can be in unicode format.",
 	},
