@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -60,11 +59,7 @@ var Ipv6dhcpoptionspaceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of a DHCP IPv6 option space object.",
 	},
 	"option_definitions": schema.ListAttribute{
-		ElementType: types.StringType,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
-		Optional:            true,
+		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The list of DHCP IPv6 option definition objects.",
 	},
@@ -75,10 +70,9 @@ func (m *Ipv6dhcpoptionspaceModel) Expand(ctx context.Context, diags *diag.Diagn
 		return nil
 	}
 	to := &dhcp.Ipv6dhcpoptionspace{
-		Comment:           flex.ExpandStringPointer(m.Comment),
-		EnterpriseNumber:  flex.ExpandInt64Pointer(m.EnterpriseNumber),
-		Name:              flex.ExpandStringPointer(m.Name),
-		OptionDefinitions: flex.ExpandFrameworkListString(ctx, m.OptionDefinitions, diags),
+		Comment:          flex.ExpandStringPointer(m.Comment),
+		EnterpriseNumber: flex.ExpandInt64Pointer(m.EnterpriseNumber),
+		Name:             flex.ExpandStringPointer(m.Name),
 	}
 	return to
 }

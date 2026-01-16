@@ -1,6 +1,6 @@
 // Create a Shared Record Group (Required as Parent)
 resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
-  fqdn = "example-sharedrecordgroup"
+  name = "example-sharedrecordgroup"
 }
 
 // Create a Shared TXT Record with Basic Fields
