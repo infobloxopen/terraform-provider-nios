@@ -458,6 +458,17 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 			)
 		}
 	}
+
+	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
+		// Check if ddns_enable_option_fqdn is set to false
+		if !data.DdnsEnableOptionFqdn.IsNull() && !data.DdnsEnableOptionFqdn.IsUnknown() && !data.DdnsEnableOptionFqdn.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ddns_server_always_updates"),
+				"Invalid Configuration",
+				"ddns_enable_option_fqdn must be set to true if ddns_server_always_updates is configured.",
+			)
+		}
+	}
 }
 
 func (r *Ipv6networktemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
