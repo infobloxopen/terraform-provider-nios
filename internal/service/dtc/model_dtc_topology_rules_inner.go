@@ -17,7 +17,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-var readableAttributesForDtcTopologyRule = "dest_type,destination_link,return_type,sources,topology,valid" 
+//var readableAttributesForDtcTopologyRule = "dest_type,destination_link,return_type,sources,topology,valid" 
 type DtcTopologyRulesInnerModel struct {
 	DestType        types.String `tfsdk:"dest_type"`
 	DestinationLink types.String `tfsdk:"destination_link"`
@@ -127,6 +127,8 @@ func (m *DtcTopologyRulesInnerModel) Flatten(ctx context.Context, from *dtc.DtcT
 	m.DestType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestType)
 	m.DestinationLink = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestinationLink)
 	m.ReturnType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.ReturnType)
+	m.Topology = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.Topology)
+    m.Valid = types.BoolPointerValue(from.DtcTopologyRulesInnerOneOf1.Valid)
 	m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, from.DtcTopologyRulesInnerOneOf1.Sources, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
 
 	// Check which OneOf variant is populated
