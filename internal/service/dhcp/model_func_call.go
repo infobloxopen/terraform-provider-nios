@@ -6,11 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -34,29 +36,47 @@ var FuncCallAttrTypes = map[string]attr.Type{
 
 var FuncCallResourceSchemaAttributes = map[string]schema.Attribute{
 	"attribute_name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 		MarkdownDescription: "The attribute to be called.",
 	},
 	"object_function": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 		MarkdownDescription: "The function to be called.",
 	},
 	"parameters": schema.MapAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		PlanModifiers: []planmodifier.Map{
+			mapplanmodifier.RequiresReplace(),
+		},
 		MarkdownDescription: "The parameters for the function.",
 	},
 	"result_field": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 		MarkdownDescription: "The result field of the function.",
 	},
 	"object": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
+		},
 		MarkdownDescription: "The object to be called.",
 	},
 	"object_parameters": schema.MapAttribute{
-		ElementType:         types.StringType,
-		Optional:            true,
+		ElementType: types.StringType,
+		Optional:    true,
+		PlanModifiers: []planmodifier.Map{
+			mapplanmodifier.RequiresReplace(),
+		},
 		MarkdownDescription: "The parameters for the object.",
 	},
 }
