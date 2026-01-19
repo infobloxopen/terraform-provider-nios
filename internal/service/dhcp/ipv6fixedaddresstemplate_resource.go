@@ -347,21 +347,27 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 	}
 
 	// Preferred lifetime must be less than or equal to valid lifetime
-	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() &&
-		!data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
-		if data.PreferredLifetime.ValueInt64() > data.ValidLifetime.ValueInt64() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("preferred_lifetime"),
-				"Invalid configuration",
-				"The 'preferred_lifetime' must be less than or equal to 'valid_lifetime'.",
-			)
+	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() {
+		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
+			if data.PreferredLifetime.ValueInt64() > data.ValidLifetime.ValueInt64() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("preferred_lifetime"),
+					"Invalid configuration",
+					"The 'preferred_lifetime' must be less than or equal to 'valid_lifetime'.",
+				)
+			}
+		} else if hasDhcpLeaseTime {
+			// if valid_lifetime is not set, compare with DHCP lease time
+			if dhcpLeaseTimeInt, err := strconv.ParseInt(dhcpLeaseTimeValue, 10, 64); err == nil {
+				if data.PreferredLifetime.ValueInt64() > dhcpLeaseTimeInt {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("preferred_lifetime"),
+						"Invalid configuration",
+						"The 'preferred_lifetime' must be less than or equal to 'dhcp-lease-time' (valid_lifetime) option value.",
+					)
+				}
+			}
 		}
-	} else if hasDhcpLeaseTime && strconv.FormatInt(data.PreferredLifetime.ValueInt64(), 10) > dhcpLeaseTimeValue {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("preferred_lifetime"),
-			"Invalid configuration",
-			"The 'preferred_lifetime' must be less than or equal to 'dhcp-lease-time' (valid_lifetime) option value.",
-		)
 	}
 }
 
