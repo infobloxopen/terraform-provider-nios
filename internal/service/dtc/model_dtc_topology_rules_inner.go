@@ -17,6 +17,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
+var readableAttributesForDtcTopologyRule = "dest_type,destination_link,return_type,sources,topology,valid" 
 type DtcTopologyRulesInnerModel struct {
 	DestType        types.String `tfsdk:"dest_type"`
 	DestinationLink types.String `tfsdk:"destination_link"`
@@ -118,26 +119,31 @@ func (m *DtcTopologyRulesInnerModel) Flatten(ctx context.Context, from *dtc.DtcT
 		*m = DtcTopologyRulesInnerModel{}
 	}
 
+	m.DestType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestType)
+	m.DestinationLink = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestinationLink)
+	m.ReturnType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.ReturnType)
+	m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, from.DtcTopologyRulesInnerOneOf1.Sources, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
+
 	// Check which OneOf variant is populated
-	if from.DtcTopologyRulesInnerOneOf != nil && from.DtcTopologyRulesInnerOneOf.Ref != nil {
-		if m.DestType.IsNull() || m.DestType.IsUnknown() {
-			m.DestType = types.StringNull()
-		}
-		if m.DestinationLink.IsNull() || m.DestinationLink.IsUnknown() {
-			m.DestinationLink = types.StringNull()
-		}
-		if m.ReturnType.IsNull() || m.ReturnType.IsUnknown() {
-			m.ReturnType = types.StringNull()
-		}
-		if m.Sources.IsNull() || m.Sources.IsUnknown() {
-			m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, nil, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
-		}
-		if m.Topology.IsNull() || m.Topology.IsUnknown() {
-			m.Topology = types.StringNull()
-		}
-		if m.Valid.IsNull() || m.Valid.IsUnknown() {
-			m.Valid = types.BoolNull()
-		}
-		return
-	}
+	// if from.DtcTopologyRulesInnerOneOf != nil && from.DtcTopologyRulesInnerOneOf.Ref != nil {
+	// 	if m.DestType.IsNull() || m.DestType.IsUnknown() {
+	// 		m.DestType = types.StringNull()
+	// 	}
+	// 	if m.DestinationLink.IsNull() || m.DestinationLink.IsUnknown() {
+	// 		m.DestinationLink = types.StringNull()
+	// 	}
+	// 	if m.ReturnType.IsNull() || m.ReturnType.IsUnknown() {
+	// 		m.ReturnType = types.StringNull()
+	// 	}
+	// 	if m.Sources.IsNull() || m.Sources.IsUnknown() {
+	// 		m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, nil, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
+	// 	}
+	// 	if m.Topology.IsNull() || m.Topology.IsUnknown() {
+	// 		m.Topology = types.StringNull()
+	// 	}
+	// 	if m.Valid.IsNull() || m.Valid.IsUnknown() {
+	// 		m.Valid = types.BoolNull()
+	// 	}
+	// 	return
+	// }
 }

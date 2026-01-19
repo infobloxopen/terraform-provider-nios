@@ -97,7 +97,7 @@ func (r *DtcTopologyResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
+	data.Flatten(ctx, &res, &resp.Diagnostics , r)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -167,7 +167,7 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
+	data.Flatten(ctx, &res, &resp.Diagnostics , r )
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -222,7 +222,7 @@ func (r *DtcTopologyResource) ReadByExtAttrs(ctx context.Context, data *DtcTopol
 		return true
 	}
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
+	data.Flatten(ctx, &res, &resp.Diagnostics , r)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -291,7 +291,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
+	data.Flatten(ctx, &res, &resp.Diagnostics , r)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
