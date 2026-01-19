@@ -5,7 +5,7 @@ resource "nios_security_snmp_user" "snmpuser_basic_fields" {
   privacy_protocol        = "NONE"
 }
 
-// Create an SNMP User with Additional fields
+// Create an SNMP User with Additional Fields
 resource "nios_security_snmp_user" "snmpuser_additional_fields" {
   name                    = "snmpuser_example_2"
   authentication_protocol = "SHA"

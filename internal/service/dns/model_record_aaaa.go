@@ -21,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -158,6 +159,9 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
@@ -166,16 +170,22 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the reclamation is allowed for the record or not.",
 	},
 	"ipv6addr": schema.StringAttribute{
-		CustomType:          iptypes.IPv6AddressType{},
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The IPv6 Address of the record.",
+		CustomType: iptypes.IPv6AddressType{},
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv6addr"),
+				path.MatchRoot("func_call"),
+			),
+		},
+		MarkdownDescription: "The IPv6 Address of the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.",
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Function call to be executed.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Record AAAA.",
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,

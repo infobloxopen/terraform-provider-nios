@@ -104,13 +104,19 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "List of Values. Applicable if the extensible attribute type is ENUM.",
 	},
 	"max": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		PlanModifiers: []planmodifier.Int64{
+			planmodifiers.ImmutableInt64(),
+		},
 		MarkdownDescription: "Maximum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER.",
 	},
 	"min": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		PlanModifiers: []planmodifier.Int64{
+			planmodifiers.ImmutableInt64(),
+		},
 		MarkdownDescription: "Minimum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER.",
 	},
 	"name": schema.StringAttribute{
@@ -144,12 +150,12 @@ func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Di
 		DescendantsAction:  ExpandExtensibleattributedefDescendantsAction(ctx, m.DescendantsAction, diags),
 		Flags:              flex.ExpandStringPointer(m.Flags),
 		ListValues:         flex.ExpandFrameworkListNestedBlock(ctx, m.ListValues, diags, ExpandExtensibleattributedefListValues),
-		Max:                flex.ExpandInt64Pointer(m.Max),
-		Min:                flex.ExpandInt64Pointer(m.Min),
 		Name:               flex.ExpandStringPointer(m.Name),
 	}
 	if isCreate {
 		to.Type = flex.ExpandStringPointer(m.Type)
+		to.Max = flex.ExpandInt64Pointer(m.Max)
+		to.Min = flex.ExpandInt64Pointer(m.Min)
 	}
 	return to
 }
@@ -188,12 +194,12 @@ func (m *ExtensibleattributedefModel) Flatten(ctx context.Context, from *grid.Ex
 
 func ExpandExtensibleAttributeDefDefaultValue(ctx context.Context, defaultValue types.String, eaType types.String, diags *diag.Diagnostics) *grid.ExtensibleattributedefDefaultValue {
 	if defaultValue.IsNull() || defaultValue.IsUnknown() {
-		return &grid.ExtensibleattributedefDefaultValue{}
+		return nil
 	}
 
 	value := defaultValue.ValueString()
 	if value == "" {
-		return &grid.ExtensibleattributedefDefaultValue{}
+		return nil
 	}
 
 	// Check the type to determine if we should send as integer or string
@@ -209,7 +215,7 @@ func ExpandExtensibleAttributeDefDefaultValue(ctx context.Context, defaultValue 
 				"Invalid Integer Default Value",
 				fmt.Sprintf("Cannot convert default_value '%s' to integer: %v", value, err),
 			)
-			return &grid.ExtensibleattributedefDefaultValue{}
+			return nil
 		}
 	}
 

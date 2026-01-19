@@ -28,6 +28,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -366,6 +367,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional: true,
@@ -377,18 +381,22 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.",
 	},
 	"ipv4addr": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The IPv4 Address of the record.",
+		CustomType: iptypes.IPv4AddressType{},
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv4addr"),
+				path.MatchRoot("func_call"),
+			),
+		},
+		MarkdownDescription: "The IPv4 address for the Fixed Address. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.",
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Attributes: FuncCallResourceSchemaAttributes,
-		Optional:   true,
-		Validators: []validator.Object{
-			objectvalidator.ConflictsWith(path.MatchRoot("ipv4addr")),
-		},
-		MarkdownDescription: "Function call to be executed for Fixed Address",
+		Attributes:          FuncCallResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Fixed Address.",
 	},
 	"is_invalid_mac": schema.BoolAttribute{
 		Computed:            true,

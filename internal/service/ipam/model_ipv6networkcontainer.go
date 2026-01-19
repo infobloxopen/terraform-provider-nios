@@ -28,6 +28,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -332,6 +333,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"federated_realms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -383,17 +387,23 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"network": schema.StringAttribute{
 		CustomType:          cidrtypes.IPv6PrefixType{},
 		Optional:            true,
-		MarkdownDescription: "The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'.",
+		MarkdownDescription: "The network address in IPv6 Address/CIDR format. For regular expression searches, only the IPv6 Address portion is supported. Searches for the CIDR portion is always an exact match. For example, both network containers 16::0/28 and 26::0/24 are matched by expression '.6' and only 26::0/24 is matched by '.6/24'. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.",
 		Computed:            true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
+		},
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("network"),
+				path.MatchRoot("func_call"),
+			),
 		},
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Computed:            true,
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
-		MarkdownDescription: "The function call to be executed on the object.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_network` function is supported for IPv6 Network Container.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,

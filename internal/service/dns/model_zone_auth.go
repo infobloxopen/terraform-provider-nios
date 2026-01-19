@@ -28,6 +28,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -400,13 +401,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"create_ptr_for_bulk_hosts": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
 	},
 	"create_ptr_for_hosts": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
@@ -428,7 +427,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_principal_group": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The DDNS Principal cluster group name.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
@@ -564,7 +562,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The rollover date for the Zone Signing Key.",
 	},
 	"do_host_abstraction": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if hosts and bulk hosts are automatically created when the zone data is imported. This field is meaningful only when import_from is set.",
@@ -596,6 +593,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"external_primaries": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -841,7 +841,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ns_group": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("grid_primary")),
 		},
@@ -999,6 +998,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"srgs": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The associated shared record groups of a DNS zone. If a shared record group is associated with a zone, then all shared records in a shared record group will be shared in the zone.",
 	},
 	"update_forwarding": schema.ListNestedAttribute{
@@ -1319,7 +1319,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.CopyXferToNotify = types.BoolPointerValue(from.CopyXferToNotify)
 	m.CreateUnderscoreZones = types.BoolPointerValue(from.CreateUnderscoreZones)
 	m.DdnsForceCreationTimestampUpdate = types.BoolPointerValue(from.DdnsForceCreationTimestampUpdate)
-	m.DdnsPrincipalGroup = flex.FlattenStringPointer(from.DdnsPrincipalGroup)
+	m.DdnsPrincipalGroup = flex.FlattenStringPointerNilAsNotEmpty(from.DdnsPrincipalGroup)
 	m.DdnsPrincipalTracking = types.BoolPointerValue(from.DdnsPrincipalTracking)
 	m.DdnsRestrictPatterns = types.BoolPointerValue(from.DdnsRestrictPatterns)
 	m.DdnsRestrictPatternsList = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.DdnsRestrictPatternsList, diags)
@@ -1401,7 +1401,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.NetworkAssociations = flex.FlattenFrameworkListString(ctx, from.NetworkAssociations, diags)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.NotifyDelay = flex.FlattenInt64Pointer(from.NotifyDelay)
-	m.NsGroup = flex.FlattenStringPointer(from.NsGroup)
+	m.NsGroup = flex.FlattenStringPointerNilAsNotEmpty(from.NsGroup)
 	m.Parent = flex.FlattenStringPointer(from.Parent)
 	m.Prefix = flex.FlattenStringPointer(from.Prefix)
 	m.PrimaryType = flex.FlattenStringPointer(from.PrimaryType)

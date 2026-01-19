@@ -166,12 +166,10 @@ var AdmingroupNetworkingSetCommandsResourceSchemaAttributes = map[string]schema.
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
 	"enable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then enable all fields",
 	},
 	"disable_all": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then disable all fields",
 	},
@@ -214,8 +212,6 @@ func (m *AdmingroupNetworkingSetCommandsModel) Expand(ctx context.Context, diags
 		SetTcpTimestamps:        flex.ExpandBoolPointer(m.SetTcpTimestamps),
 		SetTrafficCapture:       flex.ExpandBoolPointer(m.SetTrafficCapture),
 		SetWinsForwarding:       flex.ExpandBoolPointer(m.SetWinsForwarding),
-		EnableAll:               flex.ExpandBoolPointer(m.EnableAll),
-		DisableAll:              flex.ExpandBoolPointer(m.DisableAll),
 	}
 	return to
 }

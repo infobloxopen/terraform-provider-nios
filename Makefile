@@ -3,10 +3,11 @@ HOSTNAME=registry.terraform.io
 NAMESPACE=infobloxopen
 NAME=nios
 BINARY=terraform-provider-${NAME}
-VERSION=0.0.1
+VERSION=1.0.0
 OS_ARCH=$(shell uname -s | tr '[:upper:]' '[:lower:]')_$(shell uname -m)
 MODULES_DIR=./modules
 TERRAFORM_DOCS_IMAGE=quay.io/terraform-docs/terraform-docs:0.19.0
+GO_FILES=$(shell find . -name '*.go' -not -path "./vendor/*")
 
 default: install
 
@@ -37,3 +38,7 @@ fmt:
 	go fmt ./...
 
 .PHONY: default test testacc gen fmt
+
+.PHONY: goimports
+goimports: ## Check go imports
+	@docker run --rm -v $(shell pwd):/data cytopia/goimports -w "$(GO_FILES)"

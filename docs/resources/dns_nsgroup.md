@@ -169,13 +169,10 @@ Required:
 - `address` (String) The IPv4 Address or IPv6 Address of the server.
 - `name` (String) A resolvable domain name for the external DNS server.
 
-Optional:
-
-- `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
-
 Read-Only:
 
 - `shared_with_ms_parent_delegation` (Boolean) This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.
+- `stealth` (Boolean) Set this flag to hide the NS record for the primary name server from DNS queries.
 - `tsig_key` (String) A generated TSIG key.
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The TSIG key name.

@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -115,6 +114,12 @@ func (r *RangetemplateResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		RangetemplateAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -138,19 +143,21 @@ func (r *RangetemplateResource) Read(ctx context.Context, req resource.ReadReque
 		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read Rangetemplate because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
+	if associateInternalId == nil {
+		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
+		if stateExtAttrs == nil {
+			resp.Diagnostics.AddError(
+				"Missing Internal ID",
+				"Unable to read Rangetemplate because the internal ID (from extattrs_all) is missing or invalid.",
+			)
 			return
+		}
+
+		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
+		if apiTerraformId.Value != stateTerraformId.Value {
+			if r.ReadByExtAttrs(ctx, &data, resp) {
+				return
+			}
 		}
 	}
 
@@ -244,6 +251,17 @@ func (r *RangetemplateResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+	if associateInternalId != nil {
+		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+		if diags.HasError() {
+			return
+		}
+	}
 
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
@@ -276,6 +294,10 @@ func (r *RangetemplateResource) Update(ctx context.Context, req resource.UpdateR
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	if associateInternalId != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
+	}
 }
 
 func (r *RangetemplateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -302,41 +324,8 @@ func (r *RangetemplateResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *RangetemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data RangetemplateModel
-	var goClientData dhcp.Rangetemplate
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.DHCPAPI.
-		RangetemplateAPI.
-		Update(ctx, resourceRef).
-		Rangetemplate(goClientData).
-		ReturnFieldsPlus(readableAttributesForRangetemplate).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Rangetemplate for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateRangetemplateResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Rangetemplate due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
 func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -427,6 +416,44 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
 						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
 						optionName),
+				)
+			}
+		}
+
+		serverAssociationType := "NONE"
+		if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
+			serverAssociationType = data.ServerAssociationType.ValueString()
+		}
+
+		// If server_association_type is MEMBER, member field must be set
+		if serverAssociationType == "MEMBER" {
+			if data.Member.IsNull() || data.Member.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("member"),
+					"Invalid Configuration",
+					"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+				)
+			}
+		}
+
+		// If server_association_type is FAILOVER, failover_association field must be set
+		if serverAssociationType == "FAILOVER" {
+			if data.FailoverAssociation.IsNull() || data.FailoverAssociation.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("failover_association"),
+					"Invalid Configuration",
+					"The 'failover_association' field must be set when 'server_association_type' is set to 'FAILOVER'.",
+				)
+			}
+		}
+
+		// If server_association_type is MS_SERVER, ms_server field must be set
+		if serverAssociationType == "MS_SERVER" {
+			if data.MsServer.IsNull() || data.MsServer.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("ms_server"),
+					"Invalid Configuration",
+					"The 'ms_server' field must be set when 'server_association_type' is set to 'MS_SERVER'.",
 				)
 			}
 		}

@@ -13,27 +13,27 @@ Manages a DNS PTR Record.
 ## Example Usage
 
 ```terraform
-// Create an Auth Zone (Required as parent for forward records)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_zone" {
   fqdn = "example.com"
 }
 
-// Create an IPv4 Reverse Mapping Zones (Required as parent for PTR records)
-resource "nios_dns_zone_auth" "reverse_zone_10_20_1" {
+// Create IPv4 Reverse Mapping Zones (Required as Parent)
+resource "nios_dns_zone_auth" "reverse_zone1" {
   fqdn        = "10.20.1.0/24"
   view        = "default"
   zone_format = "IPV4"
   comment     = "Reverse zone for 10.20.1.0/24 network"
 }
 
-resource "nios_dns_zone_auth" "reverse_zone_22_0_0" {
+resource "nios_dns_zone_auth" "reverse_zone2" {
   fqdn        = "22.0.0.0/24"
   view        = "default"
   zone_format = "IPV4"
   comment     = "Reverse zone for 22.0.0.0/24 network"
 }
 
-// Create an IPv6 Reverse Mapping Zone (Required as parent for IPv6 PTR records)
+// Create an IPv6 Reverse Mapping Zone (Required as Parent)
 resource "nios_dns_zone_auth" "reverse_zone_ipv6" {
   fqdn        = "2001::/64"
   view        = "default"
@@ -42,7 +42,7 @@ resource "nios_dns_zone_auth" "reverse_zone_ipv6" {
 }
 
 // Create an IPv4 Reverse MappingZone for function call network (Required for function call PTR)
-resource "nios_dns_zone_auth" "reverse_zone_85_85" {
+resource "nios_dns_zone_auth" "reverse_zone3" {
   fqdn        = "85.85.0.0/16"
   view        = "default"
   zone_format = "IPV4"
@@ -56,7 +56,7 @@ resource "nios_ipam_network" "func_call_network" {
   comment      = "Network for PTR record function call"
 }
 
-// Create an IPv4 PTR record with Basic fields
+// Create an IPv4 PTR record with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4addr" {
   ptrdname = "example_record1.${nios_dns_zone_auth.parent_zone.fqdn}"
   ipv4addr = "10.20.1.2"
@@ -64,10 +64,10 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4addr" {
   extattrs = {
     Site = "location-1"
   }
-  depends_on = [nios_dns_zone_auth.reverse_zone_10_20_1]
+  depends_on = [nios_dns_zone_auth.reverse_zone1]
 }
 
-// Create an IPv6 PTR record with Basic fields
+// Create an IPv6 PTR record with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6addr" {
   ptrdname = "example_record2.${nios_dns_zone_auth.parent_zone.fqdn}"
   ipv6addr = "2001::123"
@@ -78,7 +78,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6addr" {
   depends_on = [nios_dns_zone_auth.reverse_zone_ipv6]
 }
 
-// Create an IPv4 PTR record by name with Basic fields
+// Create an IPv4 PTR record by name with Basic Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_name" {
   ptrdname = "example_record3.${nios_dns_zone_auth.parent_zone.fqdn}"
   name     = "11.0.0.22.in-addr.arpa"
@@ -86,10 +86,10 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_name" {
   extattrs = {
     Site = "location-3"
   }
-  depends_on = [nios_dns_zone_auth.reverse_zone_22_0_0]
+  depends_on = [nios_dns_zone_auth.reverse_zone2]
 }
 
-// Create an IPv4 PTR record by name with Additional fields
+// Create an IPv4 PTR record by name with Additional Fields
 resource "nios_dns_record_ptr" "create_ptr_record_with_additional_fields" {
   ptrdname = "example_record4.${nios_dns_zone_auth.parent_zone.fqdn}"
   name     = "12.0.0.22.in-addr.arpa"
@@ -105,7 +105,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_additional_fields" {
   extattrs = {
     Site = "location-4"
   }
-  depends_on = [nios_dns_zone_auth.reverse_zone_22_0_0]
+  depends_on = [nios_dns_zone_auth.reverse_zone2]
 }
 
 // Create an PTR record using function call to retrieve ipv4addr
@@ -125,8 +125,45 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_func_call" {
   comment = "Updated comment"
   depends_on = [
     nios_ipam_network.func_call_network,
-    nios_dns_zone_auth.reverse_zone_85_85
+    nios_dns_zone_auth.reverse_zone3
   ]
+}
+
+// Create an IPV4 reverse mapping zone (Required as Parent)
+resource "nios_dns_zone_auth" "create_zone1" {
+  fqdn        = "60.0.0.0/24"
+  view        = "default"
+  zone_format = "IPV4"
+}
+
+// Create an IPv4 PTR record by name with arpa notation
+resource "nios_dns_record_ptr" "create_ptr_record_with_ipv4_arpa" {
+  name     = "5.${nios_dns_zone_auth.create_zone1.display_domain}"
+  ptrdname = "0.0.192.in-addr"
+  view     = "default"
+  extattrs = {
+    Site = "location-3"
+  }
+}
+
+// Create an IPV6 reverse mapping zone (Required as Parent)
+resource "nios_dns_zone_auth" "create_zone2" {
+  fqdn        = "2002:1100::/64"
+  view        = "default"
+  zone_format = "IPV6"
+  extattrs = {
+    Site = "location-1"
+  }
+}
+
+// Create an IPv6 PTR record by name with arpa notation
+resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6_arpa" {
+  ptrdname = "example_record.example.com"
+  name     = "7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.${nios_dns_zone_auth.create_zone2.display_domain}"
+  view     = "default"
+  extattrs = {
+    Site = "location-2"
+  }
 }
 ```
 
@@ -146,10 +183,10 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_func_call" {
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `func_call` (Attributes) Function call to be executed. (see [below for nested schema](#nestedatt--func_call))
-- `ipv4addr` (String) The IPv4 Address of the record.
-- `ipv6addr` (String) The IPv6 Address of the record.
-- `name` (String) The name of the DNS PTR record in FQDN format.
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for Record PTR. (see [below for nested schema](#nestedatt--func_call))
+- `ipv4addr` (String) The IPv4 Address of the record. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.
+- `ipv6addr` (String) The IPv6 Address of the record. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.
+- `name` (String) The name of the DNS PTR record in FQDN format. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.
 - `ttl` (Number) Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, that the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the A record.
 - `view` (String) Name of the DNS View in which the record resides, for example "external".

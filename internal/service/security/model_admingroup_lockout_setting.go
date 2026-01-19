@@ -3,11 +3,13 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -38,15 +40,21 @@ var AdmingroupLockoutSettingResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "Enable/disable sequential failed login attempts lockout for local users",
 	},
 	"sequential_attempts": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(5),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(5),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 99),
+		},
 		MarkdownDescription: "The number of failed login attempts",
 	},
 	"failed_lockout_duration": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(5),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(5),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 1440),
+		},
 		MarkdownDescription: "Time period the account remains locked after sequential failed login attempt lockout.",
 	},
 	"never_unlock_user": schema.BoolAttribute{

@@ -28,6 +28,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -434,6 +435,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"federated_realms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -498,7 +502,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		CustomType:          cidrtypes.IPv6PrefixType{},
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The IPv6 network address in CIDR notation. The network address must be unique within the network view.",
+		MarkdownDescription: "The IPv6 network address in CIDR notation. The network address must be unique within the network view. This field is `required` unless a `func_call` is specified to invoke `next_available_network`.",
 		Validators: []validator.String{
 			stringvalidator.ExactlyOneOf(
 				path.MatchRoot("network"),
@@ -513,7 +517,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "A function call to be executed on the object.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_network` function is supported for IPv6 Network.",
 	},
 	"network_container": schema.StringAttribute{
 		Computed:            true,
@@ -630,7 +634,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The DHCP IPv6 Network Cisco ISE subscribe settings.",
 	},
 	"template": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set on creation, the network is created according to the values specified in the selected template.",
 	},
 	"unmanaged": schema.BoolAttribute{
@@ -851,7 +855,6 @@ func (m *Ipv6networkModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		SamePortControlDiscoveryBlackout: flex.ExpandBoolPointer(m.SamePortControlDiscoveryBlackout),
 		SendRirRequest:                   flex.ExpandBoolPointer(m.SendRirRequest),
 		SubscribeSettings:                ExpandIpv6networkSubscribeSettings(ctx, m.SubscribeSettings, diags),
-		Template:                         flex.ExpandStringPointer(m.Template),
 		Unmanaged:                        flex.ExpandBoolPointer(m.Unmanaged),
 		UpdateDnsOnLeaseRenewal:          flex.ExpandBoolPointer(m.UpdateDnsOnLeaseRenewal),
 		UseBlackoutSetting:               flex.ExpandBoolPointer(m.UseBlackoutSetting),
@@ -906,7 +909,7 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	if m == nil {
 		*m = Ipv6networkModel{}
 	}
-
+	planMembers := m.Members
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.CloudInfo = FlattenIpv6networkCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
@@ -941,6 +944,12 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.LastRirRegistrationUpdateStatus = flex.FlattenStringPointer(from.LastRirRegistrationUpdateStatus)
 	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, Ipv6networkLogicFilterRulesAttrTypes, diags, FlattenIpv6networkLogicFilterRules)
 	m.Members = flex.FlattenFrameworkListNestedBlock(ctx, from.Members, Ipv6networkMembersAttrTypes, diags, FlattenIpv6networkMembers)
+	if !planMembers.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planMembers, m.Members, "name")
+		if !diags.HasError() {
+			m.Members = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.MgmPrivate = types.BoolPointerValue(from.MgmPrivate)
 	m.MgmPrivateOverridable = types.BoolPointerValue(from.MgmPrivateOverridable)
 	m.MsAdUserData = FlattenIpv6networkMsAdUserData(ctx, from.MsAdUserData, diags)
@@ -967,6 +976,7 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.SubscribeSettings = FlattenIpv6networkSubscribeSettings(ctx, from.SubscribeSettings, diags)
+	m.Template = flex.FlattenStringPointer(from.Template)
 	m.Unmanaged = types.BoolPointerValue(from.Unmanaged)
 	m.UnmanagedCount = flex.FlattenInt64Pointer(from.UnmanagedCount)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)

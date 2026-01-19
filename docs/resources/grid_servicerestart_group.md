@@ -13,13 +13,13 @@ Manages a GRID Service Restart Group.
 ## Example Usage
 
 ```terraform
-//Create a Service Restart Group with Basic Fields
+// Create a Service Restart Group with Basic Fields
 resource "nios_grid_servicerestart_group" "grid_servicerestart_group_with_basic_fields" {
   name    = "example_grid_service_restart_group"
   service = "DNS"
 }
 
-//Create a Service Restart Group with Additional Fields
+// Create a Service Restart Group with Additional Fields
 resource "nios_grid_servicerestart_group" "grid_servicerestart_group_with_additional_fields" {
   name    = "example_grid_service_restart_group_additional"
   service = "DHCP"

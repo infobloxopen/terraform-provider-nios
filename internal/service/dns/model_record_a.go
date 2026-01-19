@@ -21,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -158,6 +159,9 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
@@ -168,14 +172,20 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 	"func_call": schema.SingleNestedAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Function call to be executed.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Record A.",
 		Attributes:          FuncCallResourceSchemaAttributes,
 	},
 	"ipv4addr": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The IPv4 Address of the record.",
+		CustomType: iptypes.IPv4AddressType{},
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv4addr"),
+				path.MatchRoot("func_call"),
+			),
+		},
+		MarkdownDescription: "The IPv4 address for the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.",
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,

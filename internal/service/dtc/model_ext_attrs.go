@@ -21,7 +21,7 @@ const terraformInternalIDEA = "Terraform Internal ID"
 
 func ExpandExtAttrs(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dtc.ExtAttrs {
 	if extattrs.IsNull() || extattrs.IsUnknown() {
-		return nil
+		return &map[string]dtc.ExtAttrs{}
 	}
 	var extAttrsMap map[string]string
 	diags.Append(extattrs.ElementsAs(ctx, &extAttrsMap, false)...)
@@ -83,18 +83,18 @@ func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[
 
 func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dtc.ExtAttrs) (*map[string]dtc.ExtAttrs, types.Map, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	var planMap map[string]dtc.ExtAttrs
 	extAttrsRespMap := make(map[string]dtc.ExtAttrs, len(planExtAttrs.Elements()))
 	extAttrsAllRespMap := make(map[string]dtc.ExtAttrs)
 	var extAttrAll types.Map
 
 	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
-		extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &respExtAttrs, &diags)
-		return nil, extAttrAll, nil
-	}
-
-	planMap := *ExpandExtAttrs(ctx, planExtAttrs, &diags)
-	if diags.HasError() {
-		return nil, extAttrAll, diags
+		planMap = make(map[string]dtc.ExtAttrs)
+	} else {
+		planMap = *ExpandExtAttrs(ctx, planExtAttrs, &diags)
+		if diags.HasError() {
+			return nil, extAttrAll, diags
+		}
 	}
 
 	for k, v := range respExtAttrs {

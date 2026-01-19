@@ -28,7 +28,7 @@ resource "nios_dns_zone_rp" "zone_rp_additional_fields" {
   fqdn = "example2.com"
   view = "default"
 
-  // Additional fields
+  // Additional Fields
   grid_primary = [
     {
       name = "infoblox.member",

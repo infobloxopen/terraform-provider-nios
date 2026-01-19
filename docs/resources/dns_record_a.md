@@ -13,7 +13,7 @@ Manages a DNS A record.
 ## Example Usage
 
 ```terraform
-// Create parent authoritative zone first (required as parent)
+// Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
   fqdn        = "example_auth.com"
   zone_format = "FORWARD"
@@ -38,7 +38,7 @@ resource "nios_dns_record_a" "create_record_a" {
   }
 }
 
-// Create Record A with additional fields
+// Create Record A with Additional Fields
 resource "nios_dns_record_a" "create_record_a_with_additional_fields" {
   name     = "name.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   ipv4addr = "10.20.1.3"
@@ -85,8 +85,8 @@ resource "nios_dns_record_a" "create_record_a_with_func_call" {
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `func_call` (Attributes) Function call to be executed. (see [below for nested schema](#nestedatt--func_call))
-- `ipv4addr` (String) The IPv4 Address of the record.
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for Record A. (see [below for nested schema](#nestedatt--func_call))
+- `ipv4addr` (String) The IPv4 address for the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.
 - `ttl` (Number) Time-to-live value of the record, in seconds.
 - `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the A record.
 - `view` (String) View that this record is part of.

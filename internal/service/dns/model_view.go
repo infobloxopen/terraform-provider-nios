@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,6 +25,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -289,7 +291,6 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_principal_group": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
 		},
@@ -467,6 +468,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"filter_aaaa": schema.StringAttribute{
 		Optional: true,
@@ -1009,7 +1013,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CustomRootNameServers = flex.FlattenFrameworkListNestedBlock(ctx, from.CustomRootNameServers, ViewCustomRootNameServersAttrTypes, diags, FlattenViewCustomRootNameServers)
 	m.DdnsForceCreationTimestampUpdate = types.BoolPointerValue(from.DdnsForceCreationTimestampUpdate)
-	m.DdnsPrincipalGroup = flex.FlattenStringPointer(from.DdnsPrincipalGroup)
+	m.DdnsPrincipalGroup = flex.FlattenStringPointerNilAsNotEmpty(from.DdnsPrincipalGroup)
 	m.DdnsPrincipalTracking = types.BoolPointerValue(from.DdnsPrincipalTracking)
 	m.DdnsRestrictPatterns = types.BoolPointerValue(from.DdnsRestrictPatterns)
 	m.DdnsRestrictPatternsList = flex.FlattenFrameworkListString(ctx, from.DdnsRestrictPatternsList, diags)

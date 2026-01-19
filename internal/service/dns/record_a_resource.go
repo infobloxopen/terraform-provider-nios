@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -127,6 +126,12 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordAAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -150,19 +155,20 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read RecordA because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
+	if associateInternalId == nil {
+		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
+		if stateExtAttrs == nil {
+			resp.Diagnostics.AddError(
+				"Missing Internal ID",
+				"Unable to read RecordA because the internal ID (from extattrs_all) is missing or invalid.",
+			)
 			return
+		}
+		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
+		if apiTerraformId.Value != stateTerraformId.Value {
+			if r.ReadByExtAttrs(ctx, &data, resp) {
+				return
+			}
 		}
 	}
 
@@ -257,6 +263,19 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+
+	if associateInternalId != nil {
+		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+		if diags.HasError() {
+			return
+		}
+	}
+
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
 	if diags.HasError() {
@@ -288,6 +307,10 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	if associateInternalId != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
+	}
 }
 
 func (r *RecordAResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -328,39 +351,6 @@ func (r *RecordAResource) UpdateFuncCallAttributeName(ctx context.Context, data 
 }
 
 func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data RecordAModel
-	var goClientData dns.RecordA
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.DNSAPI.
-		RecordAAPI.
-		Update(ctx, resourceRef).
-		RecordA(goClientData).
-		ReturnFieldsPlus(readableAttributesForRecordA).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update RecordA for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateRecordAResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

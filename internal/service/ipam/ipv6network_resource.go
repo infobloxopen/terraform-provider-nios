@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -13,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -141,6 +141,12 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		Ipv6networkAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -164,19 +170,21 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read Ipv6network because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
+	if associateInternalId == nil {
+		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
+		if stateExtAttrs == nil {
+			resp.Diagnostics.AddError(
+				"Missing Internal ID",
+				"Unable to read Ipv6network because the internal ID (from extattrs_all) is missing or invalid.",
+			)
 			return
+		}
+
+		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
+		if apiTerraformId.Value != stateTerraformId.Value {
+			if r.ReadByExtAttrs(ctx, &data, resp) {
+				return
+			}
 		}
 	}
 
@@ -270,6 +278,17 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+	if associateInternalId != nil {
+		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+		if diags.HasError() {
+			return
+		}
+	}
 
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
@@ -302,6 +321,10 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	if associateInternalId != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
+	}
 }
 
 func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -342,41 +365,8 @@ func (r *Ipv6networkResource) UpdateFuncCallAttributeName(ctx context.Context, d
 }
 
 func (r *Ipv6networkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data Ipv6networkModel
-	var goClientData ipam.Ipv6network
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Update(ctx, resourceRef).
-		Ipv6network(goClientData).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Ipv6network for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateIpv6networkResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Ipv6network due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
 func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -443,16 +433,6 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 				continue
 			}
 
-			// dhcp-lease-time (or num = 51) cannot be used with valid_lifetime
-			if optionName == "dhcp-lease-time" || optionName == "with num = 51" {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("options"),
-					"Invalid configuration for DHCP Option",
-					"The Custom option 'dhcp-lease-time' cannot be set for Ipv6 Network. "+
-						"Remove the 'dhcp-lease-time' option and set 'valid_lifetime' instead.",
-				)
-			}
-
 			if option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
@@ -478,6 +458,22 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
 						optionName),
 				)
+			}
+		}
+
+		// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+			for i, option := range options {
+				if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+					if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+						option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("options").AtListIndex(i).AtName("value"),
+							"Invalid configuration for Valid Lifetime",
+							"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+						)
+					}
+				}
 			}
 		}
 	}
