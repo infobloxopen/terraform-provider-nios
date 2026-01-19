@@ -16,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +25,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -259,6 +262,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -287,7 +291,6 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_principal_group": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
 		},
@@ -465,6 +468,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"filter_aaaa": schema.StringAttribute{
 		Optional: true,
@@ -722,6 +728,20 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_scavenging_settings")),
 		},
+		Default: objectdefault.StaticValue(types.ObjectValueMust(
+			ViewScavengingSettingsAttrTypes,
+			map[string]attr.Value{
+				"ea_expression_list":          types.ListNull(types.ObjectType{AttrTypes: ViewscavengingsettingsEaExpressionListAttrTypes}),
+				"enable_auto_reclamation":     types.BoolValue(false),
+				"enable_recurrent_scavenging": types.BoolValue(false),
+				"enable_rr_last_queried":      types.BoolValue(false),
+				"enable_scavenging":           types.BoolValue(false),
+				"enable_zone_last_queried":    types.BoolValue(false),
+				"expression_list":             types.ListNull(types.ObjectType{AttrTypes: ViewscavengingsettingsExpressionListAttrTypes}),
+				"reclaim_associated_records":  types.BoolValue(false),
+				"scavenging_schedule":         types.ObjectNull(ViewscavengingsettingsScavengingScheduleAttrTypes),
+			},
+		)),
 		MarkdownDescription: "Scavenging settings for the DNS view",
 	},
 	"sortlist": schema.ListNestedAttribute{
@@ -993,7 +1013,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CustomRootNameServers = flex.FlattenFrameworkListNestedBlock(ctx, from.CustomRootNameServers, ViewCustomRootNameServersAttrTypes, diags, FlattenViewCustomRootNameServers)
 	m.DdnsForceCreationTimestampUpdate = types.BoolPointerValue(from.DdnsForceCreationTimestampUpdate)
-	m.DdnsPrincipalGroup = flex.FlattenStringPointer(from.DdnsPrincipalGroup)
+	m.DdnsPrincipalGroup = flex.FlattenStringPointerNilAsNotEmpty(from.DdnsPrincipalGroup)
 	m.DdnsPrincipalTracking = types.BoolPointerValue(from.DdnsPrincipalTracking)
 	m.DdnsRestrictPatterns = types.BoolPointerValue(from.DdnsRestrictPatterns)
 	m.DdnsRestrictPatternsList = flex.FlattenFrameworkListString(ctx, from.DdnsRestrictPatternsList, diags)
@@ -1002,7 +1022,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 	m.DdnsRestrictStatic = types.BoolPointerValue(from.DdnsRestrictStatic)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Dns64Enabled = types.BoolPointerValue(from.Dns64Enabled)
-	m.Dns64Groups = flex.FlattenFrameworkUnorderedList(ctx, types.StringType,from.Dns64Groups, diags)
+	m.Dns64Groups = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Dns64Groups, diags)
 	m.DnssecEnabled = types.BoolPointerValue(from.DnssecEnabled)
 	m.DnssecExpiredSignaturesEnabled = types.BoolPointerValue(from.DnssecExpiredSignaturesEnabled)
 	m.DnssecNegativeTrustAnchors = flex.FlattenFrameworkListString(ctx, from.DnssecNegativeTrustAnchors, diags)

@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -72,15 +71,13 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
-		if data.DdnsServerAlwaysUpdates.ValueBool() {
-			// Check if ddns_use_option81 is set to true
-			if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ddns_server_always_updates"),
-					"Invalid Configuration",
-					"When ddns_server_always_updates is enabled, ddns_use_option81 must be set to true",
-				)
-			}
+		// Check if ddns_use_option81 is set to false
+		if data.DdnsUseOption81.IsNull() && data.DdnsUseOption81.IsUnknown() && !data.DdnsUseOption81.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ddns_server_always_updates"),
+				"Invalid Configuration",
+				"ddns_use_option81 must be set to true if ddns_server_always_updates is configured.",
+			)
 		}
 	}
 
@@ -223,6 +220,12 @@ func (r *SharednetworkResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		SharednetworkAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -247,19 +250,21 @@ func (r *SharednetworkResource) Read(ctx context.Context, req resource.ReadReque
 		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read Sharednetwork because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
+	if associateInternalId == nil {
+		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
+		if stateExtAttrs == nil {
+			resp.Diagnostics.AddError(
+				"Missing Internal ID",
+				"Unable to read Sharednetwork because the internal ID (from extattrs_all) is missing or invalid.",
+			)
 			return
+		}
+
+		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
+		if apiTerraformId.Value != stateTerraformId.Value {
+			if r.ReadByExtAttrs(ctx, &data, resp) {
+				return
+			}
 		}
 	}
 
@@ -353,6 +358,17 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+	if associateInternalId != nil {
+		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+		if diags.HasError() {
+			return
+		}
+	}
 
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
@@ -385,6 +401,10 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	if associateInternalId != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
+	}
 }
 
 func (r *SharednetworkResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -411,39 +431,6 @@ func (r *SharednetworkResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *SharednetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data SharednetworkModel
-	var goClientData dhcp.Sharednetwork
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.DHCPAPI.
-		SharednetworkAPI.
-		Update(ctx, resourceRef).
-		Sharednetwork(goClientData).
-		ReturnFieldsPlus(readableAttributesForSharednetwork).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Sharednetwork for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateSharednetworkResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Sharednetwork due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

@@ -13,6 +13,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,6 +21,8 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -103,6 +106,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -165,6 +169,9 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		ElementType:         types.StringType,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
@@ -184,19 +191,19 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 				path.MatchRoot("func_call"),
 			),
 		},
-		MarkdownDescription: "The IPv4 Address of the record.",
+		MarkdownDescription: "The IPv4 Address of the record. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.",
 	},
 	"func_call": schema.SingleNestedAttribute{
 		Attributes:          FuncCallResourceSchemaAttributes,
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Function call to be executed.",
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Record PTR.",
 	},
 	"ipv6addr": schema.StringAttribute{
 		CustomType:          iptypes.IPv6AddressType{},
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The IPv6 Address of the record.",
+		MarkdownDescription: "The IPv6 Address of the record. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.",
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
@@ -211,9 +218,12 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			stringvalidator.Any(
+				customvalidator.IsValidArpaIPv4(),
+				customvalidator.IsValidArpaIPv6(),
+			),
 		},
-		MarkdownDescription: "The name of the DNS PTR record in FQDN format.",
+		MarkdownDescription: "The name of the DNS PTR record in FQDN format. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.",
 	},
 	"ptrdname": schema.StringAttribute{
 		Required: true,
@@ -232,6 +242,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ttl": schema.Int64Attribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
 		},
@@ -251,6 +262,9 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Name of the DNS View in which the record resides, for example \"external\".",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"zone": schema.StringAttribute{
 		Computed:            true,

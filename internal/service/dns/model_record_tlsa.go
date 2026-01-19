@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -12,6 +13,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,33 +21,35 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordTlsaModel struct {
-	Ref              types.String `tfsdk:"ref"`
-	CertificateData  types.String `tfsdk:"certificate_data"`
-	CertificateUsage types.Int64  `tfsdk:"certificate_usage"`
-	CloudInfo        types.Object `tfsdk:"cloud_info"`
-	Comment          types.String `tfsdk:"comment"`
-	Creator          types.String `tfsdk:"creator"`
-	Disable          types.Bool   `tfsdk:"disable"`
-	DnsName          types.String `tfsdk:"dns_name"`
-	ExtAttrs         types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll      types.Map    `tfsdk:"extattrs_all"`
-	LastQueried      types.Int64  `tfsdk:"last_queried"`
-	MatchedType      types.Int64  `tfsdk:"matched_type"`
-	Name             types.String `tfsdk:"name"`
-	Selector         types.Int64  `tfsdk:"selector"`
-	Ttl              types.Int64  `tfsdk:"ttl"`
-	UseTtl           types.Bool   `tfsdk:"use_ttl"`
-	View             types.String `tfsdk:"view"`
-	Zone             types.String `tfsdk:"zone"`
+	Ref              types.String                             `tfsdk:"ref"`
+	CertificateData  internaltypes.CaseInsensitiveStringValue `tfsdk:"certificate_data"`
+	CertificateUsage types.Int64                              `tfsdk:"certificate_usage"`
+	CloudInfo        types.Object                             `tfsdk:"cloud_info"`
+	Comment          types.String                             `tfsdk:"comment"`
+	Creator          types.String                             `tfsdk:"creator"`
+	Disable          types.Bool                               `tfsdk:"disable"`
+	DnsName          types.String                             `tfsdk:"dns_name"`
+	ExtAttrs         types.Map                                `tfsdk:"extattrs"`
+	ExtAttrsAll      types.Map                                `tfsdk:"extattrs_all"`
+	LastQueried      types.Int64                              `tfsdk:"last_queried"`
+	MatchedType      types.Int64                              `tfsdk:"matched_type"`
+	Name             types.String                             `tfsdk:"name"`
+	Selector         types.Int64                              `tfsdk:"selector"`
+	Ttl              types.Int64                              `tfsdk:"ttl"`
+	UseTtl           types.Bool                               `tfsdk:"use_ttl"`
+	View             types.String                             `tfsdk:"view"`
+	Zone             types.String                             `tfsdk:"zone"`
 }
 
 var RecordTlsaAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
-	"certificate_data":  types.StringType,
+	"certificate_data":  internaltypes.CaseInsensitiveString{},
 	"certificate_usage": types.Int64Type,
 	"cloud_info":        types.ObjectType{AttrTypes: RecordTlsaCloudInfoAttrTypes},
 	"comment":           types.StringType,
@@ -70,7 +74,14 @@ var RecordTlsaResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"certificate_data": schema.StringAttribute{
-		Required:            true,
+		Required:   true,
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(
+				regexp.MustCompile(`^([0-9a-fA-F]{2})+$`),
+				"Should contain only hexadecimal characters and have an even length",
+			),
+		},
 		MarkdownDescription: "Hex dump of either raw data for matching type 0, or the hash of the raw data for matching types 1 and 2.",
 	},
 	"certificate_usage": schema.Int64Attribute{
@@ -125,6 +136,9 @@ var RecordTlsaResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
@@ -179,7 +193,7 @@ func (m *RecordTlsaModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		return nil
 	}
 	to := &dns.RecordTlsa{
-		CertificateData:  flex.ExpandStringPointer(m.CertificateData),
+		CertificateData:  flex.ExpandStringPointer(m.CertificateData.StringValue),
 		CertificateUsage: flex.ExpandInt64Pointer(m.CertificateUsage),
 		Comment:          flex.ExpandStringPointer(m.Comment),
 		Creator:          flex.ExpandStringPointer(m.Creator),
@@ -215,7 +229,7 @@ func (m *RecordTlsaModel) Flatten(ctx context.Context, from *dns.RecordTlsa, dia
 		*m = RecordTlsaModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.CertificateData = flex.FlattenStringPointer(from.CertificateData)
+	m.CertificateData.StringValue = flex.FlattenStringPointer(from.CertificateData)
 	m.CertificateUsage = flex.FlattenInt64Pointer(from.CertificateUsage)
 	m.CloudInfo = FlattenRecordTlsaCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

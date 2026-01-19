@@ -13,16 +13,32 @@ Manages a AAAA Record.
 ## Example Usage
 
 ```terraform
-// Create Record AAAA with Basic Fields
-resource "nios_dns_record_aaaa" "create_record_aaaa_with_basic_fields" {
-  name     = "example_record.example.com"
-  ipv6addr = "2002:1111::1401"
-  view     = "default"
+// Create an Auth Zone (Required as Parent)
+resource "nios_dns_zone_auth" "parent_auth_zone" {
+  fqdn        = "example.com"
+  zone_format = "FORWARD"
+  view        = "default"
+  comment     = "Parent zone for AAAA records"
 }
 
-// Create Record AAAA with additional fields
+// Create an IPV6 network for function call (Required as Parent)
+resource "nios_ipam_ipv6network" "example_ipv6_network" {
+  network      = "2001:db8:abcd:12::/64"
+  network_view = "default"
+  comment      = "IPv6 network for AAAA record IP allocation"
+}
+
+// Create Record AAAA with Basic Fields
+resource "nios_dns_record_aaaa" "create_record_aaaa_with_basic_fields" {
+  name       = "example_record.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
+  ipv6addr   = "2002:1111::1401"
+  view       = "default"
+  depends_on = [nios_dns_zone_auth.parent_auth_zone]
+}
+
+// Create Record AAAA with Additional Fields
 resource "nios_dns_record_aaaa" "create_record_aaaa_with_additional_fields" {
-  name     = "example_record_with_ttl.example.com"
+  name     = "example_record_with_ttl.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   ipv6addr = "2002:1111::1401"
   view     = "default"
   use_ttl  = true
@@ -31,11 +47,12 @@ resource "nios_dns_record_aaaa" "create_record_aaaa_with_additional_fields" {
   extattrs = {
     Site = "location-1"
   }
+  depends_on = [nios_dns_zone_auth.parent_auth_zone]
 }
 
 // Create Record AAAA using function call to retrieve ipv6addr
 resource "nios_dns_record_aaaa" "create_record_aaaa_with_func_call" {
-  name = "example_record_with_func_call.example.com"
+  name = "example_record_with_func_call.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   func_call = {
     attribute_name  = "ipv6addr"
     object_function = "next_available_ip"
@@ -46,7 +63,12 @@ resource "nios_dns_record_aaaa" "create_record_aaaa_with_func_call" {
       network_view = "default"
     }
   }
-  view = "default"
+  view    = "default"
+  comment = "AAAA record with function call"
+  depends_on = [
+    nios_dns_zone_auth.parent_auth_zone,
+    nios_ipam_ipv6network.example_ipv6_network
+  ]
 }
 ```
 
@@ -66,9 +88,8 @@ resource "nios_dns_record_aaaa" "create_record_aaaa_with_func_call" {
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `func_call` (Attributes) Function call to be executed. (see [below for nested schema](#nestedatt--func_call))
-- `ipv6addr` (String) The IPv6 Address of the record.
-- `remove_associated_ptr` (Boolean) Delete option that indicates whether the associated PTR records should be removed while deleting the specified A record.
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for Record AAAA. (see [below for nested schema](#nestedatt--func_call))
+- `ipv6addr` (String) The IPv6 Address of the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.
 - `ttl` (Number) The Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the AAAA record.
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".

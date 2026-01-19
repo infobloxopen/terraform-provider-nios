@@ -12,5 +12,5 @@ data "nios_dns_record_unknown" "get_unknown_records_using_extensible_attributes"
   }
 }
 
-// Retrieve all Unknown records in Default View
-data "nios_dns_record_unknown" "get_all_unknown_records_in_default_view" {}
+// Retrieve all Unknown records
+data "nios_dns_record_unknown" "get_all_unknown_records" {}

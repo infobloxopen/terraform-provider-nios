@@ -13,9 +13,24 @@ Manages a DNS A record.
 ## Example Usage
 
 ```terraform
+// Create an Auth Zone (Required as Parent)
+resource "nios_dns_zone_auth" "parent_auth_zone" {
+  fqdn        = "example_auth.com"
+  zone_format = "FORWARD"
+  view        = "default"
+  comment     = "Parent zone for A records"
+}
+
+// Create network for function call (required as parent)
+resource "nios_ipam_network" "example_network" {
+  network      = "85.85.0.0/16"
+  network_view = "default"
+  comment      = "Network for A record IP allocation"
+}
+
 // Create Record A with Basic Fields
 resource "nios_dns_record_a" "create_record_a" {
-  name     = "example_record.example.com"
+  name     = "a-record.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   ipv4addr = "10.20.1.2"
   view     = "default"
   extattrs = {
@@ -23,9 +38,9 @@ resource "nios_dns_record_a" "create_record_a" {
   }
 }
 
-// Create Record A with additional fields
+// Create Record A with Additional Fields
 resource "nios_dns_record_a" "create_record_a_with_additional_fields" {
-  name     = "example_record_with_ttl.example.com"
+  name     = "name.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   ipv4addr = "10.20.1.3"
   view     = "default"
   use_ttl  = true
@@ -38,7 +53,7 @@ resource "nios_dns_record_a" "create_record_a_with_additional_fields" {
 
 // Create Record A using function call to retrieve ipv4addr
 resource "nios_dns_record_a" "create_record_a_with_func_call" {
-  name = "example_func_call.example.com"
+  name = "example_func_call.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   func_call = {
     attribute_name  = "ipv4addr"
     object_function = "next_available_ip"
@@ -70,9 +85,8 @@ resource "nios_dns_record_a" "create_record_a_with_func_call" {
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
-- `func_call` (Attributes) Function call to be executed. (see [below for nested schema](#nestedatt--func_call))
-- `ipv4addr` (String) The IPv4 Address of the record.
-- `remove_associated_ptr` (Boolean) Whether to remove associated PTR records while deleting the A record.
+- `func_call` (Attributes) Specifies the function call to execute. The `next_available_ip` function is supported for Record A. (see [below for nested schema](#nestedatt--func_call))
+- `ipv4addr` (String) The IPv4 address for the record. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.
 - `ttl` (Number) Time-to-live value of the record, in seconds.
 - `use_ttl` (Boolean) Flag to indicate whether the TTL value should be used for the A record.
 - `view` (String) View that this record is part of.

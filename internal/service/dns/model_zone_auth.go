@@ -18,13 +18,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -397,13 +401,11 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"create_ptr_for_bulk_hosts": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
 	},
 	"create_ptr_for_hosts": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if PTR records are created for hosts automatically, if necessary, when the zone data is imported. This field is meaningful only when import_from is set.",
@@ -425,7 +427,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ddns_principal_group": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The DDNS Principal cluster group name.",
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_principal_security")),
@@ -561,7 +562,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The rollover date for the Zone Signing Key.",
 	},
 	"do_host_abstraction": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if hosts and bulk hosts are automatically created when the zone data is imported. This field is meaningful only when import_from is set.",
@@ -593,6 +593,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"external_primaries": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -630,6 +633,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.IsNotArpa(),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"grid_primary": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -662,12 +668,8 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list with Grid members that are secondary servers for this zone.",
 	},
 	"import_from": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
-		Optional:   true,
-		Computed:   true,
-		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_import_from")),
-		},
+		CustomType:          iptypes.IPAddressType{},
+		Computed:            true,
 		MarkdownDescription: "The IP address of the Infoblox appliance from which zone data is imported. Setting this address to '255.255.255.255' and do_host_abstraction to 'true' will create Host records from A records in this zone without importing zone data.",
 	},
 	"is_dnssec_enabled": schema.BoolAttribute{
@@ -839,7 +841,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ns_group": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("grid_primary")),
 		},
@@ -997,6 +998,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"srgs": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The associated shared record groups of a DNS zone. If a shared record group is associated with a zone, then all shared records in a shared record group will be shared in the zone.",
 	},
 	"update_forwarding": schema.ListNestedAttribute{
@@ -1106,9 +1108,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Use flag for: soa_default_ttl , soa_expire, soa_negative_ttl, soa_refresh, soa_retry",
 	},
 	"use_import_from": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: import_from",
 	},
 	"use_notify_delay": schema.BoolAttribute{
@@ -1155,6 +1155,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.OneOf("FORWARD", "IPV4", "IPV6"),
 		},
 		MarkdownDescription: "Determines the format of this zone.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"zone_not_queried_enabled_time": schema.Int64Attribute{
 		Computed:            true,
@@ -1203,7 +1206,6 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		ExternalSecondaries:                 flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSecondaries, diags, ExpandZoneAuthExternalSecondaries),
 		GridPrimary:                         flex.ExpandFrameworkListNestedBlock(ctx, m.GridPrimary, diags, ExpandZoneAuthGridPrimary),
 		GridSecondaries:                     flex.ExpandFrameworkListNestedBlock(ctx, m.GridSecondaries, diags, ExpandZoneAuthGridSecondaries),
-		ImportFrom:                          flex.ExpandIPAddress(m.ImportFrom),
 		LastQueriedAcl:                      flex.ExpandFrameworkListNestedBlock(ctx, m.LastQueriedAcl, diags, ExpandZoneAuthLastQueriedAcl),
 		Locked:                              flex.ExpandBoolPointer(m.Locked),
 		MemberSoaMnames:                     flex.ExpandFrameworkListNestedBlock(ctx, m.MemberSoaMnames, diags, ExpandZoneAuthMemberSoaMnames),
@@ -1247,7 +1249,6 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		UseDnssecKeyParams:                  flex.ExpandBoolPointer(m.UseDnssecKeyParams),
 		UseExternalPrimary:                  flex.ExpandBoolPointer(m.UseExternalPrimary),
 		UseGridZoneTimer:                    flex.ExpandBoolPointer(m.UseGridZoneTimer),
-		UseImportFrom:                       flex.ExpandBoolPointer(m.UseImportFrom),
 		UseNotifyDelay:                      flex.ExpandBoolPointer(m.UseNotifyDelay),
 		UseRecordNamePolicy:                 flex.ExpandBoolPointer(m.UseRecordNamePolicy),
 		UseScavengingSettings:               flex.ExpandBoolPointer(m.UseScavengingSettings),
@@ -1318,7 +1319,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.CopyXferToNotify = types.BoolPointerValue(from.CopyXferToNotify)
 	m.CreateUnderscoreZones = types.BoolPointerValue(from.CreateUnderscoreZones)
 	m.DdnsForceCreationTimestampUpdate = types.BoolPointerValue(from.DdnsForceCreationTimestampUpdate)
-	m.DdnsPrincipalGroup = flex.FlattenStringPointer(from.DdnsPrincipalGroup)
+	m.DdnsPrincipalGroup = flex.FlattenStringPointerNilAsNotEmpty(from.DdnsPrincipalGroup)
 	m.DdnsPrincipalTracking = types.BoolPointerValue(from.DdnsPrincipalTracking)
 	m.DdnsRestrictPatterns = types.BoolPointerValue(from.DdnsRestrictPatterns)
 	m.DdnsRestrictPatternsList = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.DdnsRestrictPatternsList, diags)
@@ -1341,7 +1342,14 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.EffectiveCheckNamesPolicy = flex.FlattenStringPointer(from.EffectiveCheckNamesPolicy)
 	m.EffectiveRecordNamePolicy = flex.FlattenStringPointer(from.EffectiveRecordNamePolicy)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	planExternalPrimaries := m.ExternalPrimaries
 	m.ExternalPrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalPrimaries, ZoneAuthExternalPrimariesAttrTypes, diags, FlattenZoneAuthExternalPrimaries)
+	if !planExternalPrimaries.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planExternalPrimaries, m.ExternalPrimaries, "tsig_key_name")
+		if !diags.HasError() {
+			m.ExternalPrimaries = result.(basetypes.ListValue)
+		}
+	}
 	planExternalSecondaries := m.ExternalSecondaries
 	m.ExternalSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSecondaries, ZoneAuthExternalSecondariesAttrTypes, diags, FlattenZoneAuthExternalSecondaries)
 	if !planExternalSecondaries.IsNull() {
@@ -1351,9 +1359,23 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 		}
 	}
 	m.Fqdn = flex.FlattenStringPointer(from.Fqdn)
+	planGridPrimary := m.GridPrimary
 	m.GridPrimary = flex.FlattenFrameworkListNestedBlock(ctx, from.GridPrimary, ZoneAuthGridPrimaryAttrTypes, diags, FlattenZoneAuthGridPrimary)
+	if !planGridPrimary.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planGridPrimary, m.GridPrimary, "name")
+		if !diags.HasError() {
+			m.GridPrimary = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.GridPrimarySharedWithMsParentDelegation = types.BoolPointerValue(from.GridPrimarySharedWithMsParentDelegation)
+	planGridSecondary := m.GridSecondaries
 	m.GridSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.GridSecondaries, ZoneAuthGridSecondariesAttrTypes, diags, FlattenZoneAuthGridSecondaries)
+	if !planGridSecondary.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planGridSecondary, m.GridSecondaries, "name")
+		if !diags.HasError() {
+			m.GridSecondaries = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.ImportFrom = flex.FlattenIPAddress(from.ImportFrom)
 	m.IsDnssecEnabled = types.BoolPointerValue(from.IsDnssecEnabled)
 	m.IsDnssecSigned = types.BoolPointerValue(from.IsDnssecSigned)
@@ -1379,7 +1401,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.NetworkAssociations = flex.FlattenFrameworkListString(ctx, from.NetworkAssociations, diags)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.NotifyDelay = flex.FlattenInt64Pointer(from.NotifyDelay)
-	m.NsGroup = flex.FlattenStringPointer(from.NsGroup)
+	m.NsGroup = flex.FlattenStringPointerNilAsNotEmpty(from.NsGroup)
 	m.Parent = flex.FlattenStringPointer(from.Parent)
 	m.Prefix = flex.FlattenStringPointer(from.Prefix)
 	m.PrimaryType = flex.FlattenStringPointer(from.PrimaryType)

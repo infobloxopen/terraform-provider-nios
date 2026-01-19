@@ -31,6 +31,7 @@ var Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes = map[string]s
 	"enabled_attributes": schema.ListAttribute{
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.ValueStringsAre(stringvalidator.OneOf(
 				"DOMAINNAME",
@@ -49,6 +50,7 @@ var Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes = map[string]s
 			Attributes: Ipv6networkcontainersubscribesettingsMappedEaAttributesResourceSchemaAttributes,
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -12,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -95,7 +96,20 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6network, got error: %s", err))
+		errVal := err.Error()
+		if ((strings.Contains(errVal, "The search parameters") &&
+			strings.Contains(errVal, "for object ipv6network did not return any result")) ||
+			strings.Contains(errVal, "will overlap an existing network")) &&
+			r.isIpv6NetworkConvertedToContainer(ctx, &data) {
+			resp.Diagnostics.AddError(
+				"Unable to Create Ipv6network. Ipv6network Might Be Converted to Ipv6network Container",
+				fmt.Sprintf("Failed to create Ipv6network. The parent Ipv6network appears to have been converted to a Ipv6network container. "+
+					"Manual intervention is needed to import it as a container. "+
+					"Got error: %s", err),
+			)
+		} else {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6network, got error: %s", err))
+		}
 		return
 	}
 
@@ -128,6 +142,12 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		Ipv6networkAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -152,19 +172,21 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read Ipv6network because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
+	if associateInternalId == nil {
+		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
+		if stateExtAttrs == nil {
+			resp.Diagnostics.AddError(
+				"Missing Internal ID",
+				"Unable to read Ipv6network because the internal ID (from extattrs_all) is missing or invalid.",
+			)
 			return
+		}
+
+		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
+		if apiTerraformId.Value != stateTerraformId.Value {
+			if r.ReadByExtAttrs(ctx, &data, resp) {
+				return
+			}
 		}
 	}
 
@@ -258,6 +280,17 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+	if associateInternalId != nil {
+		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+		if diags.HasError() {
+			return
+		}
+	}
 
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
@@ -290,6 +323,10 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	if associateInternalId != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
+	}
 }
 
 func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -330,41 +367,8 @@ func (r *Ipv6networkResource) UpdateFuncCallAttributeName(ctx context.Context, d
 }
 
 func (r *Ipv6networkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data Ipv6networkModel
-	var goClientData ipam.Ipv6network
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Update(ctx, resourceRef).
-		Ipv6network(goClientData).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Ipv6network for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateIpv6networkResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Ipv6network due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
 func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -458,6 +462,22 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 				)
 			}
 		}
+
+		// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
+			for i, option := range options {
+				if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+					if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+						option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("options").AtListIndex(i).AtName("value"),
+							"Invalid configuration for Valid Lifetime",
+							"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+						)
+					}
+				}
+			}
+		}
 	}
 
 	useDiscoveryBasicPollingSettings := data.UseDiscoveryBasicPollingSettings
@@ -500,4 +520,17 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			"You cannot set 'ddns_server_always_updates' to false when 'ddns_enable_option_fqdn' is false.",
 		)
 	}
+}
+
+func (r *Ipv6networkResource) isIpv6NetworkConvertedToContainer(ctx context.Context, data *Ipv6networkModel) bool {
+	// Try to fetch as Ipv6network container
+	_, _, err := r.client.IPAMAPI.
+		Ipv6networkcontainerAPI.
+		List(ctx).
+		Filters(map[string]interface{}{
+			"network": data.Network.ValueString(),
+		},
+		).
+		Execute()
+	return err == nil
 }

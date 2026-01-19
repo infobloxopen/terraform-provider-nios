@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -128,6 +127,12 @@ func (r *FixedaddressResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		FixedaddressAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -152,19 +157,21 @@ func (r *FixedaddressResource) Read(ctx context.Context, req resource.ReadReques
 		apiTerraformId.Value = ""
 	}
 
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if stateExtAttrs == nil {
-		resp.Diagnostics.AddError(
-			"Missing Internal ID",
-			"Unable to read Fixedaddress because the internal ID (from extattrs_all) is missing or invalid.",
-		)
-		return
-	}
-
-	stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-	if apiTerraformId.Value != stateTerraformId.Value {
-		if r.ReadByExtAttrs(ctx, &data, resp) {
+	if associateInternalId == nil {
+		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
+		if stateExtAttrs == nil {
+			resp.Diagnostics.AddError(
+				"Missing Internal ID",
+				"Unable to read Fixedaddress because the internal ID (from extattrs_all) is missing or invalid.",
+			)
 			return
+		}
+
+		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
+		if apiTerraformId.Value != stateTerraformId.Value {
+			if r.ReadByExtAttrs(ctx, &data, resp) {
+				return
+			}
 		}
 	}
 
@@ -258,6 +265,17 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+	if associateInternalId != nil {
+		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
+		if diags.HasError() {
+			return
+		}
+	}
 
 	// Add Inherited Extensible Attributes
 	data.ExtAttrs, diags = AddInheritedExtAttrs(ctx, data.ExtAttrs, data.ExtAttrsAll)
@@ -290,6 +308,10 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	if associateInternalId != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
+	}
 }
 
 func (r *FixedaddressResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -330,41 +352,8 @@ func (r *FixedaddressResource) UpdateFuncCallAttributeName(ctx context.Context, 
 }
 
 func (r *FixedaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var diags diag.Diagnostics
-	var data FixedaddressModel
-	var goClientData dhcp.Fixedaddress
-
-	resourceRef := utils.ExtractResourceRef(req.ID)
-	extattrs, diags := AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
-	if diags.HasError() {
-		return
-	}
-	goClientData.ExtAttrsPlus = ExpandExtAttrs(ctx, extattrs, &diags)
-	data.ExtAttrsAll = extattrs
-
-	updateRes, _, err := r.client.DHCPAPI.
-		FixedaddressAPI.
-		Update(ctx, resourceRef).
-		Fixedaddress(goClientData).
-		ReturnFieldsPlus(readableAttributesForFixedaddress).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Import Failed", fmt.Sprintf("Unable to update Fixedaddress for import, got error: %s", err))
-		return
-	}
-
-	res := updateRes.UpdateFixedaddressResponseAsObject.GetResult()
-
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrsAll, *res.ExtAttrs)
-	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Fixedaddress due inherited Extensible attributes for import, got error: %s", diags))
-		return
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
 func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -463,6 +452,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 	// Check if allow_telnet is true, then cli_credentials must contain at least one element with credentials_type set to "TELNET"
 	if !data.AllowTelnet.IsUnknown() && !data.AllowTelnet.IsNull() && data.AllowTelnet.ValueBool() {
 		isTelnet := false
+		isSSH := false
 		if !data.CliCredentials.IsNull() && !data.CliCredentials.IsUnknown() {
 			// Iterate through cli_credentials to check if an element has credentials_type set to "TELNET"
 			var cliCredentials []FixedaddressCliCredentialsModel
@@ -477,11 +467,20 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 					continue
 				}
 				credentialsType := credentials.CredentialType.ValueString()
+				if credentialsType == "SSH" {
+					isSSH = true
+				}
 				if credentialsType == "TELNET" {
 					isTelnet = true
-					break
 				}
 			}
+		}
+		if !isSSH {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("allow_telnet"),
+				"Invalid configuration",
+				"The 'cli_credentials' must contain credentials with 'credentials_type' set to 'SSH'.",
+			)
 		}
 		if !isTelnet {
 			resp.Diagnostics.AddAttributeError(

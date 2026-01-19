@@ -13,14 +13,16 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -139,10 +141,12 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"external_ns_group": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRoot("forward_to")),
 			customvalidator.ValidateTrimmedString(),
@@ -171,8 +175,8 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneForwardForwardingServersResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -188,6 +192,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.IsNotArpa(),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set. apra notation is not allowed for IP address.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"locked": schema.BoolAttribute{
 		Optional:            true,
@@ -263,6 +270,9 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The name of the DNS view in which the zone resides. Example \"external\".",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"zone_format": schema.StringAttribute{
 		Optional: true,
@@ -272,19 +282,10 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.OneOf("FORWARD", "IPV4", "IPV6"),
 		},
 		MarkdownDescription: "Determines the format of this zone.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
-}
-
-func ExpandZoneForward(ctx context.Context, o types.Object, diags *diag.Diagnostics, isCreate bool) *dns.ZoneForward {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m ZoneForwardModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags, isCreate)
 }
 
 func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.ZoneForward {

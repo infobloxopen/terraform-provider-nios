@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -26,6 +27,8 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -238,6 +241,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -363,6 +367,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional: true,
@@ -374,18 +381,22 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If this field is set to False, the appliance returns all DHCP options the client is eligible to receive, rather than only the list of options the client has requested.",
 	},
 	"ipv4addr": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The IPv4 Address of the record.",
+		CustomType: iptypes.IPv4AddressType{},
+		Optional:   true,
+		Computed:   true,
+		Validators: []validator.String{
+			stringvalidator.ExactlyOneOf(
+				path.MatchRoot("ipv4addr"),
+				path.MatchRoot("func_call"),
+			),
+		},
+		MarkdownDescription: "The IPv4 address for the Fixed Address. This field is `required` unless a `func_call` is specified to invoke `next_available_ip`.",
 	},
 	"func_call": schema.SingleNestedAttribute{
-		Attributes: FuncCallResourceSchemaAttributes,
-		Optional:   true,
-		Validators: []validator.Object{
-			objectvalidator.ConflictsWith(path.MatchRoot("ipv4addr")),
-		},
-		MarkdownDescription: "Function call to be executed for Fixed Address",
+		Attributes:          FuncCallResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Specifies the function call to execute. The `next_available_ip` function is supported for Fixed Address.",
 	},
 	"is_invalid_mac": schema.BoolAttribute{
 		Computed:            true,
@@ -456,8 +467,11 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the name of this fixed address.",
 	},
 	"network": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.IsValidIPCIDR(),
+		},
 		MarkdownDescription: "The network to which this fixed address belongs, in IPv4 Address/CIDR format.",
 	},
 	"network_view": schema.StringAttribute{
@@ -497,7 +511,7 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_pxe_lease_time")),
-			int64validator.Between(0, 4294967295),
+			int64validator.Between(0, 399999999),
 		},
 		MarkdownDescription: "The PXE lease time value for a DHCP Fixed Address object. Some hosts use PXE (Preboot Execution Environment) to boot remotely from a server. To better manage your IP resources, set a different lease time for PXE boot requests. You can configure the DHCP server to allocate an IP address with a shorter lease time to hosts that send PXE boot requests, so IP addresses are not leased longer than necessary. A 32-bit unsigned integer that represents the duration, in seconds, for which the update is cached. Zero indicates that the update is not cached.",
 	},
@@ -533,6 +547,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If set on creation, the fixed address will be created according to the values specified in the named template.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"use_bootfile": schema.BoolAttribute{
 		Optional:            true,

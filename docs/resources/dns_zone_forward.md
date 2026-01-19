@@ -13,13 +13,23 @@ Manages DNS Forward Zones.
 ## Example Usage
 
 ```terraform
-// Create a DNS zone forward with basic fields
+//Create an NS Group forward stub server (Required as Parent)
+resource "nios_dns_nsgroup_forwardstubserver" "nsgroup_forward_stub" {
+  name = "example_ns_group_forward_stub_server"
+  external_servers = [
+    {
+      name    = "example.com"
+      address = "2.3.4.4"
+    }
+  ]
+}
+// Create a DNS zone forward with Basic Fields
 resource "nios_dns_zone_forward" "zone_forward_basic_fields" {
   fqdn              = "example1.example.com"
-  external_ns_group = "nsg1"
+  external_ns_group = nios_dns_nsgroup_forwardstubserver.nsgroup_forward_stub.name
 }
 
-// Create a DNS zone forward with additional fields
+// Create a DNS zone forward with Additional Fields
 resource "nios_dns_zone_forward" "zone_forward_additional_fields" {
   fqdn = "example2.example.com"
   forward_to = [

@@ -370,6 +370,9 @@ func ToComputedAttribute(name string, val resourceschema.Attribute) resourcesche
 
 func ExtractResourceRef(ref string) string {
 	v := strings.SplitN(strings.Trim(ref, "/"), "/", 2)
+	if len(v) < 2 {
+		return ref
+	}
 	return v[1]
 }
 
@@ -670,6 +673,10 @@ func CopyFieldFromPlanToRespList(ctx context.Context, planValue, respValue attr.
 				fmt.Sprintf("Field '%s' not found in plan object at index %d", fieldName, i),
 			)
 			return respValue, &diags
+		}
+		if planFieldValue.IsUnknown() || planFieldValue.IsNull() || (planFieldValue.Type(ctx) == types.StringType && planFieldValue.(basetypes.StringValue).ValueString() == "") {
+			modifiedElements[i] = respElement
+			continue
 		}
 
 		// Check if the field exists in the response object

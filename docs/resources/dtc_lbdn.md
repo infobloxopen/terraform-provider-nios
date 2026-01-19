@@ -13,42 +13,86 @@ Manages DTC Load Balanced Domain Name (LBDN)
 ## Example Usage
 
 ```terraform
-// Create DTC LBDN with basic fields
+// Create DTC LBDN with Basic Fields
 resource "nios_dtc_lbdn" "lbdn_basic_fields" {
   name      = "example_lbdn_1"
   lb_method = "SOURCE_IP_HASH"
+  types     = ["A", "CNAME"]
 }
 
-// Create DTC LBDN with additional fields
+// Authoritative DNS zone in the default view with a grid primary association
+resource "nios_dns_zone_auth" "parent_zone" {
+  fqdn = "wapi.com"
+  view = "default"
+  grid_primary = [
+    {
+      name = "infoblox.localdomain",
+    }
+  ]
+}
+
+// Create a custom DNS view
+resource "nios_dns_view" "custom_view1" {
+  name = "custom_view"
+}
+
+// Authoritative DNS zone in the custom view with a grid primary association
+resource "nios_dns_zone_auth" "parent_zone2" {
+  fqdn = "info.com"
+  view = nios_dns_view.custom_view1.name
+  grid_primary = [
+    {
+      name = "infoblox.localdomain",
+    }
+  ]
+}
+
+// Define the DTC pools for LBDN association
+resource "nios_dtc_pool" "dtc_pool1" {
+  name                = "pool2"
+  lb_preferred_method = "ROUND_ROBIN"
+}
+
+resource "nios_dtc_pool" "dtc_pool2" {
+  name                = "pool4"
+  lb_preferred_method = "ROUND_ROBIN"
+}
+
+resource "nios_dtc_pool" "dtc_pool3" {
+  name                = "pool6"
+  lb_preferred_method = "ROUND_ROBIN"
+}
+
+// Create DTC LBDN with Additional Fields
 resource "nios_dtc_lbdn" "lbdn_additional_fields" {
   name = "example_lbdn_2"
-  // TODO: Retrieve references based on the provided names of the objects: auth_zones, pools, and topology
-  auth_zones = ["zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:wapi.com/default",
-    "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:info.com/default.custom_view"
+  auth_zones = [nios_dns_zone_auth.parent_zone.ref,
+    nios_dns_zone_auth.parent_zone2.ref
   ]
   comment = "lbdn with additional parameters"
   extattrs = {
     Site = "location-1"
   }
   lb_method = "TOPOLOGY"
-  patterns  = ["*wapi.com", "info.com*"]
+  //The topology used here must have any one of the pools configured in its topology members
+  topology = "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"
+  patterns = ["*wapi.com", "info.com*"]
   pools = [
     {
-      pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCRwb29sMg:pool2"
+      pool  = nios_dtc_pool.dtc_pool1.ref
       ratio = 2
     },
     {
-      pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCRwb29sNA:pool4"
+      pool  = nios_dtc_pool.dtc_pool2.ref
       ratio = 3
     },
     {
-      pool  = "dtc:pool/ZG5zLmlkbnNfcG9vbCR0ZXN0LXBvb2w:pool6"
+      pool  = nios_dtc_pool.dtc_pool3.ref
       ratio = 6
     }
   ]
   ttl         = 0
   use_ttl     = false
-  topology    = "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"
   disable     = true
   types       = ["A", "CNAME"]
   persistence = 100

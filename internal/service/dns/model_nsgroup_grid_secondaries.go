@@ -6,14 +6,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 )
 
 type NsgroupGridSecondariesModel struct {
@@ -42,7 +39,6 @@ var NsgroupGridSecondariesResourceSchemaAttributes = map[string]schema.Attribute
 	"stealth": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "This flag governs whether the specified Grid member is in stealth mode or not. If set to True, the member is in stealth mode. This flag is ignored if the struct is specified as part of a stub zone.",
 	},
 	"grid_replicate": schema.BoolAttribute{
@@ -61,15 +57,11 @@ var NsgroupGridSecondariesResourceSchemaAttributes = map[string]schema.Attribute
 		},
 		Optional:            true,
 		Computed:            true,
-
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
 		MarkdownDescription: "The primary preference list with Grid member names and\\or External Server extserver structs for this member.",
 	},
 	"enable_preferred_primaries": schema.BoolAttribute{
-		Optional:            true,
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "This flag represents whether the preferred_primaries field values of this member are used.",
 	},
 }

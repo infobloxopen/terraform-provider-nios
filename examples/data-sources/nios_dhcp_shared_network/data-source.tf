@@ -13,4 +13,4 @@ data "nios_dhcp_shared_network" "get_shared_network_using_extensible_attributes"
 }
 
 // Retrieve all Shared Networks
-data "nios_dhcp_shared_network" "get_all_shared_networks_in_default_view" {}
+data "nios_dhcp_shared_network" "get_all_shared_networks" {}
