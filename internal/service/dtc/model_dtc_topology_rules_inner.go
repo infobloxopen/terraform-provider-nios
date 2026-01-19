@@ -46,10 +46,15 @@ var DtcTopologyRulesInnerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"destination_link": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the destination object.",
 	},
 	"return_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("NOERR", "NXDOMAIN", "REGULAR"),
+		},
 		MarkdownDescription: "The type of the return value for this source.",
 	},
 	"topology": schema.StringAttribute{
