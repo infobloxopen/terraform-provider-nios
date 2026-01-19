@@ -67,7 +67,6 @@ var ViewscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[strin
 	"time_zone": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
-		Default:             stringdefault.StaticString("UTC"),
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{

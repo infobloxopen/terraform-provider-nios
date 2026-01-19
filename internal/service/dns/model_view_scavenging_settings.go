@@ -88,6 +88,7 @@ var ViewScavengingSettingsResourceSchemaAttributes = map[string]schema.Attribute
 			Attributes: ViewscavengingsettingsExpressionListResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -98,6 +99,7 @@ var ViewScavengingSettingsResourceSchemaAttributes = map[string]schema.Attribute
 			Attributes: ViewscavengingsettingsEaExpressionListResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},

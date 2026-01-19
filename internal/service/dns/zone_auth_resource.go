@@ -117,6 +117,16 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 			)
 		}
 	}
+
+	// Validate discovery_blackout_setting blackout_schedule
+	if !data.ScavengingSettings.IsNull() && !data.ScavengingSettings.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.ScavengingSettings,
+			"scavenging_schedule",
+			path.Root("scavenging_settings"),
+			&resp.Diagnostics,
+		)
+	}
 }
 
 func (r *ZoneAuthResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
