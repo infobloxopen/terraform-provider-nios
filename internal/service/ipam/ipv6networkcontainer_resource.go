@@ -22,6 +22,7 @@ var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainn
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &Ipv6networkcontainerResource{}
 var _ resource.ResourceWithImportState = &Ipv6networkcontainerResource{}
+var _ resource.ResourceWithValidateConfig = &Ipv6networkcontainerResource{}
 
 func NewIpv6networkcontainerResource() resource.Resource {
 	return &Ipv6networkcontainerResource{}
@@ -369,6 +370,9 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 		return
 	}
 
+	var dhcpLeaseTimeValue string
+	var hasDhcpLeaseTime bool
+
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
 		// Special DHCP option names that require use_option to be set
@@ -445,20 +449,21 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 						optionName),
 				)
 			}
+
+			if option.Name.ValueString() == "dhcp-lease-time" {
+				hasDhcpLeaseTime = true
+				dhcpLeaseTimeValue = option.Value.ValueString()
+			}
 		}
+
 		// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
-		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-			for i, option := range options {
-				if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
-					if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-						option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
-						resp.Diagnostics.AddAttributeError(
-							path.Root("options").AtListIndex(i).AtName("value"),
-							"Invalid configuration for Valid Lifetime",
-							"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
-						)
-					}
-				}
+		if hasDhcpLeaseTime && !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
+			if dhcpLeaseTimeValue != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("valid_lifetime"),
+					"Invalid configuration for Valid Lifetime",
+					"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+				)
 			}
 		}
 	}
@@ -473,18 +478,11 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 				"The 'preferred_lifetime' must be less than or equal to 'valid_lifetime'.",
 			)
 		}
-	} else if !data.Options.IsNull() && !data.Options.IsUnknown() {
-		for _, option := range options {
-			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
-				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-					strconv.FormatInt(data.PreferredLifetime.ValueInt64(), 10) > option.Value.ValueString() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("preferred_lifetime"),
-						"Invalid configuration",
-						"The 'preferred_lifetime' must be less than or equal to 'dhcp-lease-time' (valid_lifetime) option value.",
-					)
-				}
-			}
-		}
+	} else if hasDhcpLeaseTime && strconv.FormatInt(data.PreferredLifetime.ValueInt64(), 10) > dhcpLeaseTimeValue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("preferred_lifetime"),
+			"Invalid configuration",
+			"The 'preferred_lifetime' must be less than or equal to 'dhcp-lease-time' (valid_lifetime) option value.",
+		)
 	}
 }
