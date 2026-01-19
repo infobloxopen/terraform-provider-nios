@@ -230,6 +230,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzAIpaddressResource,
 		rpz.NewRecordRpzAaaaIpaddressResource,
 		rpz.NewRecordRpzCnameClientipaddressResource,
+		rpz.NewRecordRpzCnameIpaddressdnResource,
+		rpz.NewRecordRpzCnameClientipaddressdnResource,
 	}
 }
 
@@ -366,6 +368,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzAIpaddressDataSource,
 		rpz.NewRecordRpzAaaaIpaddressDataSource,
 		rpz.NewRecordRpzCnameClientipaddressDataSource,
+		rpz.NewRecordRpzCnameIpaddressdnDataSource,
+		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
 	}
 }
 
