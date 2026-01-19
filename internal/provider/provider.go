@@ -171,6 +171,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcMonitorSipResource,
 		dtc.NewDtcRecordAResource,
 		dtc.NewDtcRecordSrvResource,
+		dtc.NewDtcRecordNaptrResource,
+		dtc.NewDtcRecordCnameResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworktemplateResource,
@@ -183,6 +185,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewVlanResource,
 		ipam.NewVlanrangeResource,
 		ipam.NewSuperhostResource,
+		ipam.NewIpv6networktemplateResource,
 
 		cloud.NewAwsrte53taskgroupResource,
 		cloud.NewAwsuserResource,
@@ -225,6 +228,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzTxtResource,
 		rpz.NewRecordRpzCnameIpaddressResource,
 		rpz.NewRecordRpzAIpaddressResource,
+		rpz.NewRecordRpzAaaaIpaddressResource,
+		rpz.NewRecordRpzCnameIpaddressdnResource,
+		rpz.NewRecordRpzCnameClientipaddressdnResource,
 	}
 }
 
@@ -292,6 +298,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+		dtc.NewDtcTopologyRuleDataSource,
 		dtc.NewDtcTopologyDataSource,
 		dtc.NewDtcMonitorSnmpDataSource,
 		dtc.NewDtcMonitorHttpDataSource,
@@ -301,6 +308,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcMonitorSipDataSource,
 		dtc.NewDtcRecordADataSource,
 		dtc.NewDtcRecordSrvDataSource,
+		dtc.NewDtcRecordNaptrDataSource,
+		dtc.NewDtcRecordCnameDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworktemplateDataSource,
@@ -313,6 +322,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewVlanDataSource,
 		ipam.NewVlanrangeDataSource,
 		ipam.NewSuperhostDataSource,
+		ipam.NewIpv6networktemplateDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
 		cloud.NewAwsuserDataSource,
@@ -356,6 +366,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzTxtDataSource,
 		rpz.NewRecordRpzCnameIpaddressDataSource,
 		rpz.NewRecordRpzAIpaddressDataSource,
+		rpz.NewRecordRpzAaaaIpaddressDataSource,
+		rpz.NewRecordRpzCnameIpaddressdnDataSource,
+		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
 	}
 }
 
