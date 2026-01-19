@@ -2,10 +2,6 @@ package dtc
 
 import (
 	"context"
-	//"fmt"
-
-	// "net/http"
-	// "crypto/tls"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -18,14 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	// "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
-	// "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
-	// "github.com/infobloxopen/infoblox-nios-go-client/option"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	//"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -136,54 +127,3 @@ func (m *DtcTopologyModel) Flatten(ctx context.Context, from *dtc.DtcTopology, d
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Rules = flex.FlattenFrameworkListNestedBlock(ctx, from.Rules, DtcTopologyRulesInnerAttrTypes, diags, FlattenDtcTopologyRulesInner)
 }
-// func (r *DtcTopologyResource) getOperationOnRef(ctx context.Context, ruleRef string , diags *diag.Diagnostics) DtcTopologyRulesInnerModel{
-
-// 	apiRes, _, err := r.client.DTCAPI.
-// 	DtcTopologyRuleAPI.
-// 		Read(ctx, utils.ExtractResourceRef(ruleRef)).
-// 		ReturnFieldsPlus(readableAttributesForDtcTopologyRule).
-// 		ReturnAsObject(1).
-// 		Execute()
-
-// 		if err != nil {
-// 			diags.AddError("Client Error", fmt.Sprintf("Unable to read DTC Topology Rules %s", err))
-// 		}
-// 		res := apiRes.GetDtcTopologyRuleResponseObjectAsResult.GetResult()
-		
-// 		sources := make([]dtc.DtcTopologyRulesInnerOneOf1SourcesInner, 0, len(res.Sources))
-// 		for _, source := range res.Sources {
-// 			srcValues := dtc.DtcTopologyRulesInnerOneOf1SourcesInner{
-// 				SourceOp:    source.SourceOp,
-// 				SourceType:  source.SourceType,
-// 				SourceValue: source.SourceValue,
-// 			}
-// 			sources = append(sources, srcValues)
-// 		}
-// 		rulesInner := &dtc.DtcTopologyRulesInner{
-// 			DtcTopologyRulesInnerOneOf1 : &dtc.DtcTopologyRulesInnerOneOf1{
-// 				DestType:        res.DestType,
-// 				//DestinationLink: res.DestinationLink,
-// 				ReturnType:      res.ReturnType,
-// 				Topology:        res.Topology,
-// 				Valid:           res.Valid,
-// 				Sources:         sources,
-// 			},
-// 		}
-// 		var rule DtcTopologyRulesInnerModel
-// 		rule.Flatten(ctx,rulesInner,diags)
-
-// 		return rule
-// }
-// func FlattenDtcTopologyRules(ctx context.Context , from []dtc.DtcTopologyRulesInner, diags *diag.Diagnostics , r *DtcTopologyResource) types.List {
-// 	to := make([]DtcTopologyRulesInnerModel, 0, len(from))
-// 	for _, rule := range from {
-// 		ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
-
-// 		ruleModel := r.getOperationOnRef(ctx , *ruleRef , diags)
-// 		to = append(to, ruleModel)
-// 	}
-
-// 	t, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DtcTopologyRulesInnerAttrTypes}, to)
-// 	diags.Append(d...)
-// 	return t
-// }

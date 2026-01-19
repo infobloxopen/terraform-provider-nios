@@ -309,7 +309,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 	if diags.HasError() {
 		return
 	}
-	
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
@@ -426,7 +426,6 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 	}
 
 	if sources, ok := res.GetSourcesOk(); ok {
-		// Convert []DtcTopologyRuleSources to []DtcTopologyRulesInnerOneOf1SourcesInner
 		convertedSources := make([]dtc.DtcTopologyRulesInnerOneOf1SourcesInner, len(sources))
 		for i, source := range sources {
 			innerSource := dtc.DtcTopologyRulesInnerOneOf1SourcesInner{}
