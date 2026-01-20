@@ -1,4 +1,4 @@
-package ipam
+package dhcp
 
 import (
 	"context"
@@ -16,33 +16,35 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForIpv6networktemplate = "allow_any_netmask,auto_create_reversezone,cidr,cloud_api_compatible,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,delegated_member,domain_name,domain_name_servers,enable_ddns,extattrs,fixed_address_templates,ipv6prefix,logic_filter_rules,members,name,options,preferred_lifetime,range_templates,recycle_leases,rir,rir_organization,rir_registration_action,rir_registration_status,send_rir_request,update_dns_on_lease_renewal,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_domain_name,use_domain_name_servers,use_enable_ddns,use_logic_filter_rules,use_options,use_preferred_lifetime,use_recycle_leases,use_update_dns_on_lease_renewal,use_valid_lifetime,valid_lifetime"
+var readableAttributesForFilteroption = "apply_as_class,bootfile,bootserver,comment,expression,extattrs,lease_time,name,next_server,option_list,option_space,pxe_lease_time"
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &Ipv6networktemplateResource{}
-var _ resource.ResourceWithImportState = &Ipv6networktemplateResource{}
+var _ resource.Resource = &FilteroptionResource{}
+var _ resource.ResourceWithImportState = &FilteroptionResource{}
 
-func NewIpv6networktemplateResource() resource.Resource {
-	return &Ipv6networktemplateResource{}
+var _ resource.ResourceWithValidateConfig = &FilteroptionResource{}
+
+func NewFilteroptionResource() resource.Resource {
+	return &FilteroptionResource{}
 }
 
-// Ipv6networktemplateResource defines the resource implementation.
-type Ipv6networktemplateResource struct {
+// FilteroptionResource defines the resource implementation.
+type FilteroptionResource struct {
 	client *niosclient.APIClient
 }
 
-func (r *Ipv6networktemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "ipam_ipv6networktemplate"
+func (r *FilteroptionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_filteroption"
 }
 
-func (r *Ipv6networktemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *FilteroptionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an IPv6 Network Template.",
-		Attributes:          Ipv6networktemplateResourceSchemaAttributes,
+		MarkdownDescription: "Manages a DHCP Filteroption Resource.",
+		Attributes:          FilteroptionResourceSchemaAttributes,
 	}
 }
 
-func (r *Ipv6networktemplateResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *FilteroptionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -62,9 +64,9 @@ func (r *Ipv6networktemplateResource) Configure(ctx context.Context, req resourc
 	r.client = client
 }
 
-func (r *Ipv6networktemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *FilteroptionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
-	var data Ipv6networktemplateModel
+	var data FilteroptionModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -76,25 +78,27 @@ func (r *Ipv6networktemplateResource) Create(ctx context.Context, req resource.C
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networktemplateAPI.
+	apiRes, _, err := r.client.DHCPAPI.
+		FilteroptionAPI.
 		Create(ctx).
-		Ipv6networktemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
+		Filteroption(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForFilteroption).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6networktemplate, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Filteroption, got error: %s", err))
 		return
 	}
 
-	res := apiRes.CreateIpv6networktemplateResponseAsObject.GetResult()
+	res := apiRes.CreateFilteroptionResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Ipv6networktemplate due to inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating Filteroption due to inherited Extensible attributes")
 		return
 	}
 
@@ -104,9 +108,9 @@ func (r *Ipv6networktemplateResource) Create(ctx context.Context, req resource.C
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *FilteroptionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var diags diag.Diagnostics
-	var data Ipv6networktemplateModel
+	var data FilteroptionModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -121,10 +125,10 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	apiRes, httpRes, err := r.client.IPAMAPI.
-		Ipv6networktemplateAPI.
+	apiRes, httpRes, err := r.client.DHCPAPI.
+		FilteroptionAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
+		ReturnFieldsPlus(readableAttributesForFilteroption).
 		ReturnAsObject(1).
 		Execute()
 
@@ -133,11 +137,11 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networktemplate, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Filteroption, got error: %s", err))
 		return
 	}
 
-	res := apiRes.GetIpv6networktemplateResponseObjectAsResult.GetResult()
+	res := apiRes.GetFilteroptionResponseObjectAsResult.GetResult()
 
 	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
@@ -149,7 +153,7 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 		if stateExtAttrs == nil {
 			resp.Diagnostics.AddError(
 				"Missing Internal ID",
-				"Unable to read Ipv6networktemplate because the internal ID (from extattrs_all) is missing or invalid.",
+				"Unable to read Filteroption because the internal ID (from extattrs_all) is missing or invalid.",
 			)
 			return
 		}
@@ -164,7 +168,8 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Ipv6networktemplate due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading Filteroption due to inherited Extensible attributes")
 		return
 	}
 
@@ -174,7 +179,7 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *Ipv6networktemplateResource) ReadByExtAttrs(ctx context.Context, data *Ipv6networktemplateModel, resp *resource.ReadResponse) bool {
+func (r *FilteroptionResource) ReadByExtAttrs(ctx context.Context, data *FilteroptionModel, resp *resource.ReadResponse) bool {
 	var diags diag.Diagnostics
 
 	if data.ExtAttrsAll.IsNull() {
@@ -195,19 +200,19 @@ func (r *Ipv6networktemplateResource) ReadByExtAttrs(ctx context.Context, data *
 		terraformInternalIDEA: internalId,
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networktemplateAPI.
+	apiRes, _, err := r.client.DHCPAPI.
+		FilteroptionAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
+		ReturnFieldsPlus(readableAttributesForFilteroption).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networktemplate by extattrs, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Filteroption by extattrs, got error: %s", err))
 		return true
 	}
 
-	results := apiRes.ListIpv6networktemplateResponseObject.GetResult()
+	results := apiRes.ListFilteroptionResponseObject.GetResult()
 
 	// If the list is empty, the resource no longer exists so remove it from state
 	if len(results) == 0 {
@@ -229,9 +234,9 @@ func (r *Ipv6networktemplateResource) ReadByExtAttrs(ctx context.Context, data *
 	return true
 }
 
-func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *FilteroptionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
-	var data Ipv6networktemplateModel
+	var data FilteroptionModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -254,13 +259,14 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -272,23 +278,24 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networktemplateAPI.
+	apiRes, _, err := r.client.DHCPAPI.
+		FilteroptionAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ipv6networktemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
+		Filteroption(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForFilteroption).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ipv6networktemplate, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Filteroption, got error: %s", err))
 		return
 	}
 
-	res := apiRes.UpdateIpv6networktemplateResponseAsObject.GetResult()
+	res := apiRes.UpdateFilteroptionResponseAsObject.GetResult()
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating Ipv6networktemplate due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating Filteroption due to inherited Extensible attributes")
 		return
 	}
 
@@ -301,8 +308,8 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 	}
 }
 
-func (r *Ipv6networktemplateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data Ipv6networktemplateModel
+func (r *FilteroptionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data FilteroptionModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -311,28 +318,41 @@ func (r *Ipv6networktemplateResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
-		Ipv6networktemplateAPI.
+	httpRes, err := r.client.DHCPAPI.
+		FilteroptionAPI.
 		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ipv6networktemplate, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Filteroption, got error: %s", err))
 		return
 	}
 }
 
-func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var data Ipv6networktemplateModel
+func (r *FilteroptionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
+}
+
+func (r *FilteroptionResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data FilteroptionModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Check if options are defined
-	if !data.Options.IsNull() && !data.Options.IsUnknown() {
+	var options []FilteroptionOptionListModel
+
+	// Only decode when option_list is defined
+	if !data.OptionList.IsNull() && !data.OptionList.IsUnknown() {
+		diags := data.OptionList.ElementsAs(ctx, &options, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
 		// Special DHCP option names that require use_option to be set
 		specialOptions := map[string]bool{
 			"routers":                  true,
@@ -354,23 +374,18 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 			23: true,
 		}
 
-		var options []Ipv6networktemplateOptionsModel
-		diags := data.Options.ElementsAs(ctx, &options, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
+
 			if option.Value.IsNull() || option.Value.IsUnknown() {
 				resp.Diagnostics.AddAttributeError(
-					path.Root("options").AtListIndex(i).AtName("value"),
+					path.Root("option_list").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
 					"The 'value' attribute is a required field and must be set for all DHCP Options.",
 				)
 			}
+
 			if !option.Name.IsNull() && !option.Name.IsUnknown() {
 				optionName = option.Name.ValueString()
 				isSpecialOption = specialOptions[optionName]
@@ -380,7 +395,7 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 				optionName = fmt.Sprintf("with num = %d", optionNum)
 			} else {
 				resp.Diagnostics.AddAttributeError(
-					path.Root("options").AtListIndex(i).AtName("name"),
+					path.Root("option_list").AtListIndex(i).AtName("name"),
 					"Invalid configuration for DHCP Option",
 					"Either the 'name' or 'num' attribute must be set for all DHCP Options. "+
 						"Missing both attributes for 'option' at index "+fmt.Sprint(i)+".",
@@ -388,16 +403,16 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
+						path.Root("option_list").AtListIndex(i).AtName("value"),
 						"Invalid configuration for DHCP Option",
 						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
 					)
 				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
 					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
+						path.Root("option_list").AtListIndex(i).AtName("value"),
 						"Invalid configuration for DHCP Option",
 						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
 					)
@@ -406,7 +421,7 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 
 			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
 				resp.Diagnostics.AddAttributeError(
-					path.Root("options").AtListIndex(i).AtName("use_option"),
+					path.Root("option_list").AtListIndex(i).AtName("use_option"),
 					"Invalid configuration",
 					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Option '%s'. "+
 						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
@@ -415,63 +430,22 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 				)
 			}
 		}
+	}
 
-		// domain_name attribute must match the value of option 'domain-name'
-		if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-			for i, option := range options {
-				if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "domain-name" {
-					if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-						option.Value.ValueString() != data.DomainName.ValueString() {
-						resp.Diagnostics.AddAttributeError(
-							path.Root("options").AtListIndex(i).AtName("value"),
-							"Invalid configuration for Domain Name",
-							"domain_name attribute must match the 'value' attribute for DHCP Option 'domain-name'.",
-						)
-					}
-				}
-			}
-		}
-
-		// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
-		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-			for i, option := range options {
-				if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
-					if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-						option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
-						resp.Diagnostics.AddAttributeError(
-							path.Root("options").AtListIndex(i).AtName("value"),
-							"Invalid configuration for Valid Lifetime",
-							"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
-						)
-					}
+	// When dhcp-lease-time option is set, lease_time attribute must have the same value as option value
+	if !data.LeaseTime.IsNull() && !data.LeaseTime.IsUnknown() &&
+		!data.OptionList.IsNull() && !data.OptionList.IsUnknown() {
+		for i, option := range options {
+			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
+				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
+					option.Value.ValueString() != strconv.FormatInt(data.LeaseTime.ValueInt64(), 10) {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("option_list").AtListIndex(i).AtName("value"),
+						"Invalid configuration for Lease Time",
+						"lease_time attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+					)
 				}
 			}
 		}
 	}
-
-	if !data.AllowAnyNetmask.IsNull() && !data.AllowAnyNetmask.IsUnknown() && !data.AllowAnyNetmask.ValueBool() {
-		if data.Cidr.IsNull() || data.Cidr.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("netmask"),
-				"Invalid Configuration",
-				"cidr needs to be set when allow_any_netmask is set to false.",
-			)
-		}
-	}
-
-	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
-		// Check if ddns_enable_option_fqdn is set to false
-		if !data.DdnsEnableOptionFqdn.IsNull() && !data.DdnsEnableOptionFqdn.IsUnknown() && !data.DdnsEnableOptionFqdn.ValueBool() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("ddns_server_always_updates"),
-				"Invalid Configuration",
-				"ddns_enable_option_fqdn must be set to true if ddns_server_always_updates is configured.",
-			)
-		}
-	}
-}
-
-func (r *Ipv6networktemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
-	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
