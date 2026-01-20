@@ -158,6 +158,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewIpv6fixedaddressResource,
 		dhcp.NewIpv6filteroptionResource,
 		dhcp.NewFilterrelayagentResource,
+		dhcp.NewFilteroptionResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -186,6 +187,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		ipam.NewVlanResource,
 		ipam.NewVlanrangeResource,
 		ipam.NewSuperhostResource,
+		ipam.NewIpv6networktemplateResource,
 
 		cloud.NewAwsrte53taskgroupResource,
 		cloud.NewAwsuserResource,
@@ -229,6 +231,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameIpaddressResource,
 		rpz.NewRecordRpzAIpaddressResource,
 		rpz.NewRecordRpzAaaaIpaddressResource,
+		rpz.NewRecordRpzCnameIpaddressdnResource,
+		rpz.NewRecordRpzCnameClientipaddressdnResource,
 	}
 }
 
@@ -292,10 +296,12 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewIpv6fixedaddressDataSource,
 		dhcp.NewIpv6filteroptionDataSource,
 		dhcp.NewFilterrelayagentDataSource,
+		dhcp.NewFilteroptionDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+		dtc.NewDtcTopologyRuleDataSource,
 		dtc.NewDtcTopologyDataSource,
 		dtc.NewDtcMonitorSnmpDataSource,
 		dtc.NewDtcMonitorHttpDataSource,
@@ -320,6 +326,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		ipam.NewVlanDataSource,
 		ipam.NewVlanrangeDataSource,
 		ipam.NewSuperhostDataSource,
+		ipam.NewIpv6networktemplateDataSource,
 
 		cloud.NewAwsrte53taskgroupDataSource,
 		cloud.NewAwsuserDataSource,
@@ -364,6 +371,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameIpaddressDataSource,
 		rpz.NewRecordRpzAIpaddressDataSource,
 		rpz.NewRecordRpzAaaaIpaddressDataSource,
+		rpz.NewRecordRpzCnameIpaddressdnDataSource,
+		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
 	}
 }
 
