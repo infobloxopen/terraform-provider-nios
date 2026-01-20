@@ -44,8 +44,11 @@ Required:
 
 - `code` (Number) The code of a DHCP IPv6 option definition object. An option code number is used to identify the DHCP option.
 - `name` (String) The name of a DHCP IPv6 option definition object.
-- `space` (String) The space of a DHCP option definition object.
 - `type` (String) The data type of the Grid DHCP IPv6 option.
+
+Optional:
+
+- `space` (String) The space of a DHCP option definition object.
 
 Read-Only:
 
