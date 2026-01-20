@@ -130,27 +130,4 @@ func (m *DtcTopologyRulesInnerModel) Flatten(ctx context.Context, from *dtc.DtcT
 	m.Topology = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.Topology)
     m.Valid = types.BoolPointerValue(from.DtcTopologyRulesInnerOneOf1.Valid)
 	m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, from.DtcTopologyRulesInnerOneOf1.Sources, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
-
-	// Check which OneOf variant is populated
-	// if from.DtcTopologyRulesInnerOneOf != nil && from.DtcTopologyRulesInnerOneOf.Ref != nil {
-	// 	if m.DestType.IsNull() || m.DestType.IsUnknown() {
-	// 		m.DestType = types.StringNull()
-	// 	}
-	// 	if m.DestinationLink.IsNull() || m.DestinationLink.IsUnknown() {
-	// 		m.DestinationLink = types.StringNull()
-	// 	}
-	// 	if m.ReturnType.IsNull() || m.ReturnType.IsUnknown() {
-	// 		m.ReturnType = types.StringNull()
-	// 	}
-	// 	if m.Sources.IsNull() || m.Sources.IsUnknown() {
-	// 		m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, nil, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
-	// 	}
-	// 	if m.Topology.IsNull() || m.Topology.IsUnknown() {
-	// 		m.Topology = types.StringNull()
-	// 	}
-	// 	if m.Valid.IsNull() || m.Valid.IsUnknown() {
-	// 		m.Valid = types.BoolNull()
-	// 	}
-	// 	return
-	// }
 }

@@ -451,7 +451,9 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 func (r *DtcTopologyResource) populateTopologyRules(ctx context.Context, res *dtc.DtcTopology, diags *diag.Diagnostics) {
     for i, rule := range res.Rules {
         ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
-
+		if ruleRef == nil {
+			continue
+		}
         res.Rules[i].DtcTopologyRulesInnerOneOf1 = UpdateDtcTopologyRules(ctx, r, *ruleRef, diags)
     }
 }
