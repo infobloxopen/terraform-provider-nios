@@ -2,20 +2,16 @@ package dns
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -26,11 +22,6 @@ var readableAttributesForView = "blacklist_action,blacklist_log_query,blacklist_
 var _ resource.Resource = &ViewResource{}
 var _ resource.ResourceWithImportState = &ViewResource{}
 
-const (
-	// ViewOperationTimeout is the maximum amount of time to wait for eventual consistency
-	ViewOperationTimeout = 2 * time.Minute
-)
-
 func NewViewResource() resource.Resource {
 	return &ViewResource{}
 }
@@ -38,66 +29,6 @@ func NewViewResource() resource.Resource {
 // ViewResource defines the resource implementation.
 type ViewResource struct {
 	client *niosclient.APIClient
-}
-
-func (r *ViewResource) retryOperation(
-	ctx context.Context,
-	timeout time.Duration,
-	operation func() error,
-) error {
-
-	// If timeout is not set, execute once and return
-	if timeout <= 0 {
-		return operation()
-	}
-
-	return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		err := operation()
-
-		// ---- SUCCESS ----
-		if err == nil {
-			return nil
-		}
-
-		// ---- CONTEXT / TERRAFORM TIMEOUT HANDLING ----
-		// Never retry these, otherwise plugin can hang
-		if errors.Is(err, context.DeadlineExceeded) ||
-			errors.Is(ctx.Err(), context.DeadlineExceeded) ||
-			errors.Is(ctx.Err(), context.Canceled) {
-
-			return retry.NonRetryableError(
-				fmt.Errorf("operation stopped due to Terraform timeout or cancellation: %w", err),
-			)
-		}
-
-		// ---- PLACEHOLDER FOR FUTURE RETRY LOGIC ----
-		// Currently disabled intentionally
-		if isRetryableErrorPlaceholder(err) {
-			return retry.RetryableError(err)
-		}
-
-		// ---- DEFAULT: FAIL FAST ----
-		return retry.NonRetryableError(err)
-	})
-}
-
-func isRetryableErrorPlaceholder(err error) bool {
-	// IMPORTANT:
-	// This function is intentionally conservative.
-	// It always returns false today.
-	//
-	// Purpose:
-	// - Acts as a safe extension point
-	// - Allows retry logic to be added later
-	// - Prevents accidental infinite retries
-
-	// Example future logic (DO NOT ENABLE NOW):
-	//
-	// if strings.Contains(strings.ToLower(err.Error()), "timeout") {
-	//     return true
-	// }
-
-	return false
 }
 
 func (r *ViewResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -148,18 +79,13 @@ func (r *ViewResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	var apiRes *dns.CreateViewResponse
-	err := r.retryOperation(ctx, ViewOperationTimeout, func() error {
-		var err error
-		apiRes, _, err = r.client.DNSAPI.
-			ViewAPI.
-			Create(ctx).
-			View(*data.Expand(ctx, &resp.Diagnostics)).
-			ReturnFieldsPlus(readableAttributesForView).
-			ReturnAsObject(1).
-			Execute()
-		return err
-	})
+	apiRes, _, err := r.client.DNSAPI.
+		ViewAPI.
+		Create(ctx).
+		View(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForView).
+		ReturnAsObject(1).
+		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create View, got error: %s", err))
 		return
@@ -195,19 +121,12 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	var apiRes *dns.GetViewResponse
-	var httpRes *http.Response
-
-	err := r.retryOperation(ctx, ViewOperationTimeout, func() error {
-		var err error
-		apiRes, httpRes, err = r.client.DNSAPI.
-			ViewAPI.
-			Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-			ReturnFieldsPlus(readableAttributesForView).
-			ReturnAsObject(1).
-			Execute()
-		return err
-	})
+	apiRes, httpRes, err := r.client.DNSAPI.
+		ViewAPI.
+		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		ReturnFieldsPlus(readableAttributesForView).
+		ReturnAsObject(1).
+		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -353,19 +272,13 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	var apiRes *dns.UpdateViewResponse
-
-	err := r.retryOperation(ctx, ViewOperationTimeout, func() error {
-		var err error
-		apiRes, _, err = r.client.DNSAPI.
-			ViewAPI.
-			Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-			View(*data.Expand(ctx, &resp.Diagnostics)).
-			ReturnFieldsPlus(readableAttributesForView).
-			ReturnAsObject(1).
-			Execute()
-		return err
-	})
+	apiRes, _, err := r.client.DNSAPI.
+		ViewAPI.
+		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		View(*data.Expand(ctx, &resp.Diagnostics)).
+		ReturnFieldsPlus(readableAttributesForView).
+		ReturnAsObject(1).
+		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update View, got error: %s", err))
 		return
@@ -399,16 +312,10 @@ func (r *ViewResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	var httpRes *http.Response
-
-	err := r.retryOperation(ctx, ViewOperationTimeout, func() error {
-		var err error
-		httpRes, err = r.client.DNSAPI.
-			ViewAPI.
-			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-			Execute()
-		return err
-	})
+	httpRes, err := r.client.DNSAPI.
+		ViewAPI.
+		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
