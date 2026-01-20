@@ -16,6 +16,7 @@ import (
 
 type MemberThreatinsightModel struct {
 	Ref           types.String `tfsdk:"ref"`
+	Uuid          types.String `tfsdk:"uuid"`
 	Comment       types.String `tfsdk:"comment"`
 	EnableService types.Bool   `tfsdk:"enable_service"`
 	HostName      types.String `tfsdk:"host_name"`
@@ -26,6 +27,7 @@ type MemberThreatinsightModel struct {
 
 var MemberThreatinsightAttrTypes = map[string]attr.Type{
 	"ref":            types.StringType,
+	"uuid":           types.StringType,
 	"comment":        types.StringType,
 	"enable_service": types.BoolType,
 	"host_name":      types.StringType,
@@ -38,6 +40,10 @@ var MemberThreatinsightResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"comment": schema.StringAttribute{
 		Computed:            true,
@@ -83,6 +89,7 @@ func (m *MemberThreatinsightModel) Expand(ctx context.Context, diags *diag.Diagn
 	}
 	to := &grid.MemberThreatinsight{
 		Ref:           flex.ExpandStringPointer(m.Ref),
+		Uuid:          flex.ExpandStringPointer(m.Uuid),
 		EnableService: flex.ExpandBoolPointer(m.EnableService),
 	}
 	return to
@@ -107,6 +114,7 @@ func (m *MemberThreatinsightModel) Flatten(ctx context.Context, from *grid.Membe
 		*m = MemberThreatinsightModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.EnableService = types.BoolPointerValue(from.EnableService)
 	m.HostName = flex.FlattenStringPointer(from.HostName)

@@ -18,6 +18,7 @@ import (
 
 type UpgradestatusModel struct {
 	Ref                         types.String `tfsdk:"ref"`
+	Uuid                        types.String `tfsdk:"uuid"`
 	AllowDistribution           types.Bool   `tfsdk:"allow_distribution"`
 	AllowDistributionScheduling types.Bool   `tfsdk:"allow_distribution_scheduling"`
 	AllowUpgrade                types.Bool   `tfsdk:"allow_upgrade"`
@@ -68,6 +69,7 @@ type UpgradestatusModel struct {
 
 var UpgradestatusAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
+	"uuid":                          types.StringType,
 	"allow_distribution":            types.BoolType,
 	"allow_distribution_scheduling": types.BoolType,
 	"allow_upgrade":                 types.BoolType,
@@ -120,6 +122,10 @@ var UpgradestatusResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"allow_distribution": schema.BoolAttribute{
 		Computed:            true,
@@ -365,6 +371,7 @@ func (m *UpgradestatusModel) Flatten(ctx context.Context, from *grid.Upgradestat
 		*m = UpgradestatusModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowDistribution = types.BoolPointerValue(from.AllowDistribution)
 	m.AllowDistributionScheduling = types.BoolPointerValue(from.AllowDistributionScheduling)
 	m.AllowUpgrade = types.BoolPointerValue(from.AllowUpgrade)

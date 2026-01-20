@@ -37,6 +37,7 @@ func TestAccHsmThaleslunagroupDataSource_Filters(t *testing.T) {
 func testAccCheckHsmThaleslunagroupResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "group_sn", dataSourceName, "result.0.group_sn"),
 		resource.TestCheckResourceAttrPair(resourceName, "hsm_version", dataSourceName, "result.0.hsm_version"),

@@ -16,6 +16,7 @@ import (
 
 type GridCloudapiTenantModel struct {
 	Ref          types.String `tfsdk:"ref"`
+	Uuid         types.String `tfsdk:"uuid"`
 	CloudInfo    types.Object `tfsdk:"cloud_info"`
 	Comment      types.String `tfsdk:"comment"`
 	CreatedTs    types.Int64  `tfsdk:"created_ts"`
@@ -28,6 +29,7 @@ type GridCloudapiTenantModel struct {
 
 var GridCloudapiTenantAttrTypes = map[string]attr.Type{
 	"ref":           types.StringType,
+	"uuid":          types.StringType,
 	"cloud_info":    types.ObjectType{AttrTypes: GridCloudapiTenantCloudInfoAttrTypes},
 	"comment":       types.StringType,
 	"created_ts":    types.Int64Type,
@@ -42,6 +44,10 @@ var GridCloudapiTenantResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The universally unique identifier (UUID) for the tenant.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes: GridCloudapiTenantCloudInfoResourceSchemaAttributes,
@@ -95,6 +101,7 @@ func (m *GridCloudapiTenantModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &grid.GridCloudapiTenant{
 		Ref:       flex.ExpandStringPointer(m.Ref),
+		Uuid:      flex.ExpandStringPointer(m.Uuid),
 		CloudInfo: ExpandGridCloudapiTenantCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:   flex.ExpandStringPointer(m.Comment),
 		Name:      flex.ExpandStringPointer(m.Name),
@@ -121,6 +128,7 @@ func (m *GridCloudapiTenantModel) Flatten(ctx context.Context, from *grid.GridCl
 		*m = GridCloudapiTenantModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudInfo = FlattenGridCloudapiTenantCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CreatedTs = flex.FlattenInt64Pointer(from.CreatedTs)

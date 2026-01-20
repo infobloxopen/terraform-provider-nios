@@ -18,6 +18,7 @@ import (
 
 type GridDhcppropertiesModel struct {
 	Ref                                  types.String `tfsdk:"ref"`
+	Uuid                                 types.String `tfsdk:"uuid"`
 	Authority                            types.Bool   `tfsdk:"authority"`
 	Bootfile                             types.String `tfsdk:"bootfile"`
 	Bootserver                           types.String `tfsdk:"bootserver"`
@@ -106,6 +107,7 @@ type GridDhcppropertiesModel struct {
 
 var GridDhcppropertiesAttrTypes = map[string]attr.Type{
 	"ref":                                      types.StringType,
+	"uuid":                                     types.StringType,
 	"authority":                                types.BoolType,
 	"bootfile":                                 types.StringType,
 	"bootserver":                               types.StringType,
@@ -196,6 +198,10 @@ var GridDhcppropertiesResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The universally unique identifier (UUID) for the DHCP properties.",
 	},
 	"authority": schema.BoolAttribute{
 		Optional:            true,
@@ -605,6 +611,7 @@ func (m *GridDhcppropertiesModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &grid.GridDhcpproperties{
 		Ref:                                  flex.ExpandStringPointer(m.Ref),
+		Uuid:                                 flex.ExpandStringPointer(m.Uuid),
 		Authority:                            flex.ExpandBoolPointer(m.Authority),
 		Bootfile:                             flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                           flex.ExpandStringPointer(m.Bootserver),
@@ -711,6 +718,7 @@ func (m *GridDhcppropertiesModel) Flatten(ctx context.Context, from *grid.GridDh
 		*m = GridDhcppropertiesModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)

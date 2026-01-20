@@ -18,11 +18,13 @@ import (
 
 type GridServicerestartGroupOrderModel struct {
 	Ref    types.String `tfsdk:"ref"`
+	Uuid   types.String `tfsdk:"uuid"`
 	Groups types.List   `tfsdk:"groups"`
 }
 
 var GridServicerestartGroupOrderAttrTypes = map[string]attr.Type{
 	"ref":    types.StringType,
+	"uuid":   types.StringType,
 	"groups": types.ListType{ElemType: types.StringType},
 }
 
@@ -31,6 +33,10 @@ var GridServicerestartGroupOrderResourceSchemaAttributes = map[string]schema.Att
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"groups": schema.ListAttribute{
 		ElementType: types.StringType,
 		Validators: []validator.List{
@@ -83,5 +89,6 @@ func (m *GridServicerestartGroupOrderModel) Flatten(ctx context.Context, from *g
 		*m = GridServicerestartGroupOrderModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Groups = flex.FlattenFrameworkListString(ctx, from.Groups, diags)
 }

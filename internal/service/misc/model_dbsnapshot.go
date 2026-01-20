@@ -16,12 +16,14 @@ import (
 
 type DbsnapshotModel struct {
 	Ref       types.String `tfsdk:"ref"`
+	Uuid      types.String `tfsdk:"uuid"`
 	Comment   types.String `tfsdk:"comment"`
 	Timestamp types.Int64  `tfsdk:"timestamp"`
 }
 
 var DbsnapshotAttrTypes = map[string]attr.Type{
 	"ref":       types.StringType,
+	"uuid":      types.StringType,
 	"comment":   types.StringType,
 	"timestamp": types.Int64Type,
 }
@@ -30,6 +32,10 @@ var DbsnapshotResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"comment": schema.StringAttribute{
 		Computed:            true,
@@ -58,7 +64,8 @@ func (m *DbsnapshotModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 		return nil
 	}
 	to := &misc.Dbsnapshot{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -82,6 +89,7 @@ func (m *DbsnapshotModel) Flatten(ctx context.Context, from *misc.Dbsnapshot, di
 		*m = DbsnapshotModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Timestamp = flex.FlattenInt64Pointer(from.Timestamp)
 }

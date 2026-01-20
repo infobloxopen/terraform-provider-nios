@@ -18,12 +18,14 @@ import (
 
 type ThreatprotectionStatisticsModel struct {
 	Ref       types.String `tfsdk:"ref"`
+	Uuid      types.String `tfsdk:"uuid"`
 	Member    types.String `tfsdk:"member"`
 	StatInfos types.List   `tfsdk:"stat_infos"`
 }
 
 var ThreatprotectionStatisticsAttrTypes = map[string]attr.Type{
 	"ref":        types.StringType,
+	"uuid":       types.StringType,
 	"member":     types.StringType,
 	"stat_infos": types.ListType{ElemType: types.ObjectType{AttrTypes: ThreatprotectionStatisticsStatInfosAttrTypes}},
 }
@@ -32,6 +34,10 @@ var ThreatprotectionStatisticsResourceSchemaAttributes = map[string]schema.Attri
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"member": schema.StringAttribute{
 		Computed:            true,
@@ -66,7 +72,8 @@ func (m *ThreatprotectionStatisticsModel) Expand(ctx context.Context, diags *dia
 		return nil
 	}
 	to := &threatprotection.ThreatprotectionStatistics{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -90,6 +97,7 @@ func (m *ThreatprotectionStatisticsModel) Flatten(ctx context.Context, from *thr
 		*m = ThreatprotectionStatisticsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Member = flex.FlattenStringPointer(from.Member)
 	m.StatInfos = flex.FlattenFrameworkListNestedBlock(ctx, from.StatInfos, ThreatprotectionStatisticsStatInfosAttrTypes, diags, FlattenThreatprotectionStatisticsStatInfos)
 }

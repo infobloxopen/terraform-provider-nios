@@ -16,6 +16,7 @@ import (
 
 type GridMaxminddbinfoModel struct {
 	Ref                types.String `tfsdk:"ref"`
+	Uuid               types.String `tfsdk:"uuid"`
 	BinaryMajorVersion types.Int64  `tfsdk:"binary_major_version"`
 	BinaryMinorVersion types.Int64  `tfsdk:"binary_minor_version"`
 	BuildTime          types.Int64  `tfsdk:"build_time"`
@@ -40,6 +41,10 @@ var GridMaxminddbinfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"binary_major_version": schema.Int64Attribute{
 		Computed:            true,
@@ -112,6 +117,7 @@ func (m *GridMaxminddbinfoModel) Flatten(ctx context.Context, from *grid.GridMax
 		*m = GridMaxminddbinfoModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.BinaryMajorVersion = flex.FlattenInt64Pointer(from.BinaryMajorVersion)
 	m.BinaryMinorVersion = flex.FlattenInt64Pointer(from.BinaryMinorVersion)
 	m.BuildTime = flex.FlattenInt64Pointer(from.BuildTime)

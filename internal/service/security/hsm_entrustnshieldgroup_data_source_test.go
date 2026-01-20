@@ -37,6 +37,7 @@ func TestAccHsmEntrustnshieldgroupDataSource_Filters(t *testing.T) {
 func testAccCheckHsmEntrustnshieldgroupResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "card_name", dataSourceName, "result.0.card_name"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "entrustnshield_hsm", dataSourceName, "result.0.entrustnshield_hsm"),

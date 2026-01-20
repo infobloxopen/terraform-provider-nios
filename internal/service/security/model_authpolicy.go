@@ -18,6 +18,7 @@ import (
 
 type AuthpolicyModel struct {
 	Ref          types.String `tfsdk:"ref"`
+	Uuid         types.String `tfsdk:"uuid"`
 	AdminGroups  types.List   `tfsdk:"admin_groups"`
 	AuthServices types.List   `tfsdk:"auth_services"`
 	DefaultGroup types.String `tfsdk:"default_group"`
@@ -26,6 +27,7 @@ type AuthpolicyModel struct {
 
 var AuthpolicyAttrTypes = map[string]attr.Type{
 	"ref":           types.StringType,
+	"uuid":          types.StringType,
 	"admin_groups":  types.ListType{ElemType: types.StringType},
 	"auth_services": types.ListType{ElemType: types.StringType},
 	"default_group": types.StringType,
@@ -36,6 +38,10 @@ var AuthpolicyResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"admin_groups": schema.ListAttribute{
 		ElementType: types.StringType,
@@ -81,6 +87,7 @@ func (m *AuthpolicyModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 	}
 	to := &security.Authpolicy{
 		Ref:          flex.ExpandStringPointer(m.Ref),
+		Uuid:         flex.ExpandStringPointer(m.Uuid),
 		AdminGroups:  flex.ExpandFrameworkListString(ctx, m.AdminGroups, diags),
 		AuthServices: flex.ExpandFrameworkListString(ctx, m.AuthServices, diags),
 		DefaultGroup: flex.ExpandStringPointer(m.DefaultGroup),
@@ -108,6 +115,7 @@ func (m *AuthpolicyModel) Flatten(ctx context.Context, from *security.Authpolicy
 		*m = AuthpolicyModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AdminGroups = flex.FlattenFrameworkListString(ctx, from.AdminGroups, diags)
 	m.AuthServices = flex.FlattenFrameworkListString(ctx, from.AuthServices, diags)
 	m.DefaultGroup = flex.FlattenStringPointer(from.DefaultGroup)

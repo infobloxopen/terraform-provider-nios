@@ -16,6 +16,7 @@ import (
 
 type CacertificateModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	DistinguishedName types.String `tfsdk:"distinguished_name"`
 	Issuer            types.String `tfsdk:"issuer"`
 	Serial            types.String `tfsdk:"serial"`
@@ -26,6 +27,7 @@ type CacertificateModel struct {
 
 var CacertificateAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"distinguished_name": types.StringType,
 	"issuer":             types.StringType,
 	"serial":             types.StringType,
@@ -38,6 +40,10 @@ var CacertificateResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"distinguished_name": schema.StringAttribute{
 		Computed:            true,
@@ -82,7 +88,8 @@ func (m *CacertificateModel) Expand(ctx context.Context, diags *diag.Diagnostics
 		return nil
 	}
 	to := &security.Cacertificate{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -106,6 +113,7 @@ func (m *CacertificateModel) Flatten(ctx context.Context, from *security.Cacerti
 		*m = CacertificateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.DistinguishedName = flex.FlattenStringPointer(from.DistinguishedName)
 	m.Issuer = flex.FlattenStringPointer(from.Issuer)
 	m.Serial = flex.FlattenStringPointer(from.Serial)

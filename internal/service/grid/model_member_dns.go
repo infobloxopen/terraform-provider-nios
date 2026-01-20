@@ -20,6 +20,7 @@ import (
 
 type MemberDnsModel struct {
 	Ref                              types.String `tfsdk:"ref"`
+	Uuid                             types.String `tfsdk:"uuid"`
 	AddClientIpMacOptions            types.Bool   `tfsdk:"add_client_ip_mac_options"`
 	AdditionalIpList                 types.List   `tfsdk:"additional_ip_list"`
 	AdditionalIpListStruct           types.List   `tfsdk:"additional_ip_list_struct"`
@@ -230,6 +231,7 @@ type MemberDnsModel struct {
 
 var MemberDnsAttrTypes = map[string]attr.Type{
 	"ref":                                     types.StringType,
+	"uuid":                                    types.StringType,
 	"add_client_ip_mac_options":               types.BoolType,
 	"additional_ip_list":                      types.ListType{ElemType: types.StringType},
 	"additional_ip_list_struct":               types.ListType{ElemType: types.ObjectType{AttrTypes: MemberDnsAdditionalIpListStructAttrTypes}},
@@ -441,6 +443,10 @@ var MemberDnsResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"add_client_ip_mac_options": schema.BoolAttribute{
 		Optional:            true,
@@ -1435,6 +1441,7 @@ func (m *MemberDnsModel) Expand(ctx context.Context, diags *diag.Diagnostics) *g
 	}
 	to := &grid.MemberDns{
 		Ref:                              flex.ExpandStringPointer(m.Ref),
+		Uuid:                             flex.ExpandStringPointer(m.Uuid),
 		AddClientIpMacOptions:            flex.ExpandBoolPointer(m.AddClientIpMacOptions),
 		AdditionalIpList:                 flex.ExpandFrameworkListString(ctx, m.AdditionalIpList, diags),
 		AdditionalIpListStruct:           flex.ExpandFrameworkListNestedBlock(ctx, m.AdditionalIpListStruct, diags, ExpandMemberDnsAdditionalIpListStruct),
@@ -1660,6 +1667,7 @@ func (m *MemberDnsModel) Flatten(ctx context.Context, from *grid.MemberDns, diag
 		*m = MemberDnsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AddClientIpMacOptions = types.BoolPointerValue(from.AddClientIpMacOptions)
 	m.AdditionalIpList = flex.FlattenFrameworkListString(ctx, from.AdditionalIpList, diags)
 	m.AdditionalIpListStruct = flex.FlattenFrameworkListNestedBlock(ctx, from.AdditionalIpListStruct, MemberDnsAdditionalIpListStructAttrTypes, diags, FlattenMemberDnsAdditionalIpListStruct)

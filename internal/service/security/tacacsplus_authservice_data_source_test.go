@@ -37,6 +37,7 @@ func TestAccTacacsplusAuthserviceDataSource_Filters(t *testing.T) {
 func testAccCheckTacacsplusAuthserviceResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "acct_retries", dataSourceName, "result.0.acct_retries"),
 		resource.TestCheckResourceAttrPair(resourceName, "acct_timeout", dataSourceName, "result.0.acct_timeout"),
 		resource.TestCheckResourceAttrPair(resourceName, "auth_retries", dataSourceName, "result.0.auth_retries"),

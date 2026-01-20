@@ -14,11 +14,13 @@ import (
 )
 
 type CertificateAuthserviceRemoteLookupServiceModel struct {
-	Ref types.String `tfsdk:"ref"`
+	Ref  types.String `tfsdk:"ref"`
+	Uuid types.String `tfsdk:"uuid"`
 }
 
 var CertificateAuthserviceRemoteLookupServiceAttrTypes = map[string]attr.Type{
-	"ref": types.StringType,
+	"ref":  types.StringType,
+	"uuid": types.StringType,
 }
 
 var CertificateAuthserviceRemoteLookupServiceResourceSchemaAttributes = map[string]schema.Attribute{
@@ -79,4 +81,5 @@ func (m *CertificateAuthserviceRemoteLookupServiceModel) Flatten(ctx context.Con
 
 	// Extract the Ref from the OneOf structure
 	m.Ref = flex.FlattenStringPointer(from.CertificateAuthserviceRemoteLookupServiceOneOf.Ref)
+	
 }

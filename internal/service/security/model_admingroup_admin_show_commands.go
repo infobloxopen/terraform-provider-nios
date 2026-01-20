@@ -429,7 +429,7 @@ func (m *AdmingroupAdminShowCommandsModel) Expand(ctx context.Context, diags *di
 		ShowUpgradeHistory:            flex.ExpandBoolPointer(m.ShowUpgradeHistory),
 		ShowUptime:                    flex.ExpandBoolPointer(m.ShowUptime),
 		ShowVersion:                   flex.ExpandBoolPointer(m.ShowVersion),
-		ShowAnalyticsDatabaseDumps:    flex.ExpandBoolPointer(m.ShowAnalyticsDatabaseDumps),
+		//ShowAnalyticsDatabaseDumps:    flex.ExpandBoolPointer(m.ShowAnalyticsDatabaseDumps), ->TO DO: absent in 9.1.0
 		ShowCores:                     flex.ExpandBoolPointer(m.ShowCores),
 		ShowCoresummary:               flex.ExpandBoolPointer(m.ShowCoresummary),
 		ShowCspThreatDb:               flex.ExpandBoolPointer(m.ShowCspThreatDb),
@@ -500,7 +500,7 @@ func (m *AdmingroupAdminShowCommandsModel) Flatten(ctx context.Context, from *se
 	m.ShowUpgradeHistory = types.BoolPointerValue(from.ShowUpgradeHistory)
 	m.ShowUptime = types.BoolPointerValue(from.ShowUptime)
 	m.ShowVersion = types.BoolPointerValue(from.ShowVersion)
-	m.ShowAnalyticsDatabaseDumps = types.BoolPointerValue(from.ShowAnalyticsDatabaseDumps)
+	//m.ShowAnalyticsDatabaseDumps = types.BoolPointerValue(from.ShowAnalyticsDatabaseDumps)
 	m.ShowCores = types.BoolPointerValue(from.ShowCores)
 	m.ShowCoresummary = types.BoolPointerValue(from.ShowCoresummary)
 	m.ShowCspThreatDb = types.BoolPointerValue(from.ShowCspThreatDb)

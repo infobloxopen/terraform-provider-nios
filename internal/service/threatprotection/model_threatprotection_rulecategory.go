@@ -16,6 +16,7 @@ import (
 
 type ThreatprotectionRulecategoryModel struct {
 	Ref                   types.String `tfsdk:"ref"`
+	Uuid                  types.String `tfsdk:"uuid"`
 	IsFactoryResetEnabled types.Bool   `tfsdk:"is_factory_reset_enabled"`
 	Name                  types.String `tfsdk:"name"`
 	Ruleset               types.String `tfsdk:"ruleset"`
@@ -23,6 +24,7 @@ type ThreatprotectionRulecategoryModel struct {
 
 var ThreatprotectionRulecategoryAttrTypes = map[string]attr.Type{
 	"ref":                      types.StringType,
+	"uuid":                     types.StringType,
 	"is_factory_reset_enabled": types.BoolType,
 	"name":                     types.StringType,
 	"ruleset":                  types.StringType,
@@ -32,6 +34,10 @@ var ThreatprotectionRulecategoryResourceSchemaAttributes = map[string]schema.Att
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"is_factory_reset_enabled": schema.BoolAttribute{
 		Computed:            true,
@@ -64,7 +70,8 @@ func (m *ThreatprotectionRulecategoryModel) Expand(ctx context.Context, diags *d
 		return nil
 	}
 	to := &threatprotection.ThreatprotectionRulecategory{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -88,6 +95,7 @@ func (m *ThreatprotectionRulecategoryModel) Flatten(ctx context.Context, from *t
 		*m = ThreatprotectionRulecategoryModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.IsFactoryResetEnabled = types.BoolPointerValue(from.IsFactoryResetEnabled)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Ruleset = flex.FlattenStringPointer(from.Ruleset)

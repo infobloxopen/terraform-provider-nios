@@ -20,6 +20,7 @@ import (
 
 type SyslogEndpointModel struct {
 	Ref                types.String `tfsdk:"ref"`
+	Uuid               types.String `tfsdk:"uuid"`
 	ExtAttrs           types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll        types.Map    `tfsdk:"extattrs_all"`
 	LogLevel           types.String `tfsdk:"log_level"`
@@ -36,6 +37,7 @@ type SyslogEndpointModel struct {
 
 var SyslogEndpointAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+	"uuid":                 types.StringType,
 	"extattrs":             types.MapType{ElemType: types.StringType},
 	"extattrs_all":         types.MapType{ElemType: types.StringType},
 	"log_level":            types.StringType,
@@ -54,6 +56,10 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"extattrs": schema.MapAttribute{
 		ElementType:         types.StringType,
@@ -169,6 +175,7 @@ func (m *SyslogEndpointModel) Flatten(ctx context.Context, from *misc.SyslogEndp
 		*m = SyslogEndpointModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.LogLevel = flex.FlattenStringPointer(from.LogLevel)
 	m.Name = flex.FlattenStringPointer(from.Name)

@@ -16,6 +16,7 @@ import (
 
 type RestartservicestatusModel struct {
 	Ref             types.String `tfsdk:"ref"`
+	Uuid            types.String `tfsdk:"uuid"`
 	DhcpStatus      types.String `tfsdk:"dhcp_status"`
 	DnsStatus       types.String `tfsdk:"dns_status"`
 	Member          types.String `tfsdk:"member"`
@@ -24,6 +25,7 @@ type RestartservicestatusModel struct {
 
 var RestartservicestatusAttrTypes = map[string]attr.Type{
 	"ref":              types.StringType,
+	"uuid":             types.StringType,
 	"dhcp_status":      types.StringType,
 	"dns_status":       types.StringType,
 	"member":           types.StringType,
@@ -34,6 +36,10 @@ var RestartservicestatusResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"dhcp_status": schema.StringAttribute{
 		Computed:            true,
@@ -70,7 +76,8 @@ func (m *RestartservicestatusModel) Expand(ctx context.Context, diags *diag.Diag
 		return nil
 	}
 	to := &grid.Restartservicestatus{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -94,6 +101,7 @@ func (m *RestartservicestatusModel) Flatten(ctx context.Context, from *grid.Rest
 		*m = RestartservicestatusModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.DhcpStatus = flex.FlattenStringPointer(from.DhcpStatus)
 	m.DnsStatus = flex.FlattenStringPointer(from.DnsStatus)
 	m.Member = flex.FlattenStringPointer(from.Member)

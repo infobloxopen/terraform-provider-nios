@@ -37,6 +37,7 @@ func TestAccThreatprotectionGridRuleDataSource_Filters(t *testing.T) {
 func testAccCheckThreatprotectionGridRuleResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "allowed_actions", dataSourceName, "result.0.allowed_actions"),
 		resource.TestCheckResourceAttrPair(resourceName, "category", dataSourceName, "result.0.category"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),

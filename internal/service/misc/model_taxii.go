@@ -18,6 +18,7 @@ import (
 
 type TaxiiModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	EnableService  types.Bool   `tfsdk:"enable_service"`
 	Ipv4addr       types.String `tfsdk:"ipv4addr"`
 	Ipv6addr       types.String `tfsdk:"ipv6addr"`
@@ -27,6 +28,7 @@ type TaxiiModel struct {
 
 var TaxiiAttrTypes = map[string]attr.Type{
 	"ref":              types.StringType,
+	"uuid":             types.StringType,
 	"enable_service":   types.BoolType,
 	"ipv4addr":         types.StringType,
 	"ipv6addr":         types.StringType,
@@ -38,6 +40,10 @@ var TaxiiResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"enable_service": schema.BoolAttribute{
 		Optional:            true,
@@ -85,6 +91,7 @@ func (m *TaxiiModel) Expand(ctx context.Context, diags *diag.Diagnostics) *misc.
 	}
 	to := &misc.Taxii{
 		Ref:            flex.ExpandStringPointer(m.Ref),
+		Uuid:           flex.ExpandStringPointer(m.Uuid),
 		EnableService:  flex.ExpandBoolPointer(m.EnableService),
 		TaxiiRpzConfig: flex.ExpandFrameworkListNestedBlock(ctx, m.TaxiiRpzConfig, diags, ExpandTaxiiTaxiiRpzConfig),
 	}
@@ -110,6 +117,7 @@ func (m *TaxiiModel) Flatten(ctx context.Context, from *misc.Taxii, diags *diag.
 		*m = TaxiiModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.EnableService = types.BoolPointerValue(from.EnableService)
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)

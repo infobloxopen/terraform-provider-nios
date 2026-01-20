@@ -16,11 +16,13 @@ import (
 
 type ThreatinsightInsightAllowlistModel struct {
 	Ref     types.String `tfsdk:"ref"`
+	Uuid    types.String `tfsdk:"uuid"`
 	Version types.String `tfsdk:"version"`
 }
 
 var ThreatinsightInsightAllowlistAttrTypes = map[string]attr.Type{
 	"ref":     types.StringType,
+	"uuid":    types.StringType,
 	"version": types.StringType,
 }
 
@@ -53,6 +55,7 @@ func (m *ThreatinsightInsightAllowlistModel) Expand(ctx context.Context, diags *
 	}
 	to := &threatinsight.ThreatinsightInsightAllowlist{
 		Ref: flex.ExpandStringPointer(m.Ref),
+		
 	}
 	return to
 }
@@ -76,5 +79,6 @@ func (m *ThreatinsightInsightAllowlistModel) Flatten(ctx context.Context, from *
 		*m = ThreatinsightInsightAllowlistModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Version = flex.FlattenStringPointer(from.Version)
 }

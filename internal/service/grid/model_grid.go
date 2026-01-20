@@ -18,6 +18,7 @@ import (
 
 type GridModel struct {
 	Ref                             types.String `tfsdk:"ref"`
+	Uuid                            types.String `tfsdk:"uuid"`
 	AllowRecursiveDeletion          types.String `tfsdk:"allow_recursive_deletion"`
 	AuditLogFormat                  types.String `tfsdk:"audit_log_format"`
 	AuditToSyslogEnable             types.Bool   `tfsdk:"audit_to_syslog_enable"`
@@ -81,6 +82,7 @@ type GridModel struct {
 
 var GridAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"allow_recursive_deletion":            types.StringType,
 	"audit_log_format":                    types.StringType,
 	"audit_to_syslog_enable":              types.BoolType,
@@ -146,6 +148,10 @@ var GridResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"allow_recursive_deletion": schema.StringAttribute{
 		Optional:            true,
@@ -443,6 +449,7 @@ func (m *GridModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.G
 	}
 	to := &grid.Grid{
 		Ref:                             flex.ExpandStringPointer(m.Ref),
+		Uuid:                            flex.ExpandStringPointer(m.Uuid),
 		AllowRecursiveDeletion:          flex.ExpandStringPointer(m.AllowRecursiveDeletion),
 		AuditLogFormat:                  flex.ExpandStringPointer(m.AuditLogFormat),
 		AuditToSyslogEnable:             flex.ExpandBoolPointer(m.AuditToSyslogEnable),
@@ -523,6 +530,7 @@ func (m *GridModel) Flatten(ctx context.Context, from *grid.Grid, diags *diag.Di
 		*m = GridModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowRecursiveDeletion = flex.FlattenStringPointer(from.AllowRecursiveDeletion)
 	m.AuditLogFormat = flex.FlattenStringPointer(from.AuditLogFormat)
 	m.AuditToSyslogEnable = types.BoolPointerValue(from.AuditToSyslogEnable)

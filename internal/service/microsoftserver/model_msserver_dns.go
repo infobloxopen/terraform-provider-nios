@@ -16,6 +16,7 @@ import (
 
 type MsserverDnsModel struct {
 	Ref                        types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Address                    types.String `tfsdk:"address"`
 	EnableDnsReportsSync       types.Bool   `tfsdk:"enable_dns_reports_sync"`
 	LoginName                  types.String `tfsdk:"login_name"`
@@ -28,6 +29,7 @@ type MsserverDnsModel struct {
 
 var MsserverDnsAttrTypes = map[string]attr.Type{
 	"ref":                          types.StringType,
+    "uuid":        types.StringType,
 	"address":                      types.StringType,
 	"enable_dns_reports_sync":      types.BoolType,
 	"login_name":                   types.StringType,
@@ -43,6 +45,10 @@ var MsserverDnsResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"address": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The address or FQDN of the DNS Microsoft Server.",
@@ -125,6 +131,7 @@ func (m *MsserverDnsModel) Flatten(ctx context.Context, from *microsoftserver.Ms
 		*m = MsserverDnsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.EnableDnsReportsSync = types.BoolPointerValue(from.EnableDnsReportsSync)
 	m.LoginName = flex.FlattenStringPointer(from.LoginName)

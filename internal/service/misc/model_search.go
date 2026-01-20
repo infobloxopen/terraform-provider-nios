@@ -15,17 +15,23 @@ import (
 )
 
 type SearchModel struct {
-	Ref types.String `tfsdk:"ref"`
+	Ref  types.String `tfsdk:"ref"`
+	Uuid types.String `tfsdk:"uuid"`
 }
 
 var SearchAttrTypes = map[string]attr.Type{
-	"ref": types.StringType,
+	"ref":  types.StringType,
+	"uuid": types.StringType,
 }
 
 var SearchResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 }
 
@@ -46,7 +52,8 @@ func (m *SearchModel) Expand(ctx context.Context, diags *diag.Diagnostics) *misc
 		return nil
 	}
 	to := &misc.Search{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -70,4 +77,5 @@ func (m *SearchModel) Flatten(ctx context.Context, from *misc.Search, diags *dia
 		*m = SearchModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 }

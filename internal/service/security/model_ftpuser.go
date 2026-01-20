@@ -25,6 +25,7 @@ import (
 
 type FtpuserModel struct {
 	Ref           types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	CreateHomeDir types.Bool   `tfsdk:"create_home_dir"`
 	ExtAttrs      types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll   types.Map    `tfsdk:"extattrs_all"`
@@ -36,6 +37,7 @@ type FtpuserModel struct {
 
 var FtpuserAttrTypes = map[string]attr.Type{
 	"ref":             types.StringType,
+    "uuid":        types.StringType,
 	"create_home_dir": types.BoolType,
 	"extattrs":        types.MapType{ElemType: types.StringType},
 	"extattrs_all":    types.MapType{ElemType: types.StringType},
@@ -50,6 +52,10 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"create_home_dir": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -148,6 +154,7 @@ func (m *FtpuserModel) Flatten(ctx context.Context, from *security.Ftpuser, diag
 		*m = FtpuserModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.HomeDir = flex.FlattenStringPointer(from.HomeDir)
 	m.Permission = flex.FlattenStringPointer(from.Permission)

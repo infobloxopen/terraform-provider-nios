@@ -37,6 +37,7 @@ func TestAccNetworkuserDataSource_Filters(t *testing.T) {
 func testAccCheckNetworkuserResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "address", dataSourceName, "result.0.address"),
 		resource.TestCheckResourceAttrPair(resourceName, "address_object", dataSourceName, "result.0.address_object"),
 		resource.TestCheckResourceAttrPair(resourceName, "data_source", dataSourceName, "result.0.data_source"),

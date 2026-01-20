@@ -18,6 +18,7 @@ import (
 
 type MemberFiledistributionModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	AllowUploads      types.Bool   `tfsdk:"allow_uploads"`
 	Comment           types.String `tfsdk:"comment"`
 	EnableFtp         types.Bool   `tfsdk:"enable_ftp"`
@@ -43,6 +44,7 @@ type MemberFiledistributionModel struct {
 
 var MemberFiledistributionAttrTypes = map[string]attr.Type{
 	"ref":                 types.StringType,
+	"uuid":                types.StringType,
 	"allow_uploads":       types.BoolType,
 	"comment":             types.StringType,
 	"enable_ftp":          types.BoolType,
@@ -70,6 +72,10 @@ var MemberFiledistributionResourceSchemaAttributes = map[string]schema.Attribute
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"allow_uploads": schema.BoolAttribute{
 		Optional:            true,
@@ -193,6 +199,7 @@ func (m *MemberFiledistributionModel) Expand(ctx context.Context, diags *diag.Di
 	}
 	to := &grid.MemberFiledistribution{
 		Ref:               flex.ExpandStringPointer(m.Ref),
+		Uuid:              flex.ExpandStringPointer(m.Uuid),
 		AllowUploads:      flex.ExpandBoolPointer(m.AllowUploads),
 		EnableFtp:         flex.ExpandBoolPointer(m.EnableFtp),
 		EnableFtpFilelist: flex.ExpandBoolPointer(m.EnableFtpFilelist),
@@ -229,6 +236,7 @@ func (m *MemberFiledistributionModel) Flatten(ctx context.Context, from *grid.Me
 		*m = MemberFiledistributionModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowUploads = types.BoolPointerValue(from.AllowUploads)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.EnableFtp = types.BoolPointerValue(from.EnableFtp)

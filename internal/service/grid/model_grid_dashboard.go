@@ -16,6 +16,7 @@ import (
 
 type GridDashboardModel struct {
 	Ref                                      types.String `tfsdk:"ref"`
+	Uuid                                     types.String `tfsdk:"uuid"`
 	AnalyticsTunnelingEventCriticalThreshold types.Int64  `tfsdk:"analytics_tunneling_event_critical_threshold"`
 	AnalyticsTunnelingEventWarningThreshold  types.Int64  `tfsdk:"analytics_tunneling_event_warning_threshold"`
 	AtpCriticalEventCriticalThreshold        types.Int64  `tfsdk:"atp_critical_event_critical_threshold"`
@@ -34,6 +35,7 @@ type GridDashboardModel struct {
 
 var GridDashboardAttrTypes = map[string]attr.Type{
 	"ref": types.StringType,
+	"uuid": types.StringType,
 	"analytics_tunneling_event_critical_threshold": types.Int64Type,
 	"analytics_tunneling_event_warning_threshold":  types.Int64Type,
 	"atp_critical_event_critical_threshold":        types.Int64Type,
@@ -54,6 +56,10 @@ var GridDashboardResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The universally unique identifier (UUID) for the dashboard.",
 	},
 	"analytics_tunneling_event_critical_threshold": schema.Int64Attribute{
 		Optional:            true,
@@ -131,6 +137,7 @@ func (m *GridDashboardModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	}
 	to := &grid.GridDashboard{
 		Ref:                                      flex.ExpandStringPointer(m.Ref),
+		Uuid:                                     flex.ExpandStringPointer(m.Uuid),
 		AnalyticsTunnelingEventCriticalThreshold: flex.ExpandInt64Pointer(m.AnalyticsTunnelingEventCriticalThreshold),
 		AnalyticsTunnelingEventWarningThreshold:  flex.ExpandInt64Pointer(m.AnalyticsTunnelingEventWarningThreshold),
 		AtpCriticalEventCriticalThreshold:        flex.ExpandInt64Pointer(m.AtpCriticalEventCriticalThreshold),
@@ -168,6 +175,7 @@ func (m *GridDashboardModel) Flatten(ctx context.Context, from *grid.GridDashboa
 		*m = GridDashboardModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AnalyticsTunnelingEventCriticalThreshold = flex.FlattenInt64Pointer(from.AnalyticsTunnelingEventCriticalThreshold)
 	m.AnalyticsTunnelingEventWarningThreshold = flex.FlattenInt64Pointer(from.AnalyticsTunnelingEventWarningThreshold)
 	m.AtpCriticalEventCriticalThreshold = flex.FlattenInt64Pointer(from.AtpCriticalEventCriticalThreshold)

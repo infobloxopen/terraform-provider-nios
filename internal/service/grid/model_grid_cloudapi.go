@@ -18,6 +18,7 @@ import (
 
 type GridCloudapiModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid             types.String `tfsdk:"uuid"`
 	AllowApiAdmins   types.String `tfsdk:"allow_api_admins"`
 	AllowedApiAdmins types.List   `tfsdk:"allowed_api_admins"`
 	EnableRecycleBin types.Bool   `tfsdk:"enable_recycle_bin"`
@@ -26,6 +27,7 @@ type GridCloudapiModel struct {
 
 var GridCloudapiAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"allow_api_admins":   types.StringType,
 	"allowed_api_admins": types.ListType{ElemType: types.ObjectType{AttrTypes: GridCloudapiAllowedApiAdminsAttrTypes}},
 	"enable_recycle_bin": types.BoolType,
@@ -36,6 +38,10 @@ var GridCloudapiResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The universally unique identifier (UUID) for the cloud API.",
 	},
 	"allow_api_admins": schema.StringAttribute{
 		Optional:            true,
@@ -79,6 +85,7 @@ func (m *GridCloudapiModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 	}
 	to := &grid.GridCloudapi{
 		Ref:              flex.ExpandStringPointer(m.Ref),
+		Uuid:             flex.ExpandStringPointer(m.Uuid),
 		AllowApiAdmins:   flex.ExpandStringPointer(m.AllowApiAdmins),
 		AllowedApiAdmins: flex.ExpandFrameworkListNestedBlock(ctx, m.AllowedApiAdmins, diags, ExpandGridCloudapiAllowedApiAdmins),
 		EnableRecycleBin: flex.ExpandBoolPointer(m.EnableRecycleBin),
@@ -106,6 +113,7 @@ func (m *GridCloudapiModel) Flatten(ctx context.Context, from *grid.GridCloudapi
 		*m = GridCloudapiModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowApiAdmins = flex.FlattenStringPointer(from.AllowApiAdmins)
 	m.AllowedApiAdmins = flex.FlattenFrameworkListNestedBlock(ctx, from.AllowedApiAdmins, GridCloudapiAllowedApiAdminsAttrTypes, diags, FlattenGridCloudapiAllowedApiAdmins)
 	m.EnableRecycleBin = types.BoolPointerValue(from.EnableRecycleBin)

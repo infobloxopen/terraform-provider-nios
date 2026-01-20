@@ -18,6 +18,7 @@ import (
 
 type OutboundCloudclientModel struct {
 	Ref                       types.String `tfsdk:"ref"`
+	Uuid                      types.String `tfsdk:"uuid"`
 	Enable                    types.Bool   `tfsdk:"enable"`
 	GridMember                types.String `tfsdk:"grid_member"`
 	Interval                  types.Int64  `tfsdk:"interval"`
@@ -26,6 +27,7 @@ type OutboundCloudclientModel struct {
 
 var OutboundCloudclientAttrTypes = map[string]attr.Type{
 	"ref":                          types.StringType,
+	"uuid":                         types.StringType,
 	"enable":                       types.BoolType,
 	"grid_member":                  types.StringType,
 	"interval":                     types.Int64Type,
@@ -36,6 +38,10 @@ var OutboundCloudclientResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"enable": schema.BoolAttribute{
 		Optional:            true,
@@ -79,6 +85,7 @@ func (m *OutboundCloudclientModel) Expand(ctx context.Context, diags *diag.Diagn
 	}
 	to := &misc.OutboundCloudclient{
 		Ref:                       flex.ExpandStringPointer(m.Ref),
+		Uuid:                      flex.ExpandStringPointer(m.Uuid),
 		Enable:                    flex.ExpandBoolPointer(m.Enable),
 		GridMember:                flex.ExpandStringPointer(m.GridMember),
 		Interval:                  flex.ExpandInt64Pointer(m.Interval),
@@ -106,6 +113,7 @@ func (m *OutboundCloudclientModel) Flatten(ctx context.Context, from *misc.Outbo
 		*m = OutboundCloudclientModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Enable = types.BoolPointerValue(from.Enable)
 	m.GridMember = flex.FlattenStringPointer(from.GridMember)
 	m.Interval = flex.FlattenInt64Pointer(from.Interval)

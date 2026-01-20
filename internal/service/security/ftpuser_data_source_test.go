@@ -65,6 +65,7 @@ func TestAccFtpuserDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckFtpuserResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
 		resource.TestCheckResourceAttrPair(resourceName, "home_dir", dataSourceName, "result.0.home_dir"),
 		resource.TestCheckResourceAttrPair(resourceName, "permission", dataSourceName, "result.0.permission"),

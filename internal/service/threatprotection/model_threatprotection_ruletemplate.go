@@ -18,6 +18,7 @@ import (
 
 type ThreatprotectionRuletemplateModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	AllowedActions types.List   `tfsdk:"allowed_actions"`
 	Category       types.String `tfsdk:"category"`
 	DefaultConfig  types.Object `tfsdk:"default_config"`
@@ -29,6 +30,7 @@ type ThreatprotectionRuletemplateModel struct {
 
 var ThreatprotectionRuletemplateAttrTypes = map[string]attr.Type{
 	"ref":             types.StringType,
+	"uuid":            types.StringType,
 	"allowed_actions": types.ListType{ElemType: types.StringType},
 	"category":        types.StringType,
 	"default_config":  types.ObjectType{AttrTypes: ThreatprotectionRuletemplateDefaultConfigAttrTypes},
@@ -42,6 +44,10 @@ var ThreatprotectionRuletemplateResourceSchemaAttributes = map[string]schema.Att
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"allowed_actions": schema.ListAttribute{
 		ElementType: types.StringType,
@@ -95,6 +101,7 @@ func (m *ThreatprotectionRuletemplateModel) Expand(ctx context.Context, diags *d
 	}
 	to := &threatprotection.ThreatprotectionRuletemplate{
 		Ref:           flex.ExpandStringPointer(m.Ref),
+		Uuid:          flex.ExpandStringPointer(m.Uuid),
 		DefaultConfig: ExpandThreatprotectionRuletemplateDefaultConfig(ctx, m.DefaultConfig, diags),
 	}
 	return to
@@ -119,6 +126,7 @@ func (m *ThreatprotectionRuletemplateModel) Flatten(ctx context.Context, from *t
 		*m = ThreatprotectionRuletemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowedActions = flex.FlattenFrameworkListString(ctx, from.AllowedActions, diags)
 	m.Category = flex.FlattenStringPointer(from.Category)
 	m.DefaultConfig = FlattenThreatprotectionRuletemplateDefaultConfig(ctx, from.DefaultConfig, diags)

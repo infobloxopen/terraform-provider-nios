@@ -16,6 +16,7 @@ import (
 
 type AllendpointsModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	Address           types.String `tfsdk:"address"`
 	Comment           types.String `tfsdk:"comment"`
 	Disable           types.Bool   `tfsdk:"disable"`
@@ -26,6 +27,7 @@ type AllendpointsModel struct {
 
 var AllendpointsAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"address":            types.StringType,
 	"comment":            types.StringType,
 	"disable":            types.BoolType,
@@ -38,6 +40,10 @@ var AllendpointsResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"address": schema.StringAttribute{
 		Computed:            true,
@@ -82,7 +88,8 @@ func (m *AllendpointsModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		return nil
 	}
 	to := &misc.Allendpoints{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -106,6 +113,7 @@ func (m *AllendpointsModel) Flatten(ctx context.Context, from *misc.Allendpoints
 		*m = AllendpointsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

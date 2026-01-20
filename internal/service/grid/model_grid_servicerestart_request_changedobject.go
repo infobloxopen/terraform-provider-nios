@@ -18,6 +18,7 @@ import (
 
 type GridServicerestartRequestChangedobjectModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	Action            types.String `tfsdk:"action"`
 	ChangedProperties types.List   `tfsdk:"changed_properties"`
 	ChangedTime       types.Int64  `tfsdk:"changed_time"`
@@ -28,6 +29,7 @@ type GridServicerestartRequestChangedobjectModel struct {
 
 var GridServicerestartRequestChangedobjectAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"action":             types.StringType,
 	"changed_properties": types.ListType{ElemType: types.StringType},
 	"changed_time":       types.Int64Type,
@@ -40,6 +42,10 @@ var GridServicerestartRequestChangedobjectResourceSchemaAttributes = map[string]
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"action": schema.StringAttribute{
 		Computed:            true,
@@ -112,6 +118,7 @@ func (m *GridServicerestartRequestChangedobjectModel) Flatten(ctx context.Contex
 		*m = GridServicerestartRequestChangedobjectModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Action = flex.FlattenStringPointer(from.Action)
 	m.ChangedProperties = flex.FlattenFrameworkListString(ctx, from.ChangedProperties, diags)
 	m.ChangedTime = flex.FlattenInt64Pointer(from.ChangedTime)

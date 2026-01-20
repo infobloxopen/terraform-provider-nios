@@ -18,6 +18,7 @@ import (
 
 type UpgradescheduleModel struct {
 	Ref           types.String `tfsdk:"ref"`
+	Uuid          types.String `tfsdk:"uuid"`
 	Active        types.Bool   `tfsdk:"active"`
 	StartTime     types.Int64  `tfsdk:"start_time"`
 	TimeZone      types.String `tfsdk:"time_zone"`
@@ -26,6 +27,7 @@ type UpgradescheduleModel struct {
 
 var UpgradescheduleAttrTypes = map[string]attr.Type{
 	"ref":            types.StringType,
+	"uuid":           types.StringType,
 	"active":         types.BoolType,
 	"start_time":     types.Int64Type,
 	"time_zone":      types.StringType,
@@ -36,6 +38,10 @@ var UpgradescheduleResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"active": schema.BoolAttribute{
 		Optional:            true,
@@ -79,6 +85,7 @@ func (m *UpgradescheduleModel) Expand(ctx context.Context, diags *diag.Diagnosti
 	}
 	to := &grid.Upgradeschedule{
 		Ref:           flex.ExpandStringPointer(m.Ref),
+		Uuid:          flex.ExpandStringPointer(m.Uuid),
 		Active:        flex.ExpandBoolPointer(m.Active),
 		StartTime:     flex.ExpandInt64Pointer(m.StartTime),
 		UpgradeGroups: flex.ExpandFrameworkListNestedBlock(ctx, m.UpgradeGroups, diags, ExpandUpgradescheduleUpgradeGroups),
@@ -105,6 +112,7 @@ func (m *UpgradescheduleModel) Flatten(ctx context.Context, from *grid.Upgradesc
 		*m = UpgradescheduleModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Active = types.BoolPointerValue(from.Active)
 	m.StartTime = flex.FlattenInt64Pointer(from.StartTime)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)

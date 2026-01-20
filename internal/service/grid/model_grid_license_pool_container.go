@@ -16,12 +16,14 @@ import (
 
 type GridLicensePoolContainerModel struct {
 	Ref                   types.String `tfsdk:"ref"`
+	Uuid                  types.String `tfsdk:"uuid"`
 	LastEntitlementUpdate types.Int64  `tfsdk:"last_entitlement_update"`
 	LpcUid                types.String `tfsdk:"lpc_uid"`
 }
 
 var GridLicensePoolContainerAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"last_entitlement_update": types.Int64Type,
 	"lpc_uid":                 types.StringType,
 }
@@ -30,6 +32,10 @@ var GridLicensePoolContainerResourceSchemaAttributes = map[string]schema.Attribu
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"last_entitlement_update": schema.Int64Attribute{
 		Computed:            true,
@@ -82,6 +88,7 @@ func (m *GridLicensePoolContainerModel) Flatten(ctx context.Context, from *grid.
 		*m = GridLicensePoolContainerModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.LastEntitlementUpdate = flex.FlattenInt64Pointer(from.LastEntitlementUpdate)
 	m.LpcUid = flex.FlattenStringPointer(from.LpcUid)
 }

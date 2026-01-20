@@ -18,6 +18,7 @@ import (
 
 type GridLicensePoolModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid             types.String `tfsdk:"uuid"`
 	Assigned         types.Int64  `tfsdk:"assigned"`
 	ExpirationStatus types.String `tfsdk:"expiration_status"`
 	ExpiryDate       types.Int64  `tfsdk:"expiry_date"`
@@ -33,6 +34,7 @@ type GridLicensePoolModel struct {
 
 var GridLicensePoolAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":              types.StringType,
 	"assigned":          types.Int64Type,
 	"expiration_status": types.StringType,
 	"expiry_date":       types.Int64Type,
@@ -50,6 +52,10 @@ var GridLicensePoolResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"assigned": schema.Int64Attribute{
 		Computed:            true,
@@ -144,6 +150,7 @@ func (m *GridLicensePoolModel) Flatten(ctx context.Context, from *grid.GridLicen
 		*m = GridLicensePoolModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Assigned = flex.FlattenInt64Pointer(from.Assigned)
 	m.ExpirationStatus = flex.FlattenStringPointer(from.ExpirationStatus)
 	m.ExpiryDate = flex.FlattenInt64Pointer(from.ExpiryDate)

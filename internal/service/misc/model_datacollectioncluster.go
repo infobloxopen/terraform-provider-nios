@@ -16,12 +16,14 @@ import (
 
 type DatacollectionclusterModel struct {
 	Ref                types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	EnableRegistration types.Bool   `tfsdk:"enable_registration"`
 	Name               types.String `tfsdk:"name"`
 }
 
 var DatacollectionclusterAttrTypes = map[string]attr.Type{
 	"ref":                 types.StringType,
+    "uuid":        types.StringType,
 	"enable_registration": types.BoolType,
 	"name":                types.StringType,
 }
@@ -31,6 +33,10 @@ var DatacollectionclusterResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"enable_registration": schema.BoolAttribute{
 		Optional:            true,
 		MarkdownDescription: "Enable/disable new registration requests",
@@ -83,6 +89,7 @@ func (m *DatacollectionclusterModel) Flatten(ctx context.Context, from *misc.Dat
 		*m = DatacollectionclusterModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.EnableRegistration = types.BoolPointerValue(from.EnableRegistration)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }

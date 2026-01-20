@@ -16,12 +16,14 @@ import (
 
 type MembercloudsyncModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid             types.String `tfsdk:"uuid"`
 	CloudSyncEnabled types.Bool   `tfsdk:"cloud_sync_enabled"`
 	HostName         types.String `tfsdk:"host_name"`
 }
 
 var MembercloudsyncAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"cloud_sync_enabled": types.BoolType,
 	"host_name":          types.StringType,
 }
@@ -30,6 +32,10 @@ var MembercloudsyncResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"cloud_sync_enabled": schema.BoolAttribute{
 		Optional:            true,
@@ -59,6 +65,7 @@ func (m *MembercloudsyncModel) Expand(ctx context.Context, diags *diag.Diagnosti
 	}
 	to := &grid.Membercloudsync{
 		Ref:              flex.ExpandStringPointer(m.Ref),
+		Uuid:             flex.ExpandStringPointer(m.Uuid),
 		CloudSyncEnabled: flex.ExpandBoolPointer(m.CloudSyncEnabled),
 	}
 	return to
@@ -83,6 +90,7 @@ func (m *MembercloudsyncModel) Flatten(ctx context.Context, from *grid.Memberclo
 		*m = MembercloudsyncModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudSyncEnabled = types.BoolPointerValue(from.CloudSyncEnabled)
 	m.HostName = flex.FlattenStringPointer(from.HostName)
 }

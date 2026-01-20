@@ -16,6 +16,7 @@ import (
 
 type MemberLicenseModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid             types.String `tfsdk:"uuid"`
 	ExpirationStatus types.String `tfsdk:"expiration_status"`
 	ExpiryDate       types.Int64  `tfsdk:"expiry_date"`
 	Hwid             types.String `tfsdk:"hwid"`
@@ -28,6 +29,7 @@ type MemberLicenseModel struct {
 
 var MemberLicenseAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":              types.StringType,
 	"expiration_status": types.StringType,
 	"expiry_date":       types.Int64Type,
 	"hwid":              types.StringType,
@@ -42,6 +44,10 @@ var MemberLicenseResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"expiration_status": schema.StringAttribute{
 		Computed:            true,
@@ -118,6 +124,7 @@ func (m *MemberLicenseModel) Flatten(ctx context.Context, from *grid.MemberLicen
 		*m = MemberLicenseModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ExpirationStatus = flex.FlattenStringPointer(from.ExpirationStatus)
 	m.ExpiryDate = flex.FlattenInt64Pointer(from.ExpiryDate)
 	m.Hwid = flex.FlattenStringPointer(from.Hwid)

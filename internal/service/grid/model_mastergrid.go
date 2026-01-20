@@ -16,6 +16,7 @@ import (
 
 type MastergridModel struct {
 	Ref                 types.String `tfsdk:"ref"`
+	Uuid                types.String `tfsdk:"uuid"`
 	Address             types.String `tfsdk:"address"`
 	ConnectionDisabled  types.Bool   `tfsdk:"connection_disabled"`
 	ConnectionTimestamp types.Int64  `tfsdk:"connection_timestamp"`
@@ -32,6 +33,7 @@ type MastergridModel struct {
 
 var MastergridAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+	"uuid":                 types.StringType,
 	"address":              types.StringType,
 	"connection_disabled":  types.BoolType,
 	"connection_timestamp": types.Int64Type,
@@ -50,6 +52,10 @@ var MastergridResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The unique identifier for the object.",
 	},
 	"address": schema.StringAttribute{
 		Optional:            true,
@@ -119,6 +125,7 @@ func (m *MastergridModel) Expand(ctx context.Context, diags *diag.Diagnostics) *
 	}
 	to := &grid.Mastergrid{
 		Ref:     flex.ExpandStringPointer(m.Ref),
+		Uuid:    flex.ExpandStringPointer(m.Uuid),
 		Address: flex.ExpandStringPointer(m.Address),
 		Enable:  flex.ExpandBoolPointer(m.Enable),
 		Port:    flex.ExpandInt64Pointer(m.Port),
@@ -145,6 +152,7 @@ func (m *MastergridModel) Flatten(ctx context.Context, from *grid.Mastergrid, di
 		*m = MastergridModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.ConnectionDisabled = types.BoolPointerValue(from.ConnectionDisabled)
 	m.ConnectionTimestamp = flex.FlattenInt64Pointer(from.ConnectionTimestamp)
@@ -155,6 +163,6 @@ func (m *MastergridModel) Flatten(ctx context.Context, from *grid.Mastergrid, di
 	m.LastEventDetails = flex.FlattenStringPointer(from.LastEventDetails)
 	m.LastSyncTimestamp = flex.FlattenInt64Pointer(from.LastSyncTimestamp)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
-	m.Status = flex.FlattenStringPointer(from.Status)
+	//m.Status = flex.FlattenStringPointer(from.Status) -> TO DO: absent in 9.1.0
 	m.UseMgmtPort = types.BoolPointerValue(from.UseMgmtPort)
 }

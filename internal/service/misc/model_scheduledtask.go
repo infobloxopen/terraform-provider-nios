@@ -18,6 +18,7 @@ import (
 
 type ScheduledtaskModel struct {
 	Ref                  types.String `tfsdk:"ref"`
+	Uuid                 types.String `tfsdk:"uuid"`
 	ApprovalStatus       types.String `tfsdk:"approval_status"`
 	Approver             types.String `tfsdk:"approver"`
 	ApproverComment      types.String `tfsdk:"approver_comment"`
@@ -44,6 +45,7 @@ type ScheduledtaskModel struct {
 
 var ScheduledtaskAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"approval_status":         types.StringType,
 	"approver":                types.StringType,
 	"approver_comment":        types.StringType,
@@ -72,6 +74,10 @@ var ScheduledtaskResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"approval_status": schema.StringAttribute{
 		Optional:            true,
@@ -195,6 +201,7 @@ func (m *ScheduledtaskModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	}
 	to := &misc.Scheduledtask{
 		Ref:              flex.ExpandStringPointer(m.Ref),
+		Uuid:             flex.ExpandStringPointer(m.Uuid),
 		ApprovalStatus:   flex.ExpandStringPointer(m.ApprovalStatus),
 		ApproverComment:  flex.ExpandStringPointer(m.ApproverComment),
 		AutomaticRestart: flex.ExpandBoolPointer(m.AutomaticRestart),
@@ -225,6 +232,7 @@ func (m *ScheduledtaskModel) Flatten(ctx context.Context, from *misc.Scheduledta
 		*m = ScheduledtaskModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ApprovalStatus = flex.FlattenStringPointer(from.ApprovalStatus)
 	m.Approver = flex.FlattenStringPointer(from.Approver)
 	m.ApproverComment = flex.FlattenStringPointer(from.ApproverComment)

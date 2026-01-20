@@ -16,6 +16,7 @@ import (
 
 type ThreatprotectionRuleModel struct {
 	Ref        types.String `tfsdk:"ref"`
+	Uuid       types.String `tfsdk:"uuid"`
 	Config     types.Object `tfsdk:"config"`
 	Disable    types.Bool   `tfsdk:"disable"`
 	Member     types.String `tfsdk:"member"`
@@ -27,6 +28,7 @@ type ThreatprotectionRuleModel struct {
 
 var ThreatprotectionRuleAttrTypes = map[string]attr.Type{
 	"ref":         types.StringType,
+	"uuid":        types.StringType,
 	"config":      types.ObjectType{AttrTypes: ThreatprotectionRuleConfigAttrTypes},
 	"disable":     types.BoolType,
 	"member":      types.StringType,
@@ -40,6 +42,10 @@ var ThreatprotectionRuleResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"config": schema.SingleNestedAttribute{
 		Attributes: ThreatprotectionRuleConfigResourceSchemaAttributes,
@@ -89,6 +95,7 @@ func (m *ThreatprotectionRuleModel) Expand(ctx context.Context, diags *diag.Diag
 	}
 	to := &threatprotection.ThreatprotectionRule{
 		Ref:        flex.ExpandStringPointer(m.Ref),
+		Uuid:       flex.ExpandStringPointer(m.Uuid),
 		Config:     ExpandThreatprotectionRuleConfig(ctx, m.Config, diags),
 		Disable:    flex.ExpandBoolPointer(m.Disable),
 		UseConfig:  flex.ExpandBoolPointer(m.UseConfig),
@@ -116,6 +123,7 @@ func (m *ThreatprotectionRuleModel) Flatten(ctx context.Context, from *threatpro
 		*m = ThreatprotectionRuleModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Config = FlattenThreatprotectionRuleConfig(ctx, from.Config, diags)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Member = flex.FlattenStringPointer(from.Member)

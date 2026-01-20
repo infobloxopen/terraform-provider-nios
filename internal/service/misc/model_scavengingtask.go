@@ -16,6 +16,7 @@ import (
 
 type ScavengingtaskModel struct {
 	Ref                types.String `tfsdk:"ref"`
+	Uuid               types.String `tfsdk:"uuid"`
 	Action             types.String `tfsdk:"action"`
 	AssociatedObject   types.String `tfsdk:"associated_object"`
 	EndTime            types.Int64  `tfsdk:"end_time"`
@@ -28,6 +29,7 @@ type ScavengingtaskModel struct {
 
 var ScavengingtaskAttrTypes = map[string]attr.Type{
 	"ref":                 types.StringType,
+	"uuid":                types.StringType,
 	"action":              types.StringType,
 	"associated_object":   types.StringType,
 	"end_time":            types.Int64Type,
@@ -42,6 +44,10 @@ var ScavengingtaskResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"action": schema.StringAttribute{
 		Computed:            true,
@@ -94,7 +100,8 @@ func (m *ScavengingtaskModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		return nil
 	}
 	to := &misc.Scavengingtask{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -118,6 +125,7 @@ func (m *ScavengingtaskModel) Flatten(ctx context.Context, from *misc.Scavenging
 		*m = ScavengingtaskModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Action = flex.FlattenStringPointer(from.Action)
 	m.AssociatedObject = flex.FlattenStringPointer(from.AssociatedObject)
 	m.EndTime = flex.FlattenInt64Pointer(from.EndTime)

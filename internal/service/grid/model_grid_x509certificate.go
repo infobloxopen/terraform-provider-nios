@@ -16,6 +16,7 @@ import (
 
 type GridX509certificateModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	Issuer         types.String `tfsdk:"issuer"`
 	Serial         types.String `tfsdk:"serial"`
 	Subject        types.String `tfsdk:"subject"`
@@ -25,6 +26,7 @@ type GridX509certificateModel struct {
 
 var GridX509certificateAttrTypes = map[string]attr.Type{
 	"ref":              types.StringType,
+	"uuid":             types.StringType,
 	"issuer":           types.StringType,
 	"serial":           types.StringType,
 	"subject":          types.StringType,
@@ -36,6 +38,10 @@ var GridX509certificateResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"issuer": schema.StringAttribute{
 		Computed:            true,
@@ -100,6 +106,7 @@ func (m *GridX509certificateModel) Flatten(ctx context.Context, from *grid.GridX
 		*m = GridX509certificateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Issuer = flex.FlattenStringPointer(from.Issuer)
 	m.Serial = flex.FlattenStringPointer(from.Serial)
 	m.Subject = flex.FlattenStringPointer(from.Subject)

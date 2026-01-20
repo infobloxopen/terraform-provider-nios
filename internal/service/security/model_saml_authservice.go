@@ -16,6 +16,7 @@ import (
 
 type SamlAuthserviceModel struct {
 	Ref            types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment        types.String `tfsdk:"comment"`
 	Idp            types.Object `tfsdk:"idp"`
 	Name           types.String `tfsdk:"name"`
@@ -24,6 +25,7 @@ type SamlAuthserviceModel struct {
 
 var SamlAuthserviceAttrTypes = map[string]attr.Type{
 	"ref":             types.StringType,
+    "uuid":        types.StringType,
 	"comment":         types.StringType,
 	"idp":             types.ObjectType{AttrTypes: SamlAuthserviceIdpAttrTypes},
 	"name":            types.StringType,
@@ -35,6 +37,10 @@ var SamlAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The descriptive comment for the SAML authentication service.",
@@ -98,6 +104,7 @@ func (m *SamlAuthserviceModel) Flatten(ctx context.Context, from *security.SamlA
 		*m = SamlAuthserviceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Idp = FlattenSamlAuthserviceIdp(ctx, from.Idp, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)

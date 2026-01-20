@@ -16,6 +16,7 @@ import (
 
 type LocaluserAuthserviceModel struct {
 	Ref      types.String `tfsdk:"ref"`
+	Uuid     types.String `tfsdk:"uuid"`
 	Comment  types.String `tfsdk:"comment"`
 	Disabled types.Bool   `tfsdk:"disabled"`
 	Name     types.String `tfsdk:"name"`
@@ -23,6 +24,7 @@ type LocaluserAuthserviceModel struct {
 
 var LocaluserAuthserviceAttrTypes = map[string]attr.Type{
 	"ref":      types.StringType,
+	"uuid":     types.StringType,
 	"comment":  types.StringType,
 	"disabled": types.BoolType,
 	"name":     types.StringType,
@@ -32,6 +34,10 @@ var LocaluserAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Computed:            true,
@@ -64,7 +70,8 @@ func (m *LocaluserAuthserviceModel) Expand(ctx context.Context, diags *diag.Diag
 		return nil
 	}
 	to := &security.LocaluserAuthservice{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -88,6 +95,7 @@ func (m *LocaluserAuthserviceModel) Flatten(ctx context.Context, from *security.
 		*m = LocaluserAuthserviceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disabled = types.BoolPointerValue(from.Disabled)
 	m.Name = flex.FlattenStringPointer(from.Name)

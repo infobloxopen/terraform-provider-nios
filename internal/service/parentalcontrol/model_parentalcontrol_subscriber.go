@@ -18,6 +18,7 @@ import (
 
 type ParentalcontrolSubscriberModel struct {
 	Ref                          types.String `tfsdk:"ref"`
+	Uuid                         types.String `tfsdk:"uuid"`
 	AltSubscriberId              types.String `tfsdk:"alt_subscriber_id"`
 	AltSubscriberIdRegexp        types.String `tfsdk:"alt_subscriber_id_regexp"`
 	AltSubscriberIdSubexpression types.Int64  `tfsdk:"alt_subscriber_id_subexpression"`
@@ -50,6 +51,7 @@ type ParentalcontrolSubscriberModel struct {
 
 var ParentalcontrolSubscriberAttrTypes = map[string]attr.Type{
 	"ref":                             types.StringType,
+	"uuid":                            types.StringType,
 	"alt_subscriber_id":               types.StringType,
 	"alt_subscriber_id_regexp":        types.StringType,
 	"alt_subscriber_id_subexpression": types.Int64Type,
@@ -84,6 +86,10 @@ var ParentalcontrolSubscriberResourceSchemaAttributes = map[string]schema.Attrib
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"alt_subscriber_id": schema.StringAttribute{
 		Optional:            true,
@@ -225,6 +231,7 @@ func (m *ParentalcontrolSubscriberModel) Expand(ctx context.Context, diags *diag
 	}
 	to := &parentalcontrol.ParentalcontrolSubscriber{
 		Ref:                          flex.ExpandStringPointer(m.Ref),
+		Uuid:                         flex.ExpandStringPointer(m.Uuid),
 		AltSubscriberId:              flex.ExpandStringPointer(m.AltSubscriberId),
 		AltSubscriberIdRegexp:        flex.ExpandStringPointer(m.AltSubscriberIdRegexp),
 		AltSubscriberIdSubexpression: flex.ExpandInt64Pointer(m.AltSubscriberIdSubexpression),
@@ -275,6 +282,7 @@ func (m *ParentalcontrolSubscriberModel) Flatten(ctx context.Context, from *pare
 		*m = ParentalcontrolSubscriberModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AltSubscriberId = flex.FlattenStringPointer(from.AltSubscriberId)
 	m.AltSubscriberIdRegexp = flex.FlattenStringPointer(from.AltSubscriberIdRegexp)
 	m.AltSubscriberIdSubexpression = flex.FlattenInt64Pointer(from.AltSubscriberIdSubexpression)

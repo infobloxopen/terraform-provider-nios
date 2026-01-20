@@ -16,6 +16,7 @@ import (
 
 type GridCloudapiCloudstatisticsModel struct {
 	Ref                     types.String `tfsdk:"ref"`
+	Uuid                    types.String `tfsdk:"uuid"`
 	AllocatedAvailableRatio types.Int64  `tfsdk:"allocated_available_ratio"`
 	AllocatedIpCount        types.Int64  `tfsdk:"allocated_ip_count"`
 	AvailableIpCount        types.String `tfsdk:"available_ip_count"`
@@ -28,6 +29,7 @@ type GridCloudapiCloudstatisticsModel struct {
 
 var GridCloudapiCloudstatisticsAttrTypes = map[string]attr.Type{
 	"ref":                       types.StringType,
+	"uuid":                      types.StringType,
 	"allocated_available_ratio": types.Int64Type,
 	"allocated_ip_count":        types.Int64Type,
 	"available_ip_count":        types.StringType,
@@ -42,6 +44,10 @@ var GridCloudapiCloudstatisticsResourceSchemaAttributes = map[string]schema.Attr
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The universally unique identifier (UUID) for the cloud statistics.",
 	},
 	"allocated_available_ratio": schema.Int64Attribute{
 		Computed:            true,
@@ -118,6 +124,7 @@ func (m *GridCloudapiCloudstatisticsModel) Flatten(ctx context.Context, from *gr
 		*m = GridCloudapiCloudstatisticsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllocatedAvailableRatio = flex.FlattenInt64Pointer(from.AllocatedAvailableRatio)
 	m.AllocatedIpCount = flex.FlattenInt64Pointer(from.AllocatedIpCount)
 	m.AvailableIpCount = flex.FlattenStringPointer(from.AvailableIpCount)

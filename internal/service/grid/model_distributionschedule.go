@@ -17,6 +17,7 @@ import (
 
 type DistributionscheduleModel struct {
 	Ref           types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Active        types.Bool   `tfsdk:"active"`
 	StartTime     types.String `tfsdk:"start_time"`
 	TimeZone      types.String `tfsdk:"time_zone"`
@@ -25,6 +26,7 @@ type DistributionscheduleModel struct {
 
 var DistributionscheduleAttrTypes = map[string]attr.Type{
 	"ref":            types.StringType,
+    "uuid":        types.StringType,
 	"active":         types.BoolType,
 	"start_time":     types.StringType,
 	"time_zone":      types.StringType,
@@ -36,6 +38,10 @@ var DistributionscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"active": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -120,6 +126,7 @@ func (m *DistributionscheduleModel) Flatten(ctx context.Context, from *grid.Dist
 	}
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Active = types.BoolPointerValue(from.Active)
 	m.StartTime = flex.FlattenUnixTime(from.StartTime, diags)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)

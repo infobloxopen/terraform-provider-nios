@@ -20,6 +20,7 @@ import (
 
 type DxlEndpointModel struct {
 	Ref                        types.String `tfsdk:"ref"`
+	Uuid                       types.String `tfsdk:"uuid"`
 	Brokers                    types.List   `tfsdk:"brokers"`
 	BrokersImportToken         types.String `tfsdk:"brokers_import_token"`
 	ClientCertificateSubject   types.String `tfsdk:"client_certificate_subject"`
@@ -44,6 +45,7 @@ type DxlEndpointModel struct {
 
 var DxlEndpointAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
+	"uuid":                          types.StringType,
 	"brokers":                       types.ListType{ElemType: types.ObjectType{AttrTypes: DxlEndpointBrokersAttrTypes}},
 	"brokers_import_token":          types.StringType,
 	"client_certificate_subject":    types.StringType,
@@ -70,6 +72,10 @@ var DxlEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"brokers": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -226,6 +232,7 @@ func (m *DxlEndpointModel) Flatten(ctx context.Context, from *misc.DxlEndpoint, 
 		*m = DxlEndpointModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Brokers = flex.FlattenFrameworkListNestedBlock(ctx, from.Brokers, DxlEndpointBrokersAttrTypes, diags, FlattenDxlEndpointBrokers)
 	m.BrokersImportToken = flex.FlattenStringPointer(from.BrokersImportToken)
 	m.ClientCertificateSubject = flex.FlattenStringPointer(from.ClientCertificateSubject)

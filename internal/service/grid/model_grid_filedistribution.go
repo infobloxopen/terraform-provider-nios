@@ -16,6 +16,7 @@ import (
 
 type GridFiledistributionModel struct {
 	Ref                types.String `tfsdk:"ref"`
+	Uuid               types.String `tfsdk:"uuid"`
 	AllowUploads       types.Bool   `tfsdk:"allow_uploads"`
 	BackupStorage      types.Bool   `tfsdk:"backup_storage"`
 	CurrentUsage       types.Int64  `tfsdk:"current_usage"`
@@ -27,6 +28,7 @@ type GridFiledistributionModel struct {
 
 var GridFiledistributionAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+	"uuid":                 types.StringType,
 	"allow_uploads":        types.BoolType,
 	"backup_storage":       types.BoolType,
 	"current_usage":        types.Int64Type,
@@ -40,6 +42,10 @@ var GridFiledistributionResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"allow_uploads": schema.BoolAttribute{
 		Optional:            true,
@@ -89,6 +95,7 @@ func (m *GridFiledistributionModel) Expand(ctx context.Context, diags *diag.Diag
 	}
 	to := &grid.GridFiledistribution{
 		Ref:                flex.ExpandStringPointer(m.Ref),
+		Uuid:               flex.ExpandStringPointer(m.Uuid),
 		AllowUploads:       flex.ExpandBoolPointer(m.AllowUploads),
 		BackupStorage:      flex.ExpandBoolPointer(m.BackupStorage),
 		EnableAnonymousFtp: flex.ExpandBoolPointer(m.EnableAnonymousFtp),
@@ -116,6 +123,7 @@ func (m *GridFiledistributionModel) Flatten(ctx context.Context, from *grid.Grid
 		*m = GridFiledistributionModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowUploads = types.BoolPointerValue(from.AllowUploads)
 	m.BackupStorage = types.BoolPointerValue(from.BackupStorage)
 	m.CurrentUsage = flex.FlattenInt64Pointer(from.CurrentUsage)

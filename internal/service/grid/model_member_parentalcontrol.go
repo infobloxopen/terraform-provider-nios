@@ -16,6 +16,7 @@ import (
 
 type MemberParentalcontrolModel struct {
 	Ref           types.String `tfsdk:"ref"`
+	Uuid          types.String `tfsdk:"uuid"`
 	EnableService types.Bool   `tfsdk:"enable_service"`
 	Name          types.String `tfsdk:"name"`
 }
@@ -30,6 +31,10 @@ var MemberParentalcontrolResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"enable_service": schema.BoolAttribute{
 		Optional:            true,
@@ -59,6 +64,7 @@ func (m *MemberParentalcontrolModel) Expand(ctx context.Context, diags *diag.Dia
 	}
 	to := &grid.MemberParentalcontrol{
 		Ref:           flex.ExpandStringPointer(m.Ref),
+		Uuid:          flex.ExpandStringPointer(m.Uuid),
 		EnableService: flex.ExpandBoolPointer(m.EnableService),
 	}
 	return to
@@ -83,6 +89,7 @@ func (m *MemberParentalcontrolModel) Flatten(ctx context.Context, from *grid.Mem
 		*m = MemberParentalcontrolModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.EnableService = types.BoolPointerValue(from.EnableService)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }

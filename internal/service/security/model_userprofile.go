@@ -18,6 +18,7 @@ import (
 
 type UserprofileModel struct {
 	Ref                    types.String `tfsdk:"ref"`
+	Uuid                   types.String `tfsdk:"uuid"`
 	ActiveDashboardType    types.String `tfsdk:"active_dashboard_type"`
 	AdminGroup             types.String `tfsdk:"admin_group"`
 	DaysToExpire           types.Int64  `tfsdk:"days_to_expire"`
@@ -40,6 +41,7 @@ type UserprofileModel struct {
 
 var UserprofileAttrTypes = map[string]attr.Type{
 	"ref":                         types.StringType,
+	"uuid":                        types.StringType,
 	"active_dashboard_type":       types.StringType,
 	"admin_group":                 types.StringType,
 	"days_to_expire":              types.Int64Type,
@@ -64,6 +66,10 @@ var UserprofileResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"active_dashboard_type": schema.StringAttribute{
 		Optional:            true,
@@ -161,6 +167,7 @@ func (m *UserprofileModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 	}
 	to := &security.Userprofile{
 		Ref:                    flex.ExpandStringPointer(m.Ref),
+		Uuid:                   flex.ExpandStringPointer(m.Uuid),
 		ActiveDashboardType:    flex.ExpandStringPointer(m.ActiveDashboardType),
 		Email:                  flex.ExpandStringPointer(m.Email),
 		GlobalSearchOnEa:       flex.ExpandBoolPointer(m.GlobalSearchOnEa),
@@ -196,6 +203,7 @@ func (m *UserprofileModel) Flatten(ctx context.Context, from *security.Userprofi
 		*m = UserprofileModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ActiveDashboardType = flex.FlattenStringPointer(from.ActiveDashboardType)
 	m.AdminGroup = flex.FlattenStringPointer(from.AdminGroup)
 	m.DaysToExpire = flex.FlattenInt64Pointer(from.DaysToExpire)

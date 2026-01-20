@@ -20,6 +20,7 @@ import (
 
 type GridMemberCloudapiModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid             types.String `tfsdk:"uuid"`
 	AllowApiAdmins   types.String `tfsdk:"allow_api_admins"`
 	AllowedApiAdmins types.List   `tfsdk:"allowed_api_admins"`
 	EnableService    types.Bool   `tfsdk:"enable_service"`
@@ -32,6 +33,7 @@ type GridMemberCloudapiModel struct {
 
 var GridMemberCloudapiAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"allow_api_admins":   types.StringType,
 	"allowed_api_admins": types.ListType{ElemType: types.ObjectType{AttrTypes: GridMemberCloudapiAllowedApiAdminsAttrTypes}},
 	"enable_service":     types.BoolType,
@@ -46,6 +48,10 @@ var GridMemberCloudapiResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"allow_api_admins": schema.StringAttribute{
 		Optional:            true,
@@ -110,6 +116,7 @@ func (m *GridMemberCloudapiModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &grid.GridMemberCloudapi{
 		Ref:              flex.ExpandStringPointer(m.Ref),
+		Uuid:             flex.ExpandStringPointer(m.Uuid),
 		AllowApiAdmins:   flex.ExpandStringPointer(m.AllowApiAdmins),
 		AllowedApiAdmins: flex.ExpandFrameworkListNestedBlock(ctx, m.AllowedApiAdmins, diags, ExpandGridMemberCloudapiAllowedApiAdmins),
 		EnableService:    flex.ExpandBoolPointer(m.EnableService),
@@ -139,6 +146,7 @@ func (m *GridMemberCloudapiModel) Flatten(ctx context.Context, from *grid.GridMe
 		*m = GridMemberCloudapiModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowApiAdmins = flex.FlattenStringPointer(from.AllowApiAdmins)
 	m.AllowedApiAdmins = flex.FlattenFrameworkListNestedBlock(ctx, from.AllowedApiAdmins, GridMemberCloudapiAllowedApiAdminsAttrTypes, diags, FlattenGridMemberCloudapiAllowedApiAdmins)
 	m.EnableService = types.BoolPointerValue(from.EnableService)

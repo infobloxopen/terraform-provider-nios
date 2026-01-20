@@ -60,6 +60,7 @@ func TestAccApprovalworkflowDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckApprovalworkflowResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
     return []resource.TestCheckFunc{
         resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
         resource.TestCheckResourceAttrPair(resourceName, "approval_group", dataSourceName, "result.0.approval_group"),
         resource.TestCheckResourceAttrPair(resourceName, "approval_notify_to", dataSourceName, "result.0.approval_notify_to"),
         resource.TestCheckResourceAttrPair(resourceName, "approved_notify_to", dataSourceName, "result.0.approved_notify_to"),

@@ -18,6 +18,7 @@ import (
 
 type GridDnsModel struct {
 	Ref                                 types.String `tfsdk:"ref"`
+	Uuid                                types.String `tfsdk:"uuid"`
 	AddClientIpMacOptions               types.Bool   `tfsdk:"add_client_ip_mac_options"`
 	AllowBulkhostDdns                   types.String `tfsdk:"allow_bulkhost_ddns"`
 	AllowGssTsigZoneUpdates             types.Bool   `tfsdk:"allow_gss_tsig_zone_updates"`
@@ -172,6 +173,7 @@ type GridDnsModel struct {
 
 var GridDnsAttrTypes = map[string]attr.Type{
 	"ref":                                      types.StringType,
+	"uuid":                                     types.StringType,
 	"add_client_ip_mac_options":                types.BoolType,
 	"allow_bulkhost_ddns":                      types.StringType,
 	"allow_gss_tsig_zone_updates":              types.BoolType,
@@ -328,6 +330,10 @@ var GridDnsResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"add_client_ip_mac_options": schema.BoolAttribute{
 		Optional:            true,
@@ -1097,6 +1103,7 @@ func (m *GridDnsModel) Expand(ctx context.Context, diags *diag.Diagnostics) *gri
 	}
 	to := &grid.GridDns{
 		Ref:                                 flex.ExpandStringPointer(m.Ref),
+		Uuid:                                flex.ExpandStringPointer(m.Uuid),
 		AddClientIpMacOptions:               flex.ExpandBoolPointer(m.AddClientIpMacOptions),
 		AllowBulkhostDdns:                   flex.ExpandStringPointer(m.AllowBulkhostDdns),
 		AllowGssTsigZoneUpdates:             flex.ExpandBoolPointer(m.AllowGssTsigZoneUpdates),
@@ -1270,6 +1277,7 @@ func (m *GridDnsModel) Flatten(ctx context.Context, from *grid.GridDns, diags *d
 		*m = GridDnsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AddClientIpMacOptions = types.BoolPointerValue(from.AddClientIpMacOptions)
 	m.AllowBulkhostDdns = flex.FlattenStringPointer(from.AllowBulkhostDdns)
 	m.AllowGssTsigZoneUpdates = types.BoolPointerValue(from.AllowGssTsigZoneUpdates)

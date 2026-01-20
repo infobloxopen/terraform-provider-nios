@@ -37,6 +37,7 @@ func TestAccMsserverAdsitesSiteDataSource_Filters(t *testing.T) {
 func testAccCheckMsserverAdsitesSiteResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "domain", dataSourceName, "result.0.domain"),
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
 		resource.TestCheckResourceAttrPair(resourceName, "networks", dataSourceName, "result.0.networks"),

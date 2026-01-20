@@ -18,6 +18,7 @@ import (
 
 type MsserverAdsitesSiteModel struct {
 	Ref      types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Domain   types.String `tfsdk:"domain"`
 	Name     types.String `tfsdk:"name"`
 	Networks types.List   `tfsdk:"networks"`
@@ -25,6 +26,7 @@ type MsserverAdsitesSiteModel struct {
 
 var MsserverAdsitesSiteAttrTypes = map[string]attr.Type{
 	"ref":      types.StringType,
+    "uuid":        types.StringType,
 	"domain":   types.StringType,
 	"name":     types.StringType,
 	"networks": types.ListType{ElemType: types.StringType},
@@ -35,6 +37,10 @@ var MsserverAdsitesSiteResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"domain": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the Active Directory Domain to which the site belongs.",
@@ -97,6 +103,7 @@ func (m *MsserverAdsitesSiteModel) Flatten(ctx context.Context, from *microsofts
 		*m = MsserverAdsitesSiteModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Domain = flex.FlattenStringPointer(from.Domain)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Networks = flex.FlattenFrameworkListString(ctx, from.Networks, diags)

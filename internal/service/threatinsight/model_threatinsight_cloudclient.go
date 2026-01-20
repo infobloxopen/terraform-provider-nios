@@ -18,6 +18,7 @@ import (
 
 type ThreatinsightCloudclientModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid             types.String `tfsdk:"uuid"`
 	BlacklistRpzList types.List   `tfsdk:"blacklist_rpz_list"`
 	Enable           types.Bool   `tfsdk:"enable"`
 	ForceRefresh     types.Bool   `tfsdk:"forcerefresh"`
@@ -26,6 +27,7 @@ type ThreatinsightCloudclientModel struct {
 
 var ThreatinsightCloudclientAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"blacklist_rpz_list": types.ListType{ElemType: types.StringType},
 	"enable":             types.BoolType,
 	"forcerefresh":       types.BoolType,
@@ -36,6 +38,10 @@ var ThreatinsightCloudclientResourceSchemaAttributes = map[string]schema.Attribu
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"blacklist_rpz_list": schema.ListAttribute{
 		ElementType: types.StringType,
@@ -77,6 +83,7 @@ func (m *ThreatinsightCloudclientModel) Expand(ctx context.Context, diags *diag.
 	}
 	to := &threatinsight.ThreatinsightCloudclient{
 		Ref:              flex.ExpandStringPointer(m.Ref),
+		Uuid:             flex.ExpandStringPointer(m.Uuid),
 		BlacklistRpzList: flex.ExpandFrameworkListString(ctx, m.BlacklistRpzList, diags),
 		Enable:           flex.ExpandBoolPointer(m.Enable),
 		ForceRefresh:     flex.ExpandBoolPointer(m.ForceRefresh),
@@ -104,6 +111,7 @@ func (m *ThreatinsightCloudclientModel) Flatten(ctx context.Context, from *threa
 		*m = ThreatinsightCloudclientModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.BlacklistRpzList = flex.FlattenFrameworkListString(ctx, from.BlacklistRpzList, diags)
 	m.Enable = types.BoolPointerValue(from.Enable)
 	m.ForceRefresh = types.BoolPointerValue(from.ForceRefresh)

@@ -18,6 +18,7 @@ import (
 
 type GridCloudapiVmModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	AvailabilityZone  types.String `tfsdk:"availability_zone"`
 	CloudInfo         types.Object `tfsdk:"cloud_info"`
 	Comment           types.String `tfsdk:"comment"`
@@ -46,6 +47,7 @@ type GridCloudapiVmModel struct {
 
 var GridCloudapiVmAttrTypes = map[string]attr.Type{
 	"ref":                 types.StringType,
+	"uuid":                types.StringType,
 	"availability_zone":   types.StringType,
 	"cloud_info":          types.ObjectType{AttrTypes: GridCloudapiVmCloudInfoAttrTypes},
 	"comment":             types.StringType,
@@ -74,6 +76,10 @@ var GridCloudapiVmAttrTypes = map[string]attr.Type{
 
 var GridCloudapiVmResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
@@ -198,6 +204,7 @@ func (m *GridCloudapiVmModel) Expand(ctx context.Context, diags *diag.Diagnostic
 	}
 	to := &grid.GridCloudapiVm{
 		Ref:             flex.ExpandStringPointer(m.Ref),
+		Uuid:            flex.ExpandStringPointer(m.Uuid),
 		CloudInfo:       ExpandGridCloudapiVmCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:         flex.ExpandStringPointer(m.Comment),
 		ExtAttrs:        ExpandExtAttrs(ctx, m.ExtAttrs, diags),
@@ -229,6 +236,7 @@ func (m *GridCloudapiVmModel) Flatten(ctx context.Context, from *grid.GridClouda
 		*m = GridCloudapiVmModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AvailabilityZone = flex.FlattenStringPointer(from.AvailabilityZone)
 	m.CloudInfo = FlattenGridCloudapiVmCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

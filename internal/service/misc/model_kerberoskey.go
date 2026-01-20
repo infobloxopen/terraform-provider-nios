@@ -18,6 +18,7 @@ import (
 
 type KerberoskeyModel struct {
 	Ref             types.String `tfsdk:"ref"`
+	Uuid            types.String `tfsdk:"uuid"`
 	Domain          types.String `tfsdk:"domain"`
 	Enctype         types.String `tfsdk:"enctype"`
 	InUse           types.Bool   `tfsdk:"in_use"`
@@ -29,6 +30,7 @@ type KerberoskeyModel struct {
 
 var KerberoskeyAttrTypes = map[string]attr.Type{
 	"ref":              types.StringType,
+	"uuid":             types.StringType,
 	"domain":           types.StringType,
 	"enctype":          types.StringType,
 	"in_use":           types.BoolType,
@@ -42,6 +44,10 @@ var KerberoskeyResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"domain": schema.StringAttribute{
 		Computed:            true,
@@ -94,7 +100,8 @@ func (m *KerberoskeyModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		return nil
 	}
 	to := &misc.Kerberoskey{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -118,6 +125,7 @@ func (m *KerberoskeyModel) Flatten(ctx context.Context, from *misc.Kerberoskey, 
 		*m = KerberoskeyModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Domain = flex.FlattenStringPointer(from.Domain)
 	m.Enctype = flex.FlattenStringPointer(from.Enctype)
 	m.InUse = types.BoolPointerValue(from.InUse)

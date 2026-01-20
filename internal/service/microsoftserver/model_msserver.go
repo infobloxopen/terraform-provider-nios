@@ -18,6 +18,7 @@ import (
 
 type MsserverModel struct {
 	Ref                         types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AdDomain                    types.String `tfsdk:"ad_domain"`
 	AdSites                     types.Object `tfsdk:"ad_sites"`
 	AdUser                      types.Object `tfsdk:"ad_user"`
@@ -55,6 +56,7 @@ type MsserverModel struct {
 
 var MsserverAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
+    "uuid":        types.StringType,
 	"ad_domain":                     types.StringType,
 	"ad_sites":                      types.ObjectType{AttrTypes: MsserverAdSitesAttrTypes},
 	"ad_user":                       types.ObjectType{AttrTypes: MsserverAdUserAttrTypes},
@@ -95,6 +97,10 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"ad_domain": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The Active Directory domain to which this server belongs (if applicable).",
@@ -298,6 +304,7 @@ func (m *MsserverModel) Flatten(ctx context.Context, from *microsoftserver.Msser
 		*m = MsserverModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AdDomain = flex.FlattenStringPointer(from.AdDomain)
 	m.AdSites = FlattenMsserverAdSites(ctx, from.AdSites, diags)
 	m.AdUser = FlattenMsserverAdUser(ctx, from.AdUser, diags)

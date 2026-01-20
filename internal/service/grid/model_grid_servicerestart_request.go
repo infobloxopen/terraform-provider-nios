@@ -16,6 +16,7 @@ import (
 
 type GridServicerestartRequestModel struct {
 	Ref             types.String `tfsdk:"ref"`
+	Uuid            types.String `tfsdk:"uuid"`
 	Error           types.String `tfsdk:"error"`
 	Forced          types.Bool   `tfsdk:"forced"`
 	Group           types.String `tfsdk:"group"`
@@ -30,6 +31,7 @@ type GridServicerestartRequestModel struct {
 
 var GridServicerestartRequestAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":              types.StringType,
 	"error":             types.StringType,
 	"forced":            types.BoolType,
 	"group":             types.StringType,

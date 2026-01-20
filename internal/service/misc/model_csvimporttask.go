@@ -16,6 +16,7 @@ import (
 
 type CsvimporttaskModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	Action         types.String `tfsdk:"action"`
 	AdminName      types.String `tfsdk:"admin_name"`
 	EndTime        types.Int64  `tfsdk:"end_time"`
@@ -35,6 +36,7 @@ type CsvimporttaskModel struct {
 
 var CsvimporttaskAttrTypes = map[string]attr.Type{
 	"ref":             types.StringType,
+	"uuid":            types.StringType,
 	"action":          types.StringType,
 	"admin_name":      types.StringType,
 	"end_time":        types.Int64Type,
@@ -56,6 +58,10 @@ var CsvimporttaskResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"action": schema.StringAttribute{
 		Optional:            true,
@@ -137,6 +143,7 @@ func (m *CsvimporttaskModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	}
 	to := &misc.Csvimporttask{
 		Ref:          flex.ExpandStringPointer(m.Ref),
+		Uuid:         flex.ExpandStringPointer(m.Uuid),
 		Action:       flex.ExpandStringPointer(m.Action),
 		OnError:      flex.ExpandStringPointer(m.OnError),
 		Operation:    flex.ExpandStringPointer(m.Operation),

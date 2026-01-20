@@ -20,6 +20,7 @@ import (
 
 type MemberDhcppropertiesModel struct {
 	Ref                                   types.String `tfsdk:"ref"`
+	Uuid                                  types.String `tfsdk:"uuid"`
 	AuthServerGroup                       types.String `tfsdk:"auth_server_group"`
 	AuthnCaptivePortal                    types.String `tfsdk:"authn_captive_portal"`
 	AuthnCaptivePortalAuthenticatedFilter types.String `tfsdk:"authn_captive_portal_authenticated_filter"`
@@ -174,6 +175,7 @@ type MemberDhcppropertiesModel struct {
 
 var MemberDhcppropertiesAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+	"uuid":                 types.StringType,
 	"auth_server_group":    types.StringType,
 	"authn_captive_portal": types.StringType,
 	"authn_captive_portal_authenticated_filter": types.StringType,
@@ -330,6 +332,10 @@ var MemberDhcppropertiesResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The unique identifier for the object.",
 	},
 	"auth_server_group": schema.StringAttribute{
 		Optional:            true,
@@ -1006,6 +1012,7 @@ func (m *MemberDhcppropertiesModel) Expand(ctx context.Context, diags *diag.Diag
 	}
 	to := &grid.MemberDhcpproperties{
 		Ref:                                   flex.ExpandStringPointer(m.Ref),
+		Uuid:                                  flex.ExpandStringPointer(m.Uuid),
 		AuthServerGroup:                       flex.ExpandStringPointer(m.AuthServerGroup),
 		AuthnCaptivePortal:                    flex.ExpandStringPointer(m.AuthnCaptivePortal),
 		AuthnCaptivePortalAuthenticatedFilter: flex.ExpandStringPointer(m.AuthnCaptivePortalAuthenticatedFilter),
@@ -1171,6 +1178,7 @@ func (m *MemberDhcppropertiesModel) Flatten(ctx context.Context, from *grid.Memb
 		*m = MemberDhcppropertiesModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AuthServerGroup = flex.FlattenStringPointer(from.AuthServerGroup)
 	m.AuthnCaptivePortal = flex.FlattenStringPointer(from.AuthnCaptivePortal)
 	m.AuthnCaptivePortalAuthenticatedFilter = flex.FlattenStringPointer(from.AuthnCaptivePortalAuthenticatedFilter)

@@ -16,6 +16,7 @@ import (
 
 type DbObjectsModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	LastSequenceId types.String `tfsdk:"last_sequence_id"`
 	Object         types.String `tfsdk:"object"`
 	ObjectType     types.String `tfsdk:"object_type"`
@@ -24,6 +25,7 @@ type DbObjectsModel struct {
 
 var DbObjectsAttrTypes = map[string]attr.Type{
 	"ref":              types.StringType,
+	"uuid":             types.StringType,	
 	"last_sequence_id": types.StringType,
 	"object":           types.StringType,
 	"object_type":      types.StringType,
@@ -34,6 +36,10 @@ var DbObjectsResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"last_sequence_id": schema.StringAttribute{
 		Computed:            true,
@@ -70,7 +76,8 @@ func (m *DbObjectsModel) Expand(ctx context.Context, diags *diag.Diagnostics) *m
 		return nil
 	}
 	to := &misc.DbObjects{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -94,6 +101,7 @@ func (m *DbObjectsModel) Flatten(ctx context.Context, from *misc.DbObjects, diag
 		*m = DbObjectsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.LastSequenceId = flex.FlattenStringPointer(from.LastSequenceId)
 	m.Object = flex.FlattenStringPointer(from.Object)
 	m.ObjectType = flex.FlattenStringPointer(from.ObjectType)

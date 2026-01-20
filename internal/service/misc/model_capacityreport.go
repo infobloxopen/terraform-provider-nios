@@ -18,6 +18,7 @@ import (
 
 type CapacityreportModel struct {
 	Ref          types.String `tfsdk:"ref"`
+	Uuid         types.String `tfsdk:"uuid"`
 	HardwareType types.String `tfsdk:"hardware_type"`
 	MaxCapacity  types.Int64  `tfsdk:"max_capacity"`
 	Name         types.String `tfsdk:"name"`
@@ -29,6 +30,7 @@ type CapacityreportModel struct {
 
 var CapacityreportAttrTypes = map[string]attr.Type{
 	"ref":           types.StringType,
+	"uuid":          types.StringType,
 	"hardware_type": types.StringType,
 	"max_capacity":  types.Int64Type,
 	"name":          types.StringType,
@@ -42,6 +44,10 @@ var CapacityreportResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"hardware_type": schema.StringAttribute{
 		Computed:            true,
@@ -96,7 +102,8 @@ func (m *CapacityreportModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		return nil
 	}
 	to := &misc.Capacityreport{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -120,6 +127,7 @@ func (m *CapacityreportModel) Flatten(ctx context.Context, from *misc.Capacityre
 		*m = CapacityreportModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.HardwareType = flex.FlattenStringPointer(from.HardwareType)
 	m.MaxCapacity = flex.FlattenInt64Pointer(from.MaxCapacity)
 	m.Name = flex.FlattenStringPointer(from.Name)

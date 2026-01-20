@@ -18,6 +18,7 @@ import (
 
 type ThreatprotectionRulesetModel struct {
 	Ref                   types.String `tfsdk:"ref"`
+	Uuid                  types.String `tfsdk:"uuid"`
 	AddType               types.String `tfsdk:"add_type"`
 	AddedTime             types.Int64  `tfsdk:"added_time"`
 	Comment               types.String `tfsdk:"comment"`
@@ -29,6 +30,7 @@ type ThreatprotectionRulesetModel struct {
 
 var ThreatprotectionRulesetAttrTypes = map[string]attr.Type{
 	"ref":                      types.StringType,
+	"uuid":                     types.StringType,
 	"add_type":                 types.StringType,
 	"added_time":               types.Int64Type,
 	"comment":                  types.StringType,
@@ -42,6 +44,10 @@ var ThreatprotectionRulesetResourceSchemaAttributes = map[string]schema.Attribut
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"add_type": schema.StringAttribute{
 		Computed:            true,
@@ -97,6 +103,7 @@ func (m *ThreatprotectionRulesetModel) Expand(ctx context.Context, diags *diag.D
 		Ref:         flex.ExpandStringPointer(m.Ref),
 		Comment:     flex.ExpandStringPointer(m.Comment),
 		DoNotDelete: flex.ExpandBoolPointer(m.DoNotDelete),
+		Uuid:        flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -120,6 +127,7 @@ func (m *ThreatprotectionRulesetModel) Flatten(ctx context.Context, from *threat
 		*m = ThreatprotectionRulesetModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AddType = flex.FlattenStringPointer(from.AddType)
 	m.AddedTime = flex.FlattenInt64Pointer(from.AddedTime)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

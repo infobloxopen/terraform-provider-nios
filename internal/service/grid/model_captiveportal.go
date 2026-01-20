@@ -18,6 +18,7 @@ import (
 
 type CaptiveportalModel struct {
 	Ref                       types.String `tfsdk:"ref"`
+	Uuid                      types.String `tfsdk:"uuid"`
 	AuthnServerGroup          types.String `tfsdk:"authn_server_group"`
 	CompanyName               types.String `tfsdk:"company_name"`
 	EnableSyslogAuthFailure   types.Bool   `tfsdk:"enable_syslog_auth_failure"`
@@ -52,6 +53,7 @@ type CaptiveportalModel struct {
 
 var CaptiveportalAttrTypes = map[string]attr.Type{
 	"ref":                          types.StringType,
+	"uuid":                         types.StringType,
 	"authn_server_group":           types.StringType,
 	"company_name":                 types.StringType,
 	"enable_syslog_auth_failure":   types.BoolType,
@@ -86,6 +88,10 @@ var CaptiveportalAttrTypes = map[string]attr.Type{
 
 var CaptiveportalResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
@@ -235,6 +241,7 @@ func (m *CaptiveportalModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	}
 	to := &grid.Captiveportal{
 		Ref:                       flex.ExpandStringPointer(m.Ref),
+		Uuid:                      flex.ExpandStringPointer(m.Uuid),
 		AuthnServerGroup:          flex.ExpandStringPointer(m.AuthnServerGroup),
 		CompanyName:               flex.ExpandStringPointer(m.CompanyName),
 		EnableSyslogAuthFailure:   flex.ExpandBoolPointer(m.EnableSyslogAuthFailure),
@@ -287,6 +294,7 @@ func (m *CaptiveportalModel) Flatten(ctx context.Context, from *grid.Captiveport
 		*m = CaptiveportalModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AuthnServerGroup = flex.FlattenStringPointer(from.AuthnServerGroup)
 	m.CompanyName = flex.FlattenStringPointer(from.CompanyName)
 	m.EnableSyslogAuthFailure = types.BoolPointerValue(from.EnableSyslogAuthFailure)

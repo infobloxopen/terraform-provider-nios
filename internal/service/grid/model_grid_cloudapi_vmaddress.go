@@ -18,6 +18,7 @@ import (
 
 type GridCloudapiVmaddressModel struct {
 	Ref                   types.String `tfsdk:"ref"`
+	Uuid                  types.String `tfsdk:"uuid"`
 	Address               types.String `tfsdk:"address"`
 	AddressType           types.String `tfsdk:"address_type"`
 	AssociatedIp          types.String `tfsdk:"associated_ip"`
@@ -61,6 +62,7 @@ type GridCloudapiVmaddressModel struct {
 
 var GridCloudapiVmaddressAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"address":                 types.StringType,
 	"address_type":            types.StringType,
 	"associated_ip":           types.StringType,
@@ -104,6 +106,10 @@ var GridCloudapiVmaddressAttrTypes = map[string]attr.Type{
 
 var GridCloudapiVmaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
@@ -295,6 +301,7 @@ func (m *GridCloudapiVmaddressModel) Expand(ctx context.Context, diags *diag.Dia
 	}
 	to := &grid.GridCloudapiVmaddress{
 		Ref:          flex.ExpandStringPointer(m.Ref),
+		Uuid:         flex.ExpandStringPointer(m.Uuid),
 		CloudInfo:    ExpandGridCloudapiVmaddressCloudInfo(ctx, m.CloudInfo, diags),
 		MsAdUserData: ExpandGridCloudapiVmaddressMsAdUserData(ctx, m.MsAdUserData, diags),
 	}
@@ -320,6 +327,7 @@ func (m *GridCloudapiVmaddressModel) Flatten(ctx context.Context, from *grid.Gri
 		*m = GridCloudapiVmaddressModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.AddressType = flex.FlattenStringPointer(from.AddressType)
 	m.AssociatedIp = flex.FlattenStringPointer(from.AssociatedIp)

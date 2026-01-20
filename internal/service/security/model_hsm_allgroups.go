@@ -18,11 +18,13 @@ import (
 
 type HsmAllgroupsModel struct {
 	Ref    types.String `tfsdk:"ref"`
+	Uuid   types.String `tfsdk:"uuid"`
 	Groups types.List   `tfsdk:"groups"`
 }
 
 var HsmAllgroupsAttrTypes = map[string]attr.Type{
 	"ref":    types.StringType,
+	"uuid":   types.StringType,
 	"groups": types.ListType{ElemType: types.StringType},
 }
 
@@ -30,6 +32,10 @@ var HsmAllgroupsResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"groups": schema.ListAttribute{
 		ElementType: types.StringType,
@@ -59,6 +65,7 @@ func (m *HsmAllgroupsModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 	}
 	to := &security.HsmAllgroups{
 		Ref:    flex.ExpandStringPointer(m.Ref),
+		Uuid:   flex.ExpandStringPointer(m.Uuid),
 		Groups: flex.ExpandFrameworkListString(ctx, m.Groups, diags),
 	}
 	return to
@@ -83,5 +90,6 @@ func (m *HsmAllgroupsModel) Flatten(ctx context.Context, from *security.HsmAllgr
 		*m = HsmAllgroupsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Groups = flex.FlattenFrameworkListString(ctx, from.Groups, diags)
 }

@@ -16,11 +16,13 @@ import (
 
 type ThreatinsightModulesetModel struct {
 	Ref     types.String `tfsdk:"ref"`
+	Uuid    types.String `tfsdk:"uuid"`
 	Version types.String `tfsdk:"version"`
 }
 
 var ThreatinsightModulesetAttrTypes = map[string]attr.Type{
 	"ref":     types.StringType,
+	"uuid":    types.StringType,
 	"version": types.StringType,
 }
 
@@ -28,6 +30,10 @@ var ThreatinsightModulesetResourceSchemaAttributes = map[string]schema.Attribute
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"version": schema.StringAttribute{
 		Computed:            true,
@@ -52,7 +58,8 @@ func (m *ThreatinsightModulesetModel) Expand(ctx context.Context, diags *diag.Di
 		return nil
 	}
 	to := &threatinsight.ThreatinsightModuleset{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -76,5 +83,6 @@ func (m *ThreatinsightModulesetModel) Flatten(ctx context.Context, from *threati
 		*m = ThreatinsightModulesetModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Version = flex.FlattenStringPointer(from.Version)
 }

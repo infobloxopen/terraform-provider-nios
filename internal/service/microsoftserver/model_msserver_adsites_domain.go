@@ -16,6 +16,7 @@ import (
 
 type MsserverAdsitesDomainModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid             types.String `tfsdk:"uuid"`
 	EaDefinition     types.String `tfsdk:"ea_definition"`
 	MsSyncMasterName types.String `tfsdk:"ms_sync_master_name"`
 	Name             types.String `tfsdk:"name"`
@@ -26,6 +27,7 @@ type MsserverAdsitesDomainModel struct {
 
 var MsserverAdsitesDomainAttrTypes = map[string]attr.Type{
 	"ref":                 types.StringType,
+	"uuid":                types.StringType,
 	"ea_definition":       types.StringType,
 	"ms_sync_master_name": types.StringType,
 	"name":                types.StringType,
@@ -38,6 +40,10 @@ var MsserverAdsitesDomainResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"ea_definition": schema.StringAttribute{
 		Computed:            true,
@@ -82,7 +88,8 @@ func (m *MsserverAdsitesDomainModel) Expand(ctx context.Context, diags *diag.Dia
 		return nil
 	}
 	to := &microsoftserver.MsserverAdsitesDomain{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
+		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to
 }
@@ -106,6 +113,7 @@ func (m *MsserverAdsitesDomainModel) Flatten(ctx context.Context, from *microsof
 		*m = MsserverAdsitesDomainModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.EaDefinition = flex.FlattenStringPointer(from.EaDefinition)
 	m.MsSyncMasterName = flex.FlattenStringPointer(from.MsSyncMasterName)
 	m.Name = flex.FlattenStringPointer(from.Name)

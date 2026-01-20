@@ -18,6 +18,7 @@ import (
 
 type MemberThreatprotectionModel struct {
 	Ref                                      types.String `tfsdk:"ref"`
+	Uuid                                     types.String `tfsdk:"uuid"`
 	Comment                                  types.String `tfsdk:"comment"`
 	CurrentRuleset                           types.String `tfsdk:"current_ruleset"`
 	DisableMultipleDnsTcpRequest             types.Bool   `tfsdk:"disable_multiple_dns_tcp_request"`
@@ -43,6 +44,7 @@ type MemberThreatprotectionModel struct {
 
 var MemberThreatprotectionAttrTypes = map[string]attr.Type{
 	"ref":                              types.StringType,
+	"uuid":                             types.StringType,
 	"comment":                          types.StringType,
 	"current_ruleset":                  types.StringType,
 	"disable_multiple_dns_tcp_request": types.BoolType,
@@ -70,6 +72,10 @@ var MemberThreatprotectionResourceSchemaAttributes = map[string]schema.Attribute
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"comment": schema.StringAttribute{
 		Computed:            true,
@@ -181,6 +187,7 @@ func (m *MemberThreatprotectionModel) Expand(ctx context.Context, diags *diag.Di
 	}
 	to := &grid.MemberThreatprotection{
 		Ref:                                      flex.ExpandStringPointer(m.Ref),
+		Uuid:                                     flex.ExpandStringPointer(m.Uuid),
 		CurrentRuleset:                           flex.ExpandStringPointer(m.CurrentRuleset),
 		DisableMultipleDnsTcpRequest:             flex.ExpandBoolPointer(m.DisableMultipleDnsTcpRequest),
 		EnableAccelRespBeforeThreatProtection:    flex.ExpandBoolPointer(m.EnableAccelRespBeforeThreatProtection),
@@ -219,6 +226,7 @@ func (m *MemberThreatprotectionModel) Flatten(ctx context.Context, from *grid.Me
 		*m = MemberThreatprotectionModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CurrentRuleset = flex.FlattenStringPointer(from.CurrentRuleset)
 	m.DisableMultipleDnsTcpRequest = types.BoolPointerValue(from.DisableMultipleDnsTcpRequest)

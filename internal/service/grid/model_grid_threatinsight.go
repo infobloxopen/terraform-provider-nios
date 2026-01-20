@@ -18,6 +18,7 @@ import (
 
 type GridThreatinsightModel struct {
 	Ref                              types.String `tfsdk:"ref"`
+	Uuid                             types.String `tfsdk:"uuid"`
 	AllowlistUpdatePolicy            types.String `tfsdk:"allowlist_update_policy"`
 	ConfigureDomainCollapsing        types.Bool   `tfsdk:"configure_domain_collapsing"`
 	CurrentAllowlist                 types.String `tfsdk:"current_allowlist"`
@@ -44,6 +45,7 @@ type GridThreatinsightModel struct {
 
 var GridThreatinsightAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"allowlist_update_policy":             types.StringType,
 	"configure_domain_collapsing":         types.BoolType,
 	"current_allowlist":                   types.StringType,
@@ -72,6 +74,10 @@ var GridThreatinsightResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"allowlist_update_policy": schema.StringAttribute{
 		Optional:            true,
@@ -185,6 +191,7 @@ func (m *GridThreatinsightModel) Expand(ctx context.Context, diags *diag.Diagnos
 	}
 	to := &grid.GridThreatinsight{
 		Ref:                              flex.ExpandStringPointer(m.Ref),
+		Uuid:                             flex.ExpandStringPointer(m.Uuid),
 		AllowlistUpdatePolicy:            flex.ExpandStringPointer(m.AllowlistUpdatePolicy),
 		ConfigureDomainCollapsing:        flex.ExpandBoolPointer(m.ConfigureDomainCollapsing),
 		DnsTunnelBlockListRpzZones:       flex.ExpandFrameworkListString(ctx, m.DnsTunnelBlockListRpzZones, diags),
@@ -219,6 +226,7 @@ func (m *GridThreatinsightModel) Flatten(ctx context.Context, from *grid.GridThr
 		*m = GridThreatinsightModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowlistUpdatePolicy = flex.FlattenStringPointer(from.AllowlistUpdatePolicy)
 	m.ConfigureDomainCollapsing = types.BoolPointerValue(from.ConfigureDomainCollapsing)
 	m.CurrentAllowlist = flex.FlattenStringPointer(from.CurrentAllowlist)

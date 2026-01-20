@@ -18,18 +18,24 @@ import (
 
 type GmcscheduleModel struct {
 	Ref                      types.String `tfsdk:"ref"`
+	Uuid                     types.String `tfsdk:"uuid"`
 	ActivateGmcGroupSchedule types.Bool   `tfsdk:"activate_gmc_group_schedule"`
 	GmcGroups                types.List   `tfsdk:"gmc_groups"`
 }
 
 var GmcscheduleAttrTypes = map[string]attr.Type{
 	"ref":                         types.StringType,
+	"uuid":                        types.StringType,
 	"activate_gmc_group_schedule": types.BoolType,
 	"gmc_groups":                  types.ListType{ElemType: types.StringType},
 }
 
 var GmcscheduleResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
@@ -89,6 +95,7 @@ func (m *GmcscheduleModel) Flatten(ctx context.Context, from *grid.Gmcschedule, 
 		*m = GmcscheduleModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ActivateGmcGroupSchedule = types.BoolPointerValue(from.ActivateGmcGroupSchedule)
 	m.GmcGroups = flex.FlattenFrameworkListString(ctx, from.GmcGroups, diags)
 }

@@ -18,6 +18,7 @@ import (
 
 type HsmThaleslunagroupModel struct {
 	Ref        types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment    types.String `tfsdk:"comment"`
 	GroupSn    types.String `tfsdk:"group_sn"`
 	HsmVersion types.String `tfsdk:"hsm_version"`
@@ -29,6 +30,7 @@ type HsmThaleslunagroupModel struct {
 
 var HsmThaleslunagroupAttrTypes = map[string]attr.Type{
 	"ref":         types.StringType,
+    "uuid":        types.StringType,
 	"comment":     types.StringType,
 	"group_sn":    types.StringType,
 	"hsm_version": types.StringType,
@@ -43,6 +45,10 @@ var HsmThaleslunagroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The HSM Thales Luna group comment.",
@@ -125,6 +131,7 @@ func (m *HsmThaleslunagroupModel) Flatten(ctx context.Context, from *security.Hs
 		*m = HsmThaleslunagroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.GroupSn = flex.FlattenStringPointer(from.GroupSn)
 	m.HsmVersion = flex.FlattenStringPointer(from.HsmVersion)
