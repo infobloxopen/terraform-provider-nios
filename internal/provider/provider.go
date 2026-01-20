@@ -174,6 +174,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcRecordSrvResource,
 		dtc.NewDtcRecordNaptrResource,
 		dtc.NewDtcRecordCnameResource,
+		dtc.NewDtcRecordAaaaResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworktemplateResource,
@@ -230,6 +231,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameIpaddressResource,
 		rpz.NewRecordRpzAIpaddressResource,
 		rpz.NewRecordRpzAaaaIpaddressResource,
+		rpz.NewRecordRpzCnameClientipaddressResource,
 		rpz.NewRecordRpzCnameIpaddressdnResource,
 		rpz.NewRecordRpzCnameClientipaddressdnResource,
 	}
@@ -312,6 +314,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcRecordSrvDataSource,
 		dtc.NewDtcRecordNaptrDataSource,
 		dtc.NewDtcRecordCnameDataSource,
+		dtc.NewDtcRecordAaaaDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworktemplateDataSource,
@@ -369,6 +372,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameIpaddressDataSource,
 		rpz.NewRecordRpzAIpaddressDataSource,
 		rpz.NewRecordRpzAaaaIpaddressDataSource,
+		rpz.NewRecordRpzCnameClientipaddressDataSource,
 		rpz.NewRecordRpzCnameIpaddressdnDataSource,
 		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
 	}
