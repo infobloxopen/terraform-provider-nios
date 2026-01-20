@@ -80,7 +80,7 @@ func (v domainNameValidator) ValidateString(ctx context.Context, req validator.S
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Invalid Domain Name Format",
-			fmt.Sprintf("%s", err.Error()),
+			err.Error(),
 		)
 	}
 }
