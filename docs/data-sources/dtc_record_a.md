@@ -13,8 +13,6 @@ Retrieves information about existing DTC A Records.
 ## Example Usage
 
 ```terraform
-// Note: DTC A Record cannot be retrieved without filters. The dtc_server filter is mandatory for all queries.
-
 // Retrieve a specific DTC A Record in a DTC server using filters 
 data "nios_dtc_record_a" "get_dtc_record_a_in_dtc_server_using_filters" {
   filters = {
