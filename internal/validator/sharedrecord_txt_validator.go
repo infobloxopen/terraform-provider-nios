@@ -34,6 +34,7 @@ func (v noLeadingTrailingWhitespaceUnlessQuoted) ValidateString(ctx context.Cont
 	if str == "\"\"" {
 		resp.Diagnostics.AddAttributeError(req.Path, "Invalid value for text",
 			fmt.Sprintf(`Invalid value for text: %q: empty string with quotes is not allowed.`, str))
+		return
 	}
 
 	isQuoted := strings.HasPrefix(str, "\"") && strings.HasSuffix(str, "\"")
