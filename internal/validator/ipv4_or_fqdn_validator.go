@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"strings"
 
@@ -43,14 +44,16 @@ func (v iPv4OrFQDNValidator) ValidateString(ctx context.Context, req validator.S
 		return
 	}
 
-	validFQDN := fqdnValidator{}
+	validFQDN := domainNameValidator{
+		isMultiLabel: true,
+	}
 	fqdnResp := &validator.StringResponse{}
 	validFQDN.ValidateString(ctx, req, fqdnResp)
 
 	if fqdnResp.Diagnostics.HasError() {
 		resp.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
 			req.Path,
-			"Invalid FQDN. Must be a valid FQDN without leading/trailing whitespace, trailing dot or uppercase characters.",
+			fmt.Sprintf("Invalid FQDN. Got Error : %s", fqdnResp.Diagnostics.Errors()[0].Detail()),
 			value,
 		))
 	}
