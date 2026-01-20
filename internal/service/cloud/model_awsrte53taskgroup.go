@@ -19,6 +19,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -73,14 +74,23 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"account_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The AWS Account ID associated with this task group.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"accounts_list": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The AWS Account IDs list associated with this task group.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"aws_account_ids_file_token": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The AWS account IDs file's token.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"aws_account_ids_file_path": schema.StringAttribute{
 		Optional:            true,
@@ -184,6 +194,9 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"sync_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Indicate the overall sync status of this task group.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"task_list": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

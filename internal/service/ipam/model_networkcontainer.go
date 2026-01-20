@@ -29,6 +29,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -359,6 +360,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Discover now status for this network container.",
 		Default:             stringdefault.StaticString("NONE"),
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovery_basic_poll_settings": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerDiscoveryBasicPollSettingsResourceSchemaAttributes,
@@ -382,6 +386,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The network discovery engine type.",
 		Default:             stringdefault.StaticString("NONE"),
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovery_member": schema.StringAttribute{
 		Optional:            true,
@@ -456,6 +463,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The endpoints that provides data for the DHCP Network Container object.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,
@@ -552,10 +562,16 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_rir_registration_update_sent": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when the last RIR registration update was sent.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"last_rir_registration_update_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Last RIR registration update status.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"lease_scavenge_time": schema.Int64Attribute{
 		Optional:            true,
@@ -614,6 +630,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "This field is assumed to be True unless filled by any conforming objects, such as Network, IPv6 Network, Network Container, IPv6 Network Container, and Network View. This value is set to False if mgm_private is set to True in the parent object.",
 		Default:             booldefault.StaticBool(true),
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerMsAdUserDataResourceSchemaAttributes,
@@ -645,6 +664,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The network container to which this network belongs, if any.",
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
+			plancontrol.UseStateForUnknownString(),
 		},
 	},
 	"network_view": schema.StringAttribute{
@@ -725,6 +745,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the network container address space.",
 		Default:             stringdefault.StaticString("NONE"),
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
@@ -961,6 +984,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"utilization": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The network container utilization in percentage.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"zone_associations": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

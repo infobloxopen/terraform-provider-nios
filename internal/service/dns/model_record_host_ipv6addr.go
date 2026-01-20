@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -16,6 +17,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type RecordHostIpv6addrModel struct {
@@ -99,14 +101,23 @@ var RecordHostIpv6addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"configure_for_dhcp": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Set this to True to enable the DHCP configuration for this IPv6 host address.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"discover_now_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The discovery status of this IPv6 Host Address.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"discovered_data": schema.SingleNestedAttribute{
 		Attributes: RecordHostIpv6addrDiscoveredDataResourceSchemaAttributes,
 		Computed:   true,
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"domain_name": schema.StringAttribute{
 		Optional:            true,
@@ -121,10 +132,16 @@ var RecordHostIpv6addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"duid": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "DHCPv6 Unique Identifier (DUID) of the address object.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"host": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The host to which the IPv6 host address belongs, in FQDN format. It is only present when the host address object is not returned as part of a host.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ipv6addr": schema.StringAttribute{
 		CustomType:          iptypes.IPv6AddressType{},
@@ -152,6 +169,9 @@ var RecordHostIpv6addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"logic_filter_rules": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -163,10 +183,16 @@ var RecordHostIpv6addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"mac": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The MAC address for this host address.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"match_client": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The match_client value for this fixed address. Valid values are: \"DUID\": The host IP address is leased to the matching DUID. \"MAC_ADDRESS\": The host IP address is leased to the matching MAC address.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes: RecordHostIpv6addrMsAdUserDataResourceSchemaAttributes,
@@ -175,10 +201,16 @@ var RecordHostIpv6addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"network": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The network of the host address, in FQDN/CIDR format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"network_view": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the network view in which the host address resides.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"options": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

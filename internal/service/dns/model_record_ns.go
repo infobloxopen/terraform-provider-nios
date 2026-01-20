@@ -16,6 +16,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -68,18 +69,30 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RecordNsCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The cloud information associated with the record.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"creator": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The record creator.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the NS record in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"ms_delegation_name": schema.StringAttribute{
 		Computed:            true,
@@ -106,6 +119,9 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	"policy": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The host name policy for the record.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"view": schema.StringAttribute{
 		Optional:            true,
@@ -119,6 +135,9 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	"zone": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the zone in which the record resides. Example: \"zone.com\". If a view is not specified when searching by zone, the default view is used.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 

@@ -23,6 +23,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -268,6 +269,9 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_restricted_user_access": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines whether the restrictions will be applied to the admin connector level for users of this Admin Group.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:            true,

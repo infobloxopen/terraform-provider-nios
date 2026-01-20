@@ -7,12 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type ViewCustomRootNameServersModel struct {
@@ -50,26 +52,44 @@ var ViewCustomRootNameServersResourceSchemaAttributes = map[string]schema.Attrib
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "This flag represents whether the name server is shared with the parent Microsoft primary zone's delegation server.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"stealth": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"tsig_key": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "A generated TSIG key.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"tsig_key_alg": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The TSIG key algorithm.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"tsig_key_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The TSIG key name.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"use_tsig_key_name": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Use flag for: tsig_key_name",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 }
 

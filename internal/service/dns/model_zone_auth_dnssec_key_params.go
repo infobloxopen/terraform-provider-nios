@@ -8,12 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 )
 
 type ZoneAuthDnssecKeyParamsModel struct {
@@ -70,6 +72,9 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 			stringvalidator.OneOf("10", "13", "14", "5", "7", "8"),
 		},
 		MarkdownDescription: "Key Signing Key algorithm. Use KSK Algorithms instead.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ksk_algorithms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -90,6 +95,9 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 	"ksk_size": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "Key Signing Key size, in bits. Use KSK Algorithms instead.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"next_secure_type": schema.StringAttribute{
 		Optional: true,
@@ -143,6 +151,9 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 			stringvalidator.OneOf("10", "13", "14", "5", "7", "8"),
 		},
 		MarkdownDescription: "Zone Signing Key algorithm. Use ZSK Algorithms instead.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"zsk_algorithms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -171,6 +182,9 @@ var ZoneAuthDnssecKeyParamsResourceSchemaAttributes = map[string]schema.Attribut
 	"zsk_size": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "Zone Signing Key size, in bits. Use ZSK Algorithms instead.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 }
 

@@ -19,6 +19,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -92,10 +93,16 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 	"is_default": schema.BoolAttribute{
 		Computed:            true,
 		MarkdownDescription: "Determines if this Restart Group is the default group.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"last_updated_time": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The timestamp when the status of the latest request has changed.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"members": schema.ListAttribute{
 		ElementType: types.StringType,
@@ -125,6 +132,9 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 	"position": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The order to restart.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"recurring_schedule": schema.SingleNestedAttribute{
 		Attributes: GridServicerestartGroupRecurringScheduleResourceSchemaAttributes,
@@ -135,6 +145,9 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The list of requests associated with a restart group.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"service": schema.StringAttribute{
 		Required: true,
@@ -147,6 +160,9 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 		Attributes:          GridServicerestartStatusResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The restart status for a restart group.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 }
 

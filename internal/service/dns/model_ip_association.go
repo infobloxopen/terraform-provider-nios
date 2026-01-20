@@ -5,10 +5,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -55,6 +57,9 @@ var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 	"internal_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Internal ID of the IP association.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"mac": schema.StringAttribute{
 		CustomType:          internaltypes.MACAddressType{},

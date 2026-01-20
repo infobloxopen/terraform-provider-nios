@@ -26,6 +26,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/plancontrol"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -133,6 +134,9 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"allow_telnet": schema.BoolAttribute{
 		Computed:            true, // Setting this as computed only as backend is not setting the value correctly, needs to be fixed in future(temporary workaround)
 		MarkdownDescription: "This field controls whether the credential is used for both the Telnet and SSH credentials. If set to False, the credential is used only for SSH.",
+		PlanModifiers: []planmodifier.Bool{
+			plancontrol.UseStateForUnknownBool(),
+		},
 	},
 	"cli_credentials": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -151,6 +155,9 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          RecordHostCloudInfoResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "Structure containing all cloud API related information for this object.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -170,6 +177,9 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"creation_time": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the record creation in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"ddns_protected": schema.BoolAttribute{
 		Optional:            true,
@@ -229,10 +239,16 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The list of aliases for the host in punycode format.",
+		PlanModifiers: []planmodifier.List{
+			plancontrol.UseStateForUnknownList(),
+		},
 	},
 	"dns_name": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name for a host record in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"enable_immediate_discovery": schema.BoolAttribute{
 		Optional:            true,
@@ -259,6 +275,9 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"internal_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "Internal ID of the object.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 	"ipv4addrs": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -283,11 +302,17 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"last_queried": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "The time of the last DNS query in Epoch seconds format.",
+		PlanModifiers: []planmodifier.Int64{
+			plancontrol.UseStateForUnknownInt64(),
+		},
 	},
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes:          RecordHostMsAdUserDataResourceSchemaAttributes,
 		Computed:            true,
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
+		PlanModifiers: []planmodifier.Object{
+			plancontrol.UseStateForUnknownObject(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
@@ -376,6 +401,9 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"zone": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the zone in which the record resides. Example: \"zone.com\". If a view is not specified when searching by zone, the default view is used.",
+		PlanModifiers: []planmodifier.String{
+			plancontrol.UseStateForUnknownString(),
+		},
 	},
 }
 
