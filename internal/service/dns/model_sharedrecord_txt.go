@@ -175,13 +175,13 @@ func (m *SharedrecordTxtModel) Flatten(ctx context.Context, from *dns.Sharedreco
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SharedRecordGroup = flex.FlattenStringPointer(from.SharedRecordGroup)
-	m.Text = normalizeAPIToState(*from.Text)
+	m.Text = FlattenText(*from.Text)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
 }
 
-// apiVal is exactly what WAPI returns: "\"\"" or "\"    hello\"" or "hello world", etc.
-func normalizeAPIToState(apiVal string) types.String {
+// FlattenText handles quoted empty and empty string
+func FlattenText(apiVal string) types.String {
 	if apiVal == "\"\"" || apiVal == "" {
 		return types.StringValue("") // canonical empty
 	} else {
