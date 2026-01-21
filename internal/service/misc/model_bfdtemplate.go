@@ -118,9 +118,8 @@ func (m *BfdtemplateModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		return nil
 	}
 	to := &misc.Bfdtemplate{
-		AuthenticationKey:   flex.ExpandStringPointer(m.AuthenticationKey),
-		AuthenticationKeyId: flex.ExpandInt64Pointer(m.AuthenticationKeyId),
-		AuthenticationType:  flex.ExpandStringPointer(m.AuthenticationType),
+		// AuthenticationKey:   flex.ExpandStringPointer(m.AuthenticationKey),
+		// AuthenticationKeyId: flex.ExpandInt64Pointer(m.AuthenticationKeyId), AuthenticationType:  flex.ExpandStringPointer(m.AuthenticationType),
 		DetectionMultiplier: flex.ExpandInt64Pointer(m.DetectionMultiplier),
 		MinRxInterval:       flex.ExpandInt64Pointer(m.MinRxInterval),
 		MinTxInterval:       flex.ExpandInt64Pointer(m.MinTxInterval),
@@ -149,8 +148,8 @@ func (m *BfdtemplateModel) Flatten(ctx context.Context, from *misc.Bfdtemplate, 
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
     m.Uuid = flex.FlattenStringPointer(from.Uuid)
-	m.AuthenticationKeyId = flex.FlattenInt64Pointer(from.AuthenticationKeyId)
-	m.AuthenticationType = flex.FlattenStringPointer(from.AuthenticationType)
+	// m.AuthenticationKeyId = flex.FlattenInt64Pointer(from.AuthenticationKeyId)
+	// m.AuthenticationType = flex.FlattenStringPointer(from.AuthenticationType)
 	m.DetectionMultiplier = flex.FlattenInt64Pointer(from.DetectionMultiplier)
 	m.MinRxInterval = flex.FlattenInt64Pointer(from.MinRxInterval)
 	m.MinTxInterval = flex.FlattenInt64Pointer(from.MinTxInterval)
