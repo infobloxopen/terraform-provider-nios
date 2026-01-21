@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForNatgroup = "comment,name"
@@ -103,7 +101,7 @@ func (r *NatgroupResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	apiRes, httpRes, err := r.client.GridAPI.
 		NatgroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForNatgroup).
 		ReturnAsObject(1).
 		Execute()
@@ -138,7 +136,7 @@ func (r *NatgroupResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -146,7 +144,7 @@ func (r *NatgroupResource) Update(ctx context.Context, req resource.UpdateReques
 
 	apiRes, _, err := r.client.GridAPI.
 		NatgroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Natgroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNatgroup).
 		ReturnAsObject(1).
@@ -176,7 +174,7 @@ func (r *NatgroupResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	httpRes, err := r.client.GridAPI.
 		NatgroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

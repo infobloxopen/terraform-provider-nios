@@ -16,8 +16,6 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForIPAllocation = "aliases,allow_telnet,cli_credentials,cloud_info,comment,configure_for_dns,creation_time,ddns_protected,device_description,device_location,device_type,device_vendor,disable,disable_discovery,dns_aliases,dns_name,extattrs,ipv4addrs,ipv6addrs,last_queried,ms_ad_user_data,name,network_view,rrset_order,snmp3_credential,snmp_credential,ttl,use_cli_credentials,use_dns_ea_inheritance,use_snmp3_credential,use_snmp_credential,use_ttl,view,zone"
@@ -217,7 +215,7 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
@@ -345,7 +343,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -385,7 +383,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	// Read current state from backend to preserve DHCP settings
 	currentApiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
@@ -424,7 +422,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordHost(*updateReq).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
@@ -504,7 +502,7 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -522,7 +520,7 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 			// Attempt delete using the foundRef
 			httpResDel, errDel := r.client.DNSAPI.
 				RecordHostAPI.
-				Delete(ctx, utils.ExtractResourceRef(foundRef)).
+				Delete(ctx, data.Uuid.ValueString()).
 				Execute()
 			if errDel != nil {
 				if httpResDel != nil && httpResDel.StatusCode == http.StatusNotFound {
@@ -539,7 +537,7 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 }
 
 func (r *IPAllocationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

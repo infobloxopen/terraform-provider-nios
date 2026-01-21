@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDtcPool = "auto_consolidated_monitors,availability,comment,consolidated_monitors,disable,extattrs,health,lb_alternate_method,lb_alternate_topology,lb_dynamic_ratio_alternate,lb_dynamic_ratio_preferred,lb_preferred_method,lb_preferred_topology,monitors,name,quorum,servers,ttl,use_ttl"
@@ -124,7 +122,7 @@ func (r *DtcPoolResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcPoolAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDtcPool).
 		ReturnAsObject(1).
 		Execute()
@@ -242,7 +240,7 @@ func (r *DtcPoolResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -274,7 +272,7 @@ func (r *DtcPoolResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcPoolAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		DtcPool(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDtcPool).
 		ReturnAsObject(1).
@@ -314,7 +312,7 @@ func (r *DtcPoolResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	httpRes, err := r.client.DTCAPI.
 		DtcPoolAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -326,7 +324,7 @@ func (r *DtcPoolResource) Delete(ctx context.Context, req resource.DeleteRequest
 }
 
 func (r *DtcPoolResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

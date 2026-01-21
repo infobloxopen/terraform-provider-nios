@@ -16,7 +16,6 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForIPAssociation = "aliases,allow_telnet,cli_credentials,cloud_info,comment,configure_for_dns,creation_time,ddns_protected,device_description,device_location,device_type,device_vendor,disable,disable_discovery,dns_aliases,dns_name,extattrs,ipv4addrs,ipv6addrs,last_queried,ms_ad_user_data,name,network_view,rrset_order,snmp3_credential,snmp_credential,ttl,use_cli_credentials,use_dns_ea_inheritance,use_snmp3_credential,use_snmp_credential,use_ttl,view,zone"
@@ -152,7 +151,7 @@ func (r *IPAssociationResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -267,19 +266,19 @@ func (r *IPAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.Re
 	return "", fmt.Errorf("terraform internal ID not found in extensible attributes")
 }
 
-func (r *IPAssociationResource) getHostRecordByRef(ctx context.Context, ref string) (*dns.RecordHost, bool, error) {
+func (r *IPAssociationResource) getHostRecordByRef(ctx context.Context, uuid string) (*dns.RecordHost, bool, error) {
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(ref)).
+		Read(ctx, uuid).
 		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).
 		Execute()
 
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return nil, true, fmt.Errorf("host record not found with ref: %s", ref)
+			return nil, true, fmt.Errorf("host record not found with uuid: %s", uuid)
 		}
-		return nil, false, fmt.Errorf("failed to read host record by ref %s: %w", ref, err)
+		return nil, false, fmt.Errorf("failed to read host record by uuid %s: %w", uuid, err)
 	}
 
 	hostRecord := apiRes.GetRecordHostResponseObjectAsResult.GetResult()
@@ -365,7 +364,7 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Update(ctx, utils.ExtractResourceRef(*hostRec.Ref)).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordHost(updateReq).
 		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).

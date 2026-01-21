@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDiscoveryCredentialgroup = "name"
@@ -104,7 +102,7 @@ func (r *DiscoveryCredentialgroupResource) Read(ctx context.Context, req resourc
 
 	apiRes, httpRes, err := r.client.DiscoveryAPI.
 		DiscoveryCredentialgroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDiscoveryCredentialgroup).
 		ReturnAsObject(1).
 		Execute()
@@ -139,7 +137,7 @@ func (r *DiscoveryCredentialgroupResource) Update(ctx context.Context, req resou
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -148,7 +146,7 @@ func (r *DiscoveryCredentialgroupResource) Update(ctx context.Context, req resou
 
 	apiRes, _, err := r.client.DiscoveryAPI.
 		DiscoveryCredentialgroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		DiscoveryCredentialgroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDiscoveryCredentialgroup).
 		ReturnAsObject(1).
@@ -179,7 +177,7 @@ func (r *DiscoveryCredentialgroupResource) Delete(ctx context.Context, req resou
 
 	httpRes, err := r.client.DiscoveryAPI.
 		DiscoveryCredentialgroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

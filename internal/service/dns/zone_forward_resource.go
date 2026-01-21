@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForZoneForward = "address,comment,disable,disable_ns_generation,display_domain,dns_fqdn,extattrs,external_ns_group,forward_to,forwarders_only,forwarding_servers,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed,ms_read_only,ms_sync_master_name,ns_group,parent,prefix,using_srg_associations,view,zone_format"
@@ -122,7 +120,7 @@ func (r *ZoneForwardResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		ZoneForwardAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForZoneForward).
 		ReturnAsObject(1).
 		Execute()
@@ -240,7 +238,7 @@ func (r *ZoneForwardResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -272,7 +270,7 @@ func (r *ZoneForwardResource) Update(ctx context.Context, req resource.UpdateReq
 
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneForwardAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		ZoneForward(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForZoneForward).
 		ReturnAsObject(1).
@@ -312,7 +310,7 @@ func (r *ZoneForwardResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.DNSAPI.
 		ZoneForwardAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -324,6 +322,6 @@ func (r *ZoneForwardResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *ZoneForwardResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

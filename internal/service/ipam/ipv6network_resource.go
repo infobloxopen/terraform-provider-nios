@@ -149,7 +149,7 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		Ipv6networkAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIpv6network).
 		ReturnAsObject(1).
 		Execute()
@@ -267,7 +267,7 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -299,7 +299,7 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 
 	apiRes, _, err := r.client.IPAMAPI.
 		Ipv6networkAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ipv6network(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForIpv6network).
 		ReturnAsObject(1).
@@ -339,7 +339,7 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.IPAMAPI.
 		Ipv6networkAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -365,7 +365,7 @@ func (r *Ipv6networkResource) UpdateFuncCallAttributeName(ctx context.Context, d
 }
 
 func (r *Ipv6networkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

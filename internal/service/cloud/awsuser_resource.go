@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForAwsuser = "access_key_id,account_id,govcloud_enabled,last_used,name,nios_user_name,status"
@@ -103,7 +101,7 @@ func (r *AwsuserResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	apiRes, httpRes, err := r.client.CloudAPI.
 		AwsuserAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForAwsuser).
 		ReturnAsObject(1).
 		Execute()
@@ -138,7 +136,7 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -146,7 +144,7 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	apiRes, _, err := r.client.CloudAPI.
 		AwsuserAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Awsuser(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForAwsuser).
 		ReturnAsObject(1).
@@ -176,7 +174,7 @@ func (r *AwsuserResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	httpRes, err := r.client.CloudAPI.
 		AwsuserAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

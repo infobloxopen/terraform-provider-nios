@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDtcMonitorHttp = "ciphers,client_cert,comment,content_check,content_check_input,content_check_op,content_check_regex,content_extract_group,content_extract_type,content_extract_value,enable_sni,extattrs,interval,name,port,request,result,result_code,retry_down,retry_up,secure,timeout,validate_cert"
@@ -123,7 +121,7 @@ func (r *DtcMonitorHttpResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcMonitorHttpAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDtcMonitorHttp).
 		ReturnAsObject(1).
 		Execute()
@@ -241,7 +239,7 @@ func (r *DtcMonitorHttpResource) Update(ctx context.Context, req resource.Update
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -274,7 +272,7 @@ func (r *DtcMonitorHttpResource) Update(ctx context.Context, req resource.Update
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcMonitorHttpAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		DtcMonitorHttp(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDtcMonitorHttp).
 		ReturnAsObject(1).
@@ -313,7 +311,7 @@ func (r *DtcMonitorHttpResource) Delete(ctx context.Context, req resource.Delete
 
 	httpRes, err := r.client.DTCAPI.
 		DtcMonitorHttpAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -325,7 +323,7 @@ func (r *DtcMonitorHttpResource) Delete(ctx context.Context, req resource.Delete
 }
 
 func (r *DtcMonitorHttpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

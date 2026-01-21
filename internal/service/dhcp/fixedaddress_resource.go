@@ -134,7 +134,7 @@ func (r *FixedaddressResource) Read(ctx context.Context, req resource.ReadReques
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		FixedaddressAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForFixedaddress).
 		ReturnAsObject(1).
 		Execute()
@@ -252,7 +252,7 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -284,7 +284,7 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 
 	apiRes, _, err := r.client.DHCPAPI.
 		FixedaddressAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Fixedaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForFixedaddress).
 		ReturnAsObject(1).
@@ -324,7 +324,7 @@ func (r *FixedaddressResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	httpRes, err := r.client.DHCPAPI.
 		FixedaddressAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -350,7 +350,7 @@ func (r *FixedaddressResource) UpdateFuncCallAttributeName(ctx context.Context, 
 }
 
 func (r *FixedaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

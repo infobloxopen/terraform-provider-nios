@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForVlanview = "allow_range_overlapping,comment,end_vlan_id,extattrs,name,pre_create_vlan,start_vlan_id,vlan_name_prefix"
@@ -123,7 +121,7 @@ func (r *VlanviewResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		VlanviewAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForVlanview).
 		ReturnAsObject(1).
 		Execute()
@@ -241,7 +239,7 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -274,7 +272,7 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 
 	apiRes, _, err := r.client.IPAMAPI.
 		VlanviewAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Vlanview(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForVlanview).
 		ReturnAsObject(1).
@@ -313,7 +311,7 @@ func (r *VlanviewResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	httpRes, err := r.client.IPAMAPI.
 		VlanviewAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -352,6 +350,6 @@ func (r *VlanviewResource) ValidateConfig(ctx context.Context, req resource.Vali
 }
 
 func (r *VlanviewResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

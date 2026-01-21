@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForAdminuser = "admin_groups,auth_method,auth_type,ca_certificate_issuer,client_certificate_serial_number,comment,disable,email,enable_certificate_authentication,extattrs,name,ssh_keys,status,time_zone,use_ssh_keys,use_time_zone"
@@ -122,7 +120,7 @@ func (r *AdminuserResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	apiRes, httpRes, err := r.client.SecurityAPI.
 		AdminuserAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForAdminuser).
 		ReturnAsObject(1).
 		Execute()
@@ -240,7 +238,7 @@ func (r *AdminuserResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -272,7 +270,7 @@ func (r *AdminuserResource) Update(ctx context.Context, req resource.UpdateReque
 
 	apiRes, _, err := r.client.SecurityAPI.
 		AdminuserAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Adminuser(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForAdminuser).
 		ReturnAsObject(1).
@@ -312,7 +310,7 @@ func (r *AdminuserResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	httpRes, err := r.client.SecurityAPI.
 		AdminuserAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -324,6 +322,6 @@ func (r *AdminuserResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 func (r *AdminuserResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

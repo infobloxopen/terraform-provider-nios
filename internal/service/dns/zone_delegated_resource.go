@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForZoneDelegated = "address,comment,delegate_to,delegated_ttl,disable,display_domain,dns_fqdn,enable_rfc2317_exclusion,extattrs,fqdn,locked,locked_by,mask_prefix,ms_ad_integrated,ms_ddns_mode,ms_managed,ms_read_only,ms_sync_master_name,ns_group,parent,prefix,use_delegated_ttl,using_srg_associations,view,zone_format"
@@ -122,7 +120,7 @@ func (r *ZoneDelegatedResource) Read(ctx context.Context, req resource.ReadReque
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		ZoneDelegatedAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForZoneDelegated).
 		ReturnAsObject(1).
 		Execute()
@@ -240,7 +238,7 @@ func (r *ZoneDelegatedResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -272,7 +270,7 @@ func (r *ZoneDelegatedResource) Update(ctx context.Context, req resource.UpdateR
 
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneDelegatedAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		ZoneDelegated(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForZoneDelegated).
 		ReturnAsObject(1).
@@ -312,7 +310,7 @@ func (r *ZoneDelegatedResource) Delete(ctx context.Context, req resource.DeleteR
 
 	httpRes, err := r.client.DNSAPI.
 		ZoneDelegatedAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -324,6 +322,6 @@ func (r *ZoneDelegatedResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *ZoneDelegatedResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

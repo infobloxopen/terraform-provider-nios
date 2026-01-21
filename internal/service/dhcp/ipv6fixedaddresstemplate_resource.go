@@ -12,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForIpv6fixedaddresstemplate = "comment,domain_name,domain_name_servers,extattrs,logic_filter_rules,name,number_of_addresses,offset,options,preferred_lifetime,use_domain_name,use_domain_name_servers,use_logic_filter_rules,use_options,use_preferred_lifetime,use_valid_lifetime,valid_lifetime"
@@ -111,7 +109,7 @@ func (r *Ipv6fixedaddresstemplateResource) Read(ctx context.Context, req resourc
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6fixedaddresstemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIpv6fixedaddresstemplate).
 		ReturnAsObject(1).
 		Execute()
@@ -152,7 +150,7 @@ func (r *Ipv6fixedaddresstemplateResource) Update(ctx context.Context, req resou
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -173,7 +171,7 @@ func (r *Ipv6fixedaddresstemplateResource) Update(ctx context.Context, req resou
 
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6fixedaddresstemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ipv6fixedaddresstemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6fixedaddresstemplate).
 		ReturnAsObject(1).
@@ -209,7 +207,7 @@ func (r *Ipv6fixedaddresstemplateResource) Delete(ctx context.Context, req resou
 
 	httpRes, err := r.client.DHCPAPI.
 		Ipv6fixedaddresstemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -354,5 +352,5 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 }
 
 func (r *Ipv6fixedaddresstemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 }

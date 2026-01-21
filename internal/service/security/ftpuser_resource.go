@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForFtpuser = "extattrs,home_dir,permission,username"
@@ -122,7 +120,7 @@ func (r *FtpuserResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	apiRes, httpRes, err := r.client.SecurityAPI.
 		FtpuserAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
 		ReturnAsObject(1).
 		Execute()
@@ -240,7 +238,7 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -272,7 +270,7 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	apiRes, _, err := r.client.SecurityAPI.
 		FtpuserAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
 		ReturnAsObject(1).
@@ -312,7 +310,7 @@ func (r *FtpuserResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	httpRes, err := r.client.SecurityAPI.
 		FtpuserAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -324,7 +322,7 @@ func (r *FtpuserResource) Delete(ctx context.Context, req resource.DeleteRequest
 }
 
 func (r *FtpuserResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForSharedrecordA = "comment,disable,dns_name,extattrs,ipv4addr,name,shared_record_group,ttl,use_ttl"
@@ -110,7 +108,7 @@ func (r *SharedrecordAResource) Read(ctx context.Context, req resource.ReadReque
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		SharedrecordAAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForSharedrecordA).
 		ReturnAsObject(1).
 		Execute()
@@ -151,7 +149,7 @@ func (r *SharedrecordAResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -172,7 +170,7 @@ func (r *SharedrecordAResource) Update(ctx context.Context, req resource.UpdateR
 
 	apiRes, _, err := r.client.DNSAPI.
 		SharedrecordAAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		SharedrecordA(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordA).
 		ReturnAsObject(1).
@@ -208,7 +206,7 @@ func (r *SharedrecordAResource) Delete(ctx context.Context, req resource.DeleteR
 
 	httpRes, err := r.client.DNSAPI.
 		SharedrecordAAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -220,5 +218,5 @@ func (r *SharedrecordAResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *SharedrecordAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 }

@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForNetworktemplate = "allow_any_netmask,authority,auto_create_reversezone,bootfile,bootserver,cloud_api_compatible,comment,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,delegated_member,deny_bootp,email_list,enable_ddns,enable_dhcp_thresholds,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,extattrs,fixed_address_templates,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ipam_email_addresses,ipam_threshold_settings,ipam_trap_settings,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,members,name,netmask,nextserver,options,pxe_lease_time,range_templates,recycle_leases,rir,rir_organization,rir_registration_action,rir_registration_status,send_rir_request,update_dns_on_lease_renewal,use_authority,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_ignore_dhcp_option_list_request,use_ipam_email_addresses,use_ipam_threshold_settings,use_ipam_trap_settings,use_lease_scavenge_time,use_logic_filter_rules,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_update_dns_on_lease_renewal"
@@ -125,7 +123,7 @@ func (r *NetworktemplateResource) Read(ctx context.Context, req resource.ReadReq
 
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		NetworktemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForNetworktemplate).
 		ReturnAsObject(1).
 		Execute()
@@ -244,7 +242,7 @@ func (r *NetworktemplateResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -278,7 +276,7 @@ func (r *NetworktemplateResource) Update(ctx context.Context, req resource.Updat
 
 	apiRes, _, err := r.client.IPAMAPI.
 		NetworktemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Networktemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNetworktemplate).
 		ReturnAsObject(1).
@@ -318,7 +316,7 @@ func (r *NetworktemplateResource) Delete(ctx context.Context, req resource.Delet
 
 	httpRes, err := r.client.IPAMAPI.
 		NetworktemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -475,6 +473,6 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 }
 
 func (r *NetworktemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

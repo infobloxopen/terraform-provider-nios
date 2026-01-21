@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForRecordTxt = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,dns_name,extattrs,forbid_reclamation,last_queried,name,reclaimable,shared_record_group,text,ttl,use_ttl,view,zone"
@@ -122,7 +120,7 @@ func (r *RecordTxtResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordTxtAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRecordTxt).
 		ReturnAsObject(1).
 		Execute()
@@ -240,7 +238,7 @@ func (r *RecordTxtResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -272,7 +270,7 @@ func (r *RecordTxtResource) Update(ctx context.Context, req resource.UpdateReque
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordTxtAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordTxt(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordTxt).
 		ReturnAsObject(1).
@@ -312,7 +310,7 @@ func (r *RecordTxtResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	httpRes, err := r.client.DNSAPI.
 		RecordTxtAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -324,6 +322,6 @@ func (r *RecordTxtResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 func (r *RecordTxtResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

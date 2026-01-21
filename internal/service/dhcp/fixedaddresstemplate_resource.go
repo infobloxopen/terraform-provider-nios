@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForFixedaddresstemplate = "bootfile,bootserver,comment,ddns_domainname,ddns_hostname,deny_bootp,enable_ddns,enable_pxe_lease_time,extattrs,ignore_dhcp_option_list_request,logic_filter_rules,name,nextserver,number_of_addresses,offset,options,pxe_lease_time,use_bootfile,use_bootserver,use_ddns_domainname,use_deny_bootp,use_enable_ddns,use_ignore_dhcp_option_list_request,use_logic_filter_rules,use_nextserver,use_options,use_pxe_lease_time"
@@ -110,7 +108,7 @@ func (r *FixedaddresstemplateResource) Read(ctx context.Context, req resource.Re
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		FixedaddresstemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForFixedaddresstemplate).
 		ReturnAsObject(1).
 		Execute()
@@ -150,7 +148,7 @@ func (r *FixedaddresstemplateResource) Update(ctx context.Context, req resource.
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -171,7 +169,7 @@ func (r *FixedaddresstemplateResource) Update(ctx context.Context, req resource.
 
 	apiRes, _, err := r.client.DHCPAPI.
 		FixedaddresstemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Fixedaddresstemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForFixedaddresstemplate).
 		ReturnAsObject(1).
@@ -207,7 +205,7 @@ func (r *FixedaddresstemplateResource) Delete(ctx context.Context, req resource.
 
 	httpRes, err := r.client.DHCPAPI.
 		FixedaddresstemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -313,5 +311,5 @@ func (r *FixedaddresstemplateResource) ValidateConfig(ctx context.Context, req r
 }
 
 func (r *FixedaddresstemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 }

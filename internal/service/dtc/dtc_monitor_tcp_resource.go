@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDtcMonitorTcp = "comment,extattrs,interval,name,port,retry_down,retry_up,timeout"
@@ -122,7 +120,7 @@ func (r *DtcMonitorTcpResource) Read(ctx context.Context, req resource.ReadReque
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcMonitorTcpAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDtcMonitorTcp).
 		ReturnAsObject(1).
 		Execute()
@@ -240,7 +238,7 @@ func (r *DtcMonitorTcpResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -273,7 +271,7 @@ func (r *DtcMonitorTcpResource) Update(ctx context.Context, req resource.UpdateR
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcMonitorTcpAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		DtcMonitorTcp(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDtcMonitorTcp).
 		ReturnAsObject(1).
@@ -312,7 +310,7 @@ func (r *DtcMonitorTcpResource) Delete(ctx context.Context, req resource.DeleteR
 
 	httpRes, err := r.client.DTCAPI.
 		DtcMonitorTcpAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -324,6 +322,6 @@ func (r *DtcMonitorTcpResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *DtcMonitorTcpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

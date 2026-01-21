@@ -29,6 +29,7 @@ import (
 
 type ZoneDelegatedModel struct {
 	Ref                    types.String      `tfsdk:"ref"`
+	Uuid                   types.String      `tfsdk:"uuid"`
 	Address                iptypes.IPAddress `tfsdk:"address"`
 	Comment                types.String      `tfsdk:"comment"`
 	DelegateTo             types.List        `tfsdk:"delegate_to"`
@@ -59,6 +60,7 @@ type ZoneDelegatedModel struct {
 
 var ZoneDelegatedAttrTypes = map[string]attr.Type{
 	"ref":                      types.StringType,
+	"uuid":                     types.StringType,
 	"address":                  iptypes.IPAddressType{},
 	"comment":                  types.StringType,
 	"delegate_to":              types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneDelegatedDelegateToAttrTypes}},
@@ -91,6 +93,10 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
@@ -315,6 +321,7 @@ func (m *ZoneDelegatedModel) Flatten(ctx context.Context, from *dns.ZoneDelegate
 		*m = ZoneDelegatedModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DelegateTo = flex.FlattenFrameworkListNestedBlock(ctx, from.DelegateTo, ZoneDelegatedDelegateToAttrTypes, diags, FlattenZoneDelegatedDelegateTo)

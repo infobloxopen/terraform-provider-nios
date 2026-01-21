@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDtcTopology = "comment,extattrs,name,rules"
@@ -122,7 +120,7 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDtcTopology).
 		ReturnAsObject(1).
 		Execute()
@@ -240,7 +238,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -273,7 +271,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		DtcTopology(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDtcTopology).
 		ReturnAsObject(1).
@@ -312,7 +310,7 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -324,6 +322,6 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *DtcTopologyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

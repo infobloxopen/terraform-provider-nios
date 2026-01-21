@@ -14,8 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 const (
@@ -111,7 +109,7 @@ func (r *DhcpoptionspaceResource) Read(ctx context.Context, req resource.ReadReq
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		DhcpoptionspaceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
 		ReturnAsObject(1).
 		Execute()
@@ -146,7 +144,7 @@ func (r *DhcpoptionspaceResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -154,7 +152,7 @@ func (r *DhcpoptionspaceResource) Update(ctx context.Context, req resource.Updat
 
 	apiRes, _, err := r.client.DHCPAPI.
 		DhcpoptionspaceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
 		ReturnAsObject(1).
@@ -185,7 +183,7 @@ func (r *DhcpoptionspaceResource) Delete(ctx context.Context, req resource.Delet
 	err := retry.RetryContext(ctx, OptionSpaceOperationTimeout, func() *retry.RetryError {
 		httpRes, err := r.client.DHCPAPI.
 			DhcpoptionspaceAPI.
-			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			Delete(ctx, data.Uuid.ValueString()).
 			Execute()
 		if err != nil {
 			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
