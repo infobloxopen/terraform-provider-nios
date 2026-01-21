@@ -22,33 +22,34 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
-	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
-type RecordRpzTxtModel struct {
-	Ref         types.String                             `tfsdk:"ref"`
-	Comment     types.String                             `tfsdk:"comment"`
-	Disable     types.Bool                               `tfsdk:"disable"`
-	ExtAttrs    types.Map                                `tfsdk:"extattrs"`
-	Name        internaltypes.CaseInsensitiveStringValue `tfsdk:"name"`
-	RpZone      types.String                             `tfsdk:"rp_zone"`
-	Text        types.String                             `tfsdk:"text"`
-	Ttl         types.Int64                              `tfsdk:"ttl"`
-	UseTtl      types.Bool                               `tfsdk:"use_ttl"`
-	View        types.String                             `tfsdk:"view"`
-	Zone        types.String                             `tfsdk:"zone"`
-	ExtAttrsAll types.Map                                `tfsdk:"extattrs_all"`
+type RecordRpzCnameClientipaddressModel struct {
+	Ref         types.String `tfsdk:"ref"`
+	Canonical   types.String `tfsdk:"canonical"`
+	Comment     types.String `tfsdk:"comment"`
+	Disable     types.Bool   `tfsdk:"disable"`
+	ExtAttrs    types.Map    `tfsdk:"extattrs"`
+	IsIpv4      types.Bool   `tfsdk:"is_ipv4"`
+	Name        types.String `tfsdk:"name"`
+	RpZone      types.String `tfsdk:"rp_zone"`
+	Ttl         types.Int64  `tfsdk:"ttl"`
+	UseTtl      types.Bool   `tfsdk:"use_ttl"`
+	View        types.String `tfsdk:"view"`
+	Zone        types.String `tfsdk:"zone"`
+	ExtAttrsAll types.Map    `tfsdk:"extattrs_all"`
 }
 
-var RecordRpzTxtAttrTypes = map[string]attr.Type{
+var RecordRpzCnameClientipaddressAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"canonical":    types.StringType,
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
-	"name":         internaltypes.CaseInsensitiveString{},
+	"is_ipv4":      types.BoolType,
+	"name":         types.StringType,
 	"rp_zone":      types.StringType,
-	"text":         types.StringType,
 	"ttl":          types.Int64Type,
 	"use_ttl":      types.BoolType,
 	"view":         types.StringType,
@@ -56,20 +57,27 @@ var RecordRpzTxtAttrTypes = map[string]attr.Type{
 	"extattrs_all": types.MapType{ElemType: types.StringType},
 }
 
-var RecordRpzTxtResourceSchemaAttributes = map[string]schema.Attribute{
+var RecordRpzCnameClientipaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+	"canonical": schema.StringAttribute{
+		Required:            true,
+		MarkdownDescription: "The canonical name in FQDN format. This value can be in unicode format.",
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
+	},
 	"comment": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString(""),
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The comment for the record; maximum 256 characters.",
+		Default:             stringdefault.StaticString(""),
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
 			customvalidator.ValidateTrimmedString(),
 		},
-		MarkdownDescription: "The comment for the record; maximum 256 characters.",
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
@@ -87,9 +95,12 @@ var RecordRpzTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
+	"is_ipv4": schema.BoolAttribute{
+		Computed:            true,
+		MarkdownDescription: "Indicates whether the record is an IPv4 record. If the return value is \"true\", it is an IPv4 record. Otherwise, it is an IPv6 record.",
+	},
 	"name": schema.StringAttribute{
-		CustomType: internaltypes.CaseInsensitiveString{},
-		Required:   true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.IsValidDomainName(),
 			customvalidator.ValidateTrimmedString(),
@@ -103,18 +114,9 @@ var RecordRpzTxtResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The name of a response policy zone in which the record resides.",
 	},
-	"text": schema.StringAttribute{
-		Required: true,
-		Validators: []validator.String{
-			customvalidator.ValidateTXT(true),
-			customvalidator.StringNotEmpty(),
-			customvalidator.ValidateTrimmedString(),
-		},
-		MarkdownDescription: "Text associated with the record. It can contain up to 255 bytes per substring, up to a total of 512 bytes. To enter leading, trailing, or embedded spaces in the text, add quotes around the text to preserve the spaces.",
-	},
 	"ttl": schema.Int64Attribute{
-		Optional: true,
 		Computed: true,
+		Optional: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
 		},
@@ -152,52 +154,54 @@ var RecordRpzTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordRpzTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *rpz.RecordRpzTxt {
+func (m *RecordRpzCnameClientipaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *rpz.RecordRpzCnameClientipaddress {
 	if m == nil {
 		return nil
 	}
-	to := &rpz.RecordRpzTxt{
-		Comment:  flex.ExpandStringPointer(m.Comment),
-		Disable:  flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs: ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		Name:     flex.ExpandStringPointer(m.Name.StringValue),
-		RpZone:   flex.ExpandStringPointer(m.RpZone),
-		Text:     flex.ExpandStringPointer(m.Text),
-		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
+	to := &rpz.RecordRpzCnameClientipaddress{
+		Canonical: flex.ExpandStringPointer(m.Canonical),
+		Comment:   flex.ExpandStringPointer(m.Comment),
+		Disable:   flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:  ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		Name:      flex.ExpandStringPointer(m.Name),
+		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
 	}
+
 	if isCreate {
+		to.RpZone = flex.ExpandStringPointer(m.RpZone)
 		to.View = flex.ExpandStringPointer(m.View)
 	}
 	return to
 }
 
-func FlattenRecordRpzTxt(ctx context.Context, from *rpz.RecordRpzTxt, diags *diag.Diagnostics) types.Object {
+func FlattenRecordRpzCnameClientipaddress(ctx context.Context, from *rpz.RecordRpzCnameClientipaddress, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(RecordRpzTxtAttrTypes)
+		return types.ObjectNull(RecordRpzCnameClientipaddressAttrTypes)
 	}
-	m := RecordRpzTxtModel{}
+	m := RecordRpzCnameClientipaddressModel{}
 	m.Flatten(ctx, from, diags)
 	m.ExtAttrsAll = types.MapNull(types.StringType)
-	t, d := types.ObjectValueFrom(ctx, RecordRpzTxtAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, RecordRpzCnameClientipaddressAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *RecordRpzTxtModel) Flatten(ctx context.Context, from *rpz.RecordRpzTxt, diags *diag.Diagnostics) {
+func (m *RecordRpzCnameClientipaddressModel) Flatten(ctx context.Context, from *rpz.RecordRpzCnameClientipaddress, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = RecordRpzTxtModel{}
+		*m = RecordRpzCnameClientipaddressModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Canonical = flex.FlattenStringPointer(from.Canonical)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.Name.StringValue = flex.FlattenStringPointer(from.Name)
+	m.IsIpv4 = types.BoolPointerValue(from.IsIpv4)
+	m.Name = flex.FlattenStringPointer(from.Name)
 	m.RpZone = flex.FlattenStringPointer(from.RpZone)
-	m.Text = flex.FlattenStringPointer(from.Text)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)
 	m.View = flex.FlattenStringPointer(from.View)
