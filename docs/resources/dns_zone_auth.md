@@ -532,6 +532,9 @@ Optional:
 - `enable_zone_last_queried` (Boolean) This flag indicates if the last queried monitoring for affected zones is enabled or not.
 - `expression_list` (Attributes List) The expression list. The particular record is treated as reclaimable if expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. (see [below for nested schema](#nestedatt--scavenging_settings--expression_list))
 - `reclaim_associated_records` (Boolean) This flag indicates if the associated resource record scavenging is enabled or not.
+
+Read-Only:
+
 - `scavenging_schedule` (Attributes) The schedule setting for cloud discovery task. (see [below for nested schema](#nestedatt--scavenging_settings--scavenging_schedule))
 
 <a id="nestedatt--scavenging_settings--ea_expression_list"></a>
