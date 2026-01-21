@@ -383,6 +383,7 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),
 			listvalidator.SizeAtLeast(1),
+			listvalidator.ValueStringsAre(customvalidator.IsValidIPv6Address()),
 		},
 	},
 	"enable_ddns": schema.BoolAttribute{
