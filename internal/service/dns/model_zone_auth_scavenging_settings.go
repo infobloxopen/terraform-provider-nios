@@ -79,7 +79,6 @@ var ZoneAuthScavengingSettingsResourceSchemaAttributes = map[string]schema.Attri
 	},
 	"scavenging_schedule": schema.SingleNestedAttribute{
 		Attributes:          ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes,
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The schedule setting for cloud discovery task.",
 	},
