@@ -23,6 +23,7 @@ import (
 
 type CertificateAuthserviceModel struct {
 	Ref                   types.String `tfsdk:"ref"`
+	Uuid                  types.String `tfsdk:"uuid"`
 	AutoPopulateLogin     types.String `tfsdk:"auto_populate_login"`
 	CaCertificates        types.List   `tfsdk:"ca_certificates"`
 	Comment               types.String `tfsdk:"comment"`
@@ -44,6 +45,7 @@ type CertificateAuthserviceModel struct {
 
 var CertificateAuthserviceAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"auto_populate_login":     types.StringType,
 	"ca_certificates":         types.ListType{ElemType: types.StringType},
 	"comment":                 types.StringType,
@@ -67,6 +69,10 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"auto_populate_login": schema.StringAttribute{
 		Optional: true,
@@ -245,6 +251,7 @@ func (m *CertificateAuthserviceModel) Flatten(ctx context.Context, from *securit
 		*m = CertificateAuthserviceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AutoPopulateLogin = flex.FlattenStringPointer(from.AutoPopulateLogin)
 	m.CaCertificates = flex.FlattenFrameworkListString(ctx, from.CaCertificates, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

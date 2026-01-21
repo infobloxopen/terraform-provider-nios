@@ -15,18 +15,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type AdmingroupModel struct {
 	Ref                               types.String                     `tfsdk:"ref"`
+	Uuid                              types.String                     `tfsdk:"uuid"`
 	AccessMethod                      internaltypes.UnorderedListValue `tfsdk:"access_method"`
 	AdminSetCommands                  types.Object                     `tfsdk:"admin_set_commands"`
 	AdminShowCommands                 types.Object                     `tfsdk:"admin_show_commands"`
@@ -75,6 +78,7 @@ type AdmingroupModel struct {
 
 var AdmingroupAttrTypes = map[string]attr.Type{
 	"ref":                                   types.StringType,
+	"uuid":                                  types.StringType,
 	"access_method":                         internaltypes.UnorderedListOfStringType,
 	"admin_set_commands":                    types.ObjectType{AttrTypes: AdmingroupAdminSetCommandsAttrTypes},
 	"admin_show_commands":                   types.ObjectType{AttrTypes: AdmingroupAdminShowCommandsAttrTypes},
@@ -125,6 +129,10 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"access_method": schema.ListAttribute{
 		CustomType:  internaltypes.UnorderedListOfStringType,
@@ -281,6 +289,9 @@ var AdmingroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"grid_set_commands": schema.SingleNestedAttribute{
 		Attributes:          AdmingroupGridSetCommandsResourceSchemaAttributes,
@@ -501,6 +512,7 @@ func (m *AdmingroupModel) Flatten(ctx context.Context, from *security.Admingroup
 		*m = AdmingroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AccessMethod = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.AccessMethod, diags)
 	m.AdminSetCommands = FlattenAdmingroupAdminSetCommands(ctx, from.AdminSetCommands, diags)
 	m.AdminShowCommands = FlattenAdmingroupAdminShowCommands(ctx, from.AdminShowCommands, diags)

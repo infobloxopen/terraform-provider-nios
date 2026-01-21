@@ -12,17 +12,20 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcServerModel struct {
 	Ref                  types.String `tfsdk:"ref"`
+	Uuid                 types.String `tfsdk:"uuid"`
 	AutoCreateHostRecord types.Bool   `tfsdk:"auto_create_host_record"`
 	Comment              types.String `tfsdk:"comment"`
 	Disable              types.Bool   `tfsdk:"disable"`
@@ -38,6 +41,7 @@ type DtcServerModel struct {
 
 var DtcServerAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"auto_create_host_record": types.BoolType,
 	"comment":                 types.StringType,
 	"disable":                 types.BoolType,
@@ -55,6 +59,10 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"auto_create_host_record": schema.BoolAttribute{
 		Optional:            true,
@@ -87,6 +95,9 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"health": schema.SingleNestedAttribute{
 		Attributes:          DtcServerHealthResourceSchemaAttributes,
@@ -168,6 +179,7 @@ func (m *DtcServerModel) Flatten(ctx context.Context, from *dtc.DtcServer, diags
 		*m = DtcServerModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AutoCreateHostRecord = types.BoolPointerValue(from.AutoCreateHostRecord)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

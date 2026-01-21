@@ -15,6 +15,7 @@ import (
 
 type IPAssociationModel struct {
 	Ref              types.String                  `tfsdk:"ref"`
+	Uuid             types.String                  `tfsdk:"uuid"`
 	ConfigureForDhcp types.Bool                    `tfsdk:"configure_for_dhcp"`
 	Duid             internaltypes.DUIDValue       `tfsdk:"duid"`
 	InternalID       types.String                  `tfsdk:"internal_id"`
@@ -24,6 +25,7 @@ type IPAssociationModel struct {
 
 var IPAssociationAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"configure_for_dhcp": types.BoolType,
 	"duid":               internaltypes.DUIDType{},
 	"internal_id":        types.StringType,
@@ -35,6 +37,10 @@ var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"configure_for_dhcp": schema.BoolAttribute{
 		Optional:            true,

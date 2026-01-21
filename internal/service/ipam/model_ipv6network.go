@@ -28,12 +28,14 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6networkModel struct {
 	Ref                              types.String         `tfsdk:"ref"`
+	Uuid                             types.String         `tfsdk:"uuid"`
 	AutoCreateReversezone            types.Bool           `tfsdk:"auto_create_reversezone"`
 	CloudInfo                        types.Object         `tfsdk:"cloud_info"`
 	Comment                          types.String         `tfsdk:"comment"`
@@ -121,6 +123,7 @@ type Ipv6networkModel struct {
 
 var Ipv6networkAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+	"uuid":                                 types.StringType,
 	"auto_create_reversezone":              types.BoolType,
 	"cloud_info":                           types.ObjectType{AttrTypes: Ipv6networkCloudInfoAttrTypes},
 	"comment":                              types.StringType,
@@ -210,6 +213,10 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"auto_create_reversezone": schema.BoolAttribute{
 		Optional:            true,
@@ -434,6 +441,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"federated_realms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -776,7 +786,6 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Use this method to set or retrieve the valid lifetime value of a DHCP IPv6 Network object.",
 		Computed:            true,
-		Default:             int64default.StaticInt64(43200),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},
@@ -905,8 +914,9 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	if m == nil {
 		*m = Ipv6networkModel{}
 	}
-
+	planMembers := m.Members
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudInfo = FlattenIpv6networkCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DdnsDomainname = flex.FlattenStringPointer(from.DdnsDomainname)
@@ -940,6 +950,12 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.LastRirRegistrationUpdateStatus = flex.FlattenStringPointer(from.LastRirRegistrationUpdateStatus)
 	m.LogicFilterRules = flex.FlattenFrameworkListNestedBlock(ctx, from.LogicFilterRules, Ipv6networkLogicFilterRulesAttrTypes, diags, FlattenIpv6networkLogicFilterRules)
 	m.Members = flex.FlattenFrameworkListNestedBlock(ctx, from.Members, Ipv6networkMembersAttrTypes, diags, FlattenIpv6networkMembers)
+	if !planMembers.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planMembers, m.Members, "name")
+		if !diags.HasError() {
+			m.Members = reOrderedList.(basetypes.ListValue)
+		}
+	}
 	m.MgmPrivate = types.BoolPointerValue(from.MgmPrivate)
 	m.MgmPrivateOverridable = types.BoolPointerValue(from.MgmPrivateOverridable)
 	m.MsAdUserData = FlattenIpv6networkMsAdUserData(ctx, from.MsAdUserData, diags)

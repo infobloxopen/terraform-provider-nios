@@ -29,12 +29,14 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NetworkModel struct {
 	Ref                              types.String         `tfsdk:"ref"`
+	Uuid                             types.String         `tfsdk:"uuid"`
 	Authority                        types.Bool           `tfsdk:"authority"`
 	AutoCreateReversezone            types.Bool           `tfsdk:"auto_create_reversezone"`
 	Bootfile                         types.String         `tfsdk:"bootfile"`
@@ -163,6 +165,7 @@ type NetworkModel struct {
 
 var NetworkAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+	"uuid":                                 types.StringType,
 	"authority":                            types.BoolType,
 	"auto_create_reversezone":              types.BoolType,
 	"bootfile":                             types.StringType,
@@ -293,6 +296,10 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"authority": schema.BoolAttribute{
 		Optional:            true,
@@ -604,6 +611,9 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"federated_realms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -1308,6 +1318,7 @@ func (m *NetworkModel) Flatten(ctx context.Context, from *ipam.Network, diags *d
 	}
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)

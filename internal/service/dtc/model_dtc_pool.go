@@ -13,6 +13,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,12 +21,14 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcPoolModel struct {
 	Ref                      types.String                     `tfsdk:"ref"`
+	Uuid                     types.String                     `tfsdk:"uuid"`
 	AutoConsolidatedMonitors types.Bool                       `tfsdk:"auto_consolidated_monitors"`
 	Availability             types.String                     `tfsdk:"availability"`
 	Comment                  types.String                     `tfsdk:"comment"`
@@ -50,6 +53,7 @@ type DtcPoolModel struct {
 
 var DtcPoolAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
+	"uuid":                       types.StringType,
 	"auto_consolidated_monitors": types.BoolType,
 	"availability":               types.StringType,
 	"comment":                    types.StringType,
@@ -77,6 +81,10 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
+	},
 	"auto_consolidated_monitors": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -101,8 +109,8 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcPoolConsolidatedMonitorsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -128,6 +136,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"health": schema.SingleNestedAttribute{
 		Attributes:          DtcPoolHealthResourceSchemaAttributes,
@@ -173,9 +184,9 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The preferred topology for load balancing.",
 	},
 	"monitors": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -196,7 +207,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcPoolServersResourceSchemaAttributes,
 		},
-		Optional:            true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -204,6 +215,7 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ttl": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Time To Live (TTL) value for the DTC Pool. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.",
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_ttl")),
@@ -264,6 +276,7 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 		*m = DtcPoolModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AutoConsolidatedMonitors = types.BoolPointerValue(from.AutoConsolidatedMonitors)
 	m.Availability = flex.FlattenStringPointer(from.Availability)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
@@ -286,8 +299,8 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 }
 
 func FlattenQuorumBasedOnAvailability(availability *string, quorum *int64) types.Int64 {
-    if availability == nil || *availability != "QUORUM" {
-        return types.Int64Null()
-    }
-    return flex.FlattenInt64Pointer(quorum)
+	if availability == nil || *availability != "QUORUM" {
+		return types.Int64Null()
+	}
+	return flex.FlattenInt64Pointer(quorum)
 }

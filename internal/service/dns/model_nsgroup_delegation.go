@@ -8,17 +8,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NsgroupDelegationModel struct {
 	Ref         types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment     types.String `tfsdk:"comment"`
 	DelegateTo  types.List   `tfsdk:"delegate_to"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
@@ -28,6 +31,7 @@ type NsgroupDelegationModel struct {
 
 var NsgroupDelegationAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+    "uuid":        types.StringType,
 	"comment":      types.StringType,
 	"delegate_to":  types.ListType{ElemType: types.ObjectType{AttrTypes: NsgroupDelegationDelegateToAttrTypes}},
 	"extattrs":     types.MapType{ElemType: types.StringType},
@@ -40,13 +44,17 @@ var NsgroupDelegationResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
-		Default : stringdefault.StaticString(""),
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The comment for the delegated NS group.",
 	},
 	"delegate_to": schema.ListNestedAttribute{
@@ -70,13 +78,15 @@ var NsgroupDelegationResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The name of the delegated NS group.",
 	},
 }
-
 
 func (m *NsgroupDelegationModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.NsgroupDelegation {
 	if m == nil {
@@ -111,6 +121,7 @@ func (m *NsgroupDelegationModel) Flatten(ctx context.Context, from *dns.NsgroupD
 		*m = NsgroupDelegationModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DelegateTo = flex.FlattenFrameworkListNestedBlock(ctx, from.DelegateTo, NsgroupDelegationDelegateToAttrTypes, diags, FlattenNsgroupDelegationDelegateTo)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)

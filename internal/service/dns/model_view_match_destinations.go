@@ -21,6 +21,7 @@ import (
 
 type ViewMatchDestinationsModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	Address        types.String `tfsdk:"address"`
 	Struct         types.String `tfsdk:"struct"`
 	Permission     types.String `tfsdk:"permission"`
@@ -32,6 +33,7 @@ type ViewMatchDestinationsModel struct {
 
 var ViewMatchDestinationsAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":              types.StringType,
 	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
@@ -64,6 +66,10 @@ var ViewMatchDestinationsResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 		},
 		MarkdownDescription: "The reference to the Named ACL object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"address": schema.StringAttribute{
 		Optional: true,
@@ -186,6 +192,7 @@ func (m *ViewMatchDestinationsModel) Flatten(ctx context.Context, from *dns.View
 		*m = ViewMatchDestinationsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Permission = flex.FlattenStringPointer(from.Permission)

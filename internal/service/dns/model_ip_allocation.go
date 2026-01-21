@@ -25,12 +25,14 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type IPAllocationModel struct {
 	Ref                      types.String                     `tfsdk:"ref"`
+	Uuid                     types.String                     `tfsdk:"uuid"`
 	Aliases                  internaltypes.UnorderedListValue `tfsdk:"aliases"`
 	AllowTelnet              types.Bool                       `tfsdk:"allow_telnet"`
 	CliCredentials           types.List                       `tfsdk:"cli_credentials"`
@@ -73,6 +75,7 @@ type IPAllocationModel struct {
 
 var IPAllocationAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
+	"uuid":                       types.StringType,
 	"aliases":                    internaltypes.UnorderedListOfStringType,
 	"allow_telnet":               types.BoolType,
 	"cli_credentials":            types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostCliCredentialsAttrTypes}},
@@ -117,6 +120,10 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"aliases": schema.ListAttribute{
 		CustomType:          internaltypes.UnorderedListOfStringType,
@@ -251,6 +258,9 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"internal_id": schema.StringAttribute{
 		Computed:            true,
@@ -450,6 +460,7 @@ func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, d
 		*m = IPAllocationModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Aliases = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Aliases, diags)
 	m.AllowTelnet = types.BoolPointerValue(from.AllowTelnet)
 	m.CliCredentials = flex.FlattenFrameworkListNestedBlock(ctx, from.CliCredentials, RecordHostCliCredentialsAttrTypes, diags, FlattenRecordHostCliCredentials)

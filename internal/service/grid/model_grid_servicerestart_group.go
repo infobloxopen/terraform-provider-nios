@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -17,11 +18,13 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type GridServicerestartGroupModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	Comment           types.String `tfsdk:"comment"`
 	ExtAttrs          types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll       types.Map    `tfsdk:"extattrs_all"`
@@ -39,6 +42,7 @@ type GridServicerestartGroupModel struct {
 
 var GridServicerestartGroupAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"comment":            types.StringType,
 	"extattrs":           types.MapType{ElemType: types.StringType},
 	"extattrs_all":       types.MapType{ElemType: types.StringType},
@@ -58,6 +62,10 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -83,6 +91,9 @@ var GridServicerestartGroupResourceSchemaAttributes = map[string]schema.Attribut
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"is_default": schema.BoolAttribute{
 		Computed:            true,
@@ -181,6 +192,7 @@ func (m *GridServicerestartGroupModel) Flatten(ctx context.Context, from *grid.G
 		*m = GridServicerestartGroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.IsDefault = types.BoolPointerValue(from.IsDefault)

@@ -6,11 +6,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -19,25 +19,31 @@ import (
 
 type ViewFilterAaaaListModel struct {
 	Ref        types.String `tfsdk:"ref"`
+	Uuid      types.String `tfsdk:"uuid"`
 	Address    types.String `tfsdk:"address"`
 	Permission types.String `tfsdk:"permission"`
 }
 
 var ViewFilterAaaaListAttrTypes = map[string]attr.Type{
 	"ref":        types.StringType,
+	"uuid":      types.StringType,
 	"address":    types.StringType,
 	"permission": types.StringType,
 }
 
 var ViewFilterAaaaListResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("address")),
 			stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("permission")),
 		},
 		MarkdownDescription: "The reference to the Named ACL object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"address": schema.StringAttribute{
 		Optional: true,
@@ -100,6 +106,7 @@ func (m *ViewFilterAaaaListModel) Flatten(ctx context.Context, from *dns.ViewFil
 		*m = ViewFilterAaaaListModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 }

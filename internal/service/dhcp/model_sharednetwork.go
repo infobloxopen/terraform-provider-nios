@@ -26,6 +26,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -36,6 +37,7 @@ import (
 
 type SharednetworkModel struct {
 	Ref                            types.String                     `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Authority                      types.Bool                       `tfsdk:"authority"`
 	Bootfile                       types.String                     `tfsdk:"bootfile"`
 	Bootserver                     types.String                     `tfsdk:"bootserver"`
@@ -92,6 +94,7 @@ type SharednetworkModel struct {
 
 var SharednetworkAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+    "uuid":        types.StringType,
 	"authority":                           types.BoolType,
 	"bootfile":                            types.StringType,
 	"bootserver":                          types.StringType,
@@ -151,6 +154,10 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"authority": schema.BoolAttribute{
 		Optional: true,
 		Computed: true,
@@ -286,6 +293,9 @@ var SharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"ignore_client_identifier": schema.BoolAttribute{
 		Optional: true,
@@ -612,6 +622,7 @@ func (m *SharednetworkModel) Flatten(ctx context.Context, from *dhcp.Sharednetwo
 		*m = SharednetworkModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)

@@ -28,12 +28,14 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type Ipv6networkcontainerModel struct {
 	Ref                              types.String         `tfsdk:"ref"`
+	Uuid                             types.String         `tfsdk:"uuid"`
 	AutoCreateReversezone            types.Bool           `tfsdk:"auto_create_reversezone"`
 	CloudInfo                        types.Object         `tfsdk:"cloud_info"`
 	Comment                          types.String         `tfsdk:"comment"`
@@ -104,6 +106,7 @@ type Ipv6networkcontainerModel struct {
 
 var Ipv6networkcontainerAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+	"uuid":                                 types.StringType,
 	"auto_create_reversezone":              types.BoolType,
 	"cloud_info":                           types.ObjectType{AttrTypes: Ipv6networkcontainerCloudInfoAttrTypes},
 	"comment":                              types.StringType,
@@ -176,6 +179,10 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		MarkdownDescription: "The reference to the object.",
 		Computed:            true,
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"auto_create_reversezone": schema.BoolAttribute{
 		Optional:            true,
@@ -332,6 +339,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"federated_realms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -741,6 +751,7 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	}
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudInfo = FlattenIpv6networkcontainerCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DdnsDomainname = flex.FlattenStringPointer(from.DdnsDomainname)

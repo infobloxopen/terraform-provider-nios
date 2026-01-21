@@ -2,6 +2,7 @@ package security
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -11,17 +12,20 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type AdminuserModel struct {
 	Ref                             types.String `tfsdk:"ref"`
+	Uuid                            types.String `tfsdk:"uuid"`
 	AdminGroups                     types.List   `tfsdk:"admin_groups"`
 	AuthMethod                      types.String `tfsdk:"auth_method"`
 	AuthType                        types.String `tfsdk:"auth_type"`
@@ -44,6 +48,7 @@ type AdminuserModel struct {
 
 var AdminuserAttrTypes = map[string]attr.Type{
 	"ref":                               types.StringType,
+	"uuid":                              types.StringType,
 	"admin_groups":                      types.ListType{ElemType: types.StringType},
 	"auth_method":                       types.StringType,
 	"auth_type":                         types.StringType,
@@ -68,6 +73,10 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"admin_groups": schema.ListAttribute{
 		ElementType: types.StringType,
@@ -148,6 +157,9 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
@@ -243,6 +255,7 @@ func (m *AdminuserModel) Flatten(ctx context.Context, from *security.Adminuser, 
 		*m = AdminuserModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AdminGroups = flex.FlattenFrameworkListString(ctx, from.AdminGroups, diags)
 	m.AuthMethod = flex.FlattenStringPointer(from.AuthMethod)
 	m.AuthType = flex.FlattenStringPointer(from.AuthType)

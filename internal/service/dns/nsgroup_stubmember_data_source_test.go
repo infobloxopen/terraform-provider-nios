@@ -1,4 +1,3 @@
-
 package dns_test
 
 import (
@@ -33,8 +32,8 @@ func TestAccNsgroupStubmemberDataSource_Filters(t *testing.T) {
 				Config: testAccNsgroupStubmemberDataSourceConfigFilters(name, stubMember),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
-						}, testAccCheckNsgroupStubmemberResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
+					}, testAccCheckNsgroupStubmemberResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -59,11 +58,11 @@ func TestAccNsgroupStubmemberDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckNsgroupStubmemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsgroupStubmemberDataSourceConfigExtAttrFilters(name , stubMember, extAttrValue),
+				Config: testAccNsgroupStubmemberDataSourceConfigExtAttrFilters(name, stubMember, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
-						}, testAccCheckNsgroupStubmemberResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
+					}, testAccCheckNsgroupStubmemberResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -72,14 +71,15 @@ func TestAccNsgroupStubmemberDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckNsgroupStubmemberResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-        resource.TestCheckResourceAttrPair(resourceName, "stub_members", dataSourceName, "result.0.stub_members"),
-    }
+func testAccCheckNsgroupStubmemberResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+		resource.TestCheckResourceAttrPair(resourceName, "stub_members", dataSourceName, "result.0.stub_members"),
+	}
 }
 
 func testAccNsgroupStubmemberDataSourceConfigFilters(name string, stubMember []map[string]any) string {
@@ -116,4 +116,3 @@ data "nios_dns_nsgroup_stubmember" "test" {
 }
 `, name, stubMemberStr, extAttrsValue)
 }
-

@@ -14,17 +14,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcLbdnModel struct {
 	Ref                      types.String                     `tfsdk:"ref"`
+	Uuid                     types.String                     `tfsdk:"uuid"`
 	AuthZones                internaltypes.UnorderedListValue `tfsdk:"auth_zones"`
 	AutoConsolidatedMonitors types.Bool                       `tfsdk:"auto_consolidated_monitors"`
 	Comment                  types.String                     `tfsdk:"comment"`
@@ -46,6 +49,7 @@ type DtcLbdnModel struct {
 
 var DtcLbdnAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
+	"uuid":                       types.StringType,
 	"auth_zones":                 internaltypes.UnorderedListOfStringType,
 	"auto_consolidated_monitors": types.BoolType,
 	"comment":                    types.StringType,
@@ -70,11 +74,15 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
-	"auth_zones": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
+	"uuid": schema.StringAttribute{
 		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
+	},
+	"auth_zones": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -111,6 +119,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		ElementType:         types.StringType,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"health": schema.SingleNestedAttribute{
 		Attributes:          DtcLbdnHealthResourceSchemaAttributes,
@@ -132,9 +143,9 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The display name of the DTC LBDN, not DNS related.",
 	},
 	"patterns": schema.ListAttribute{
-		CustomType:          internaltypes.UnorderedListOfStringType,
-		ElementType:         types.StringType,
-		Optional:            true,
+		CustomType:  internaltypes.UnorderedListOfStringType,
+		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -150,8 +161,8 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: DtcLbdnPoolsResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -239,6 +250,7 @@ func (m *DtcLbdnModel) Flatten(ctx context.Context, from *dtc.DtcLbdn, diags *di
 		*m = DtcLbdnModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AuthZones = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.AuthZones, diags)
 	m.AutoConsolidatedMonitors = types.BoolPointerValue(from.AutoConsolidatedMonitors)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

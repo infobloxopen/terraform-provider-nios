@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,11 +20,13 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NetworkviewModel struct {
 	Ref                  types.String `tfsdk:"ref"`
+	Uuid                 types.String `tfsdk:"uuid"`
 	AssociatedDnsViews   types.List   `tfsdk:"associated_dns_views"`
 	AssociatedMembers    types.List   `tfsdk:"associated_members"`
 	CloudInfo            types.Object `tfsdk:"cloud_info"`
@@ -44,6 +47,7 @@ type NetworkviewModel struct {
 
 var NetworkviewAttrTypes = map[string]attr.Type{
 	"ref":                    types.StringType,
+	"uuid":                   types.StringType,
 	"associated_dns_views":   types.ListType{ElemType: types.StringType},
 	"associated_members":     types.ListType{ElemType: types.ObjectType{AttrTypes: NetworkviewAssociatedMembersAttrTypes}},
 	"cloud_info":             types.ObjectType{AttrTypes: NetworkviewCloudInfoAttrTypes},
@@ -66,6 +70,10 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"associated_dns_views": schema.ListAttribute{
 		ElementType: types.StringType,
@@ -127,6 +135,9 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"federated_realms": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -247,6 +258,7 @@ func (m *NetworkviewModel) Flatten(ctx context.Context, from *ipam.Networkview, 
 		*m = NetworkviewModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AssociatedDnsViews = flex.FlattenFrameworkListString(ctx, from.AssociatedDnsViews, diags)
 	m.AssociatedMembers = flex.FlattenFrameworkListNestedBlock(ctx, from.AssociatedMembers, NetworkviewAssociatedMembersAttrTypes, diags, FlattenNetworkviewAssociatedMembers)
 	m.CloudInfo = FlattenNetworkviewCloudInfo(ctx, from.CloudInfo, diags)

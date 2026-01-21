@@ -25,6 +25,7 @@ import (
 
 type VdiscoverytaskModel struct {
 	Ref                             types.String `tfsdk:"ref"`
+	Uuid                            types.String `tfsdk:"uuid"`
 	AccountsList                    types.List   `tfsdk:"accounts_list"`
 	AllowUnsecuredConnection        types.Bool   `tfsdk:"allow_unsecured_connection"`
 	AutoConsolidateCloudEa          types.Bool   `tfsdk:"auto_consolidate_cloud_ea"`
@@ -77,6 +78,7 @@ type VdiscoverytaskModel struct {
 
 var VdiscoverytaskAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"accounts_list":                       types.ListType{ElemType: types.StringType},
 	"allow_unsecured_connection":          types.BoolType,
 	"auto_consolidate_cloud_ea":           types.BoolType,
@@ -131,6 +133,10 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"accounts_list": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -504,6 +510,7 @@ func (m *VdiscoverytaskModel) Flatten(ctx context.Context, from *discovery.Vdisc
 		*m = VdiscoverytaskModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AccountsList = flex.FlattenFrameworkListString(ctx, from.AccountsList, diags)
 	m.AllowUnsecuredConnection = types.BoolPointerValue(from.AllowUnsecuredConnection)
 	m.AutoConsolidateCloudEa = types.BoolPointerValue(from.AutoConsolidateCloudEa)

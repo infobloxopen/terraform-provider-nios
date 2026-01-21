@@ -12,6 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,11 +20,13 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordMxModel struct {
 	Ref                types.String `tfsdk:"ref"`
+	Uuid               types.String `tfsdk:"uuid"`
 	AwsRte53RecordInfo types.Object `tfsdk:"aws_rte53_record_info"`
 	CloudInfo          types.Object `tfsdk:"cloud_info"`
 	Comment            types.String `tfsdk:"comment"`
@@ -51,6 +54,7 @@ type RecordMxModel struct {
 
 var RecordMxAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
+	"uuid":                  types.StringType,
 	"aws_rte53_record_info": types.ObjectType{AttrTypes: RecordMxAwsRte53RecordInfoAttrTypes},
 	"cloud_info":            types.ObjectType{AttrTypes: RecordMxCloudInfoAttrTypes},
 	"comment":               types.StringType,
@@ -80,6 +84,10 @@ var RecordMxResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
 		Attributes:          RecordMxAwsRte53RecordInfoResourceSchemaAttributes,
@@ -153,6 +161,9 @@ var RecordMxResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
@@ -261,6 +272,7 @@ func (m *RecordMxModel) Flatten(ctx context.Context, from *dns.RecordMx, diags *
 		*m = RecordMxModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AwsRte53RecordInfo = FlattenRecordMxAwsRte53RecordInfo(ctx, from.AwsRte53RecordInfo, diags)
 	m.CloudInfo = FlattenRecordMxCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

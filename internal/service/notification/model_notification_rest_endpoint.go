@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,11 +21,13 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type NotificationRestEndpointModel struct {
 	Ref                        types.String `tfsdk:"ref"`
+	Uuid                       types.String `tfsdk:"uuid"`
 	ClientCertificateSubject   types.String `tfsdk:"client_certificate_subject"`
 	ClientCertificateToken     types.String `tfsdk:"client_certificate_token"`
 	ClientCertificateFile      types.String `tfsdk:"client_certificate_file"`
@@ -51,6 +54,7 @@ type NotificationRestEndpointModel struct {
 
 var NotificationRestEndpointAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
+	"uuid":                          types.StringType,
 	"client_certificate_subject":    types.StringType,
 	"client_certificate_token":      types.StringType,
 	"client_certificate_file":       types.StringType,
@@ -79,6 +83,10 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"client_certificate_subject": schema.StringAttribute{
 		Computed:            true,
@@ -123,6 +131,9 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"log_level": schema.StringAttribute{
 		Optional: true,
@@ -276,6 +287,7 @@ func (m *NotificationRestEndpointModel) Flatten(ctx context.Context, from *notif
 		*m = NotificationRestEndpointModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ClientCertificateSubject = flex.FlattenStringPointer(from.ClientCertificateSubject)
 	m.ClientCertificateToken = flex.FlattenStringPointer(from.ClientCertificateToken)
 	m.ClientCertificateValidFrom = flex.FlattenInt64Pointer(from.ClientCertificateValidFrom)

@@ -12,6 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -19,11 +20,13 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordCaaModel struct {
 	Ref               types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	CaFlag            types.Int64  `tfsdk:"ca_flag"`
 	CaTag             types.String `tfsdk:"ca_tag"`
 	CaValue           types.String `tfsdk:"ca_value"`
@@ -49,6 +52,7 @@ type RecordCaaModel struct {
 
 var RecordCaaAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+    "uuid":        types.StringType,
 	"ca_flag":            types.Int64Type,
 	"ca_tag":             types.StringType,
 	"ca_value":           types.StringType,
@@ -77,6 +81,10 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"ca_flag": schema.Int64Attribute{
 		Required:            true,
 		MarkdownDescription: "Flag of CAA record.",
@@ -157,6 +165,9 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"forbid_reclamation": schema.BoolAttribute{
 		Optional:            true,
@@ -251,6 +262,7 @@ func (m *RecordCaaModel) Flatten(ctx context.Context, from *dns.RecordCaa, diags
 		*m = RecordCaaModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CaFlag = flex.FlattenInt64Pointer(from.CaFlag)
 	m.CaTag = flex.FlattenStringPointer(from.CaTag)
 	m.CaValue = flex.FlattenStringPointer(from.CaValue)

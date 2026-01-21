@@ -19,11 +19,13 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type FtpuserModel struct {
 	Ref           types.String `tfsdk:"ref"`
+	Uuid          types.String `tfsdk:"uuid"`
 	CreateHomeDir types.Bool   `tfsdk:"create_home_dir"`
 	ExtAttrs      types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll   types.Map    `tfsdk:"extattrs_all"`
@@ -35,6 +37,7 @@ type FtpuserModel struct {
 
 var FtpuserAttrTypes = map[string]attr.Type{
 	"ref":             types.StringType,
+	"uuid":            types.StringType,
 	"create_home_dir": types.BoolType,
 	"extattrs":        types.MapType{ElemType: types.StringType},
 	"extattrs_all":    types.MapType{ElemType: types.StringType},
@@ -48,6 +51,10 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"create_home_dir": schema.BoolAttribute{
 		Optional:            true,
@@ -72,6 +79,9 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object, including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"home_dir": schema.StringAttribute{
 		Optional:            true,
@@ -144,6 +154,7 @@ func (m *FtpuserModel) Flatten(ctx context.Context, from *security.Ftpuser, diag
 		*m = FtpuserModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.HomeDir = flex.FlattenStringPointer(from.HomeDir)
 	m.Permission = flex.FlattenStringPointer(from.Permission)

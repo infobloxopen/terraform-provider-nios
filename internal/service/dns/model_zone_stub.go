@@ -21,12 +21,14 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneStubModel struct {
 	Ref                  types.String                             `tfsdk:"ref"`
+	Uuid                 types.String                             `tfsdk:"uuid"`
 	Address              types.String                             `tfsdk:"address"`
 	Comment              types.String                             `tfsdk:"comment"`
 	Disable              types.Bool                               `tfsdk:"disable"`
@@ -65,6 +67,7 @@ type ZoneStubModel struct {
 
 var ZoneStubAttrTypes = map[string]attr.Type{
 	"ref":                    types.StringType,
+	"uuid":                   types.StringType,
 	"address":                types.StringType,
 	"comment":                types.StringType,
 	"disable":                types.BoolType,
@@ -105,6 +108,10 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address": schema.StringAttribute{
 		Computed:            true,
@@ -153,6 +160,9 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"external_ns_group": schema.StringAttribute{
 		Optional: true,
@@ -379,6 +389,7 @@ func (m *ZoneStubModel) Flatten(ctx context.Context, from *dns.ZoneStub, diags *
 		*m = ZoneStubModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +24,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -30,6 +32,7 @@ import (
 
 type RangetemplateModel struct {
 	Ref                            types.String                     `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Bootfile                       types.String                     `tfsdk:"bootfile"`
 	Bootserver                     types.String                     `tfsdk:"bootserver"`
 	CloudApiCompatible             types.Bool                       `tfsdk:"cloud_api_compatible"`
@@ -98,6 +101,7 @@ type RangetemplateModel struct {
 
 var RangetemplateAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+    "uuid":        types.StringType,
 	"bootfile":                            types.StringType,
 	"bootserver":                          types.StringType,
 	"cloud_api_compatible":                types.BoolType,
@@ -169,6 +173,10 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"bootfile": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -307,6 +315,9 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"failover_association": schema.StringAttribute{
 		Optional: true,
@@ -755,6 +766,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 		*m = RangetemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
 	m.CloudApiCompatible = types.BoolPointerValue(from.CloudApiCompatible)

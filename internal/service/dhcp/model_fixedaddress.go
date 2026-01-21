@@ -28,12 +28,14 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type FixedaddressModel struct {
 	Ref                            types.String        `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AgentCircuitId                 types.String        `tfsdk:"agent_circuit_id"`
 	AgentRemoteId                  types.String        `tfsdk:"agent_remote_id"`
 	AllowTelnet                    types.Bool          `tfsdk:"allow_telnet"`
@@ -100,6 +102,7 @@ type FixedaddressModel struct {
 
 var FixedaddressAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+    "uuid":        types.StringType,
 	"agent_circuit_id":                    types.StringType,
 	"agent_remote_id":                     types.StringType,
 	"allow_telnet":                        types.BoolType,
@@ -169,6 +172,10 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"agent_circuit_id": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -366,6 +373,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"ignore_dhcp_option_list_request": schema.BoolAttribute{
 		Optional: true,
@@ -722,6 +732,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	}
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AgentCircuitId = flex.FlattenStringPointer(from.AgentCircuitId)
 	m.AgentRemoteId = flex.FlattenStringPointer(from.AgentRemoteId)
 	m.AllowTelnet = types.BoolPointerValue(from.AllowTelnet)

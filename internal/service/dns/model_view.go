@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,12 +25,14 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ViewModel struct {
 	Ref                                 types.String                     `tfsdk:"ref"`
+	Uuid                                types.String                     `tfsdk:"uuid"`
 	BlacklistAction                     types.String                     `tfsdk:"blacklist_action"`
 	BlacklistLogQuery                   types.Bool                       `tfsdk:"blacklist_log_query"`
 	BlacklistRedirectAddresses          types.List                       `tfsdk:"blacklist_redirect_addresses"`
@@ -117,6 +120,7 @@ type ViewModel struct {
 
 var ViewAttrTypes = map[string]attr.Type{
 	"ref":                                      types.StringType,
+	"uuid":                                     types.StringType,
 	"blacklist_action":                         types.StringType,
 	"blacklist_log_query":                      types.BoolType,
 	"blacklist_redirect_addresses":             types.ListType{ElemType: types.StringType},
@@ -206,6 +210,10 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"blacklist_action": schema.StringAttribute{
 		Optional: true,
@@ -466,6 +474,9 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"filter_aaaa": schema.StringAttribute{
 		Optional: true,
@@ -999,6 +1010,7 @@ func (m *ViewModel) Flatten(ctx context.Context, from *dns.View, diags *diag.Dia
 		*m = ViewModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.BlacklistAction = flex.FlattenStringPointer(from.BlacklistAction)
 	m.BlacklistLogQuery = types.BoolPointerValue(from.BlacklistLogQuery)
 	m.BlacklistRedirectAddresses = flex.FlattenFrameworkListString(ctx, from.BlacklistRedirectAddresses, diags)

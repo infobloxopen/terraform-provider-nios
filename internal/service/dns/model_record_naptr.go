@@ -21,11 +21,13 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordNaptrModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	CloudInfo         types.Object `tfsdk:"cloud_info"`
 	Comment           types.String `tfsdk:"comment"`
 	CreationTime      types.Int64  `tfsdk:"creation_time"`
@@ -55,6 +57,7 @@ type RecordNaptrModel struct {
 
 var RecordNaptrAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"cloud_info":         types.ObjectType{AttrTypes: RecordNaptrCloudInfoAttrTypes},
 	"comment":            types.StringType,
 	"creation_time":      types.Int64Type,
@@ -86,6 +89,10 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          RecordNaptrCloudInfoResourceSchemaAttributes,
@@ -153,6 +160,9 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"flags": schema.StringAttribute{
 		Optional: true,
@@ -302,6 +312,7 @@ func (m *RecordNaptrModel) Flatten(ctx context.Context, from *dns.RecordNaptr, d
 		*m = RecordNaptrModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudInfo = FlattenRecordNaptrCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CreationTime = flex.FlattenInt64Pointer(from.CreationTime)

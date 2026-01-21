@@ -3,6 +3,7 @@ package misc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -11,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -20,6 +20,7 @@ import (
 
 type RulesetModel struct {
 	Ref           types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment       types.String `tfsdk:"comment"`
 	Disabled      types.Bool   `tfsdk:"disabled"`
 	Name          types.String `tfsdk:"name"`
@@ -29,6 +30,7 @@ type RulesetModel struct {
 
 var RulesetAttrTypes = map[string]attr.Type{
 	"ref":            types.StringType,
+    "uuid":        types.StringType,
 	"comment":        types.StringType,
 	"disabled":       types.BoolType,
 	"name":           types.StringType,
@@ -41,6 +43,10 @@ var RulesetResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -64,8 +70,8 @@ var RulesetResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RulesetNxdomainRulesResourceSchemaAttributes,
 		},
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -113,6 +119,7 @@ func (m *RulesetModel) Flatten(ctx context.Context, from *misc.Ruleset, diags *d
 		*m = RulesetModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disabled = types.BoolPointerValue(from.Disabled)
 	m.Name = flex.FlattenStringPointer(from.Name)

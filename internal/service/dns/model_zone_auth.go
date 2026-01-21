@@ -28,6 +28,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
@@ -37,6 +38,7 @@ import (
 
 type ZoneAuthModel struct {
 	Ref                                     types.String                     `tfsdk:"ref"`
+	Uuid                                    types.String                     `tfsdk:"uuid"`
 	Address                                 iptypes.IPAddress                `tfsdk:"address"`
 	AllowActiveDir                          types.List                       `tfsdk:"allow_active_dir"`
 	AllowFixedRrsetOrder                    types.Bool                       `tfsdk:"allow_fixed_rrset_order"`
@@ -158,6 +160,7 @@ type ZoneAuthModel struct {
 
 var ZoneAuthAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+	"uuid":                                 types.StringType,
 	"address":                              iptypes.IPAddressType{},
 	"allow_active_dir":                     types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneAuthAllowActiveDirAttrTypes}},
 	"allow_fixed_rrset_order":              types.BoolType,
@@ -281,6 +284,10 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
@@ -592,6 +599,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object , including default attributes.",
 		ElementType:         types.StringType,
+		PlanModifiers: []planmodifier.Map{
+			importmod.AssociateInternalId(),
+		},
 	},
 	"external_primaries": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -994,6 +1004,7 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"srgs": schema.ListAttribute{
 		ElementType:         types.StringType,
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The associated shared record groups of a DNS zone. If a shared record group is associated with a zone, then all shared records in a shared record group will be shared in the zone.",
 	},
 	"update_forwarding": schema.ListNestedAttribute{
@@ -1278,6 +1289,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 		*m = ZoneAuthModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenIPAddress(from.Address)
 	m.AllowActiveDir = flex.FlattenFrameworkListNestedBlock(ctx, from.AllowActiveDir, ZoneAuthAllowActiveDirAttrTypes, diags, FlattenZoneAuthAllowActiveDir)
 	m.AllowFixedRrsetOrder = types.BoolPointerValue(from.AllowFixedRrsetOrder)
