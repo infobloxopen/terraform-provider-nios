@@ -17,7 +17,6 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
-//var readableAttributesForDtcTopologyRule = "dest_type,destination_link,return_type,sources,topology,valid" 
 type DtcTopologyRulesInnerModel struct {
 	DestType        types.String `tfsdk:"dest_type"`
 	DestinationLink types.String `tfsdk:"destination_link"`
