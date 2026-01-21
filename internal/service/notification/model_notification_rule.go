@@ -27,6 +27,7 @@ import (
 
 type NotificationRuleModel struct {
 	Ref                              types.String                             `tfsdk:"ref"`
+	Uuid                             types.String                             `tfsdk:"uuid"`
 	AllMembers                       types.Bool                               `tfsdk:"all_members"`
 	Comment                          types.String                             `tfsdk:"comment"`
 	Disable                          types.Bool                               `tfsdk:"disable"`
@@ -49,6 +50,7 @@ type NotificationRuleModel struct {
 
 var NotificationRuleAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"all_members":                         types.BoolType,
 	"comment":                             types.StringType,
 	"disable":                             types.BoolType,
@@ -73,6 +75,10 @@ var NotificationRuleResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"all_members": schema.BoolAttribute{
 		Computed:            true,
@@ -257,6 +263,7 @@ func (m *NotificationRuleModel) Flatten(ctx context.Context, from *notification.
 		*m = NotificationRuleModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllMembers = types.BoolPointerValue(from.AllMembers)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

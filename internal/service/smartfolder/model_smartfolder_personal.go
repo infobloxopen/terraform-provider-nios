@@ -20,6 +20,7 @@ import (
 
 type SmartfolderPersonalModel struct {
 	Ref        types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment    types.String `tfsdk:"comment"`
 	GroupBys   types.List   `tfsdk:"group_bys"`
 	IsShortcut types.Bool   `tfsdk:"is_shortcut"`
@@ -29,6 +30,7 @@ type SmartfolderPersonalModel struct {
 
 var SmartfolderPersonalAttrTypes = map[string]attr.Type{
 	"ref":         types.StringType,
+    "uuid":        types.StringType,
 	"comment":     types.StringType,
 	"group_bys":   types.ListType{ElemType: types.ObjectType{AttrTypes: SmartfolderPersonalGroupBysAttrTypes}},
 	"is_shortcut": types.BoolType,
@@ -41,6 +43,10 @@ var SmartfolderPersonalResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -132,6 +138,7 @@ func (m *SmartfolderPersonalModel) Flatten(ctx context.Context, from *smartfolde
 		*m = SmartfolderPersonalModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.GroupBys = flex.FlattenFrameworkListNestedBlock(ctx, from.GroupBys, SmartfolderPersonalGroupBysAttrTypes, diags, FlattenSmartfolderPersonalGroupBys)
 	m.IsShortcut = types.BoolPointerValue(from.IsShortcut)

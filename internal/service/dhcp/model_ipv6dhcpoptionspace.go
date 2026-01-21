@@ -19,6 +19,7 @@ import (
 
 type Ipv6dhcpoptionspaceModel struct {
 	Ref               types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	Comment           types.String `tfsdk:"comment"`
 	EnterpriseNumber  types.Int64  `tfsdk:"enterprise_number"`
 	Name              types.String `tfsdk:"name"`
@@ -27,6 +28,7 @@ type Ipv6dhcpoptionspaceModel struct {
 
 var Ipv6dhcpoptionspaceAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+    "uuid":        types.StringType,
 	"comment":            types.StringType,
 	"enterprise_number":  types.Int64Type,
 	"name":               types.StringType,
@@ -38,6 +40,10 @@ var Ipv6dhcpoptionspaceResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -96,6 +102,7 @@ func (m *Ipv6dhcpoptionspaceModel) Flatten(ctx context.Context, from *dhcp.Ipv6d
 		*m = Ipv6dhcpoptionspaceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.EnterpriseNumber = flex.FlattenInt64Pointer(from.EnterpriseNumber)
 	m.Name = flex.FlattenStringPointer(from.Name)

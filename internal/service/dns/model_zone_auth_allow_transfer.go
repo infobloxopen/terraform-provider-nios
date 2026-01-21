@@ -20,6 +20,7 @@ import (
 
 type ZoneAuthAllowTransferModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	Address        types.String `tfsdk:"address"`
 	Struct         types.String `tfsdk:"struct"`
 	Permission     types.String `tfsdk:"permission"`
@@ -31,6 +32,7 @@ type ZoneAuthAllowTransferModel struct {
 
 var ZoneAuthAllowTransferAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":              types.StringType,
 	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
@@ -63,6 +65,10 @@ var ZoneAuthAllowTransferResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 		},
 		MarkdownDescription: "The reference to the Named ACL object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The UUID of the object.",
 	},
 	"address": schema.StringAttribute{
 		Optional: true,
@@ -168,6 +174,7 @@ func (m *ZoneAuthAllowTransferModel) Flatten(ctx context.Context, from *dns.Zone
 	}
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

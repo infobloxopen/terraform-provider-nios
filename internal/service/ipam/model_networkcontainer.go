@@ -34,6 +34,7 @@ import (
 
 type NetworkcontainerModel struct {
 	Ref                              types.String         `tfsdk:"ref"`
+	Uuid                             types.String         `tfsdk:"uuid"`
 	Authority                        types.Bool           `tfsdk:"authority"`
 	AutoCreateReversezone            types.Bool           `tfsdk:"auto_create_reversezone"`
 	Bootfile                         types.String         `tfsdk:"bootfile"`
@@ -138,6 +139,7 @@ type NetworkcontainerModel struct {
 
 var NetworkcontainerAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+	"uuid":                                 types.StringType,
 	"authority":                            types.BoolType,
 	"auto_create_reversezone":              types.BoolType,
 	"bootfile":                             types.StringType,
@@ -244,6 +246,10 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"authority": schema.BoolAttribute{
 		Optional:            true,
@@ -1098,6 +1104,7 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 		*m = NetworkcontainerModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Authority = types.BoolPointerValue(from.Authority)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
