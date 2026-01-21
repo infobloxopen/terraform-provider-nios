@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -98,6 +99,11 @@ func (r *DtcTopologyResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	r.populateTopologyRules(ctx, &res, &diags)
+
+	if diags.HasError() {
+		return
+	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -168,6 +174,12 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
+	r.populateTopologyRules(ctx, &res, &diags)
+
+	if diags.HasError() {
+		return
+	}
+	
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
@@ -292,6 +304,12 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	r.populateTopologyRules(ctx, &res, &diags)
+
+	if diags.HasError() {
+		return
+	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
@@ -370,4 +388,72 @@ func (r *DtcTopologyResource) ValidateConfig(ctx context.Context, req resource.V
 			}
 		}
 	}
+}
+
+func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef string, diags *diag.Diagnostics) *dtc.DtcTopologyRulesInnerOneOf1 {
+	apiRes, _, err := r.client.DTCAPI.
+		DtcTopologyRuleAPI.
+		Read(ctx, utils.ExtractResourceRef(ruleRef)).
+		ReturnFieldsPlus(readableAttributesForDtcTopologyRule).
+		ReturnAsObject(1).
+		Execute()
+
+	if err != nil {
+		diags.AddError("Client Error", fmt.Sprintf("Unable to read DTC Topology Rules %s", err))
+	}
+	res := apiRes.GetDtcTopologyRuleResponseObjectAsResult.GetResult()
+
+	ruleData := &dtc.DtcTopologyRulesInnerOneOf1{}
+
+	if destType, ok := res.GetDestTypeOk(); ok {
+		ruleData.SetDestType(*destType)
+	}
+
+	if destLink, ok := res.GetDestinationLinkOk(); ok {
+	    ruleData.SetDestinationLink(*destLink.DtcTopologyRuleDestinationLinkOneOf.Ref)
+	}
+
+	if returnType, ok := res.GetReturnTypeOk(); ok {
+		ruleData.SetReturnType(*returnType)
+	}
+
+	if topology, ok := res.GetTopologyOk(); ok {
+		ruleData.SetTopology(*topology)
+	}
+
+	if valid, ok := res.GetValidOk(); ok {
+		ruleData.SetValid(*valid)
+	}
+
+	if sources, ok := res.GetSourcesOk(); ok {
+		convertedSources := make([]dtc.DtcTopologyRulesInnerOneOf1SourcesInner, len(sources))
+		for i, source := range sources {
+			innerSource := dtc.DtcTopologyRulesInnerOneOf1SourcesInner{}
+
+			if sourceOp, ok := source.GetSourceOpOk(); ok {
+				innerSource.SourceOp = sourceOp
+			}
+			if sourceType, ok := source.GetSourceTypeOk(); ok {
+				innerSource.SourceType = sourceType
+			}
+			if sourceValue, ok := source.GetSourceValueOk(); ok {
+				innerSource.SourceValue = sourceValue
+			}
+
+			convertedSources[i] = innerSource
+		}
+		ruleData.SetSources(convertedSources)
+	}
+
+	return ruleData
+}
+
+func (r *DtcTopologyResource) populateTopologyRules(ctx context.Context, res *dtc.DtcTopology, diags *diag.Diagnostics) {
+    for i, rule := range res.Rules {
+        ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
+		if ruleRef == nil {
+			continue
+		}
+        res.Rules[i].DtcTopologyRulesInnerOneOf1 = UpdateDtcTopologyRules(ctx, r, *ruleRef, diags)
+    }
 }

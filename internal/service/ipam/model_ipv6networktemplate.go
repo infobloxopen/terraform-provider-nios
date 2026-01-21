@@ -238,6 +238,7 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),
+			listvalidator.ValueStringsAre(customvalidator.IsValidIPv6Address()),
 		},
 		MarkdownDescription: "Use this method to set or retrieve the dynamic DNS updates flag of a DHCP IPv6 Network object. The DHCP server can send DDNS updates to DNS servers in the same Grid and to external DNS servers. This setting overrides the member level settings.",
 	},
@@ -274,7 +275,7 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		MarkdownDescription: "The list of IPv6 fixed address templates assigned to this IPv6 network template object. When you create an IPv6 network based on an IPv6 network template object that contains IPv6 fixed address templates, the IPv6 fixed addresses are created based on the associated IPv6 fixed address templates.",
+		MarkdownDescription: "The list of IPv6 fixed address templates assigned to this IPv6 network template object. When you create an IPv6 network based on an IPv6 network template object that contains IPv6 fixed address templates, the IPv6 fixed addresses are created based on the associated IPv6 fixed address templates. These Templates can only be set with cloud incompatible IPv6 Network Templates ",
 	},
 	"ipv6prefix": schema.StringAttribute{
 		Computed:            true,
@@ -364,7 +365,7 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
-		MarkdownDescription: "The RIR organization associated with the IPv6 network.",
+		MarkdownDescription: "The RIR organization associated with the IPv6 network. RIR Organization can only be set with Cloud Incompatible IPv6 Network Templates.",
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Computed: true,
@@ -373,7 +374,7 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.OneOf("CREATE", "NONE"),
 		},
-		MarkdownDescription: "The action for the RIR registration.",
+		MarkdownDescription: "The action for the RIR registration. RIR Registration Action can only be set with Cloud Incompatible IPv6 Network Templates.",
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Computed: true,
@@ -508,7 +509,7 @@ func (m *Ipv6networktemplateModel) Expand(ctx context.Context, diags *diag.Diagn
 		EnableDdns:                 flex.ExpandBoolPointer(m.EnableDdns),
 		ExtAttrs:                   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		FixedAddressTemplates:      flex.ExpandFrameworkListString(ctx, m.FixedAddressTemplates, diags),
-		Ipv6prefix:                 flex.ExpandStringPointer(m.Ipv6prefix),
+		Ipv6prefix:                 flex.ExpandStringPointerEmptyAsNil(m.Ipv6prefix),
 		LogicFilterRules:           flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6networktemplateLogicFilterRules),
 		Members:                    flex.ExpandFrameworkListNestedBlock(ctx, m.Members, diags, ExpandIpv6networktemplateMembers),
 		Name:                       flex.ExpandStringPointer(m.Name),

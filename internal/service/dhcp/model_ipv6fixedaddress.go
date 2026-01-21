@@ -254,6 +254,7 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),
+			listvalidator.ValueStringsAre(customvalidator.IsValidIPv6Address()),
 		},
 		Optional:            true,
 		Computed:            true,
