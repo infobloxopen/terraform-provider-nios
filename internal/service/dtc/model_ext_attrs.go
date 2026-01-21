@@ -21,7 +21,7 @@ const terraformInternalIDEA = "Terraform Internal ID"
 
 func ExpandExtAttrs(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dtc.ExtAttrs {
 	if extattrs.IsNull() || extattrs.IsUnknown() {
-		return nil
+		return &map[string]dtc.ExtAttrs{}
 	}
 	var extAttrsMap map[string]string
 	diags.Append(extattrs.ElementsAs(ctx, &extAttrsMap, false)...)
