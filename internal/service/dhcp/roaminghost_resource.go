@@ -338,18 +338,19 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 		return
 	}
 
-	var options []RoaminghostOptionsModel
-	diags := data.Options.ElementsAs(ctx, &options, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	var dhcpLeaseTimeValue string
 	var hasDhcpLeaseTime bool
 
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
+
+		var options []RoaminghostOptionsModel
+		diags := data.Options.ElementsAs(ctx, &options, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
 		// Special DHCP option names that require use_option to be set
 		specialOptions := map[string]bool{
 			"routers":                  true,
@@ -412,6 +413,7 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
 					)
 				}
+				return
 			}
 
 			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
