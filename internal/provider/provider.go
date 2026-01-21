@@ -158,6 +158,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dhcp.NewIpv6fixedaddressResource,
 		dhcp.NewIpv6filteroptionResource,
 		dhcp.NewFilterrelayagentResource,
+		dhcp.NewFilteroptionResource,
 
 		dtc.NewDtcLbdnResource,
 		dtc.NewDtcServerResource,
@@ -173,6 +174,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dtc.NewDtcRecordSrvResource,
 		dtc.NewDtcRecordNaptrResource,
 		dtc.NewDtcRecordCnameResource,
+		dtc.NewDtcRecordAaaaResource,
 
 		ipam.NewNetworkResource,
 		ipam.NewNetworktemplateResource,
@@ -229,6 +231,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameIpaddressResource,
 		rpz.NewRecordRpzAIpaddressResource,
 		rpz.NewRecordRpzAaaaIpaddressResource,
+		rpz.NewRecordRpzCnameClientipaddressResource,
+		rpz.NewRecordRpzCnameIpaddressdnResource,
+		rpz.NewRecordRpzCnameClientipaddressdnResource,
 	}
 }
 
@@ -292,10 +297,12 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dhcp.NewIpv6fixedaddressDataSource,
 		dhcp.NewIpv6filteroptionDataSource,
 		dhcp.NewFilterrelayagentDataSource,
+		dhcp.NewFilteroptionDataSource,
 
 		dtc.NewDtcLbdnDataSource,
 		dtc.NewDtcServerDataSource,
 		dtc.NewDtcPoolDataSource,
+		dtc.NewDtcTopologyRuleDataSource,
 		dtc.NewDtcTopologyDataSource,
 		dtc.NewDtcMonitorSnmpDataSource,
 		dtc.NewDtcMonitorHttpDataSource,
@@ -307,6 +314,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dtc.NewDtcRecordSrvDataSource,
 		dtc.NewDtcRecordNaptrDataSource,
 		dtc.NewDtcRecordCnameDataSource,
+		dtc.NewDtcRecordAaaaDataSource,
 
 		ipam.NewNetworkDataSource,
 		ipam.NewNetworktemplateDataSource,
@@ -364,6 +372,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameIpaddressDataSource,
 		rpz.NewRecordRpzAIpaddressDataSource,
 		rpz.NewRecordRpzAaaaIpaddressDataSource,
+		rpz.NewRecordRpzCnameClientipaddressDataSource,
+		rpz.NewRecordRpzCnameIpaddressdnDataSource,
+		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
 	}
 }
 
