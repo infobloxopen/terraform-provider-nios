@@ -101,7 +101,7 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 	"host": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidDomainName(),
+			customvalidator.IsValidIPv4OrFQDN(),
 		},
 		MarkdownDescription: "The address or FQDN of the server.",
 	},
