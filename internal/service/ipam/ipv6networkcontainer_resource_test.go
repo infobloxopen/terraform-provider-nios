@@ -1216,7 +1216,7 @@ func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "false"),
+				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "false", "100"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "false"),
@@ -1225,7 +1225,7 @@ func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "true"),
+				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "true", "100"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "true"),
@@ -1827,13 +1827,14 @@ resource "nios_ipam_ipv6network_container" "test_use_options" {
 `, network, useOptions)
 }
 
-func testAccIpv6networkcontainerUsePreferredLifetime(network, usePreferredLifetime string) string {
+func testAccIpv6networkcontainerUsePreferredLifetime(network, usePreferredLifetime, preferredLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_use_preferred_lifetime" {
     network = %q
     use_preferred_lifetime = %q
+    preferred_lifetime = %q
 }
-`, network, usePreferredLifetime)
+`, network, usePreferredLifetime, preferredLifetime)
 }
 
 func testAccIpv6networkcontainerUseSubscribeSettings(network, useSubscribeSettings string) string {
