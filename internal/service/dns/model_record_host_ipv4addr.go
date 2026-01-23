@@ -112,7 +112,7 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_bootserver")),
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidIPv4OrFQDN(),
 		},
 		MarkdownDescription: "The IP address or hostname of the boot file server where the boot file is stored.",
 	},
@@ -206,6 +206,7 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_nextserver")),
+			customvalidator.IsValidIPv4OrFQDN(),
 		},
 		Computed:            true,
 		MarkdownDescription: "The name in FQDN format and/or IPv4 Address of the next server that the host needs to boot.",
