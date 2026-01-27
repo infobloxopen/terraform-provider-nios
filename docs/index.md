@@ -28,6 +28,7 @@ provider "nios" {
   nios_host_url = "<NIOS_HOST_URL>"
   nios_username = "<NIOS_USERNAME>"
   nios_password = "<NIOS_PASSWORD>"
+  retry_timeout = "<RETRY_TIMEOUT_IN_SECONDS>"
 }
 ```
 
@@ -39,3 +40,4 @@ provider "nios" {
 - `nios_host_url` (String)
 - `nios_password` (String)
 - `nios_username` (String)
+- `retry_timeout` (Number) Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.
