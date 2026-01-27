@@ -111,6 +111,7 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: ZoneDelegatedDelegateToResourceSchemaAttributes,
 		},
 		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
