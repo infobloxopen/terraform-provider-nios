@@ -57,7 +57,7 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 			errors.Is(ctx.Err(), context.Canceled) {
 			// Overriding the ctx deadline error message for better user understanding
 			return fmt.Errorf(
-				"retry timeout exceeded while waiting for the operation to complete, the failure may be due to a transient network issue.",
+				"retry timeout exceeded while waiting for the operation to complete, the failure may be due to a transient network issue",
 			)
 		}
 
