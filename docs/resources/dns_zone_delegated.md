@@ -88,12 +88,12 @@ resource "nios_dns_zone_delegated" "zone_delegated_additional_fields" {
 
 ### Required
 
-- `delegate_to` (Attributes List) This provides information for the remote name server that maintains data for the delegated zone. The Infoblox appliance redirects queries for data for the delegated zone to this remote name server. (see [below for nested schema](#nestedatt--delegate_to))
 - `fqdn` (String) The name of this DNS zone. For a reverse zone, this is in "address/cidr" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set.
 
 ### Optional
 
 - `comment` (String) Comment for the zone; maximum 256 characters.
+- `delegate_to` (Attributes List) This provides information for the remote name server that maintains data for the delegated zone. The Infoblox appliance redirects queries for data for the delegated zone to this remote name server. (see [below for nested schema](#nestedatt--delegate_to))
 - `delegated_ttl` (Number) You can specify the Time to Live (TTL) values of auto-generated NS and glue records for a delegated zone. This value is the number of seconds that data is cached.
 - `disable` (Boolean) Determines whether a zone is disabled or not. When this is set to False, the zone is enabled.
 - `enable_rfc2317_exclusion` (Boolean) This flag controls whether automatic generation of RFC 2317 CNAMEs for delegated reverse zones overwrite existing PTR records. The default behavior is to overwrite all the existing records in the range; this corresponds to "allow_ptr_creation_in_parent" set to False. However, when this flag is set to True the existing PTR records are not overwritten.
