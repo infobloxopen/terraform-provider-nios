@@ -134,7 +134,7 @@ var FingerprintResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Default:  stringdefault.StaticString("CUSTOM"),
 		Validators: []validator.String{
-			stringvalidator.OneOf("CUSTOM", "STANDARD"),
+			stringvalidator.OneOf("CUSTOM"),
 		},
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
