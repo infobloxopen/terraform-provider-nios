@@ -524,13 +524,13 @@ Read-Only:
 
 Optional:
 
-- `ea_expression_list` (Attributes List) The extensible attributes expression list. The particular record is treated as reclaimable if extensible attributes expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. (see [below for nested schema](#nestedatt--scavenging_settings--ea_expression_list))
+- `ea_expression_list` (Attributes List) The extensible attributes expression list. The particular record is treated as reclaimable if extensible attributes expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. To unset the ea_expression_list, set it to null. (see [below for nested schema](#nestedatt--scavenging_settings--ea_expression_list))
 - `enable_auto_reclamation` (Boolean) This flag indicates if the automatic resource record scavenging is enabled or not.
 - `enable_recurrent_scavenging` (Boolean) This flag indicates if the recurrent resource record scavenging is enabled or not.
 - `enable_rr_last_queried` (Boolean) This flag indicates if the resource record last queried monitoring in affected zones is enabled or not.
 - `enable_scavenging` (Boolean) This flag indicates if the resource record scavenging is enabled or not.
 - `enable_zone_last_queried` (Boolean) This flag indicates if the last queried monitoring for affected zones is enabled or not.
-- `expression_list` (Attributes List) The expression list. The particular record is treated as reclaimable if expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. (see [below for nested schema](#nestedatt--scavenging_settings--expression_list))
+- `expression_list` (Attributes List) The expression list. The particular record is treated as reclaimable if expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. To unset the expression_list, set it to null. (see [below for nested schema](#nestedatt--scavenging_settings--expression_list))
 - `reclaim_associated_records` (Boolean) This flag indicates if the associated resource record scavenging is enabled or not.
 
 Read-Only:
