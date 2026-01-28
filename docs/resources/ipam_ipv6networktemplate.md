@@ -91,7 +91,7 @@ resource "nios_ipam_ipv6networktemplate" "ipam_ipv6_network_template_with_additi
 - `domain_name_servers` (List of String) Use this method to set or retrieve the dynamic DNS updates flag of a DHCP IPv6 Network object. The DHCP server can send DDNS updates to DNS servers in the same Grid and to external DNS servers. This setting overrides the member level settings.
 - `enable_ddns` (Boolean) The dynamic DNS updates flag of a DHCP IPv6 network object. If set to True, the DHCP server sends DDNS updates to DNS servers in the same Grid, and to external DNS servers.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
-- `fixed_address_templates` (List of String) The list of IPv6 fixed address templates assigned to this IPv6 network template object. When you create an IPv6 network based on an IPv6 network template object that contains IPv6 fixed address templates, the IPv6 fixed addresses are created based on the associated IPv6 fixed address templates.
+- `fixed_address_templates` (List of String) The list of IPv6 fixed address templates assigned to this IPv6 network template object. When you create an IPv6 network based on an IPv6 network template object that contains IPv6 fixed address templates, the IPv6 fixed addresses are created based on the associated IPv6 fixed address templates. These Templates can only be set with cloud incompatible IPv6 Network Templates
 - `ipv6prefix` (String) The IPv6 Address prefix of the DHCP IPv6 network.
 - `logic_filter_rules` (Attributes List) This field contains the logic filters to be applied on this IPv6 network template. This list corresponds to the match rules that are written to the DHCPv6 configuration file. (see [below for nested schema](#nestedatt--logic_filter_rules))
 - `members` (Attributes List) A list of members that serve DHCP for the network. All members in the array must be of the same type. The struct type must be indicated in each element, by setting the "_struct" member to the struct type. (see [below for nested schema](#nestedatt--members))
@@ -99,8 +99,8 @@ resource "nios_ipam_ipv6networktemplate" "ipam_ipv6_network_template_with_additi
 - `preferred_lifetime` (Number) Use this method to set or retrieve the preferred lifetime value of a DHCP IPv6 Network object.
 - `range_templates` (List of String) The list of IPv6 address range templates assigned to this IPv6 network template object. When you create an IPv6 network based on an IPv6 network template object that contains IPv6 range templates, the IPv6 address ranges are created based on the associated IPv6 address range templates.
 - `recycle_leases` (Boolean) If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.
-- `rir_organization` (String) The RIR organization associated with the IPv6 network.
-- `rir_registration_action` (String) The action for the RIR registration.
+- `rir_organization` (String) The RIR organization associated with the IPv6 network. RIR Organization can only be set with Cloud Incompatible IPv6 Network Templates.
+- `rir_registration_action` (String) The action for the RIR registration. RIR Registration Action can only be set with Cloud Incompatible IPv6 Network Templates.
 - `rir_registration_status` (String) The registration status of the IPv6 network in RIR.
 - `send_rir_request` (Boolean) Determines whether to send the RIR registration request.
 - `update_dns_on_lease_renewal` (Boolean) This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.

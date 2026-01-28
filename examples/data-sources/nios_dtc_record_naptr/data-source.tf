@@ -1,5 +1,3 @@
-// Note: DTC NAPTR Record cannot be retrieved without filters. The dtc_server filter is mandatory for all queries.
-
 // Retrieve a specific DTC NAPTR Record in a DTC server using filters 
 data "nios_dtc_record_naptr" "get_dtc_record_naptr_in_dtc_server_using_filters" {
   filters = {
