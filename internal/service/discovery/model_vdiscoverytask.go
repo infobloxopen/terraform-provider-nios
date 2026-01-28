@@ -3,20 +3,19 @@ package discovery
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/infobloxopen/infoblox-nios-go-client/discovery"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -164,8 +163,8 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.Bool{
-			boolvalidator.AlsoRequires((path.MatchRoot("auto_create_dns_record_type"))),
-			boolvalidator.AlsoRequires((path.MatchRoot("auto_create_dns_hostname_template"))),
+			boolvalidator.AlsoRequires(path.MatchRoot("auto_create_dns_record_type")),
+			boolvalidator.AlsoRequires(path.MatchRoot("auto_create_dns_hostname_template")),
 		},
 		MarkdownDescription: "Control whether to create or update DNS record using discovered data.",
 	},
