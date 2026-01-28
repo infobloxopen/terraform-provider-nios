@@ -94,7 +94,7 @@ func isDomainName(s string, allowMultiLabel bool, checkPrintableChars bool) erro
 
 	// Check for leading or trailing whitespace
 	if strings.TrimSpace(s) != s {
-		return fmt.Errorf("domain name cannot have leading or trailing whitespaces")
+		return fmt.Errorf("domain name cannot have leading or trailing whitespace")
 	}
 
 	// Check for uppercase characters
