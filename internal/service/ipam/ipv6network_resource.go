@@ -498,7 +498,13 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 
 	// Preferred lifetime must be less than or equal to valid lifetime
 	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() {
-		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
+		if (data.ValidLifetime.IsUnknown() || data.ValidLifetime.IsNull()) && !hasDhcpLeaseTime {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("preferred_lifetime"),
+				"Invalid configuration",
+				"Either 'valid_lifetime' attribute or 'dhcp-lease-time' option must be set when 'preferred_lifetime' is specified.",
+			)
+		} else if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
 			if data.PreferredLifetime.ValueInt64() > data.ValidLifetime.ValueInt64() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("preferred_lifetime"),
@@ -514,6 +520,38 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 						path.Root("preferred_lifetime"),
 						"Invalid configuration",
 						"The 'preferred_lifetime' must be less than or equal to 'dhcp-lease-time' (valid_lifetime) option value.",
+					)
+				}
+			}
+		}
+	}
+
+	// Check for valid lifetime or dhcp-lease-time when preferred_lifetime is NOT set
+	if data.PreferredLifetime.IsNull() || data.PreferredLifetime.IsUnknown() {
+		// validate that valid_lifetime is >= 27000
+		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() &&
+			!data.UseValidLifetime.IsNull() && !data.UseValidLifetime.IsUnknown() &&
+			data.UseValidLifetime.ValueBool() {
+
+			if data.ValidLifetime.ValueInt64() < 27000 {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("valid_lifetime"),
+					"Invalid configuration",
+					"When 'preferred_lifetime' is not set ,"+
+						"'valid_lifetime' must be greater than or equal to 27000.",
+				)
+			}
+		}
+
+		// validate that dhcp-lease-time  is >= 27000
+		if hasDhcpLeaseTime {
+			if dhcpLeaseTimeInt, err := strconv.ParseInt(dhcpLeaseTimeValue, 10, 64); err == nil {
+				if dhcpLeaseTimeInt < 27000 {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options"),
+						"Invalid configuration",
+						"When 'preferred_lifetime' is not set, the DHCP option "+
+							"'dhcp-lease-time' must be greater than or equal to 27000.",
 					)
 				}
 			}

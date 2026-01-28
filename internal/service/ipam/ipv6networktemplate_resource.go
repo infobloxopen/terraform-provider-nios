@@ -453,7 +453,13 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 
 	// Preferred lifetime must be less than or equal to valid lifetime
 	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() {
-		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
+		if (data.ValidLifetime.IsUnknown() || data.ValidLifetime.IsNull()) && !hasDhcpLeaseTime {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("preferred_lifetime"),
+				"Invalid configuration",
+				"Either 'valid_lifetime' attribute or 'dhcp-lease-time' option must be set when 'preferred_lifetime' is specified.",
+			)
+		} else if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
 			if data.PreferredLifetime.ValueInt64() > data.ValidLifetime.ValueInt64() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("preferred_lifetime"),

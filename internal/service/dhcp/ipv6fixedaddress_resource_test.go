@@ -1929,7 +1929,9 @@ resource "nios_dhcp_ipv6fixedaddress" "test_preferred_lifetime" {
     ipv6addr = %q
     duid = %q
     preferred_lifetime = %d
+	valid_lifetime = 43200
     use_preferred_lifetime = true
+	use_valid_lifetime = true
     network = nios_ipam_ipv6network.test_ipv6_network.network
     network_view = nios_ipam_network_view.parent_network_view.name
 }

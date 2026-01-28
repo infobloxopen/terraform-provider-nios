@@ -1573,7 +1573,7 @@ func TestAccIpv6networkResource_UseValidLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkUseValidLifetime(network, "true", "20000"),
+				Config: testAccIpv6networkUseValidLifetime(network, "true", "28000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
@@ -1981,6 +1981,8 @@ resource "nios_ipam_ipv6network" "test_preferred_lifetime" {
     network = %q
     preferred_lifetime = %q
     use_preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
 `, network, preferredLifetime, usePreferredLifetime)
 }
@@ -2166,6 +2168,8 @@ resource "nios_ipam_ipv6network" "test_use_preferred_lifetime" {
     network = %q
     preferred_lifetime = %q
     use_preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
 `, network, preferredLifetime, usePreferredLifetime)
 }

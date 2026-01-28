@@ -1677,6 +1677,8 @@ resource "nios_ipam_ipv6network_container" "test_preferred_lifetime" {
     network = %q
     preferred_lifetime = %q
     use_preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
 `, network, preferredLifetime, usePreferredLifetime)
 }
@@ -1833,6 +1835,8 @@ resource "nios_ipam_ipv6network_container" "test_use_preferred_lifetime" {
     network = %q
     use_preferred_lifetime = %q
     preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
 `, network, usePreferredLifetime, preferredLifetime)
 }

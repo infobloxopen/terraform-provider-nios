@@ -2025,6 +2025,8 @@ resource "nios_ipam_ipv6networktemplate" "test_use_preferred_lifetime" {
     cidr = %d
     use_preferred_lifetime = %q
     preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
 `, name, cidr, usePreferredLifetime, preferredLifetime)
 }
