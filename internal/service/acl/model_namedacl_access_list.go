@@ -158,10 +158,10 @@ func (m *NamedaclAccessListModel) Flatten(ctx context.Context, from *acl.Namedac
 		*m = NamedaclAccessListModel{}
 	}
 	m.Struct = flex.FlattenStringPointer(from.Struct)
-	m.Address = flex.FlattenStringPointer(from.Address)
-	m.Permission = flex.FlattenStringPointer(from.Permission)
-	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
-	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)
-	m.TsigKeyName = flex.FlattenStringPointer(from.TsigKeyName)
+	m.Address = flex.FlattenStringPointerNilAsNotEmpty(from.Address)
+	m.Permission = flex.FlattenStringPointerNilAsNotEmpty(from.Permission)
+	m.TsigKey = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKey)
+	m.TsigKeyAlg = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyAlg)
+	m.TsigKeyName = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyName)
 	m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
 }
