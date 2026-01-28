@@ -157,10 +157,18 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	// Save original IPv6 function call attributes
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
+	diags.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential"), &data.Snmp3Credential)...)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	createRequest := data.Expand(ctx, &resp.Diagnostics)
+
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Create(ctx).
-		RecordHost(*data.Expand(ctx, &resp.Diagnostics)).
+		RecordHost(*createRequest).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
@@ -420,6 +428,12 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	// Prepare the update request while preserving DHCP settings
 	updateReq := data.Expand(ctx, &resp.Diagnostics)
 	preserveDHCPSettings(updateReq, &currentHost)
+	diags.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential"), &data.Snmp3Credential)...)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	updateReq = data.Expand(ctx, &resp.Diagnostics)
 	updateReq.NetworkView = nil
 
 	apiRes, _, err := r.client.DNSAPI.

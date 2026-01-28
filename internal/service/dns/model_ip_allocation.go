@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -19,8 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -379,17 +376,17 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func ExpandRecordHost(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordHost {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m IPAllocationModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
+//func ExpandRecordHost(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dns.RecordHost {
+//	if o.IsNull() || o.IsUnknown() {
+//		return nil
+//	}
+//	var m IPAllocationModel
+//	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+//	if diags.HasError() {
+//		return nil
+//	}
+//	return m.Expand(ctx, diags, nil)
+//}
 
 func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dns.RecordHost {
 	if m == nil {

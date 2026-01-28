@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -45,6 +44,7 @@ var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attrib
 	},
 	"authentication_password": schema.StringAttribute{
 		Optional:            true,
+		WriteOnly:           true,
 		MarkdownDescription: "Authentication password for the SNMPv3 user.",
 	},
 	"privacy_protocol": schema.StringAttribute{
@@ -53,6 +53,7 @@ var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attrib
 	},
 	"privacy_password": schema.StringAttribute{
 		Optional:            true,
+		WriteOnly:           true,
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},
 	"comment": schema.StringAttribute{
