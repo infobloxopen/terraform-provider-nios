@@ -378,7 +378,7 @@ func validateOptionSequence(optionStr string, attrPath path.Path, attrName strin
 			diags.AddAttributeError(
 				attrPath,
 				fmt.Sprintf("Invalid %s", attrName),
-				fmt.Sprintf("Leading or Trailing whitespace is not allowed in the %s %s in %s", attrName, numStr, optionStr),
+				fmt.Sprintf("Leading or Trailing whitespace is not allowed in the option %s in %s '%s'", trimmedNumStr, attrName, optionStr),
 			)
 			continue
 		}
