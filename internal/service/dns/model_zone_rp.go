@@ -227,7 +227,7 @@ var ZoneRpResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidDomainNameOrIPCIDR(),
+			customvalidator.IsValidDomainName(),
 			customvalidator.IsNotArpa(),
 		},
 		PlanModifiers: []planmodifier.String{

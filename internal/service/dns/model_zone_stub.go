@@ -169,7 +169,7 @@ var ZoneStubResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidDomainNameOrIPCIDR(),
+			customvalidator.IsValidDomainName(),
 			customvalidator.IsNotArpa(),
 			stringvalidator.AlsoRequires(path.MatchRoot("stub_from")),
 		},

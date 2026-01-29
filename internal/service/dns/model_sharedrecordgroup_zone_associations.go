@@ -30,7 +30,7 @@ var SharedrecordgroupZoneAssociationsResourceSchemaAttributes = map[string]schem
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidDomainNameOrIPCIDR(),
+			customvalidator.IsValidDomainName(),
 			customvalidator.IsNotArpa(),
 		},
 		MarkdownDescription: "The FQDN of the authoritative forward zone.",

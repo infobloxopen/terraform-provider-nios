@@ -42,7 +42,7 @@ var CertificateAuthserviceOcspRespondersResourceSchemaAttributes = map[string]sc
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
-			customvalidator.IsValidDomainNameOrIPCIDR(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The FQDN (Fully Qualified Domain Name) or IP address of the server.",
 	},
