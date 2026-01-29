@@ -524,14 +524,17 @@ Read-Only:
 
 Optional:
 
-- `ea_expression_list` (Attributes List) The extensible attributes expression list. The particular record is treated as reclaimable if extensible attributes expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. (see [below for nested schema](#nestedatt--scavenging_settings--ea_expression_list))
+- `ea_expression_list` (Attributes List) The extensible attributes expression list. The particular record is treated as reclaimable if extensible attributes expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. To unset the ea_expression_list, set it to null. (see [below for nested schema](#nestedatt--scavenging_settings--ea_expression_list))
 - `enable_auto_reclamation` (Boolean) This flag indicates if the automatic resource record scavenging is enabled or not.
 - `enable_recurrent_scavenging` (Boolean) This flag indicates if the recurrent resource record scavenging is enabled or not.
 - `enable_rr_last_queried` (Boolean) This flag indicates if the resource record last queried monitoring in affected zones is enabled or not.
 - `enable_scavenging` (Boolean) This flag indicates if the resource record scavenging is enabled or not.
 - `enable_zone_last_queried` (Boolean) This flag indicates if the last queried monitoring for affected zones is enabled or not.
-- `expression_list` (Attributes List) The expression list. The particular record is treated as reclaimable if expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. (see [below for nested schema](#nestedatt--scavenging_settings--expression_list))
+- `expression_list` (Attributes List) The expression list. The particular record is treated as reclaimable if expression condition evaluates to 'true' for given record if scavenging hasn't been manually disabled on a given resource record. To unset the expression_list, set it to null. (see [below for nested schema](#nestedatt--scavenging_settings--expression_list))
 - `reclaim_associated_records` (Boolean) This flag indicates if the associated resource record scavenging is enabled or not.
+
+Read-Only:
+
 - `scavenging_schedule` (Attributes) The schedule setting for cloud discovery task. (see [below for nested schema](#nestedatt--scavenging_settings--scavenging_schedule))
 
 <a id="nestedatt--scavenging_settings--ea_expression_list"></a>
@@ -578,12 +581,9 @@ Optional:
 - `month` (Number) The month for the scheduled task.
 - `recurring_time` (Number) The recurring time for the schedule in Epoch seconds format. This field is obsolete and is preserved only for backward compatibility purposes. Please use other applicable fields to define the recurring schedule. DO NOT use recurring_time together with these fields. If you use recurring_time with other fields to define the recurring schedule, recurring_time has priority over year, hour_of_day, and minutes_past_hour and will override the values of these fields, although it does not override month and day_of_month. In this case, the recurring time value might be different than the intended value that you define.
 - `repeat` (String) Indicates if the scheduled task will be repeated or run only once.
+- `time_zone` (String) The time zone for the schedule.
 - `weekdays` (List of String) Days of the week when scheduling is triggered.
 - `year` (Number) The year for the scheduled task.
-
-Read-Only:
-
-- `time_zone` (String) The time zone for the schedule.
 
 
 

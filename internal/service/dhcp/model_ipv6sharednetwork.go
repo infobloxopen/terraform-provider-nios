@@ -186,6 +186,7 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),
+			listvalidator.ValueStringsAre(customvalidator.IsValidIPv6Address()),
 		},
 		MarkdownDescription: "Use this method to set or retrieve the dynamic DNS updates flag of a DHCP IPv6 Shared Network object. The DHCP server can send DDNS updates to DNS servers in the same Grid and to external DNS servers. This setting overrides the member level settings.",
 	},
@@ -361,7 +362,6 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"valid_lifetime": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(43200),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},

@@ -75,10 +75,9 @@ var Ipv6rangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes 
 		MarkdownDescription: "Days of the week when scheduling is triggered.",
 	},
 	"time_zone": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Default:  stringdefault.StaticString("UTC"),
-
+		Computed:            true,
+		Optional:            true,
+		Default:             stringdefault.StaticString("UTC"),
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
@@ -124,6 +123,7 @@ var Ipv6rangeportcontrolblackoutsettingBlackoutScheduleResourceSchemaAttributes 
 	},
 	"year": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The year for the scheduled task.",
 	},
 	"month": schema.Int64Attribute{

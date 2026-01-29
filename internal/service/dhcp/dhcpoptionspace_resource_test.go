@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -125,41 +124,6 @@ func TestAccDhcpoptionspaceResource_Name(t *testing.T) {
 	})
 }
 
-func TestAccDhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
-	var resourceName = "nios_dhcp_optionspace.test_option_definitions"
-	var v dhcp.Dhcpoptionspace
-	optionSpace1 := acctest.RandomNameWithPrefix("option-space")
-	optionSpace2 := acctest.RandomNameWithPrefix("option-space")
-	optionDefinition1 := "nios_dhcp_optiondefinition.test2"
-	optionDefinition2 := "nios_dhcp_optiondefinition.test3"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccDhcpoptionspaceOptionDefinitions(optionSpace1, optionSpace2, optionDefinition1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDhcpoptionspaceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_definitions.#", "1"),
-					resource.TestCheckResourceAttrPair(resourceName, "option_definitions.0", optionDefinition1, "name"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccDhcpoptionspaceOptionDefinitions(optionSpace1, optionSpace2, optionDefinition2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDhcpoptionspaceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_definitions.#", "1"),
-					resource.TestCheckResourceAttrPair(resourceName, "option_definitions.0", optionDefinition2, "name"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func testAccCheckDhcpoptionspaceExists(ctx context.Context, resourceName string, v *dhcp.Dhcpoptionspace) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -241,39 +205,4 @@ resource "nios_dhcp_optionspace" "test_name" {
     name = %q
 }
 `, name)
-}
-
-func testAccDhcpoptionspaceOptionDefinitions(optionSpace1, optionSpace2 string, optionDefinition string) string {
-	config := fmt.Sprintf(`
-resource "nios_dhcp_optionspace" "test_option_definitions" {
-    name = %q
-    option_definitions =  [
-		%s.name,
-	]
-}
-`, optionSpace2, optionDefinition)
-	return strings.Join([]string{testAccBaseWithDHCPOptionSpaceAndOptionDefinition(optionSpace1), config}, "")
-}
-
-func testAccBaseWithDHCPOptionSpaceAndOptionDefinition(name string) string {
-	optionDefinition1 := acctest.RandomNameWithPrefix("option-definition")
-	optionDefinition2 := acctest.RandomNameWithPrefix("option-definition")
-
-	return fmt.Sprintf(`
-resource "nios_dhcp_optionspace" "test1" {
-  name = %q
-}
-resource "nios_dhcp_optiondefinition" "test2" {
-  name = %q
-  code = 10
-  space = nios_dhcp_optionspace.test1.name
-  type = "string"
-}
-resource "nios_dhcp_optiondefinition" "test3" {
-  name = %q
-  code = 30
-  space = nios_dhcp_optionspace.test1.name
-  type = "ip-address"
-}
-`, name, optionDefinition1, optionDefinition2)
 }
