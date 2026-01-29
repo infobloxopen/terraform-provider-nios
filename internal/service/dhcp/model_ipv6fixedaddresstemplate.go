@@ -88,7 +88,7 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_domain_name")),
 		},
 		MarkdownDescription: "Domain name of the IPv6 fixed address template object.",
