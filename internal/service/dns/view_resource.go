@@ -373,9 +373,8 @@ func (r *ViewResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		if httpRes != nil {
 			if httpRes.StatusCode == http.StatusNotFound {
 				return 0, nil
-			} else {
-				return httpRes.StatusCode, callErr
 			}
+			return httpRes.StatusCode, callErr
 		}
 		return 0, callErr
 	})

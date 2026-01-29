@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	initialBackoff = 1 * time.Second
-	maxBackoff     = 30 * time.Second
+	initialBackoff  = 1 * time.Second
+	maxBackoff      = 30 * time.Second
+	retryTimeoutMsg = "retry timeout exceeded while waiting for the operation to complete, the failure may be due to a transient issue or request cancellation"
 )
 
 // Can be overridden at the provider config level
@@ -55,10 +56,8 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 			errors.Is(err, context.Canceled) ||
 			errors.Is(ctx.Err(), context.DeadlineExceeded) ||
 			errors.Is(ctx.Err(), context.Canceled) {
-			// Overriding the ctx deadline error message for better user understanding
-			return fmt.Errorf(
-				"retry timeout exceeded while waiting for the operation to complete, the failure may be due to a transient network issue",
-			)
+			// Overriding the ctx deadline/cancellation error message for better user understanding
+			return fmt.Errorf(retryTimeoutMsg)
 		}
 
 		// Stop retrying if error is not retryable
@@ -76,7 +75,7 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 		// Wait before retrying with exponential backoff
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return fmt.Errorf(retryTimeoutMsg)
 		case <-time.After(backoff):
 		}
 
