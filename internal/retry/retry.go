@@ -57,7 +57,7 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 			errors.Is(ctx.Err(), context.DeadlineExceeded) ||
 			errors.Is(ctx.Err(), context.Canceled) {
 			// Overriding the ctx deadline/cancellation error message for better user understanding
-			return fmt.Errorf(retryTimeoutMsg)
+			return errors.New(retryTimeoutMsg)
 		}
 
 		// Stop retrying if error is not retryable
@@ -75,7 +75,7 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 		// Wait before retrying with exponential backoff
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf(retryTimeoutMsg)
+			return errors.New(retryTimeoutMsg)
 		case <-time.After(backoff):
 		}
 
