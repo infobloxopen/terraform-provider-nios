@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -31,10 +30,7 @@ var SharedrecordgroupZoneAssociationsResourceSchemaAttributes = map[string]schem
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.Any(
-				customvalidator.IsValidFQDN(),
-				customvalidator.IsValidIPCIDR(),
-			),
+			customvalidator.IsValidDomainNameOrIPCIDR(),
 			customvalidator.IsNotArpa(),
 		},
 		MarkdownDescription: "The FQDN of the authoritative forward zone.",
