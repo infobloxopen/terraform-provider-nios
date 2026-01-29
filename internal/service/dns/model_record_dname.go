@@ -165,7 +165,7 @@ var RecordDnameResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The name of the DNS DNAME record in FQDN format.",
 	},
@@ -180,7 +180,7 @@ var RecordDnameResourceSchemaAttributes = map[string]schema.Attribute{
 	"target": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The target domain name of the DNS DNAME record in FQDN format.",
 	},
