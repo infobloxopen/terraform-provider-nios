@@ -80,7 +80,7 @@ func (v domainNameValidator) ValidateString(ctx context.Context, req validator.S
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Invalid Domain Name Format",
-			fmt.Sprintf("%s: %q", err.Error(), value),
+			err.Error(),
 		)
 	}
 }
@@ -90,6 +90,16 @@ func isDomainName(s string, allowMultiLabel bool, checkPrintableChars bool) erro
 	// Check for leading or trailing dots
 	if s == "" || strings.HasPrefix(s, dot) || strings.HasSuffix(s, dot) {
 		return fmt.Errorf("domain name cannot be empty or have leading/trailing dots")
+	}
+
+	// Check for leading or trailing whitespace
+	if strings.TrimSpace(s) != s {
+		return fmt.Errorf("domain name cannot have leading or trailing whitespace")
+	}
+
+	// Check for uppercase characters
+	if s != strings.ToLower(s) {
+		return fmt.Errorf("domain name must not contain uppercase characters")
 	}
 
 	// Check printable characters (ASCII 32-126)

@@ -2405,7 +2405,7 @@ resource "nios_dhcp_fixed_address" "test_ms_server" {
 	match_client = %q
 	mac = %q
 	ms_server = {
-		ipv4addr = %q	
+		ipv4addr = %q
 	}
 	network_view = %q
 	name = %q

@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -89,7 +88,7 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_domain_name")),
 		},
 		MarkdownDescription: "Domain name of the IPv6 fixed address template object.",
@@ -221,7 +220,6 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 	"valid_lifetime": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(43200),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_valid_lifetime")),
 		},
