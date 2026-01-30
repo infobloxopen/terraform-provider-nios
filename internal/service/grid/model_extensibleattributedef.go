@@ -104,20 +104,14 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "List of Values. Applicable if the extensible attribute type is ENUM.",
 	},
 	"max": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		PlanModifiers: []planmodifier.Int64{
-			planmodifiers.ImmutableInt64(),
-		},
-		MarkdownDescription: "Maximum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER.",
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Maximum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER. Maximum value can only be updated if originally set. New maximum must be greater than the previous value, Otherwise modification is not allowed.",
 	},
 	"min": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		PlanModifiers: []planmodifier.Int64{
-			planmodifiers.ImmutableInt64(),
-		},
-		MarkdownDescription: "Minimum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER.",
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "Minimum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER. Minimum value can only be updated if originally set. New minimum must be lesser than the previous value. Otherwise modification is not allowed.",
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
@@ -150,12 +144,12 @@ func (m *ExtensibleattributedefModel) Expand(ctx context.Context, diags *diag.Di
 		DescendantsAction:  ExpandExtensibleattributedefDescendantsAction(ctx, m.DescendantsAction, diags),
 		Flags:              flex.ExpandStringPointer(m.Flags),
 		ListValues:         flex.ExpandFrameworkListNestedBlock(ctx, m.ListValues, diags, ExpandExtensibleattributedefListValues),
+		Max:                flex.ExpandInt64Pointer(m.Max),
+		Min:                flex.ExpandInt64Pointer(m.Min),
 		Name:               flex.ExpandStringPointer(m.Name),
 	}
 	if isCreate {
 		to.Type = flex.ExpandStringPointer(m.Type)
-		to.Max = flex.ExpandInt64Pointer(m.Max)
-		to.Min = flex.ExpandInt64Pointer(m.Min)
 	}
 	return to
 }
