@@ -252,6 +252,56 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 			}
 		}
 	}
+
+	if !data.UseIdentity.IsNull() && !data.UseIdentity.IsUnknown() && data.UseIdentity.ValueBool() {
+		// When use_identity is true, enforce standard ports
+		if !data.Protocol.IsNull() && !data.Protocol.IsUnknown() && !data.Port.IsNull() && !data.Port.IsUnknown() {
+			protocol := data.Protocol.ValueString()
+			port := data.Port.ValueInt64()
+
+			if protocol == "HTTPS" && port != 443 {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("port"),
+					"Invalid Port Configuration",
+					fmt.Sprintf("When use_identity is true and protocol is HTTPS, port must be 443. Got: %d", port),
+				)
+			}
+
+			if protocol == "HTTP" && port != 80 {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("port"),
+					"Invalid Port Configuration",
+					fmt.Sprintf("When use_identity is true and protocol is HTTP, port must be 80. Got: %d", port),
+				)
+			}
+		}
+	}
+
+	// Validate allow_unsecured_connection requirements
+	if !data.AllowUnsecuredConnection.IsNull() && !data.AllowUnsecuredConnection.IsUnknown() && data.AllowUnsecuredConnection.ValueBool() {
+		// When allow_unsecured_connection is true, protocol must be HTTPS
+		if !data.Protocol.IsNull() && !data.Protocol.IsUnknown() {
+			if data.Protocol.ValueString() != "HTTPS" {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("protocol"),
+					"Invalid Protocol Configuration",
+					fmt.Sprintf("When allow_unsecured_connection is true, protocol must be HTTPS. Got: %s", data.Protocol.ValueString()),
+				)
+			}
+		}
+
+		// When allow_unsecured_connection is true, driver_type must be VMware or OpenStack
+		if !data.DriverType.IsNull() && !data.DriverType.IsUnknown() {
+			driverType := data.DriverType.ValueString()
+			if driverType != "VMWARE" && driverType != "OPENSTACK" {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("driver_type"),
+					"Invalid Driver Type Configuration",
+					fmt.Sprintf("When allow_unsecured_connection is true, driver_type must be either VMware or OpenStack. Got: %s", driverType),
+				)
+			}
+		}
+	}
 }
 
 func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

@@ -89,7 +89,7 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The name of the NS record in FQDN format. This value can be in unicode format.",
 		PlanModifiers: []planmodifier.String{
