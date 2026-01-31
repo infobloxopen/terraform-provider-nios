@@ -52,10 +52,8 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 		}
 
 		// Stop retrying on context deadline exceeded, cancellation
-		if errors.Is(err, context.DeadlineExceeded) ||
-			errors.Is(err, context.Canceled) ||
-			errors.Is(ctx.Err(), context.DeadlineExceeded) ||
-			errors.Is(ctx.Err(), context.Canceled) {
+		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) ||
+			errors.Is(ctx.Err(), context.DeadlineExceeded) || errors.Is(ctx.Err(), context.Canceled) {
 			// Overriding the ctx deadline/cancellation error message for better user understanding
 			return errors.New(retryTimeoutMsg)
 		}
@@ -67,9 +65,7 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 
 		tflog.Debug(ctx, fmt.Sprintf(
 			"Transient error detected, retrying request (attempt=%d, backoff=%s, err=%v)",
-			attempt,
-			backoff,
-			err,
+			attempt, backoff, err,
 		))
 
 		// Wait before retrying with exponential backoff
@@ -87,10 +83,12 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 	}
 }
 
-// TransientErrors retries on transient errors like network issues etc.
-func TransientErrors(err error) bool {
+// TransientErrors determines if an error is retryable based on transient conditions.
+// TODO: Currently returns false, treating all errors as non-retryable.
+// This can be extended in the future to include predicates for specific transient errors
+// such as network errors, temporary service unavailability (5xx errors), etc.
+func TransientErrors(_ error) bool {
 	// Everything is non-retryable for now
-	// If needed, we can add predicates for specific transient errors(like network errors, etc.)
 	return false
 }
 
@@ -106,6 +104,7 @@ func IsNetworkError(err error) bool {
 		return true
 	}
 
+	// TODO: Extend these error patterns as per future requirements.
 	// Check for common network error strings (case-insensitive)
 	errStr := strings.ToLower(err.Error())
 	networkPatterns := []string{
@@ -132,6 +131,5 @@ func IsAlreadyExistsErr(err error) bool {
 		return false
 	}
 	errStr := strings.ToLower(err.Error())
-	return strings.Contains(errStr, "already exists") ||
-		strings.Contains(errStr, "conflict")
+	return strings.Contains(errStr, "already exists") || strings.Contains(errStr, "conflict")
 }
