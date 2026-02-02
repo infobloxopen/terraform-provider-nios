@@ -106,12 +106,12 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 	"max": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Maximum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER. Maximum value can only be updated if originally set. New maximum must be greater than the previous value, Otherwise modification is not allowed.",
+		MarkdownDescription: "Maximum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER. Maximum value can only be updated if set while EA creation. New maximum must be greater than the previous value, Otherwise modification is not allowed.",
 	},
 	"min": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Minimum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER. Minimum value can only be updated if originally set. New minimum must be lesser than the previous value. Otherwise modification is not allowed.",
+		MarkdownDescription: "Minimum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER. Minimum value can only be updated if set while EA creation. New minimum must be lesser than the previous value. Otherwise modification is not allowed.",
 	},
 	"name": schema.StringAttribute{
 		Required:            true,
