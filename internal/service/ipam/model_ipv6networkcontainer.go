@@ -506,7 +506,6 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"subscribe_settings": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes,
-		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
