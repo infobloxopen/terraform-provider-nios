@@ -87,7 +87,10 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 // TODO: Currently returns false, treating all errors as non-retryable.
 // This can be extended in the future to include predicates for specific transient errors
 // such as network errors, temporary service unavailability (5xx errors), etc.
-func TransientErrors(_ error) bool {
+func TransientErrors(err error) bool {
+	if err == nil {
+		return false
+	}
 	// Everything is non-retryable for now
 	return false
 }
