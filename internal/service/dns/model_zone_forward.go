@@ -23,38 +23,39 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ZoneForwardModel struct {
-	Ref                  types.String      `tfsdk:"ref"`
-	Address              iptypes.IPAddress `tfsdk:"address"`
-	Comment              types.String      `tfsdk:"comment"`
-	Disable              types.Bool        `tfsdk:"disable"`
-	DisableNsGeneration  types.Bool        `tfsdk:"disable_ns_generation"`
-	DisplayDomain        types.String      `tfsdk:"display_domain"`
-	DnsFqdn              types.String      `tfsdk:"dns_fqdn"`
-	ExtAttrs             types.Map         `tfsdk:"extattrs"`
-	ExtAttrsAll          types.Map         `tfsdk:"extattrs_all"`
-	ExternalNsGroup      types.String      `tfsdk:"external_ns_group"`
-	ForwardTo            types.List        `tfsdk:"forward_to"`
-	ForwardersOnly       types.Bool        `tfsdk:"forwarders_only"`
-	ForwardingServers    types.List        `tfsdk:"forwarding_servers"`
-	Fqdn                 types.String      `tfsdk:"fqdn"`
-	Locked               types.Bool        `tfsdk:"locked"`
-	LockedBy             types.String      `tfsdk:"locked_by"`
-	MaskPrefix           types.String      `tfsdk:"mask_prefix"`
-	MsAdIntegrated       types.Bool        `tfsdk:"ms_ad_integrated"`
-	MsDdnsMode           types.String      `tfsdk:"ms_ddns_mode"`
-	MsManaged            types.String      `tfsdk:"ms_managed"`
-	MsReadOnly           types.Bool        `tfsdk:"ms_read_only"`
-	MsSyncMasterName     types.String      `tfsdk:"ms_sync_master_name"`
-	NsGroup              types.String      `tfsdk:"ns_group"`
-	Parent               types.String      `tfsdk:"parent"`
-	Prefix               types.String      `tfsdk:"prefix"`
-	UsingSrgAssociations types.Bool        `tfsdk:"using_srg_associations"`
-	View                 types.String      `tfsdk:"view"`
-	ZoneFormat           types.String      `tfsdk:"zone_format"`
+	Ref                  types.String                             `tfsdk:"ref"`
+	Address              iptypes.IPAddress                        `tfsdk:"address"`
+	Comment              types.String                             `tfsdk:"comment"`
+	Disable              types.Bool                               `tfsdk:"disable"`
+	DisableNsGeneration  types.Bool                               `tfsdk:"disable_ns_generation"`
+	DisplayDomain        types.String                             `tfsdk:"display_domain"`
+	DnsFqdn              types.String                             `tfsdk:"dns_fqdn"`
+	ExtAttrs             types.Map                                `tfsdk:"extattrs"`
+	ExtAttrsAll          types.Map                                `tfsdk:"extattrs_all"`
+	ExternalNsGroup      types.String                             `tfsdk:"external_ns_group"`
+	ForwardTo            types.List                               `tfsdk:"forward_to"`
+	ForwardersOnly       types.Bool                               `tfsdk:"forwarders_only"`
+	ForwardingServers    types.List                               `tfsdk:"forwarding_servers"`
+	Fqdn                 types.String                             `tfsdk:"fqdn"`
+	Locked               types.Bool                               `tfsdk:"locked"`
+	LockedBy             types.String                             `tfsdk:"locked_by"`
+	MaskPrefix           types.String                             `tfsdk:"mask_prefix"`
+	MsAdIntegrated       types.Bool                               `tfsdk:"ms_ad_integrated"`
+	MsDdnsMode           types.String                             `tfsdk:"ms_ddns_mode"`
+	MsManaged            types.String                             `tfsdk:"ms_managed"`
+	MsReadOnly           types.Bool                               `tfsdk:"ms_read_only"`
+	MsSyncMasterName     types.String                             `tfsdk:"ms_sync_master_name"`
+	NsGroup              types.String                             `tfsdk:"ns_group"`
+	Parent               types.String                             `tfsdk:"parent"`
+	Prefix               internaltypes.CaseInsensitiveStringValue `tfsdk:"prefix"`
+	UsingSrgAssociations types.Bool                               `tfsdk:"using_srg_associations"`
+	View                 types.String                             `tfsdk:"view"`
+	ZoneFormat           types.String                             `tfsdk:"zone_format"`
 }
 
 var ZoneForwardAttrTypes = map[string]attr.Type{
@@ -82,7 +83,7 @@ var ZoneForwardAttrTypes = map[string]attr.Type{
 	"ms_sync_master_name":    types.StringType,
 	"ns_group":               types.StringType,
 	"parent":                 types.StringType,
-	"prefix":                 types.StringType,
+	"prefix":                 internaltypes.CaseInsensitiveString{},
 	"using_srg_associations": types.BoolType,
 	"view":                   types.StringType,
 	"zone_format":            types.StringType,
@@ -185,10 +186,7 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.Any(
-				customvalidator.IsValidFQDN(),
-				customvalidator.IsValidIPCIDR(),
-			),
+			customvalidator.IsValidDomainName(),
 			customvalidator.IsNotArpa(),
 		},
 		MarkdownDescription: "The name of this DNS zone. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format. This value can be in unicode format. Note that for a reverse zone, the corresponding zone_format value should be set. apra notation is not allowed for IP address.",
@@ -250,9 +248,10 @@ var ZoneForwardResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The parent zone of this zone. Note that when searching for reverse zones, the \"in-addr.arpa\" notation should be used.",
 	},
 	"prefix": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
-		Default:  stringdefault.StaticString(""),
+		CustomType: internaltypes.CaseInsensitiveString{},
+		Optional:   true,
+		Computed:   true,
+		Default:    stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -305,7 +304,7 @@ func (m *ZoneForwardModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		MsAdIntegrated:      flex.ExpandBoolPointer(m.MsAdIntegrated),
 		MsDdnsMode:          flex.ExpandStringPointer(m.MsDdnsMode),
 		NsGroup:             flex.ExpandStringPointer(m.NsGroup),
-		Prefix:              flex.ExpandStringPointer(m.Prefix),
+		Prefix:              flex.ExpandStringPointer(m.Prefix.StringValue),
 	}
 	if isCreate {
 		to.Fqdn = flex.ExpandStringPointer(m.Fqdn)
@@ -357,7 +356,7 @@ func (m *ZoneForwardModel) Flatten(ctx context.Context, from *dns.ZoneForward, d
 	m.MsSyncMasterName = flex.FlattenStringPointer(from.MsSyncMasterName)
 	m.NsGroup = flex.FlattenStringPointerNilAsNotEmpty(from.NsGroup)
 	m.Parent = flex.FlattenStringPointer(from.Parent)
-	m.Prefix = flex.FlattenStringPointer(from.Prefix)
+	m.Prefix.StringValue = flex.FlattenStringPointer(from.Prefix)
 	m.UsingSrgAssociations = types.BoolPointerValue(from.UsingSrgAssociations)
 	m.View = flex.FlattenStringPointer(from.View)
 	m.ZoneFormat = flex.FlattenStringPointer(from.ZoneFormat)
