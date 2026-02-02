@@ -90,9 +90,9 @@ func TestDo_ContextTimeout(t *testing.T) {
 	callCount := 0
 	fn := func(ctx context.Context) (int, error) {
 		callCount++
-		// Simulate slow operation
-		time.Sleep(500 * time.Millisecond)
-		return 500, errors.New("always fails")
+		// Block until the retry context times out or is cancelled
+		<-ctx.Done()
+		return 500, ctx.Err()
 	}
 
 	isRetryable := func(err error) bool {
