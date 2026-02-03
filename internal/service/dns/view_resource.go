@@ -109,7 +109,7 @@ func (r *ViewResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	if err != nil {
 		if retry.IsAlreadyExistsErr(err) {
-			// Resource already exists, try to fetch it using the params provided and add ref in the error message
+			// Resource already exists, import required
 			resp.Diagnostics.AddError(
 				"Resource Already Exists",
 				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
