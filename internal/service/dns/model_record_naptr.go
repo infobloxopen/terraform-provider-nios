@@ -215,7 +215,7 @@ var RecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 	"replacement": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The replacement field of the NAPTR record object. For nonterminal NAPTR records, this field specifies the next domain name to look up. This value can be in unicode format.",
 	},

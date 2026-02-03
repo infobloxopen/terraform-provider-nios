@@ -420,4 +420,71 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 			}
 		}
 	}
+
+	serverAssociationType := "NONE"
+	if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
+		serverAssociationType = data.ServerAssociationType.ValueString()
+	}
+
+	// If server_association_type is MEMBER, member field must be set
+	if serverAssociationType == "MEMBER" {
+		if data.Member.IsNull() || data.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+			)
+		}
+	}
+
+	// If server_association_type is NONE, member field cannot be set
+	if serverAssociationType == "NONE" {
+		if !data.Member.IsNull() && !data.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
+			)
+		}
+	}
+
+	// Validate discovery_blackout_setting blackout_schedule
+	if !data.DiscoveryBlackoutSetting.IsNull() && !data.DiscoveryBlackoutSetting.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.DiscoveryBlackoutSetting,
+			"blackout_schedule",
+			path.Root("discovery_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
+	// Validate port_control_blackout_setting blackout_schedule
+	if !data.PortControlBlackoutSetting.IsNull() && !data.PortControlBlackoutSetting.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.PortControlBlackoutSetting,
+			"blackout_schedule",
+			path.Root("port_control_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
+	// discovery_basic_poll_settings can be set only when use_discovery_basic_polling_settings is true
+	if !data.DiscoveryBasicPollSettings.IsNull() && !data.DiscoveryBasicPollSettings.IsUnknown() {
+		if !data.UseDiscoveryBasicPollingSettings.IsNull() && !data.UseDiscoveryBasicPollingSettings.IsUnknown() && !data.UseDiscoveryBasicPollingSettings.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Discovery Basic Poll Settings Not Allowed",
+				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings cannot be configured. Either set use_discovery_basic_polling_settings to true or remove the discovery_basic_poll_settings block.",
+			)
+		}
+	}
+
+	// same_port_control_discovery_blackout can be set only when use_blackout_setting is true
+	if !data.SamePortControlDiscoveryBlackout.IsNull() && !data.SamePortControlDiscoveryBlackout.IsUnknown() {
+		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Same Port Control Discovery Blackout Not Allowed",
+				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+			)
+		}
+	}
 }

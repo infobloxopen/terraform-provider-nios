@@ -378,97 +378,14 @@ func (r *GridServicerestartGroupResource) ValidateConfig(ctx context.Context, re
 		}
 	}
 
-	scheduleAttr := data.RecurringSchedule.Attributes()["schedule"]
-	if scheduleAttr.IsNull() || scheduleAttr.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
+	// Validate recurring_schedule schedule
+	if !data.RecurringSchedule.IsNull() && !data.RecurringSchedule.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.RecurringSchedule,
+			"schedule",
 			path.Root("recurring_schedule"),
-			"Invalid Configuration for Recurring Schedule",
-			"Schedule must be set if recurring_schedule is set",
+			&resp.Diagnostics,
 		)
-		return
-	}
-	if !scheduleAttr.IsNull() && !scheduleAttr.IsUnknown() {
-		scheduleObj, ok := scheduleAttr.(types.Object)
-		if !ok {
-			resp.Diagnostics.AddError(
-				"Invalid Schedule Attribute",
-				"Expected schedule to be an object but got different type",
-			)
-			return
-		}
-		schedule := scheduleObj.Attributes()
-		recurringTime := schedule["recurring_time"]
-		if !recurringTime.IsNull() && !recurringTime.IsUnknown() {
-			if !schedule["hour_of_day"].IsNull() || !schedule["hour_of_day"].IsUnknown() || !schedule["year"].IsNull() || !schedule["year"].IsUnknown() || !schedule["month"].IsNull() || !schedule["month"].IsUnknown() || !schedule["day_of_month"].IsNull() || !schedule["day_of_month"].IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("recurring_schedule").AtName("schedule").AtName("recurring_time"),
-					"Invalid Configuration for Schedule",
-					"Cannot Set Recurring Time if any of hour_of_day, year, month, day_of_month is set",
-				)
-			}
-		}
-
-		repeat := schedule["repeat"]
-		if !repeat.IsNull() && !repeat.IsUnknown() {
-			repeatStr, ok := repeat.(types.String)
-			if !ok {
-				resp.Diagnostics.AddError(
-					"Invalid Repeat Attribute",
-					"Expected repeat to be a string but got different type",
-				)
-				return
-			}
-			if repeatStr.ValueString() == "ONCE" {
-				if (!schedule["weekdays"].IsNull() && !schedule["weekdays"].IsUnknown()) || (!schedule["frequency"].IsNull() && !schedule["frequency"].IsUnknown()) || (!schedule["every"].IsNull() && !schedule["every"].IsUnknown()) {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("recurring_schedule").AtName("schedule").AtName("repeat"),
-						"Invalid Configuration for Repeat",
-						"Cannot Set Frequency, Weekdays and Every if Repeat is set to ONCE",
-					)
-				}
-				if schedule["month"].IsNull() || schedule["month"].IsUnknown() || schedule["day_of_month"].IsNull() || schedule["day_of_month"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("recurring_schedule").AtName("schedule").AtName("repeat"),
-						"Invalid Configuration for Schedule",
-						"If REPEAT is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
-					)
-				}
-			} else {
-				if (!schedule["month"].IsNull() && !schedule["month"].IsUnknown()) || (!schedule["day_of_month"].IsNull() && !schedule["day_of_month"].IsUnknown()) || (!schedule["year"].IsNull() && !schedule["year"].IsUnknown()) {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("recurring_schedule").AtName("schedule").AtName("repeat"),
-						"Invalid Configuration for Repeat",
-						"Cannot Set Month, Day of Month and Year if Repeat is set to RECUR",
-					)
-				}
-
-				if schedule["frequency"].IsNull() || schedule["frequency"].IsUnknown() || schedule["minutes_past_hour"].IsNull() || schedule["minutes_past_hour"].IsUnknown() || schedule["hour_of_day"].IsNull() || schedule["hour_of_day"].IsUnknown() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("recurring_schedule").AtName("schedule").AtName("repeat"),
-						"Invalid Configuration for Schedule",
-						"If REPEAT is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
-					)
-				}
-
-				if schedule["frequency"].String() == "\"WEEKLY\"" {
-					if schedule["weekdays"].IsNull() || schedule["weekdays"].IsUnknown() {
-						resp.Diagnostics.AddAttributeError(
-							path.Root("recurring_schedule").AtName("schedule").AtName("weekdays"),
-							"Invalid Configuration for Weekdays",
-							"Weekdays must be set if Frequency is set to WEEKLY",
-						)
-					}
-				} else {
-					if !schedule["weekdays"].IsNull() && !schedule["weekdays"].IsUnknown() {
-						resp.Diagnostics.AddAttributeError(
-							path.Root("recurring_schedule").AtName("schedule").AtName("weekdays"),
-							"Invalid Configuration for Weekdays",
-							"Weekdays can only be set if Frequency is set to WEEKLY",
-						)
-					}
-				}
-			}
-		}
 	}
 }
 

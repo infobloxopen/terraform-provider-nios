@@ -42,6 +42,7 @@ var NetworkcontainerDiscoveryBlackoutSettingResourceSchemaAttributes = map[strin
 	"blackout_schedule": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerdiscoveryblackoutsettingBlackoutScheduleResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 }
 

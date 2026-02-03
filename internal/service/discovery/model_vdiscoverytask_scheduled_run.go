@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -18,25 +17,26 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/discovery"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 )
 
 type VdiscoverytaskScheduledRunModel struct {
-	Weekdays        types.List   `tfsdk:"weekdays"`
-	TimeZone        types.String `tfsdk:"time_zone"`
-	RecurringTime   types.Int64  `tfsdk:"recurring_time"`
-	Frequency       types.String `tfsdk:"frequency"`
-	Every           types.Int64  `tfsdk:"every"`
-	MinutesPastHour types.Int64  `tfsdk:"minutes_past_hour"`
-	HourOfDay       types.Int64  `tfsdk:"hour_of_day"`
-	Year            types.Int64  `tfsdk:"year"`
-	Month           types.Int64  `tfsdk:"month"`
-	DayOfMonth      types.Int64  `tfsdk:"day_of_month"`
-	Repeat          types.String `tfsdk:"repeat"`
-	Disable         types.Bool   `tfsdk:"disable"`
+	Weekdays        internaltypes.UnorderedListValue `tfsdk:"weekdays"`
+	TimeZone        types.String                     `tfsdk:"time_zone"`
+	RecurringTime   types.Int64                      `tfsdk:"recurring_time"`
+	Frequency       types.String                     `tfsdk:"frequency"`
+	Every           types.Int64                      `tfsdk:"every"`
+	MinutesPastHour types.Int64                      `tfsdk:"minutes_past_hour"`
+	HourOfDay       types.Int64                      `tfsdk:"hour_of_day"`
+	Year            types.Int64                      `tfsdk:"year"`
+	Month           types.Int64                      `tfsdk:"month"`
+	DayOfMonth      types.Int64                      `tfsdk:"day_of_month"`
+	Repeat          types.String                     `tfsdk:"repeat"`
+	Disable         types.Bool                       `tfsdk:"disable"`
 }
 
 var VdiscoverytaskScheduledRunAttrTypes = map[string]attr.Type{
-	"weekdays":          types.ListType{ElemType: types.StringType},
+	"weekdays":          internaltypes.UnorderedListOfStringType,
 	"time_zone":         types.StringType,
 	"recurring_time":    types.Int64Type,
 	"frequency":         types.StringType,
@@ -53,6 +53,7 @@ var VdiscoverytaskScheduledRunAttrTypes = map[string]attr.Type{
 var VdiscoverytaskScheduledRunResourceSchemaAttributes = map[string]schema.Attribute{
 	"weekdays": schema.ListAttribute{
 		ElementType: types.StringType,
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		Optional:    true,
 		Computed:    true,
 		Validators: []validator.List{
@@ -68,15 +69,8 @@ var VdiscoverytaskScheduledRunResourceSchemaAttributes = map[string]schema.Attri
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		Validators: []validator.Int64{
-			int64validator.ConflictsWith(
-				path.MatchRelative().AtParent().AtName("hour_of_day"),
-				path.MatchRelative().AtParent().AtName("year"),
-				path.MatchRelative().AtParent().AtName("minutes_past_hour"),
-			),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The recurring time for the schedule in Epoch seconds format. This field is obsolete and is preserved only for backward compatibility purposes. Please use other applicable fields to define the recurring schedule. DO NOT use recurring_time together with these fields. If you use recurring_time with other fields to define the recurring schedule, recurring_time has priority over year, hour_of_day, and minutes_past_hour and will override the values of these fields, although it does not override month and day_of_month. In this case, the recurring time value might be different than the intended value that you define.",
 	},
 	"frequency": schema.StringAttribute{
@@ -196,7 +190,7 @@ func (m *VdiscoverytaskScheduledRunModel) Flatten(ctx context.Context, from *dis
 	if m == nil {
 		*m = VdiscoverytaskScheduledRunModel{}
 	}
-	m.Weekdays = flex.FlattenFrameworkListString(ctx, from.Weekdays, diags)
+	m.Weekdays = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Weekdays, diags)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.RecurringTime = flex.FlattenInt64Pointer(from.RecurringTime)
 	m.Frequency = flex.FlattenStringPointer(from.Frequency)
