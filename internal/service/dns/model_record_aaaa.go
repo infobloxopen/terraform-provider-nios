@@ -200,7 +200,7 @@ var RecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "Name for the AAAA record in FQDN format. This value can be in unicode format.",
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 	},
 	"reclaimable": schema.BoolAttribute{

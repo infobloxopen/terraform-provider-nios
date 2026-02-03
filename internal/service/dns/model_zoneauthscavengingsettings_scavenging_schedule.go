@@ -3,13 +3,13 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -17,25 +17,26 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 )
 
 type ZoneauthscavengingsettingsScavengingScheduleModel struct {
-	Weekdays        types.List   `tfsdk:"weekdays"`
-	TimeZone        types.String `tfsdk:"time_zone"`
-	RecurringTime   types.Int64  `tfsdk:"recurring_time"`
-	Frequency       types.String `tfsdk:"frequency"`
-	Every           types.Int64  `tfsdk:"every"`
-	MinutesPastHour types.Int64  `tfsdk:"minutes_past_hour"`
-	HourOfDay       types.Int64  `tfsdk:"hour_of_day"`
-	Year            types.Int64  `tfsdk:"year"`
-	Month           types.Int64  `tfsdk:"month"`
-	DayOfMonth      types.Int64  `tfsdk:"day_of_month"`
-	Repeat          types.String `tfsdk:"repeat"`
-	Disable         types.Bool   `tfsdk:"disable"`
+	Weekdays        internaltypes.UnorderedListValue `tfsdk:"weekdays"`
+	TimeZone        types.String                     `tfsdk:"time_zone"`
+	RecurringTime   types.Int64                      `tfsdk:"recurring_time"`
+	Frequency       types.String                     `tfsdk:"frequency"`
+	Every           types.Int64                      `tfsdk:"every"`
+	MinutesPastHour types.Int64                      `tfsdk:"minutes_past_hour"`
+	HourOfDay       types.Int64                      `tfsdk:"hour_of_day"`
+	Year            types.Int64                      `tfsdk:"year"`
+	Month           types.Int64                      `tfsdk:"month"`
+	DayOfMonth      types.Int64                      `tfsdk:"day_of_month"`
+	Repeat          types.String                     `tfsdk:"repeat"`
+	Disable         types.Bool                       `tfsdk:"disable"`
 }
 
 var ZoneauthscavengingsettingsScavengingScheduleAttrTypes = map[string]attr.Type{
-	"weekdays":          types.ListType{ElemType: types.StringType},
+	"weekdays":          internaltypes.UnorderedListOfStringType,
 	"time_zone":         types.StringType,
 	"recurring_time":    types.Int64Type,
 	"frequency":         types.StringType,
@@ -52,7 +53,9 @@ var ZoneauthscavengingsettingsScavengingScheduleAttrTypes = map[string]attr.Type
 var ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[string]schema.Attribute{
 	"weekdays": schema.ListAttribute{
 		ElementType: types.StringType,
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.ValueStringsAre(
 				stringvalidator.OneOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"),
@@ -63,10 +66,12 @@ var ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[s
 	},
 	"time_zone": schema.StringAttribute{
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "The time zone for the schedule.",
 	},
 	"recurring_time": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The recurring time for the schedule in Epoch seconds format. This field is obsolete and is preserved only for backward compatibility purposes. Please use other applicable fields to define the recurring schedule. DO NOT use recurring_time together with these fields. If you use recurring_time with other fields to define the recurring schedule, recurring_time has priority over year, hour_of_day, and minutes_past_hour and will override the values of these fields, although it does not override month and day_of_month. In this case, the recurring time value might be different than the intended value that you define.",
 	},
 	"frequency": schema.StringAttribute{
@@ -80,35 +85,43 @@ var ZoneauthscavengingsettingsScavengingScheduleResourceSchemaAttributes = map[s
 	"every": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(1),
 		MarkdownDescription: "The number of frequency to wait before repeating the scheduled task.",
 	},
 	"minutes_past_hour": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1),
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 59),
+		},
 		MarkdownDescription: "The minutes past the hour for the scheduled task.",
 	},
 	"hour_of_day": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1),
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 23),
+		},
 		MarkdownDescription: "The hour of day for the scheduled task.",
 	},
 	"year": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The year for the scheduled task.",
 	},
 	"month": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1),
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 12),
+		},
 		MarkdownDescription: "The month for the scheduled task.",
 	},
 	"day_of_month": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1),
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 31),
+		},
 		MarkdownDescription: "The day of the month for the scheduled task.",
 	},
 	"repeat": schema.StringAttribute{
@@ -179,7 +192,7 @@ func (m *ZoneauthscavengingsettingsScavengingScheduleModel) Flatten(ctx context.
 	if m == nil {
 		*m = ZoneauthscavengingsettingsScavengingScheduleModel{}
 	}
-	m.Weekdays = flex.FlattenFrameworkListString(ctx, from.Weekdays, diags)
+	m.Weekdays = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Weekdays, diags)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.RecurringTime = flex.FlattenInt64Pointer(from.RecurringTime)
 	m.Frequency = flex.FlattenStringPointer(from.Frequency)
