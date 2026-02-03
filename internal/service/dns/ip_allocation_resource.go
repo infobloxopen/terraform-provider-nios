@@ -192,6 +192,13 @@ func (r *IPAllocationResource) ValidateConfig(ctx context.Context, req resource.
 				"must not end with a dot",
 			)
 		}
+		if !strings.Contains(name, ".") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("name"),
+				"Invalid FQDN",
+				"Parent not found - ensure the zone or network exists before creating the record.",
+			)
+		}
 	}
 }
 

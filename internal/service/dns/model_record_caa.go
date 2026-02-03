@@ -176,7 +176,7 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The CAA record name in FQDN format. This value can be in unicode format.",
 	},

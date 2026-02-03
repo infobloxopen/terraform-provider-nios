@@ -293,7 +293,10 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The Microsoft Active Directory user related information.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidDomainName(),
+		},
 		MarkdownDescription: "The host name in FQDN format This value can be in unicode format. Regular expression search is not supported for unicode values.",
 	},
 	"network_view": schema.StringAttribute{

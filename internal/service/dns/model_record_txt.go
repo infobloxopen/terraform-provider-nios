@@ -164,7 +164,7 @@ var RecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "Name for the TXT record in FQDN format. This value can be in unicode format.",
 	},
