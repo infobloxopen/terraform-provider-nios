@@ -5,15 +5,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
@@ -126,34 +125,5 @@ func (m *DtcTopologyModel) Flatten(ctx context.Context, from *dtc.DtcTopology, d
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Rules = FlattenDtcTopologyRulesWithPlan(ctx, from.Rules, m.Rules, DtcTopologyRulesInnerAttrTypes, diags)
-}
-
-func FlattenDtcTopologyRulesWithPlan(ctx context.Context, from []dtc.DtcTopologyRulesInner, planRules types.List, attrTypes map[string]attr.Type, diags *diag.Diagnostics) types.List {
-	if from == nil {
-		return types.ListNull(types.ObjectType{AttrTypes: attrTypes})
-	}
-
-	// Extract plan values if available
-	var planList []types.Object
-	if !planRules.IsNull() && !planRules.IsUnknown() {
-		diags.Append(planRules.ElementsAs(ctx, &planList, false)...)
-	}
-
-	to := make([]DtcTopologyRulesInnerModel, 0, len(from))
-	for i, v := range from {
-		var m DtcTopologyRulesInnerModel
-
-		// Pre-populate with plan values if available
-		if i < len(planList) && !planList[i].IsNull() {
-			diags.Append(planList[i].As(ctx, &m, basetypes.ObjectAsOptions{})...)
-		}
-		m.Flatten(ctx, &v, diags)
-
-		to = append(to, m)
-	}
-
-	t, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: attrTypes}, to)
-	diags.Append(d...)
-	return t
+	m.Rules = flex.FlattenFrameworkListNestedBlock(ctx, from.Rules, DtcTopologyRulesInnerAttrTypes, diags, FlattenDtcTopologyRulesInner)
 }

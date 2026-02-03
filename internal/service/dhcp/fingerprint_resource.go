@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -20,6 +23,7 @@ var readableAttributesForFingerprint = "comment,device_class,disable,extattrs,ip
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &FingerprintResource{}
 var _ resource.ResourceWithImportState = &FingerprintResource{}
+var _ resource.ResourceWithValidateConfig = &FingerprintResource{}
 
 func NewFingerprintResource() resource.Resource {
 	return &FingerprintResource{}
@@ -326,6 +330,67 @@ func (r *FingerprintResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Fingerprint, got error: %s", err))
 		return
+	}
+}
+
+func (r *FingerprintResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data FingerprintModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Validate option_sequence
+	if !data.OptionSequence.IsNull() && !data.OptionSequence.IsUnknown() {
+		for _, option := range data.OptionSequence.Elements() {
+			optionStr := option.(types.String).ValueString()
+			validateOptionSequence(optionStr, path.Root("option_sequence"), "option_sequence", &resp.Diagnostics)
+		}
+	}
+
+	// Validate ipv6_option_sequence
+	if !data.Ipv6OptionSequence.IsNull() && !data.Ipv6OptionSequence.IsUnknown() {
+		for _, option := range data.Ipv6OptionSequence.Elements() {
+			optionStr := option.(types.String).ValueString()
+			validateOptionSequence(optionStr, path.Root("ipv6_option_sequence"), "ipv6_option_sequence", &resp.Diagnostics)
+		}
+	}
+}
+
+// validateOptionSequence validates that the option sequence contains comma separated numbers in the range of 0 to 255.
+func validateOptionSequence(optionStr string, attrPath path.Path, attrName string, diags *diag.Diagnostics) {
+	optionNumbers := strings.Split(optionStr, ",")
+	for _, numStr := range optionNumbers {
+		if numStr == "" {
+			diags.AddAttributeError(
+				attrPath,
+				fmt.Sprintf("Invalid %s", attrName),
+				fmt.Sprintf("Option sequence cannot be empty. %s is not valid.", optionStr),
+			)
+			continue
+		}
+
+		trimmedNumStr := strings.TrimSpace(numStr)
+		if numStr != trimmedNumStr {
+			diags.AddAttributeError(
+				attrPath,
+				fmt.Sprintf("Invalid %s", attrName),
+				fmt.Sprintf("Leading or Trailing whitespace is not allowed in the option %s in %s '%s'", trimmedNumStr, attrName, optionStr),
+			)
+			continue
+		}
+
+		numInt, err := strconv.Atoi(numStr)
+		if err != nil || numInt < 0 || numInt > 255 {
+			diags.AddAttributeError(
+				attrPath,
+				fmt.Sprintf("Invalid %s", attrName),
+				fmt.Sprintf("An option sequence must contain comma separated numbers in the range of 0 to 255. Invalid value: %s", numStr),
+			)
+		}
 	}
 }
 

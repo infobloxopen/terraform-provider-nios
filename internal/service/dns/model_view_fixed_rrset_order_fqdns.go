@@ -32,7 +32,7 @@ var ViewFixedRrsetOrderFqdnsResourceSchemaAttributes = map[string]schema.Attribu
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The FQDN of the fixed RRset configuration item.",
 	},
