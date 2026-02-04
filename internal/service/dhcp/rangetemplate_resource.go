@@ -421,5 +421,43 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 				)
 			}
 		}
+
+		serverAssociationType := "NONE"
+		if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
+			serverAssociationType = data.ServerAssociationType.ValueString()
+		}
+
+		// If server_association_type is MEMBER, member field must be set
+		if serverAssociationType == "MEMBER" {
+			if data.Member.IsNull() || data.Member.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("member"),
+					"Invalid Configuration",
+					"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+				)
+			}
+		}
+
+		// If server_association_type is FAILOVER, failover_association field must be set
+		if serverAssociationType == "FAILOVER" {
+			if data.FailoverAssociation.IsNull() || data.FailoverAssociation.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("failover_association"),
+					"Invalid Configuration",
+					"The 'failover_association' field must be set when 'server_association_type' is set to 'FAILOVER'.",
+				)
+			}
+		}
+
+		// If server_association_type is MS_SERVER, ms_server field must be set
+		if serverAssociationType == "MS_SERVER" {
+			if data.MsServer.IsNull() || data.MsServer.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("ms_server"),
+					"Invalid Configuration",
+					"The 'ms_server' field must be set when 'server_association_type' is set to 'MS_SERVER'.",
+				)
+			}
+		}
 	}
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -195,91 +194,62 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		}
 	}
 
-	// Validate schedule configuration
+	// Validate scheduled_run configuration
 	if !data.ScheduledRun.IsNull() && !data.ScheduledRun.IsUnknown() {
-		var scheduledRun VdiscoverytaskScheduledRunModel
-		diags := data.ScheduledRun.As(ctx, &scheduledRun, basetypes.ObjectAsOptions{})
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
+		utils.ValidateScheduleConfig(
+			data.ScheduledRun,
+			"",
+			path.Root("scheduled_run"),
+			&resp.Diagnostics,
+		)
+	}
 
-		// Validate recurring_time conflicts
-		if !scheduledRun.RecurringTime.IsNull() && !scheduledRun.RecurringTime.IsUnknown() {
-			if !scheduledRun.HourOfDay.IsNull() || !scheduledRun.Year.IsNull() || !scheduledRun.Month.IsNull() || !scheduledRun.DayOfMonth.IsNull() {
+	if !data.UseIdentity.IsNull() && !data.UseIdentity.IsUnknown() && data.UseIdentity.ValueBool() {
+		// When use_identity is true, enforce standard ports
+		if !data.Protocol.IsNull() && !data.Protocol.IsUnknown() && !data.Port.IsNull() && !data.Port.IsUnknown() {
+			protocol := data.Protocol.ValueString()
+			port := data.Port.ValueInt64()
+
+			if protocol == "HTTPS" && port != 443 {
 				resp.Diagnostics.AddAttributeError(
-					path.Root("scheduled_run").AtName("recurring_time"),
-					"Invalid Configuration for Schedule",
-					"Cannot set recurring_time if any of hour_of_day, year, month, day_of_month is set",
+					path.Root("port"),
+					"Invalid Port Configuration",
+					fmt.Sprintf("When use_identity is true and protocol is HTTPS, port must be 443. Got: %d", port),
+				)
+			}
+
+			if protocol == "HTTP" && port != 80 {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("port"),
+					"Invalid Port Configuration",
+					fmt.Sprintf("When use_identity is true and protocol is HTTP, port must be 80. Got: %d", port),
+				)
+			}
+		}
+	}
+
+	// Validate allow_unsecured_connection requirements
+	if !data.AllowUnsecuredConnection.IsNull() && !data.AllowUnsecuredConnection.IsUnknown() && data.AllowUnsecuredConnection.ValueBool() {
+		// When allow_unsecured_connection is true, protocol must be HTTPS
+		if !data.Protocol.IsNull() && !data.Protocol.IsUnknown() {
+			if data.Protocol.ValueString() != "HTTPS" {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("protocol"),
+					"Invalid Protocol Configuration",
+					fmt.Sprintf("When allow_unsecured_connection is true, protocol must be HTTPS. Got: %s", data.Protocol.ValueString()),
 				)
 			}
 		}
 
-		// Validate repeat field logic
-		if !scheduledRun.Repeat.IsNull() && !scheduledRun.Repeat.IsUnknown() {
-			repeatValue := scheduledRun.Repeat.ValueString()
-
-			switch repeatValue {
-			case "ONCE":
-				// For ONCE: cannot set weekdays, frequency, every
-				if !scheduledRun.Weekdays.IsNull() || !scheduledRun.Frequency.IsNull() || !scheduledRun.Every.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("scheduled_run").AtName("repeat"),
-						"Invalid Configuration for Repeat",
-						"Cannot set frequency, weekdays and every if repeat is set to ONCE",
-					)
-				}
-				// For ONCE: must set month, day_of_month, hour_of_day, minutes_past_hour
-				if scheduledRun.Month.IsNull() || scheduledRun.DayOfMonth.IsNull() || scheduledRun.HourOfDay.IsNull() || scheduledRun.MinutesPastHour.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("scheduled_run").AtName("repeat"),
-						"Invalid Configuration for Schedule",
-						"If repeat is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
-					)
-				}
-			case "RECUR":
-				// For RECUR: cannot set month, day_of_month, year
-				if !scheduledRun.Month.IsNull() || !scheduledRun.DayOfMonth.IsNull() || !scheduledRun.Year.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("scheduled_run").AtName("repeat"),
-						"Invalid Configuration for Repeat",
-						"Cannot set month, day_of_month and year if repeat is set to RECUR",
-					)
-				}
-
-				// For RECUR: must set frequency, hour_of_day, minutes_past_hour
-				if scheduledRun.Frequency.IsNull() || scheduledRun.HourOfDay.IsNull() || scheduledRun.MinutesPastHour.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("scheduled_run").AtName("repeat"),
-						"Invalid Configuration for Schedule",
-						"If repeat is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
-					)
-				}
-
-				// Handle weekdays validation based on frequency for RECUR only
-				if !scheduledRun.Frequency.IsNull() && !scheduledRun.Frequency.IsUnknown() {
-					frequencyValue := scheduledRun.Frequency.ValueString()
-
-					if frequencyValue == "WEEKLY" {
-						// WEEKLY requires weekdays
-						if scheduledRun.Weekdays.IsNull() || scheduledRun.Weekdays.IsUnknown() {
-							resp.Diagnostics.AddAttributeError(
-								path.Root("scheduled_run").AtName("weekdays"),
-								"Invalid Configuration for Weekdays",
-								"Weekdays must be set if Frequency is set to WEEKLY",
-							)
-						}
-					} else {
-						// Non-WEEKLY cannot have weekdays
-						if !scheduledRun.Weekdays.IsNull() && !scheduledRun.Weekdays.IsUnknown() {
-							resp.Diagnostics.AddAttributeError(
-								path.Root("scheduled_run").AtName("weekdays"),
-								"Invalid Configuration for Weekdays",
-								"Weekdays can only be set if Frequency is set to WEEKLY",
-							)
-						}
-					}
-				}
+		// When allow_unsecured_connection is true, driver_type must be VMware or OpenStack
+		if !data.DriverType.IsNull() && !data.DriverType.IsUnknown() {
+			driverType := data.DriverType.ValueString()
+			if driverType != "VMWARE" && driverType != "OPENSTACK" {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("driver_type"),
+					"Invalid Driver Type Configuration",
+					fmt.Sprintf("When allow_unsecured_connection is true, driver_type must be either VMware or OpenStack. Got: %s", driverType),
+				)
 			}
 		}
 	}
