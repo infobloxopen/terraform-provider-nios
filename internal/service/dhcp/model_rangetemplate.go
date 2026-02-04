@@ -32,6 +32,7 @@ import (
 
 type RangetemplateModel struct {
 	Ref                            types.String                     `tfsdk:"ref"`
+	Uuid                           types.String                     `tfsdk:"uuid"`
 	Bootfile                       types.String                     `tfsdk:"bootfile"`
 	Bootserver                     types.String                     `tfsdk:"bootserver"`
 	CloudApiCompatible             types.Bool                       `tfsdk:"cloud_api_compatible"`
@@ -100,6 +101,7 @@ type RangetemplateModel struct {
 
 var RangetemplateAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"bootfile":                            types.StringType,
 	"bootserver":                          types.StringType,
 	"cloud_api_compatible":                types.BoolType,
@@ -170,6 +172,10 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"bootfile": schema.StringAttribute{
 		Optional: true,
@@ -762,6 +768,7 @@ func (m *RangetemplateModel) Flatten(ctx context.Context, from *dhcp.Rangetempla
 		*m = RangetemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
 	m.CloudApiCompatible = types.BoolPointerValue(from.CloudApiCompatible)

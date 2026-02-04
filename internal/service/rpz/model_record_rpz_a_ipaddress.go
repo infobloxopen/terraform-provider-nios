@@ -29,6 +29,7 @@ import (
 
 type RecordRpzAIpaddressModel struct {
 	Ref         types.String           `tfsdk:"ref"`
+	Uuid        types.String           `tfsdk:"uuid"`
 	Comment     types.String           `tfsdk:"comment"`
 	Disable     types.Bool             `tfsdk:"disable"`
 	ExtAttrs    types.Map              `tfsdk:"extattrs"`
@@ -44,6 +45,7 @@ type RecordRpzAIpaddressModel struct {
 
 var RecordRpzAIpaddressAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
@@ -61,6 +63,10 @@ var RecordRpzAIpaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -188,6 +194,7 @@ func (m *RecordRpzAIpaddressModel) Flatten(ctx context.Context, from *rpz.Record
 		*m = RecordRpzAIpaddressModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)

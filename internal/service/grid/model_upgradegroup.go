@@ -20,6 +20,7 @@ import (
 
 type UpgradegroupModel struct {
 	Ref                        types.String `tfsdk:"ref"`
+	Uuid                       types.String `tfsdk:"uuid"`
 	Comment                    types.String `tfsdk:"comment"`
 	DistributionDependentGroup types.String `tfsdk:"distribution_dependent_group"`
 	DistributionPolicy         types.String `tfsdk:"distribution_policy"`
@@ -34,6 +35,7 @@ type UpgradegroupModel struct {
 
 var UpgradegroupAttrTypes = map[string]attr.Type{
 	"ref":                          types.StringType,
+	"uuid":                         types.StringType,
 	"comment":                      types.StringType,
 	"distribution_dependent_group": types.StringType,
 	"distribution_policy":          types.StringType,
@@ -50,6 +52,10 @@ var UpgradegroupResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -164,6 +170,7 @@ func (m *UpgradegroupModel) Flatten(ctx context.Context, from *grid.Upgradegroup
 		*m = UpgradegroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DistributionDependentGroup = flex.FlattenStringPointer(from.DistributionDependentGroup)
 	m.DistributionPolicy = flex.FlattenStringPointer(from.DistributionPolicy)

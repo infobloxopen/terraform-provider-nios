@@ -63,6 +63,7 @@ func TestAccZoneAuthDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckZoneAuthResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "address", dataSourceName, "result.0.address"),
 		resource.TestCheckResourceAttrPair(resourceName, "allow_active_dir", dataSourceName, "result.0.allow_active_dir"),
 		resource.TestCheckResourceAttrPair(resourceName, "allow_fixed_rrset_order", dataSourceName, "result.0.allow_fixed_rrset_order"),

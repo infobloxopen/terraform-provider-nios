@@ -10,20 +10,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcRecordNaptrModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	Comment     types.String `tfsdk:"comment"`
 	Disable     types.Bool   `tfsdk:"disable"`
 	DtcServer   types.String `tfsdk:"dtc_server"`
@@ -39,6 +40,7 @@ type DtcRecordNaptrModel struct {
 
 var DtcRecordNaptrAttrTypes = map[string]attr.Type{
 	"ref":         types.StringType,
+	"uuid":        types.StringType,
 	"comment":     types.StringType,
 	"disable":     types.BoolType,
 	"dtc_server":  types.StringType,
@@ -57,6 +59,10 @@ var DtcRecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
+	},
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
@@ -74,7 +80,7 @@ var DtcRecordNaptrResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the record is disabled or not. False means that the record is enabled.",
 	},
 	"dtc_server": schema.StringAttribute{
-		Required:            true,
+		Required: true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
@@ -186,6 +192,7 @@ func (m *DtcRecordNaptrModel) Flatten(ctx context.Context, from *dtc.DtcRecordNa
 		*m = DtcRecordNaptrModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DtcServer = flex.FlattenStringPointer(from.DtcServer)

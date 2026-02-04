@@ -19,6 +19,7 @@ import (
 
 type DhcpoptionspaceModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	Comment           types.String `tfsdk:"comment"`
 	Name              types.String `tfsdk:"name"`
 	OptionDefinitions types.List   `tfsdk:"option_definitions"`
@@ -27,6 +28,7 @@ type DhcpoptionspaceModel struct {
 
 var DhcpoptionspaceAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"comment":            types.StringType,
 	"name":               types.StringType,
 	"option_definitions": types.ListType{ElemType: types.StringType},
@@ -37,6 +39,10 @@ var DhcpoptionspaceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -95,6 +101,7 @@ func (m *DhcpoptionspaceModel) Flatten(ctx context.Context, from *dhcp.Dhcpoptio
 		*m = DhcpoptionspaceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OptionDefinitions = flex.FlattenFrameworkListString(ctx, from.OptionDefinitions, diags)

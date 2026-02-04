@@ -24,6 +24,7 @@ import (
 
 type VlanModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	AssignedTo  types.List   `tfsdk:"assigned_to"`
 	Comment     types.String `tfsdk:"comment"`
 	Contact     types.String `tfsdk:"contact"`
@@ -40,6 +41,7 @@ type VlanModel struct {
 
 var VlanAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"assigned_to":  types.ListType{ElemType: types.StringType},
 	"comment":      types.StringType,
 	"contact":      types.StringType,
@@ -58,6 +60,10 @@ var VlanResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"assigned_to": schema.ListAttribute{
 		ElementType:         types.StringType,
@@ -184,6 +190,7 @@ func (m *VlanModel) Flatten(ctx context.Context, from *ipam.Vlan, diags *diag.Di
 		*m = VlanModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AssignedTo = flex.FlattenFrameworkListString(ctx, from.AssignedTo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Contact = flex.FlattenStringPointer(from.Contact)

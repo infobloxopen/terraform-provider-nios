@@ -31,6 +31,7 @@ import (
 
 type Ipv6rangeModel struct {
 	Ref                              types.String         `tfsdk:"ref"`
+	Uuid                             types.String         `tfsdk:"uuid"`
 	AddressType                      types.String         `tfsdk:"address_type"`
 	CloudInfo                        types.Object         `tfsdk:"cloud_info"`
 	Comment                          types.String         `tfsdk:"comment"`
@@ -73,6 +74,7 @@ type Ipv6rangeModel struct {
 
 var Ipv6rangeAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+	"uuid":                                 types.StringType,
 	"address_type":                         types.StringType,
 	"cloud_info":                           types.ObjectType{AttrTypes: Ipv6rangeCloudInfoAttrTypes},
 	"comment":                              types.StringType,
@@ -117,6 +119,10 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address_type": schema.StringAttribute{
 		Computed: true,
@@ -456,6 +462,7 @@ func (m *Ipv6rangeModel) Flatten(ctx context.Context, from *dhcp.Ipv6range, diag
 		*m = Ipv6rangeModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AddressType = flex.FlattenStringPointer(from.AddressType)
 	m.CloudInfo = FlattenIpv6rangeCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
