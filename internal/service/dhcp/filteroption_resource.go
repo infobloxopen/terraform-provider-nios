@@ -208,6 +208,7 @@ func (r *FilteroptionResource) ReadByExtAttrs(ctx context.Context, data *Filtero
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForFilteroption).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Filteroption by extattrs, got error: %s", err))

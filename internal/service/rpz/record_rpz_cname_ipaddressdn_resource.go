@@ -205,6 +205,7 @@ func (r *RecordRpzCnameIpaddressdnResource) ReadByExtAttrs(ctx context.Context, 
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCnameIpaddressdn).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzCnameIpaddressdn by extattrs, got error: %s", err))

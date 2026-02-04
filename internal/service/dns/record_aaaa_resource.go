@@ -214,6 +214,7 @@ func (r *RecordAaaaResource) ReadByExtAttrs(ctx context.Context, data *RecordAaa
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordAaaa).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordAaaa by extattrs, got error: %s", err))

@@ -207,6 +207,7 @@ func (r *FilternacResource) ReadByExtAttrs(ctx context.Context, data *FilternacM
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForFilternac).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Filternac by extattrs, got error: %s", err))

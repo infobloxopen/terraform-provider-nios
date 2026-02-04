@@ -202,6 +202,7 @@ func (r *VlanrangeResource) ReadByExtAttrs(ctx context.Context, data *VlanrangeM
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForVlanrange).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Vlanrange by extattrs, got error: %s", err))

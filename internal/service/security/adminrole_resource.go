@@ -202,6 +202,7 @@ func (r *AdminroleResource) ReadByExtAttrs(ctx context.Context, data *AdminroleM
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForAdminrole).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Adminrole by extattrs, got error: %s", err))

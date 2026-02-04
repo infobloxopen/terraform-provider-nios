@@ -202,6 +202,7 @@ func (r *RecordAliasResource) ReadByExtAttrs(ctx context.Context, data *RecordAl
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordAlias).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordAlias by extattrs, got error: %s", err))

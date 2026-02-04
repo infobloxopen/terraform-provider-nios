@@ -229,6 +229,7 @@ func (r *Ipv6networkResource) ReadByExtAttrs(ctx context.Context, data *Ipv6netw
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForIpv6network).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6network by extattrs, got error: %s", err))

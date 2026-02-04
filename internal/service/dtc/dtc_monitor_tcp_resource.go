@@ -202,6 +202,7 @@ func (r *DtcMonitorTcpResource) ReadByExtAttrs(ctx context.Context, data *DtcMon
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForDtcMonitorTcp).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcMonitorTcp by extattrs, got error: %s", err))

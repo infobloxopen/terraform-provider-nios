@@ -202,6 +202,7 @@ func (r *RecordNaptrResource) ReadByExtAttrs(ctx context.Context, data *RecordNa
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordNaptr).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordNaptr by extattrs, got error: %s", err))

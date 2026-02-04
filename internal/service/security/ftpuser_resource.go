@@ -202,6 +202,7 @@ func (r *FtpuserResource) ReadByExtAttrs(ctx context.Context, data *FtpuserModel
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ftpuser by extattrs, got error: %s", err))

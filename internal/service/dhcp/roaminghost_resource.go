@@ -207,6 +207,7 @@ func (r *RoaminghostResource) ReadByExtAttrs(ctx context.Context, data *Roamingh
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRoaminghost).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Roaminghost by extattrs, got error: %s", err))

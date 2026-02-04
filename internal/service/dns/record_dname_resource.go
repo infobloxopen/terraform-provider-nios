@@ -202,6 +202,7 @@ func (r *RecordDnameResource) ReadByExtAttrs(ctx context.Context, data *RecordDn
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordDname).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordDname by extattrs, got error: %s", err))

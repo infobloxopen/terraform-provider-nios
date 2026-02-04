@@ -202,6 +202,7 @@ func (r *DtcLbdnResource) ReadByExtAttrs(ctx context.Context, data *DtcLbdnModel
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForDtcLbdn).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcLbdn by extattrs, got error: %s", err))

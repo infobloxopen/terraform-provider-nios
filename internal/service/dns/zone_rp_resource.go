@@ -255,6 +255,7 @@ func (r *ZoneRpResource) ReadByExtAttrs(ctx context.Context, data *ZoneRpModel, 
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForZoneRp).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ZoneRp by extattrs, got error: %s", err))

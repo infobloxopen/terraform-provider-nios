@@ -295,6 +295,7 @@ func (r *AdmingroupResource) ReadByExtAttrs(ctx context.Context, data *Admingrou
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForAdmingroup).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Admingroup by extattrs, got error: %s", err))

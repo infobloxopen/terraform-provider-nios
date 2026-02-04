@@ -206,6 +206,7 @@ func (r *NetworktemplateResource) ReadByExtAttrs(ctx context.Context, data *Netw
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNetworktemplate).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Networktemplate by extattrs, got error: %s", err))

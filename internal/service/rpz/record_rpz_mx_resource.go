@@ -202,6 +202,7 @@ func (r *RecordRpzMxResource) ReadByExtAttrs(ctx context.Context, data *RecordRp
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordRpzMx).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzMx by extattrs, got error: %s", err))

@@ -214,6 +214,7 @@ func (r *NetworkcontainerResource) ReadByExtAttrs(ctx context.Context, data *Net
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Networkcontainer by extattrs, got error: %s", err))

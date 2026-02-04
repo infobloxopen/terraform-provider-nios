@@ -202,6 +202,7 @@ func (r *NsgroupStubmemberResource) ReadByExtAttrs(ctx context.Context, data *Ns
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNsgroupStubmember).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NsgroupStubmember by extattrs, got error: %s", err))

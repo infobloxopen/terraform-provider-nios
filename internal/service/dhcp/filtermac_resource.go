@@ -205,6 +205,7 @@ func (r *FiltermacResource) ReadByExtAttrs(ctx context.Context, data *FiltermacM
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForFiltermac).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Filtermac by extattrs, got error: %s", err))

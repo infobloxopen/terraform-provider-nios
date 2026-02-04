@@ -205,6 +205,7 @@ func (r *GridServicerestartGroupResource) ReadByExtAttrs(ctx context.Context, da
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForGridServicerestartGroup).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read GridServicerestartGroup by extattrs, got error: %s", err))

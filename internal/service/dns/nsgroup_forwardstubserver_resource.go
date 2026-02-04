@@ -202,6 +202,7 @@ func (r *NsgroupForwardstubserverResource) ReadByExtAttrs(ctx context.Context, d
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNsgroupForwardstubserver).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NsgroupForwardstubserver by extattrs, got error: %s", err))

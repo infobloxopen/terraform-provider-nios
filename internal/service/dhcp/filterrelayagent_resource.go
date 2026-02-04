@@ -207,6 +207,7 @@ func (r *FilterrelayagentResource) ReadByExtAttrs(ctx context.Context, data *Fil
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForFilterrelayagent).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Filterrelayagent by extattrs, got error: %s", err))

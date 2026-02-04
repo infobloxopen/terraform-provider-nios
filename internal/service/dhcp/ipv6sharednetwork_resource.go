@@ -204,6 +204,7 @@ func (r *Ipv6sharednetworkResource) ReadByExtAttrs(ctx context.Context, data *Ip
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6sharednetwork by extattrs, got error: %s", err))

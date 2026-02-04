@@ -202,6 +202,7 @@ func (r *ZoneForwardResource) ReadByExtAttrs(ctx context.Context, data *ZoneForw
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForZoneForward).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ZoneForward by extattrs, got error: %s", err))

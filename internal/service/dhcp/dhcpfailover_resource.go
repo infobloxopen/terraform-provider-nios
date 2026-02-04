@@ -202,6 +202,7 @@ func (r *DhcpfailoverResource) ReadByExtAttrs(ctx context.Context, data *Dhcpfai
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForDhcpfailover).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Dhcpfailover by extattrs, got error: %s", err))

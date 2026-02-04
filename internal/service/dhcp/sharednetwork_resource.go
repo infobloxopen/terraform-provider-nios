@@ -307,6 +307,7 @@ func (r *SharednetworkResource) ReadByExtAttrs(ctx context.Context, data *Shared
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForSharednetwork).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Sharednetwork by extattrs, got error: %s", err))

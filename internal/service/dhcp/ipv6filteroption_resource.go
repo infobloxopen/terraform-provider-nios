@@ -205,6 +205,7 @@ func (r *Ipv6filteroptionResource) ReadByExtAttrs(ctx context.Context, data *Ipv
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForIpv6filteroption).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6filteroption by extattrs, got error: %s", err))

@@ -202,6 +202,7 @@ func (r *RecordUnknownResource) ReadByExtAttrs(ctx context.Context, data *Record
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordUnknown).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordUnknown by extattrs, got error: %s", err))

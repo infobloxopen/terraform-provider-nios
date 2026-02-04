@@ -202,6 +202,7 @@ func (r *NsgroupDelegationResource) ReadByExtAttrs(ctx context.Context, data *Ns
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNsgroupDelegation).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NsgroupDelegation by extattrs, got error: %s", err))

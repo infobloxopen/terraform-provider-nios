@@ -245,6 +245,7 @@ func (r *SnmpuserResource) ReadByExtAttrs(ctx context.Context, data *SnmpuserMod
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForSnmpuser).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Snmpuser by extattrs, got error: %s", err))

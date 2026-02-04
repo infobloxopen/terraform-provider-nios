@@ -297,6 +297,7 @@ func (r *NotificationRestEndpointResource) ReadByExtAttrs(ctx context.Context, d
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NotificationRestEndpoint by extattrs, got error: %s", err))

@@ -202,6 +202,7 @@ func (r *ZoneStubResource) ReadByExtAttrs(ctx context.Context, data *ZoneStubMod
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForZoneStub).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ZoneStub by extattrs, got error: %s", err))

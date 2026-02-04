@@ -202,6 +202,7 @@ func (r *DtcServerResource) ReadByExtAttrs(ctx context.Context, data *DtcServerM
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForDtcServer).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcServer by extattrs, got error: %s", err))

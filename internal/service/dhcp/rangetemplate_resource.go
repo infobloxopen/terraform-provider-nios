@@ -202,6 +202,7 @@ func (r *RangetemplateResource) ReadByExtAttrs(ctx context.Context, data *Ranget
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRangetemplate).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Rangetemplate by extattrs, got error: %s", err))

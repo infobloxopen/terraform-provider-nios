@@ -209,6 +209,7 @@ func (r *FingerprintResource) ReadByExtAttrs(ctx context.Context, data *Fingerpr
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForFingerprint).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Fingerprint by extattrs, got error: %s", err))
