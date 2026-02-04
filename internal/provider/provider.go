@@ -103,10 +103,7 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithProxyURL(data.ProxyURL.ValueString()),
 	)
 
-	// Set ProxySearch configuration for use in resources and data sources
-	// TODO: ideally this should be passed to the data sources and resources via Configure method
-	// of each resource and data source, but that would require changes in configure method and struct of each resource and data source.
-	// For now, we are using a global variable to store the ProxySearch value.
+	// Set ProxySearch configuration
 	config.SetProxySearch(data.ProxySearch.ValueString())
 
 	err := checkAndCreatePreRequisites(ctx, client)
