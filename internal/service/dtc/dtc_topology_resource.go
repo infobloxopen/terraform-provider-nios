@@ -14,6 +14,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -132,6 +133,7 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForDtcTopology).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -179,7 +181,7 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 	if diags.HasError() {
 		return
 	}
-	
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
@@ -410,7 +412,7 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 	}
 
 	if destLink, ok := res.GetDestinationLinkOk(); ok {
-	    ruleData.SetDestinationLink(*destLink.DtcTopologyRuleDestinationLinkOneOf.Ref)
+		ruleData.SetDestinationLink(*destLink.DtcTopologyRuleDestinationLinkOneOf.Ref)
 	}
 
 	if returnType, ok := res.GetReturnTypeOk(); ok {
@@ -449,11 +451,11 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 }
 
 func (r *DtcTopologyResource) populateTopologyRules(ctx context.Context, res *dtc.DtcTopology, diags *diag.Diagnostics) {
-    for i, rule := range res.Rules {
-        ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
+	for i, rule := range res.Rules {
+		ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
 		if ruleRef == nil {
 			continue
 		}
-        res.Rules[i].DtcTopologyRulesInnerOneOf1 = UpdateDtcTopologyRules(ctx, r, *ruleRef, diags)
-    }
+		res.Rules[i].DtcTopologyRulesInnerOneOf1 = UpdateDtcTopologyRules(ctx, r, *ruleRef, diags)
+	}
 }
