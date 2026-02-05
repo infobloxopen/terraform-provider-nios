@@ -104,7 +104,7 @@ func (r *SmartfolderGlobalResource) Read(ctx context.Context, req resource.ReadR
 
 	apiRes, httpRes, err := r.client.SmartFolderAPI.
 		SmartfolderGlobalAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForSmartfolderGlobal).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -140,7 +140,7 @@ func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -148,7 +148,7 @@ func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.Upd
 
 	apiRes, _, err := r.client.SmartFolderAPI.
 		SmartfolderGlobalAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		SmartfolderGlobal(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForSmartfolderGlobal).
 		ReturnAsObject(1).
@@ -178,7 +178,7 @@ func (r *SmartfolderGlobalResource) Delete(ctx context.Context, req resource.Del
 
 	httpRes, err := r.client.SmartFolderAPI.
 		SmartfolderGlobalAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

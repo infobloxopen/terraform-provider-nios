@@ -104,7 +104,7 @@ func (r *RecordNsResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordNsAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRecordNs).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -140,7 +140,7 @@ func (r *RecordNsResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -148,7 +148,7 @@ func (r *RecordNsResource) Update(ctx context.Context, req resource.UpdateReques
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordNsAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordNs(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordNs).
 		ReturnAsObject(1).
@@ -178,7 +178,7 @@ func (r *RecordNsResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	httpRes, err := r.client.DNSAPI.
 		RecordNsAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

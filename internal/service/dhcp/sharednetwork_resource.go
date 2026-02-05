@@ -228,7 +228,7 @@ func (r *SharednetworkResource) Read(ctx context.Context, req resource.ReadReque
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		SharednetworkAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForSharednetwork).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -348,7 +348,7 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -380,7 +380,7 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 
 	apiRes, _, err := r.client.DHCPAPI.
 		SharednetworkAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Sharednetwork(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForSharednetwork).
 		ReturnAsObject(1).
@@ -420,7 +420,7 @@ func (r *SharednetworkResource) Delete(ctx context.Context, req resource.DeleteR
 
 	httpRes, err := r.client.DHCPAPI.
 		SharednetworkAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -432,6 +432,6 @@ func (r *SharednetworkResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *SharednetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

@@ -123,7 +123,7 @@ func (r *DtcLbdnResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcLbdnAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDtcLbdn).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -243,7 +243,7 @@ func (r *DtcLbdnResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -275,7 +275,7 @@ func (r *DtcLbdnResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcLbdnAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		DtcLbdn(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDtcLbdn).
 		ReturnAsObject(1).
@@ -315,7 +315,7 @@ func (r *DtcLbdnResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	httpRes, err := r.client.DTCAPI.
 		DtcLbdnAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -327,6 +327,6 @@ func (r *DtcLbdnResource) Delete(ctx context.Context, req resource.DeleteRequest
 }
 
 func (r *DtcLbdnResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

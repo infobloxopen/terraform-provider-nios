@@ -124,7 +124,7 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		ViewAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForView).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -244,7 +244,7 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -277,7 +277,7 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	apiRes, _, err := r.client.DNSAPI.
 		ViewAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		View(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForView).
 		ReturnAsObject(1).
@@ -317,7 +317,7 @@ func (r *ViewResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 	httpRes, err := r.client.DNSAPI.
 		ViewAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -329,7 +329,7 @@ func (r *ViewResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 }
 
 func (r *ViewResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

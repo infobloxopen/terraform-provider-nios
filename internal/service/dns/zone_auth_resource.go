@@ -181,7 +181,7 @@ func (r *ZoneAuthResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		ZoneAuthAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForZoneAuth).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -301,7 +301,7 @@ func (r *ZoneAuthResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -333,7 +333,7 @@ func (r *ZoneAuthResource) Update(ctx context.Context, req resource.UpdateReques
 
 	apiRes, _, err := r.client.DNSAPI.
 		ZoneAuthAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForZoneAuth).
 		ReturnAsObject(1).
@@ -373,7 +373,7 @@ func (r *ZoneAuthResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	httpRes, err := r.client.DNSAPI.
 		ZoneAuthAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -385,6 +385,6 @@ func (r *ZoneAuthResource) Delete(ctx context.Context, req resource.DeleteReques
 }
 
 func (r *ZoneAuthResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

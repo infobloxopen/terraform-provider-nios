@@ -111,7 +111,7 @@ func (r *CertificateAuthserviceResource) Read(ctx context.Context, req resource.
 
 	apiRes, httpRes, err := r.client.SecurityAPI.
 		CertificateAuthserviceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -150,7 +150,7 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 	if !r.processOcspResponders(ctx, &data, &resp.Diagnostics) {
 		return
 	}
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -158,7 +158,7 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 
 	apiRes, _, err := r.client.SecurityAPI.
 		CertificateAuthserviceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		CertificateAuthservice(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
 		ReturnAsObject(1).
@@ -188,7 +188,7 @@ func (r *CertificateAuthserviceResource) Delete(ctx context.Context, req resourc
 
 	httpRes, err := r.client.SecurityAPI.
 		CertificateAuthserviceAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

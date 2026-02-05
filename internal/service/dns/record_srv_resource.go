@@ -123,7 +123,7 @@ func (r *RecordSrvResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordSrvAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRecordSrv).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -243,7 +243,7 @@ func (r *RecordSrvResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -275,7 +275,7 @@ func (r *RecordSrvResource) Update(ctx context.Context, req resource.UpdateReque
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordSrvAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordSrv(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordSrv).
 		ReturnAsObject(1).
@@ -315,7 +315,7 @@ func (r *RecordSrvResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	httpRes, err := r.client.DNSAPI.
 		RecordSrvAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -327,6 +327,6 @@ func (r *RecordSrvResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 func (r *RecordSrvResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

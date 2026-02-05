@@ -153,7 +153,7 @@ func (r *IPAssociationResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -271,7 +271,7 @@ func (r *IPAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.Re
 func (r *IPAssociationResource) getHostRecordByRef(ctx context.Context, ref string) (*dns.RecordHost, bool, error) {
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(ref)).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -367,7 +367,7 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Update(ctx, utils.ExtractResourceRef(*hostRec.Ref)).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordHost(updateReq).
 		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).

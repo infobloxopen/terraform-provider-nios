@@ -104,7 +104,7 @@ func (r *UpgradegroupResource) Read(ctx context.Context, req resource.ReadReques
 
 	apiRes, httpRes, err := r.client.GridAPI.
 		UpgradegroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForUpgradegroup).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -140,7 +140,7 @@ func (r *UpgradegroupResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -148,7 +148,7 @@ func (r *UpgradegroupResource) Update(ctx context.Context, req resource.UpdateRe
 
 	apiRes, _, err := r.client.GridAPI.
 		UpgradegroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Upgradegroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForUpgradegroup).
 		ReturnAsObject(1).
@@ -178,7 +178,7 @@ func (r *UpgradegroupResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	httpRes, err := r.client.GridAPI.
 		UpgradegroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
