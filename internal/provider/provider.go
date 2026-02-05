@@ -14,6 +14,7 @@ import (
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -45,6 +46,7 @@ type NIOSProviderModel struct {
 	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
 	NIOSUsername types.String `tfsdk:"nios_username"`
 	NIOSPassword types.String `tfsdk:"nios_password"`
+	RetryTimeout types.Int64  `tfsdk:"retry_timeout"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -64,6 +66,10 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			},
 			"nios_password": schema.StringAttribute{
 				Optional: true,
+			},
+			"retry_timeout": schema.Int64Attribute{
+				Optional:    true,
+				Description: "Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.",
 			},
 		},
 	}
@@ -85,6 +91,11 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithNIOSHostUrl(data.NIOSHostURL.ValueString()),
 		option.WithDebug(true),
 	)
+
+	// Set global retry timeout if specified
+	if !data.RetryTimeout.IsNull() && !data.RetryTimeout.IsUnknown() {
+		retry.SetRetryTimeout(data.RetryTimeout.ValueInt64())
+	}
 
 	err := checkAndCreatePreRequisites(ctx, client)
 	if err != nil {
