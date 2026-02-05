@@ -24,6 +24,7 @@ import (
 
 type NsgroupStubmemberModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	Comment     types.String `tfsdk:"comment"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
 	ExtAttrsAll types.Map    `tfsdk:"extattrs_all"`
@@ -33,6 +34,7 @@ type NsgroupStubmemberModel struct {
 
 var NsgroupStubmemberAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"comment":      types.StringType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
 	"extattrs_all": types.MapType{ElemType: types.StringType},
@@ -44,6 +46,10 @@ var NsgroupStubmemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -137,6 +143,7 @@ func (m *NsgroupStubmemberModel) Flatten(ctx context.Context, from *dns.NsgroupS
 		*m = NsgroupStubmemberModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)

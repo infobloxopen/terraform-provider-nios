@@ -66,6 +66,7 @@ func TestAccVlanrangeDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckVlanrangeResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "delete_vlans", dataSourceName, "result.0.delete_vlans"),
 		resource.TestCheckResourceAttrPair(resourceName, "end_vlan_id", dataSourceName, "result.0.end_vlan_id"),

@@ -37,6 +37,7 @@ import (
 
 type RangeModel struct {
 	Ref                              types.String                     `tfsdk:"ref"`
+	Uuid                             types.String                     `tfsdk:"uuid"`
 	AlwaysUpdateDns                  types.Bool                       `tfsdk:"always_update_dns"`
 	Bootfile                         types.String                     `tfsdk:"bootfile"`
 	Bootserver                       types.String                     `tfsdk:"bootserver"`
@@ -138,6 +139,7 @@ type RangeModel struct {
 
 var RangeAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+	"uuid":                                 types.StringType,
 	"always_update_dns":                    types.BoolType,
 	"bootfile":                             types.StringType,
 	"bootserver":                           types.StringType,
@@ -241,6 +243,10 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"always_update_dns": schema.BoolAttribute{
 		Optional:            true,
@@ -1081,6 +1087,7 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 		*m = RangeModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AlwaysUpdateDns = types.BoolPointerValue(from.AlwaysUpdateDns)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)

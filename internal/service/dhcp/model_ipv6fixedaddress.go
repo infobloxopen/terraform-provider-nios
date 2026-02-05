@@ -35,6 +35,7 @@ import (
 
 type Ipv6fixedaddressModel struct {
 	Ref                      types.String                             `tfsdk:"ref"`
+	Uuid                     types.String                             `tfsdk:"uuid"`
 	AddressType              types.String                             `tfsdk:"address_type"`
 	AllowTelnet              types.Bool                               `tfsdk:"allow_telnet"`
 	CliCredentials           types.List                               `tfsdk:"cli_credentials"`
@@ -86,6 +87,7 @@ type Ipv6fixedaddressModel struct {
 
 var Ipv6fixedaddressAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
+	"uuid":                       types.StringType,
 	"address_type":               types.StringType,
 	"allow_telnet":               types.BoolType,
 	"cli_credentials":            types.ListType{ElemType: types.ObjectType{AttrTypes: Ipv6fixedaddressCliCredentialsAttrTypes}},
@@ -139,6 +141,10 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address_type": schema.StringAttribute{
 		Optional: true,
@@ -582,6 +588,7 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 		*m = Ipv6fixedaddressModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AddressType = flex.FlattenStringPointer(from.AddressType)
 	m.AllowTelnet = types.BoolPointerValue(from.AllowTelnet)
 	planCredentials := m.CliCredentials

@@ -25,6 +25,7 @@ import (
 
 type SnmpuserModel struct {
 	Ref                    types.String `tfsdk:"ref"`
+	Uuid                   types.String `tfsdk:"uuid"`
 	AuthenticationPassword types.String `tfsdk:"authentication_password"`
 	AuthenticationProtocol types.String `tfsdk:"authentication_protocol"`
 	Comment                types.String `tfsdk:"comment"`
@@ -38,6 +39,7 @@ type SnmpuserModel struct {
 
 var SnmpuserAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"authentication_password": types.StringType,
 	"authentication_protocol": types.StringType,
 	"comment":                 types.StringType,
@@ -53,6 +55,10 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"authentication_password": schema.StringAttribute{
 		Optional:  true,
@@ -166,6 +172,7 @@ func (m *SnmpuserModel) Flatten(ctx context.Context, from *security.Snmpuser, di
 		*m = SnmpuserModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

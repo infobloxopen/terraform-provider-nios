@@ -47,6 +47,7 @@ func TestAccRecordNsDataSource_Filters(t *testing.T) {
 func testAccCheckRecordNsResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "addresses", dataSourceName, "result.0.addresses"),
 		resource.TestCheckResourceAttrPair(resourceName, "cloud_info", dataSourceName, "result.0.cloud_info"),
 		resource.TestCheckResourceAttrPair(resourceName, "creator", dataSourceName, "result.0.creator"),

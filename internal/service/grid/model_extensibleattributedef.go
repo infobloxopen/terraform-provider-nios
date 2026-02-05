@@ -23,6 +23,7 @@ import (
 
 type ExtensibleattributedefModel struct {
 	Ref                types.String `tfsdk:"ref"`
+	Uuid               types.String `tfsdk:"uuid"`
 	AllowedObjectTypes types.List   `tfsdk:"allowed_object_types"`
 	Comment            types.String `tfsdk:"comment"`
 	DefaultValue       types.String `tfsdk:"default_value"`
@@ -38,6 +39,7 @@ type ExtensibleattributedefModel struct {
 
 var ExtensibleattributedefAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+	"uuid":                 types.StringType,
 	"allowed_object_types": types.ListType{ElemType: types.StringType},
 	"comment":              types.StringType,
 	"default_value":        types.StringType,
@@ -55,6 +57,10 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"allowed_object_types": schema.ListAttribute{
 		ElementType: types.StringType,
@@ -173,6 +179,7 @@ func (m *ExtensibleattributedefModel) Flatten(ctx context.Context, from *grid.Ex
 		*m = ExtensibleattributedefModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowedObjectTypes = flex.FlattenFrameworkListString(ctx, from.AllowedObjectTypes, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DefaultValue = FlattenExtensibleAttributeDefDefaultValue(ctx, from.DefaultValue, diags)

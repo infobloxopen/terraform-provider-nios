@@ -40,6 +40,7 @@ func TestAccDhcpoptionspaceDataSource_Filters(t *testing.T) {
 func testAccCheckDhcpoptionspaceResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
 		resource.TestCheckResourceAttrPair(resourceName, "option_definitions", dataSourceName, "result.0.option_definitions"),

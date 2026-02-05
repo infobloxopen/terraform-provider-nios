@@ -24,6 +24,7 @@ import (
 
 type DtcRecordSrvModel struct {
 	Ref       types.String `tfsdk:"ref"`
+	Uuid      types.String `tfsdk:"uuid"`
 	Comment   types.String `tfsdk:"comment"`
 	Disable   types.Bool   `tfsdk:"disable"`
 	DtcServer types.String `tfsdk:"dtc_server"`
@@ -38,6 +39,7 @@ type DtcRecordSrvModel struct {
 
 var DtcRecordSrvAttrTypes = map[string]attr.Type{
 	"ref":        types.StringType,
+	"uuid":       types.StringType,
 	"comment":    types.StringType,
 	"disable":    types.BoolType,
 	"dtc_server": types.StringType,
@@ -54,6 +56,10 @@ var DtcRecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -170,6 +176,7 @@ func (m *DtcRecordSrvModel) Flatten(ctx context.Context, from *dtc.DtcRecordSrv,
 		*m = DtcRecordSrvModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DtcServer = flex.FlattenStringPointer(from.DtcServer)
