@@ -1,7 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-package stringplanmodifier
+package int64planmodifier
 
 import (
 	"context"
@@ -21,7 +21,7 @@ import (
 // Null is also a known value in Terraform and will be copied to the planned value
 // by this plan modifier. For use-cases like a child attribute of a nested attribute or
 // if null is desired to be marked as unknown in the case of an update, use [UseNonNullStateForUnknown].
-func UseStateForUnknown() planmodifier.String {
+func UseStateForUnknown() planmodifier.Int64 {
 	return useStateForUnknownModifier{}
 }
 
@@ -38,8 +38,8 @@ func (m useStateForUnknownModifier) MarkdownDescription(_ context.Context) strin
 	return "Once set, the value of this attribute in state will not change."
 }
 
-// PlanModifyString implements the plan modification logic.
-func (m useStateForUnknownModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+// PlanModifyInt64 implements the plan modification logic.
+func (m useStateForUnknownModifier) PlanModifyInt64(_ context.Context, req planmodifier.Int64Request, resp *planmodifier.Int64Response) {
 	// Do nothing if there is no state (resource is being created).
 	if req.State.Raw.IsNull() {
 		return
