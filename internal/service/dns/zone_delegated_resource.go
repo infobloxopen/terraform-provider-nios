@@ -327,3 +327,28 @@ func (r *ZoneDelegatedResource) ImportState(ctx context.Context, req resource.Im
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
+
+func (r *ZoneDelegatedResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data ZoneDelegatedModel
+
+	// Read Terraform config data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	delegateTo := data.DelegateTo
+
+	nsGroup := data.NsGroup
+
+	if delegateTo.IsNull() || delegateTo.IsUnknown() {
+		if nsGroup.IsNull() || nsGroup.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("delegate_to"),
+				"Missing Required Configuration",
+				"Either 'delegate_to' must be provided or 'ns_group' must be specified. At least one of these attributes is required.",
+			)
+		}
+	}
+}
