@@ -124,7 +124,7 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:   true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_ddns_domainname")),
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The dynamic DNS domain name the appliance uses specifically for DDNS updates for this network.",
 	},
@@ -176,7 +176,7 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:   true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("use_domain_name")),
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "Use this method to set or retrieve the domain_name value of a DHCP IPv6 Shared Network object.",
 	},
