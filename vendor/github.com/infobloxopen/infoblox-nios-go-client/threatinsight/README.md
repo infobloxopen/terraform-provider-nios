@@ -89,6 +89,8 @@ Class | Method | HTTP request | Description
 *ThreatinsightCloudclientAPI* | [**Update**](docs/ThreatinsightCloudclientAPI.md#update) | **Put** /threatinsight:cloudclient/{reference} | Update a threatinsight:cloudclient object
 *ThreatinsightInsightAllowlistAPI* | [**List**](docs/ThreatinsightInsightAllowlistAPI.md#list) | **Get** /threatinsight:insight_allowlist | Retrieve threatinsight:insight_allowlist objects
 *ThreatinsightInsightAllowlistAPI* | [**Read**](docs/ThreatinsightInsightAllowlistAPI.md#read) | **Get** /threatinsight:insight_allowlist/{reference} | Get a specific threatinsight:insight_allowlist object
+*ThreatinsightModulesetAPI* | [**List**](docs/ThreatinsightModulesetAPI.md#list) | **Get** /threatinsight:moduleset | Retrieve threatinsight:moduleset objects
+*ThreatinsightModulesetAPI* | [**Read**](docs/ThreatinsightModulesetAPI.md#read) | **Get** /threatinsight:moduleset/{reference} | Get a specific threatinsight:moduleset object
 
 
 ## Documentation For Models
@@ -102,21 +104,28 @@ Class | Method | HTTP request | Description
  - [GetThreatinsightCloudclientResponseObjectAsResult](docs/GetThreatinsightCloudclientResponseObjectAsResult.md)
  - [GetThreatinsightInsightAllowlistResponse](docs/GetThreatinsightInsightAllowlistResponse.md)
  - [GetThreatinsightInsightAllowlistResponseObjectAsResult](docs/GetThreatinsightInsightAllowlistResponseObjectAsResult.md)
+ - [GetThreatinsightModulesetResponse](docs/GetThreatinsightModulesetResponse.md)
+ - [GetThreatinsightModulesetResponseObjectAsResult](docs/GetThreatinsightModulesetResponseObjectAsResult.md)
  - [ListThreatinsightAllowlistResponse](docs/ListThreatinsightAllowlistResponse.md)
  - [ListThreatinsightAllowlistResponseObject](docs/ListThreatinsightAllowlistResponseObject.md)
  - [ListThreatinsightCloudclientResponse](docs/ListThreatinsightCloudclientResponse.md)
  - [ListThreatinsightCloudclientResponseObject](docs/ListThreatinsightCloudclientResponseObject.md)
  - [ListThreatinsightInsightAllowlistResponse](docs/ListThreatinsightInsightAllowlistResponse.md)
  - [ListThreatinsightInsightAllowlistResponseObject](docs/ListThreatinsightInsightAllowlistResponseObject.md)
+ - [ListThreatinsightModulesetResponse](docs/ListThreatinsightModulesetResponse.md)
+ - [ListThreatinsightModulesetResponseObject](docs/ListThreatinsightModulesetResponseObject.md)
  - [ThreatinsightAllowlist](docs/ThreatinsightAllowlist.md)
  - [ThreatinsightCloudclient](docs/ThreatinsightCloudclient.md)
  - [ThreatinsightInsightAllowlist](docs/ThreatinsightInsightAllowlist.md)
+ - [ThreatinsightModuleset](docs/ThreatinsightModuleset.md)
  - [UpdateThreatinsightAllowlistResponse](docs/UpdateThreatinsightAllowlistResponse.md)
  - [UpdateThreatinsightAllowlistResponseAsObject](docs/UpdateThreatinsightAllowlistResponseAsObject.md)
  - [UpdateThreatinsightCloudclientResponse](docs/UpdateThreatinsightCloudclientResponse.md)
  - [UpdateThreatinsightCloudclientResponseAsObject](docs/UpdateThreatinsightCloudclientResponseAsObject.md)
  - [UpdateThreatinsightInsightAllowlistResponse](docs/UpdateThreatinsightInsightAllowlistResponse.md)
  - [UpdateThreatinsightInsightAllowlistResponseAsObject](docs/UpdateThreatinsightInsightAllowlistResponseAsObject.md)
+ - [UpdateThreatinsightModulesetResponse](docs/UpdateThreatinsightModulesetResponse.md)
+ - [UpdateThreatinsightModulesetResponseAsObject](docs/UpdateThreatinsightModulesetResponseAsObject.md)
 
 
 ## Documentation For Authorization

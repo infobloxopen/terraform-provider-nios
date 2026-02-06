@@ -79,11 +79,6 @@ All URIs are relative to *http://localhost/wapi/v2.14*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*NotificationRestEndpointAPI* | [**Create**](docs/NotificationRestEndpointAPI.md#create) | **Post** /notification:rest:endpoint | Create a notification:rest:endpoint object
-*NotificationRestEndpointAPI* | [**Delete**](docs/NotificationRestEndpointAPI.md#delete) | **Delete** /notification:rest:endpoint/{reference} | Delete a notification:rest:endpoint object
-*NotificationRestEndpointAPI* | [**List**](docs/NotificationRestEndpointAPI.md#list) | **Get** /notification:rest:endpoint | Retrieve notification:rest:endpoint objects
-*NotificationRestEndpointAPI* | [**Read**](docs/NotificationRestEndpointAPI.md#read) | **Get** /notification:rest:endpoint/{reference} | Get a specific notification:rest:endpoint object
-*NotificationRestEndpointAPI* | [**Update**](docs/NotificationRestEndpointAPI.md#update) | **Put** /notification:rest:endpoint/{reference} | Update a notification:rest:endpoint object
 *NotificationRestTemplateAPI* | [**Delete**](docs/NotificationRestTemplateAPI.md#delete) | **Delete** /notification:rest:template/{reference} | Delete a notification:rest:template object
 *NotificationRestTemplateAPI* | [**List**](docs/NotificationRestTemplateAPI.md#list) | **Get** /notification:rest:template | Retrieve notification:rest:template objects
 *NotificationRestTemplateAPI* | [**Read**](docs/NotificationRestTemplateAPI.md#read) | **Get** /notification:rest:template/{reference} | Get a specific notification:rest:template object
@@ -97,25 +92,17 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [CreateNotificationRestEndpointResponse](docs/CreateNotificationRestEndpointResponse.md)
- - [CreateNotificationRestEndpointResponseAsObject](docs/CreateNotificationRestEndpointResponseAsObject.md)
  - [CreateNotificationRuleResponse](docs/CreateNotificationRuleResponse.md)
  - [CreateNotificationRuleResponseAsObject](docs/CreateNotificationRuleResponseAsObject.md)
  - [ExtAttrs](docs/ExtAttrs.md)
- - [GetNotificationRestEndpointResponse](docs/GetNotificationRestEndpointResponse.md)
- - [GetNotificationRestEndpointResponseObjectAsResult](docs/GetNotificationRestEndpointResponseObjectAsResult.md)
  - [GetNotificationRestTemplateResponse](docs/GetNotificationRestTemplateResponse.md)
  - [GetNotificationRestTemplateResponseObjectAsResult](docs/GetNotificationRestTemplateResponseObjectAsResult.md)
  - [GetNotificationRuleResponse](docs/GetNotificationRuleResponse.md)
  - [GetNotificationRuleResponseObjectAsResult](docs/GetNotificationRuleResponseObjectAsResult.md)
- - [ListNotificationRestEndpointResponse](docs/ListNotificationRestEndpointResponse.md)
- - [ListNotificationRestEndpointResponseObject](docs/ListNotificationRestEndpointResponseObject.md)
  - [ListNotificationRestTemplateResponse](docs/ListNotificationRestTemplateResponse.md)
  - [ListNotificationRestTemplateResponseObject](docs/ListNotificationRestTemplateResponseObject.md)
  - [ListNotificationRuleResponse](docs/ListNotificationRuleResponse.md)
  - [ListNotificationRuleResponseObject](docs/ListNotificationRuleResponseObject.md)
- - [NotificationRestEndpoint](docs/NotificationRestEndpoint.md)
- - [NotificationRestEndpointTemplateInstance](docs/NotificationRestEndpointTemplateInstance.md)
  - [NotificationRestTemplate](docs/NotificationRestTemplate.md)
  - [NotificationRestTemplateParameters](docs/NotificationRestTemplateParameters.md)
  - [NotificationRule](docs/NotificationRule.md)
@@ -123,10 +110,7 @@ Class | Method | HTTP request | Description
  - [NotificationRulePublishSettings](docs/NotificationRulePublishSettings.md)
  - [NotificationRuleScheduledEvent](docs/NotificationRuleScheduledEvent.md)
  - [NotificationRuleTemplateInstance](docs/NotificationRuleTemplateInstance.md)
- - [NotificationrestendpointtemplateinstanceParameters](docs/NotificationrestendpointtemplateinstanceParameters.md)
  - [NotificationruletemplateinstanceParameters](docs/NotificationruletemplateinstanceParameters.md)
- - [UpdateNotificationRestEndpointResponse](docs/UpdateNotificationRestEndpointResponse.md)
- - [UpdateNotificationRestEndpointResponseAsObject](docs/UpdateNotificationRestEndpointResponseAsObject.md)
  - [UpdateNotificationRestTemplateResponse](docs/UpdateNotificationRestTemplateResponse.md)
  - [UpdateNotificationRestTemplateResponseAsObject](docs/UpdateNotificationRestTemplateResponseAsObject.md)
  - [UpdateNotificationRuleResponse](docs/UpdateNotificationRuleResponse.md)
