@@ -497,7 +497,7 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 	switch matchClient {
 	case "MAC_ADDRESS":
 		// When match_client is MAC_ADDRESS, mac is required and dhcp_identifier should not be set
-		if !data.Mac.IsUnknown() && !data.DhcpClientIdentifier.IsUnknown() {
+		if !data.Mac.IsUnknown() {
 			if data.Mac.IsNull() || data.Mac.ValueString() == "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("mac"),
@@ -505,6 +505,8 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 					"When 'match_client' is set to 'MAC_ADDRESS', the 'mac' attribute is required.",
 				)
 			}
+		}
+		if !data.DhcpClientIdentifier.IsUnknown() {
 			if !data.DhcpClientIdentifier.IsNull() && data.DhcpClientIdentifier.ValueString() != "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("dhcp_client_identifier"),
@@ -515,7 +517,7 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 		}
 	case "CLIENT_ID":
 		// When match_client is CLIENT_ID, dhcp_identifier is required and mac should not be set
-		if !data.DhcpClientIdentifier.IsUnknown() && !data.Mac.IsUnknown() {
+		if !data.DhcpClientIdentifier.IsUnknown() {
 			if data.DhcpClientIdentifier.IsNull() || data.DhcpClientIdentifier.ValueString() == "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("dhcp_client_identifier"),
@@ -523,6 +525,8 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 					"When 'match_client' is set to 'CLIENT_ID', the 'dhcp_client_identifier' attribute is required.",
 				)
 			}
+		}
+		if !data.Mac.IsUnknown() {
 			if !data.Mac.IsNull() && data.Mac.ValueString() != "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("mac"),
@@ -545,7 +549,7 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 	switch ipv6MatchOption {
 	case "V6_MAC_ADDRESS":
 		// When ipv6_match_option is V6_MAC_ADDRESS, ipv6_mac_address is required and ipv6_duid should not be set
-		if !data.Ipv6MacAddress.IsNull() && !data.Ipv6Duid.IsUnknown() {
+		if !data.Ipv6MacAddress.IsNull() {
 			if data.Ipv6MacAddress.IsNull() || data.Ipv6MacAddress.ValueString() == "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("ipv6_mac_address"),
@@ -553,6 +557,8 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 					"When 'ipv6_match_option' is set to 'V6_MAC_ADDRESS', the 'ipv6_mac_address' attribute is required.",
 				)
 			}
+		}
+		if !data.Ipv6Duid.IsUnknown() {
 			if !data.Ipv6Duid.IsNull() && data.Ipv6Duid.ValueString() != "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("ipv6_duid"),
@@ -563,7 +569,7 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 		}
 	case "DUID":
 		// When ipv6_match_option is DUID, ipv6_duid is required and ipv6_mac_address should not be set
-		if !data.Ipv6Duid.IsUnknown() && !data.Ipv6MacAddress.IsUnknown() {
+		if !data.Ipv6Duid.IsUnknown() {
 			if data.Ipv6Duid.IsNull() || data.Ipv6Duid.ValueString() == "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("ipv6_duid"),
@@ -571,6 +577,8 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 					"When 'ipv6_match_option' is set to 'DUID', the 'ipv6_duid' attribute is required.",
 				)
 			}
+		}
+		if !data.Ipv6MacAddress.IsUnknown() {
 			if !data.Ipv6MacAddress.IsNull() && data.Ipv6MacAddress.ValueString() != "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("ipv6_mac_address"),
