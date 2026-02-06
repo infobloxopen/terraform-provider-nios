@@ -36,7 +36,7 @@ resource "nios_dns_zone_auth" "reverse_zone3" {
 
 // Create Network for function call (Required for next_available_ip)
 resource "nios_ipam_network" "func_call_network" {
-  network      = "85.85.0.0/16"
+  network      = "85.86.0.0/16"
   network_view = "default"
   comment      = "Network for PTR record function call"
 }
