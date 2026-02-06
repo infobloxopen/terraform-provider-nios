@@ -35,6 +35,7 @@ import (
 
 type FixedaddressModel struct {
 	Ref                            types.String        `tfsdk:"ref"`
+	Uuid                           types.String        `tfsdk:"uuid"`
 	AgentCircuitId                 types.String        `tfsdk:"agent_circuit_id"`
 	AgentRemoteId                  types.String        `tfsdk:"agent_remote_id"`
 	AllowTelnet                    types.Bool          `tfsdk:"allow_telnet"`
@@ -101,6 +102,7 @@ type FixedaddressModel struct {
 
 var FixedaddressAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"agent_circuit_id":                    types.StringType,
 	"agent_remote_id":                     types.StringType,
 	"allow_telnet":                        types.BoolType,
@@ -169,6 +171,10 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"agent_circuit_id": schema.StringAttribute{
 		Optional: true,
@@ -727,6 +733,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	}
 
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AgentCircuitId = flex.FlattenStringPointer(from.AgentCircuitId)
 	m.AgentRemoteId = flex.FlattenStringPointer(from.AgentRemoteId)
 	m.AllowTelnet = types.BoolPointerValue(from.AllowTelnet)

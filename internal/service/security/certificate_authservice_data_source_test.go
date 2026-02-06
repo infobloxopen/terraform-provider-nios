@@ -43,6 +43,7 @@ func TestAccCertificateAuthserviceDataSource_Filters(t *testing.T) {
 func testAccCheckCertificateAuthserviceResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "auto_populate_login", dataSourceName, "result.0.auto_populate_login"),
 		resource.TestCheckResourceAttrPair(resourceName, "ca_certificates", dataSourceName, "result.0.ca_certificates"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),

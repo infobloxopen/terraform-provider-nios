@@ -27,6 +27,7 @@ import (
 
 type DtcLbdnModel struct {
 	Ref                      types.String                     `tfsdk:"ref"`
+	Uuid                     types.String                     `tfsdk:"uuid"`
 	AuthZones                internaltypes.UnorderedListValue `tfsdk:"auth_zones"`
 	AutoConsolidatedMonitors types.Bool                       `tfsdk:"auto_consolidated_monitors"`
 	Comment                  types.String                     `tfsdk:"comment"`
@@ -48,6 +49,7 @@ type DtcLbdnModel struct {
 
 var DtcLbdnAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
+	"uuid":                       types.StringType,
 	"auth_zones":                 internaltypes.UnorderedListOfStringType,
 	"auto_consolidated_monitors": types.BoolType,
 	"comment":                    types.StringType,
@@ -71,6 +73,10 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"auth_zones": schema.ListAttribute{
 		CustomType:  internaltypes.UnorderedListOfStringType,
@@ -244,6 +250,7 @@ func (m *DtcLbdnModel) Flatten(ctx context.Context, from *dtc.DtcLbdn, diags *di
 		*m = DtcLbdnModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AuthZones = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.AuthZones, diags)
 	m.AutoConsolidatedMonitors = types.BoolPointerValue(from.AutoConsolidatedMonitors)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

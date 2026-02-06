@@ -26,6 +26,7 @@ import (
 
 type FilternacModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	Comment     types.String `tfsdk:"comment"`
 	Expression  types.String `tfsdk:"expression"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
@@ -37,6 +38,7 @@ type FilternacModel struct {
 
 var FilternacAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"comment":      types.StringType,
 	"expression":   types.StringType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
@@ -50,6 +52,10 @@ var FilternacResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -146,6 +152,7 @@ func (m *FilternacModel) Flatten(ctx context.Context, from *dhcp.Filternac, diag
 		*m = FilternacModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Expression = flex.FlattenStringPointer(from.Expression)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)

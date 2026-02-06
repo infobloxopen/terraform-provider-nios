@@ -26,6 +26,7 @@ import (
 
 type SuperhostModel struct {
 	Ref                     types.String                     `tfsdk:"ref"`
+	Uuid                    types.String                     `tfsdk:"uuid"`
 	Comment                 types.String                     `tfsdk:"comment"`
 	DeleteAssociatedObjects types.Bool                       `tfsdk:"delete_associated_objects"`
 	DhcpAssociatedObjects   internaltypes.UnorderedListValue `tfsdk:"dhcp_associated_objects"`
@@ -38,6 +39,7 @@ type SuperhostModel struct {
 
 var SuperhostAttrTypes = map[string]attr.Type{
 	"ref":                       types.StringType,
+	"uuid":                      types.StringType,
 	"comment":                   types.StringType,
 	"delete_associated_objects": types.BoolType,
 	"dhcp_associated_objects":   internaltypes.UnorderedListOfStringType,
@@ -52,6 +54,10 @@ var SuperhostResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Computed: true,
@@ -158,6 +164,7 @@ func (m *SuperhostModel) Flatten(ctx context.Context, from *ipam.Superhost, diag
 		*m = SuperhostModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DhcpAssociatedObjects = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.DhcpAssociatedObjects, diags)
 	m.Disabled = types.BoolPointerValue(from.Disabled)

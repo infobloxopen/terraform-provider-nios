@@ -24,6 +24,7 @@ import (
 
 type DtcRecordCnameModel struct {
 	Ref          types.String `tfsdk:"ref"`
+	Uuid         types.String `tfsdk:"uuid"`
 	AutoCreated  types.Bool   `tfsdk:"auto_created"`
 	Canonical    types.String `tfsdk:"canonical"`
 	Comment      types.String `tfsdk:"comment"`
@@ -36,6 +37,7 @@ type DtcRecordCnameModel struct {
 
 var DtcRecordCnameAttrTypes = map[string]attr.Type{
 	"ref":           types.StringType,
+	"uuid":          types.StringType,
 	"auto_created":  types.BoolType,
 	"canonical":     types.StringType,
 	"comment":       types.StringType,
@@ -50,6 +52,10 @@ var DtcRecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"auto_created": schema.BoolAttribute{
 		Computed:            true,
@@ -138,6 +144,7 @@ func (m *DtcRecordCnameModel) Flatten(ctx context.Context, from *dtc.DtcRecordCn
 		*m = DtcRecordCnameModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AutoCreated = types.BoolPointerValue(from.AutoCreated)
 	m.Canonical = flex.FlattenStringPointer(from.Canonical)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

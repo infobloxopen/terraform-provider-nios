@@ -34,6 +34,7 @@ import (
 
 type RoaminghostModel struct {
 	Ref                            types.String                             `tfsdk:"ref"`
+	Uuid                           types.String                             `tfsdk:"uuid"`
 	AddressType                    types.String                             `tfsdk:"address_type"`
 	Bootfile                       types.String                             `tfsdk:"bootfile"`
 	Bootserver                     types.String                             `tfsdk:"bootserver"`
@@ -92,6 +93,7 @@ type RoaminghostModel struct {
 
 var RoaminghostAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"address_type":                        types.StringType,
 	"bootfile":                            types.StringType,
 	"bootserver":                          types.StringType,
@@ -152,6 +154,10 @@ var RoaminghostResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address_type": schema.StringAttribute{
 		Computed: true,
@@ -662,6 +668,7 @@ func (m *RoaminghostModel) Flatten(ctx context.Context, from *dhcp.Roaminghost, 
 		*m = RoaminghostModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AddressType = flex.FlattenStringPointer(from.AddressType)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)

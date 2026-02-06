@@ -24,6 +24,7 @@ import (
 
 type VlanrangeModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	Comment        types.String `tfsdk:"comment"`
 	DeleteVlans    types.Bool   `tfsdk:"delete_vlans"`
 	EndVlanId      types.Int64  `tfsdk:"end_vlan_id"`
@@ -38,6 +39,7 @@ type VlanrangeModel struct {
 
 var VlanrangeAttrTypes = map[string]attr.Type{
 	"ref":              types.StringType,
+	"uuid":             types.StringType,
 	"comment":          types.StringType,
 	"delete_vlans":     types.BoolType,
 	"end_vlan_id":      types.Int64Type,
@@ -54,6 +56,10 @@ var VlanrangeResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Computed: true,
@@ -167,6 +173,7 @@ func (m *VlanrangeModel) Flatten(ctx context.Context, from *ipam.Vlanrange, diag
 		*m = VlanrangeModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DeleteVlans = types.BoolPointerValue(from.DeleteVlans)
 	m.EndVlanId = flex.FlattenInt64Pointer(from.EndVlanId)

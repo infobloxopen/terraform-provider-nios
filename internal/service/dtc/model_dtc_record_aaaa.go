@@ -26,6 +26,7 @@ import (
 
 type DtcRecordAaaaModel struct {
 	Ref         types.String        `tfsdk:"ref"`
+	Uuid        types.String        `tfsdk:"uuid"`
 	AutoCreated types.Bool          `tfsdk:"auto_created"`
 	Comment     types.String        `tfsdk:"comment"`
 	Disable     types.Bool          `tfsdk:"disable"`
@@ -37,6 +38,7 @@ type DtcRecordAaaaModel struct {
 
 var DtcRecordAaaaAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"auto_created": types.BoolType,
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
@@ -50,6 +52,10 @@ var DtcRecordAaaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"auto_created": schema.BoolAttribute{
 		Computed:            true,
@@ -135,6 +141,7 @@ func (m *DtcRecordAaaaModel) Flatten(ctx context.Context, from *dtc.DtcRecordAaa
 		*m = DtcRecordAaaaModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AutoCreated = types.BoolPointerValue(from.AutoCreated)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

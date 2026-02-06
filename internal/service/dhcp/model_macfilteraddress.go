@@ -23,6 +23,7 @@ import (
 
 type MacfilteraddressModel struct {
 	Ref                 types.String                  `tfsdk:"ref"`
+	Uuid                types.String                  `tfsdk:"uuid"`
 	AuthenticationTime  types.Int64                   `tfsdk:"authentication_time"`
 	Comment             types.String                  `tfsdk:"comment"`
 	ExpirationTime      types.Int64                   `tfsdk:"expiration_time"`
@@ -48,6 +49,7 @@ type MacfilteraddressModel struct {
 
 var MacfilteraddressAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
+	"uuid":                  types.StringType,
 	"authentication_time":   types.Int64Type,
 	"comment":               types.StringType,
 	"expiration_time":       types.Int64Type,
@@ -75,6 +77,10 @@ var MacfilteraddressResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"authentication_time": schema.Int64Attribute{
 		Optional:            true,
@@ -287,6 +293,7 @@ func (m *MacfilteraddressModel) Flatten(ctx context.Context, from *dhcp.Macfilte
 		*m = MacfilteraddressModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AuthenticationTime = flex.FlattenInt64Pointer(from.AuthenticationTime)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExpirationTime = flex.FlattenInt64Pointer(from.ExpirationTime)

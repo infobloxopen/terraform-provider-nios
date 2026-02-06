@@ -65,6 +65,7 @@ func TestAccSnmpuserDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckSnmpuserResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "authentication_password", dataSourceName, "result.0.authentication_password"),
 		resource.TestCheckResourceAttrPair(resourceName, "authentication_protocol", dataSourceName, "result.0.authentication_protocol"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),

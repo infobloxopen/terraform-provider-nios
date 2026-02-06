@@ -19,6 +19,7 @@ import (
 
 type AwsuserModel struct {
 	Ref             types.String `tfsdk:"ref"`
+    Uuid        types.String `tfsdk:"uuid"`
 	AccessKeyId     types.String `tfsdk:"access_key_id"`
 	AccountId       types.String `tfsdk:"account_id"`
 	GovcloudEnabled types.Bool   `tfsdk:"govcloud_enabled"`
@@ -31,6 +32,7 @@ type AwsuserModel struct {
 
 var AwsuserAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+    "uuid":        types.StringType,
 	"access_key_id":     types.StringType,
 	"account_id":        types.StringType,
 	"govcloud_enabled":  types.BoolType,
@@ -46,6 +48,10 @@ var AwsuserResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+    "uuid": schema.StringAttribute{
+        Computed:            true,
+        MarkdownDescription: "The uuid to the object.",
+    },
 	"access_key_id": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
@@ -133,6 +139,7 @@ func (m *AwsuserModel) Flatten(ctx context.Context, from *cloud.Awsuser, diags *
 		*m = AwsuserModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+    m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AccessKeyId = flex.FlattenStringPointer(from.AccessKeyId)
 	m.AccountId = flex.FlattenStringPointer(from.AccountId)
 	m.GovcloudEnabled = types.BoolPointerValue(from.GovcloudEnabled)

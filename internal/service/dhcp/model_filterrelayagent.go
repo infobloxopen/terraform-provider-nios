@@ -23,6 +23,7 @@ import (
 
 type FilterrelayagentModel struct {
 	Ref                      types.String `tfsdk:"ref"`
+	Uuid                     types.String `tfsdk:"uuid"`
 	CircuitIdName            types.String `tfsdk:"circuit_id_name"`
 	CircuitIdSubstringLength types.Int64  `tfsdk:"circuit_id_substring_length"`
 	CircuitIdSubstringOffset types.Int64  `tfsdk:"circuit_id_substring_offset"`
@@ -41,6 +42,7 @@ type FilterrelayagentModel struct {
 
 var FilterrelayagentAttrTypes = map[string]attr.Type{
 	"ref":                         types.StringType,
+	"uuid":                        types.StringType,
 	"circuit_id_name":             types.StringType,
 	"circuit_id_substring_length": types.Int64Type,
 	"circuit_id_substring_offset": types.Int64Type,
@@ -61,6 +63,10 @@ var FilterrelayagentResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"circuit_id_name": schema.StringAttribute{
 		Optional: true,
@@ -206,6 +212,7 @@ func (m *FilterrelayagentModel) Flatten(ctx context.Context, from *dhcp.Filterre
 		*m = FilterrelayagentModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CircuitIdName = flex.FlattenStringPointer(from.CircuitIdName)
 	m.CircuitIdSubstringLength = flex.FlattenInt64Pointer(from.CircuitIdSubstringLength)
 	m.CircuitIdSubstringOffset = flex.FlattenInt64Pointer(from.CircuitIdSubstringOffset)

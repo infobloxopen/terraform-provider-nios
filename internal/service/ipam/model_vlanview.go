@@ -26,6 +26,7 @@ import (
 
 type VlanviewModel struct {
 	Ref                   types.String `tfsdk:"ref"`
+	Uuid                  types.String `tfsdk:"uuid"`
 	AllowRangeOverlapping types.Bool   `tfsdk:"allow_range_overlapping"`
 	Comment               types.String `tfsdk:"comment"`
 	EndVlanId             types.Int64  `tfsdk:"end_vlan_id"`
@@ -39,6 +40,7 @@ type VlanviewModel struct {
 
 var VlanviewAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"allow_range_overlapping": types.BoolType,
 	"comment":                 types.StringType,
 	"end_vlan_id":             types.Int64Type,
@@ -54,6 +56,10 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"allow_range_overlapping": schema.BoolAttribute{
 		Optional:            true,
@@ -171,6 +177,7 @@ func (m *VlanviewModel) Flatten(ctx context.Context, from *ipam.Vlanview, diags 
 		*m = VlanviewModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowRangeOverlapping = types.BoolPointerValue(from.AllowRangeOverlapping)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.EndVlanId = flex.FlattenInt64Pointer(from.EndVlanId)

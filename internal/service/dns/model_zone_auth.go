@@ -38,6 +38,7 @@ import (
 
 type ZoneAuthModel struct {
 	Ref                                     types.String                             `tfsdk:"ref"`
+	Uuid                                    types.String                             `tfsdk:"uuid"`
 	Address                                 iptypes.IPAddress                        `tfsdk:"address"`
 	AllowActiveDir                          types.List                               `tfsdk:"allow_active_dir"`
 	AllowFixedRrsetOrder                    types.Bool                               `tfsdk:"allow_fixed_rrset_order"`
@@ -159,6 +160,7 @@ type ZoneAuthModel struct {
 
 var ZoneAuthAttrTypes = map[string]attr.Type{
 	"ref":                                  types.StringType,
+	"uuid":                                 types.StringType,
 	"address":                              iptypes.IPAddressType{},
 	"allow_active_dir":                     types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneAuthAllowActiveDirAttrTypes}},
 	"allow_fixed_rrset_order":              types.BoolType,
@@ -282,6 +284,10 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
@@ -1281,6 +1287,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 		*m = ZoneAuthModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenIPAddress(from.Address)
 	m.AllowActiveDir = flex.FlattenFrameworkListNestedBlock(ctx, from.AllowActiveDir, ZoneAuthAllowActiveDirAttrTypes, diags, FlattenZoneAuthAllowActiveDir)
 	m.AllowFixedRrsetOrder = types.BoolPointerValue(from.AllowFixedRrsetOrder)

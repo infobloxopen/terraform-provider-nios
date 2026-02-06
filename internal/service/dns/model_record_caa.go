@@ -26,6 +26,7 @@ import (
 
 type RecordCaaModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	CaFlag            types.Int64  `tfsdk:"ca_flag"`
 	CaTag             types.String `tfsdk:"ca_tag"`
 	CaValue           types.String `tfsdk:"ca_value"`
@@ -51,6 +52,7 @@ type RecordCaaModel struct {
 
 var RecordCaaAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"ca_flag":            types.Int64Type,
 	"ca_tag":             types.StringType,
 	"ca_value":           types.StringType,
@@ -78,6 +80,10 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"ca_flag": schema.Int64Attribute{
 		Required:            true,
@@ -256,6 +262,7 @@ func (m *RecordCaaModel) Flatten(ctx context.Context, from *dns.RecordCaa, diags
 		*m = RecordCaaModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CaFlag = flex.FlattenInt64Pointer(from.CaFlag)
 	m.CaTag = flex.FlattenStringPointer(from.CaTag)
 	m.CaValue = flex.FlattenStringPointer(from.CaValue)

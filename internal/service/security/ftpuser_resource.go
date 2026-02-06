@@ -78,8 +78,7 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		FtpuserAPI.
+	apiRes, _, err := r.client.SecurityAPI.FtpuserAPI.
 		Create(ctx).
 		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForFtpuser).

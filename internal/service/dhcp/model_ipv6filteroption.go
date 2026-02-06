@@ -27,6 +27,7 @@ import (
 
 type Ipv6filteroptionModel struct {
 	Ref          types.String `tfsdk:"ref"`
+	Uuid         types.String `tfsdk:"uuid"`
 	ApplyAsClass types.Bool   `tfsdk:"apply_as_class"`
 	Comment      types.String `tfsdk:"comment"`
 	Expression   types.String `tfsdk:"expression"`
@@ -40,6 +41,7 @@ type Ipv6filteroptionModel struct {
 
 var Ipv6filteroptionAttrTypes = map[string]attr.Type{
 	"ref":            types.StringType,
+	"uuid":           types.StringType,
 	"apply_as_class": types.BoolType,
 	"comment":        types.StringType,
 	"expression":     types.StringType,
@@ -55,6 +57,10 @@ var Ipv6filteroptionResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"apply_as_class": schema.BoolAttribute{
 		Optional:            true,
@@ -165,6 +171,7 @@ func (m *Ipv6filteroptionModel) Flatten(ctx context.Context, from *dhcp.Ipv6filt
 		*m = Ipv6filteroptionModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ApplyAsClass = types.BoolPointerValue(from.ApplyAsClass)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Expression = flex.FlattenStringPointer(from.Expression)

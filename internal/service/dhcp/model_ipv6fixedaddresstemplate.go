@@ -28,6 +28,7 @@ import (
 
 type Ipv6fixedaddresstemplateModel struct {
 	Ref                  types.String `tfsdk:"ref"`
+	Uuid                 types.String `tfsdk:"uuid"`
 	Comment              types.String `tfsdk:"comment"`
 	DomainName           types.String `tfsdk:"domain_name"`
 	DomainNameServers    types.List   `tfsdk:"domain_name_servers"`
@@ -50,6 +51,7 @@ type Ipv6fixedaddresstemplateModel struct {
 
 var Ipv6fixedaddresstemplateAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"comment":                 types.StringType,
 	"domain_name":             types.StringType,
 	"domain_name_servers":     types.ListType{ElemType: types.StringType},
@@ -74,6 +76,10 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -273,6 +279,7 @@ func (m *Ipv6fixedaddresstemplateModel) Flatten(ctx context.Context, from *dhcp.
 		*m = Ipv6fixedaddresstemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DomainName = flex.FlattenStringPointer(from.DomainName)
 	m.DomainNameServers = flex.FlattenFrameworkListString(ctx, from.DomainNameServers, diags)

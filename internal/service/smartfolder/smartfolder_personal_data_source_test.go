@@ -41,6 +41,7 @@ func TestAccSmartfolderPersonalDataSource_Filters(t *testing.T) {
 func testAccCheckSmartfolderPersonalResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "group_bys", dataSourceName, "result.0.group_bys"),
 		resource.TestCheckResourceAttrPair(resourceName, "is_shortcut", dataSourceName, "result.0.is_shortcut"),

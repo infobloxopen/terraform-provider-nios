@@ -23,6 +23,7 @@ import (
 
 type RecordHostIpv6addrModel struct {
 	Ref                  types.String        `tfsdk:"ref"`
+	Uuid                 types.String        `tfsdk:"uuid"`
 	AddressType          types.String        `tfsdk:"address_type"`
 	ConfigureForDhcp     types.Bool          `tfsdk:"configure_for_dhcp"`
 	DiscoverNowStatus    types.String        `tfsdk:"discover_now_status"`
@@ -57,6 +58,7 @@ type RecordHostIpv6addrModel struct {
 
 var RecordHostIpv6addrAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"address_type":            types.StringType,
 	"configure_for_dhcp":      types.BoolType,
 	"discover_now_status":     types.StringType,
@@ -93,6 +95,10 @@ var RecordHostIpv6addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address_type": schema.StringAttribute{
 		Optional:            true,
@@ -259,6 +265,7 @@ func (m *RecordHostIpv6addrModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &dns.RecordHostIpv6addr{
 		Ref:                  flex.ExpandStringPointer(m.Ref),
+		Uuid:                 flex.ExpandStringPointer(m.Uuid),
 		AddressType:          flex.ExpandStringPointer(m.AddressType),
 		ConfigureForDhcp:     flex.ExpandBoolPointer(m.ConfigureForDhcp),
 		DiscoveredData:       ExpandRecordHostIpv6addrDiscoveredData(ctx, m.DiscoveredData, diags),
@@ -307,6 +314,7 @@ func (m *RecordHostIpv6addrModel) Flatten(ctx context.Context, from *dns.RecordH
 		*m = RecordHostIpv6addrModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AddressType = flex.FlattenStringPointer(from.AddressType)
 	m.ConfigureForDhcp = types.BoolPointerValue(from.ConfigureForDhcp)
 	m.DiscoverNowStatus = flex.FlattenStringPointer(from.DiscoverNowStatus)

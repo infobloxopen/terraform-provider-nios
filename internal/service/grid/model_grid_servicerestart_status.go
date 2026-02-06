@@ -16,6 +16,7 @@ import (
 
 type GridServicerestartStatusModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	Failures       types.Int64  `tfsdk:"failures"`
 	Finished       types.Int64  `tfsdk:"finished"`
 	Grouped        types.String `tfsdk:"grouped"`
@@ -32,6 +33,7 @@ type GridServicerestartStatusModel struct {
 
 var GridServicerestartStatusAttrTypes = map[string]attr.Type{
 	"ref":             types.StringType,
+	"uuid":            types.StringType,
 	"failures":        types.Int64Type,
 	"finished":        types.Int64Type,
 	"grouped":         types.StringType,
@@ -50,6 +52,10 @@ var GridServicerestartStatusResourceSchemaAttributes = map[string]schema.Attribu
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"failures": schema.Int64Attribute{
 		Computed:            true,
@@ -140,6 +146,7 @@ func (m *GridServicerestartStatusModel) Flatten(ctx context.Context, from *grid.
 		*m = GridServicerestartStatusModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Failures = flex.FlattenInt64Pointer(from.Failures)
 	m.Finished = flex.FlattenInt64Pointer(from.Finished)
 	m.Grouped = flex.FlattenStringPointer(from.Grouped)

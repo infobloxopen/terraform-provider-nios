@@ -28,6 +28,7 @@ import (
 
 type RecordTlsaModel struct {
 	Ref              types.String                             `tfsdk:"ref"`
+	Uuid             types.String                             `tfsdk:"uuid"`
 	CertificateData  internaltypes.CaseInsensitiveStringValue `tfsdk:"certificate_data"`
 	CertificateUsage types.Int64                              `tfsdk:"certificate_usage"`
 	CloudInfo        types.Object                             `tfsdk:"cloud_info"`
@@ -49,6 +50,7 @@ type RecordTlsaModel struct {
 
 var RecordTlsaAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":              types.StringType,
 	"certificate_data":  internaltypes.CaseInsensitiveString{},
 	"certificate_usage": types.Int64Type,
 	"cloud_info":        types.ObjectType{AttrTypes: RecordTlsaCloudInfoAttrTypes},
@@ -72,6 +74,10 @@ var RecordTlsaResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"certificate_data": schema.StringAttribute{
 		Required:   true,
@@ -229,6 +235,7 @@ func (m *RecordTlsaModel) Flatten(ctx context.Context, from *dns.RecordTlsa, dia
 		*m = RecordTlsaModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CertificateData.StringValue = flex.FlattenStringPointer(from.CertificateData)
 	m.CertificateUsage = flex.FlattenInt64Pointer(from.CertificateUsage)
 	m.CloudInfo = FlattenRecordTlsaCloudInfo(ctx, from.CloudInfo, diags)

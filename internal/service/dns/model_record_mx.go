@@ -26,6 +26,7 @@ import (
 
 type RecordMxModel struct {
 	Ref                types.String `tfsdk:"ref"`
+	Uuid               types.String `tfsdk:"uuid"`
 	AwsRte53RecordInfo types.Object `tfsdk:"aws_rte53_record_info"`
 	CloudInfo          types.Object `tfsdk:"cloud_info"`
 	Comment            types.String `tfsdk:"comment"`
@@ -53,6 +54,7 @@ type RecordMxModel struct {
 
 var RecordMxAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
+	"uuid":                  types.StringType,
 	"aws_rte53_record_info": types.ObjectType{AttrTypes: RecordMxAwsRte53RecordInfoAttrTypes},
 	"cloud_info":            types.ObjectType{AttrTypes: RecordMxCloudInfoAttrTypes},
 	"comment":               types.StringType,
@@ -82,6 +84,10 @@ var RecordMxResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
 		Attributes:          RecordMxAwsRte53RecordInfoResourceSchemaAttributes,
@@ -266,6 +272,7 @@ func (m *RecordMxModel) Flatten(ctx context.Context, from *dns.RecordMx, diags *
 		*m = RecordMxModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AwsRte53RecordInfo = FlattenRecordMxAwsRte53RecordInfo(ctx, from.AwsRte53RecordInfo, diags)
 	m.CloudInfo = FlattenRecordMxCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

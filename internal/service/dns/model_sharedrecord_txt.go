@@ -25,6 +25,7 @@ import (
 
 type SharedrecordTxtModel struct {
 	Ref               types.String `tfsdk:"ref"`
+	Uuid              types.String `tfsdk:"uuid"`
 	Comment           types.String `tfsdk:"comment"`
 	Disable           types.Bool   `tfsdk:"disable"`
 	DnsName           types.String `tfsdk:"dns_name"`
@@ -39,6 +40,7 @@ type SharedrecordTxtModel struct {
 
 var SharedrecordTxtAttrTypes = map[string]attr.Type{
 	"ref":                 types.StringType,
+	"uuid":                types.StringType,
 	"comment":             types.StringType,
 	"disable":             types.BoolType,
 	"dns_name":            types.StringType,
@@ -55,6 +57,10 @@ var SharedrecordTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -169,6 +175,7 @@ func (m *SharedrecordTxtModel) Flatten(ctx context.Context, from *dns.Sharedreco
 		*m = SharedrecordTxtModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.DnsName = flex.FlattenStringPointer(from.DnsName)

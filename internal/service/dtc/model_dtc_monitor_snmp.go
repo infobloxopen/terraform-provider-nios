@@ -28,6 +28,7 @@ import (
 
 type DtcMonitorSnmpModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	Comment     types.String `tfsdk:"comment"`
 	Community   types.String `tfsdk:"community"`
 	Context     types.String `tfsdk:"context"`
@@ -47,6 +48,7 @@ type DtcMonitorSnmpModel struct {
 
 var DtcMonitorSnmpAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"comment":      types.StringType,
 	"community":    types.StringType,
 	"context":      types.StringType,
@@ -68,6 +70,10 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -230,6 +236,7 @@ func (m *DtcMonitorSnmpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorS
 		*m = DtcMonitorSnmpModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Community = flex.FlattenStringPointer(from.Community)
 	m.Context = flex.FlattenStringPointer(from.Context)

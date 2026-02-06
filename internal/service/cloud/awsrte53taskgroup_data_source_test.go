@@ -40,6 +40,7 @@ func TestAccAwsrte53taskgroupDataSource_Filters(t *testing.T) {
 func testAccCheckAwsrte53taskgroupResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "account_id", dataSourceName, "result.0.account_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "accounts_list", dataSourceName, "result.0.accounts_list"),
 		resource.TestCheckResourceAttrPair(resourceName, "aws_account_ids_file_token", dataSourceName, "result.0.aws_account_ids_file_token"),

@@ -21,6 +21,7 @@ import (
 
 type RecordNsModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid             types.String `tfsdk:"uuid"`
 	Addresses        types.List   `tfsdk:"addresses"`
 	CloudInfo        types.Object `tfsdk:"cloud_info"`
 	Creator          types.String `tfsdk:"creator"`
@@ -36,6 +37,7 @@ type RecordNsModel struct {
 
 var RecordNsAttrTypes = map[string]attr.Type{
 	"ref":                types.StringType,
+	"uuid":               types.StringType,
 	"addresses":          types.ListType{ElemType: types.ObjectType{AttrTypes: RecordNsAddressesAttrTypes}},
 	"cloud_info":         types.ObjectType{AttrTypes: RecordNsCloudInfoAttrTypes},
 	"creator":            types.StringType,
@@ -53,6 +55,10 @@ var RecordNsResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"addresses": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -157,6 +163,7 @@ func (m *RecordNsModel) Flatten(ctx context.Context, from *dns.RecordNs, diags *
 		*m = RecordNsModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Addresses = flex.FlattenFrameworkListNestedBlock(ctx, from.Addresses, RecordNsAddressesAttrTypes, diags, FlattenRecordNsAddresses)
 	m.CloudInfo = FlattenRecordNsCloudInfo(ctx, from.CloudInfo, diags)
 	m.Creator = flex.FlattenStringPointer(from.Creator)

@@ -28,6 +28,7 @@ import (
 
 type FilteroptionModel struct {
 	Ref          types.String `tfsdk:"ref"`
+	Uuid         types.String `tfsdk:"uuid"`
 	ApplyAsClass types.Bool   `tfsdk:"apply_as_class"`
 	Bootfile     types.String `tfsdk:"bootfile"`
 	Bootserver   types.String `tfsdk:"bootserver"`
@@ -45,6 +46,7 @@ type FilteroptionModel struct {
 
 var FilteroptionAttrTypes = map[string]attr.Type{
 	"ref":            types.StringType,
+	"uuid":           types.StringType,
 	"apply_as_class": types.BoolType,
 	"bootfile":       types.StringType,
 	"bootserver":     types.StringType,
@@ -64,6 +66,10 @@ var FilteroptionResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"apply_as_class": schema.BoolAttribute{
 		Optional:            true,
@@ -205,6 +211,7 @@ func (m *FilteroptionModel) Flatten(ctx context.Context, from *dhcp.Filteroption
 		*m = FilteroptionModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ApplyAsClass = types.BoolPointerValue(from.ApplyAsClass)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)

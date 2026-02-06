@@ -24,6 +24,7 @@ import (
 
 type RecordHostIpv4addrModel struct {
 	Ref                             types.String        `tfsdk:"ref"`
+	Uuid                            types.String        `tfsdk:"uuid"`
 	Bootfile                        types.String        `tfsdk:"bootfile"`
 	Bootserver                      types.String        `tfsdk:"bootserver"`
 	ConfigureForDhcp                types.Bool          `tfsdk:"configure_for_dhcp"`
@@ -60,6 +61,7 @@ type RecordHostIpv4addrModel struct {
 
 var RecordHostIpv4addrAttrTypes = map[string]attr.Type{
 	"ref":                                 types.StringType,
+	"uuid":                                types.StringType,
 	"bootfile":                            types.StringType,
 	"bootserver":                          types.StringType,
 	"configure_for_dhcp":                  types.BoolType,
@@ -98,6 +100,10 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"bootfile": schema.StringAttribute{
 		Optional:            true,
@@ -283,6 +289,7 @@ func (m *RecordHostIpv4addrModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &dns.RecordHostIpv4addr{
 		Ref:                             flex.ExpandStringPointer(m.Ref),
+		Uuid:                            flex.ExpandStringPointer(m.Uuid),
 		Bootfile:                        flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                      flex.ExpandStringPointer(m.Bootserver),
 		ConfigureForDhcp:                flex.ExpandBoolPointer(m.ConfigureForDhcp),
@@ -332,6 +339,7 @@ func (m *RecordHostIpv4addrModel) Flatten(ctx context.Context, from *dns.RecordH
 		*m = RecordHostIpv4addrModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
 	m.ConfigureForDhcp = types.BoolPointerValue(from.ConfigureForDhcp)
