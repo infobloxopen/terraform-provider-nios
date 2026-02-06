@@ -70,8 +70,12 @@ func (r *Ipv6rangetemplateResource) ValidateConfig(ctx context.Context, req reso
 		return
 	}
 
+	if config.ServerAssociationType.IsUnknown() {
+		return
+	}
+
 	serverAssociationType := "NONE"
-	if !config.ServerAssociationType.IsNull() && !config.ServerAssociationType.IsUnknown() {
+	if !config.ServerAssociationType.IsNull() {
 		serverAssociationType = config.ServerAssociationType.ValueString()
 	}
 

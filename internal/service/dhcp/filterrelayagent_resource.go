@@ -343,14 +343,20 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 		return
 	}
 
+	if data.IsCircuitId.IsUnknown() {
+		return
+	}
 	// Get the values or default to empty string
 	isCircuitId := "ANY"
-	if !data.IsCircuitId.IsNull() && !data.IsCircuitId.IsUnknown() {
+	if !data.IsCircuitId.IsNull() {
 		isCircuitId = data.IsCircuitId.ValueString()
 	}
 
+	if data.IsRemoteId.IsUnknown() {
+		return
+	}
 	isRemoteId := "ANY"
-	if !data.IsRemoteId.IsNull() && !data.IsRemoteId.IsUnknown() {
+	if !data.IsRemoteId.IsNull() {
 		isRemoteId = data.IsRemoteId.ValueString()
 	}
 
