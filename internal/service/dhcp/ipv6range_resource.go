@@ -331,8 +331,13 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 		return
 	}
 
+	if data.AddressType.IsUnknown() {
+		return
+	}
+
 	addressType := "ADDRESS"
-	if !data.AddressType.IsNull() && !data.AddressType.IsUnknown() {
+
+	if !data.AddressType.IsNull() {
 		addressType = data.AddressType.ValueString()
 	}
 
