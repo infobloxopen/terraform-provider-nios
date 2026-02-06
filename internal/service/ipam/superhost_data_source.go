@@ -15,6 +15,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -138,7 +139,8 @@ func (d *SuperhostDataSource) Read(ctx context.Context, req datasource.ReadReque
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForSuperhost).
 				Paging(paging).
-				MaxResults(maxResults)
+				MaxResults(maxResults).
+				ProxySearch(config.GetProxySearch())
 
 			// Add page ID if provided
 			if pageID != "" {

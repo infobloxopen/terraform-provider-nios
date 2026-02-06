@@ -14,6 +14,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -273,6 +274,7 @@ func (r *IPAssociationResource) getHostRecordByRef(ctx context.Context, ref stri
 		Read(ctx, utils.ExtractResourceRef(ref)).
 		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	if err != nil {
