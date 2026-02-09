@@ -16,6 +16,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -220,6 +221,7 @@ func (r *NotificationRestEndpointResource) Read(ctx context.Context, req resourc
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -295,6 +297,7 @@ func (r *NotificationRestEndpointResource) ReadByExtAttrs(ctx context.Context, d
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NotificationRestEndpoint by extattrs, got error: %s", err))
