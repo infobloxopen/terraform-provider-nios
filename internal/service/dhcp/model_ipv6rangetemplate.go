@@ -22,6 +22,7 @@ import (
 
 type Ipv6rangetemplateModel struct {
 	Ref                   types.String `tfsdk:"ref"`
+	Uuid                  types.String `tfsdk:"uuid"`
 	CloudApiCompatible    types.Bool   `tfsdk:"cloud_api_compatible"`
 	Comment               types.String `tfsdk:"comment"`
 	DelegatedMember       types.Object `tfsdk:"delegated_member"`
@@ -40,6 +41,7 @@ type Ipv6rangetemplateModel struct {
 
 var Ipv6rangetemplateAttrTypes = map[string]attr.Type{
 	"ref":                     types.StringType,
+	"uuid":                    types.StringType,
 	"cloud_api_compatible":    types.BoolType,
 	"comment":                 types.StringType,
 	"delegated_member":        types.ObjectType{AttrTypes: Ipv6rangetemplateDelegatedMemberAttrTypes},
@@ -60,6 +62,10 @@ var Ipv6rangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"cloud_api_compatible": schema.BoolAttribute{
 		Optional:            true,
@@ -210,6 +216,7 @@ func (m *Ipv6rangetemplateModel) Flatten(ctx context.Context, from *dhcp.Ipv6ran
 		*m = Ipv6rangetemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.CloudApiCompatible = types.BoolPointerValue(from.CloudApiCompatible)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DelegatedMember = FlattenIpv6rangetemplateDelegatedMember(ctx, from.DelegatedMember, diags)

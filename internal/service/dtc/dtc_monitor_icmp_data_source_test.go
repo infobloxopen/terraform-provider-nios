@@ -63,6 +63,7 @@ func TestAccDtcMonitorIcmpDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckDtcMonitorIcmpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
 		resource.TestCheckResourceAttrPair(resourceName, "interval", dataSourceName, "result.0.interval"),

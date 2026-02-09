@@ -19,12 +19,14 @@ import (
 
 type ViewFilterAaaaListModel struct {
 	Ref        types.String `tfsdk:"ref"`
+	Uuid       types.String `tfsdk:"uuid"`
 	Address    types.String `tfsdk:"address"`
 	Permission types.String `tfsdk:"permission"`
 }
 
 var ViewFilterAaaaListAttrTypes = map[string]attr.Type{
 	"ref":        types.StringType,
+	"uuid":       types.StringType,
 	"address":    types.StringType,
 	"permission": types.StringType,
 }
@@ -38,6 +40,10 @@ var ViewFilterAaaaListResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("permission")),
 		},
 		MarkdownDescription: "The reference to the Named ACL object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address": schema.StringAttribute{
 		Optional: true,
@@ -75,6 +81,7 @@ func (m *ViewFilterAaaaListModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &dns.ViewFilterAaaaList{
 		Ref:        flex.ExpandStringPointer(m.Ref),
+		Uuid:       flex.ExpandStringPointer(m.Uuid),
 		Address:    flex.ExpandStringPointer(m.Address),
 		Permission: flex.ExpandStringPointer(m.Permission),
 	}
@@ -100,6 +107,7 @@ func (m *ViewFilterAaaaListModel) Flatten(ctx context.Context, from *dns.ViewFil
 		*m = ViewFilterAaaaListModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 }

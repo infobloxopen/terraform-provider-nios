@@ -21,6 +21,7 @@ import (
 
 type NsgroupDelegationModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	Comment     types.String `tfsdk:"comment"`
 	DelegateTo  types.List   `tfsdk:"delegate_to"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
@@ -30,6 +31,7 @@ type NsgroupDelegationModel struct {
 
 var NsgroupDelegationAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"comment":      types.StringType,
 	"delegate_to":  types.ListType{ElemType: types.ObjectType{AttrTypes: NsgroupDelegationDelegateToAttrTypes}},
 	"extattrs":     types.MapType{ElemType: types.StringType},
@@ -41,6 +43,10 @@ var NsgroupDelegationResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -115,6 +121,7 @@ func (m *NsgroupDelegationModel) Flatten(ctx context.Context, from *dns.NsgroupD
 		*m = NsgroupDelegationModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DelegateTo = flex.FlattenFrameworkListNestedBlock(ctx, from.DelegateTo, NsgroupDelegationDelegateToAttrTypes, diags, FlattenNsgroupDelegationDelegateTo)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)

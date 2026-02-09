@@ -28,6 +28,7 @@ import (
 
 type RecordRpzCnameClientipaddressdnModel struct {
 	Ref         types.String         `tfsdk:"ref"`
+	Uuid        types.String         `tfsdk:"uuid"`
 	Canonical   types.String         `tfsdk:"canonical"`
 	Comment     types.String         `tfsdk:"comment"`
 	Disable     types.Bool           `tfsdk:"disable"`
@@ -44,6 +45,7 @@ type RecordRpzCnameClientipaddressdnModel struct {
 
 var RecordRpzCnameClientipaddressdnAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"canonical":    types.StringType,
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
@@ -62,6 +64,10 @@ var RecordRpzCnameClientipaddressdnResourceSchemaAttributes = map[string]schema.
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"canonical": schema.StringAttribute{
 		Required: true,
@@ -196,6 +202,7 @@ func (m *RecordRpzCnameClientipaddressdnModel) Flatten(ctx context.Context, from
 		*m = RecordRpzCnameClientipaddressdnModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Canonical = flex.FlattenStringPointer(from.Canonical)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
