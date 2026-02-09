@@ -2,17 +2,12 @@ package validator
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 var _ validator.String = engineIDValidator{}
 
-var (
-	// engineIDHexadecimalPattern validates that the engine ID contains only hexadecimal digits
-	engineIDHexadecimalPattern = regexp.MustCompile(`^[0-9a-fA-F]+$`)
-)
 
 type engineIDValidator struct{}
 
