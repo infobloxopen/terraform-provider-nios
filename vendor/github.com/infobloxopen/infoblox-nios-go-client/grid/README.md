@@ -161,6 +161,9 @@ Class | Method | HTTP request | Description
 *LicenseGridwideAPI* | [**Delete**](docs/LicenseGridwideAPI.md#delete) | **Delete** /license:gridwide/{reference} | Delete a license:gridwide object
 *LicenseGridwideAPI* | [**List**](docs/LicenseGridwideAPI.md#list) | **Get** /license:gridwide | Retrieve license:gridwide objects
 *LicenseGridwideAPI* | [**Read**](docs/LicenseGridwideAPI.md#read) | **Get** /license:gridwide/{reference} | Get a specific license:gridwide object
+*MastergridAPI* | [**List**](docs/MastergridAPI.md#list) | **Get** /mastergrid | Retrieve mastergrid objects
+*MastergridAPI* | [**Read**](docs/MastergridAPI.md#read) | **Get** /mastergrid/{reference} | Get a specific mastergrid object
+*MastergridAPI* | [**Update**](docs/MastergridAPI.md#update) | **Put** /mastergrid/{reference} | Update a mastergrid object
 *MemberAPI* | [**Create**](docs/MemberAPI.md#create) | **Post** /member | Create a member object
 *MemberAPI* | [**Delete**](docs/MemberAPI.md#delete) | **Delete** /member/{reference} | Delete a member object
 *MemberAPI* | [**List**](docs/MemberAPI.md#list) | **Get** /member | Retrieve member objects
@@ -208,6 +211,9 @@ Class | Method | HTTP request | Description
 *UpgradescheduleAPI* | [**List**](docs/UpgradescheduleAPI.md#list) | **Get** /upgradeschedule | Retrieve upgradeschedule objects
 *UpgradescheduleAPI* | [**Read**](docs/UpgradescheduleAPI.md#read) | **Get** /upgradeschedule/{reference} | Get a specific upgradeschedule object
 *UpgradescheduleAPI* | [**Update**](docs/UpgradescheduleAPI.md#update) | **Put** /upgradeschedule/{reference} | Update a upgradeschedule object
+*UpgradestatusAPI* | [**List**](docs/UpgradestatusAPI.md#list) | **Get** /upgradestatus | Retrieve upgradestatus objects
+*UpgradestatusAPI* | [**Read**](docs/UpgradestatusAPI.md#read) | **Get** /upgradestatus/{reference} | Get a specific upgradestatus object
+*UpgradestatusAPI* | [**Update**](docs/UpgradestatusAPI.md#update) | **Put** /upgradestatus/{reference} | Update a upgradestatus object
 
 
 ## Documentation For Models
@@ -291,6 +297,8 @@ Class | Method | HTTP request | Description
  - [GetGridX509certificateResponseObjectAsResult](docs/GetGridX509certificateResponseObjectAsResult.md)
  - [GetLicenseGridwideResponse](docs/GetLicenseGridwideResponse.md)
  - [GetLicenseGridwideResponseObjectAsResult](docs/GetLicenseGridwideResponseObjectAsResult.md)
+ - [GetMastergridResponse](docs/GetMastergridResponse.md)
+ - [GetMastergridResponseObjectAsResult](docs/GetMastergridResponseObjectAsResult.md)
  - [GetMemberDhcppropertiesResponse](docs/GetMemberDhcppropertiesResponse.md)
  - [GetMemberDhcppropertiesResponseObjectAsResult](docs/GetMemberDhcppropertiesResponseObjectAsResult.md)
  - [GetMemberDnsResponse](docs/GetMemberDnsResponse.md)
@@ -319,6 +327,8 @@ Class | Method | HTTP request | Description
  - [GetUpgradegroupResponseObjectAsResult](docs/GetUpgradegroupResponseObjectAsResult.md)
  - [GetUpgradescheduleResponse](docs/GetUpgradescheduleResponse.md)
  - [GetUpgradescheduleResponseObjectAsResult](docs/GetUpgradescheduleResponseObjectAsResult.md)
+ - [GetUpgradestatusResponse](docs/GetUpgradestatusResponse.md)
+ - [GetUpgradestatusResponseObjectAsResult](docs/GetUpgradestatusResponseObjectAsResult.md)
  - [Gmcgroup](docs/Gmcgroup.md)
  - [GmcgroupMembers](docs/GmcgroupMembers.md)
  - [Gmcschedule](docs/Gmcschedule.md)
@@ -499,6 +509,8 @@ Class | Method | HTTP request | Description
  - [ListGridX509certificateResponseObject](docs/ListGridX509certificateResponseObject.md)
  - [ListLicenseGridwideResponse](docs/ListLicenseGridwideResponse.md)
  - [ListLicenseGridwideResponseObject](docs/ListLicenseGridwideResponseObject.md)
+ - [ListMastergridResponse](docs/ListMastergridResponse.md)
+ - [ListMastergridResponseObject](docs/ListMastergridResponseObject.md)
  - [ListMemberDhcppropertiesResponse](docs/ListMemberDhcppropertiesResponse.md)
  - [ListMemberDhcppropertiesResponseObject](docs/ListMemberDhcppropertiesResponseObject.md)
  - [ListMemberDnsResponse](docs/ListMemberDnsResponse.md)
@@ -527,6 +539,9 @@ Class | Method | HTTP request | Description
  - [ListUpgradegroupResponseObject](docs/ListUpgradegroupResponseObject.md)
  - [ListUpgradescheduleResponse](docs/ListUpgradescheduleResponse.md)
  - [ListUpgradescheduleResponseObject](docs/ListUpgradescheduleResponseObject.md)
+ - [ListUpgradestatusResponse](docs/ListUpgradestatusResponse.md)
+ - [ListUpgradestatusResponseObject](docs/ListUpgradestatusResponseObject.md)
+ - [Mastergrid](docs/Mastergrid.md)
  - [Member](docs/Member.md)
  - [MemberAdditionalIpList](docs/MemberAdditionalIpList.md)
  - [MemberAutomatedTrafficCaptureSetting](docs/MemberAutomatedTrafficCaptureSetting.md)
@@ -684,6 +699,8 @@ Class | Method | HTTP request | Description
  - [UpdateGridX509certificateResponseAsObject](docs/UpdateGridX509certificateResponseAsObject.md)
  - [UpdateLicenseGridwideResponse](docs/UpdateLicenseGridwideResponse.md)
  - [UpdateLicenseGridwideResponseAsObject](docs/UpdateLicenseGridwideResponseAsObject.md)
+ - [UpdateMastergridResponse](docs/UpdateMastergridResponse.md)
+ - [UpdateMastergridResponseAsObject](docs/UpdateMastergridResponseAsObject.md)
  - [UpdateMemberDhcppropertiesResponse](docs/UpdateMemberDhcppropertiesResponse.md)
  - [UpdateMemberDhcppropertiesResponseAsObject](docs/UpdateMemberDhcppropertiesResponseAsObject.md)
  - [UpdateMemberDnsResponse](docs/UpdateMemberDnsResponse.md)
@@ -712,10 +729,15 @@ Class | Method | HTTP request | Description
  - [UpdateUpgradegroupResponseAsObject](docs/UpdateUpgradegroupResponseAsObject.md)
  - [UpdateUpgradescheduleResponse](docs/UpdateUpgradescheduleResponse.md)
  - [UpdateUpgradescheduleResponseAsObject](docs/UpdateUpgradescheduleResponseAsObject.md)
+ - [UpdateUpgradestatusResponse](docs/UpdateUpgradestatusResponse.md)
+ - [UpdateUpgradestatusResponseAsObject](docs/UpdateUpgradestatusResponseAsObject.md)
  - [Upgradegroup](docs/Upgradegroup.md)
  - [UpgradegroupMembers](docs/UpgradegroupMembers.md)
  - [Upgradeschedule](docs/Upgradeschedule.md)
  - [UpgradescheduleUpgradeGroups](docs/UpgradescheduleUpgradeGroups.md)
+ - [Upgradestatus](docs/Upgradestatus.md)
+ - [UpgradestatusHotfixes](docs/UpgradestatusHotfixes.md)
+ - [UpgradestatusSteps](docs/UpgradestatusSteps.md)
 
 
 ## Documentation For Authorization

@@ -51,6 +51,7 @@ type APIClient struct {
 	GridThreatprotectionAPI GridThreatprotectionAPI
 	GridX509certificateAPI GridX509certificateAPI
 	LicenseGridwideAPI LicenseGridwideAPI
+	MastergridAPI MastergridAPI
 	MemberAPI MemberAPI
 	MemberDhcppropertiesAPI MemberDhcppropertiesAPI
 	MemberDnsAPI MemberDnsAPI
@@ -65,6 +66,7 @@ type APIClient struct {
 	RestartservicestatusAPI RestartservicestatusAPI
 	UpgradegroupAPI UpgradegroupAPI
 	UpgradescheduleAPI UpgradescheduleAPI
+	UpgradestatusAPI UpgradestatusAPI
 }
 
 // NewAPIClient creates a new API client.
@@ -114,6 +116,7 @@ func NewAPIClient(options ...option.ClientOption) *APIClient {
 	c.GridThreatprotectionAPI = (*GridThreatprotectionAPIService)(&c.Common)
 	c.GridX509certificateAPI = (*GridX509certificateAPIService)(&c.Common)
 	c.LicenseGridwideAPI = (*LicenseGridwideAPIService)(&c.Common)
+	c.MastergridAPI = (*MastergridAPIService)(&c.Common)
 	c.MemberAPI = (*MemberAPIService)(&c.Common)
 	c.MemberDhcppropertiesAPI = (*MemberDhcppropertiesAPIService)(&c.Common)
 	c.MemberDnsAPI = (*MemberDnsAPIService)(&c.Common)
@@ -128,6 +131,7 @@ func NewAPIClient(options ...option.ClientOption) *APIClient {
 	c.RestartservicestatusAPI = (*RestartservicestatusAPIService)(&c.Common)
 	c.UpgradegroupAPI = (*UpgradegroupAPIService)(&c.Common)
 	c.UpgradescheduleAPI = (*UpgradescheduleAPIService)(&c.Common)
+	c.UpgradestatusAPI = (*UpgradestatusAPIService)(&c.Common)
 
 	return c
 }

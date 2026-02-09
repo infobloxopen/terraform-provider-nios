@@ -26,6 +26,7 @@ type APIClient struct {
 	ThreatinsightAllowlistAPI ThreatinsightAllowlistAPI
 	ThreatinsightCloudclientAPI ThreatinsightCloudclientAPI
 	ThreatinsightInsightAllowlistAPI ThreatinsightInsightAllowlistAPI
+	ThreatinsightModulesetAPI ThreatinsightModulesetAPI
 }
 
 // NewAPIClient creates a new API client.
@@ -50,6 +51,7 @@ func NewAPIClient(options ...option.ClientOption) *APIClient {
 	c.ThreatinsightAllowlistAPI = (*ThreatinsightAllowlistAPIService)(&c.Common)
 	c.ThreatinsightCloudclientAPI = (*ThreatinsightCloudclientAPIService)(&c.Common)
 	c.ThreatinsightInsightAllowlistAPI = (*ThreatinsightInsightAllowlistAPIService)(&c.Common)
+	c.ThreatinsightModulesetAPI = (*ThreatinsightModulesetAPIService)(&c.Common)
 
 	return c
 }
