@@ -12,6 +12,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -82,7 +83,7 @@ func (r *RecordRpzCnameIpaddressdnResource) Create(ctx context.Context, req reso
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzCnameIpaddressdnAPI.
 		Create(ctx).
-		RecordRpzCnameIpaddressdn(*data.Expand(ctx, &resp.Diagnostics, true)).
+		RecordRpzCnameIpaddressdn(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCnameIpaddressdn).
 		ReturnAsObject(1).
 		Execute()
@@ -127,6 +128,7 @@ func (r *RecordRpzCnameIpaddressdnResource) Read(ctx context.Context, req resour
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCnameIpaddressdn).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -203,6 +205,7 @@ func (r *RecordRpzCnameIpaddressdnResource) ReadByExtAttrs(ctx context.Context, 
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCnameIpaddressdn).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzCnameIpaddressdn by extattrs, got error: %s", err))
@@ -278,7 +281,7 @@ func (r *RecordRpzCnameIpaddressdnResource) Update(ctx context.Context, req reso
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzCnameIpaddressdnAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzCnameIpaddressdn(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordRpzCnameIpaddressdn(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCnameIpaddressdn).
 		ReturnAsObject(1).
 		Execute()
