@@ -270,7 +270,7 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	providedAuth := !authPwd.IsNull() && !authPwd.IsUnknown()
 	providedPriv := !privPwd.IsNull() && !privPwd.IsUnknown()
 	createRequest := data.Expand(ctx, &resp.Diagnostics)
-	if !authPwd.IsNull() && !privPwd.IsNull() {
+	if !authPwd.IsNull() || !privPwd.IsNull() {
 		ap, pp := "", ""
 		if providedAuth || providedPriv {
 			if providedAuth {
@@ -573,7 +573,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	providedAuth := !authPwd.IsNull() && !authPwd.IsUnknown()
 	providedPriv := !privPwd.IsNull() && !privPwd.IsUnknown()
 	ap, pp := "", ""
-	if !authPwd.IsNull() && !privPwd.IsNull() {
+	if !authPwd.IsNull() || !privPwd.IsNull() {
 
 		if providedAuth || providedPriv {
 			if providedAuth {

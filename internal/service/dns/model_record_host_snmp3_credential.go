@@ -3,9 +3,11 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -44,8 +46,11 @@ var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "Authentication protocol for the SNMPv3 user.",
 	},
 	"authentication_password": schema.StringAttribute{
-		Optional:            true,
-		WriteOnly:           true,
+		Optional:  true,
+		WriteOnly: true,
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(1, 64),
+		},
 		MarkdownDescription: "Authentication password for the SNMPv3 user.",
 	},
 	"privacy_protocol": schema.StringAttribute{
@@ -53,8 +58,11 @@ var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "Privacy protocol for the SNMPv3 user.",
 	},
 	"privacy_password": schema.StringAttribute{
-		Optional:            true,
-		WriteOnly:           true,
+		Optional:  true,
+		WriteOnly: true,
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(1, 64),
+		},
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},
 	"comment": schema.StringAttribute{
