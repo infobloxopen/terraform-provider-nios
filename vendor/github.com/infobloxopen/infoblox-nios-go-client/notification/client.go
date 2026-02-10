@@ -23,6 +23,7 @@ type APIClient struct {
 	*internal.APIClient
 
 	// API Services
+	NotificationRestEndpointAPI NotificationRestEndpointAPI
 	NotificationRestTemplateAPI NotificationRestTemplateAPI
 	NotificationRuleAPI NotificationRuleAPI
 }
@@ -46,6 +47,7 @@ func NewAPIClient(options ...option.ClientOption) *APIClient {
 	c.APIClient = internal.NewAPIClient(serviceBasePath, cfg)
 
 	// API Services
+	c.NotificationRestEndpointAPI = (*NotificationRestEndpointAPIService)(&c.Common)
 	c.NotificationRestTemplateAPI = (*NotificationRestTemplateAPIService)(&c.Common)
 	c.NotificationRuleAPI = (*NotificationRuleAPIService)(&c.Common)
 
