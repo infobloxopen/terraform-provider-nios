@@ -76,6 +76,11 @@ func (r *IPAllocationResource) ModifyPlan(
 	req resource.ModifyPlanRequest,
 	resp *resource.ModifyPlanResponse,
 ) {
+	// Check if the plan is null (resource is being destroyed)
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
 	// 1) Read write-only values from CONFIG (not from plan/state)
 	var authPwd, privPwd types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
@@ -254,14 +259,45 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	diags.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential"), &data.Snmp3Credential)...)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
+	// Read write-only from CONFIG
+	var authPwd, privPwd types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
+		path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
+		path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
 
+	// Persist private hash so future plans can read it
+	providedAuth := !authPwd.IsNull() && !authPwd.IsUnknown()
+	providedPriv := !privPwd.IsNull() && !privPwd.IsUnknown()
 	createRequest := data.Expand(ctx, &resp.Diagnostics)
-
+	if !authPwd.IsNull() && !privPwd.IsNull() {
+		ap, pp := "", ""
+		if providedAuth || providedPriv {
+			if providedAuth {
+				ap = authPwd.ValueString()
+			}
+			if providedPriv {
+				pp = privPwd.ValueString()
+			}
+			h := sha256.New()
+			h.Write([]byte(ap))
+			h.Write([]byte{0})
+			h.Write([]byte(pp))
+			val := map[string]string{"algo": "sha256", "hash": hex.EncodeToString(h.Sum(nil))}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", b)...)
+		}
+		if pp != "" {
+			createRequest.Snmp3Credential.PrivacyPassword = &pp
+		}
+		if ap != "" {
+			createRequest.Snmp3Credential.AuthenticationPassword = &ap
+		}
+	}
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Create(ctx).
@@ -312,6 +348,11 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	// refresh non-secret state from API...
+	if prev, diags := req.Private.GetKey(ctx, "snmp3_secrets_hash"); diags == nil && prev != nil {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", prev)...)
 	}
 
 	// Save original IPv4 function call attributes
@@ -522,16 +563,55 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		currentHost = currentApiRes.GetRecordHostResponseObjectAsResult.GetResult()
 	}
 
-	// Prepare the update request while preserving DHCP settings
 	updateReq := data.Expand(ctx, &resp.Diagnostics)
-	preserveDHCPSettings(updateReq, &currentHost)
-	diags.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential"), &data.Snmp3Credential)...)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
+	var authPwd, privPwd types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
+		path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
+		path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	providedAuth := !authPwd.IsNull() && !authPwd.IsUnknown()
+	providedPriv := !privPwd.IsNull() && !privPwd.IsUnknown()
+	ap, pp := "", ""
+	if !authPwd.IsNull() && !privPwd.IsNull() {
+
+		if providedAuth || providedPriv {
+			if providedAuth {
+				ap = authPwd.ValueString()
+			}
+			if providedPriv {
+				pp = privPwd.ValueString()
+			}
+			h := sha256.New()
+			h.Write([]byte(ap))
+			h.Write([]byte{0})
+			h.Write([]byte(pp))
+			val := map[string]string{"algo": "sha256", "hash": hex.EncodeToString(h.Sum(nil))}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", b)...)
+		} else {
+			// No new secrets; **forward** existing private so it persists
+			if prev, diags := req.Private.GetKey(ctx, "snmp3_secrets_hash"); diags != nil {
+				resp.Diagnostics.Append(diags...)
+			} else if prev != nil {
+				resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", prev)...)
+			}
+		}
 	}
+	// Prepare the update request while preserving DHCP settings
+	preserveDHCPSettings(updateReq, &currentHost)
 	updateReq = data.Expand(ctx, &resp.Diagnostics)
 	updateReq.NetworkView = nil
+	if ap != "" {
+		updateReq.Snmp3Credential.AuthenticationPassword = &ap
+	}
+	if pp != "" {
+		updateReq.Snmp3Credential.PrivacyPassword = &pp
+	}
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
