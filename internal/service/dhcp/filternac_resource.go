@@ -13,7 +13,6 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForFilternac = "comment,expression,extattrs,lease_time,name,options"
@@ -127,7 +126,7 @@ func (r *FilternacResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		FilternacAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForFilternac).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -248,7 +247,7 @@ func (r *FilternacResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -282,7 +281,7 @@ func (r *FilternacResource) Update(ctx context.Context, req resource.UpdateReque
 
 	apiRes, _, err := r.client.DHCPAPI.
 		FilternacAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Filternac(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForFilternac).
 		ReturnAsObject(1).
@@ -322,7 +321,7 @@ func (r *FilternacResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	httpRes, err := r.client.DHCPAPI.
 		FilternacAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -334,7 +333,7 @@ func (r *FilternacResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 func (r *FilternacResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 func (r *FilternacResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {

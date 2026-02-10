@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForMacfilteraddress = "authentication_time,comment,expiration_time,extattrs,filter,fingerprint,guest_custom_field1,guest_custom_field2,guest_custom_field3,guest_custom_field4,guest_email,guest_first_name,guest_last_name,guest_middle_name,guest_phone,is_registered_user,mac,never_expires,reserved_for_infoblox,username"
@@ -145,7 +144,7 @@ func (r *MacfilteraddressResource) Read(ctx context.Context, req resource.ReadRe
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		MacfilteraddressAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForMacfilteraddress).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -265,7 +264,7 @@ func (r *MacfilteraddressResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -298,7 +297,7 @@ func (r *MacfilteraddressResource) Update(ctx context.Context, req resource.Upda
 
 	apiRes, _, err := r.client.DHCPAPI.
 		MacfilteraddressAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Macfilteraddress(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForMacfilteraddress).
 		ReturnAsObject(1).
@@ -337,7 +336,7 @@ func (r *MacfilteraddressResource) Delete(ctx context.Context, req resource.Dele
 
 	httpRes, err := r.client.DHCPAPI.
 		MacfilteraddressAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -349,6 +348,6 @@ func (r *MacfilteraddressResource) Delete(ctx context.Context, req resource.Dele
 }
 
 func (r *MacfilteraddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

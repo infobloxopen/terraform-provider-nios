@@ -15,7 +15,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDtcTopology = "comment,extattrs,name,rules"
@@ -130,7 +129,7 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDtcTopology).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -256,7 +255,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -289,7 +288,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		DtcTopology(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDtcTopology).
 		ReturnAsObject(1).
@@ -334,7 +333,7 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -346,7 +345,7 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *DtcTopologyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
@@ -393,10 +392,10 @@ func (r *DtcTopologyResource) ValidateConfig(ctx context.Context, req resource.V
 	}
 }
 
-func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef string, diags *diag.Diagnostics) *dtc.DtcTopologyRulesInnerOneOf1 {
+func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleUuid string, diags *diag.Diagnostics) *dtc.DtcTopologyRulesInnerOneOf1 {
 	apiRes, _, err := r.client.DTCAPI.
 		DtcTopologyRuleAPI.
-		Read(ctx, utils.ExtractResourceRef(ruleRef)).
+		Read(ctx, ruleUuid).
 		ReturnFieldsPlus(readableAttributesForDtcTopologyRule).
 		ReturnAsObject(1).
 		Execute()
@@ -453,10 +452,10 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 
 func (r *DtcTopologyResource) populateTopologyRules(ctx context.Context, res *dtc.DtcTopology, diags *diag.Diagnostics) {
 	for i, rule := range res.Rules {
-		ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
-		if ruleRef == nil {
+		ruleUuid := rule.DtcTopologyRulesInnerOneOf.Uuid
+		if ruleUuid == nil {
 			continue
 		}
-		res.Rules[i].DtcTopologyRulesInnerOneOf1 = UpdateDtcTopologyRules(ctx, r, *ruleRef, diags)
+		res.Rules[i].DtcTopologyRulesInnerOneOf1 = UpdateDtcTopologyRules(ctx, r, *ruleUuid, diags)
 	}
 }

@@ -14,7 +14,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForIpv6sharednetwork = "comment,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_use_option81,disable,domain_name,domain_name_servers,enable_ddns,extattrs,logic_filter_rules,name,network_view,networks,options,preferred_lifetime,update_dns_on_lease_renewal,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_use_option81,use_domain_name,use_domain_name_servers,use_enable_ddns,use_logic_filter_rules,use_options,use_preferred_lifetime,use_update_dns_on_lease_renewal,use_valid_lifetime,valid_lifetime"
@@ -125,7 +124,7 @@ func (r *Ipv6sharednetworkResource) Read(ctx context.Context, req resource.ReadR
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6sharednetworkAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -245,7 +244,7 @@ func (r *Ipv6sharednetworkResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -278,7 +277,7 @@ func (r *Ipv6sharednetworkResource) Update(ctx context.Context, req resource.Upd
 
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6sharednetworkAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
 		ReturnAsObject(1).
@@ -317,7 +316,7 @@ func (r *Ipv6sharednetworkResource) Delete(ctx context.Context, req resource.Del
 
 	httpRes, err := r.client.DHCPAPI.
 		Ipv6sharednetworkAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -466,6 +465,6 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 }
 
 func (r *Ipv6sharednetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

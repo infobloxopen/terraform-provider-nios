@@ -360,7 +360,7 @@ func (r *VdiscoverytaskResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiRes, httpRes, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -396,7 +396,7 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -418,7 +418,7 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 
 	apiRes, _, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Vdiscoverytask(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 		ReturnAsObject(1).
@@ -448,7 +448,7 @@ func (r *VdiscoverytaskResource) Delete(ctx context.Context, req resource.Delete
 
 	httpRes, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

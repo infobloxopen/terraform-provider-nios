@@ -14,7 +14,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDhcpoptiondefinition = "code,name,space,type"
@@ -105,7 +104,7 @@ func (r *DhcpoptiondefinitionResource) Read(ctx context.Context, req resource.Re
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		DhcpoptiondefinitionAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -143,7 +142,7 @@ func (r *DhcpoptiondefinitionResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -159,7 +158,7 @@ func (r *DhcpoptiondefinitionResource) Update(ctx context.Context, req resource.
 
 	apiRes, _, err := r.client.DHCPAPI.
 		DhcpoptiondefinitionAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Dhcpoptiondefinition(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
 		ReturnAsObject(1).
@@ -189,7 +188,7 @@ func (r *DhcpoptiondefinitionResource) Delete(ctx context.Context, req resource.
 
 	httpRes, err := r.client.DHCPAPI.
 		DhcpoptiondefinitionAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

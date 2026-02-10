@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForRecordRpzNaptr = "comment,disable,extattrs,flags,last_queried,name,order,preference,regexp,replacement,rp_zone,services,ttl,use_ttl,view,zone"
@@ -124,7 +123,7 @@ func (r *RecordRpzNaptrResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiRes, httpRes, err := r.client.RPZAPI.
 		RecordRpzNaptrAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRecordRpzNaptr).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -244,7 +243,7 @@ func (r *RecordRpzNaptrResource) Update(ctx context.Context, req resource.Update
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -278,7 +277,7 @@ func (r *RecordRpzNaptrResource) Update(ctx context.Context, req resource.Update
 
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzNaptrAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordRpzNaptr(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzNaptr).
 		ReturnAsObject(1).
@@ -317,7 +316,7 @@ func (r *RecordRpzNaptrResource) Delete(ctx context.Context, req resource.Delete
 
 	httpRes, err := r.client.RPZAPI.
 		RecordRpzNaptrAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -329,6 +328,6 @@ func (r *RecordRpzNaptrResource) Delete(ctx context.Context, req resource.Delete
 }
 
 func (r *RecordRpzNaptrResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

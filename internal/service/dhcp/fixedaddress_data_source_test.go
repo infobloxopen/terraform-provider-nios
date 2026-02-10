@@ -81,7 +81,7 @@ func TestAccFixedaddressDataSource_MsServerStruct(t *testing.T) {
 func testAccCheckFixedaddressResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "agent_circuit_id", dataSourceName, "result.0.agent_circuit_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "agent_remote_id", dataSourceName, "result.0.agent_remote_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "allow_telnet", dataSourceName, "result.0.allow_telnet"),

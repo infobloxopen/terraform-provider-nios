@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForFilterrelayagent = "circuit_id_name,circuit_id_substring_length,circuit_id_substring_offset,comment,extattrs,is_circuit_id,is_circuit_id_substring,is_remote_id,is_remote_id_substring,name,remote_id_name,remote_id_substring_length,remote_id_substring_offset"
@@ -127,7 +126,7 @@ func (r *FilterrelayagentResource) Read(ctx context.Context, req resource.ReadRe
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		FilterrelayagentAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForFilterrelayagent).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -248,7 +247,7 @@ func (r *FilterrelayagentResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -282,7 +281,7 @@ func (r *FilterrelayagentResource) Update(ctx context.Context, req resource.Upda
 
 	apiRes, _, err := r.client.DHCPAPI.
 		FilterrelayagentAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Filterrelayagent(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForFilterrelayagent).
 		ReturnAsObject(1).
@@ -322,7 +321,7 @@ func (r *FilterrelayagentResource) Delete(ctx context.Context, req resource.Dele
 
 	httpRes, err := r.client.DHCPAPI.
 		FilterrelayagentAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -334,7 +333,7 @@ func (r *FilterrelayagentResource) Delete(ctx context.Context, req resource.Dele
 }
 
 func (r *FilterrelayagentResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

@@ -16,7 +16,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForFingerprint = "comment,device_class,disable,extattrs,ipv6_option_sequence,name,option_sequence,type,vendor_id"
@@ -129,7 +128,7 @@ func (r *FingerprintResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		FingerprintAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForFingerprint).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -251,7 +250,7 @@ func (r *FingerprintResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -285,7 +284,7 @@ func (r *FingerprintResource) Update(ctx context.Context, req resource.UpdateReq
 
 	apiRes, _, err := r.client.DHCPAPI.
 		FingerprintAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Fingerprint(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForFingerprint).
 		ReturnAsObject(1).
@@ -325,7 +324,7 @@ func (r *FingerprintResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.DHCPAPI.
 		FingerprintAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -398,6 +397,6 @@ func validateOptionSequence(optionStr string, attrPath path.Path, attrName strin
 }
 
 func (r *FingerprintResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

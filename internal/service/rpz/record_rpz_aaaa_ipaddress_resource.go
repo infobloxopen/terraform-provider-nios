@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForRecordRpzAaaaIpaddress = "comment,disable,extattrs,ipv6addr,name,rp_zone,ttl,use_ttl,view,zone"
@@ -125,7 +124,7 @@ func (r *RecordRpzAaaaIpaddressResource) Read(ctx context.Context, req resource.
 
 	apiRes, httpRes, err := r.client.RPZAPI.
 		RecordRpzAaaaIpaddressAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRecordRpzAaaaIpaddress).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -246,7 +245,7 @@ func (r *RecordRpzAaaaIpaddressResource) Update(ctx context.Context, req resourc
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -280,7 +279,7 @@ func (r *RecordRpzAaaaIpaddressResource) Update(ctx context.Context, req resourc
 
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzAaaaIpaddressAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordRpzAaaaIpaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzAaaaIpaddress).
 		ReturnAsObject(1).
@@ -320,7 +319,7 @@ func (r *RecordRpzAaaaIpaddressResource) Delete(ctx context.Context, req resourc
 
 	httpRes, err := r.client.RPZAPI.
 		RecordRpzAaaaIpaddressAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -332,6 +331,6 @@ func (r *RecordRpzAaaaIpaddressResource) Delete(ctx context.Context, req resourc
 }
 
 func (r *RecordRpzAaaaIpaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

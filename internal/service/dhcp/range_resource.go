@@ -123,7 +123,7 @@ func (r *RangeResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		RangeAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRange).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -243,7 +243,7 @@ func (r *RangeResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -275,7 +275,7 @@ func (r *RangeResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	apiRes, _, err := r.client.DHCPAPI.
 		RangeAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Range_(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForRange).
 		ReturnAsObject(1).
@@ -315,7 +315,7 @@ func (r *RangeResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 
 	httpRes, err := r.client.DHCPAPI.
 		RangeAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -327,7 +327,7 @@ func (r *RangeResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 }
 
 func (r *RangeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

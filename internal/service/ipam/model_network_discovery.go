@@ -15,12 +15,12 @@ import (
 )
 
 type NetworkDiscoveryModel struct {
-	Ref types.String `tfsdk:"ref"`
+	Ref  types.String `tfsdk:"ref"`
 	Uuid types.String `tfsdk:"uuid"`
 }
 
 var NetworkDiscoveryAttrTypes = map[string]attr.Type{
-	"ref": types.StringType,
+	"ref":  types.StringType,
 	"uuid": types.StringType,
 }
 
@@ -54,7 +54,7 @@ func (m *NetworkDiscoveryModel) Expand(ctx context.Context, diags *diag.Diagnost
 		return nil
 	}
 	to := &ipam.NetworkDiscovery{
-		Ref: flex.ExpandStringPointer(m.Ref),
+		Ref:  flex.ExpandStringPointer(m.Ref),
 		Uuid: flex.ExpandStringPointer(m.Uuid),
 	}
 	return to

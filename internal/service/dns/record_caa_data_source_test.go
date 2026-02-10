@@ -66,7 +66,7 @@ func TestAccRecordCaaDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckRecordCaaResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "ca_flag", dataSourceName, "result.0.ca_flag"),
 		resource.TestCheckResourceAttrPair(resourceName, "ca_tag", dataSourceName, "result.0.ca_tag"),
 		resource.TestCheckResourceAttrPair(resourceName, "ca_value", dataSourceName, "result.0.ca_value"),

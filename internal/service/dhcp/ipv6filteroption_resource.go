@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForIpv6filteroption = "apply_as_class,comment,expression,extattrs,lease_time,name,option_list,option_space"
@@ -125,7 +124,7 @@ func (r *Ipv6filteroptionResource) Read(ctx context.Context, req resource.ReadRe
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6filteroptionAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIpv6filteroption).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -247,7 +246,7 @@ func (r *Ipv6filteroptionResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -281,7 +280,7 @@ func (r *Ipv6filteroptionResource) Update(ctx context.Context, req resource.Upda
 
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6filteroptionAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ipv6filteroption(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6filteroption).
 		ReturnAsObject(1).
@@ -321,7 +320,7 @@ func (r *Ipv6filteroptionResource) Delete(ctx context.Context, req resource.Dele
 
 	httpRes, err := r.client.DHCPAPI.
 		Ipv6filteroptionAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -333,6 +332,6 @@ func (r *Ipv6filteroptionResource) Delete(ctx context.Context, req resource.Dele
 }
 
 func (r *Ipv6filteroptionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

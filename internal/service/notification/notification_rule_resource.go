@@ -105,7 +105,7 @@ func (r *NotificationRuleResource) Read(ctx context.Context, req resource.ReadRe
 
 	apiRes, httpRes, err := r.client.NotificationAPI.
 		NotificationRuleAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForNotificationRule).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -141,7 +141,7 @@ func (r *NotificationRuleResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -149,7 +149,7 @@ func (r *NotificationRuleResource) Update(ctx context.Context, req resource.Upda
 
 	apiRes, _, err := r.client.NotificationAPI.
 		NotificationRuleAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		NotificationRule(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForNotificationRule).
 		ReturnAsObject(1).
@@ -179,7 +179,7 @@ func (r *NotificationRuleResource) Delete(ctx context.Context, req resource.Dele
 
 	httpRes, err := r.client.NotificationAPI.
 		NotificationRuleAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

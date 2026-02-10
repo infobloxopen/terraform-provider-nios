@@ -15,12 +15,12 @@ import (
 )
 
 type NetworkviewDdnsZonePrimariesDnsGridZoneModel struct {
-	Ref types.String `tfsdk:"ref"`
+	Ref  types.String `tfsdk:"ref"`
 	Uuid types.String `tfsdk:"uuid"`
 }
 
 var NetworkviewDdnsZonePrimariesDnsGridZoneAttrTypes = map[string]attr.Type{
-	"ref": types.StringType,
+	"ref":  types.StringType,
 	"uuid": types.StringType,
 }
 

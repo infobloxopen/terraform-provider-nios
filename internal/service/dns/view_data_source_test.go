@@ -62,7 +62,7 @@ func TestAccViewDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckViewResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "blacklist_action", dataSourceName, "result.0.blacklist_action"),
 		resource.TestCheckResourceAttrPair(resourceName, "blacklist_log_query", dataSourceName, "result.0.blacklist_log_query"),
 		resource.TestCheckResourceAttrPair(resourceName, "blacklist_redirect_addresses", dataSourceName, "result.0.blacklist_redirect_addresses"),

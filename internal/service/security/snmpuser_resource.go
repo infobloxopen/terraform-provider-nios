@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForSnmpuser = "authentication_protocol,comment,disable,extattrs,name,privacy_protocol"
@@ -166,7 +165,7 @@ func (r *SnmpuserResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	apiRes, httpRes, err := r.client.SecurityAPI.
 		SnmpuserAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForSnmpuser).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -286,7 +285,7 @@ func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -318,7 +317,7 @@ func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateReques
 
 	apiRes, _, err := r.client.SecurityAPI.
 		SnmpuserAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Snmpuser(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForSnmpuser).
 		ReturnAsObject(1).
@@ -358,7 +357,7 @@ func (r *SnmpuserResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	httpRes, err := r.client.SecurityAPI.
 		SnmpuserAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -370,6 +369,6 @@ func (r *SnmpuserResource) Delete(ctx context.Context, req resource.DeleteReques
 }
 
 func (r *SnmpuserResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForVlanrange = "comment,end_vlan_id,extattrs,name,pre_create_vlan,start_vlan_id,vlan_name_prefix,vlan_view"
@@ -123,7 +122,7 @@ func (r *VlanrangeResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		VlanrangeAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForVlanrange).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -243,7 +242,7 @@ func (r *VlanrangeResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -276,7 +275,7 @@ func (r *VlanrangeResource) Update(ctx context.Context, req resource.UpdateReque
 
 	apiRes, _, err := r.client.IPAMAPI.
 		VlanrangeAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Vlanrange(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForVlanrange).
 		ReturnAsObject(1).
@@ -315,7 +314,7 @@ func (r *VlanrangeResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	httpRes, err := r.client.IPAMAPI.
 		VlanrangeAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -354,6 +353,6 @@ func (r *VlanrangeResource) ValidateConfig(ctx context.Context, req resource.Val
 }
 
 func (r *VlanrangeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

@@ -63,7 +63,7 @@ func TestAccIpv6networktemplateDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckIpv6networktemplateResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "allow_any_netmask", dataSourceName, "result.0.allow_any_netmask"),
 		resource.TestCheckResourceAttrPair(resourceName, "auto_create_reversezone", dataSourceName, "result.0.auto_create_reversezone"),
 		resource.TestCheckResourceAttrPair(resourceName, "cidr", dataSourceName, "result.0.cidr"),

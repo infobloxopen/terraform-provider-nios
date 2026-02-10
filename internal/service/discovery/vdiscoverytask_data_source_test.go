@@ -40,7 +40,7 @@ func TestAccVdiscoverytaskDataSource_Filters(t *testing.T) {
 func testAccCheckVdiscoverytaskResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "accounts_list", dataSourceName, "result.0.accounts_list"),
 		resource.TestCheckResourceAttrPair(resourceName, "allow_unsecured_connection", dataSourceName, "result.0.allow_unsecured_connection"),
 		resource.TestCheckResourceAttrPair(resourceName, "auto_consolidate_cloud_ea", dataSourceName, "result.0.auto_consolidate_cloud_ea"),

@@ -69,7 +69,7 @@ func TestAccIpv6fixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckIpv6fixedaddressResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "address_type", dataSourceName, "result.0.address_type"),
 		resource.TestCheckResourceAttrPair(resourceName, "allow_telnet", dataSourceName, "result.0.allow_telnet"),
 		resource.TestCheckResourceAttrPair(resourceName, "cli_credentials", dataSourceName, "result.0.cli_credentials"),

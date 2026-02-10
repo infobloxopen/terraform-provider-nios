@@ -25,7 +25,7 @@ import (
 
 type Awsrte53taskgroupModel struct {
 	Ref                        types.String `tfsdk:"ref"`
-    Uuid        types.String `tfsdk:"uuid"`
+	Uuid                       types.String `tfsdk:"uuid"`
 	AccountId                  types.String `tfsdk:"account_id"`
 	AccountsList               types.String `tfsdk:"accounts_list"`
 	AwsAccountIdsFileToken     types.String `tfsdk:"aws_account_ids_file_token"`
@@ -47,7 +47,7 @@ type Awsrte53taskgroupModel struct {
 
 var Awsrte53taskgroupAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
-    "uuid":        types.StringType,
+	"uuid":                          types.StringType,
 	"account_id":                    types.StringType,
 	"accounts_list":                 types.StringType,
 	"aws_account_ids_file_token":    types.StringType,
@@ -72,10 +72,10 @@ var Awsrte53taskgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
-    "uuid": schema.StringAttribute{
-        Computed:            true,
-        MarkdownDescription: "The uuid to the object.",
-    },
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
+	},
 	"account_id": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The AWS Account ID associated with this task group.",
@@ -244,7 +244,7 @@ func (m *Awsrte53taskgroupModel) Flatten(ctx context.Context, from *cloud.Awsrte
 		*m = Awsrte53taskgroupModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-    m.Uuid = flex.FlattenStringPointer(from.Uuid)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AccountId = flex.FlattenStringPointer(from.AccountId)
 	m.AccountsList = flex.FlattenStringPointer(from.AccountsList)
 	m.AwsAccountIdsFileToken = flex.FlattenStringPointer(from.AwsAccountIdsFileToken)

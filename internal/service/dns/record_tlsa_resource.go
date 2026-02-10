@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForRecordTlsa = "certificate_data,certificate_usage,cloud_info,comment,creator,disable,dns_name,extattrs,last_queried,matched_type,name,selector,ttl,use_ttl,view,zone"
@@ -123,7 +122,7 @@ func (r *RecordTlsaResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordTlsaAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRecordTlsa).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -243,7 +242,7 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -275,7 +274,7 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordTlsaAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordTlsa(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordTlsa).
 		ReturnAsObject(1).
@@ -315,7 +314,7 @@ func (r *RecordTlsaResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	httpRes, err := r.client.DNSAPI.
 		RecordTlsaAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -327,6 +326,6 @@ func (r *RecordTlsaResource) Delete(ctx context.Context, req resource.DeleteRequ
 }
 
 func (r *RecordTlsaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

@@ -136,7 +136,7 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		Ipv6networkcontainerAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -256,7 +256,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -288,7 +288,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 
 	apiRes, _, err := r.client.IPAMAPI.
 		Ipv6networkcontainerAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ipv6networkcontainer(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
 		ReturnAsObject(1).
@@ -328,7 +328,7 @@ func (r *Ipv6networkcontainerResource) Delete(ctx context.Context, req resource.
 
 	httpRes, err := r.client.IPAMAPI.
 		Ipv6networkcontainerAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -354,7 +354,7 @@ func (r *Ipv6networkcontainerResource) UpdateFuncCallAttributeName(ctx context.C
 }
 
 func (r *Ipv6networkcontainerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
