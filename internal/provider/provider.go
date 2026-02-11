@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -406,35 +407,53 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 		"name": terraformInternalIDEA,
 	}
 
-	apiRes, _, err := client.GridAPI.ExtensibleattributedefAPI.
-		List(ctx).
-		Filters(filters).
-		ReturnFieldsPlus(readableAttributesForEADefinition).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		return fmt.Errorf("error checking for existing extensible attribute: %w", err)
-	}
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
 
-	// If EA already exists, creation is not required
-	if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
-		return nil
-	}
+		// Check if EA already exists
+		apiRes, httpRes, callErr := client.GridAPI.ExtensibleattributedefAPI.
+			List(ctx).
+			Filters(filters).
+			ReturnFieldsPlus(readableAttributesForEADefinition).
+			ReturnAsObject(1).
+			Execute()
 
-	// Create EA if it doesn't exist
-	data := gridclient.Extensibleattributedef{
-		Name:    gridclient.PtrString(terraformInternalIDEA),
-		Type:    gridclient.PtrString("STRING"),
-		Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
-		Flags:   gridclient.PtrString("CR"),
-	}
+		if callErr != nil {
+			if httpRes != nil {
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		}
 
-	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
-		Create(ctx).
-		Extensibleattributedef(data).
-		ReturnFieldsPlus(readableAttributesForEADefinition).
-		ReturnAsObject(1).
-		Execute()
+		// If EA already exists, creation is not required
+		if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
+			return http.StatusOK, nil
+		}
+
+		// Create EA if it doesn't exist
+		data := gridclient.Extensibleattributedef{
+			Name:    gridclient.PtrString(terraformInternalIDEA),
+			Type:    gridclient.PtrString("STRING"),
+			Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
+			Flags:   gridclient.PtrString("CR"),
+		}
+
+		_, httpRes, callErr = client.GridAPI.ExtensibleattributedefAPI.
+			Create(ctx).
+			Extensibleattributedef(data).
+			ReturnFieldsPlus(readableAttributesForEADefinition).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		return fmt.Errorf("error creating Terraform extensible attribute: %w", err)
 	}

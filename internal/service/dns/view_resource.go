@@ -150,12 +150,25 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		ViewAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForView).
-		ReturnAsObject(1).
-		Execute()
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetViewResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ViewAPI.
+			Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			ReturnFieldsPlus(readableAttributesForView).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {

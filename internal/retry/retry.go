@@ -33,12 +33,20 @@ func SetRetryTimeout(timeout int64) {
 	RetryTimeout = time.Duration(timeout) * time.Second
 }
 
-// Do retries fn until:
+// Do retries fn with the global RetryTimeout until:
 // - fn succeeds
 // - error is non-retryable
 // - context is canceled or times out
 func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) error {
-	ctx, cancel := context.WithTimeout(parentCtx, RetryTimeout)
+	return DoWithTimeout(parentCtx, RetryTimeout, isRetryable, fn)
+}
+
+// DoWithTimeout retries fn with a custom timeout until:
+// - fn succeeds
+// - error is non-retryable
+// - context is canceled or times out
+func DoWithTimeout(parentCtx context.Context, timeout time.Duration, isRetryable RetryableFunc, fn RetryFunc) error {
+	ctx, cancel := context.WithTimeout(parentCtx, timeout)
 	defer cancel()
 
 	backoff := initialBackoff
@@ -63,7 +71,7 @@ func Do(parentCtx context.Context, isRetryable RetryableFunc, fn RetryFunc) erro
 			return err
 		}
 
-		tflog.Debug(ctx, fmt.Sprintf(
+		tflog.Warn(ctx, fmt.Sprintf(
 			"Transient error detected, retrying request (attempt=%d, backoff=%s, err=%v)",
 			attempt, backoff, err,
 		))

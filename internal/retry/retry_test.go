@@ -231,3 +231,43 @@ func ExampleDo_networkErrorRetry() {
 
 	// Output: Network operation succeeded after 2 attempts
 }
+
+// TestDoWithTimeout_Success tests that DoWithTimeout works with custom timeout
+func TestDoWithTimeout_Success(t *testing.T) {
+	callCount := 0
+	fn := func(ctx context.Context) (int, error) {
+		callCount++
+		return 200, nil
+	}
+
+	err := DoWithTimeout(context.Background(), 5*time.Second, nil, fn)
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	if callCount != 1 {
+		t.Errorf("Expected 1 call, got: %d", callCount)
+	}
+}
+
+// TestDoWithTimeout_CustomTimeout tests that custom timeout is respected
+func TestDoWithTimeout_CustomTimeout(t *testing.T) {
+	callCount := 0
+	fn := func(ctx context.Context) (int, error) {
+		callCount++
+		<-ctx.Done()
+		return 500, ctx.Err()
+	}
+
+	isRetryable := func(err error) bool {
+		return true
+	}
+
+	// Use a very short timeout
+	err := DoWithTimeout(context.Background(), 500*time.Millisecond, isRetryable, fn)
+	if err == nil {
+		t.Error("Expected timeout error, got nil")
+	}
+	if err.Error() != retryTimeoutMsg {
+		t.Errorf("Expected timeout message, got: %v", err)
+	}
+}
