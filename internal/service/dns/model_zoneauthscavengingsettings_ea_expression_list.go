@@ -61,6 +61,7 @@ var ZoneauthscavengingsettingsEaExpressionListResourceSchemaAttributes = map[str
 	},
 	"op2_type": schema.StringAttribute{
 		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("FIELD", "LIST", "STRING"),
 		},

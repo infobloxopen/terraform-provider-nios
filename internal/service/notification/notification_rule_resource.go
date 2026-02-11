@@ -12,6 +12,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -20,6 +21,7 @@ var readableAttributesForNotificationRule = "all_members,comment,disable,enable_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &NotificationRuleResource{}
 var _ resource.ResourceWithImportState = &NotificationRuleResource{}
+var _ resource.ResourceWithValidateConfig = &NotificationRuleResource{}
 
 func NewNotificationRuleResource() resource.Resource {
 	return &NotificationRuleResource{}
@@ -106,6 +108,7 @@ func (r *NotificationRuleResource) Read(ctx context.Context, req resource.ReadRe
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForNotificationRule).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// Handle not found case
@@ -184,6 +187,25 @@ func (r *NotificationRuleResource) Delete(ctx context.Context, req resource.Dele
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete NotificationRule, got error: %s", err))
 		return
+	}
+}
+
+func (r *NotificationRuleResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data NotificationRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Validate scheduled_event configuration
+	if !data.ScheduledEvent.IsNull() && !data.ScheduledEvent.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.ScheduledEvent,
+			"",
+			path.Root("scheduled_event"),
+			&resp.Diagnostics,
+		)
 	}
 }
 

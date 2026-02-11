@@ -19,7 +19,7 @@ terraform {
   required_providers {
     nios = {
       source  = "infobloxopen/nios"
-      version = "1.0.0"
+      version = "1.1.0"
     }
   }
 }
@@ -40,4 +40,6 @@ provider "nios" {
 - `nios_host_url` (String)
 - `nios_password` (String)
 - `nios_username` (String)
+- `proxy_search` (String) Proxy search mode. Allowed values: LOCAL (default), GM.
+- `proxy_url` (String) Proxy URL to connect to Infoblox NIOS.
 - `retry_timeout` (Number) Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.

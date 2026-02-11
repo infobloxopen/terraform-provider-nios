@@ -5,16 +5,19 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
@@ -47,6 +50,8 @@ type NIOSProviderModel struct {
 	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
 	NIOSUsername types.String `tfsdk:"nios_username"`
 	NIOSPassword types.String `tfsdk:"nios_password"`
+	ProxyURL     types.String `tfsdk:"proxy_url"`
+	ProxySearch  types.String `tfsdk:"proxy_search"`
 	RetryTimeout types.Int64  `tfsdk:"retry_timeout"`
 }
 
@@ -67,6 +72,17 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			},
 			"nios_password": schema.StringAttribute{
 				Optional: true,
+			},
+			"proxy_url": schema.StringAttribute{
+				Description: "Proxy URL to connect to Infoblox NIOS.",
+				Optional:    true,
+			},
+			"proxy_search": schema.StringAttribute{
+				Optional:    true,
+				Description: "Proxy search mode. Allowed values: LOCAL (default), GM.",
+				Validators: []validator.String{
+					stringvalidator.OneOf("LOCAL", "GM"),
+				},
 			},
 			"retry_timeout": schema.Int64Attribute{
 				Optional:    true,
@@ -91,7 +107,11 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithNIOSPassword(data.NIOSPassword.ValueString()),
 		option.WithNIOSHostUrl(data.NIOSHostURL.ValueString()),
 		option.WithDebug(true),
+		option.WithProxyURL(data.ProxyURL.ValueString()),
 	)
+
+	// Set ProxySearch configuration
+	config.SetProxySearch(data.ProxySearch.ValueString())
 
 	// Set global retry timeout if specified
 	if !data.RetryTimeout.IsNull() && !data.RetryTimeout.IsUnknown() {

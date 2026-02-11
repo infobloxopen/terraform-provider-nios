@@ -13,6 +13,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -148,6 +149,7 @@ func (r *SuperhostResource) Read(ctx context.Context, req resource.ReadRequest, 
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForSuperhost).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -224,6 +226,7 @@ func (r *SuperhostResource) ReadByExtAttrs(ctx context.Context, data *SuperhostM
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForSuperhost).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Superhost by extattrs, got error: %s", err))

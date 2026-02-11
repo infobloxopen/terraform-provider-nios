@@ -50,8 +50,8 @@ resource "nios_grid_extensibleattributedef" "extensibleattributedef_with_additio
 - `default_value` (String) Default value used to pre-populate the attribute value in the GUI. For email, URL, and string types, the value is a string with a maximum of 256 characters. For an integer, the value is an integer from -2147483648 through 2147483647. For a date, the value is the number of seconds that have elapsed since January 1st, 1970 UTC.
 - `flags` (String) This field contains extensible attribute flags. Possible values: (A)udited, (C)loud API, Cloud (G)master, (I)nheritable, (L)isted, (M)andatory value, MGM (P)rivate, (R)ead Only, (S)ort enum values, Multiple (V)alues If there are two or more flags in the field, you must list them according to the order they are listed above. For example, 'CR' is a valid value for the 'flags' field because C = Cloud API is listed before R = Read only. However, the value 'RC' is invalid because the order for the 'flags' field is broken.
 - `list_values` (Attributes List) List of Values. Applicable if the extensible attribute type is ENUM. (see [below for nested schema](#nestedatt--list_values))
-- `max` (Number) Maximum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER.
-- `min` (Number) Minimum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER.
+- `max` (Number) Maximum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER. Maximum value can only be updated if set while EA creation. New maximum must be greater than the previous value, Otherwise modification is not allowed.
+- `min` (Number) Minimum allowed value of extensible attribute. Applicable if the extensible attribute type is INTEGER. Minimum value can only be updated if set while EA creation. New minimum must be lesser than the previous value. Otherwise modification is not allowed.
 
 ### Read-Only
 

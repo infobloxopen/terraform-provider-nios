@@ -13,6 +13,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -137,6 +138,7 @@ func (r *NetworkcontainerResource) Read(ctx context.Context, req resource.ReadRe
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -212,6 +214,7 @@ func (r *NetworkcontainerResource) ReadByExtAttrs(ctx context.Context, data *Net
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForNetworkcontainer).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Networkcontainer by extattrs, got error: %s", err))
@@ -460,6 +463,46 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 						optionName),
 				)
 			}
+		}
+	}
+
+	// Validate discovery_blackout_setting blackout_schedule
+	if !data.DiscoveryBlackoutSetting.IsNull() && !data.DiscoveryBlackoutSetting.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.DiscoveryBlackoutSetting,
+			"blackout_schedule",
+			path.Root("discovery_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
+	// Validate port_control_blackout_setting blackout_schedule
+	if !data.PortControlBlackoutSetting.IsNull() && !data.PortControlBlackoutSetting.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.PortControlBlackoutSetting,
+			"blackout_schedule",
+			path.Root("port_control_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
+	// discovery_basic_poll_settings can be set only when use_discovery_basic_polling_settings is true
+	if !data.DiscoveryBasicPollSettings.IsNull() && !data.DiscoveryBasicPollSettings.IsUnknown() {
+		if !data.UseDiscoveryBasicPollingSettings.IsNull() && !data.UseDiscoveryBasicPollingSettings.IsUnknown() && !data.UseDiscoveryBasicPollingSettings.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Discovery Basic Poll Settings Not Allowed",
+				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings cannot be configured. Either set use_discovery_basic_polling_settings to true or remove the discovery_basic_poll_settings block.",
+			)
+		}
+	}
+
+	// same_port_control_discovery_blackout can be set only when use_blackout_setting is true
+	if !data.SamePortControlDiscoveryBlackout.IsNull() && !data.SamePortControlDiscoveryBlackout.IsUnknown() {
+		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Same Port Control Discovery Blackout Not Allowed",
+				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+			)
 		}
 	}
 }

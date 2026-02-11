@@ -200,7 +200,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "The Name of the record.",
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 	},
 	"reclaimable": schema.BoolAttribute{
