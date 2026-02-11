@@ -156,11 +156,13 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		apiRes  *dns.GetViewResponse
 	)
 
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
 	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ViewAPI.
-			Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			Read(ctx, resourceRef).
 			ReturnFieldsPlus(readableAttributesForView).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
