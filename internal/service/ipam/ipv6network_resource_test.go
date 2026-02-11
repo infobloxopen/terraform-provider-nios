@@ -1564,19 +1564,19 @@ func TestAccIpv6networkResource_UseValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkUseValidLifetime(network, "false", "10000"),
+				Config: testAccIpv6networkUseValidLifetime(network, "true", "28000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkUseValidLifetime(network, "true", "28000"),
+				Config: testAccIpv6networkUseValidLifetime(network, "false", "28000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},

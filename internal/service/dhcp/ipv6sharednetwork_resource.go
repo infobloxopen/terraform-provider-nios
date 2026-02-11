@@ -496,9 +496,7 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 	if data.PreferredLifetime.IsNull() || data.PreferredLifetime.IsUnknown() {
 		// validate that valid_lifetime is >= 27000
 		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() &&
-			!data.UseValidLifetime.IsNull() && !data.UseValidLifetime.IsUnknown() &&
-			data.UseValidLifetime.ValueBool() {
-
+			!data.UseValidLifetime.IsNull() && !data.UseValidLifetime.IsUnknown() {
 			if data.ValidLifetime.ValueInt64() < 27000 {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("valid_lifetime"),

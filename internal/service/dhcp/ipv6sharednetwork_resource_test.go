@@ -1295,7 +1295,7 @@ func TestAccIpv6sharednetworkResource_UseValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6sharednetworkUseValidLifetime(name, networks, network1, network2, "24000", "true"),
+				Config: testAccIpv6sharednetworkUseValidLifetime(name, networks, network1, network2, "28000", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
@@ -1303,10 +1303,10 @@ func TestAccIpv6sharednetworkResource_UseValidLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6sharednetworkUseValidLifetime(name, networks, network1, network2, "25000", "true"),
+				Config: testAccIpv6sharednetworkUseValidLifetime(name, networks, network1, network2, "28000", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
