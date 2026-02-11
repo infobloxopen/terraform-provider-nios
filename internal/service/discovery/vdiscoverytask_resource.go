@@ -9,12 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -73,6 +73,25 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	}
 
 	driverType := data.DriverType.ValueString()
+
+	// Validate auto_create_dns_record_type and auto_create_dns_hostname_template requirement when auto_create_dns_record is true
+	if !data.AutoCreateDnsRecord.IsNull() && !data.AutoCreateDnsRecord.IsUnknown() && data.AutoCreateDnsRecord.ValueBool() {
+		// Check auto_create_dns_record_type is provided
+		if data.AutoCreateDnsRecordType.IsNull() || data.AutoCreateDnsRecordType.IsUnknown() || data.AutoCreateDnsRecordType.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"Missing DNS Record Type",
+				"'auto_create_dns_record_type' is required when 'auto_create_dns_record' is set to true.",
+			)
+		}
+
+		// Check auto_create_dns_hostname_template is provided
+		if data.AutoCreateDnsHostnameTemplate.IsNull() || data.AutoCreateDnsHostnameTemplate.IsUnknown() || data.AutoCreateDnsHostnameTemplate.ValueString() == "" {
+			resp.Diagnostics.AddError(
+				"Missing DNS Hostname Template",
+				"'auto_create_dns_hostname_template' is required when 'auto_create_dns_record' is set to true.",
+			)
+		}
+	}
 
 	// Validate cdiscovery_file requirement for UPLOAD policy
 	if !data.MultipleAccountsSyncPolicy.IsNull() && !data.MultipleAccountsSyncPolicy.IsUnknown() {
@@ -194,93 +213,14 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		}
 	}
 
-	// Validate schedule configuration
+	// Validate scheduled_run configuration
 	if !data.ScheduledRun.IsNull() && !data.ScheduledRun.IsUnknown() {
-		var scheduledRun VdiscoverytaskScheduledRunModel
-		diags := data.ScheduledRun.As(ctx, &scheduledRun, basetypes.ObjectAsOptions{})
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Validate recurring_time conflicts
-		if !scheduledRun.RecurringTime.IsNull() && !scheduledRun.RecurringTime.IsUnknown() {
-			if !scheduledRun.HourOfDay.IsNull() || !scheduledRun.Year.IsNull() || !scheduledRun.Month.IsNull() || !scheduledRun.DayOfMonth.IsNull() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("scheduled_run").AtName("recurring_time"),
-					"Invalid Configuration for Schedule",
-					"Cannot set recurring_time if any of hour_of_day, year, month, day_of_month is set",
-				)
-			}
-		}
-
-		// Validate repeat field logic
-		if !scheduledRun.Repeat.IsNull() && !scheduledRun.Repeat.IsUnknown() {
-			repeatValue := scheduledRun.Repeat.ValueString()
-
-			switch repeatValue {
-			case "ONCE":
-				// For ONCE: cannot set weekdays, frequency, every
-				if !scheduledRun.Weekdays.IsNull() || !scheduledRun.Frequency.IsNull() || !scheduledRun.Every.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("scheduled_run").AtName("repeat"),
-						"Invalid Configuration for Repeat",
-						"Cannot set frequency, weekdays and every if repeat is set to ONCE",
-					)
-				}
-				// For ONCE: must set month, day_of_month, hour_of_day, minutes_past_hour
-				if scheduledRun.Month.IsNull() || scheduledRun.DayOfMonth.IsNull() || scheduledRun.HourOfDay.IsNull() || scheduledRun.MinutesPastHour.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("scheduled_run").AtName("repeat"),
-						"Invalid Configuration for Schedule",
-						"If repeat is set to ONCE, then month, day_of_month, hour_of_day and minutes_past_hour must be set",
-					)
-				}
-			case "RECUR":
-				// For RECUR: cannot set month, day_of_month, year
-				if !scheduledRun.Month.IsNull() || !scheduledRun.DayOfMonth.IsNull() || !scheduledRun.Year.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("scheduled_run").AtName("repeat"),
-						"Invalid Configuration for Repeat",
-						"Cannot set month, day_of_month and year if repeat is set to RECUR",
-					)
-				}
-
-				// For RECUR: must set frequency, hour_of_day, minutes_past_hour
-				if scheduledRun.Frequency.IsNull() || scheduledRun.HourOfDay.IsNull() || scheduledRun.MinutesPastHour.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("scheduled_run").AtName("repeat"),
-						"Invalid Configuration for Schedule",
-						"If repeat is set to RECUR, then frequency, hour_of_day and minutes_past_hour must be set",
-					)
-				}
-
-				// Handle weekdays validation based on frequency for RECUR only
-				if !scheduledRun.Frequency.IsNull() && !scheduledRun.Frequency.IsUnknown() {
-					frequencyValue := scheduledRun.Frequency.ValueString()
-
-					if frequencyValue == "WEEKLY" {
-						// WEEKLY requires weekdays
-						if scheduledRun.Weekdays.IsNull() || scheduledRun.Weekdays.IsUnknown() {
-							resp.Diagnostics.AddAttributeError(
-								path.Root("scheduled_run").AtName("weekdays"),
-								"Invalid Configuration for Weekdays",
-								"Weekdays must be set if Frequency is set to WEEKLY",
-							)
-						}
-					} else {
-						// Non-WEEKLY cannot have weekdays
-						if !scheduledRun.Weekdays.IsNull() && !scheduledRun.Weekdays.IsUnknown() {
-							resp.Diagnostics.AddAttributeError(
-								path.Root("scheduled_run").AtName("weekdays"),
-								"Invalid Configuration for Weekdays",
-								"Weekdays can only be set if Frequency is set to WEEKLY",
-							)
-						}
-					}
-				}
-			}
-		}
+		utils.ValidateScheduleConfig(
+			data.ScheduledRun,
+			"",
+			path.Root("scheduled_run"),
+			&resp.Diagnostics,
+		)
 	}
 
 	if !data.UseIdentity.IsNull() && !data.UseIdentity.IsUnknown() && data.UseIdentity.ValueBool() {
@@ -392,6 +332,7 @@ func (r *VdiscoverytaskResource) Read(ctx context.Context, req resource.ReadRequ
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 		// Handle not found case

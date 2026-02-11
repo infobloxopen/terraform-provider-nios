@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -78,6 +78,13 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 			"Invalid Configuration",
 			"`use_disable_concurrent_login` must be set to true when `disable_concurrent_login` is used.",
 		)
+	}
+
+	// Check if password_setting is set and use_password_setting is false
+	if !config.PasswordSetting.IsNull() && !config.PasswordSetting.IsUnknown() && !config.UsePasswordSetting.ValueBool() {
+		resp.Diagnostics.AddAttributeError(path.Root("password_setting"),
+			"Invalid Configuration",
+			"`use_password_setting` must be set to true when `password_setting` is used.")
 	}
 
 	// Skip validation if UserAccess is not provided
@@ -212,6 +219,7 @@ func (r *AdmingroupResource) Read(ctx context.Context, req resource.ReadRequest,
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForAdmingroup).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -287,6 +295,7 @@ func (r *AdmingroupResource) ReadByExtAttrs(ctx context.Context, data *Admingrou
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForAdmingroup).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Admingroup by extattrs, got error: %s", err))

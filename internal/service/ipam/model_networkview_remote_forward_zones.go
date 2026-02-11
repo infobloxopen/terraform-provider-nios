@@ -45,7 +45,7 @@ var NetworkviewRemoteForwardZonesResourceSchemaAttributes = map[string]schema.At
 	"fqdn": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The FQDN of the remote server.",
 	},

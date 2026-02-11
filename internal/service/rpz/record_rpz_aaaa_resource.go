@@ -12,6 +12,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -82,7 +83,7 @@ func (r *RecordRpzAaaaResource) Create(ctx context.Context, req resource.CreateR
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzAaaaAPI.
 		Create(ctx).
-		RecordRpzAaaa(*data.Expand(ctx, &resp.Diagnostics, true)).
+		RecordRpzAaaa(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
 		ReturnAsObject(1).
 		Execute()
@@ -127,6 +128,7 @@ func (r *RecordRpzAaaaResource) Read(ctx context.Context, req resource.ReadReque
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -203,6 +205,7 @@ func (r *RecordRpzAaaaResource) ReadByExtAttrs(ctx context.Context, data *Record
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordRpzAaaa by extattrs, got error: %s", err))
@@ -278,7 +281,7 @@ func (r *RecordRpzAaaaResource) Update(ctx context.Context, req resource.UpdateR
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzAaaaAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzAaaa(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordRpzAaaa(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
 		ReturnAsObject(1).
 		Execute()

@@ -15,6 +15,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -153,6 +154,7 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForIpv6network).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -228,6 +230,7 @@ func (r *Ipv6networkResource) ReadByExtAttrs(ctx context.Context, data *Ipv6netw
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForIpv6network).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6network by extattrs, got error: %s", err))
@@ -595,6 +598,36 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			"Invalid DDNS Configuration",
 			"You cannot set 'ddns_server_always_updates' to false when 'ddns_enable_option_fqdn' is false.",
 		)
+	}
+
+	// Validate discovery_blackout_setting blackout_schedule
+	if !data.DiscoveryBlackoutSetting.IsNull() && !data.DiscoveryBlackoutSetting.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.DiscoveryBlackoutSetting,
+			"blackout_schedule",
+			path.Root("discovery_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
+	// Validate port_control_blackout_setting blackout_schedule
+	if !data.PortControlBlackoutSetting.IsNull() && !data.PortControlBlackoutSetting.IsUnknown() {
+		utils.ValidateScheduleConfig(
+			data.PortControlBlackoutSetting,
+			"blackout_schedule",
+			path.Root("port_control_blackout_setting"),
+			&resp.Diagnostics,
+		)
+	}
+
+	// same_port_control_discovery_blackout can be set only when use_blackout_setting is true
+	if !data.SamePortControlDiscoveryBlackout.IsNull() && !data.SamePortControlDiscoveryBlackout.IsUnknown() {
+		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Same Port Control Discovery Blackout Not Allowed",
+				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+			)
+		}
 	}
 }
 
