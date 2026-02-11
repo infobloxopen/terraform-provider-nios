@@ -210,23 +210,19 @@ func (r *NotificationRestEndpointResource) Read(ctx context.Context, req resourc
 		return
 	}
 
-	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	apiRes, httpRes, err := r.client.NotificationAPI.
 		NotificationRestEndpointAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			// Resource no longer exists, remove from state
+			resp.State.RemoveResource(ctx)
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NotificationRestEndpoint, got error: %s", err))
@@ -234,29 +230,6 @@ func (r *NotificationRestEndpointResource) Read(ctx context.Context, req resourc
 	}
 
 	res := apiRes.GetNotificationRestEndpointResponseObjectAsResult.GetResult()
-
-	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
-	if !ok {
-		apiTerraformId.Value = ""
-	}
-
-	if associateInternalId == nil {
-		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-		if stateExtAttrs == nil {
-			resp.Diagnostics.AddError(
-				"Missing Internal ID",
-				"Unable to read NotificationRestEndpoint because the internal ID (from extattrs_all) is missing or invalid.",
-			)
-			return
-		}
-
-		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-		if apiTerraformId.Value != stateTerraformId.Value {
-			if r.ReadByExtAttrs(ctx, &data, resp) {
-				return
-			}
-		}
-	}
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
@@ -270,61 +243,6 @@ func (r *NotificationRestEndpointResource) Read(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *NotificationRestEndpointResource) ReadByExtAttrs(ctx context.Context, data *NotificationRestEndpointModel, resp *resource.ReadResponse) bool {
-	var diags diag.Diagnostics
-
-	if data.ExtAttrsAll.IsNull() {
-		return false
-	}
-
-	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if diags.HasError() {
-		return false
-	}
-
-	internalId := internalIdExtAttr[terraformInternalIDEA].Value
-	if internalId == "" {
-		return false
-	}
-
-	idMap := map[string]interface{}{
-		terraformInternalIDEA: internalId,
-	}
-
-	apiRes, _, err := r.client.NotificationAPI.
-		NotificationRestEndpointAPI.
-		List(ctx).
-		Extattrfilter(idMap).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read NotificationRestEndpoint by extattrs, got error: %s", err))
-		return true
-	}
-
-	results := apiRes.ListNotificationRestEndpointResponseObject.GetResult()
-
-	// If the list is empty, the resource no longer exists so remove it from state
-	if len(results) == 0 {
-		resp.State.RemoveResource(ctx)
-		return true
-	}
-
-	res := results[0]
-
-	// Remove inherited external attributes from extattrs
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		return true
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
-	return true
-}
 
 func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
@@ -341,7 +259,7 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 		return
 	}
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -373,7 +291,7 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 
 	apiRes, _, err := r.client.NotificationAPI.
 		NotificationRestEndpointAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		NotificationRestEndpoint(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
 		ReturnAsObject(1).
@@ -413,7 +331,7 @@ func (r *NotificationRestEndpointResource) Delete(ctx context.Context, req resou
 
 	httpRes, err := r.client.NotificationAPI.
 		NotificationRestEndpointAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -425,7 +343,7 @@ func (r *NotificationRestEndpointResource) Delete(ctx context.Context, req resou
 }
 
 func (r *NotificationRestEndpointResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

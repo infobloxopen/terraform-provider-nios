@@ -62,6 +62,7 @@ func TestAccAdminuserDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckAdminuserResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "admin_groups", dataSourceName, "result.0.admin_groups"),
 		resource.TestCheckResourceAttrPair(resourceName, "auth_method", dataSourceName, "result.0.auth_method"),
 		resource.TestCheckResourceAttrPair(resourceName, "auth_type", dataSourceName, "result.0.auth_type"),

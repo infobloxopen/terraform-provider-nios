@@ -14,7 +14,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForIpv6networktemplate = "allow_any_netmask,auto_create_reversezone,cidr,cloud_api_compatible,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,delegated_member,domain_name,domain_name_servers,enable_ddns,extattrs,fixed_address_templates,ipv6prefix,logic_filter_rules,members,name,options,preferred_lifetime,range_templates,recycle_leases,rir,rir_organization,rir_registration_action,rir_registration_status,send_rir_request,update_dns_on_lease_renewal,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_domain_name,use_domain_name_servers,use_enable_ddns,use_logic_filter_rules,use_options,use_preferred_lifetime,use_recycle_leases,use_update_dns_on_lease_renewal,use_valid_lifetime,valid_lifetime"
@@ -116,23 +115,19 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		Ipv6networktemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			// Resource no longer exists, remove from state
+			resp.State.RemoveResource(ctx)
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networktemplate, got error: %s", err))
@@ -140,29 +135,6 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	res := apiRes.GetIpv6networktemplateResponseObjectAsResult.GetResult()
-
-	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
-	if !ok {
-		apiTerraformId.Value = ""
-	}
-
-	if associateInternalId == nil {
-		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-		if stateExtAttrs == nil {
-			resp.Diagnostics.AddError(
-				"Missing Internal ID",
-				"Unable to read Ipv6networktemplate because the internal ID (from extattrs_all) is missing or invalid.",
-			)
-			return
-		}
-
-		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-		if apiTerraformId.Value != stateTerraformId.Value {
-			if r.ReadByExtAttrs(ctx, &data, resp) {
-				return
-			}
-		}
-	}
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
@@ -176,61 +148,6 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *Ipv6networktemplateResource) ReadByExtAttrs(ctx context.Context, data *Ipv6networktemplateModel, resp *resource.ReadResponse) bool {
-	var diags diag.Diagnostics
-
-	if data.ExtAttrsAll.IsNull() {
-		return false
-	}
-
-	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if diags.HasError() {
-		return false
-	}
-
-	internalId := internalIdExtAttr[terraformInternalIDEA].Value
-	if internalId == "" {
-		return false
-	}
-
-	idMap := map[string]interface{}{
-		terraformInternalIDEA: internalId,
-	}
-
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networktemplateAPI.
-		List(ctx).
-		Extattrfilter(idMap).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networktemplate by extattrs, got error: %s", err))
-		return true
-	}
-
-	results := apiRes.ListIpv6networktemplateResponseObject.GetResult()
-
-	// If the list is empty, the resource no longer exists so remove it from state
-	if len(results) == 0 {
-		resp.State.RemoveResource(ctx)
-		return true
-	}
-
-	res := results[0]
-
-	// Remove inherited external attributes from extattrs
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		return true
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
-	return true
-}
 
 func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
@@ -244,7 +161,7 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -277,7 +194,7 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 
 	apiRes, _, err := r.client.IPAMAPI.
 		Ipv6networktemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ipv6networktemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 		ReturnAsObject(1).
@@ -316,7 +233,7 @@ func (r *Ipv6networktemplateResource) Delete(ctx context.Context, req resource.D
 
 	httpRes, err := r.client.IPAMAPI.
 		Ipv6networktemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -475,6 +392,6 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 }
 
 func (r *Ipv6networktemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

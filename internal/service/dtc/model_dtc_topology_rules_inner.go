@@ -127,6 +127,6 @@ func (m *DtcTopologyRulesInnerModel) Flatten(ctx context.Context, from *dtc.DtcT
 	m.DestinationLink = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestinationLink)
 	m.ReturnType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.ReturnType)
 	m.Topology = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.Topology)
-    m.Valid = types.BoolPointerValue(from.DtcTopologyRulesInnerOneOf1.Valid)
+	m.Valid = types.BoolPointerValue(from.DtcTopologyRulesInnerOneOf1.Valid)
 	m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, from.DtcTopologyRulesInnerOneOf1.Sources, DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes, diags, FlattenDtcTopologyRulesInnerOneOf1SourcesInner)
 }

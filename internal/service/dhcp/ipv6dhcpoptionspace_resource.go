@@ -16,7 +16,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 const (
@@ -112,7 +111,7 @@ func (r *Ipv6dhcpoptionspaceResource) Read(ctx context.Context, req resource.Rea
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6dhcpoptionspaceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -148,7 +147,7 @@ func (r *Ipv6dhcpoptionspaceResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -156,7 +155,7 @@ func (r *Ipv6dhcpoptionspaceResource) Update(ctx context.Context, req resource.U
 
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6dhcpoptionspaceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ipv6dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 		ReturnAsObject(1).
@@ -187,7 +186,7 @@ func (r *Ipv6dhcpoptionspaceResource) Delete(ctx context.Context, req resource.D
 	err := retry.RetryContext(ctx, Ipv6OptionSpaceOperationTimeout, func() *retry.RetryError {
 		httpRes, err := r.client.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
-			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			Delete(ctx, data.Uuid.ValueString()).
 			Execute()
 		if err != nil {
 			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForRecordAlias = "aws_rte53_record_info,cloud_info,comment,creator,disable,dns_name,dns_target_name,extattrs,last_queried,name,target_name,target_type,ttl,use_ttl,view,zone"
@@ -115,23 +114,19 @@ func (r *RecordAliasResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordAliasAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForRecordAlias).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			// Resource no longer exists, remove from state
+			resp.State.RemoveResource(ctx)
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordAlias, got error: %s", err))
@@ -139,29 +134,6 @@ func (r *RecordAliasResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	res := apiRes.GetRecordAliasResponseObjectAsResult.GetResult()
-
-	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
-	if !ok {
-		apiTerraformId.Value = ""
-	}
-
-	if associateInternalId == nil {
-		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-		if stateExtAttrs == nil {
-			resp.Diagnostics.AddError(
-				"Missing Internal ID",
-				"Unable to read RecordAlias because the internal ID (from extattrs_all) is missing or invalid.",
-			)
-			return
-		}
-
-		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-		if apiTerraformId.Value != stateTerraformId.Value {
-			if r.ReadByExtAttrs(ctx, &data, resp) {
-				return
-			}
-		}
-	}
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
@@ -173,62 +145,6 @@ func (r *RecordAliasResource) Read(ctx context.Context, req resource.ReadRequest
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func (r *RecordAliasResource) ReadByExtAttrs(ctx context.Context, data *RecordAliasModel, resp *resource.ReadResponse) bool {
-	var diags diag.Diagnostics
-
-	if data.ExtAttrsAll.IsNull() {
-		return false
-	}
-
-	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if diags.HasError() {
-		return false
-	}
-
-	internalId := internalIdExtAttr[terraformInternalIDEA].Value
-	if internalId == "" {
-		return false
-	}
-
-	idMap := map[string]interface{}{
-		terraformInternalIDEA: internalId,
-	}
-
-	apiRes, _, err := r.client.DNSAPI.
-		RecordAliasAPI.
-		List(ctx).
-		Extattrfilter(idMap).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForRecordAlias).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordAlias by extattrs, got error: %s", err))
-		return true
-	}
-
-	results := apiRes.ListRecordAliasResponseObject.GetResult()
-
-	// If the list is empty, the resource no longer exists so remove it from state
-	if len(results) == 0 {
-		resp.State.RemoveResource(ctx)
-		return true
-	}
-
-	res := results[0]
-
-	// Remove inherited external attributes from extattrs
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		return true
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
-	return true
 }
 
 func (r *RecordAliasResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -243,7 +159,7 @@ func (r *RecordAliasResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	planExtAttrs := data.ExtAttrs
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -275,7 +191,7 @@ func (r *RecordAliasResource) Update(ctx context.Context, req resource.UpdateReq
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordAliasAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		RecordAlias(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordAlias).
 		ReturnAsObject(1).
@@ -315,7 +231,7 @@ func (r *RecordAliasResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.DNSAPI.
 		RecordAliasAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -327,6 +243,6 @@ func (r *RecordAliasResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *RecordAliasResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

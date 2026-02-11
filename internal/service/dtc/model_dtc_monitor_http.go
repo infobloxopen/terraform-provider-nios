@@ -27,6 +27,7 @@ import (
 
 type DtcMonitorHttpModel struct {
 	Ref                 types.String `tfsdk:"ref"`
+	Uuid                types.String `tfsdk:"uuid"`
 	Ciphers             types.String `tfsdk:"ciphers"`
 	ClientCert          types.String `tfsdk:"client_cert"`
 	Comment             types.String `tfsdk:"comment"`
@@ -55,6 +56,7 @@ type DtcMonitorHttpModel struct {
 
 var DtcMonitorHttpAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
+	"uuid":                  types.StringType,
 	"ciphers":               types.StringType,
 	"client_cert":           types.StringType,
 	"comment":               types.StringType,
@@ -85,6 +87,10 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"ciphers": schema.StringAttribute{
 		Optional:            true,
@@ -312,6 +318,7 @@ func (m *DtcMonitorHttpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorH
 		*m = DtcMonitorHttpModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Ciphers = flex.FlattenStringPointer(from.Ciphers)
 	m.ClientCert = flex.FlattenStringPointer(from.ClientCert)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

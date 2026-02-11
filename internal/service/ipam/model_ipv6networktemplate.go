@@ -32,6 +32,7 @@ import (
 
 type Ipv6networktemplateModel struct {
 	Ref                        types.String `tfsdk:"ref"`
+	Uuid                       types.String `tfsdk:"uuid"`
 	AllowAnyNetmask            types.Bool   `tfsdk:"allow_any_netmask"`
 	AutoCreateReversezone      types.Bool   `tfsdk:"auto_create_reversezone"`
 	Cidr                       types.Int64  `tfsdk:"cidr"`
@@ -81,6 +82,7 @@ type Ipv6networktemplateModel struct {
 
 var Ipv6networktemplateAttrTypes = map[string]attr.Type{
 	"ref":                             types.StringType,
+	"uuid":                            types.StringType,
 	"allow_any_netmask":               types.BoolType,
 	"auto_create_reversezone":         types.BoolType,
 	"cidr":                            types.Int64Type,
@@ -132,6 +134,10 @@ var Ipv6networktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"allow_any_netmask": schema.BoolAttribute{
 		Optional:            true,
@@ -560,6 +566,7 @@ func (m *Ipv6networktemplateModel) Flatten(ctx context.Context, from *ipam.Ipv6n
 		*m = Ipv6networktemplateModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AllowAnyNetmask = types.BoolPointerValue(from.AllowAnyNetmask)
 	m.AutoCreateReversezone = types.BoolPointerValue(from.AutoCreateReversezone)
 	m.Cidr = flex.FlattenInt64Pointer(from.Cidr)

@@ -20,6 +20,7 @@ import (
 
 type ZoneAuthAllowQueryModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	Address        types.String `tfsdk:"address"`
 	Struct         types.String `tfsdk:"struct"`
 	Permission     types.String `tfsdk:"permission"`
@@ -31,6 +32,7 @@ type ZoneAuthAllowQueryModel struct {
 
 var ZoneAuthAllowQueryAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":              types.StringType,
 	"address":           types.StringType,
 	"struct":            types.StringType,
 	"permission":        types.StringType,
@@ -63,6 +65,10 @@ var ZoneAuthAllowQueryResourceSchemaAttributes = map[string]schema.Attribute{
 			),
 		},
 		MarkdownDescription: "The reference to the Named ACL object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"address": schema.StringAttribute{
 		Optional:            true,
@@ -138,6 +144,7 @@ func (m *ZoneAuthAllowQueryModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &dns.ZoneAuthAllowQuery{
 		Ref:            flex.ExpandStringPointer(m.Ref),
+		Uuid:           flex.ExpandStringPointer(m.Uuid),
 		Address:        flex.ExpandStringPointer(m.Address),
 		Struct:         flex.ExpandStringPointer(m.Struct),
 		Permission:     flex.ExpandStringPointer(m.Permission),
@@ -168,6 +175,7 @@ func (m *ZoneAuthAllowQueryModel) Flatten(ctx context.Context, from *dns.ZoneAut
 		*m = ZoneAuthAllowQueryModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)

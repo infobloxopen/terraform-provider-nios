@@ -20,6 +20,7 @@ import (
 
 type RulesetModel struct {
 	Ref           types.String `tfsdk:"ref"`
+	Uuid          types.String `tfsdk:"uuid"`
 	Comment       types.String `tfsdk:"comment"`
 	Disabled      types.Bool   `tfsdk:"disabled"`
 	Name          types.String `tfsdk:"name"`
@@ -29,6 +30,7 @@ type RulesetModel struct {
 
 var RulesetAttrTypes = map[string]attr.Type{
 	"ref":            types.StringType,
+	"uuid":           types.StringType,
 	"comment":        types.StringType,
 	"disabled":       types.BoolType,
 	"name":           types.StringType,
@@ -40,6 +42,10 @@ var RulesetResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -113,6 +119,7 @@ func (m *RulesetModel) Flatten(ctx context.Context, from *misc.Ruleset, diags *d
 		*m = RulesetModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disabled = types.BoolPointerValue(from.Disabled)
 	m.Name = flex.FlattenStringPointer(from.Name)

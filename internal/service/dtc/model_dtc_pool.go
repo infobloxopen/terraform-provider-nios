@@ -28,6 +28,7 @@ import (
 
 type DtcPoolModel struct {
 	Ref                      types.String                     `tfsdk:"ref"`
+	Uuid                     types.String                     `tfsdk:"uuid"`
 	AutoConsolidatedMonitors types.Bool                       `tfsdk:"auto_consolidated_monitors"`
 	Availability             types.String                     `tfsdk:"availability"`
 	Comment                  types.String                     `tfsdk:"comment"`
@@ -52,6 +53,7 @@ type DtcPoolModel struct {
 
 var DtcPoolAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
+	"uuid":                       types.StringType,
 	"auto_consolidated_monitors": types.BoolType,
 	"availability":               types.StringType,
 	"comment":                    types.StringType,
@@ -78,6 +80,10 @@ var DtcPoolResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"auto_consolidated_monitors": schema.BoolAttribute{
 		Optional:            true,
@@ -270,6 +276,7 @@ func (m *DtcPoolModel) Flatten(ctx context.Context, from *dtc.DtcPool, diags *di
 		*m = DtcPoolModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AutoConsolidatedMonitors = types.BoolPointerValue(from.AutoConsolidatedMonitors)
 	m.Availability = flex.FlattenStringPointer(from.Availability)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

@@ -12,7 +12,6 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForIpv6rangetemplate = "cloud_api_compatible,comment,delegated_member,exclude,logic_filter_rules,member,name,number_of_addresses,offset,option_filter_rules,recycle_leases,server_association_type,use_logic_filter_rules,use_recycle_leases"
@@ -141,7 +140,7 @@ func (r *Ipv6rangetemplateResource) Read(ctx context.Context, req resource.ReadR
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6rangetemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForIpv6rangetemplate).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -177,7 +176,7 @@ func (r *Ipv6rangetemplateResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -185,7 +184,7 @@ func (r *Ipv6rangetemplateResource) Update(ctx context.Context, req resource.Upd
 
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6rangetemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Ipv6rangetemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6rangetemplate).
 		ReturnAsObject(1).
@@ -215,7 +214,7 @@ func (r *Ipv6rangetemplateResource) Delete(ctx context.Context, req resource.Del
 
 	httpRes, err := r.client.DHCPAPI.
 		Ipv6rangetemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

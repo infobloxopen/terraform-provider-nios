@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForDtcRecordSrv = "comment,disable,dtc_server,name,port,priority,target,ttl,use_ttl,weight"
@@ -104,7 +103,7 @@ func (r *DtcRecordSrvResource) Read(ctx context.Context, req resource.ReadReques
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcRecordSrvAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForDtcRecordSrv).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -140,7 +139,7 @@ func (r *DtcRecordSrvResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -148,7 +147,7 @@ func (r *DtcRecordSrvResource) Update(ctx context.Context, req resource.UpdateRe
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcRecordSrvAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		DtcRecordSrv(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForDtcRecordSrv).
 		ReturnAsObject(1).
@@ -178,7 +177,7 @@ func (r *DtcRecordSrvResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	httpRes, err := r.client.DTCAPI.
 		DtcRecordSrvAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

@@ -112,7 +112,7 @@ func (r *Awsrte53taskgroupResource) Read(ctx context.Context, req resource.ReadR
 
 	apiRes, httpRes, err := r.client.CloudAPI.
 		Awsrte53taskgroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForAwsrte53taskgroup).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -155,7 +155,7 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 		}
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -163,7 +163,7 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 
 	apiRes, _, err := r.client.CloudAPI.
 		Awsrte53taskgroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Awsrte53taskgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForAwsrte53taskgroup).
 		ReturnAsObject(1).
@@ -193,7 +193,7 @@ func (r *Awsrte53taskgroupResource) Delete(ctx context.Context, req resource.Del
 
 	httpRes, err := r.client.CloudAPI.
 		Awsrte53taskgroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {

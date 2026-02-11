@@ -114,7 +114,7 @@ func TestAccDtcMonitorTcpResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorTcpExtAttrs(name , port , map[string]string{
+				Config: testAccDtcMonitorTcpExtAttrs(name, port, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -124,7 +124,7 @@ func TestAccDtcMonitorTcpResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorTcpExtAttrs(name , port , map[string]string{
+				Config: testAccDtcMonitorTcpExtAttrs(name, port, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -149,7 +149,7 @@ func TestAccDtcMonitorTcpResource_Interval(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorTcpInterval(name , port , 4),
+				Config: testAccDtcMonitorTcpInterval(name, port, 4),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "interval", "4"),
@@ -157,7 +157,7 @@ func TestAccDtcMonitorTcpResource_Interval(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorTcpInterval(name , port , 10),
+				Config: testAccDtcMonitorTcpInterval(name, port, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "interval", "10"),
@@ -189,7 +189,7 @@ func TestAccDtcMonitorTcpResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorTcpName(nameUpdate , port ),
+				Config: testAccDtcMonitorTcpName(nameUpdate, port),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
@@ -213,7 +213,7 @@ func TestAccDtcMonitorTcpResource_Port(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorTcpPort(name , port),
+				Config: testAccDtcMonitorTcpPort(name, port),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", fmt.Sprintf("%d", port)),
@@ -221,7 +221,7 @@ func TestAccDtcMonitorTcpResource_Port(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorTcpPort(name , portUpdate),
+				Config: testAccDtcMonitorTcpPort(name, portUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", fmt.Sprintf("%d", portUpdate)),
@@ -244,7 +244,7 @@ func TestAccDtcMonitorTcpResource_RetryDown(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorTcpRetryDown(name , port , 3),
+				Config: testAccDtcMonitorTcpRetryDown(name, port, 3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "3"),
@@ -252,7 +252,7 @@ func TestAccDtcMonitorTcpResource_RetryDown(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorTcpRetryDown(name , port , 5),
+				Config: testAccDtcMonitorTcpRetryDown(name, port, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "5"),
@@ -275,7 +275,7 @@ func TestAccDtcMonitorTcpResource_RetryUp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorTcpRetryUp(name , port , 4),
+				Config: testAccDtcMonitorTcpRetryUp(name, port, 4),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "4"),
@@ -283,7 +283,7 @@ func TestAccDtcMonitorTcpResource_RetryUp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorTcpRetryUp(name , port , 6),
+				Config: testAccDtcMonitorTcpRetryUp(name, port, 6),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "6"),
@@ -306,7 +306,7 @@ func TestAccDtcMonitorTcpResource_Timeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorTcpTimeout(name , port , 30),
+				Config: testAccDtcMonitorTcpTimeout(name, port, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "30"),
@@ -314,7 +314,7 @@ func TestAccDtcMonitorTcpResource_Timeout(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorTcpTimeout(name , port , 40),
+				Config: testAccDtcMonitorTcpTimeout(name, port, 40),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorTcpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "40"),
@@ -392,7 +392,7 @@ resource "nios_dtc_monitor_tcp" "test" {
 `, name, port)
 }
 
-func testAccDtcMonitorTcpComment(name string , port int, comment string) string {
+func testAccDtcMonitorTcpComment(name string, port int, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_comment" {
 	name  = %q
@@ -402,7 +402,7 @@ resource "nios_dtc_monitor_tcp" "test_comment" {
 `, name, port, comment)
 }
 
-func testAccDtcMonitorTcpExtAttrs(name string , port int , extAttrs map[string]string) string {
+func testAccDtcMonitorTcpExtAttrs(name string, port int, extAttrs map[string]string) string {
 	extattrsStr := "{"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf(`%s = %q`, k, v)
@@ -417,7 +417,7 @@ resource "nios_dtc_monitor_tcp" "test_extattrs" {
 `, name, port, extattrsStr)
 }
 
-func testAccDtcMonitorTcpInterval(name string , port int , interval int) string {
+func testAccDtcMonitorTcpInterval(name string, port int, interval int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_interval" {
 	name     = %q
@@ -427,7 +427,7 @@ resource "nios_dtc_monitor_tcp" "test_interval" {
 `, name, port, interval)
 }
 
-func testAccDtcMonitorTcpName(name string , port int ) string {
+func testAccDtcMonitorTcpName(name string, port int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_name" {
     name = %q
@@ -436,7 +436,7 @@ resource "nios_dtc_monitor_tcp" "test_name" {
 `, name, port)
 }
 
-func testAccDtcMonitorTcpPort(name string , port int) string {
+func testAccDtcMonitorTcpPort(name string, port int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_port" {
     name = %q
@@ -445,7 +445,7 @@ resource "nios_dtc_monitor_tcp" "test_port" {
 `, name, port)
 }
 
-func testAccDtcMonitorTcpRetryDown(name string , port int , retryDown int ) string {
+func testAccDtcMonitorTcpRetryDown(name string, port int, retryDown int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_retry_down" {
 	name = %q
@@ -455,7 +455,7 @@ resource "nios_dtc_monitor_tcp" "test_retry_down" {
 `, name, port, retryDown)
 }
 
-func testAccDtcMonitorTcpRetryUp(name string , port int , retryUp int) string {
+func testAccDtcMonitorTcpRetryUp(name string, port int, retryUp int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_retry_up" {
     name = %q
@@ -465,7 +465,7 @@ resource "nios_dtc_monitor_tcp" "test_retry_up" {
 `, name, port, retryUp)
 }
 
-func testAccDtcMonitorTcpTimeout(name string , port int , timeout int) string {
+func testAccDtcMonitorTcpTimeout(name string, port int, timeout int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_tcp" "test_timeout" {
 	name = %q

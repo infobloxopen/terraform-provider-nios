@@ -32,6 +32,7 @@ import (
 
 type IPAllocationModel struct {
 	Ref                      types.String                     `tfsdk:"ref"`
+	Uuid                     types.String                     `tfsdk:"uuid"`
 	Aliases                  internaltypes.UnorderedListValue `tfsdk:"aliases"`
 	AllowTelnet              types.Bool                       `tfsdk:"allow_telnet"`
 	CliCredentials           types.List                       `tfsdk:"cli_credentials"`
@@ -51,7 +52,6 @@ type IPAllocationModel struct {
 	EnableImmediateDiscovery types.Bool                       `tfsdk:"enable_immediate_discovery"`
 	ExtAttrs                 types.Map                        `tfsdk:"extattrs"`
 	ExtAttrsAll              types.Map                        `tfsdk:"extattrs_all"`
-	InternalID               types.String                     `tfsdk:"internal_id"`
 	Ipv4addrs                types.List                       `tfsdk:"ipv4addrs"`
 	Ipv6addrs                types.List                       `tfsdk:"ipv6addrs"`
 	LastQueried              types.Int64                      `tfsdk:"last_queried"`
@@ -74,6 +74,7 @@ type IPAllocationModel struct {
 
 var IPAllocationAttrTypes = map[string]attr.Type{
 	"ref":                        types.StringType,
+	"uuid":                       types.StringType,
 	"aliases":                    internaltypes.UnorderedListOfStringType,
 	"allow_telnet":               types.BoolType,
 	"cli_credentials":            types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostCliCredentialsAttrTypes}},
@@ -93,7 +94,6 @@ var IPAllocationAttrTypes = map[string]attr.Type{
 	"enable_immediate_discovery": types.BoolType,
 	"extattrs":                   types.MapType{ElemType: types.StringType},
 	"extattrs_all":               types.MapType{ElemType: types.StringType},
-	"internal_id":                types.StringType,
 	"ipv4addrs":                  types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostIpv4addrAttrTypes}},
 	"ipv6addrs":                  types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostIpv6addrAttrTypes}},
 	"last_queried":               types.Int64Type,
@@ -118,6 +118,10 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"aliases": schema.ListAttribute{
 		CustomType:          internaltypes.UnorderedListOfStringType,
@@ -255,10 +259,6 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		PlanModifiers: []planmodifier.Map{
 			importmod.AssociateInternalId(),
 		},
-	},
-	"internal_id": schema.StringAttribute{
-		Computed:            true,
-		MarkdownDescription: "Internal ID of the object.",
 	},
 	"ipv4addrs": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -400,6 +400,7 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 	}
 	to := &dns.RecordHost{
 		Ref:                      flex.ExpandStringPointer(m.Ref),
+		Uuid:                     flex.ExpandStringPointer(m.Uuid),
 		Aliases:                  flex.ExpandFrameworkListString(ctx, m.Aliases, diags),
 		AllowTelnet:              flex.ExpandBoolPointer(m.AllowTelnet),
 		CliCredentials:           flex.ExpandFrameworkListNestedBlock(ctx, m.CliCredentials, diags, ExpandRecordHostCliCredentials),
@@ -457,6 +458,7 @@ func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, d
 		*m = IPAllocationModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Aliases = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Aliases, diags)
 	m.AllowTelnet = types.BoolPointerValue(from.AllowTelnet)
 	m.CliCredentials = flex.FlattenFrameworkListNestedBlock(ctx, from.CliCredentials, RecordHostCliCredentialsAttrTypes, diags, FlattenRecordHostCliCredentials)

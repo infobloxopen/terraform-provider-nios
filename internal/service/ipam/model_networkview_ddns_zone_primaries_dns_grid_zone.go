@@ -15,17 +15,23 @@ import (
 )
 
 type NetworkviewDdnsZonePrimariesDnsGridZoneModel struct {
-	Ref types.String `tfsdk:"ref"`
+	Ref  types.String `tfsdk:"ref"`
+	Uuid types.String `tfsdk:"uuid"`
 }
 
 var NetworkviewDdnsZonePrimariesDnsGridZoneAttrTypes = map[string]attr.Type{
-	"ref": types.StringType,
+	"ref":  types.StringType,
+	"uuid": types.StringType,
 }
 
 var NetworkviewDdnsZonePrimariesDnsGridZoneResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The reference to the DNS zone object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 }
 
@@ -70,4 +76,5 @@ func (m *NetworkviewDdnsZonePrimariesDnsGridZoneModel) Flatten(ctx context.Conte
 		*m = NetworkviewDdnsZonePrimariesDnsGridZoneModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 }

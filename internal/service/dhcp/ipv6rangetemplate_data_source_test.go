@@ -39,6 +39,7 @@ func TestAccIpv6rangetemplateDataSource_Filters(t *testing.T) {
 func testAccCheckIpv6rangetemplateResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "cloud_api_compatible", dataSourceName, "result.0.cloud_api_compatible"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "delegated_member", dataSourceName, "result.0.delegated_member"),

@@ -19,6 +19,7 @@ import (
 
 type DhcpoptiondefinitionModel struct {
 	Ref   types.String `tfsdk:"ref"`
+	Uuid  types.String `tfsdk:"uuid"`
 	Code  types.Int64  `tfsdk:"code"`
 	Name  types.String `tfsdk:"name"`
 	Space types.String `tfsdk:"space"`
@@ -27,6 +28,7 @@ type DhcpoptiondefinitionModel struct {
 
 var DhcpoptiondefinitionAttrTypes = map[string]attr.Type{
 	"ref":   types.StringType,
+	"uuid":  types.StringType,
 	"code":  types.Int64Type,
 	"name":  types.StringType,
 	"space": types.StringType,
@@ -37,6 +39,10 @@ var DhcpoptiondefinitionResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The uuid to the object.",
 	},
 	"code": schema.Int64Attribute{
 		Required: true,
@@ -105,6 +111,7 @@ func (m *DhcpoptiondefinitionModel) Flatten(ctx context.Context, from *dhcp.Dhcp
 		*m = DhcpoptiondefinitionModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Code = flex.FlattenInt64Pointer(from.Code)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Space = flex.FlattenStringPointer(from.Space)

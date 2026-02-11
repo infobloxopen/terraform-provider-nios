@@ -13,7 +13,6 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 var readableAttributesForPermission = "group,object,permission,resource_type,role"
@@ -104,7 +103,7 @@ func (r *PermissionResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	apiRes, httpRes, err := r.client.SecurityAPI.
 		PermissionAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, data.Uuid.ValueString()).
 		ReturnFieldsPlus(readableAttributesForPermission).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -140,7 +139,7 @@ func (r *PermissionResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -148,7 +147,7 @@ func (r *PermissionResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	apiRes, _, err := r.client.SecurityAPI.
 		PermissionAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, data.Uuid.ValueString()).
 		Permission(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForPermission).
 		ReturnAsObject(1).
@@ -178,7 +177,7 @@ func (r *PermissionResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	httpRes, err := r.client.SecurityAPI.
 		PermissionAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, data.Uuid.ValueString()).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
