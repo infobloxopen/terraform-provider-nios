@@ -17,6 +17,7 @@ func TestAccRirOrganizationDataSource_Filters(t *testing.T) {
 	resourceName := "nios_rir_organization.test"
 	var v rir.RirOrganization
 	name := acctest.RandomNameWithPrefix("rir-org")
+	id := fmt.Sprintf("ORG-CB%d-IBTEST", acctest.RandomNumber(9999))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -24,7 +25,13 @@ func TestAccRirOrganizationDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRirOrganizationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRirOrganizationDataSourceConfigFilters("EXT_ATTRS_REPLACE_ME", "ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
+				Config: testAccRirOrganizationDataSourceConfigFilters(map[string]string{
+					"RIPE Admin Contact":     "ib-contact",
+					"RIPE Country":           "United Kingdom (GB)",
+					"RIPE Technical Contact": "TEST123-IB",
+					"RIPE Email":             "support@infoblox.com",
+				},
+					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -40,6 +47,7 @@ func TestAccRirOrganizationDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_rir_organization.test"
 	var v rir.RirOrganization
 	name := acctest.RandomNameWithPrefix("rir-org")
+	id := fmt.Sprintf("ORG-CB%d-IBTEST", acctest.RandomNumber(9999))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -47,7 +55,13 @@ func TestAccRirOrganizationDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRirOrganizationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRirOrganizationDataSourceConfigExtAttrFilters("EXT_ATTRS_REPLACE_ME", "ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com", acctest.RandomName()),
+				Config: testAccRirOrganizationDataSourceConfigExtAttrFilters(map[string]string{
+					"RIPE Admin Contact":     "ib-contact",
+					"RIPE Country":           "United Kingdom (GB)",
+					"RIPE Technical Contact": "TEST123-IB",
+					"RIPE Email":             "support@infoblox.com",
+				},
+					id, ", infoblox", name, "test-pass", "RIPE", "support@infoblox.com", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -67,16 +81,16 @@ func testAccCheckRirOrganizationResourceAttrPair(resourceName, dataSourceName st
 		resource.TestCheckResourceAttrPair(resourceName, "id", dataSourceName, "result.0.id"),
 		resource.TestCheckResourceAttrPair(resourceName, "maintainer", dataSourceName, "result.0.maintainer"),
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-		resource.TestCheckResourceAttrPair(resourceName, "password", dataSourceName, "result.0.password"),
 		resource.TestCheckResourceAttrPair(resourceName, "rir", dataSourceName, "result.0.rir"),
 		resource.TestCheckResourceAttrPair(resourceName, "sender_email", dataSourceName, "result.0.sender_email"),
 	}
 }
 
-func testAccRirOrganizationDataSourceConfigFilters(extAttrs, id, maintainer, name, password, rir, senderEmail string) string {
+func testAccRirOrganizationDataSourceConfigFilters(extAttrs map[string]string, id, maintainer, name, password, rir, senderEmail string) string {
+	extattrsStr := formatExtAttrs(extAttrs)
 	return fmt.Sprintf(`
 resource "nios_rir_organization" "test" {
-  extattrs = %q
+  extattrs = %s
   id = %q
   maintainer = %q
   name = %q
@@ -87,13 +101,14 @@ resource "nios_rir_organization" "test" {
 
 data "nios_rir_organization" "test" {
   filters = {
-	extattrs = nios_rir_organization.test.extattrs
+	name = nios_rir_organization.test.name
   }
 }
-`, extAttrs, id, maintainer, name, password, rir, senderEmail)
+`, extattrsStr, id, maintainer, name, password, rir, senderEmail)
 }
 
-func testAccRirOrganizationDataSourceConfigExtAttrFilters(extAttrs, id, maintainer, name, password, rir, senderEmail, extAttrsValue string) string {
+func testAccRirOrganizationDataSourceConfigExtAttrFilters(extAttrs map[string]string, id, maintainer, name, password, rir, senderEmail, extAttrsValue string) string {
+	extattrsStr := formatExtAttrs(extAttrs)
 	return fmt.Sprintf(`
 resource "nios_rir_organization" "test" {
   extattrs = %q
@@ -103,15 +118,12 @@ resource "nios_rir_organization" "test" {
   password = %q
   rir = %q
   sender_email = %q
-  extattrs = {
-    Site = %q
-  } 
 }
 
 data "nios_rir_organization" "test" {
   extattrfilters = {
-    Site = nios_rir_organization.test.extattrs.Site
+    "RIPE Email" = nios_rir_organization.test.extattrs.Site
   }
 }
-`, extAttrs, id, maintainer, name, password, rir, senderEmail, extAttrsValue)
+`, extattrsStr, id, maintainer, name, password, rir, senderEmail)
 }

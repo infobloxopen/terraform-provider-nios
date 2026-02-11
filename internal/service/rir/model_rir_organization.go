@@ -2,12 +2,15 @@ package rir
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -51,6 +54,11 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
 		Validators: []validator.Map{
 			mapvalidator.SizeAtLeast(1),
+			customvalidator.MapContainsKey("RIPE Admin Contact"),
+			customvalidator.MapContainsKey("RIPE Country"),
+			customvalidator.MapContainsKey("RIPE Technical Contact"),
+			customvalidator.MapContainsKey("RIPE Email"),
+			mapvalidator.KeysAre(stringvalidator.OneOf("RIPE Description", "RIPE Admin Contact", "RIPE Country", "RIPE Technical Contact", "RIPE Email", "RIPE Remarks", "RIP Notify", "RIPE Registry Source", "RIPE Organization Type", "RIPE Address", "RIPE Phone Number", "RIPE Fax Number", "RIPE Abuse Mailbox", "RIPE Reference Notify")),
 		},
 		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
@@ -58,13 +66,15 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.RegexMatches(regexp.MustCompile(`^ORG-[A-Za-z]{2,4}[1-9][0-9]{0,4}-[A-Za-z0-9]{1,9}$`), "A Valid Organization ID starts with 'ORG-', followed by 2-4 letters, then a number between 1 and 99999, and ends with a hyphen and 1-9 alphanumeric characters. Valid Examples for ID are ORG-CA1-RIPE or ORG-CB2-TEST"),
 		},
-		MarkdownDescription: "The RIR organization identifier.",
+		MarkdownDescription: "The RIR organization identifier. Valid Examples for ID are ORG-CA1-RIPE or ORG-CB2-TEST ",
 	},
 	"maintainer": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 80),
 		},
 		MarkdownDescription: "The RIR organization maintainer.",
 	},
@@ -76,18 +86,28 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The RIR organization name.",
 	},
 	"password": schema.StringAttribute{
-		Required:            true,
-		Sensitive:           true,
+		Required:  true,
+		Sensitive: true,
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The password for the maintainer of RIR organization.",
 	},
 	"rir": schema.StringAttribute{
-		Required:            true,
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("RIPE"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("RIPE"),
+		},
 		MarkdownDescription: "The RIR associated with RIR organization.",
 	},
 	"sender_email": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.RegexMatches(regexp.MustCompile(`^[^@]+@[^@]+\.com$`), "must be a valid .com email address"),
 		},
 		MarkdownDescription: "The sender e-mail address for RIR organization.",
 	},
