@@ -14,6 +14,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/rpz"
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -137,7 +138,8 @@ func (d *RecordRpzNaptrDataSource) Read(ctx context.Context, req datasource.Read
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForRecordRpzNaptr).
 				Paging(paging).
-				MaxResults(maxResults)
+				MaxResults(maxResults).
+				ProxySearch(config.GetProxySearch())
 
 			// Add page ID if provided
 			if pageID != "" {
