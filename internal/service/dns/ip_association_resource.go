@@ -230,96 +230,16 @@ func (r *IPAssociationResource) ImportState(ctx context.Context, req resource.Im
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
 }
 
-// func (r *IPAssociationResource) getOrFindHostRecordByRef(ctx context.Context, data *IPAssociationModel) (*dns.RecordHost, string, string, bool, error) {
-// 	// Always try ref first if it exists
-// 	if !data.Ref.IsNull() && !data.Ref.IsUnknown() && data.Ref.ValueString() != "" {
-// 		hostRecord, notFound, err := r.getHostRecordByRef(ctx, data.Ref.ValueString())
-// 		if err == nil {
-// 			internalID, err := r.extractInternalIDFromExtAttrs(hostRecord)
-// 			if err != nil {
-// 				return nil, "", "", notFound, fmt.Errorf("failed to extract internal_id from extensible attributes: %w", err)
-// 			}
-// 			return hostRecord, data.Ref.ValueString(), internalID, notFound, nil
-// 		}
-// 	}
-
-// 	// Fallback to internal_id search
-// 	if !data.InternalID.IsNull() && !data.InternalID.IsUnknown() && data.InternalID.ValueString() != "" {
-// 		hostRecord, notFound, err := r.getHostRecordByInternalID(ctx, data.InternalID.ValueString())
-// 		if err != nil {
-// 			return nil, "", "", notFound, fmt.Errorf("host record not found by ref or internal_id: %w", err)
-// 		}
-// 		if hostRecord != nil && hostRecord.Ref == nil {
-// 			return nil, "", "", notFound, fmt.Errorf("nil ref found on host record located by internal_id")
-// 		}
-// 		return hostRecord, *hostRecord.Ref, data.InternalID.ValueString(), notFound, nil
-// 	}
-
-// 	return nil, "", "", false, fmt.Errorf("both ref and internal_id are empty or null")
-// }
-
 func (r *IPAssociationResource) getOrFindHostRecordByUUID(ctx context.Context, data *IPAssociationModel) (*dns.RecordHost, string, bool, error) {
 	// Always try ref first if it exists
 	if !data.Uuid.IsNull() && !data.Uuid.IsUnknown() && data.Uuid.ValueString() != "" {
 		hostRecord, notFound, err := r.getHostRecordByUUID(ctx, data.Uuid.ValueString())
 		if err == nil {
-			// internalID, err := r.extractInternalIDFromExtAttrs(hostRecord)
-			// if err != nil {
-			// 	return nil, "", "", notFound, fmt.Errorf("failed to extract internal_id from extensible attributes: %w", err)
-			// }
 			return hostRecord, data.Uuid.ValueString(), notFound, nil
 		}
 	}
-
-	// Fallback to internal_id search
-	// if !data.InternalID.IsNull() && !data.InternalID.IsUnknown() && data.InternalID.ValueString() != "" {
-	// 	hostRecord, notFound, err := r.getHostRecordByInternalID(ctx, data.InternalID.ValueString())
-	// 	if err != nil {
-	// 		return nil, "", notFound, fmt.Errorf("host record not found by ref or internal_id: %w", err)
-	// 	}
-	// 	if hostRecord != nil && hostRecord.Ref == nil {
-	// 		return nil, "", "", notFound, fmt.Errorf("nil ref found on host record located by internal_id")
-	// 	}
-	// 	return hostRecord, *hostRecord.Ref, data.InternalID.ValueString(), notFound, nil
-	// }
-
 	return nil, "", false, fmt.Errorf("both ref and internal_id are empty or null")
 }
-
-// func (r *IPAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.RecordHost) (string, error) {
-// 	if hostRecord.ExtAttrs == nil {
-// 		return "", fmt.Errorf("no extensible attributes found")
-// 	}
-
-// 	extAttrs := *hostRecord.ExtAttrs
-// 	if internalAttr, exists := extAttrs[terraformInternalIDEA]; exists {
-// 		if stringVal, ok := internalAttr.Value.(string); ok && stringVal != "" {
-// 			return stringVal, nil
-// 		}
-// 	}
-
-// 	return "", fmt.Errorf("terraform internal ID not found in extensible attributes")
-// }
-
-// func (r *IPAssociationResource) getHostRecordByRef(ctx context.Context, ref string) (*dns.RecordHost, bool, error) {
-// 	apiRes, httpRes, err := r.client.DNSAPI.
-// 		RecordHostAPI.
-// 		Read(ctx, utils.ExtractResourceRef(ref)).
-// 		ReturnFieldsPlus(readableAttributesForIPAssociation).
-// 		ReturnAsObject(1).
-// 		ProxySearch(config.GetProxySearch()).
-// 		Execute()
-
-// 	if err != nil {
-// 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-// 			return nil, true, fmt.Errorf("host record not found with ref: %s", ref)
-// 		}
-// 		return nil, false, fmt.Errorf("failed to read host record by ref %s: %w", ref, err)
-// 	}
-
-// 	hostRecord := apiRes.GetRecordHostResponseObjectAsResult.GetResult()
-// 	return &hostRecord, false, nil
-// }
 
 func (r *IPAssociationResource) getHostRecordByUUID(ctx context.Context, uuid string) (*dns.RecordHost, bool, error) {
 	apiRes, httpRes, err := r.client.DNSAPI.
@@ -340,34 +260,6 @@ func (r *IPAssociationResource) getHostRecordByUUID(ctx context.Context, uuid st
 	hostRecord := apiRes.GetRecordHostResponseObjectAsResult.GetResult()
 	return &hostRecord, false, nil
 }
-
-// func (r *IPAssociationResource) getHostRecordByInternalID(ctx context.Context, internalID string) (*dns.RecordHost, bool, error) {
-// 	searchFilter := map[string]any{
-// 		terraformInternalIDEA: internalID,
-// 	}
-
-// 	apiRes, httpRes, err := r.client.DNSAPI.
-// 		RecordHostAPI.
-// 		List(ctx).
-// 		Extattrfilter(searchFilter).
-// 		ReturnAsObject(1).
-// 		ReturnFieldsPlus(readableAttributesForIPAssociation).
-// 		Execute()
-
-// 	if err != nil {
-// 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-// 			return nil, true, fmt.Errorf("host record not found with internal_id: %s", internalID)
-// 		}
-// 		return nil, false, fmt.Errorf("failed to search host record by internal_id %s: %w", internalID, err)
-// 	}
-
-// 	results := apiRes.ListRecordHostResponseObject.GetResult()
-// 	if len(results) == 0 {
-// 		return nil, false, fmt.Errorf("no host record found with internal_id: %s", internalID)
-// 	}
-
-// 	return &results[0], false, nil
-// }
 
 func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *dns.RecordHost, data *IPAssociationModel) (*dns.RecordHost, error) {
 	// Build update request preserving all existing settings except DHCP

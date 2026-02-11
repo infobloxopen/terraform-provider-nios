@@ -144,20 +144,6 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	// Populate the internal ID field from the extattrs map
-	// extAttrsMap := data.ExtAttrs.Elements()
-	// if internalIDValue, exists := extAttrsMap[terraformInternalIDEA]; exists {
-	// 	if stringVal, ok := internalIDValue.(types.String); ok {
-	// 		data.InternalID = stringVal
-	// 	} else {
-	// 		resp.Diagnostics.AddError("Type Error", "Internal ID in ExtAttrs is not a string")
-	// 		return
-	// 	}
-	// } else {
-	// 	resp.Diagnostics.AddError("Missing Internal ID", "Internal ID was not found in ExtAttrs after generation")
-	// 	return
-	// }
-
 	// Save original IPv4 function call attributes
 	savedIPv4FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv4addrs)
 
@@ -210,12 +196,6 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	// Save original IPv4 function call attributes
 	savedIPv4FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv4addrs)
 
@@ -230,9 +210,11 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 		ProxySearch(config.GetProxySearch()).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			// Resource no longer exists, remove from state
+			resp.State.RemoveResource(ctx)
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordHost, got error: %s", err))
@@ -240,29 +222,6 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	res := apiRes.GetRecordHostResponseObjectAsResult.GetResult()
-
-	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
-	if !ok {
-		apiTerraformId.Value = ""
-	}
-
-	stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-
-	if associateInternalId == nil {
-		if stateExtAttrs == nil {
-			resp.Diagnostics.AddError(
-				"Missing Internal ID",
-				"Unable to read RecordHost because the internal ID (from extattrs_all) is missing or invalid.",
-			)
-			return
-		}
-		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-		if apiTerraformId.Value != stateTerraformId.Value {
-			if r.ReadByExtAttrs(ctx, &data, resp) {
-				return
-			}
-		}
-	}
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
@@ -284,62 +243,6 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func (r *IPAllocationResource) ReadByExtAttrs(ctx context.Context, data *IPAllocationModel, resp *resource.ReadResponse) bool {
-	var diags diag.Diagnostics
-
-	if data.ExtAttrsAll.IsNull() {
-		return false
-	}
-
-	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if diags.HasError() {
-		return false
-	}
-
-	internalId := internalIdExtAttr[terraformInternalIDEA].Value
-	if internalId == "" {
-		return false
-	}
-
-	idMap := map[string]interface{}{
-		terraformInternalIDEA: internalId,
-	}
-
-	apiRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		List(ctx).
-		Extattrfilter(idMap).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordHost by extattrs, got error: %s", err))
-		return true
-	}
-
-	results := apiRes.ListRecordHostResponseObject.GetResult()
-
-	// If the list is empty, the resource no longer exists so remove it from state
-	if len(results) == 0 {
-		resp.State.RemoveResource(ctx)
-		return true
-	}
-
-	res := results[0]
-
-	// Remove inherited external attributes from extattrs
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		return true
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
-	return true
 }
 
 func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -365,12 +268,6 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	// diags = req.State.GetAttribute(ctx, path.Root("internal_id"), &data.InternalID)
-	// if diags.HasError() {
-	// 	resp.Diagnostics.Append(diags...)
-	// 	return
-	// }
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
 	resp.Diagnostics.Append(diags...)

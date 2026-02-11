@@ -52,25 +52,24 @@ type IPAllocationModel struct {
 	EnableImmediateDiscovery types.Bool                       `tfsdk:"enable_immediate_discovery"`
 	ExtAttrs                 types.Map                        `tfsdk:"extattrs"`
 	ExtAttrsAll              types.Map                        `tfsdk:"extattrs_all"`
-	// InternalID               types.String                     `tfsdk:"internal_id"`
-	Ipv4addrs           types.List   `tfsdk:"ipv4addrs"`
-	Ipv6addrs           types.List   `tfsdk:"ipv6addrs"`
-	LastQueried         types.Int64  `tfsdk:"last_queried"`
-	MsAdUserData        types.Object `tfsdk:"ms_ad_user_data"`
-	Name                types.String `tfsdk:"name"`
-	NetworkView         types.String `tfsdk:"network_view"`
-	RestartIfNeeded     types.Bool   `tfsdk:"restart_if_needed"`
-	RrsetOrder          types.String `tfsdk:"rrset_order"`
-	Snmp3Credential     types.Object `tfsdk:"snmp3_credential"`
-	SnmpCredential      types.Object `tfsdk:"snmp_credential"`
-	Ttl                 types.Int64  `tfsdk:"ttl"`
-	UseCliCredentials   types.Bool   `tfsdk:"use_cli_credentials"`
-	UseDnsEaInheritance types.Bool   `tfsdk:"use_dns_ea_inheritance"`
-	UseSnmp3Credential  types.Bool   `tfsdk:"use_snmp3_credential"`
-	UseSnmpCredential   types.Bool   `tfsdk:"use_snmp_credential"`
-	UseTtl              types.Bool   `tfsdk:"use_ttl"`
-	View                types.String `tfsdk:"view"`
-	Zone                types.String `tfsdk:"zone"`
+	Ipv4addrs                types.List                       `tfsdk:"ipv4addrs"`
+	Ipv6addrs                types.List                       `tfsdk:"ipv6addrs"`
+	LastQueried              types.Int64                      `tfsdk:"last_queried"`
+	MsAdUserData             types.Object                     `tfsdk:"ms_ad_user_data"`
+	Name                     types.String                     `tfsdk:"name"`
+	NetworkView              types.String                     `tfsdk:"network_view"`
+	RestartIfNeeded          types.Bool                       `tfsdk:"restart_if_needed"`
+	RrsetOrder               types.String                     `tfsdk:"rrset_order"`
+	Snmp3Credential          types.Object                     `tfsdk:"snmp3_credential"`
+	SnmpCredential           types.Object                     `tfsdk:"snmp_credential"`
+	Ttl                      types.Int64                      `tfsdk:"ttl"`
+	UseCliCredentials        types.Bool                       `tfsdk:"use_cli_credentials"`
+	UseDnsEaInheritance      types.Bool                       `tfsdk:"use_dns_ea_inheritance"`
+	UseSnmp3Credential       types.Bool                       `tfsdk:"use_snmp3_credential"`
+	UseSnmpCredential        types.Bool                       `tfsdk:"use_snmp_credential"`
+	UseTtl                   types.Bool                       `tfsdk:"use_ttl"`
+	View                     types.String                     `tfsdk:"view"`
+	Zone                     types.String                     `tfsdk:"zone"`
 }
 
 var IPAllocationAttrTypes = map[string]attr.Type{
@@ -95,25 +94,24 @@ var IPAllocationAttrTypes = map[string]attr.Type{
 	"enable_immediate_discovery": types.BoolType,
 	"extattrs":                   types.MapType{ElemType: types.StringType},
 	"extattrs_all":               types.MapType{ElemType: types.StringType},
-	// "internal_id":                types.StringType,
-	"ipv4addrs":              types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostIpv4addrAttrTypes}},
-	"ipv6addrs":              types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostIpv6addrAttrTypes}},
-	"last_queried":           types.Int64Type,
-	"ms_ad_user_data":        types.ObjectType{AttrTypes: RecordHostMsAdUserDataAttrTypes},
-	"name":                   types.StringType,
-	"network_view":           types.StringType,
-	"restart_if_needed":      types.BoolType,
-	"rrset_order":            types.StringType,
-	"snmp3_credential":       types.ObjectType{AttrTypes: RecordHostSnmp3CredentialAttrTypes},
-	"snmp_credential":        types.ObjectType{AttrTypes: RecordHostSnmpCredentialAttrTypes},
-	"ttl":                    types.Int64Type,
-	"use_cli_credentials":    types.BoolType,
-	"use_dns_ea_inheritance": types.BoolType,
-	"use_snmp3_credential":   types.BoolType,
-	"use_snmp_credential":    types.BoolType,
-	"use_ttl":                types.BoolType,
-	"view":                   types.StringType,
-	"zone":                   types.StringType,
+	"ipv4addrs":                  types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostIpv4addrAttrTypes}},
+	"ipv6addrs":                  types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHostIpv6addrAttrTypes}},
+	"last_queried":               types.Int64Type,
+	"ms_ad_user_data":            types.ObjectType{AttrTypes: RecordHostMsAdUserDataAttrTypes},
+	"name":                       types.StringType,
+	"network_view":               types.StringType,
+	"restart_if_needed":          types.BoolType,
+	"rrset_order":                types.StringType,
+	"snmp3_credential":           types.ObjectType{AttrTypes: RecordHostSnmp3CredentialAttrTypes},
+	"snmp_credential":            types.ObjectType{AttrTypes: RecordHostSnmpCredentialAttrTypes},
+	"ttl":                        types.Int64Type,
+	"use_cli_credentials":        types.BoolType,
+	"use_dns_ea_inheritance":     types.BoolType,
+	"use_snmp3_credential":       types.BoolType,
+	"use_snmp_credential":        types.BoolType,
+	"use_ttl":                    types.BoolType,
+	"view":                       types.StringType,
+	"zone":                       types.StringType,
 }
 
 var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
@@ -262,10 +260,6 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 			importmod.AssociateInternalId(),
 		},
 	},
-	// "internal_id": schema.StringAttribute{
-	// 	Computed:            true,
-	// 	MarkdownDescription: "Internal ID of the object.",
-	// },
 	"ipv4addrs": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: RecordHostIpv4addrResourceSchemaAttributes,

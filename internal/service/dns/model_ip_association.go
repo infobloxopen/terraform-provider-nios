@@ -14,13 +14,12 @@ import (
 )
 
 type IPAssociationModel struct {
-	Ref              types.String            `tfsdk:"ref"`
-	Uuid             types.String            `tfsdk:"uuid"`
-	ConfigureForDhcp types.Bool              `tfsdk:"configure_for_dhcp"`
-	Duid             internaltypes.DUIDValue `tfsdk:"duid"`
-	// InternalID       types.String                  `tfsdk:"internal_id"`
-	MacAddr     internaltypes.MACAddressValue `tfsdk:"mac"`
-	MatchClient types.String                  `tfsdk:"match_client"`
+	Ref              types.String                  `tfsdk:"ref"`
+	Uuid             types.String                  `tfsdk:"uuid"`
+	ConfigureForDhcp types.Bool                    `tfsdk:"configure_for_dhcp"`
+	Duid             internaltypes.DUIDValue       `tfsdk:"duid"`
+	MacAddr          internaltypes.MACAddressValue `tfsdk:"mac"`
+	MatchClient      types.String                  `tfsdk:"match_client"`
 }
 
 var IPAssociationAttrTypes = map[string]attr.Type{
@@ -28,14 +27,12 @@ var IPAssociationAttrTypes = map[string]attr.Type{
 	"uuid":               types.StringType,
 	"configure_for_dhcp": types.BoolType,
 	"duid":               internaltypes.DUIDType{},
-	// "internal_id":        types.StringType,
-	"mac":          internaltypes.MACAddressType{},
-	"match_client": types.StringType,
+	"mac":                internaltypes.MACAddressType{},
+	"match_client":       types.StringType,
 }
 
 var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
@@ -59,10 +56,6 @@ var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.IsValidDUID(),
 		},
 	},
-	// "internal_id": schema.StringAttribute{
-	// 	Computed:            true,
-	// 	MarkdownDescription: "Internal ID of the IP association.",
-	// },
 	"mac": schema.StringAttribute{
 		CustomType:          internaltypes.MACAddressType{},
 		Optional:            true,

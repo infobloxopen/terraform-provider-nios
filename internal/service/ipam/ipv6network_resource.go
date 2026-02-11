@@ -142,12 +142,6 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		Ipv6networkAPI.
 		Read(ctx, data.Uuid.ValueString()).
@@ -156,9 +150,11 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		ProxySearch(config.GetProxySearch()).
 		Execute()
 
-	// If the resource is not found, try searching using Extensible Attributes
+	// Handle not found case
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			// Resource no longer exists, remove from state
+			resp.State.RemoveResource(ctx)
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6network, got error: %s", err))
@@ -166,29 +162,6 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	res := apiRes.GetIpv6networkResponseObjectAsResult.GetResult()
-
-	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
-	if !ok {
-		apiTerraformId.Value = ""
-	}
-
-	if associateInternalId == nil {
-		stateExtAttrs := ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-		if stateExtAttrs == nil {
-			resp.Diagnostics.AddError(
-				"Missing Internal ID",
-				"Unable to read Ipv6network because the internal ID (from extattrs_all) is missing or invalid.",
-			)
-			return
-		}
-
-		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
-		if apiTerraformId.Value != stateTerraformId.Value {
-			if r.ReadByExtAttrs(ctx, &data, resp) {
-				return
-			}
-		}
-	}
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
@@ -202,61 +175,6 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *Ipv6networkResource) ReadByExtAttrs(ctx context.Context, data *Ipv6networkModel, resp *resource.ReadResponse) bool {
-	var diags diag.Diagnostics
-
-	if data.ExtAttrsAll.IsNull() {
-		return false
-	}
-
-	internalIdExtAttr := *ExpandExtAttrs(ctx, data.ExtAttrsAll, &diags)
-	if diags.HasError() {
-		return false
-	}
-
-	internalId := internalIdExtAttr[terraformInternalIDEA].Value
-	if internalId == "" {
-		return false
-	}
-
-	idMap := map[string]interface{}{
-		terraformInternalIDEA: internalId,
-	}
-
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		List(ctx).
-		Extattrfilter(idMap).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6network by extattrs, got error: %s", err))
-		return true
-	}
-
-	results := apiRes.ListIpv6networkResponseObject.GetResult()
-
-	// If the list is empty, the resource no longer exists so remove it from state
-	if len(results) == 0 {
-		resp.State.RemoveResource(ctx)
-		return true
-	}
-
-	res := results[0]
-
-	// Remove inherited external attributes from extattrs
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
-	if diags.HasError() {
-		return true
-	}
-
-	data.Flatten(ctx, &res, &resp.Diagnostics)
-	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
-
-	return true
-}
 
 func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
