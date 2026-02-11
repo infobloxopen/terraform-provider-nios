@@ -366,6 +366,7 @@ func TestAccRecordRpzMxResource_View(t *testing.T) {
 	rpZone := acctest.RandomNameWithPrefix("rpz") + ".example.com"
 	name := acctest.RandomName() + "." + rpZone
 	mailExchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	view := acctest.RandomNameWithPrefix("test-view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -373,10 +374,10 @@ func TestAccRecordRpzMxResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordRpzMxView(name, mailExchanger, rpZone, 10, "default"),
+				Config: testAccRecordRpzMxView(name, mailExchanger, rpZone, 10, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordRpzMxExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "view", view),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -586,8 +587,8 @@ resource "nios_rpz_record_mx" "test_view" {
     mail_exchanger = %q
     preference     = %d
     rp_zone        = nios_dns_zone_rp.test.fqdn
-    view           = %q
-}`, name, mailExchanger, preference, view)
+    view           = nios_dns_view.custom_view.name
+}`, name, mailExchanger, preference)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone, view), config}, "")
+	return strings.Join([]string{testAccBaseWithView(view), testAccBaseWithZone(rpZone, "nios_dns_view.custom_view.name"), config}, "")
 }
