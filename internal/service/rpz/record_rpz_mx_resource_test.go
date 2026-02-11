@@ -589,5 +589,5 @@ resource "nios_rpz_record_mx" "test_view" {
     view           = %q
 }`, name, mailExchanger, preference, view)
 
-	return strings.Join([]string{testAccBaseWithZone(rpZone, view), config}, "")
+	return strings.Join([]string{testAccBaseWithZone(rpZone, fmt.Sprintf("%q", view)), config}, "")
 }
