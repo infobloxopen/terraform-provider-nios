@@ -16,6 +16,7 @@ func TestAccRirOrganizationDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_rir_organization.test"
 	resourceName := "nios_rir_organization.test"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +24,30 @@ func TestAccRirOrganizationDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRirOrganizationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRirOrganizationDataSourceConfigFilters("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationDataSourceConfigFilters("EXT_ATTRS_REPLACE_ME", "ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
+				Check: resource.ComposeTestCheckFunc(
+					append([]resource.TestCheckFunc{
+						testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
+					}, testAccCheckRirOrganizationResourceAttrPair(resourceName, dataSourceName)...)...,
+				),
+			},
+		},
+	})
+}
+
+func TestAccRirOrganizationDataSource_ExtAttrFilters(t *testing.T) {
+	dataSourceName := "data.nios_rir_organization.test"
+	resourceName := "nios_rir_organization.test"
+	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckRirOrganizationDestroy(context.Background(), &v),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRirOrganizationDataSourceConfigExtAttrFilters("EXT_ATTRS_REPLACE_ME", "ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com", acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -39,6 +63,7 @@ func TestAccRirOrganizationDataSource_Filters(t *testing.T) {
 func testAccCheckRirOrganizationResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
 		resource.TestCheckResourceAttrPair(resourceName, "id", dataSourceName, "result.0.id"),
 		resource.TestCheckResourceAttrPair(resourceName, "maintainer", dataSourceName, "result.0.maintainer"),
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
@@ -48,9 +73,10 @@ func testAccCheckRirOrganizationResourceAttrPair(resourceName, dataSourceName st
 	}
 }
 
-func testAccRirOrganizationDataSourceConfigFilters(id, maintainer, name, password, rir, senderEmail string) string {
+func testAccRirOrganizationDataSourceConfigFilters(extAttrs, id, maintainer, name, password, rir, senderEmail string) string {
 	return fmt.Sprintf(`
 resource "nios_rir_organization" "test" {
+  extattrs = %q
   id = %q
   maintainer = %q
   name = %q
@@ -61,8 +87,31 @@ resource "nios_rir_organization" "test" {
 
 data "nios_rir_organization" "test" {
   filters = {
-	id = nios_rir_organization.test.id
+	extattrs = nios_rir_organization.test.extattrs
   }
 }
-`, id, maintainer, name, password, rir, senderEmail)
+`, extAttrs, id, maintainer, name, password, rir, senderEmail)
+}
+
+func testAccRirOrganizationDataSourceConfigExtAttrFilters(extAttrs, id, maintainer, name, password, rir, senderEmail, extAttrsValue string) string {
+	return fmt.Sprintf(`
+resource "nios_rir_organization" "test" {
+  extattrs = %q
+  id = %q
+  maintainer = %q
+  name = %q
+  password = %q
+  rir = %q
+  sender_email = %q
+  extattrs = {
+    Site = %q
+  } 
+}
+
+data "nios_rir_organization" "test" {
+  extattrfilters = {
+    Site = nios_rir_organization.test.extattrs.Site
+  }
+}
+`, extAttrs, id, maintainer, name, password, rir, senderEmail, extAttrsValue)
 }

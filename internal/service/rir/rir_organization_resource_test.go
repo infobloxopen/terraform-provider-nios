@@ -20,6 +20,7 @@ var readableAttributesForRirOrganization = "extattrs,id,maintainer,name,rir,send
 func TestAccRirOrganizationResource_basic(t *testing.T) {
 	var resourceName = "nios_rir_organization.test"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,16 +28,16 @@ func TestAccRirOrganizationResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationBasicConfig("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationBasicConfig("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "id", "ID_REPLACE_ME"),
-					resource.TestCheckResourceAttr(resourceName, "maintainer", "MAINTAINER_REPLACE_ME"),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "maintainer", "infoblox"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "password", "PASSWORD_REPLACE_ME"),
-					resource.TestCheckResourceAttr(resourceName, "rir", "RIR_REPLACE_ME"),
-					resource.TestCheckResourceAttr(resourceName, "sender_email", "SENDER_EMAIL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rir", "RIR"),
+					resource.TestCheckResourceAttr(resourceName, "sender_email", "support@infoblox.com"),
 					// Test fields with default value
 				),
 			},
@@ -48,6 +49,7 @@ func TestAccRirOrganizationResource_basic(t *testing.T) {
 func TestAccRirOrganizationResource_disappears(t *testing.T) {
 	resourceName := "nios_rir_organization.test"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -55,7 +57,7 @@ func TestAccRirOrganizationResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRirOrganizationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRirOrganizationBasicConfig("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationBasicConfig("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					testAccCheckRirOrganizationDisappears(context.Background(), &v),
@@ -69,6 +71,7 @@ func TestAccRirOrganizationResource_disappears(t *testing.T) {
 func TestAccRirOrganizationResource_Import(t *testing.T) {
 	var resourceName = "nios_rir_organization.test"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -76,7 +79,7 @@ func TestAccRirOrganizationResource_Import(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationBasicConfig("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationBasicConfig("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 				),
@@ -107,6 +110,7 @@ func TestAccRirOrganizationResource_Import(t *testing.T) {
 func TestAccRirOrganizationResource_Id(t *testing.T) {
 	var resourceName = "nios_rir_organization.test_id"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -114,7 +118,7 @@ func TestAccRirOrganizationResource_Id(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationId("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationId("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "id", "ID_REPLACE_ME"),
@@ -122,7 +126,7 @@ func TestAccRirOrganizationResource_Id(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationId("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationId("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "id", "ID_UPDATE_REPLACE_ME"),
@@ -136,6 +140,7 @@ func TestAccRirOrganizationResource_Id(t *testing.T) {
 func TestAccRirOrganizationResource_Maintainer(t *testing.T) {
 	var resourceName = "nios_rir_organization.test_maintainer"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -143,18 +148,18 @@ func TestAccRirOrganizationResource_Maintainer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationMaintainer("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationMaintainer("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "maintainer", "MAINTAINER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "maintainer", "infoblox"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationMaintainer("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationMaintainer("ID_REPLACE_ME", "NIOS", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "maintainer", "MAINTAINER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "maintainer", "NIOS"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -165,6 +170,7 @@ func TestAccRirOrganizationResource_Maintainer(t *testing.T) {
 func TestAccRirOrganizationResource_Name(t *testing.T) {
 	var resourceName = "nios_rir_organization.test_name"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -172,15 +178,15 @@ func TestAccRirOrganizationResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationName("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationName("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationName("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationName("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
@@ -194,6 +200,7 @@ func TestAccRirOrganizationResource_Name(t *testing.T) {
 func TestAccRirOrganizationResource_Password(t *testing.T) {
 	var resourceName = "nios_rir_organization.test_password"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -201,7 +208,7 @@ func TestAccRirOrganizationResource_Password(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationPassword("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationPassword("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "password", "PASSWORD_REPLACE_ME"),
@@ -209,7 +216,7 @@ func TestAccRirOrganizationResource_Password(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationPassword("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationPassword("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "password", "PASSWORD_UPDATE_REPLACE_ME"),
@@ -223,6 +230,7 @@ func TestAccRirOrganizationResource_Password(t *testing.T) {
 func TestAccRirOrganizationResource_Rir(t *testing.T) {
 	var resourceName = "nios_rir_organization.test_rir"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -230,15 +238,15 @@ func TestAccRirOrganizationResource_Rir(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationRir("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationRir("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir", "RIR_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "rir", "RIR"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationRir("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationRir("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIR_UPDATE_REPLACE_ME"),
@@ -252,6 +260,7 @@ func TestAccRirOrganizationResource_Rir(t *testing.T) {
 func TestAccRirOrganizationResource_SenderEmail(t *testing.T) {
 	var resourceName = "nios_rir_organization.test_sender_email"
 	var v rir.RirOrganization
+	name := acctest.RandomNameWithPrefix("rir-org")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -259,15 +268,15 @@ func TestAccRirOrganizationResource_SenderEmail(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationSenderEmail("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationSenderEmail("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "sender_email", "SENDER_EMAIL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "sender_email", "support@infoblox.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationSenderEmail("ID_REPLACE_ME", "MAINTAINER_REPLACE_ME", "NAME_REPLACE_ME", "PASSWORD_REPLACE_ME", "RIR_REPLACE_ME", "SENDER_EMAIL_REPLACE_ME"),
+				Config: testAccRirOrganizationSenderEmail("ID_REPLACE_ME", "infoblox", name, "PASSWORD_REPLACE_ME", "RIR", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "sender_email", "SENDER_EMAIL_UPDATE_REPLACE_ME"),
