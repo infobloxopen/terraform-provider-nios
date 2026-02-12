@@ -34,5 +34,4 @@ resource "nios_rir_organization" "rir_organization_with_additional_fields" {
 
   // Additional Fields
   rir = "RIPE"
-
 }
