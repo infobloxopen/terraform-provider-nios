@@ -272,7 +272,6 @@ var Ipv6sharednetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"preferred_lifetime": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(27000),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_preferred_lifetime")),
 		},

@@ -83,7 +83,7 @@ func (r *RecordRpzCnameResource) Create(ctx context.Context, req resource.Create
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzCnameAPI.
 		Create(ctx).
-		RecordRpzCname(*data.Expand(ctx, &resp.Diagnostics, true)).
+		RecordRpzCname(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCname).
 		ReturnAsObject(1).
 		Execute()
@@ -279,7 +279,7 @@ func (r *RecordRpzCnameResource) Update(ctx context.Context, req resource.Update
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzCnameAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzCname(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordRpzCname(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCname).
 		ReturnAsObject(1).
 		Execute()
