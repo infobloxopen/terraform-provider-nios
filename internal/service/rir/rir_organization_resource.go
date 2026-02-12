@@ -19,6 +19,11 @@ import (
 
 var readableAttributesForRirOrganization = "extattrs,id,maintainer,name,rir,sender_email"
 
+var (
+	ripeEmailRegex            = regexp.MustCompile(`^[^@]+@[^@]+\.com$`)
+	ripeTechnicalContactRegex = regexp.MustCompile(`^[A-Za-z]{2,4}(?:[1-9][0-9]{0,5})?-[A-Za-z0-9]{1,9}$`)
+)
+
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RirOrganizationResource{}
 var _ resource.ResourceWithImportState = &RirOrganizationResource{}
@@ -251,11 +256,11 @@ func (r *RirOrganizationResource) ValidateConfig(ctx context.Context, req resour
 					resp.Diagnostics.AddError("Invalid RIPE Country", fmt.Sprintf("RIPE Country '%s' is not a valid option. Valid Values are %q", value, eaRipeCountryList))
 				}
 			} else if key == "RIPE Email" {
-				if matched, _ := regexp.MatchString(`^[^@]+@[^@]+\.com$`, value); !matched {
+				if !ripeEmailRegex.MatchString(value) {
 					resp.Diagnostics.AddError("Invalid RIPE Email", fmt.Sprintf("RIPE Email '%s' is not a valid .com email address.", value))
 				}
 			} else if key == "RIPE Technical Contact" {
-				if matched, _ := regexp.MatchString(`^[A-Za-z]{2,4}(?:[1-9][0-9]{0,5})?-[A-Za-z0-9]{1,9}$`, value); !matched {
+				if !ripeTechnicalContactRegex.MatchString(value) {
 					resp.Diagnostics.AddError("Invalid RIPE Technical Contact", fmt.Sprintf("RIPE Technical Contact '%s' is not a valid value. Valid format is 'AB123-XYZ'", value))
 				}
 			} else if key == "RIPE Organization Type" {
