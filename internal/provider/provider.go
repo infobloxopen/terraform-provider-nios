@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -17,6 +18,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -50,6 +52,7 @@ type NIOSProviderModel struct {
 	NIOSPassword types.String `tfsdk:"nios_password"`
 	ProxyURL     types.String `tfsdk:"proxy_url"`
 	ProxySearch  types.String `tfsdk:"proxy_search"`
+	RetryTimeout types.Int64  `tfsdk:"retry_timeout"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -81,6 +84,10 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 					stringvalidator.OneOf("LOCAL", "GM"),
 				},
 			},
+			"retry_timeout": schema.Int64Attribute{
+				Optional:    true,
+				Description: "Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.",
+			},
 		},
 	}
 }
@@ -105,6 +112,11 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	// Set ProxySearch configuration
 	config.SetProxySearch(data.ProxySearch.ValueString())
+
+	// Set global retry timeout if specified
+	if !data.RetryTimeout.IsNull() && !data.RetryTimeout.IsUnknown() {
+		retry.SetRetryTimeout(data.RetryTimeout.ValueInt64())
+	}
 
 	err := checkAndCreatePreRequisites(ctx, client)
 	if err != nil {
@@ -415,35 +427,53 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 		"name": terraformInternalIDEA,
 	}
 
-	apiRes, _, err := client.GridAPI.ExtensibleattributedefAPI.
-		List(ctx).
-		Filters(filters).
-		ReturnFieldsPlus(readableAttributesForEADefinition).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		return fmt.Errorf("error checking for existing extensible attribute: %w", err)
-	}
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
 
-	// If EA already exists, creation is not required
-	if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
-		return nil
-	}
+		// Check if EA already exists
+		apiRes, httpRes, callErr := client.GridAPI.ExtensibleattributedefAPI.
+			List(ctx).
+			Filters(filters).
+			ReturnFieldsPlus(readableAttributesForEADefinition).
+			ReturnAsObject(1).
+			Execute()
 
-	// Create EA if it doesn't exist
-	data := gridclient.Extensibleattributedef{
-		Name:    gridclient.PtrString(terraformInternalIDEA),
-		Type:    gridclient.PtrString("STRING"),
-		Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
-		Flags:   gridclient.PtrString("CR"),
-	}
+		if callErr != nil {
+			if httpRes != nil {
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		}
 
-	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
-		Create(ctx).
-		Extensibleattributedef(data).
-		ReturnFieldsPlus(readableAttributesForEADefinition).
-		ReturnAsObject(1).
-		Execute()
+		// If EA already exists, creation is not required
+		if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
+			return http.StatusOK, nil
+		}
+
+		// Create EA if it doesn't exist
+		data := gridclient.Extensibleattributedef{
+			Name:    gridclient.PtrString(terraformInternalIDEA),
+			Type:    gridclient.PtrString("STRING"),
+			Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
+			Flags:   gridclient.PtrString("CR"),
+		}
+
+		_, httpRes, callErr = client.GridAPI.ExtensibleattributedefAPI.
+			Create(ctx).
+			Extensibleattributedef(data).
+			ReturnFieldsPlus(readableAttributesForEADefinition).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		return fmt.Errorf("error creating Terraform extensible attribute: %w", err)
 	}
