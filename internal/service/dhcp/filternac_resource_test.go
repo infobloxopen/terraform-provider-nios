@@ -338,8 +338,21 @@ func testAccCheckFilternacDisappears(ctx context.Context, v *dhcp.Filternac) res
 
 func testAccFilternacBasicConfig(name string) string {
 	return fmt.Sprintf(`
+variable "options" {
+  type = list(object({
+    name         = string
+    num          = number
+    use_option   = bool
+    value        = string
+    vendor_class = string
+  }))
+  description = "DHCP options for the NAC filter"
+  default     = null
+}
+
 resource "nios_dhcp_filternac" "test" {
     name = %q
+	options = var.options
 }
 `, name)
 }
