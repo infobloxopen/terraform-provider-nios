@@ -44,7 +44,7 @@ resource "nios_rir_organization" "rir_organization_with_additional_fields" {
     // Additional Extensible Attributes
     "RIPE Remarks" : "Example RIR Organization"
     "RIPE Organization Type" : "IANA"
-    "RIP Notify" : "support@infoblox.com"
+    "RIPE Notify" : "support@infoblox.com"
   }
 
   // Additional Fields
