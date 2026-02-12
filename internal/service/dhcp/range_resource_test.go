@@ -193,8 +193,8 @@ func TestAccRangeResource_Bootserver(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.19"
 	endAddr := "10.0.0.20"
-	bootServer := "bootServer"
-	bootServerUpdate := "bootServerUpdate"
+	bootServer := "bootserver"
+	bootServerUpdate := "bootserverupdate"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2316,7 +2316,7 @@ func TestAccRangeResource_UseBootserver(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeUseBootserver(startAddr, endAddr, bootServer, false),
+				Config: testAccRangeUseBootserver(startAddr, endAddr, bootServer, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_bootserver", "true"),
