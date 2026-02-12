@@ -1295,7 +1295,7 @@ func TestAccIpv6sharednetworkResource_UseValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6sharednetworkUseValidLifetime(name, networks, network1, network2, "30000", "true"),
+				Config: testAccIpv6sharednetworkUseValidLifetime(name, networks, network1, network2, "28000", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
@@ -1303,7 +1303,7 @@ func TestAccIpv6sharednetworkResource_UseValidLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6sharednetworkUseValidLifetime(name, networks, network1, network2, "30000", "false"),
+				Config: testAccIpv6sharednetworkUseValidLifetime(name, networks, network1, network2, "28000", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
@@ -1648,6 +1648,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_preferred_lifetime" {
     networks = %s
     preferred_lifetime = %q
 	use_preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = "true"
 }
 `, name, networksStr, preferredLifetime, usePreferredLifetime)
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
@@ -1794,6 +1796,8 @@ resource "nios_dhcp_ipv6sharednetwork" "test_use_preferred_lifetime" {
     networks = %s
     use_preferred_lifetime = %q
 	preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = "true"
 }
 `, name, networksStr, usePreferredLifetime, preferredLifetime)
 	return strings.Join([]string{testAccBaseWithwoIPv6Networks(network1, network2), config}, "")
