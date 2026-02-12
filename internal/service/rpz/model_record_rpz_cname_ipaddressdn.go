@@ -67,7 +67,7 @@ var RecordRpzCnameIpaddressdnResourceSchemaAttributes = map[string]schema.Attrib
 	"canonical": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidDomainName(),
+			customvalidator.IsValidFQDN(),
 		},
 		MarkdownDescription: "The canonical name in FQDN format. This value can be in unicode format.",
 	},
