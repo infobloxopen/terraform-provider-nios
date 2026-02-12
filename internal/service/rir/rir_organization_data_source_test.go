@@ -61,7 +61,7 @@ func TestAccRirOrganizationDataSource_ExtAttrFilters(t *testing.T) {
 					"RIPE Technical Contact": "TEST123-IB",
 					"RIPE Email":             "support@infoblox.com",
 				},
-					id, ", infoblox", name, "test-pass", "RIPE", "support@infoblox.com", "support@infoblox.com"),
+					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -111,7 +111,7 @@ func testAccRirOrganizationDataSourceConfigExtAttrFilters(extAttrs map[string]st
 	extattrsStr := formatExtAttrs(extAttrs)
 	return fmt.Sprintf(`
 resource "nios_rir_organization" "test" {
-  extattrs = %q
+  extattrs = %s
   id = %q
   maintainer = %q
   name = %q
@@ -122,7 +122,7 @@ resource "nios_rir_organization" "test" {
 
 data "nios_rir_organization" "test" {
   extattrfilters = {
-    "RIPE Email" = nios_rir_organization.test.extattrs.Site
+    "RIPE Email" = nios_rir_organization.test.extattrs["RIPE Email"]
   }
 }
 `, extattrsStr, id, maintainer, name, password, rir, senderEmail)

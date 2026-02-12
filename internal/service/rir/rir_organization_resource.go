@@ -209,6 +209,10 @@ func (r *RirOrganizationResource) ValidateConfig(ctx context.Context, req resour
 
 		for key, value := range extattrsMap {
 			if key == "RIPE Country" {
+				if value == "" {
+					resp.Diagnostics.AddError("Invalid RIPE Country", "RIPE Country cannot be empty.")
+					continue
+				}
 				eaRipeCountryList := []string{
 					"Afghanistan (AF)", "Åland Islands (AX)", "Albania (AL)", "Algeria (DZ)", "American Samoa (AS)", "Andorra (AD)", "Angola (AO)", "Anguilla (AI)", "Antarctica (AQ)", "Antigua and Barbuda (AG)",
 					"Argentina (AR)", "Armenia (AM)", "Aruba (AW)", "Australia (AU)", "Austria (AT)", "Azerbaijan (AZ)", "Bahamas (BS)", "Bahrain (BH)", "Bangladesh (BD)", "Barbados (BB)",
@@ -253,6 +257,23 @@ func (r *RirOrganizationResource) ValidateConfig(ctx context.Context, req resour
 			} else if key == "RIPE Technical Contact" {
 				if matched, _ := regexp.MatchString(`^[A-Za-z]{2,4}(?:[1-9][0-9]{0,5})?-[A-Za-z0-9]{1,9}$`, value); !matched {
 					resp.Diagnostics.AddError("Invalid RIPE Technical Contact", fmt.Sprintf("RIPE Technical Contact '%s' is not a valid value. Valid format is 'AB123-XYZ'", value))
+				}
+			} else if key == "RIPE Organization Type" {
+				eaRipeOrgTypeList := []string{
+					"IANA", "RIR", "NIR", "LIR", "WHITEPAGES",
+					"DIRECT_ASSIGNMENT", "OTHER",
+				}
+				if value != "" {
+					found := false
+					for _, orgType := range eaRipeOrgTypeList {
+						if value == orgType {
+							found = true
+							break
+						}
+					}
+					if !found {
+						resp.Diagnostics.AddError("Invalid RIPE Organization Type", fmt.Sprintf("RIPE Organization Type '%s' is not a valid option. Valid Values are %q", value, eaRipeOrgTypeList))
+					}
 				}
 			}
 		}

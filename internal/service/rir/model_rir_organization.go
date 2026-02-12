@@ -58,23 +58,22 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.MapContainsKey("RIPE Country"),
 			customvalidator.MapContainsKey("RIPE Technical Contact"),
 			customvalidator.MapContainsKey("RIPE Email"),
-			mapvalidator.KeysAre(stringvalidator.OneOf("RIPE Description", "RIPE Admin Contact", "RIPE Country", "RIPE Technical Contact", "RIPE Email", "RIPE Remarks", "RIP Notify", "RIPE Registry Source", "RIPE Organization Type", "RIPE Address", "RIPE Phone Number", "RIPE Fax Number", "RIPE Abuse Mailbox", "RIPE Reference Notify")),
+			mapvalidator.KeysAre(stringvalidator.OneOf("RIPE Description", "RIPE Admin Contact", "RIPE Country", "RIPE Technical Contact", "RIPE Email", "RIPE Remarks", "RIPE Notify", "RIPE Registry Source", "RIPE Organization Type", "RIPE Address", "RIPE Phone Number", "RIPE Fax Number", "RIPE Abuse Mailbox", "RIPE Reference Notify")),
 		},
 		MarkdownDescription: "Extensible attributes associated with the object.",
 	},
 	"id": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-			stringvalidator.RegexMatches(regexp.MustCompile(`^ORG-[A-Za-z]{2,4}[1-9][0-9]{0,4}-[A-Za-z0-9]{1,9}$`), "A Valid Organization ID starts with 'ORG-', followed by 2-4 letters, then a number between 1 and 99999, and ends with a hyphen and 1-9 alphanumeric characters. Valid Examples for ID are ORG-CA1-RIPE or ORG-CB2-TEST"),
+			stringvalidator.RegexMatches(regexp.MustCompile(`^ORG-[A-Za-z]{2,4}[1-9][0-9]{0,4}-[A-Za-z0-9]{1,9}$`), "- Invalid Organization ID. A Valid Organization ID starts with 'ORG-', followed by 2-4 letters, then a number between 1 and 99999, and ends with a hyphen and 1-9 alphanumeric characters. Valid Examples for ID are ORG-CA1-RIPE or ORG-CB2-TEST"),
 		},
 		MarkdownDescription: "The RIR organization identifier. Valid Examples for ID are ORG-CA1-RIPE or ORG-CB2-TEST ",
 	},
 	"maintainer": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
 			stringvalidator.LengthBetween(0, 80),
+			stringvalidator.RegexMatches(regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_-]*[A-Za-z0-9]$`), "- A valid maintainer starts with a letter, followed by letters, numbers, underscores, or hyphens, and ends with a letter or number. Valid examples for maintainer are 'infoblox' and 'nios-support'"),
 		},
 		MarkdownDescription: "The RIR organization maintainer.",
 	},
@@ -106,8 +105,7 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 	"sender_email": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-			stringvalidator.RegexMatches(regexp.MustCompile(`^[^@]+@[^@]+\.com$`), "must be a valid .com email address"),
+			stringvalidator.RegexMatches(regexp.MustCompile(`^[^@]+@[^@]+\.com$`), "- must be a valid .com email address"),
 		},
 		MarkdownDescription: "The sender e-mail address for RIR organization.",
 	},
