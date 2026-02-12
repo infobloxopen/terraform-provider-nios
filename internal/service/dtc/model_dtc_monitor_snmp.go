@@ -97,8 +97,9 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			customvalidator.IsValidHexadecimal(),
-			customvalidator.ValidateTrimmedString(),
+			customvalidator.EngineIDValidator(),
+			// customvalidator.IsValidHexadecimal(),
+			// customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The SNMPv3 engine identifier.",
 	},
@@ -249,6 +250,6 @@ func (m *DtcMonitorSnmpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorS
 	m.RetryDown = flex.FlattenInt64Pointer(from.RetryDown)
 	m.RetryUp = flex.FlattenInt64Pointer(from.RetryUp)
 	m.Timeout = flex.FlattenInt64Pointer(from.Timeout)
-	m.User = flex.FlattenStringPointer(from.User)
+	m.User = flex.FlattenStringPointerNilAsNotEmpty(from.User)
 	m.Version = flex.FlattenStringPointer(from.Version)
 }
