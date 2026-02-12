@@ -111,7 +111,8 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: ZoneDelegatedDelegateToResourceSchemaAttributes,
 		},
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -335,7 +336,7 @@ func (m *ZoneDelegatedModel) Flatten(ctx context.Context, from *dns.ZoneDelegate
 	m.MsManaged = flex.FlattenStringPointer(from.MsManaged)
 	m.MsReadOnly = types.BoolPointerValue(from.MsReadOnly)
 	m.MsSyncMasterName = flex.FlattenStringPointer(from.MsSyncMasterName)
-	m.NsGroup = flex.FlattenStringPointer(from.NsGroup)
+	m.NsGroup = flex.FlattenStringPointerNilAsNotEmpty(from.NsGroup)
 	m.Parent = flex.FlattenStringPointer(from.Parent)
 	m.Prefix.StringValue = flex.FlattenStringPointer(from.Prefix)
 	m.UseDelegatedTtl = types.BoolPointerValue(from.UseDelegatedTtl)

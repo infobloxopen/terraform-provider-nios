@@ -1646,7 +1646,7 @@ func TestAccRoaminghostResource_UsePreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRoaminghostUsePreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "true"),
+				Config: testAccRoaminghostUsePreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "true", "100"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "true"),
@@ -1654,7 +1654,7 @@ func TestAccRoaminghostResource_UsePreferredLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRoaminghostUsePreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "false"),
+				Config: testAccRoaminghostUsePreferredLifetime(name, mac, "IPV4", "MAC_ADDRESS", "false", "100"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "false"),
@@ -2456,16 +2456,17 @@ resource "nios_dhcp_roaminghost" "test_use_options" {
 `, name, mac, addressType, matchClient, useOptions)
 }
 
-func testAccRoaminghostUsePreferredLifetime(name string, mac string, addressType string, matchClient string, usePreferredLifetime string) string {
+func testAccRoaminghostUsePreferredLifetime(name string, mac string, addressType string, matchClient string, usePreferredLifetime string, preferredLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_use_preferred_lifetime" {
     name = %q
     mac = %q
     address_type = %q
     match_client = %q
+	preferred_lifetime = %q
     use_preferred_lifetime = %q
 }
-`, name, mac, addressType, matchClient, usePreferredLifetime)
+`, name, mac, addressType, matchClient, preferredLifetime, usePreferredLifetime)
 }
 
 func testAccRoaminghostUsePxeLeaseTime(name string, mac string, addressType string, matchClient string, usePxeLeaseTime string) string {
