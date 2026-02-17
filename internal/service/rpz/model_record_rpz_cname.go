@@ -150,7 +150,7 @@ var RecordRpzCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordRpzCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *rpz.RecordRpzCname {
+func (m *RecordRpzCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics) *rpz.RecordRpzCname {
 	if m == nil {
 		return nil
 	}
@@ -163,10 +163,9 @@ func (m *RecordRpzCnameModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		RpZone:    flex.ExpandStringPointer(m.RpZone),
 		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
+		View:      flex.ExpandStringPointer(m.View),
 	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
-	}
+
 	return to
 }
 
