@@ -98,8 +98,6 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.String{
 			customvalidator.EngineIDValidator(),
-			// customvalidator.IsValidHexadecimal(),
-			// customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The SNMPv3 engine identifier.",
 	},
