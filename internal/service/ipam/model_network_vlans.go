@@ -30,6 +30,7 @@ var NetworkVlansAttrTypes = map[string]attr.Type{
 var NetworkVlansResourceSchemaAttributes = map[string]schema.Attribute{
 	"vlan": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Reference to the underlying StaticVlan object vlan.",
 	},
 	"id": schema.Int64Attribute{
