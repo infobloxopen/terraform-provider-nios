@@ -32,7 +32,7 @@ Host Record serves as the backend for the following operations:
 
 ## Examples
 
-For additional Terraform configurations, see the [Terraform resource examples](../examples/resources/nios_record_host/).
+For additional Terraform configurations, see the [Terraform resource examples](../examples/resources/nios_dns_record_host/).
 
 > **Note:** It’s recommended to reference the allocation (`ref = nios_ip_allocation.<name>.ref`) in the association to create an implicit dependency. This ensures Terraform builds the correct dependency graph and executes the allocation before the association, avoiding race conditions in parallel execution.
 

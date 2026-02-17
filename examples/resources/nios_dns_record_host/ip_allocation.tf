@@ -1,4 +1,4 @@
-# IP address allocation with static IPv4 address and location metadata
+# Manage IP address allocation with static IPv4 address and location metadata
 resource "nios_ip_allocation" "allocation1" {
   name              = "host1.example.com"
   view              = "default"
@@ -13,7 +13,7 @@ resource "nios_ip_allocation" "allocation1" {
   }
 }
 
-# IP address allocation with both IPv4 and IPv6 addresses
+# Manage IP address allocation with both IPv4 and IPv6 addresses
 resource "nios_ip_allocation" "allocation2" {
   name              = "host2.example.com"
   view              = "default"
@@ -33,7 +33,7 @@ resource "nios_ip_allocation" "allocation2" {
   }
 }
 
-# IP address allocation using function call to retrieve ipv4addr
+# Manage IP address allocation using function call to retrieve ipv4addr
 resource "nios_ip_allocation" "allocation3" {
   name              = "host3.example.com"
   view              = "default"
@@ -58,27 +58,4 @@ resource "nios_ip_allocation" "allocation3" {
   extattrs = {
     Site = "location-1"
   }
-}
-
-# Associate MAC address with host1's IP without DHCP configuration
-resource "nios_ip_association" "association1" {
-  ref                = nios_ip_allocation.allocation1.ref
-  mac                = "12:00:43:fe:9a:8c"
-  configure_for_dhcp = false
-}
-
-# Associate MAC and DUID with host2's IP with DHCP configuration enabled
-resource "nios_ip_association" "association2" {
-  ref                = nios_ip_allocation.allocation2.ref
-  mac                = "12:43:fd:ba:9c:c9"
-  duid               = "00:01:5f:3a:1b:2c:12:34:56:78:9a:bc"
-  match_client       = "DUID"
-  configure_for_dhcp = true
-}
-
-# Associate MAC address with host3's IP without DHCP configuration
-resource "nios_ip_association" "association3" {
-  ref                = nios_ip_allocation.allocation3.ref
-  mac                = "12:00:43:fe:9a:8d"
-  configure_for_dhcp = false
 }
