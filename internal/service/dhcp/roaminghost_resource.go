@@ -13,6 +13,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -129,6 +130,7 @@ func (r *RoaminghostResource) Read(ctx context.Context, req resource.ReadRequest
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForRoaminghost).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -205,6 +207,7 @@ func (r *RoaminghostResource) ReadByExtAttrs(ctx context.Context, data *Roamingh
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRoaminghost).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Roaminghost by extattrs, got error: %s", err))
@@ -338,15 +341,19 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 		return
 	}
 
-	var options []RoaminghostOptionsModel
-	diags := data.Options.ElementsAs(ctx, &options, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	var dhcpLeaseTimeValue string
+	var hasDhcpLeaseTime bool
 
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
+
+		var options []RoaminghostOptionsModel
+		diags := data.Options.ElementsAs(ctx, &options, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
 		// Special DHCP option names that require use_option to be set
 		specialOptions := map[string]bool{
 			"routers":                  true,
@@ -409,6 +416,7 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
 					)
 				}
+				return
 			}
 
 			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
@@ -421,19 +429,43 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 						optionName),
 				)
 			}
+
+			if option.Name.ValueString() == "dhcp-lease-time" {
+				hasDhcpLeaseTime = true
+				dhcpLeaseTimeValue = option.Value.ValueString()
+			}
+		}
+
+		// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
+		if hasDhcpLeaseTime && !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
+			if dhcpLeaseTimeValue != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("valid_lifetime"),
+					"Invalid configuration for Valid Lifetime",
+					"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+				)
+			}
 		}
 	}
 
-	// When dhcp-lease-time option is set, valid_lifetime attribute must have the same value as option value
-	if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-		for i, option := range options {
-			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
-				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-					option.Value.ValueString() != strconv.FormatInt(data.ValidLifetime.ValueInt64(), 10) {
+	// Preferred lifetime must be less than or equal to valid lifetime
+	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() {
+		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() {
+			if data.PreferredLifetime.ValueInt64() > data.ValidLifetime.ValueInt64() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("preferred_lifetime"),
+					"Invalid configuration",
+					"The 'preferred_lifetime' must be less than or equal to 'valid_lifetime'.",
+				)
+			}
+		} else if hasDhcpLeaseTime {
+			// if valid_lifetime is not set, compare with DHCP lease time
+			if dhcpLeaseTimeInt, err := strconv.ParseInt(dhcpLeaseTimeValue, 10, 64); err == nil {
+				if data.PreferredLifetime.ValueInt64() > dhcpLeaseTimeInt {
 					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for Valid Lifetime",
-						"valid_lifetime attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+						path.Root("preferred_lifetime"),
+						"Invalid configuration",
+						"The 'preferred_lifetime' must be less than or equal to 'dhcp-lease-time' (valid_lifetime) option value.",
 					)
 				}
 			}

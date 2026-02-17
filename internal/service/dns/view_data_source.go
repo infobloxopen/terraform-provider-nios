@@ -14,6 +14,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -137,7 +138,8 @@ func (d *ViewDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForView).
 				Paging(paging).
-				MaxResults(maxResults)
+				MaxResults(maxResults).
+				ProxySearch(config.GetProxySearch())
 
 			// Add page ID if provided
 			if pageID != "" {
