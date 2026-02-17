@@ -105,11 +105,6 @@ func (c *Config) canonicalField(name string) (string, bool) {
 	return "", false
 }
 
-func (c *Config) isRelayOption(name string) bool {
-	_, ok := c.IPv6RelayAgentOptions[name]
-	return ok
-}
-
 // Public entry point
 func Validate(expr string, cfg Config) error {
 	p := newParser(expr, cfg)
@@ -241,10 +236,7 @@ func (l *lexer) readNumberOrHexList() token {
 
 	// If next char is ':', treat the whole thing as a hex list
 	if l.peek() == ':' {
-		for {
-			if l.peek() != ':' {
-				break
-			}
+		for l.peek() == ':' { // Lifted condition into loop
 			l.next() // consume ':'
 
 			// Read next hex segment (1-2 hex chars)
@@ -265,8 +257,7 @@ func (l *lexer) readNumberOrHexList() token {
 		return token{typ: tIDENT, lit: string(l.src[start:l.i]), pos: start}
 	}
 
-	// No ':' following: this is a plain decimal number (we only
-	// allowed 0-2 digits above, so continue reading any remaining digits).
+	// No ':' following: this is a plain decimal number
 	for unicode.IsDigit(l.peek()) {
 		l.next()
 	}
@@ -716,28 +707,26 @@ func (p *parser) parseV6Relay() (LValue, error) {
 		return LValue{}, err
 	}
 	var inner LValue
-	if p.tok.typ == tSUBSTRING {
+	switch p.tok.typ {
+	case tSUBSTRING:
 		sub, err := p.parseSubstring()
 		if err != nil {
 			return LValue{}, err
 		}
 		inner = sub
-	} else if p.tok.typ == tOPTION || p.tok.typ == tIDENT {
-		// allow option <field> or bare field
-		if p.tok.typ == tOPTION {
-			of, err := p.parseOptionField()
-			if err != nil {
-				return LValue{}, err
-			}
-			inner = of
-		} else {
-			// bare field
-			f := p.tok.lit
-			ipos := p.tok.pos
-			p.bump()
-			inner = LValue{Kind: LVOption, PosAt: ipos, Field: f}
+	case tOPTION:
+		of, err := p.parseOptionField()
+		if err != nil {
+			return LValue{}, err
 		}
-	} else {
+		inner = of
+	case tIDENT:
+		// bare field
+		f := p.tok.lit
+		ipos := p.tok.pos
+		p.bump()
+		inner = LValue{Kind: LVOption, PosAt: ipos, Field: f}
+	default:
 		return LValue{}, fmt.Errorf("expected 'option' or field or 'substring' after v6relay(, at %d", p.tok.pos)
 	}
 	if err := p.expect(tRPAREN, "')'"); err != nil {
@@ -910,16 +899,18 @@ func validateOptionRHS(name string, typ TypeName, rhs RValue, cfg *Config, isSub
 		return fmt.Errorf("boolean expected for %s at %d (true|false)", name, rhs.Pos())
 
 	case TI32:
-		_, err := parseInt(raw, 32, true)
+		_, err := parseInt(raw, 32)
 		if err != nil {
 			return fmt.Errorf("%s expects 32-bit signed integer, got %q at %d", name, val, rhs.Pos())
 		}
 		return nil
+
 	case TU32:
 		if _, err := parseUint(raw, 32); err != nil {
 			return fmt.Errorf("%s expects 32-bit unsigned integer, got %q at %d", name, val, rhs.Pos())
 		}
 		return nil
+
 	case TU16:
 		u, err := parseUint(raw, 16)
 		if err != nil {
@@ -929,12 +920,14 @@ func validateOptionRHS(name string, typ TypeName, rhs RValue, cfg *Config, isSub
 			return fmt.Errorf("%s value out of range (0..65535) at %d", name, rhs.Pos())
 		}
 		return nil
+
 	case TU8:
 		u, err := parseUint(raw, 8)
 		if err != nil || u > 255 {
 			return fmt.Errorf("%s expects 8-bit unsigned integer, got %q at %d", name, val, rhs.Pos())
 		}
 		return nil
+
 	case TArrayU8:
 		parts := splitCSVorSpace(raw)
 		if len(parts) == 0 {
@@ -953,6 +946,7 @@ func validateOptionRHS(name string, typ TypeName, rhs RValue, cfg *Config, isSub
 			return fmt.Errorf("%s expects IPv4 address, got %q at %d", name, val, rhs.Pos())
 		}
 		return nil
+
 	case TArrayIPAddress:
 		// Accept one or many IPv4 addresses (comma or space separated)
 		addrs := splitCSVorSpace(raw)
@@ -965,6 +959,7 @@ func validateOptionRHS(name string, typ TypeName, rhs RValue, cfg *Config, isSub
 			}
 		}
 		return nil
+
 	case TArrayIPPair:
 		// Expect pairs like "1.1.1.1 255.255.255.0, 2.2.2.2 255.255.0.0"
 		chunks := strings.Split(raw, ",")
@@ -1030,7 +1025,7 @@ func parseUint(s string, bits int) (uint64, error) {
 	return u, err
 }
 
-func parseInt(s string, bits int, signed bool) (int64, error) {
+func parseInt(s string, bits int) (int64, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return 0, fmt.Errorf("empty")
