@@ -24,6 +24,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type FilteroptionModel struct {
@@ -96,6 +97,7 @@ var FilteroptionResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Optional:            true,
 		Default:             stringdefault.StaticString(""),
+		Validators:          []validator.String{customvalidator.IsValidExpression()},
 		MarkdownDescription: "The conditional expression of a DHCP filter option object.",
 	},
 	"extattrs": schema.MapAttribute{
