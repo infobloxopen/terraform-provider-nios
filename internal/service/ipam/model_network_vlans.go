@@ -16,20 +16,19 @@ import (
 
 // TODO: function call support for VLANs
 type NetworkVlansModel struct {
-	Vlan types.Map    `tfsdk:"vlan"`
+	Vlan types.String `tfsdk:"vlan"`
 	Id   types.Int64  `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
 }
 
 var NetworkVlansAttrTypes = map[string]attr.Type{
-	"vlan": types.MapType{ElemType: types.StringType},
+	"vlan": types.StringType,
 	"id":   types.Int64Type,
 	"name": types.StringType,
 }
 
 var NetworkVlansResourceSchemaAttributes = map[string]schema.Attribute{
-	"vlan": schema.MapAttribute{
-		ElementType:         types.StringType,
+	"vlan": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "Reference to the underlying StaticVlan object vlan.",
 	},
@@ -60,7 +59,7 @@ func (m *NetworkVlansModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		return nil
 	}
 	to := &ipam.NetworkVlans{
-		Vlan: flex.ExpandFrameworkMapString(ctx, m.Vlan, diags),
+		Vlan: flex.ExpandStringPointer(m.Vlan),
 	}
 	return to
 }
@@ -83,7 +82,7 @@ func (m *NetworkVlansModel) Flatten(ctx context.Context, from *ipam.NetworkVlans
 	if m == nil {
 		*m = NetworkVlansModel{}
 	}
-	m.Vlan = flex.FlattenFrameworkMapString(ctx, from.Vlan, diags)
+	m.Vlan = flex.FlattenStringPointer(from.Vlan)
 	m.Id = flex.FlattenInt64Pointer(from.Id)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }
