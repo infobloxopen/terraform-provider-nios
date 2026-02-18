@@ -30,6 +30,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/threatprotection"
 )
 
 // Ensure NIOSProvider satisfies various provider interfaces.
@@ -254,6 +255,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameClientipaddressResource,
 		rpz.NewRecordRpzCnameIpaddressdnResource,
 		rpz.NewRecordRpzCnameClientipaddressdnResource,
+
+		threatprotection.NewThreatprotectionGridRuleResource,
 	}
 }
 
@@ -395,6 +398,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameClientipaddressDataSource,
 		rpz.NewRecordRpzCnameIpaddressdnDataSource,
 		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
+
+		threatprotection.NewThreatprotectionGridRuleDataSource,
 	}
 }
 
