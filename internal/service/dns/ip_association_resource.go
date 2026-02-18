@@ -42,7 +42,7 @@ func (r *IPAssociationResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *IPAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages IP Association for a DNS HOST Record",
 		Attributes:          IpAssociationResourceSchemaAttributes,
 	}
 }
