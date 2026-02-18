@@ -423,8 +423,13 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 			}
 		}
 
+		if data.ServerAssociationType.IsUnknown() {
+			return
+		}
+
 		serverAssociationType := "NONE"
-		if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
+
+		if !data.ServerAssociationType.IsNull() {
 			serverAssociationType = data.ServerAssociationType.ValueString()
 		}
 
