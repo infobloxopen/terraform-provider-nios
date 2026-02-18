@@ -2,7 +2,6 @@ package dtc
 
 import (
 	"context"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -97,13 +96,6 @@ var DtcMonitorSnmpResourceSchemaAttributes = map[string]schema.Attribute{
 	"engine_id": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
-		Validators: []validator.String{
-			stringvalidator.LengthBetween(10, 64),
-            stringvalidator.RegexMatches(
-                regexp.MustCompile(`^([0-9a-fA-F]{2})+$`),
-                "Should contain only hexadecimal characters and have an even length",
-            ),
-        },
 		MarkdownDescription: "The SNMPv3 engine identifier.",
 	},
 	"extattrs": schema.MapAttribute{
