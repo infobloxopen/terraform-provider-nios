@@ -3971,7 +3971,7 @@ func formatExtAttrsForHCL(extAttrs map[string]string) string {
 	var result strings.Builder
 	result.WriteString("{\n")
 	for k, v := range extAttrs {
-		result.WriteString(fmt.Sprintf("        %s = %q\n", k, v))
+		fmt.Fprintf(&result, "        %s = %q\n", k, v)
 	}
 	result.WriteString("    }")
 	return result.String()
