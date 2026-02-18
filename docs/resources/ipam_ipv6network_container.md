@@ -120,7 +120,6 @@ resource "nios_ipam_ipv6network_container" "example_func_call" {
 - `rir_registration_status` (String) The registration status of the IPv6 network container in RIR.
 - `same_port_control_discovery_blackout` (Boolean) If the field is set to True, the discovery blackout setting will be used for port control blackout setting.
 - `send_rir_request` (Boolean) Determines whether to send the RIR registration request.
-- `subscribe_settings` (Attributes) (see [below for nested schema](#nestedatt--subscribe_settings))
 - `unmanaged` (Boolean) Determines whether the network container is unmanaged or not.
 - `update_dns_on_lease_renewal` (Boolean) This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.
 - `use_blackout_setting` (Boolean) Use flag for: discovery_blackout_setting , port_control_blackout_setting, same_port_control_discovery_blackout
@@ -156,6 +155,7 @@ resource "nios_ipam_ipv6network_container" "example_func_call" {
 - `network_container` (String) The network container to which this network belongs, if any.
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the IPv6 network container address space.
+- `subscribe_settings` (Attributes) (see [below for nested schema](#nestedatt--subscribe_settings))
 - `utilization` (Number) The network container utilization in percentage.
 
 <a id="nestedatt--cloud_info"></a>
@@ -330,24 +330,6 @@ Optional:
 
 
 
-<a id="nestedatt--subscribe_settings"></a>
-### Nested Schema for `subscribe_settings`
-
-Optional:
-
-- `enabled_attributes` (List of String)
-- `mapped_ea_attributes` (Attributes List) The list of NIOS extensible attributes to Cisco ISE attributes mappings. (see [below for nested schema](#nestedatt--subscribe_settings--mapped_ea_attributes))
-
-<a id="nestedatt--subscribe_settings--mapped_ea_attributes"></a>
-### Nested Schema for `subscribe_settings.mapped_ea_attributes`
-
-Required:
-
-- `mapped_ea` (String) The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.
-- `name` (String) The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.
-
-
-
 <a id="nestedatt--zone_associations"></a>
 ### Nested Schema for `zone_associations`
 
@@ -364,3 +346,20 @@ Optional:
 Read-Only:
 
 - `active_users_count` (Number) The number of active users.
+
+
+<a id="nestedatt--subscribe_settings"></a>
+### Nested Schema for `subscribe_settings`
+
+Read-Only:
+
+- `enabled_attributes` (List of String)
+- `mapped_ea_attributes` (Attributes List) The list of NIOS extensible attributes to Cisco ISE attributes mappings. (see [below for nested schema](#nestedatt--subscribe_settings--mapped_ea_attributes))
+
+<a id="nestedatt--subscribe_settings--mapped_ea_attributes"></a>
+### Nested Schema for `subscribe_settings.mapped_ea_attributes`
+
+Required:
+
+- `mapped_ea` (String) The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.
+- `name` (String) The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.

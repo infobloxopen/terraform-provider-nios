@@ -155,8 +155,8 @@ func TestAccRangetemplateResource_Bootserver(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := 100
 	offset := 50
-	bootServer := "bootServer"
-	bootServerUpdated := "bootServer3"
+	bootServer := "bootserver"
+	bootServerUpdated := "bootserver3"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
