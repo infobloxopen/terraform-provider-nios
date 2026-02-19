@@ -21,6 +21,7 @@ var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failo
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &DhcpfailoverResource{}
 var _ resource.ResourceWithImportState = &DhcpfailoverResource{}
+var _ resource.ResourceWithValidateConfig = &DhcpfailoverResource{}
 
 func NewDhcpfailoverResource() resource.Resource {
 	return &DhcpfailoverResource{}
