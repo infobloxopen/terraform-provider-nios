@@ -2,7 +2,6 @@ package validator
 
 import (
 	"context"
-	"math"
 	"regexp"
 	"strconv"
 	"fmt"
@@ -17,7 +16,7 @@ var (
 	// oidSubIdentifierPattern validates that a sub-identifier contains only digits
 	oidSubIdentifierPattern = regexp.MustCompile(`^\d+$`)
 	// oidSubIdentifierMaxValue is the maximum value for one sub-identifier (2^32 - 1)
-	oidSubIdentifierMaxValue = uint64(math.Pow(2, 32) - 1)
+	oidSubIdentifierMaxValue = uint64(4294967295)
 )
 
 type oidValidator struct{}
