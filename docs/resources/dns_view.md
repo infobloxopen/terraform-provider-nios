@@ -61,7 +61,7 @@ resource "nios_dns_view" "create_view_with_additional_fields" {
 
 ### Optional
 
-- `blacklist_action` (String) The action to perform when a domain name matches the pattern defined in a rule that is specified by the blacklist_ruleset method. Valid values are "REDIRECT" or "REFUSE". The default value is "REFUSE".
+- `blacklist_action` (String) The action to perform when a domain name matches the pattern defined in a rule that is specified by the blacklist_ruleset method. Valid values are "REDIRECT" or "REFUSE". The default value is "REDIRECT".
 - `blacklist_log_query` (Boolean) The flag that indicates whether blacklist redirection queries are logged. Specify "true" to enable logging, or "false" to disable it. The default value is "false".
 - `blacklist_redirect_addresses` (List of String) The array of IP addresses the appliance includes in the response it sends in place of a blacklisted IP address.
 - `blacklist_redirect_ttl` (Number) The Time To Live (TTL) value of the synthetic DNS responses resulted from blacklist redirection. The TTL value is a 32-bit unsigned integer that represents the TTL in seconds.

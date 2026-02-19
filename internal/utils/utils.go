@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
 
@@ -418,10 +417,6 @@ func ParseInterfaceValue(valStr string) interface{} {
 		}
 	}
 
-	// Try to parse the value as an integer
-	if intVal, err := strconv.ParseInt(valStr, 10, 64); err == nil {
-		return intVal
-	}
 	return valStr
 }
 
