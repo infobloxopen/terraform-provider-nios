@@ -210,14 +210,12 @@ func (r *Ipv6dhcpoptiondefinitionResource) ValidateConfig(ctx context.Context, r
 		return
 	}
 
-	if data.Space.IsUnknown() {
-		return
-	}
-
-	space := "DHCPv6"
-
-	if !data.Space.IsNull() {
-		space = data.Space.ValueString()
+	var space string
+	if !data.Space.IsUnknown() {
+		space = "DHCPv6"
+		if !data.Space.IsNull() {
+			space = data.Space.ValueString()
+		}
 	}
 
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {

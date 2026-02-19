@@ -71,13 +71,13 @@ func (r *Ipv6rangetemplateResource) ValidateConfig(ctx context.Context, req reso
 		return
 	}
 
-	if config.ServerAssociationType.IsUnknown() {
-		return
-	}
+	var serverAssociationType string
 
-	serverAssociationType := "NONE"
-	if !config.ServerAssociationType.IsNull() {
-		serverAssociationType = config.ServerAssociationType.ValueString()
+	if !config.ServerAssociationType.IsUnknown() {
+		serverAssociationType = "NONE"
+		if !config.ServerAssociationType.IsNull() {
+			serverAssociationType = config.ServerAssociationType.ValueString()
+		}
 	}
 
 	// If server_association_type is MEMBER, member field must be set
