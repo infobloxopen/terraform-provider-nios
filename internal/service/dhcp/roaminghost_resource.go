@@ -518,12 +518,11 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 		}
 	}
 
-	if data.MatchClient.IsUnknown() {
-		return
-	}
 	var matchClient string
-	if !data.MatchClient.IsNull() {
-		matchClient = data.MatchClient.ValueString()
+	if !data.MatchClient.IsUnknown() {
+		if !data.MatchClient.IsNull() {
+			matchClient = data.MatchClient.ValueString()
+		}
 	}
 
 	switch matchClient {
@@ -581,7 +580,7 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 	switch ipv6MatchOption {
 	case "V6_MAC_ADDRESS":
 		// When ipv6_match_option is V6_MAC_ADDRESS, ipv6_mac_address is required and ipv6_duid should not be set
-		if !data.Ipv6MacAddress.IsNull() {
+		if !data.Ipv6MacAddress.IsUnknown() {
 			if data.Ipv6MacAddress.IsNull() || data.Ipv6MacAddress.ValueString() == "" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("ipv6_mac_address"),

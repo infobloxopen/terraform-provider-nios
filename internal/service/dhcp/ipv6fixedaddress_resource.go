@@ -367,14 +367,13 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate based on address_type only if func_call is not set
 	if data.FuncCall.IsNull() || data.FuncCall.IsUnknown() {
-		if data.AddressType.IsUnknown() {
-			return
-		}
 
-		addressType := "ADDRESS"
-
-		if !data.AddressType.IsNull() {
-			addressType = data.AddressType.ValueString()
+		var addressType string
+		if !data.AddressType.IsUnknown() {
+			addressType = "ADDRESS"
+			if !data.AddressType.IsNull() {
+				addressType = data.AddressType.ValueString()
+			}
 		}
 
 		switch addressType {
