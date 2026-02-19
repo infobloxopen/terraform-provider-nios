@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -924,7 +923,7 @@ func TestAccRangeResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeExtAttrs(startAddr, endAddr, map[string]string{
+				Config: testAccRangeExtAttrs(startAddr, endAddr, map[string]any{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -934,7 +933,7 @@ func TestAccRangeResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeExtAttrs(startAddr, endAddr, map[string]string{
+				Config: testAccRangeExtAttrs(startAddr, endAddr, map[string]any{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -3335,8 +3334,8 @@ resource "nios_dhcp_range" "test_exclude" {
 `, startAddr, endAddr, excludeHCL)
 }
 
-func testAccRangeExtAttrs(startAddr, endAddr string, extAttrs map[string]string) string {
-	extattrsStr := formatExtAttrsForHCL(extAttrs)
+func testAccRangeExtAttrs(startAddr, endAddr string, extAttrs map[string]any) string {
+	extattrsStr := utils.ConvertMapToHCL(extAttrs)
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_extattrs" {
 	start_addr = %q
@@ -3965,14 +3964,4 @@ resource "nios_dhcp_range" "test_use_update_dns_on_lease_renewal" {
     use_update_dns_on_lease_renewal = %t
 }
 `, startAddr, endAddr, useUpdateDnsOnLeaseRenewal)
-}
-
-func formatExtAttrsForHCL(extAttrs map[string]string) string {
-	var result strings.Builder
-	result.WriteString("{\n")
-	for k, v := range extAttrs {
-		result.WriteString(fmt.Sprintf("        %s = %q\n", k, v))
-	}
-	result.WriteString("    }")
-	return result.String()
 }
