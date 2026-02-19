@@ -423,9 +423,13 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 			}
 		}
 
-		serverAssociationType := "NONE"
-		if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
-			serverAssociationType = data.ServerAssociationType.ValueString()
+		var serverAssociationType string
+
+		if !data.ServerAssociationType.IsUnknown() {
+			serverAssociationType = "NONE"
+			if !data.ServerAssociationType.IsNull() {
+				serverAssociationType = data.ServerAssociationType.ValueString()
+			}
 		}
 
 		// If server_association_type is MEMBER, member field must be set
