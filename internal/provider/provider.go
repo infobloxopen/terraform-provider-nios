@@ -233,6 +233,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewUpgradegroupResource,
 		grid.NewGridServicerestartGroupResource,
 		grid.NewDistributionscheduleResource,
+		grid.NewGmcgroupResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
 		discovery.NewVdiscoverytaskResource,
@@ -373,6 +374,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewUpgradegroupDataSource,
 		grid.NewGridServicerestartGroupDataSource,
 		grid.NewDistributionscheduleDataSource,
+		grid.NewGmcgroupDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
 		discovery.NewVdiscoverytaskDataSource,
