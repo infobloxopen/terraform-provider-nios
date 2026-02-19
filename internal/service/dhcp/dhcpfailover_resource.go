@@ -21,6 +21,7 @@ var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failo
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &DhcpfailoverResource{}
 var _ resource.ResourceWithImportState = &DhcpfailoverResource{}
+var _ resource.ResourceWithValidateConfig = &DhcpfailoverResource{}
 
 func NewDhcpfailoverResource() resource.Resource {
 	return &DhcpfailoverResource{}
@@ -329,4 +330,31 @@ func (r *DhcpfailoverResource) Delete(ctx context.Context, req resource.DeleteRe
 func (r *DhcpfailoverResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
+}
+
+func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data DhcpfailoverModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	primaryServerType := ""
+	secondaryServerType := ""
+	// Get the values or default to empty string
+	if !data.PrimaryServerType.IsNull() && !data.PrimaryServerType.IsUnknown() {
+		primaryServerType = data.PrimaryServerType.ValueString()
+	}
+
+	if !data.SecondaryServerType.IsNull() && !data.SecondaryServerType.IsUnknown() {
+		secondaryServerType = data.SecondaryServerType.ValueString()
+	}
+
+	if secondaryServerType == "EXTERNAL" && primaryServerType == "EXTERNAL" {
+		resp.Diagnostics.AddError(
+			"Invalid Server Types",
+			"Both primary_server_type and secondary_server_type cannot be set to EXTERNAL.",
+		)
+	}
+
 }
