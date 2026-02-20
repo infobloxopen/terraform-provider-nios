@@ -9,8 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -74,6 +77,8 @@ func (l *RecordAList) ListResourceConfigSchema(ctx context.Context, req list.Lis
 
 func (l *RecordAList) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data RecordAListModel
+	pageCount := 0
+	limit := int32(req.Limit)
 
 	diags := req.Config.Get(ctx, &data)
 	if diags.HasError() {
@@ -81,14 +86,65 @@ func (l *RecordAList) List(ctx context.Context, req list.ListRequest, stream *li
 		return
 	}
 
-	apiRes, _, err := l.client.DNSAPI.RecordAAPI.
-		List(ctx).
-		Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &diags)).
-		Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &diags)).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForRecordA).
-		MaxResults(int32(req.Limit)).
-		Execute()
+	allResults, err := utils.ReadWithPages(
+		func(pageID string, maxResultsPerPage int32) ([]dns.RecordA, string, error) {
+
+			var paging int32 = 1
+
+			// If total limit is set by user and is less than maxResultsPerPage, use it as maxResultsPerPage for API call to optimize the number of results.
+			// If limit > maxResultsPerPage, terraform automatically breaks connection to the provider after limit is reached.
+			if limit < maxResultsPerPage {
+				maxResultsPerPage = limit
+			}
+
+			//Increment the page count
+			pageCount++
+
+			request := l.client.DNSAPI.RecordAAPI.
+				List(ctx).
+				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &diags)).
+				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &diags)).
+				ReturnAsObject(1).
+				ReturnFieldsPlus(readableAttributesForRecordA).
+				Paging(paging).
+				MaxResults(maxResultsPerPage)
+
+			// Add page ID if provided
+			if pageID != "" {
+				request = request.PageId(pageID)
+			}
+
+			// Execute the request
+			apiRes, _, err := request.Execute()
+			if err != nil {
+				return nil, "", err
+			}
+
+			res := apiRes.ListRecordAResponseObject.GetResult()
+			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
+
+			// Check for next page ID in additional properties
+			additionalProperties := apiRes.ListRecordAResponseObject.AdditionalProperties
+			var nextPageID string
+
+			// If limit is reached , we do not need to continue to make API calls, we can return the results and empty nextPageID to stop pagination.
+			if len(res) >= int(limit) {
+				nextPageID = ""
+				tflog.Info(ctx, "Limit reached, stopped fetching more pages.")
+				return res, nextPageID, nil
+			}
+
+			npId, ok := additionalProperties["next_page_id"]
+			if ok {
+				if npIdStr, ok := npId.(string); ok {
+					nextPageID = npIdStr
+				}
+			} else {
+				tflog.Info(ctx, "No next page ID found. This is the last page.")
+			}
+			return res, nextPageID, nil
+		},
+	)
 
 	if err != nil {
 		diags.AddError("Client Error", fmt.Sprintf("Unable to list RecordA, got error: %s", err))
@@ -96,24 +152,11 @@ func (l *RecordAList) List(ctx context.Context, req list.ListRequest, stream *li
 		return
 	}
 
-	if apiRes == nil || apiRes.ListRecordAResponseObject == nil {
-		// No results found, return empty stream
-		stream.Results = func(push func(list.ListResult) bool) {}
-		return
-	}
-
-	res := apiRes.ListRecordAResponseObject.GetResult()
-	if res == nil {
-		// No results found, return empty stream
-		stream.Results = func(push func(list.ListResult) bool) {}
-		return
-	}
-
 	stream.Results = func(push func(list.ListResult) bool) {
-		for _, item := range res {
+		for _, item := range allResults {
 			result := req.NewListResult(ctx)
 
-			//result.Diagnostics.Append(result.Identity.Set(ctx, identityData)...)
+			// Set the Identity for each result
 			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("ref"), &item.Ref)...)
 			if result.Diagnostics.HasError() {
 				if !push(result) {
@@ -122,6 +165,8 @@ func (l *RecordAList) List(ctx context.Context, req list.ListRequest, stream *li
 				continue
 			}
 
+			// By default, list only returns the identity.
+			// If IncludeResource is true, it gets the full resource and set it in the result.Resource
 			if req.IncludeResource {
 				var extAttrsAll types.Map
 				item.ExtAttrs, extAttrsAll, diags = RemoveInheritedExtAttrs(ctx, extAttrsAll, *item.ExtAttrs)

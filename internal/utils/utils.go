@@ -877,3 +877,16 @@ func ReorderAndFilterDHCPOptions(
 
 	return newList, &diags
 }
+
+func ProviderSetup() string {
+	return `
+	terraform {
+  required_providers {
+    nios = {
+      source  = "registry.terraform.io/infobloxopen/nios"
+      version = "1.0.0"
+    }
+  }
+}
+`
+}
