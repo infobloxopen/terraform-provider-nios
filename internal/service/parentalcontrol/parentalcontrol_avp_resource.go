@@ -62,6 +62,27 @@ func (r *ParentalcontrolAvpResource) Configure(ctx context.Context, req resource
 	r.client = client
 }
 
+func (r *ParentalcontrolAvpResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data ParentalcontrolAvpModel
+
+	// Read Terraform configuration data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Perform custom validation logic here and append any diagnostics to resp.Diagnostics
+	if !data.DomainTypes.IsNull() {
+		if !data.IsRestricted.IsNull() && !data.IsRestricted.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"'is_restricted' must be true when 'domain_types' is specified.",
+			)
+		}
+	}
+}
+
 func (r *ParentalcontrolAvpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data ParentalcontrolAvpModel
 

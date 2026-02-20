@@ -28,7 +28,7 @@ func TestAccParentalcontrolAvpResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolAvpBasicConfig(name, "BYTE", 10),
+				Config: testAccParentalcontrolAvpBasicConfig(name, "BYTE", 111),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -52,7 +52,7 @@ func TestAccParentalcontrolAvpResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckParentalcontrolAvpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccParentalcontrolAvpBasicConfig(name, "BYTE", 10),
+				Config: testAccParentalcontrolAvpBasicConfig(name, "BYTE", 112),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
 					testAccCheckParentalcontrolAvpDisappears(context.Background(), &v),
@@ -73,7 +73,7 @@ func TestAccParentalcontrolAvpResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolAvpComment(name, "BYTE", "Parental control AVP", 10),
+				Config: testAccParentalcontrolAvpComment(name, "BYTE", "Parental control AVP", 113),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Parental control AVP"),
@@ -81,7 +81,7 @@ func TestAccParentalcontrolAvpResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolAvpComment(name, "BYTE", "Parental control AVP updated", 10),
+				Config: testAccParentalcontrolAvpComment(name, "BYTE", "Parental control AVP updated", 113),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Parental control AVP updated"),
@@ -97,27 +97,27 @@ func TestAccParentalcontrolAvpResource_DomainTypes(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolAvp
 	name := acctest.RandomNameWithPrefix("parentalcontrol-avp")
 	domainTypes1 := []string{"ANCILLARY"}
-	domainTypes2 := []string{"LOCAL_ID", "IP_SPACE_DIS"}
+	domainTypes2 := []string{"NAS_CONTEXT", "IP_SPACE_DIS"}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolAvpDomainTypes(name, "BYTE", domainTypes1, 10),
+				Config: testAccParentalcontrolAvpDomainTypes(name, "BYTE", domainTypes1, 114),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "domain_types.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "domain_types.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "domain_types.0", "ANCILLARY"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolAvpDomainTypes(name, "BYTE", domainTypes2, 10),
+				Config: testAccParentalcontrolAvpDomainTypes(name, "BYTE", domainTypes2, 114),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "domain_types.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "domain_types.0", "LOCAL_ID"),
+					resource.TestCheckResourceAttr(resourceName, "domain_types.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "domain_types.0", "NAS_CONTEXT"),
 					resource.TestCheckResourceAttr(resourceName, "domain_types.1", "IP_SPACE_DIS"),
 				),
 			},
@@ -136,7 +136,7 @@ func TestAccParentalcontrolAvpResource_IsRestricted(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolAvpIsRestricted(name, "BYTE", "true", 10),
+				Config: testAccParentalcontrolAvpIsRestricted(name, "BYTE", "true", 115),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "is_restricted", "true"),
@@ -144,7 +144,7 @@ func TestAccParentalcontrolAvpResource_IsRestricted(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolAvpIsRestricted(name, "BYTE", "false", 10),
+				Config: testAccParentalcontrolAvpIsRestricted(name, "BYTE", "false", 115),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "is_restricted", "false"),
@@ -166,7 +166,7 @@ func TestAccParentalcontrolAvpResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolAvpName(name1, "BYTE", 10),
+				Config: testAccParentalcontrolAvpName(name1, "BYTE", 116),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name1),
@@ -174,7 +174,7 @@ func TestAccParentalcontrolAvpResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolAvpName(name2, "BYTE", 10),
+				Config: testAccParentalcontrolAvpName(name2, "BYTE", 116),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name2),
@@ -195,18 +195,18 @@ func TestAccParentalcontrolAvpResource_Type(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolAvpType(name, "BYTE", 10),
+				Config: testAccParentalcontrolAvpType(name, "BYTE", 117),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "type", "10"),
+					resource.TestCheckResourceAttr(resourceName, "type", "117"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolAvpType(name, "BYTE", 20),
+				Config: testAccParentalcontrolAvpType(name, "BYTE", 120),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "type", "20"),
+					resource.TestCheckResourceAttr(resourceName, "type", "120"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -282,18 +282,18 @@ func TestAccParentalcontrolAvpResource_VendorType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolAvpVendorType(name, "BYTE", 26, 123, 122),
+				Config: testAccParentalcontrolAvpVendorType(name, "BYTE", 26, 124, 125),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vendor_type", "122"),
+					resource.TestCheckResourceAttr(resourceName, "vendor_type", "125"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolAvpVendorType(name, "BYTE", 26, 123, 132),
+				Config: testAccParentalcontrolAvpVendorType(name, "BYTE", 26, 126, 133),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vendor_type", "132"),
+					resource.TestCheckResourceAttr(resourceName, "vendor_type", "133"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -388,6 +388,7 @@ resource "nios_parentalcontrol_avp" "test_domain_types" {
 	value_type = %q
 	type = %d
     domain_types = %s
+    is_restricted = true
 }
 `, name, valueType, type_, domainTypesStr)
 }

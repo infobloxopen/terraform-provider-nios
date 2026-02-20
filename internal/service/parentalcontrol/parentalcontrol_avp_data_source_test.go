@@ -22,7 +22,7 @@ func TestAccParentalcontrolAvpDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckParentalcontrolAvpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccParentalcontrolAvpDataSourceConfigFilters(name, "STRING", 20),
+				Config: testAccParentalcontrolAvpDataSourceConfigFilters(name, "STRING", 220),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckParentalcontrolAvpExists(context.Background(), resourceName, &v),

@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
@@ -64,6 +65,7 @@ var ParentalcontrolAvpResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType: types.StringType,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("is_restricted")),
 			listvalidator.ValueStringsAre(
 				stringvalidator.OneOf(
 					"ANCILLARY",
