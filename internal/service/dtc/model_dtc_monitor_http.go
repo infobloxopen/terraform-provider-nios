@@ -313,7 +313,7 @@ func (m *DtcMonitorHttpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorH
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Ciphers = flex.FlattenStringPointer(from.Ciphers)
-	m.ClientCert = flex.FlattenStringPointer(from.ClientCert)
+	m.ClientCert = flex.FlattenStringPointerNilAsNotEmpty(from.ClientCert)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ContentCheck = flex.FlattenStringPointer(from.ContentCheck)
 	m.ContentCheckInput = flex.FlattenStringPointer(from.ContentCheckInput)
