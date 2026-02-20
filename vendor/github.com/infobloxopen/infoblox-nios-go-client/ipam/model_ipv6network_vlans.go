@@ -20,7 +20,7 @@ var _ MappedNullable = &Ipv6networkVlans{}
 // Ipv6networkVlans struct for Ipv6networkVlans
 type Ipv6networkVlans struct {
 	// Reference to the underlying StaticVlan object vlan.
-	Vlan *string `json:"vlan,omitempty"`
+	Vlan map[string]interface{} `json:"vlan,omitempty"`
 	// VLAN ID value.
 	Id *int64 `json:"id,omitempty"`
 	// Name of the VLAN.
@@ -48,19 +48,19 @@ func NewIpv6networkVlansWithDefaults() *Ipv6networkVlans {
 }
 
 // GetVlan returns the Vlan field value if set, zero value otherwise.
-func (o *Ipv6networkVlans) GetVlan() string {
+func (o *Ipv6networkVlans) GetVlan() map[string]interface{} {
 	if o == nil || IsNil(o.Vlan) {
-		var ret string
+		var ret map[string]interface{}
 		return ret
 	}
-	return *o.Vlan
+	return o.Vlan
 }
 
 // GetVlanOk returns a tuple with the Vlan field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Ipv6networkVlans) GetVlanOk() (*string, bool) {
+func (o *Ipv6networkVlans) GetVlanOk() (map[string]interface{}, bool) {
 	if o == nil || IsNil(o.Vlan) {
-		return nil, false
+		return map[string]interface{}{}, false
 	}
 	return o.Vlan, true
 }
@@ -74,9 +74,9 @@ func (o *Ipv6networkVlans) HasVlan() bool {
 	return false
 }
 
-// SetVlan gets a reference to the given string and assigns it to the Vlan field.
-func (o *Ipv6networkVlans) SetVlan(v string) {
-	o.Vlan = &v
+// SetVlan gets a reference to the given map[string]interface{} and assigns it to the Vlan field.
+func (o *Ipv6networkVlans) SetVlan(v map[string]interface{}) {
+	o.Vlan = v
 }
 
 // GetId returns the Id field value if set, zero value otherwise.
