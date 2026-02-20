@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -34,6 +35,8 @@ import (
 
 // Ensure NIOSProvider satisfies various provider interfaces.
 var _ provider.Provider = &NIOSProvider{}
+
+var _ provider.ProviderWithListResources = &NIOSProvider{}
 
 const terraformInternalIDEA = "Terraform Internal ID"
 
@@ -115,6 +118,7 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	}
 	resp.DataSourceData = client
 	resp.ResourceData = client
+	resp.ListResourceData = client
 }
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
@@ -395,6 +399,12 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameClientipaddressDataSource,
 		rpz.NewRecordRpzCnameIpaddressdnDataSource,
 		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
+	}
+}
+
+func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListResource {
+	return []func() list.ListResource{
+		dns.NewRecordAList,
 	}
 }
 
