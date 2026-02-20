@@ -24,7 +24,7 @@ func NewRecordAList() list.ListResource {
 	return &RecordAList{}
 }
 
-// RecordAList defines the data source implementation.
+// RecordAList defines the List implementation.
 type RecordAList struct {
 	client *niosclient.APIClient
 }
@@ -59,7 +59,7 @@ type RecordAListModel struct {
 
 func (l *RecordAList) ListResourceConfigSchema(ctx context.Context, req list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing DNS A Records.",
+		MarkdownDescription: "Query existing DNS A Records.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				MarkdownDescription: "Filter parameters for querying DNS A records.",
