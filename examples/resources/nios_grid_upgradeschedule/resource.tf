@@ -10,7 +10,7 @@ resource "nios_grid_upgradeschedule" "schedule_with_upgrade_groups" {
   start_time = "2026-10-09T20:00:00"
   upgrade_groups = [
     {
-      name              = "Default"
+      name         = "Default"
       upgrade_time = "2026-10-09T22:30:00"
     }
   ]
