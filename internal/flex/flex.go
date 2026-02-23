@@ -344,7 +344,7 @@ func ExpandParsedFrameworkMapString(ctx context.Context, tfMap types.Map, diags 
 	elementsNew := make(map[string]interface{})
 
 	for key, valStr := range elements {
-		parsedValue := utils.ParseInterfaceValue(valStr)
+		parsedValue := utils.ParseInterfaceValueWithIntFallback(valStr)
 		elementsNew[key] = parsedValue
 	}
 	return elementsNew
