@@ -113,12 +113,23 @@ func (v oidValidator) ValidateString(ctx context.Context, req validator.StringRe
 			return
 		}
 
+		 // Validate second sub-identifier constraints when first is 0 or 1
+		 if len(oidSubIdentifiers) > 2 {
+            secondSubID, err := strconv.ParseUint(oidSubIdentifiers[2], 10, 64)
+            if err == nil {
+                if (firstSubID == 0 || firstSubID == 1) && secondSubID > 39 {
+                    resp.Diagnostics.AddAttributeError(
+                        req.Path,
+                        "Invalid OID Format",
+                        "Second sub-identifier must be between 0 and 39 when first sub-identifier is 0 or 1.",
+                    )
+                    return
+                }
+            }
+        }
+
 		//Validate remaining sub-identifiers (only digits and within max value)
 		for i := 2; i < len(oidSubIdentifiers); i++ {
-			if oidSubIdentifiers[i] == "" {
-				continue
-			}
-
 			if !oidSubIdentifierPattern.MatchString(oidSubIdentifiers[i]) {
 				resp.Diagnostics.AddAttributeError(
 					req.Path,
@@ -136,21 +147,6 @@ func (v oidValidator) ValidateString(ctx context.Context, req validator.StringRe
 					fmt.Sprintf("Sub-identifier at position %d exceeds maximum value of %d.", i, oidSubIdentifierMaxValue),
 				)
 				return
-			}
-		}
-		if len(oidSubIdentifiers) > 2 {
-			firstSubID, err1 := strconv.ParseUint(oidSubIdentifiers[1], 10, 64)
-			secondSubID, err2 := strconv.ParseUint(oidSubIdentifiers[2], 10, 64)
-
-			if err1 == nil && err2 == nil {
-				if (firstSubID == 0 || firstSubID == 1) && secondSubID > 39 {
-					resp.Diagnostics.AddAttributeError(
-						req.Path,
-						"Invalid OID Format",
-						"Second sub-identifier must be between 0 and 39 when first sub-identifier is 0 or 1.",
-					)
-					return
-				}
 			}
 		}
 
