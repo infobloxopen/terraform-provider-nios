@@ -48,6 +48,7 @@ func TestAccRirOrganizationDataSource_ExtAttrFilters(t *testing.T) {
 	var v rir.RirOrganization
 	name := acctest.RandomNameWithPrefix("rir-org")
 	id := fmt.Sprintf("ORG-CB%d-IBTEST", acctest.RandomNumber(9999))
+	randomRemark := acctest.RandomNameWithPrefix("remark")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -60,6 +61,7 @@ func TestAccRirOrganizationDataSource_ExtAttrFilters(t *testing.T) {
 					"RIPE Country":           "United Kingdom (GB)",
 					"RIPE Technical Contact": "TEST123-IB",
 					"RIPE Email":             "support@infoblox.com",
+					"RIPE Remarks":           randomRemark,
 				},
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
@@ -122,7 +124,7 @@ resource "nios_rir_organization" "test" {
 
 data "nios_rir_organization" "test" {
   extattrfilters = {
-    "RIPE Email" = nios_rir_organization.test.extattrs["RIPE Email"]
+    "RIPE Remarks" = nios_rir_organization.test.extattrs["RIPE Remarks"]
   }
 }
 `, extattrsStr, id, maintainer, name, password, rir, senderEmail)
