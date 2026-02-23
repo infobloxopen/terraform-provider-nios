@@ -62,7 +62,7 @@ var SharedrecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 	"canonical": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 			customvalidator.StringNotEmpty(),
 		},
 		MarkdownDescription: "Canonical name in FQDN format. This value can be in unicode format.",

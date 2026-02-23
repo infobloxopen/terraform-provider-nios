@@ -341,12 +341,8 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 		return
 	}
 
-	var options []FiltermacOptionsModel
-	diags := data.Options.ElementsAs(ctx, &options, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	var dhcpLeaseTimeValue string
+	var hasDhcpLeaseTime bool
 
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
@@ -370,6 +366,14 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 			51: true,
 			23: true,
 		}
+
+		var options []FiltermacOptionsModel
+		diags := data.Options.ElementsAs(ctx, &options, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
@@ -423,21 +427,22 @@ func (r *FiltermacResource) ValidateConfig(ctx context.Context, req resource.Val
 						optionName),
 				)
 			}
-		}
-	}
 
-	// When dhcp-lease-time option is set, lease_time attribute must have the same value as option value
-	if !data.LeaseTime.IsNull() && !data.LeaseTime.IsUnknown() && !data.Options.IsNull() && !data.Options.IsUnknown() {
-		for i, option := range options {
-			if !option.Name.IsNull() && !option.Name.IsUnknown() && option.Name.ValueString() == "dhcp-lease-time" {
-				if !option.Value.IsNull() && !option.Value.IsUnknown() &&
-					option.Value.ValueString() != strconv.FormatInt(data.LeaseTime.ValueInt64(), 10) {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for Lease Time",
-						"lease_time attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
-					)
-				}
+			if option.Name.ValueString() == "dhcp-lease-time" {
+				hasDhcpLeaseTime = true
+				dhcpLeaseTimeValue = option.Value.ValueString()
+			}
+
+		}
+
+		// When dhcp-lease-time option is set, lease_time attribute must have the same value as option value
+		if hasDhcpLeaseTime && !data.LeaseTime.IsNull() && !data.LeaseTime.IsUnknown() {
+			if dhcpLeaseTimeValue != strconv.FormatInt(data.LeaseTime.ValueInt64(), 10) {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("lease_time"),
+					"Invalid configuration for Lease Time",
+					"lease_time attribute must match the 'value' attribute for DHCP Option 'dhcp-lease-time'.",
+				)
 			}
 		}
 	}

@@ -99,14 +99,14 @@ var RecordRpzMxResourceSchemaAttributes = map[string]schema.Attribute{
 	"mail_exchanger": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "Mail exchanger name in FQDN format. This value can be in unicode format.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The name for a record in FQDN format. This value cannot be in unicode format.",
 	},
