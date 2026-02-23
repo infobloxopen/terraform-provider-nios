@@ -21,6 +21,7 @@ var readableAttributesForPxgridEndpoint = "address,client_certificate_subject,cl
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &PxgridEndpointResource{}
 var _ resource.ResourceWithImportState = &PxgridEndpointResource{}
+var _ resource.ResourceWithValidateConfig = &PxgridEndpointResource{}
 
 func NewPxgridEndpointResource() resource.Resource {
 	return &PxgridEndpointResource{}
@@ -37,7 +38,7 @@ func (r *PxgridEndpointResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *PxgridEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a PxgridEndpoint resource object.",
+		MarkdownDescription: "Manages a Pxgrid Endpoint.",
 		Attributes:          PxgridEndpointResourceSchemaAttributes,
 	}
 }
@@ -335,6 +336,34 @@ func (r *PxgridEndpointResource) Delete(ctx context.Context, req resource.Delete
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete PxgridEndpoint, got error: %s", err))
 		return
+	}
+}
+
+func (r *PxgridEndpointResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data PxgridEndpointModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Outbound Members Validation
+	if data.OutboundMemberType.ValueString() == "MEMBER" {
+		if data.OutboundMembers.IsNull() || data.OutboundMembers.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("outbound_members"),
+				"Invalid Configuration",
+				"Attribute 'outbound_members' must be specified when 'outbound_member_type' is set to 'MEMBER'.",
+			)
+		}
+	} else if !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("outbound_members"),
+			"Invalid Configuration",
+			"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
+		)
 	}
 }
 

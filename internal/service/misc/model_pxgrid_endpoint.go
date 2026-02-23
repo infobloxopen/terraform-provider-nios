@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -203,13 +204,19 @@ var PxgridEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The vendor identifier.",
 	},
 	"wapi_user_name": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("wapi_user_password")),
+		},
 		MarkdownDescription: "The user name for WAPI integration.",
 	},
 	"wapi_user_password": schema.StringAttribute{
-		Sensitive:           true,
-		Optional:            true,
+		Sensitive: true,
+		Optional:  true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("wapi_user_name")),
+		},
 		MarkdownDescription: "The user password for WAPI integration.",
 	},
 }

@@ -3,6 +3,7 @@ package misc_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -10,34 +11,16 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
-
-/*
-// Retrieve a specific misc PxgridEndpoint by filters
-data "nios_misc_pxgrid_endpoint" "get_misc_pxgrid_endpoint_using_filters" {
-  filters = {
-    address = "ADDRESS_REPLACE_ME"
-    client_certificate_token = "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME"
-    name = "NAME_REPLACE_ME"
-    outbound_member_type = "OUTBOUND_MEMBER_TYPE_REPLACE_ME"
-    subscribe_settings = "SUBSCRIBE_SETTINGS_REPLACE_ME"
-  }
-}
-// Retrieve specific misc PxgridEndpoint using Extensible Attributes
-data "nios_misc_pxgrid_endpoint" "get_misc_pxgrid_endpoint_using_extensible_attributes" {
-  extattrfilters = {
-    Site = "location-1"
-  }
-}
-
-// Retrieve all misc PxgridEndpoint
-data "nios_misc_pxgrid_endpoint" "get_all_misc_pxgrid_endpoint" {}
-*/
 
 func TestAccPxgridEndpointDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_misc_pxgrid_endpoint.test"
 	resourceName := "nios_misc_pxgrid_endpoint.test"
 	var v misc.PxgridEndpoint
+	view := acctest.RandomNameWithPrefix("network-view")
+	name := acctest.RandomNameWithPrefix("pxgrid-endpoint")
+	address := acctest.RandomIP()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -45,7 +28,7 @@ func TestAccPxgridEndpointDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckPxgridEndpointDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPxgridEndpointDataSourceConfigFilters("ADDRESS_REPLACE_ME", "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "SUBSCRIBE_SETTINGS_REPLACE_ME"),
+				Config: testAccPxgridEndpointDataSourceConfigFilters(view, address, clientCertificateFile, name, "GM", subscribeSettings, publishSettings),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckPxgridEndpointExists(context.Background(), resourceName, &v),
@@ -60,6 +43,10 @@ func TestAccPxgridEndpointDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_misc_pxgrid_endpoint.test"
 	resourceName := "nios_misc_pxgrid_endpoint.test"
 	var v misc.PxgridEndpoint
+	view := acctest.RandomNameWithPrefix("network-view")
+	name := acctest.RandomNameWithPrefix("pxgrid-endpoint")
+	address := acctest.RandomIP()
+	extAttrsValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -67,7 +54,7 @@ func TestAccPxgridEndpointDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckPxgridEndpointDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPxgridEndpointDataSourceConfigExtAttrFilters("ADDRESS_REPLACE_ME", "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "SUBSCRIBE_SETTINGS_REPLACE_ME", acctest.RandomName()),
+				Config: testAccPxgridEndpointDataSourceConfigExtAttrFilters(view, address, clientCertificateFile, name, "GM", subscribeSettings, publishSettings, extAttrsValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckPxgridEndpointExists(context.Background(), resourceName, &v),
@@ -106,14 +93,18 @@ func testAccCheckPxgridEndpointResourceAttrPair(resourceName, dataSourceName str
 	}
 }
 
-func testAccPxgridEndpointDataSourceConfigFilters(address, clientCertificateToken, name, outboundMemberType, subscribeSettings string) string {
-	return fmt.Sprintf(`
+func testAccPxgridEndpointDataSourceConfigFilters(view, address, clientCertificateFile, name, outboundMemberType string, subscribeSettings map[string]any, publishSettings map[string]any) string {
+	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
+	publishSettingsStr := utils.ConvertMapToHCL(publishSettings)
+	config := fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test" {
   address = %q
-  client_certificate_token = %q
+  client_certificate_file = %q
   name = %q
   outbound_member_type = %q
-  subscribe_settings = %q
+  subscribe_settings = %s
+  publish_settings = %s
+  network_view = nios_ipam_network_view.test.name
 }
 
 data "nios_misc_pxgrid_endpoint" "test" {
@@ -121,17 +112,22 @@ data "nios_misc_pxgrid_endpoint" "test" {
 	address = nios_misc_pxgrid_endpoint.test.address
   }
 }
-`, address, clientCertificateToken, name, outboundMemberType, subscribeSettings)
+`, address, clientCertificateFile, name, outboundMemberType, subscribeSettingsStr, publishSettingsStr)
+	return strings.Join([]string{testAccBaseWithview(view), config}, "")
 }
 
-func testAccPxgridEndpointDataSourceConfigExtAttrFilters(address, clientCertificateToken, name, outboundMemberType, subscribeSettings, extAttrsValue string) string {
-	return fmt.Sprintf(`
+func testAccPxgridEndpointDataSourceConfigExtAttrFilters(view, address, clientCertificateFile, name, outboundMemberType string, subscribeSettings map[string]any, publishSettings map[string]any, extAttrsValue string) string {
+	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
+	publishSettingsStr := utils.ConvertMapToHCL(publishSettings)
+	config := fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test" {
   address = %q
-  client_certificate_token = %q
+  client_certificate_file = %q
   name = %q
   outbound_member_type = %q
-  subscribe_settings = %q
+  subscribe_settings = %s
+  publish_settings = %s
+  network_view = nios_ipam_network_view.test.name
   extattrs = {
     Site = %q
   } 
@@ -142,5 +138,6 @@ data "nios_misc_pxgrid_endpoint" "test" {
     Site = nios_misc_pxgrid_endpoint.test.extattrs.Site
   }
 }
-`, address, clientCertificateToken, name, outboundMemberType, subscribeSettings, extAttrsValue)
+`, address, clientCertificateFile, name, outboundMemberType, subscribeSettingsStr, publishSettingsStr, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithview(view), config}, "")
 }
