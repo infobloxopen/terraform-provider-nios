@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -418,6 +419,16 @@ func ParseInterfaceValue(valStr string) interface{} {
 	}
 
 	return valStr
+}
+
+func ParseInterfaceValueWithIntFallback(valStr string) interface{} {
+	value := ParseInterfaceValue(valStr)
+
+	// Try to parse the value as an integer
+	if intVal, err := strconv.ParseInt(valStr, 10, 64); err == nil {
+		return intVal
+	}
+	return value
 }
 
 // ConvertSliceOfMapsToHCL serializes a slice of []map[string]any into an HCL format.
