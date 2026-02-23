@@ -255,7 +255,7 @@ resource "nios_grid_upgradegroup" "test" {
 
 resource "nios_grid_upgradeschedule" "test_upgrade_groups" {
   	start_time = %q
-    upgrade_groups = %q
+    upgrade_groups = %s
 }
 `, groupName, startTime, upgradeGroupsHCL)
 }

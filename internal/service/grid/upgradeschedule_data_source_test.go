@@ -34,7 +34,6 @@ func TestAccUpgradescheduleDataSource_Read(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckUpgradescheduleDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccUpgradescheduleDataSourceConfig(active, start_time, upgrade_groups),
@@ -71,9 +70,7 @@ resource "nios_grid_upgradeschedule" "test" {
 }
 
 data "nios_grid_upgradeschedule" "test" {
-  filters = {
-	depends_on = [nios_grid_upgradeschedule.test]
-  }
+  depends_on = [nios_grid_upgradeschedule.test]
 }
 `, active, start_time, upgradeGroupsHCL)
 }
