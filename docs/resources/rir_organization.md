@@ -15,7 +15,7 @@ Manages a RirOrganization resource object.
 ```terraform
 // Manage an RIR Organization with Basic Fields
 resource "nios_rir_organization" "rir_organization_basic" {
-  id           = "ORG-CR07-IB"
+  id           = "ORG-CR17-IB"
   maintainer   = "infoblox"
   name         = "example_rir_organization"
   password     = "example-pass"

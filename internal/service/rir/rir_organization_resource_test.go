@@ -15,6 +15,13 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+var defaultExtensibleAttributesForRirOrganization = map[string]string{
+	"RIPE Admin Contact":     "ib-contact",
+	"RIPE Country":           "United Kingdom (GB)",
+	"RIPE Technical Contact": "TEST123-IB",
+	"RIPE Email":             "support@infoblox.com",
+}
+
 var readableAttributesForRirOrganization = "extattrs,id,maintainer,name,rir,sender_email"
 
 func TestAccRirOrganizationResource_basic(t *testing.T) {
@@ -29,12 +36,7 @@ func TestAccRirOrganizationResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationBasicConfig(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationBasicConfig(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -68,12 +70,7 @@ func TestAccRirOrganizationResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRirOrganizationDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRirOrganizationBasicConfig(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationBasicConfig(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -97,12 +94,7 @@ func TestAccRirOrganizationResource_Import(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationBasicConfig(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationBasicConfig(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -204,12 +196,7 @@ func TestAccRirOrganizationResource_Id(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationId(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationId(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -218,12 +205,7 @@ func TestAccRirOrganizationResource_Id(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationId(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationId(defaultExtensibleAttributesForRirOrganization,
 					id2, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -247,12 +229,7 @@ func TestAccRirOrganizationResource_Maintainer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationMaintainer(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationMaintainer(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -261,12 +238,7 @@ func TestAccRirOrganizationResource_Maintainer(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationMaintainer(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationMaintainer(defaultExtensibleAttributesForRirOrganization,
 					id, "nios-support", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -291,12 +263,7 @@ func TestAccRirOrganizationResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationName(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationName(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -305,12 +272,7 @@ func TestAccRirOrganizationResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationName(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationName(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name2, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -334,12 +296,7 @@ func TestAccRirOrganizationResource_Password(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationPassword(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationPassword(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -348,12 +305,7 @@ func TestAccRirOrganizationResource_Password(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationPassword(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationPassword(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass2", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -377,12 +329,7 @@ func TestAccRirOrganizationResource_Rir(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationRir(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationRir(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -407,12 +354,7 @@ func TestAccRirOrganizationResource_SenderEmail(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRirOrganizationSenderEmail(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationSenderEmail(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
@@ -421,12 +363,7 @@ func TestAccRirOrganizationResource_SenderEmail(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRirOrganizationSenderEmail(map[string]string{
-					"RIPE Admin Contact":     "ib-contact",
-					"RIPE Country":           "United Kingdom (GB)",
-					"RIPE Technical Contact": "TEST123-IB",
-					"RIPE Email":             "support@infoblox.com",
-				},
+				Config: testAccRirOrganizationSenderEmail(defaultExtensibleAttributesForRirOrganization,
 					id, "infoblox", name, "test-pass", "RIPE", "support2@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),

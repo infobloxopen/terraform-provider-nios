@@ -7,7 +7,7 @@ data "nios_rir_organization" "get_rir_organization_using_filters" {
 // Retrieve specific RIR Organizations using Extensible Attributes
 data "nios_rir_organization" "get_rir_organization_using_extensible_attributes" {
   extattrfilters = {
-    "RIPE Email" = nios_rir_organization.test.extattrs["RIPE Email"]
+    "RIPE Email" = "support@infoblox.com"
   }
 }
 
