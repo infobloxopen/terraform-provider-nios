@@ -208,7 +208,7 @@ var PxgridEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The user name for WAPI integration.",
 	},
 	"wapi_user_password": schema.StringAttribute{
-		Computed:            true,
+		Sensitive:           true,
 		Optional:            true,
 		MarkdownDescription: "The user password for WAPI integration.",
 	},

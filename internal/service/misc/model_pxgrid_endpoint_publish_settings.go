@@ -14,19 +14,21 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type PxgridEndpointPublishSettingsModel struct {
-	EnabledAttributes types.List `tfsdk:"enabled_attributes"`
+	EnabledAttributes internaltypes.UnorderedListValue `tfsdk:"enabled_attributes"`
 }
 
 var PxgridEndpointPublishSettingsAttrTypes = map[string]attr.Type{
-	"enabled_attributes": types.ListType{ElemType: types.StringType},
+	"enabled_attributes": internaltypes.UnorderedListOfStringType,
 }
 
 var PxgridEndpointPublishSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled_attributes": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		ElementType: types.StringType,
 		Required:    true,
 		Validators: []validator.List{
@@ -77,5 +79,5 @@ func (m *PxgridEndpointPublishSettingsModel) Flatten(ctx context.Context, from *
 	if m == nil {
 		*m = PxgridEndpointPublishSettingsModel{}
 	}
-	m.EnabledAttributes = flex.FlattenFrameworkListString(ctx, from.EnabledAttributes, diags)
+	m.EnabledAttributes = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.EnabledAttributes, diags)
 }

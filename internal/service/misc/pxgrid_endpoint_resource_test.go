@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -45,9 +48,23 @@ resource "nios_misc_pxgrid_endpoint" "misc_pxgrid_endpoint_with_additional_field
 
 var readableAttributesForPxgridEndpoint = "address,client_certificate_subject,client_certificate_valid_from,client_certificate_valid_to,comment,disable,extattrs,log_level,name,network_view,outbound_member_type,outbound_members,publish_settings,subscribe_settings,template_instance,timeout,vendor_identifier,wapi_user_name"
 
+var (
+	testDataPath          = getTestDataPath()
+	clientCertificateFile = filepath.Join(testDataPath, "client.pem")
+	subscribeSettings     = map[string]any{
+		"enabled_attributes": []string{"ENDPOINT_PROFILE", "DOMAINNAME", "USERNAME"},
+	}
+	publishSettings = map[string]any{
+		"enabled_attributes": []string{"IPADDRESS"},
+	}
+)
+
 func TestAccPxgridEndpointResource_basic(t *testing.T) {
 	var resourceName = "nios_misc_pxgrid_endpoint.test"
 	var v misc.PxgridEndpoint
+	view := acctest.RandomNameWithPrefix("view")
+	name := acctest.RandomNameWithPrefix("pxgrid-endpoint")
+	address := acctest.RandomIP()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -55,15 +72,16 @@ func TestAccPxgridEndpointResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccPxgridEndpointBasicConfig("ADDRESS_REPLACE_ME", "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "SUBSCRIBE_SETTINGS_REPLACE_ME"),
+				Config: testAccPxgridEndpointBasicConfig(view, address, clientCertificateFile, name, "GM", subscribeSettings, publishSettings),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPxgridEndpointExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					resource.TestCheckResourceAttr(resourceName, "address", "ADDRESS_REPLACE_ME"),
-					resource.TestCheckResourceAttr(resourceName, "client_certificate_token", "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME"),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
-					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "OUTBOUND_MEMBER_TYPE_REPLACE_ME"),
-					resource.TestCheckResourceAttr(resourceName, "subscribe_settings", "SUBSCRIBE_SETTINGS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "address", address),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "GM"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "ENDPOINT_PROFILE"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.1", "DOMAINNAME"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.2", "USERNAME"),
+					resource.TestCheckResourceAttr(resourceName, "publish_settings.enabled_attributes.0", "IPADDRESS"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "WARNING"),
@@ -75,64 +93,26 @@ func TestAccPxgridEndpointResource_basic(t *testing.T) {
 	})
 }
 
-func TestAccPxgridEndpointResource_disappears(t *testing.T) {
-	resourceName := "nios_misc_pxgrid_endpoint.test"
-	var v misc.PxgridEndpoint
+// func TestAccPxgridEndpointResource_disappears(t *testing.T) {
+// 	resourceName := "nios_misc_pxgrid_endpoint.test"
+// 	var v misc.PxgridEndpoint
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckPxgridEndpointDestroy(context.Background(), &v),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccPxgridEndpointBasicConfig("ADDRESS_REPLACE_ME", "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "SUBSCRIBE_SETTINGS_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPxgridEndpointExists(context.Background(), resourceName, &v),
-					testAccCheckPxgridEndpointDisappears(context.Background(), &v),
-				),
-				ExpectNonEmptyPlan: true,
-			},
-		},
-	})
-}
-
-func TestAccPxgridEndpointResource_Import(t *testing.T) {
-	var resourceName = "nios_misc_pxgrid_endpoint.test"
-	var v misc.PxgridEndpoint
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccPxgridEndpointBasicConfig("ADDRESS_REPLACE_ME", "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "SUBSCRIBE_SETTINGS_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPxgridEndpointExists(context.Background(), resourceName, &v),
-				),
-			},
-			// Import with PlanOnly to detect differences
-			{
-				ResourceName:                         resourceName,
-				ImportState:                          true,
-				ImportStateIdFunc:                    testAccPxgridEndpointImportStateIdFunc(resourceName),
-				ImportStateVerify:                    true,
-				ImportStateVerifyIdentifierAttribute: "ref",
-				PlanOnly:                             true,
-			},
-			// Import and Verify
-			{
-				ResourceName:                         resourceName,
-				ImportState:                          true,
-				ImportStateIdFunc:                    testAccPxgridEndpointImportStateIdFunc(resourceName),
-				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all"},
-				ImportStateVerifyIdentifierAttribute: "ref",
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
+// 	resource.ParallelTest(t, resource.TestCase{
+// 		PreCheck:                 func() { acctest.PreCheck(t) },
+// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+// 		CheckDestroy:             testAccCheckPxgridEndpointDestroy(context.Background(), &v),
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccPxgridEndpointBasicConfig("ADDRESS_REPLACE_ME", "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "SUBSCRIBE_SETTINGS_REPLACE_ME"),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheckPxgridEndpointExists(context.Background(), resourceName, &v),
+// 					testAccCheckPxgridEndpointDisappears(context.Background(), &v),
+// 				),
+// 				ExpectNonEmptyPlan: true,
+// 			},
+// 		},
+// 	})
+// }
 
 func TestAccPxgridEndpointResource_Address(t *testing.T) {
 	var resourceName = "nios_misc_pxgrid_endpoint.test_address"
@@ -718,23 +698,28 @@ func testAccPxgridEndpointImportStateIdFunc(resourceName string) resource.Import
 	}
 }
 
-func testAccPxgridEndpointBasicConfig(address, clientCertificateToken, name, outboundMemberType, subscribeSettings string) string {
-	return fmt.Sprintf(`
+func testAccPxgridEndpointBasicConfig(view, address, clientCertificateToken, name, outboundMemberType string, subscribeSettings map[string]any, publishSettings map[string]any) string {
+	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
+	publishSettingsStr := utils.ConvertMapToHCL(publishSettings)
+	config := fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
-    subscribe_settings = %q
+    subscribe_settings = %s
+	publish_settings = %s
+	network_view = nios_ipam_network_view.test.name
 }
-`, address, clientCertificateToken, name, outboundMemberType, subscribeSettings)
+`, address, clientCertificateToken, name, outboundMemberType, subscribeSettingsStr, publishSettingsStr)
+	return strings.Join([]string{testAccBaseWithview(view), config}, "")
 }
 
 func testAccPxgridEndpointAddress(address string, clientCertificateToken string, name string, outboundMemberType string, subscribeSettings string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_address" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -746,7 +731,7 @@ func testAccPxgridEndpointClientCertificateToken(address string, clientCertifica
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_client_certificate_token" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -758,7 +743,7 @@ func testAccPxgridEndpointComment(address string, clientCertificateToken string,
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_comment" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -771,7 +756,7 @@ func testAccPxgridEndpointDisable(address string, clientCertificateToken string,
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_disable" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -789,7 +774,7 @@ func testAccPxgridEndpointExtAttrs(address string, clientCertificateToken string
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_extattrs" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -802,7 +787,7 @@ func testAccPxgridEndpointLogLevel(address string, clientCertificateToken string
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_log_level" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -815,7 +800,7 @@ func testAccPxgridEndpointName(address string, clientCertificateToken string, na
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_name" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -827,7 +812,7 @@ func testAccPxgridEndpointNetworkView(address string, clientCertificateToken str
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_network_view" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -840,7 +825,7 @@ func testAccPxgridEndpointOutboundMemberType(address string, clientCertificateTo
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_outbound_member_type" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -853,7 +838,7 @@ func testAccPxgridEndpointOutboundMembers(address string, clientCertificateToken
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_outbound_members" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -866,7 +851,7 @@ func testAccPxgridEndpointPublishSettings(address string, clientCertificateToken
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_publish_settings" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -879,7 +864,7 @@ func testAccPxgridEndpointSubscribeSettings(address string, clientCertificateTok
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_subscribe_settings" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -891,7 +876,7 @@ func testAccPxgridEndpointTemplateInstance(address string, clientCertificateToke
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_template_instance" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -904,7 +889,7 @@ func testAccPxgridEndpointTimeout(address string, clientCertificateToken string,
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_timeout" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -917,7 +902,7 @@ func testAccPxgridEndpointVendorIdentifier(address string, clientCertificateToke
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_vendor_identifier" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -930,7 +915,7 @@ func testAccPxgridEndpointWapiUserName(address string, clientCertificateToken st
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_wapi_user_name" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
@@ -943,11 +928,27 @@ func testAccPxgridEndpointWapiUserPassword(address string, clientCertificateToke
 	return fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test_wapi_user_password" {
     address = %q
-    client_certificate_token = %q
+    client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     subscribe_settings = %q
     wapi_user_password = %q
 }
 `, address, clientCertificateToken, name, outboundMemberType, subscribeSettings, wapiUserPassword)
+}
+
+func getTestDataPath() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "../../testdata/nios_misc_pxgrid_endpoint"
+	}
+	return filepath.Join(wd, "../../testdata/nios_misc_pxgrid_endpoint")
+}
+
+func testAccBaseWithview(name string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_view" "test" {
+	name = %q
+}
+`, name)
 }

@@ -222,6 +222,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
+		misc.NewPxgridEndpointResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -362,6 +363,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
+		misc.NewPxgridEndpointDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,

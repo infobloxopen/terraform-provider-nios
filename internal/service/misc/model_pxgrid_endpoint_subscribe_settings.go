@@ -14,22 +14,24 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type PxgridEndpointSubscribeSettingsModel struct {
-	EnabledAttributes  types.List `tfsdk:"enabled_attributes"`
-	MappedEaAttributes types.List `tfsdk:"mapped_ea_attributes"`
+	EnabledAttributes  internaltypes.UnorderedListValue `tfsdk:"enabled_attributes"`
+	MappedEaAttributes types.List                       `tfsdk:"mapped_ea_attributes"`
 }
 
 var PxgridEndpointSubscribeSettingsAttrTypes = map[string]attr.Type{
-	"enabled_attributes":   types.ListType{ElemType: types.StringType},
+	"enabled_attributes":   internaltypes.UnorderedListOfStringType,
 	"mapped_ea_attributes": types.ListType{ElemType: types.ObjectType{AttrTypes: PxgridendpointsubscribesettingsMappedEaAttributesAttrTypes}},
 }
 
 var PxgridEndpointSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled_attributes": schema.ListAttribute{
 		ElementType: types.StringType,
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		Required:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
@@ -91,6 +93,6 @@ func (m *PxgridEndpointSubscribeSettingsModel) Flatten(ctx context.Context, from
 	if m == nil {
 		*m = PxgridEndpointSubscribeSettingsModel{}
 	}
-	m.EnabledAttributes = flex.FlattenFrameworkListString(ctx, from.EnabledAttributes, diags)
+	m.EnabledAttributes = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.EnabledAttributes, diags)
 	m.MappedEaAttributes = flex.FlattenFrameworkListNestedBlock(ctx, from.MappedEaAttributes, PxgridendpointsubscribesettingsMappedEaAttributesAttrTypes, diags, FlattenPxgridendpointsubscribesettingsMappedEaAttributes)
 }
