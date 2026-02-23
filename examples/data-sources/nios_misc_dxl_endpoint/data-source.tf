@@ -1,7 +1,7 @@
 // Retrieve a specific DXL Endpoint by filters
 data "nios_misc_dxl_endpoint" "get_dxl_endpoint_using_filters" {
   filters = {
-    name = "example-dxl-endpoint"
+    name                 = "example-dxl-endpoint"
     outbound_member_type = "GM"
   }
 }

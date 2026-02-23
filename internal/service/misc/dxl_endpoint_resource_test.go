@@ -19,7 +19,7 @@ import (
 )
 
 // OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// DXL Template : "Version5_DXL_Session_Template"
+// DXL Template : "Version5_DXL_Session_Template", "Version5_DXL_Session_Template_2"
 // Grid Master Candidate : "infoblox.grid_master_candidate1, infoblox.grid_master_candidate2"
 
 var readableAttributesForDxlEndpoint = "brokers,client_certificate_subject,client_certificate_valid_from,client_certificate_valid_to,comment,disable,extattrs,log_level,name,outbound_member_type,outbound_members,template_instance,timeout,topics,vendor_identifier,wapi_user_name"
@@ -430,7 +430,9 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 	templateInstanceVal := map[string]any{
 		"template": "Version5_DXL_Session_Template",
 	}
-	// templateInstanceValUpdated := map[string]any{}
+	templateInstanceValUpdated := map[string]any{
+		"template": "Version5_DXL_Session_Template_2",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -445,13 +447,13 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 				),
 			},
 			// Update and Read
-			// {
-			// 	Config: testAccDxlEndpointTemplateInstance(clientCertificateFile, broker, name, "GM", templateInstanceValUpdated),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-			// 		resource.TestCheckResourceAttr(resourceName, "template_instance", "TEMPLATE_INSTANCE_UPDATE_REPLACE_ME"),
-			// 	),
-			// },
+			{
+				Config: testAccDxlEndpointTemplateInstance(clientCertificateFile, broker, name, "GM", templateInstanceValUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template_2"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
