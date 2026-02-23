@@ -18,28 +18,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-/*
-// Manage misc DxlEndpoint with Basic Fields
-resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_basic" {
-    client_certificate_token = "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME"
-    name = "NAME_REPLACE_ME"
-    outbound_member_type = "OUTBOUND_MEMBER_TYPE_REPLACE_ME"
-}
-
-// Manage misc DxlEndpoint with Additional Fields
-resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
-    client_certificate_token = "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME"
-    name = "NAME_REPLACE_ME"
-    outbound_member_type = "OUTBOUND_MEMBER_TYPE_REPLACE_ME"
-
-// TODO : Add additional optional fields below
-
-    //Extensible Attributes
-    extattrs = {
-        Site = "location-1"
-    }
-}
-*/
+// OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// DXL Template : "Version5_DXL_Session_Template"
+// Grid Master Candidate : "infoblox.grid_master_candidate1, infoblox.grid_master_candidate2"
 
 var readableAttributesForDxlEndpoint = "brokers,client_certificate_subject,client_certificate_valid_from,client_certificate_valid_to,comment,disable,extattrs,log_level,name,outbound_member_type,outbound_members,template_instance,timeout,topics,vendor_identifier,wapi_user_name"
 
@@ -152,6 +133,7 @@ func TestAccDxlEndpointResource_Brokers(t *testing.T) {
 func TestAccDxlEndpointResource_BrokersImportToken(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_brokers_import_token"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -159,7 +141,7 @@ func TestAccDxlEndpointResource_BrokersImportToken(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointBrokersImportToken("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "BROKERS_IMPORT_TOKEN_REPLACE_ME"),
+				Config: testAccDxlEndpointBrokersImportToken(clientCertificateFile, name, "GM", "BROKERS_IMPORT_TOKEN_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "brokers_import_token", "BROKERS_IMPORT_TOKEN_REPLACE_ME"),
@@ -167,7 +149,7 @@ func TestAccDxlEndpointResource_BrokersImportToken(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointBrokersImportToken("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "BROKERS_IMPORT_TOKEN_UPDATE_REPLACE_ME"),
+				Config: testAccDxlEndpointBrokersImportToken(clientCertificateFile, name, "GM", "BROKERS_IMPORT_TOKEN_UPDATE_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "brokers_import_token", "BROKERS_IMPORT_TOKEN_UPDATE_REPLACE_ME"),
@@ -181,6 +163,10 @@ func TestAccDxlEndpointResource_BrokersImportToken(t *testing.T) {
 func TestAccDxlEndpointResource_ClientCertificateToken(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_client_certificate_token"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+	testDataPath := getTestDataPath()
+	clientCertificateFile := filepath.Join(testDataPath, "client.pem")
+	updatedClientCertificateFile := filepath.Join(testDataPath, "client_updated.pem")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -188,18 +174,16 @@ func TestAccDxlEndpointResource_ClientCertificateToken(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointClientCertificateToken("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME"),
+				Config: testAccDxlEndpointClientCertificateToken(clientCertificateFile, name, "GM", broker),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "client_certificate_token", "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointClientCertificateToken("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME"),
+				Config: testAccDxlEndpointClientCertificateToken(updatedClientCertificateFile, name, "GM", broker),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "client_certificate_token", "CLIENT_CERTIFICATE_TOKEN_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -210,6 +194,7 @@ func TestAccDxlEndpointResource_ClientCertificateToken(t *testing.T) {
 func TestAccDxlEndpointResource_Comment(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_comment"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -217,7 +202,7 @@ func TestAccDxlEndpointResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointComment("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "Comment for the object"),
+				Config: testAccDxlEndpointComment(clientCertificateFile, broker, name, "GM", "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -225,7 +210,7 @@ func TestAccDxlEndpointResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointComment("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "Updated comment for the object"),
+				Config: testAccDxlEndpointComment(clientCertificateFile, broker, name, "GM", "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -239,6 +224,7 @@ func TestAccDxlEndpointResource_Comment(t *testing.T) {
 func TestAccDxlEndpointResource_Disable(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_disable"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -246,7 +232,7 @@ func TestAccDxlEndpointResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointDisable("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "true"),
+				Config: testAccDxlEndpointDisable(clientCertificateFile, broker, name, "GM", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
@@ -254,7 +240,7 @@ func TestAccDxlEndpointResource_Disable(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointDisable("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "false"),
+				Config: testAccDxlEndpointDisable(clientCertificateFile, broker, name, "GM", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
@@ -268,6 +254,7 @@ func TestAccDxlEndpointResource_Disable(t *testing.T) {
 func TestAccDxlEndpointResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_extattrs"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -277,7 +264,7 @@ func TestAccDxlEndpointResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointExtAttrs("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", map[string]string{
+				Config: testAccDxlEndpointExtAttrs(clientCertificateFile, broker, name, "GM", map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -287,7 +274,7 @@ func TestAccDxlEndpointResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointExtAttrs("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", map[string]string{
+				Config: testAccDxlEndpointExtAttrs(clientCertificateFile, broker, name, "GM", map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -303,6 +290,7 @@ func TestAccDxlEndpointResource_ExtAttrs(t *testing.T) {
 func TestAccDxlEndpointResource_LogLevel(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_log_level"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -310,28 +298,28 @@ func TestAccDxlEndpointResource_LogLevel(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointLogLevel("LOG_LEVEL_REPLACE_ME", "LOG_LEVEL_REPLACE_ME", "LOG_LEVEL_REPLACE_ME", "DEBUG"),
+				Config: testAccDxlEndpointLogLevel(clientCertificateFile, broker, name, "GM", "DEBUG"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "DEBUG"),
 				),
 			},
 			{
-				Config: testAccDxlEndpointLogLevel("LOG_LEVEL_REPLACE_ME", "LOG_LEVEL_REPLACE_ME", "LOG_LEVEL_REPLACE_ME", "ERROR"),
+				Config: testAccDxlEndpointLogLevel(clientCertificateFile, broker, name, "GM", "ERROR"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "ERROR"),
 				),
 			},
 			{
-				Config: testAccDxlEndpointLogLevel("LOG_LEVEL_REPLACE_ME", "LOG_LEVEL_REPLACE_ME", "LOG_LEVEL_REPLACE_ME", "INFO"),
+				Config: testAccDxlEndpointLogLevel(clientCertificateFile, broker, name, "GM", "INFO"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "INFO"),
 				),
 			},
 			{
-				Config: testAccDxlEndpointLogLevel("LOG_LEVEL_REPLACE_ME", "LOG_LEVEL_REPLACE_ME", "LOG_LEVEL_REPLACE_ME", "WARNING"),
+				Config: testAccDxlEndpointLogLevel(clientCertificateFile, broker, name, "GM", "WARNING"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "WARNING"),
@@ -344,6 +332,8 @@ func TestAccDxlEndpointResource_LogLevel(t *testing.T) {
 func TestAccDxlEndpointResource_Name(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_name"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+	nameUpdated := acctest.RandomNameWithPrefix("dxl-endpoint-updated")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -351,18 +341,18 @@ func TestAccDxlEndpointResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointName("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME"),
+				Config: testAccDxlEndpointName(clientCertificateFile, broker, name, "GM"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointName("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME"),
+				Config: testAccDxlEndpointName(clientCertificateFile, broker, nameUpdated, "GM"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdated),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -373,6 +363,8 @@ func TestAccDxlEndpointResource_Name(t *testing.T) {
 func TestAccDxlEndpointResource_OutboundMemberType(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_outbound_member_type"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+	outboundMembers := []string{"infoblox.grid_master_candidate1"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -380,14 +372,14 @@ func TestAccDxlEndpointResource_OutboundMemberType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointOutboundMemberType("OUTBOUND_MEMBER_TYPE_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME"),
+				Config: testAccDxlEndpointOutboundMemberType(clientCertificateFile, broker, name, "GM"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "GM"),
 				),
 			},
 			{
-				Config: testAccDxlEndpointOutboundMemberType("OUTBOUND_MEMBER_TYPE_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME"),
+				Config: testAccDxlEndpointOutboundMemberTypeUpdate(clientCertificateFile, broker, name, "MEMBER", outboundMembers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "MEMBER"),
@@ -400,8 +392,9 @@ func TestAccDxlEndpointResource_OutboundMemberType(t *testing.T) {
 func TestAccDxlEndpointResource_OutboundMembers(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_outbound_members"
 	var v misc.DxlEndpoint
-	outboundMembersVal := []string{"OUTBOUND_MEMBERS_REPLACE_ME1", "OUTBOUND_MEMBERS_REPLACE_ME2"}
-	outboundMembersValUpdated := []string{"OUTBOUND_MEMBERS_REPLACE_ME1", "OUTBOUND_MEMBERS_REPLACE_ME2"}
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+	outboundMembersVal := []string{"infoblox.grid_master_candidate1"}
+	outboundMembersValUpdated := []string{"infoblox.grid_master_candidate2"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -409,18 +402,20 @@ func TestAccDxlEndpointResource_OutboundMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointOutboundMembers("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", outboundMembersVal),
+				Config: testAccDxlEndpointOutboundMembers(clientCertificateFile, broker, name, "MEMBER", outboundMembersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "outbound_members", "OUTBOUND_MEMBERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "outbound_members.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", "infoblox.grid_master_candidate1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointOutboundMembers("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", outboundMembersValUpdated),
+				Config: testAccDxlEndpointOutboundMembers(clientCertificateFile, broker, name, "MEMBER", outboundMembersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "outbound_members", "OUTBOUND_MEMBERS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "outbound_members.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", "infoblox.grid_master_candidate2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -431,8 +426,11 @@ func TestAccDxlEndpointResource_OutboundMembers(t *testing.T) {
 func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_template_instance"
 	var v misc.DxlEndpoint
-	templateInstanceVal := map[string]any{}
-	templateInstanceValUpdated := map[string]any{}
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+	templateInstanceVal := map[string]any{
+		"template": "Version5_DXL_Session_Template",
+	}
+	// templateInstanceValUpdated := map[string]any{}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -440,20 +438,20 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointTemplateInstance("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", templateInstanceVal),
+				Config: testAccDxlEndpointTemplateInstance(clientCertificateFile, broker, name, "GM", templateInstanceVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance", "TEMPLATE_INSTANCE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template"),
 				),
 			},
 			// Update and Read
-			{
-				Config: testAccDxlEndpointTemplateInstance("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", templateInstanceValUpdated),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance", "TEMPLATE_INSTANCE_UPDATE_REPLACE_ME"),
-				),
-			},
+			// {
+			// 	Config: testAccDxlEndpointTemplateInstance(clientCertificateFile, broker, name, "GM", templateInstanceValUpdated),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+			// 		resource.TestCheckResourceAttr(resourceName, "template_instance", "TEMPLATE_INSTANCE_UPDATE_REPLACE_ME"),
+			// 	),
+			// },
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -461,6 +459,7 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 func TestAccDxlEndpointResource_Timeout(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_timeout"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -468,18 +467,18 @@ func TestAccDxlEndpointResource_Timeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointTimeout("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "TIMEOUT_REPLACE_ME"),
+				Config: testAccDxlEndpointTimeout(clientCertificateFile, broker, name, "GM", "60"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "60"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointTimeout("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccDxlEndpointTimeout(clientCertificateFile, broker, name, "GM", "120"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "120"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -489,8 +488,9 @@ func TestAccDxlEndpointResource_Timeout(t *testing.T) {
 func TestAccDxlEndpointResource_Topics(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_topics"
 	var v misc.DxlEndpoint
-	topicsVal := []string{"TOPICS_REPLACE_ME1", "TOPICS_REPLACE_ME2"}
-	topicsValUpdated := []string{"TOPICS_REPLACE_ME1", "TOPICS_REPLACE_ME2"}
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+	topicsVal := []string{"/outbound/session", "/infoblox/outbound/LEASE"}
+	topicsValUpdated := []string{"/outbound/session/updated", "/outbound/session"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -498,18 +498,22 @@ func TestAccDxlEndpointResource_Topics(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointTopics("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", topicsVal),
+				Config: testAccDxlEndpointTopics(clientCertificateFile, broker, name, "GM", topicsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "topics", "TOPICS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "topics.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "topics.0", "/outbound/session"),
+					resource.TestCheckResourceAttr(resourceName, "topics.1", "/infoblox/outbound/LEASE"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointTopics("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", topicsValUpdated),
+				Config: testAccDxlEndpointTopics(clientCertificateFile, broker, name, "GM", topicsValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "topics", "TOPICS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "topics.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "topics.0", "/outbound/session/updated"),
+					resource.TestCheckResourceAttr(resourceName, "topics.1", "/outbound/session"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -520,6 +524,7 @@ func TestAccDxlEndpointResource_Topics(t *testing.T) {
 func TestAccDxlEndpointResource_VendorIdentifier(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_vendor_identifier"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -527,18 +532,18 @@ func TestAccDxlEndpointResource_VendorIdentifier(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointVendorIdentifier("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "VENDOR_IDENTIFIER_REPLACE_ME"),
+				Config: testAccDxlEndpointVendorIdentifier(clientCertificateFile, broker, name, "GM", "McAfee"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vendor_identifier", "VENDOR_IDENTIFIER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "vendor_identifier", "McAfee"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointVendorIdentifier("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "VENDOR_IDENTIFIER_UPDATE_REPLACE_ME"),
+				Config: testAccDxlEndpointVendorIdentifier(clientCertificateFile, broker, name, "GM", "testing123"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vendor_identifier", "VENDOR_IDENTIFIER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "vendor_identifier", "testing123"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -549,6 +554,7 @@ func TestAccDxlEndpointResource_VendorIdentifier(t *testing.T) {
 func TestAccDxlEndpointResource_WapiUserName(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_wapi_user_name"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -556,47 +562,19 @@ func TestAccDxlEndpointResource_WapiUserName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointWapiUserName("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "WAPI_USER_NAME_REPLACE_ME"),
+				Config: testAccDxlEndpointWapiUserName(clientCertificateFile, broker, name, "GM", "admin", "password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "WAPI_USER_NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointWapiUserName("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "WAPI_USER_NAME_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "WAPI_USER_NAME_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
+				Config: testAccDxlEndpointWapiUserName(clientCertificateFile, broker, name, "GM", "admin_updated", "password"),
 
-func TestAccDxlEndpointResource_WapiUserPassword(t *testing.T) {
-	var resourceName = "nios_misc_dxl_endpoint.test_wapi_user_password"
-	var v misc.DxlEndpoint
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccDxlEndpointWapiUserPassword("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "WAPI_USER_PASSWORD_REPLACE_ME"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "wapi_user_password", "WAPI_USER_PASSWORD_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccDxlEndpointWapiUserPassword("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", "WAPI_USER_PASSWORD_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "wapi_user_password", "WAPI_USER_PASSWORD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin_updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -662,19 +640,6 @@ func testAccCheckDxlEndpointDisappears(ctx context.Context, v *misc.DxlEndpoint)
 	}
 }
 
-func testAccDxlEndpointImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("not found: %s", resourceName)
-		}
-		if rs.Primary.Attributes["ref"] == "" {
-			return "", fmt.Errorf("ref is not set")
-		}
-		return rs.Primary.Attributes["ref"], nil
-	}
-}
-
 func testAccDxlEndpointBasicConfig(clientCertificateToken, name, outboundMemberType string, broker []map[string]any) string {
 	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
@@ -710,39 +675,46 @@ resource "nios_misc_dxl_endpoint" "test_brokers_import_token" {
 `, clientCertificateToken, name, outboundMemberType, brokersImportToken)
 }
 
-func testAccDxlEndpointClientCertificateToken(clientCertificateToken string, name string, outboundMemberType string) string {
+func testAccDxlEndpointClientCertificateToken(clientCertificateToken string, name string, outboundMemberType string, broker []map[string]any) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_client_certificate_token" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
+    brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType)
+`, clientCertificateToken, name, outboundMemberType, brokerStr)
 }
 
-func testAccDxlEndpointComment(clientCertificateToken string, name string, outboundMemberType string, comment string) string {
+func testAccDxlEndpointComment(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, comment string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_comment" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     comment = %q
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, comment)
+`, clientCertificateToken, name, outboundMemberType, comment, brokerStr)
 }
 
-func testAccDxlEndpointDisable(clientCertificateToken string, name string, outboundMemberType string, disable string) string {
+func testAccDxlEndpointDisable(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, disable string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_disable" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     disable = %q
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, disable)
+`, clientCertificateToken, name, outboundMemberType, disable, brokerStr)
 }
 
-func testAccDxlEndpointExtAttrs(clientCertificateToken string, name string, outboundMemberType string, extAttrs map[string]string) string {
+func testAccDxlEndpointExtAttrs(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, extAttrs map[string]string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	extAttrsStr := "{\n"
 	for k, v := range extAttrs {
 		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
@@ -754,42 +726,64 @@ resource "nios_misc_dxl_endpoint" "test_extattrs" {
     name = %q
     outbound_member_type = %q
     extattrs = %s
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, extAttrsStr)
+`, clientCertificateToken, name, outboundMemberType, extAttrsStr, brokerStr)
 }
 
-func testAccDxlEndpointLogLevel(clientCertificateToken string, name string, outboundMemberType string, logLevel string) string {
+func testAccDxlEndpointLogLevel(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, logLevel string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_log_level" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     log_level = %q
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, logLevel)
+`, clientCertificateToken, name, outboundMemberType, logLevel, brokerStr)
 }
 
-func testAccDxlEndpointName(clientCertificateToken string, name string, outboundMemberType string) string {
+func testAccDxlEndpointName(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_name" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType)
+`, clientCertificateToken, name, outboundMemberType, brokerStr)
 }
 
-func testAccDxlEndpointOutboundMemberType(clientCertificateToken string, name string, outboundMemberType string) string {
+func testAccDxlEndpointOutboundMemberType(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_outbound_member_type" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType)
+`, clientCertificateToken, name, outboundMemberType, brokerStr)
 }
 
-func testAccDxlEndpointOutboundMembers(clientCertificateToken string, name string, outboundMemberType string, outboundMembers []string) string {
+func testAccDxlEndpointOutboundMemberTypeUpdate(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, outboundMembers []string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
+	outboundMembersStr := utils.ConvertStringSliceToHCL(outboundMembers)
+	return fmt.Sprintf(`
+resource "nios_misc_dxl_endpoint" "test_outbound_member_type" {
+    client_certificate_file = %q
+    name = %q
+    outbound_member_type = %q
+	brokers = %s
+	outbound_members = %s
+}
+`, clientCertificateToken, name, outboundMemberType, brokerStr, outboundMembersStr)
+}
+
+func testAccDxlEndpointOutboundMembers(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, outboundMembers []string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	outboundMembersStr := utils.ConvertStringSliceToHCL(outboundMembers)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_outbound_members" {
@@ -797,33 +791,40 @@ resource "nios_misc_dxl_endpoint" "test_outbound_members" {
     name = %q
     outbound_member_type = %q
     outbound_members = %s
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, outboundMembersStr)
+`, clientCertificateToken, name, outboundMemberType, outboundMembersStr, brokerStr)
 }
 
-func testAccDxlEndpointTemplateInstance(clientCertificateToken string, name string, outboundMemberType string, templateInstance map[string]any) string {
+func testAccDxlEndpointTemplateInstance(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, templateInstance map[string]any) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
+	templateInstanceStr := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_template_instance" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     template_instance = %s
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, templateInstance)
+`, clientCertificateToken, name, outboundMemberType, templateInstanceStr, brokerStr)
 }
 
-func testAccDxlEndpointTimeout(clientCertificateToken string, name string, outboundMemberType string, timeout string) string {
+func testAccDxlEndpointTimeout(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, timeout string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_timeout" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     timeout = %q
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, timeout)
+`, clientCertificateToken, name, outboundMemberType, timeout, brokerStr)
 }
 
-func testAccDxlEndpointTopics(clientCertificateToken string, name string, outboundMemberType string, topics []string) string {
+func testAccDxlEndpointTopics(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, topics []string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	topicsStr := utils.ConvertStringSliceToHCL(topics)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_topics" {
@@ -831,41 +832,36 @@ resource "nios_misc_dxl_endpoint" "test_topics" {
     name = %q
     outbound_member_type = %q
     topics = %s
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, topicsStr)
+`, clientCertificateToken, name, outboundMemberType, topicsStr, brokerStr)
 }
 
-func testAccDxlEndpointVendorIdentifier(clientCertificateToken string, name string, outboundMemberType string, vendorIdentifier string) string {
+func testAccDxlEndpointVendorIdentifier(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, vendorIdentifier string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_vendor_identifier" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     vendor_identifier = %q
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, vendorIdentifier)
+`, clientCertificateToken, name, outboundMemberType, vendorIdentifier, brokerStr)
 }
 
-func testAccDxlEndpointWapiUserName(clientCertificateToken string, name string, outboundMemberType string, wapiUserName string) string {
+func testAccDxlEndpointWapiUserName(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, wapiUserName, password string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_wapi_user_name" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
     wapi_user_name = %q
-}
-`, clientCertificateToken, name, outboundMemberType, wapiUserName)
-}
-
-func testAccDxlEndpointWapiUserPassword(clientCertificateToken string, name string, outboundMemberType string, wapiUserPassword string) string {
-	return fmt.Sprintf(`
-resource "nios_misc_dxl_endpoint" "test_wapi_user_password" {
-    client_certificate_file = %q
-    name = %q
-    outbound_member_type = %q
     wapi_user_password = %q
+	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, wapiUserPassword)
+`, clientCertificateToken, name, outboundMemberType, wapiUserName, password, brokerStr)
 }
 
 func getTestDataPath() string {

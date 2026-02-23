@@ -10,32 +10,14 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
-
-/*
-// Retrieve a specific misc DxlEndpoint by filters
-data "nios_misc_dxl_endpoint" "get_misc_dxl_endpoint_using_filters" {
-  filters = {
-    client_certificate_token = "CLIENT_CERTIFICATE_TOKEN_REPLACE_ME"
-    name = "NAME_REPLACE_ME"
-    outbound_member_type = "OUTBOUND_MEMBER_TYPE_REPLACE_ME"
-  }
-}
-// Retrieve specific misc DxlEndpoint using Extensible Attributes
-data "nios_misc_dxl_endpoint" "get_misc_dxl_endpoint_using_extensible_attributes" {
-  extattrfilters = {
-    Site = "location-1"
-  }
-}
-
-// Retrieve all misc DxlEndpoint
-data "nios_misc_dxl_endpoint" "get_all_misc_dxl_endpoint" {}
-*/
 
 func TestAccDxlEndpointDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_misc_dxl_endpoint.test"
 	resourceName := "nios_misc_dxl_endpoint.test"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -43,7 +25,7 @@ func TestAccDxlEndpointDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckDxlEndpointDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDxlEndpointDataSourceConfigFilters("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME"),
+				Config: testAccDxlEndpointDataSourceConfigFilters(clientCertificateFile, name, "GM", broker),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
@@ -58,6 +40,7 @@ func TestAccDxlEndpointDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_misc_dxl_endpoint.test"
 	resourceName := "nios_misc_dxl_endpoint.test"
 	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -65,7 +48,7 @@ func TestAccDxlEndpointDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDxlEndpointDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDxlEndpointDataSourceConfigExtAttrFilters("CLIENT_CERTIFICATE_TOKEN_REPLACE_ME", "NAME_REPLACE_ME", "OUTBOUND_MEMBER_TYPE_REPLACE_ME", acctest.RandomName()),
+				Config: testAccDxlEndpointDataSourceConfigExtAttrFilters(clientCertificateFile, name, "GM", broker, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
@@ -103,28 +86,33 @@ func testAccCheckDxlEndpointResourceAttrPair(resourceName, dataSourceName string
 	}
 }
 
-func testAccDxlEndpointDataSourceConfigFilters(clientCertificateToken, name, outboundMemberType string) string {
+func testAccDxlEndpointDataSourceConfigFilters(clientCertificateToken, name, outboundMemberType string, broker []map[string]any) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test" {
-  client_certificate_token = %q
+  client_certificate_file = %q
   name = %q
   outbound_member_type = %q
+  brokers = %s
 }
 
 data "nios_misc_dxl_endpoint" "test" {
   filters = {
-	client_certificate_token = nios_misc_dxl_endpoint.test.client_certificate_token
+	name = nios_misc_dxl_endpoint.test.name
+	outbound_member_type = nios_misc_dxl_endpoint.test.outbound_member_type
   }
 }
-`, clientCertificateToken, name, outboundMemberType)
+`, clientCertificateToken, name, outboundMemberType, brokerStr)
 }
 
-func testAccDxlEndpointDataSourceConfigExtAttrFilters(clientCertificateToken, name, outboundMemberType, extAttrsValue string) string {
+func testAccDxlEndpointDataSourceConfigExtAttrFilters(clientCertificateToken, name, outboundMemberType string, broker []map[string]any, extAttrsValue string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test" {
-  client_certificate_token = %q
+  client_certificate_file = %q
   name = %q
   outbound_member_type = %q
+  brokers = %s
   extattrs = {
     Site = %q
   } 
@@ -135,5 +123,5 @@ data "nios_misc_dxl_endpoint" "test" {
     Site = nios_misc_dxl_endpoint.test.extattrs.Site
   }
 }
-`, clientCertificateToken, name, outboundMemberType, extAttrsValue)
+`, clientCertificateToken, name, outboundMemberType, brokerStr, extAttrsValue)
 }
