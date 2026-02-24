@@ -31,13 +31,8 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
   client_certificate_file = "${path.module}/../../../internal/testdata/nios_misc_dxl_endpoint/client.pem"
   name                    = "example-dxl-endpoint2"
   outbound_member_type    = "MEMBER"
-  outbound_members        = ["infoblox.member1"]
-  brokers = [
-    {
-      host_name = "broker2.example.com",
-      port      = 8443
-    }
-  ]
+  outbound_members        = ["infoblox.grid_master_candidate1"]
+  brokers_import_file     = "${path.module}/../../../internal/testdata/nios_misc_dxl_endpoint/brokerlist.properties"
   template_instance = {
     template = "Version5_DXL_Session_Template"
   }
@@ -64,6 +59,7 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
 ### Optional
 
 - `brokers` (Attributes List) The list of DXL endpoint brokers. Note that you cannot specify brokers and brokers_import_token at the same time. (see [below for nested schema](#nestedatt--brokers))
+- `brokers_import_file` (String) The file path for the DXL broker configuration file. When specified, the file is uploaded and the resulting configuration is stored in the brokers field.
 - `brokers_import_token` (String) The token returned by the uploadinit function call in object fileop for a DXL broker configuration file. Note that you cannot specify brokers and brokers_import_token at the same time.
 - `client_certificate_file` (String) The file path for the DXL endpoint client certificate.
 - `comment` (String) The comment of a DXL endpoint.
@@ -90,13 +86,10 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
 <a id="nestedatt--brokers"></a>
 ### Nested Schema for `brokers`
 
-Required:
-
-- `host_name` (String) The FQDN for the DXL endpoint broker.
-
 Optional:
 
 - `address` (String) The IPv4 Address or IPv6 Address for the DXL endpoint broker.
+- `host_name` (String) The FQDN for the DXL endpoint broker.
 - `port` (Number) The communication port for the DXL endpoint broker.
 - `unique_id` (String) The unique identifier for the DXL endpoint.
 

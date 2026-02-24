@@ -29,6 +29,7 @@ type DxlEndpointModel struct {
 	Ref                        types.String `tfsdk:"ref"`
 	Brokers                    types.List   `tfsdk:"brokers"`
 	BrokersImportToken         types.String `tfsdk:"brokers_import_token"`
+	BrokersImportFile          types.String `tfsdk:"brokers_import_file"`
 	ClientCertificateSubject   types.String `tfsdk:"client_certificate_subject"`
 	ClientCertificateToken     types.String `tfsdk:"client_certificate_token"`
 	ClientCertificateFile      types.String `tfsdk:"client_certificate_file"`
@@ -54,6 +55,7 @@ var DxlEndpointAttrTypes = map[string]attr.Type{
 	"ref":                           types.StringType,
 	"brokers":                       types.ListType{ElemType: types.ObjectType{AttrTypes: DxlEndpointBrokersAttrTypes}},
 	"brokers_import_token":          types.StringType,
+	"brokers_import_file":           types.StringType,
 	"client_certificate_subject":    types.StringType,
 	"client_certificate_token":      types.StringType,
 	"client_certificate_file":       types.StringType,
@@ -95,6 +97,10 @@ var DxlEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop for a DXL broker configuration file. Note that you cannot specify brokers and brokers_import_token at the same time.",
+	},
+	"brokers_import_file": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The file path for the DXL broker configuration file. When specified, the file is uploaded and the resulting configuration is stored in the brokers field.",
 	},
 	"client_certificate_subject": schema.StringAttribute{
 		Computed:            true,
@@ -225,7 +231,7 @@ func (m *DxlEndpointModel) Expand(ctx context.Context, diags *diag.Diagnostics) 
 		return nil
 	}
 	to := &misc.DxlEndpoint{
-		Brokers:                flex.ExpandFrameworkListNestedBlock(ctx, m.Brokers, diags, ExpandDxlEndpointBrokers),
+		Brokers:                flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.Brokers, diags, ExpandDxlEndpointBrokers),
 		BrokersImportToken:     flex.ExpandStringPointer(m.BrokersImportToken),
 		ClientCertificateToken: flex.ExpandStringPointer(m.ClientCertificateToken),
 		Comment:                flex.ExpandStringPointer(m.Comment),

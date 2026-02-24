@@ -134,6 +134,9 @@ func TestAccDxlEndpointResource_BrokersImportToken(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_brokers_import_token"
 	var v misc.DxlEndpoint
 	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+	testDataPath := getTestDataPath()
+	brokerPropertiesFile := filepath.Join(testDataPath, "brokerlist.properties")
+	brokerPropertiesFileUpdated := filepath.Join(testDataPath, "brokerlist_updated.properties")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -141,18 +144,16 @@ func TestAccDxlEndpointResource_BrokersImportToken(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDxlEndpointBrokersImportToken(clientCertificateFile, name, "GM", "BROKERS_IMPORT_TOKEN_REPLACE_ME"),
+				Config: testAccDxlEndpointBrokersImportToken(clientCertificateFile, name, "GM", brokerPropertiesFile),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "brokers_import_token", "BROKERS_IMPORT_TOKEN_REPLACE_ME"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointBrokersImportToken(clientCertificateFile, name, "GM", "BROKERS_IMPORT_TOKEN_UPDATE_REPLACE_ME"),
+				Config: testAccDxlEndpointBrokersImportToken(clientCertificateFile, name, "GM", brokerPropertiesFileUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "brokers_import_token", "BROKERS_IMPORT_TOKEN_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -488,6 +489,7 @@ func TestAccDxlEndpointResource_Timeout(t *testing.T) {
 	})
 }
 func TestAccDxlEndpointResource_Topics(t *testing.T) {
+	t.Skip("Additional config is required to run this test")
 	var resourceName = "nios_misc_dxl_endpoint.test_topics"
 	var v misc.DxlEndpoint
 	name := acctest.RandomNameWithPrefix("dxl-endpoint")
@@ -666,15 +668,15 @@ resource "nios_misc_dxl_endpoint" "test_brokers" {
 `, clientCertificateToken, name, outboundMemberType, brokersStr)
 }
 
-func testAccDxlEndpointBrokersImportToken(clientCertificateToken string, name string, outboundMemberType string, brokersImportToken string) string {
+func testAccDxlEndpointBrokersImportToken(clientCertificateToken string, name string, outboundMemberType string, brokersImportFile string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_brokers_import_token" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
-    brokers_import_token = %q
+    brokers_import_file = %q
 }
-`, clientCertificateToken, name, outboundMemberType, brokersImportToken)
+`, clientCertificateToken, name, outboundMemberType, brokersImportFile)
 }
 
 func testAccDxlEndpointClientCertificateToken(clientCertificateToken string, name string, outboundMemberType string, broker []map[string]any) string {

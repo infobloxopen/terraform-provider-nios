@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -33,7 +32,8 @@ var DxlEndpointBrokersAttrTypes = map[string]attr.Type{
 
 var DxlEndpointBrokersResourceSchemaAttributes = map[string]schema.Attribute{
 	"host_name": schema.StringAttribute{
-		Required: true,
+		Computed: true,
+		Optional: true,
 		Validators: []validator.String{
 			customvalidator.IsValidFQDN(),
 		},
@@ -47,7 +47,6 @@ var DxlEndpointBrokersResourceSchemaAttributes = map[string]schema.Attribute{
 	"port": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(8883),
 		MarkdownDescription: "The communication port for the DXL endpoint broker.",
 	},
 	"unique_id": schema.StringAttribute{

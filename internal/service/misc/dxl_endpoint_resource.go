@@ -85,6 +85,10 @@ func (r *DxlEndpointResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	if !r.processBrokersImportFile(ctx, &data, &resp.Diagnostics) {
+		return
+	}
+
 	apiRes, _, err := r.client.MiscAPI.
 		DxlEndpointAPI.
 		Create(ctx).
@@ -253,6 +257,10 @@ func (r *DxlEndpointResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	if !r.processBrokersImportFile(ctx, &data, &resp.Diagnostics) {
+		return
+	}
+
 	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
@@ -364,6 +372,39 @@ func (r *DxlEndpointResource) ValidateConfig(ctx context.Context, req resource.V
 			"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
 		)
 	}
+
+	// Either brokers or brokers_import_file can be specified
+	if (!data.Brokers.IsNull() && !data.Brokers.IsUnknown()) && (!data.BrokersImportFile.IsNull() && !data.BrokersImportFile.IsUnknown()) {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"Only one of 'brokers' or 'brokers_import_file' should be specified.",
+		)
+	} else if (data.Brokers.IsNull() || data.Brokers.IsUnknown()) && (data.BrokersImportFile.IsNull() || data.BrokersImportFile.IsUnknown()) {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"One of 'brokers' or 'brokers_import_file' must be specified.",
+		)
+	}
+
+	// When brokers is specified, host_name must be specified
+	if !data.Brokers.IsNull() && !data.Brokers.IsUnknown() {
+		var brokers []DxlEndpointBrokersModel
+		diags := data.Brokers.ElementsAs(ctx, &brokers, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		for i, broker := range brokers {
+			if broker.HostName.IsNull() || broker.HostName.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("brokers").AtListIndex(i).AtName("host_name"),
+					"Invalid Configuration",
+					"'host_name' must be specified for each broker when 'brokers' is used.",
+				)
+			}
+		}
+	}
 }
 
 func (r *DxlEndpointResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -371,13 +412,35 @@ func (r *DxlEndpointResource) ImportState(ctx context.Context, req resource.Impo
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
-func (r *DxlEndpointResource) processClientCertificate(
+func (r *DxlEndpointResource) processClientCertificate(ctx context.Context, data *DxlEndpointModel, diag *diag.Diagnostics) bool {
+	return r.processFileUpload(
+		ctx,
+		data.ClientCertificateFile,
+		&data.ClientCertificateToken,
+		"certificate file",
+		diag,
+	)
+}
+
+func (r *DxlEndpointResource) processBrokersImportFile(ctx context.Context, data *DxlEndpointModel, diag *diag.Diagnostics) bool {
+	return r.processFileUpload(
+		ctx,
+		data.BrokersImportFile,
+		&data.BrokersImportToken,
+		"brokers configuration file",
+		diag,
+	)
+}
+
+// processFileUpload is a helper function to upload a file and set the resulting token
+func (r *DxlEndpointResource) processFileUpload(
 	ctx context.Context,
-	data *DxlEndpointModel,
+	filePathAttr types.String,
+	tokenAttr *types.String,
+	fileDescription string,
 	diag *diag.Diagnostics,
 ) bool {
-
-	if data.ClientCertificateFile.IsNull() || data.ClientCertificateFile.IsUnknown() {
+	if filePathAttr.IsNull() || filePathAttr.IsUnknown() {
 		return true
 	}
 
@@ -385,15 +448,15 @@ func (r *DxlEndpointResource) processClientCertificate(
 	username := r.client.SecurityAPI.Cfg.NIOSUsername
 	password := r.client.SecurityAPI.Cfg.NIOSPassword
 
-	filePath := data.ClientCertificateFile.ValueString()
+	filePath := filePathAttr.ValueString()
 	token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
 	if err != nil {
 		diag.AddError(
 			"Client Error",
-			fmt.Sprintf("Unable to process certificate file %s, got error: %s", filePath, err),
+			fmt.Sprintf("Unable to process %s %s, got error: %s", fileDescription, filePath, err),
 		)
 		return false
 	}
-	data.ClientCertificateToken = types.StringValue(token)
+	*tokenAttr = types.StringValue(token)
 	return true
 }

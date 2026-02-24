@@ -57,6 +57,7 @@ Required:
 Optional:
 
 - `brokers` (Attributes List) The list of DXL endpoint brokers. Note that you cannot specify brokers and brokers_import_token at the same time. (see [below for nested schema](#nestedatt--result--brokers))
+- `brokers_import_file` (String) The file path for the DXL broker configuration file. When specified, the file is uploaded and the resulting configuration is stored in the brokers field.
 - `brokers_import_token` (String) The token returned by the uploadinit function call in object fileop for a DXL broker configuration file. Note that you cannot specify brokers and brokers_import_token at the same time.
 - `client_certificate_file` (String) The file path for the DXL endpoint client certificate.
 - `comment` (String) The comment of a DXL endpoint.
@@ -83,13 +84,10 @@ Read-Only:
 <a id="nestedatt--result--brokers"></a>
 ### Nested Schema for `result.brokers`
 
-Required:
-
-- `host_name` (String) The FQDN for the DXL endpoint broker.
-
 Optional:
 
 - `address` (String) The IPv4 Address or IPv6 Address for the DXL endpoint broker.
+- `host_name` (String) The FQDN for the DXL endpoint broker.
 - `port` (Number) The communication port for the DXL endpoint broker.
 - `unique_id` (String) The unique identifier for the DXL endpoint.
 
