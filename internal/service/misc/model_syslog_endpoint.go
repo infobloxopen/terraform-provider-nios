@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -19,7 +20,9 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SyslogEndpointModel struct {
@@ -103,27 +106,49 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
+		Optional: true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: SyslogEndpointSyslogServersAttrTypes},
+				[]attr.Value{},
+			),
+		),
 		MarkdownDescription: "List of syslog servers",
 	},
 	"template_instance": schema.SingleNestedAttribute{
 		Attributes: SyslogEndpointTemplateInstanceResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
+		PlanModifiers: []planmodifier.Object{
+			immutable.ImmutableObject(),
+		},
+		MarkdownDescription: "The Syslog template instance.",
 	},
 	"timeout": schema.Int64Attribute{
+		Computed:            true,
 		Optional:            true,
+		Default:             int64default.StaticInt64(30),
 		MarkdownDescription: "The timeout of session management (in seconds).",
 	},
 	"vendor_identifier": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The vendor identifier.",
 	},
 	"wapi_user_name": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The user name for WAPI integration.",
 	},
 	"wapi_user_password": schema.StringAttribute{
-		Optional:            true,
+		Optional:  true,
+		Computed:  true,
+		Sensitive: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The user password for WAPI integration.",
 	},
 	"extattrs_all": schema.MapAttribute{
