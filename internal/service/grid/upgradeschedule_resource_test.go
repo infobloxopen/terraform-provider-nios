@@ -21,7 +21,7 @@ func TestAccUpgradescheduleResource_basic(t *testing.T) {
 	var v grid.Upgradeschedule
 	start_time := time.Now().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -48,24 +48,24 @@ func TestAccUpgradescheduleResource_Active(t *testing.T) {
 	var resourceName = "nios_grid_upgradeschedule.test_active"
 	var v grid.Upgradeschedule
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccUpgradescheduleActive(false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "active", "false"),
-				),
-			},
-			// Update and Read
-			{
 				Config: testAccUpgradescheduleActive(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "active", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccUpgradescheduleActive(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "active", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -80,7 +80,7 @@ func TestAccUpgradescheduleResource_StartTime(t *testing.T) {
 	start_time := now.Add(6 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	updated_start_time := now.Add(10 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -141,7 +141,7 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 		},
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
