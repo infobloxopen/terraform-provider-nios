@@ -97,7 +97,7 @@ var MemberAutomatedTrafficCaptureSettingResourceSchemaAttributes = map[string]sc
 		MarkdownDescription: "User name for accessing the FTP/SCP server.",
 	},
 	"password": schema.StringAttribute{
-		Computed:            true,
+		Sensitive:           true,
 		Optional:            true,
 		MarkdownDescription: "Password for accessing the FTP/SCP server. This field is not readable.",
 	},

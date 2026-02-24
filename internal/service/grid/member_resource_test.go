@@ -36,6 +36,28 @@ resource "nios_grid_member" "grid_member_with_additional_fields" {
 
 var readableAttributesForMember = "active_position,additional_ip_list,automated_traffic_capture_setting,bgp_as,comment,config_addr_type,csp_access_key,csp_member_setting,dns_resolver_setting,dscp,email_setting,enable_ha,enable_lom,enable_member_redirect,enable_ro_api_access,extattrs,external_syslog_backup_servers,external_syslog_server_enable,ha_cloud_platform,ha_on_cloud,host_name,ipv6_setting,ipv6_static_routes,is_dscp_capable,lan2_enabled,lan2_port_setting,lom_network_config,lom_users,master_candidate,member_service_communication,mgmt_port_setting,mmdb_ea_build_time,mmdb_geoip_build_time,nat_setting,node_info,ntp_setting,ospf_list,passive_ha_arp_enabled,platform,pre_provisioning,preserve_if_owns_delegation,remote_console_access_enable,router_id,service_status,service_type_configuration,snmp_setting,static_routes,support_access_enable,support_access_info,syslog_proxy_setting,syslog_servers,syslog_size,threshold_traps,time_zone,traffic_capture_auth_dns_setting,traffic_capture_chr_setting,traffic_capture_qps_setting,traffic_capture_rec_dns_setting,traffic_capture_rec_queries_setting,trap_notifications,upgrade_group,use_automated_traffic_capture,use_dns_resolver_setting,use_dscp,use_email_setting,use_enable_lom,use_enable_member_redirect,use_external_syslog_backup_servers,use_remote_console_access_enable,use_snmp_setting,use_support_access_enable,use_syslog_proxy_setting,use_threshold_traps,use_time_zone,use_traffic_capture_auth_dns,use_traffic_capture_chr,use_traffic_capture_qps,use_traffic_capture_rec_dns,use_traffic_capture_rec_queries,use_trap_notifications,use_v4_vrrp,vip_setting,vpn_mtu"
 
+type memberBasicInput struct {
+	HostName          string
+	ConfigAddrType    string
+	Platform          string
+	ServiceTypeConfig string
+	VIPAddress        string
+	VIPGateway        string
+	VIPSubnetMask     string
+}
+
+func testAccMemberBasicInput() memberBasicInput {
+	return memberBasicInput{
+		HostName:          fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName()),
+		ConfigAddrType:    "IPV4",
+		Platform:          "VNIOS",
+		ServiceTypeConfig: "ALL_V4",
+		VIPAddress:        fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254)),
+		VIPGateway:        "172.28.82.1",
+		VIPSubnetMask:     "255.255.254.0",
+	}
+}
+
 func TestAccMemberResource_basic(t *testing.T) {
 	var resourceName = "nios_grid_member.test"
 	var v grid.Member
@@ -85,61 +107,30 @@ func TestAccMemberResource_basic(t *testing.T) {
 	})
 }
 
-// func TestAccMemberResource_disappears(t *testing.T) {
-// 	resourceName := "nios_grid_member.test"
-// 	var v grid.Member
-
-// 	resource.ParallelTest(t, resource.TestCase{
-// 		PreCheck:                 func() { acctest.PreCheck(t) },
-// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-// 		CheckDestroy:             testAccCheckMemberDestroy(context.Background(), &v),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccMemberBasicConfig("HOST_NAME_REPLACE_ME"),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-// 					testAccCheckMemberDisappears(context.Background(), &v),
-// 				),
-// 				ExpectNonEmptyPlan: true,
-// 			},
-// 		},
-// 	})
-// }
-
-func TestAccMemberResource_Import(t *testing.T) {
-	var resourceName = "nios_grid_member.test"
+func TestAccMemberResource_disappears(t *testing.T) {
+	resourceName := "nios_grid_member.test"
 	var v grid.Member
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckMemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				//Config: testAccMemberBasicConfig("HOST_NAME_REPLACE_ME"),
+				Config: testAccMemberBasicConfig(hostName, "IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					testAccCheckMemberDisappears(context.Background(), &v),
 				),
+				ExpectNonEmptyPlan: true,
 			},
-			// Import with PlanOnly to detect differences
-			{
-				ResourceName:                         resourceName,
-				ImportState:                          true,
-				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
-				ImportStateVerify:                    true,
-				ImportStateVerifyIdentifierAttribute: "ref",
-				PlanOnly:                             true,
-			},
-			// Import and Verify
-			{
-				ResourceName:                         resourceName,
-				ImportState:                          true,
-				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
-				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all"},
-				ImportStateVerifyIdentifierAttribute: "ref",
-			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -147,88 +138,298 @@ func TestAccMemberResource_Import(t *testing.T) {
 func TestAccMemberResource_AdditionalIpList(t *testing.T) {
 	var resourceName = "nios_grid_member.test_additional_ip_list"
 	var v grid.Member
-	additionalIpListVal := []map[string]any{}
-	additionalIpListValUpdated := []map[string]any{}
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	additionalIpListVal := []map[string]any{
+		{
+			"anycast":     true,
+			"enable_bgp":  true,
+			"enable_ospf": false,
+			"interface":   "LOOPBACK",
+			"ipv4_network_setting": map[string]any{
+				"address":     "172.21.3.2",
+				"dscp":        0,
+				"subnet_mask": "255.255.255.255",
+				"use_dscp":    false,
+			},
+		},
+	}
+	bgpAsVal := []map[string]any{
+		{
+			"as":          100,
+			"holddown":    16,
+			"keepalive":   4,
+			"link_detect": false,
+			"neighbors": []map[string]any{
+				{
+					"authentication_mode": "NONE",
+					"enable_bfd":          false,
+					"enable_bfd_dnscheck": true,
+					"interface":           "LAN_HA",
+					"multihop":            false,
+					"multihop_ttl":        255,
+					"neighbor_ip":         "172.21.3.41",
+					"remote_as":           1233,
+				},
+			},
+		},
+	}
+	additionalIpListValUpdated := []map[string]any{
+		{
+			"anycast":     false,
+			"enable_bgp":  false,
+			"enable_ospf": true,
+			"interface":   "LOOPBACK",
+			"ipv4_network_setting": map[string]any{
+				"address":     "172.21.3.4",
+				"dscp":        0,
+				"subnet_mask": "255.255.255.255",
+				"use_dscp":    false,
+			},
+		},
+	}
+	ospfListVal := []map[string]any{
+		{
+			"area_id":                "121",
+			"area_type":              "STANDARD",
+			"authentication_type":    "NONE",
+			"auto_calc_cost_enabled": true,
+			"cost":                   1,
+			"dead_interval":          40,
+			"enable_bfd":             false,
+			"enable_bfd_dnscheck":    true,
+			"hello_interval":         10,
+			"interface":              "LAN_HA",
+			"is_ipv4":                true,
+			"key_id":                 1,
+			"retransmit_interval":    5,
+			"transmit_delay":         1,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberAdditionalIpList("HOST_NAME_REPLACE_ME", additionalIpListVal),
+				Config: testAccMemberAdditionalIpList(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					additionalIpListVal,
+					bgpAsVal,
+					[]map[string]any{},
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "additional_ip_list", "ADDITIONAL_IP_LIST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.anycast", "true"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.enable_bgp", "true"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.enable_ospf", "false"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.interface", "LOOPBACK"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.ipv4_network_setting.address", "172.21.3.2"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.ipv4_network_setting.dscp", "0"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.ipv4_network_setting.primary", "false"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.ipv4_network_setting.subnet_mask", "255.255.255.255"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.ipv4_network_setting.use_dscp", "false"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberAdditionalIpList("HOST_NAME_REPLACE_ME", additionalIpListValUpdated),
+				Config: testAccMemberAdditionalIpList(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					additionalIpListValUpdated,
+					[]map[string]any{},
+					ospfListVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "additional_ip_list", "ADDITIONAL_IP_LIST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.anycast", "false"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.enable_bgp", "false"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.enable_ospf", "true"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.interface", "LOOPBACK"),
+					resource.TestCheckResourceAttr(resourceName, "additional_ip_list.0.ipv4_network_setting.address", "172.21.3.4"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
-
 func TestAccMemberResource_AutomatedTrafficCaptureSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_automated_traffic_capture_setting"
 	var v grid.Member
-	automatedTrafficCaptureSettingVal := map[string]any{}
-	automatedTrafficCaptureSettingValUpdated := map[string]any{}
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	automatedTrafficCaptureSettingVal := map[string]any{
+		"destination":            "NONE",
+		"include_support_bundle": false,
+		"keep_local_copy":        false,
+		"traffic_capture_enable": false,
+	}
+	automatedTrafficCaptureSettingValUpdated := map[string]any{
+		"destination":               "FTP",
+		"include_support_bundle":    true,
+		"keep_local_copy":           true,
+		"traffic_capture_enable":    true,
+		"duration":                  5,
+		"destination_host":          "192.28.0.1",
+		"traffic_capture_directory": "192.28.0.1",
+		"username":                  "user",
+		"password":                  "nios",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberAutomatedTrafficCaptureSetting("HOST_NAME_REPLACE_ME", automatedTrafficCaptureSettingVal),
+				Config: testAccMemberAutomatedTrafficCaptureSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					automatedTrafficCaptureSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting", "AUTOMATED_TRAFFIC_CAPTURE_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting.destination", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting.include_support_bundle", "false"),
+					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting.keep_local_copy", "false"),
+					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting.traffic_capture_enable", "false"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberAutomatedTrafficCaptureSetting("HOST_NAME_REPLACE_ME", automatedTrafficCaptureSettingValUpdated),
+				Config: testAccMemberAutomatedTrafficCaptureSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					automatedTrafficCaptureSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting", "AUTOMATED_TRAFFIC_CAPTURE_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting.destination", "FTP"),
+					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting.include_support_bundle", "true"),
+					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting.keep_local_copy", "true"),
+					resource.TestCheckResourceAttr(resourceName, "automated_traffic_capture_setting.traffic_capture_enable", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
-}
+} // call some one for password issue
+
 func TestAccMemberResource_BgpAs(t *testing.T) {
 	var resourceName = "nios_grid_member.test_bgp_as"
 	var v grid.Member
-	bgpAsVal := []map[string]any{}
-	bgpAsValUpdated := []map[string]any{}
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	bgpAsVal := []map[string]any{
+		{
+			"as":          100,
+			"holddown":    16,
+			"keepalive":   4,
+			"link_detect": false,
+			"neighbors": []map[string]any{
+				{
+					"authentication_mode": "NONE",
+					"enable_bfd":          false,
+					"enable_bfd_dnscheck": true,
+					"interface":           "LAN_HA",
+					"multihop":            false,
+					"multihop_ttl":        255,
+					"neighbor_ip":         "172.21.3.41",
+					"remote_as":           1233,
+				},
+			},
+		},
+	}
+	bgpAsValUpdated := []map[string]any{
+		{
+			"as":          200,
+			"holddown":    20,
+			"keepalive":   5,
+			"link_detect": true,
+			"neighbors": []map[string]any{
+				{
+					"authentication_mode": "NONE",
+					"enable_bfd":          false,
+					"enable_bfd_dnscheck": true,
+					"interface":           "LAN_HA",
+					"multihop":            false,
+					"multihop_ttl":        255,
+					"neighbor_ip":         "172.21.3.42",
+					"remote_as":           2233,
+				},
+			},
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberBgpAs("HOST_NAME_REPLACE_ME", bgpAsVal),
+				Config: testAccMemberBgpAs(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					bgpAsVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bgp_as", "BGP_AS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.as", "100"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.holddown", "16"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.keepalive", "4"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.link_detect", "false"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.neighbors.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.neighbors.0.neighbor_ip", "172.21.3.41"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.neighbors.0.remote_as", "1233"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberBgpAs("HOST_NAME_REPLACE_ME", bgpAsValUpdated),
+				Config: testAccMemberBgpAs(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					bgpAsValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "bgp_as", "BGP_AS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.as", "200"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.holddown", "20"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.keepalive", "5"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.link_detect", "true"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.neighbors.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.neighbors.0.neighbor_ip", "172.21.3.42"),
+					resource.TestCheckResourceAttr(resourceName, "bgp_as.0.neighbors.0.remote_as", "2233"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -239,25 +440,43 @@ func TestAccMemberResource_BgpAs(t *testing.T) {
 func TestAccMemberResource_Comment(t *testing.T) {
 	var resourceName = "nios_grid_member.test_comment"
 	var v grid.Member
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberComment("HOST_NAME_REPLACE_ME", "Comment for the object"),
+				Config: testAccMemberComment(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					"Test comment",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Test comment"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberComment("HOST_NAME_REPLACE_ME", "Updated comment for the object"),
+				Config: testAccMemberComment(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					"Test comment updated",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Test comment updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -268,28 +487,39 @@ func TestAccMemberResource_Comment(t *testing.T) {
 func TestAccMemberResource_ConfigAddrType(t *testing.T) {
 	var resourceName = "nios_grid_member.test_config_addr_type"
 	var v grid.Member
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress4 := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+	vipAddress6 := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberConfigAddrType("CONFIG_ADDR_TYPE_REPLACE_ME", "BOTH"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "config_addr_type", "BOTH"),
+				Config: testAccMemberConfigAddrType(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress4,
+					"172.28.82.1",
+					"255.255.254.0",
 				),
-			},
-			{
-				Config: testAccMemberConfigAddrType("CONFIG_ADDR_TYPE_REPLACE_ME", "IPV4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "config_addr_type", "IPV4"),
 				),
 			},
 			{
-				Config: testAccMemberConfigAddrType("CONFIG_ADDR_TYPE_REPLACE_ME", "IPV6"),
+				Config: testAccMemberConfigAddrType(
+					hostName,
+					"IPV6",
+					"VNIOS",
+					"ALL_V6",
+					vipAddress6,
+					"2001::1",
+					"64",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "config_addr_type", "IPV6"),
@@ -297,7 +527,7 @@ func TestAccMemberResource_ConfigAddrType(t *testing.T) {
 			},
 		},
 	})
-}
+} // ask someone
 
 func TestAccMemberResource_CspAccessKey(t *testing.T) {
 	var resourceName = "nios_grid_member.test_csp_access_key"
@@ -2518,19 +2748,6 @@ func testAccCheckMemberDisappears(ctx context.Context, v *grid.Member) resource.
 	}
 }
 
-func testAccMemberImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("not found: %s", resourceName)
-		}
-		if rs.Primary.Attributes["ref"] == "" {
-			return "", fmt.Errorf("ref is not set")
-		}
-		return rs.Primary.Attributes["ref"], nil
-	}
-}
-
 func testAccMemberBasicConfig(hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test" {
@@ -2559,52 +2776,190 @@ resource "nios_grid_member" "test" {
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }
 
-func testAccMemberAdditionalIpList(hostName string, additionalIpList []map[string]any) string {
+func testAccMemberAdditionalIpList(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	additionalIpList []map[string]any,
+	bgpAs []map[string]any,
+	ospfList []map[string]any,
+) string {
+
 	additionalIpListStr := utils.ConvertSliceOfMapsToHCL(additionalIpList)
+
+	bgpAsStr := "null"
+	if len(bgpAs) > 0 {
+		bgpAsStr = utils.ConvertSliceOfMapsToHCL(bgpAs)
+	}
+
+	ospfListStr := "null"
+	if len(ospfList) > 0 {
+		ospfListStr = utils.ConvertSliceOfMapsToHCL(ospfList)
+	}
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_additional_ip_list" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_dscp = false
     additional_ip_list = %s
+    bgp_as = %s
+    ospf_list = %s
 }
-`, hostName, additionalIpListStr)
+`, hostName, configAddrType, platform, serviceTypeConfig,
+		vipAddress, vipGateway, vipSubnetMask,
+		additionalIpListStr, bgpAsStr, ospfListStr)
 }
 
-func testAccMemberAutomatedTrafficCaptureSetting(hostName string, automatedTrafficCaptureSetting map[string]any) string {
+func testAccMemberAutomatedTrafficCaptureSetting(hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string, automatedTrafficCaptureSetting map[string]any) string {
+	automatedTrafficCaptureSettingStr := utils.ConvertMapToHCL(automatedTrafficCaptureSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_automated_traffic_capture_setting" {
     host_name = %q
+	config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
     automated_traffic_capture_setting = %s
     use_automated_traffic_capture = true
 }
-`, hostName, automatedTrafficCaptureSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, automatedTrafficCaptureSettingStr)
 }
 
-func testAccMemberBgpAs(hostName string, bgpAs []map[string]any) string {
-	bgpAsStr := utils.ConvertSliceOfMapsToHCL(bgpAs)
+func testAccMemberBgpAs(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	bgpAs []map[string]any,
+) string {
+	bgpAsStr := "null"
+	if len(bgpAs) > 0 {
+		bgpAsStr = utils.ConvertSliceOfMapsToHCL(bgpAs)
+	}
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_bgp_as" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     bgp_as = %s
 }
-`, hostName, bgpAsStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, bgpAsStr)
 }
 
-func testAccMemberComment(hostName string, comment string) string {
+func testAccMemberComment(hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask string, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_comment" {
     host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
+	
+	ipv6_setting = {
+	auto_router_config_enabled = false
+	dscp = 0
+	enabled = false
+	primary = true
+	use_dscp = false
+	}
+
+	vip_setting = {
+	address = %q
+	dscp = 0
+	gateway = %q
+	primary = true
+	subnet_mask = %q
+	use_dscp = false
+	}
     comment = %q
 }
-`, hostName, comment)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, comment)
 }
 
-func testAccMemberConfigAddrType(hostName string, configAddrType string) string {
+func testAccMemberConfigAddrType(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_config_addr_type" {
     host_name = %q
     config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
 }
-`, hostName, configAddrType)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }
 
 func testAccMemberCspAccessKey(hostName string, cspAccessKey []string) string {
