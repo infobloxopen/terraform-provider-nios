@@ -2,9 +2,7 @@ package grid_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net/http"
 	"testing"
 	"time"
 
@@ -197,26 +195,6 @@ func testAccCheckUpgradescheduleExists(ctx context.Context, resourceName string,
 		}
 		*v = apiRes.GetUpgradescheduleResponseObjectAsResult.GetResult()
 		return nil
-	}
-}
-
-func testAccCheckUpgradescheduleDestroy(ctx context.Context, v *grid.Upgradeschedule) resource.TestCheckFunc {
-	// Verify the resource was destroyed
-	return func(state *terraform.State) error {
-		_, httpRes, err := acctest.NIOSClient.GridAPI.
-			UpgradescheduleAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
-			ReturnAsObject(1).
-			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
-			Execute()
-		if err != nil {
-			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-				// resource was deleted
-				return nil
-			}
-			return err
-		}
-		return errors.New("expected to be deleted")
 	}
 }
 
