@@ -17,21 +17,23 @@ import (
 )
 
 type SamlAuthserviceIdpModel struct {
-	IdpType        types.String `tfsdk:"idp_type"`
-	Comment        types.String `tfsdk:"comment"`
-	MetadataUrl    types.String `tfsdk:"metadata_url"`
-	MetadataToken  types.String `tfsdk:"metadata_token"`
-	Groupname      types.String `tfsdk:"groupname"`
-	SsoRedirectUrl types.String `tfsdk:"sso_redirect_url"`
+	IdpType          types.String `tfsdk:"idp_type"`
+	Comment          types.String `tfsdk:"comment"`
+	MetadataUrl      types.String `tfsdk:"metadata_url"`
+	MetadataToken    types.String `tfsdk:"metadata_token"`
+	MetadataFilePath types.String `tfsdk:"metadata_file_path"`
+	Groupname        types.String `tfsdk:"groupname"`
+	SsoRedirectUrl   types.String `tfsdk:"sso_redirect_url"`
 }
 
 var SamlAuthserviceIdpAttrTypes = map[string]attr.Type{
-	"idp_type":         types.StringType,
-	"comment":          types.StringType,
-	"metadata_url":     types.StringType,
-	"metadata_token":   types.StringType,
-	"groupname":        types.StringType,
-	"sso_redirect_url": types.StringType,
+	"idp_type":           types.StringType,
+	"comment":            types.StringType,
+	"metadata_url":       types.StringType,
+	"metadata_token":     types.StringType,
+	"metadata_file_path": types.StringType,
+	"groupname":          types.StringType,
+	"sso_redirect_url":   types.StringType,
 }
 
 var SamlAuthserviceIdpResourceSchemaAttributes = map[string]schema.Attribute{
@@ -55,11 +57,16 @@ var SamlAuthserviceIdpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"metadata_url": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Identity Provider Metadata URL.",
 	},
 	"metadata_token": schema.StringAttribute{
-		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop.",
+	},
+	"metadata_file_path": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The file path to the certificate.",
 	},
 	"groupname": schema.StringAttribute{
 		Optional:            true,
@@ -68,6 +75,7 @@ var SamlAuthserviceIdpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"sso_redirect_url": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "host name or IP address of the GM",
 	},
 }
@@ -124,4 +132,3 @@ func (m *SamlAuthserviceIdpModel) Flatten(ctx context.Context, from *security.Sa
 	m.Groupname = flex.FlattenStringPointer(from.Groupname)
 	m.SsoRedirectUrl = flex.FlattenStringPointer(from.SsoRedirectUrl)
 }
-

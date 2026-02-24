@@ -14,6 +14,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -100,7 +101,15 @@ func (m *SamlAuthserviceModel) Flatten(ctx context.Context, from *security.SamlA
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
+	//m.Idp = FlattenSamlAuthserviceIdp(ctx, from.Idp, diags)
+	planIdp := m.Idp
 	m.Idp = FlattenSamlAuthserviceIdp(ctx, from.Idp, diags)
+	if !planIdp.IsUnknown() {
+		idpVal, diags := utils.CopyFieldFromPlanToRespObject(ctx, planIdp, m.Idp, "metadata_file_path")
+		if !diags.HasError() {
+			m.Idp = idpVal.(types.Object)
+		}
+	}
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.SessionTimeout = flex.FlattenInt64Pointer(from.SessionTimeout)
 }

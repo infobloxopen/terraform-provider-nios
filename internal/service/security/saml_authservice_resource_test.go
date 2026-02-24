@@ -5,10 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"os"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
@@ -21,6 +24,12 @@ func TestAccSamlAuthserviceResource_basic(t *testing.T) {
 	var resourceName = "nios_security_saml_authservice.test"
 	var v security.SamlAuthservice
 	name := acctest.RandomNameWithPrefix("saml_authservice")
+	testDataPath := getSamlTestDataPath()
+	idp := map[string]any{
+		"idp_type":           "AZURE_SSO",
+		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"sso_redirect_url":   "2.2.2.2",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -28,11 +37,13 @@ func TestAccSamlAuthserviceResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSamlAuthserviceBasicConfig(name),
+				Config: testAccSamlAuthserviceBasicConfig(name, idp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "session_timeout", "1800"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -43,6 +54,13 @@ func TestAccSamlAuthserviceResource_basic(t *testing.T) {
 func TestAccSamlAuthserviceResource_disappears(t *testing.T) {
 	resourceName := "nios_security_saml_authservice.test"
 	var v security.SamlAuthservice
+	name := acctest.RandomNameWithPrefix("saml_authservice")
+	testDataPath := getSamlTestDataPath()
+	idp := map[string]any{
+		"idp_type":           "AZURE_SSO",
+		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"sso_redirect_url":   "2.2.2.2",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -50,7 +68,7 @@ func TestAccSamlAuthserviceResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckSamlAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSamlAuthserviceBasicConfig(""),
+				Config: testAccSamlAuthserviceBasicConfig(name, idp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
 					testAccCheckSamlAuthserviceDisappears(context.Background(), &v),
@@ -64,6 +82,13 @@ func TestAccSamlAuthserviceResource_disappears(t *testing.T) {
 func TestAccSamlAuthserviceResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_saml_authservice.test_comment"
 	var v security.SamlAuthservice
+	name := acctest.RandomNameWithPrefix("saml_authservice")
+	testDataPath := getSamlTestDataPath()
+	idp := map[string]any{
+		"idp_type":           "AZURE_SSO",
+		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"sso_redirect_url":   "2.2.2.2",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -71,18 +96,18 @@ func TestAccSamlAuthserviceResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSamlAuthserviceComment("COMMENT_REPLACE_ME"),
+				Config: testAccSamlAuthserviceComment(name, "This is a comment", idp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSamlAuthserviceComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccSamlAuthserviceComment(name, "This comment is updated", idp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This comment is updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -93,6 +118,18 @@ func TestAccSamlAuthserviceResource_Comment(t *testing.T) {
 func TestAccSamlAuthserviceResource_Idp(t *testing.T) {
 	var resourceName = "nios_security_saml_authservice.test_idp"
 	var v security.SamlAuthservice
+	name := acctest.RandomNameWithPrefix("saml_authservice")
+	testDataPath := getSamlTestDataPath()
+	idp := map[string]any{
+		"idp_type":           "AZURE_SSO",
+		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"sso_redirect_url":   "2.2.2.2",
+	}
+	idpUpdate := map[string]any{
+		"idp_type":         "OKTA",
+		"metadata_url":     "https://idp.example.com",
+		"sso_redirect_url": "2.2.2.1",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -100,18 +137,21 @@ func TestAccSamlAuthserviceResource_Idp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSamlAuthserviceIdp("IDP_REPLACE_ME"),
+				Config: testAccSamlAuthserviceIdp(name, idp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "idp", "IDP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "idp.idp_type", "AZURE_SSO"),
+					resource.TestCheckResourceAttr(resourceName, "idp.sso_redirect_url", "2.2.2.2"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSamlAuthserviceIdp("IDP_UPDATE_REPLACE_ME"),
+				Config: testAccSamlAuthserviceIdp(name, idpUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "idp", "IDP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "idp.idp_type", "OKTA"),
+					resource.TestCheckResourceAttr(resourceName, "idp.metadata_url", "https://idp.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "idp.sso_redirect_url", "2.2.2.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -122,6 +162,14 @@ func TestAccSamlAuthserviceResource_Idp(t *testing.T) {
 func TestAccSamlAuthserviceResource_Name(t *testing.T) {
 	var resourceName = "nios_security_saml_authservice.test_name"
 	var v security.SamlAuthservice
+	name := acctest.RandomNameWithPrefix("saml_authservice")
+	nameUpdate := acctest.RandomNameWithPrefix("saml_authservice")
+	testDataPath := getSamlTestDataPath()
+	idp := map[string]any{
+		"idp_type":           "AZURE_SSO",
+		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"sso_redirect_url":   "2.2.2.2",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -129,18 +177,18 @@ func TestAccSamlAuthserviceResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSamlAuthserviceName("NAME_REPLACE_ME"),
+				Config: testAccSamlAuthserviceName(name, idp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSamlAuthserviceName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccSamlAuthserviceName(nameUpdate, idp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -151,6 +199,13 @@ func TestAccSamlAuthserviceResource_Name(t *testing.T) {
 func TestAccSamlAuthserviceResource_SessionTimeout(t *testing.T) {
 	var resourceName = "nios_security_saml_authservice.test_session_timeout"
 	var v security.SamlAuthservice
+	name := acctest.RandomNameWithPrefix("saml_authservice")
+	testDataPath := getSamlTestDataPath()
+	idp := map[string]any{
+		"idp_type":           "AZURE_SSO",
+		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"sso_redirect_url":   "2.2.2.2",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -158,18 +213,18 @@ func TestAccSamlAuthserviceResource_SessionTimeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSamlAuthserviceSessionTimeout("SESSION_TIMEOUT_REPLACE_ME"),
+				Config: testAccSamlAuthserviceSessionTimeout(name, idp, 2700),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "session_timeout", "SESSION_TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "session_timeout", "2700"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSamlAuthserviceSessionTimeout("SESSION_TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccSamlAuthserviceSessionTimeout(name, idp, 3600),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "session_timeout", "SESSION_TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "session_timeout", "3600"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -235,42 +290,62 @@ func testAccCheckSamlAuthserviceDisappears(ctx context.Context, v *security.Saml
 	}
 }
 
-func testAccSamlAuthserviceBasicConfig(name string) string {
+func testAccSamlAuthserviceBasicConfig(name string, idp map[string]any) string {
+	idpString := utils.ConvertMapToHCL(idp)
 	return fmt.Sprintf(`
 resource "nios_security_saml_authservice" "test" {
 	name = %q
+	idp = %s
 }
-`, name)
+`, name, idpString)
 }
 
-func testAccSamlAuthserviceComment(comment string) string {
+func testAccSamlAuthserviceComment(name, comment string, idp map[string]any) string {
+	idpString := utils.ConvertMapToHCL(idp)
 	return fmt.Sprintf(`
 resource "nios_security_saml_authservice" "test_comment" {
+	name = %q
+	idp = %s
     comment = %q
 }
-`, comment)
+`, name, idpString, comment)
 }
 
-func testAccSamlAuthserviceIdp(idp string) string {
+func testAccSamlAuthserviceIdp(name string, idp map[string]any) string {
+	ipdString := utils.ConvertMapToHCL(idp)
 	return fmt.Sprintf(`
 resource "nios_security_saml_authservice" "test_idp" {
-    idp = %q
+	name = %q
+    idp = %s
 }
-`, idp)
+`, name, ipdString)
 }
 
-func testAccSamlAuthserviceName(name string) string {
+func testAccSamlAuthserviceName(name string, idp map[string]any) string {
+	idpString := utils.ConvertMapToHCL(idp)
 	return fmt.Sprintf(`
 resource "nios_security_saml_authservice" "test_name" {
     name = %q
+	idp = %s
 }
-`, name)
+`, name, idpString)
 }
 
-func testAccSamlAuthserviceSessionTimeout(sessionTimeout string) string {
+func testAccSamlAuthserviceSessionTimeout(name string, idp map[string]any, sessionTimeout int) string {
+	idpString := utils.ConvertMapToHCL(idp)
 	return fmt.Sprintf(`
 resource "nios_security_saml_authservice" "test_session_timeout" {
-    session_timeout = %q
+	name = %q
+	idp = %s
+    session_timeout = %d
 }
-`, sessionTimeout)
+`, name, idpString, sessionTimeout)
+}
+
+func getSamlTestDataPath() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "../../testdata/nios_security_saml_authservice"
+	}
+	return filepath.Join(wd, "../../testdata/nios_security_saml_authservice")
 }

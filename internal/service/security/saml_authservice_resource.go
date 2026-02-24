@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -37,7 +39,7 @@ func (r *SamlAuthserviceResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *SamlAuthserviceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages an SAML Authservice.",
 		Attributes:          SamlAuthserviceResourceSchemaAttributes,
 	}
 }
@@ -71,6 +73,11 @@ func (r *SamlAuthserviceResource) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Process IDP metadata file
+    if !r.processIdpMetadata(ctx, &data, &resp.Diagnostics) {
+        return
+    }
 
 	apiRes, _, err := r.client.SecurityAPI.
 		SamlAuthserviceAPI.
@@ -140,6 +147,10 @@ func (r *SamlAuthserviceResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
+	// Process IDP metadata file
+    if !r.processIdpMetadata(ctx, &data, &resp.Diagnostics) {
+        return
+    }
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -191,4 +202,48 @@ func (r *SamlAuthserviceResource) Delete(ctx context.Context, req resource.Delet
 
 func (r *SamlAuthserviceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+func (r *SamlAuthserviceResource) processIdpMetadata(
+	ctx context.Context,
+	data *SamlAuthserviceModel,
+	diag *diag.Diagnostics,
+) bool {
+	if data.Idp.IsNull() || data.Idp.IsUnknown() {
+		return true
+	}
+
+	baseUrl := r.client.SecurityAPI.Cfg.NIOSHostURL
+	username := r.client.SecurityAPI.Cfg.NIOSUsername
+	password := r.client.SecurityAPI.Cfg.NIOSPassword
+
+	var idp SamlAuthserviceIdpModel
+	diagResult := data.Idp.As(ctx, &idp, basetypes.ObjectAsOptions{})
+	diag.Append(diagResult...)
+	if diag.HasError() {
+		return false
+	}
+
+	if !idp.MetadataFilePath.IsNull() && !idp.MetadataFilePath.IsUnknown() {
+		filePath := idp.MetadataFilePath.ValueString()
+		token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
+		if err != nil {
+			diag.AddError(
+				"Client Error",
+				fmt.Sprintf("Unable to process metadata file %s, got error: %s", filePath, err),
+			)
+			return false
+		}
+		idp.MetadataToken = types.StringValue(token)
+
+		objValue, diagResult := types.ObjectValueFrom(ctx, SamlAuthserviceIdpAttrTypes, idp)
+		diag.Append(diagResult...)
+		if diag.HasError() {
+			return false
+		}
+
+		data.Idp = objValue
+	}
+
+	return true
 }

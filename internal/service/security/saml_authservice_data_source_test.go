@@ -3,18 +3,27 @@ package security_test
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccSamlAuthserviceDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_security_saml_authservice.test"
 	resourceName := "nios_security_saml_authservice.test"
 	var v security.SamlAuthservice
+	name := acctest.RandomNameWithPrefix("saml_authservice")
+	testDataPath := getSamlTestDataPath()
+	idp := map[string]any{
+		"idp_type":           "AZURE_SSO",
+		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"sso_redirect_url":   "2.2.2.2",
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +31,7 @@ func TestAccSamlAuthserviceDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckSamlAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSamlAuthserviceDataSourceConfigFilters(),
+				Config: testAccSamlAuthserviceDataSourceConfigFilters(name, idp),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckSamlAuthserviceExists(context.Background(), resourceName, &v),
@@ -45,15 +54,18 @@ func testAccCheckSamlAuthserviceResourceAttrPair(resourceName, dataSourceName st
 	}
 }
 
-func testAccSamlAuthserviceDataSourceConfigFilters() string {
+func testAccSamlAuthserviceDataSourceConfigFilters(name string, idp map[string]any) string {
+	idpString := utils.ConvertMapToHCL(idp)
 	return fmt.Sprintf(`
 resource "nios_security_saml_authservice" "test" {
+	name = %q
+	idp = %s
 }
 
 data "nios_security_saml_authservice" "test" {
   filters = {
-	 = nios_security_saml_authservice.test.
+	name = nios_security_saml_authservice.test.name
   }
 }
-`)
+`, name, idpString)
 }
