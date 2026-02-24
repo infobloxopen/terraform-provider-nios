@@ -3,12 +3,12 @@
 page_title: "nios_misc_dxl_endpoint Data Source - nios"
 subcategory: "MISC"
 description: |-
-  Retrieves information about existing DxlEndpoints.
+  Retrieves information about existing Dxl Endpoints.
 ---
 
 # nios_misc_dxl_endpoint (Data Source)
 
-Retrieves information about existing DxlEndpoints.
+Retrieves information about existing Dxl Endpoints.
 
 ## Example Usage
 

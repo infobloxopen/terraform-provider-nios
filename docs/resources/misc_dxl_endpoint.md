@@ -3,12 +3,12 @@
 page_title: "nios_misc_dxl_endpoint Resource - nios"
 subcategory: "MISC"
 description: |-
-  Manages a DxlEndpoint resource object.
+  Manages a Dxl Endpoint.
 ---
 
 # nios_misc_dxl_endpoint (Resource)
 
-Manages a DxlEndpoint resource object.
+Manages a Dxl Endpoint.
 
 ## Example Usage
 

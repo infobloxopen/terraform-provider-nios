@@ -21,6 +21,7 @@ var readableAttributesForDxlEndpoint = "brokers,client_certificate_subject,clien
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &DxlEndpointResource{}
 var _ resource.ResourceWithImportState = &DxlEndpointResource{}
+var _ resource.ResourceWithValidateConfig = &DxlEndpointResource{}
 
 func NewDxlEndpointResource() resource.Resource {
 	return &DxlEndpointResource{}
@@ -37,7 +38,7 @@ func (r *DxlEndpointResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *DxlEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DxlEndpoint resource object.",
+		MarkdownDescription: "Manages a Dxl Endpoint.",
 		Attributes:          DxlEndpointResourceSchemaAttributes,
 	}
 }
@@ -335,6 +336,33 @@ func (r *DxlEndpointResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete DxlEndpoint, got error: %s", err))
 		return
+	}
+}
+
+func (r *DxlEndpointResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data DxlEndpointModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Outbound Members Validation
+	if data.OutboundMemberType.ValueString() == "MEMBER" {
+		if data.OutboundMembers.IsNull() || data.OutboundMembers.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("outbound_members"),
+				"Invalid Configuration",
+				"Attribute 'outbound_members' must be specified when 'outbound_member_type' is set to 'MEMBER'.",
+			)
+		}
+	} else if !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("outbound_members"),
+			"Invalid Configuration",
+			"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
+		)
 	}
 }
 
