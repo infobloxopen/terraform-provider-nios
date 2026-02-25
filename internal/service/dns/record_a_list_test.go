@@ -81,7 +81,6 @@ func TestAccRecordAList_Filters(t *testing.T) {
 					querycheck.ExpectLength("nios_dns_record_a.test", 1),
 				},
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -121,7 +120,6 @@ func TestAccRecordAList_ExtAttrFilters(t *testing.T) {
 					querycheck.ExpectLength("nios_dns_record_a.test", 1),
 				},
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
