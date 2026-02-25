@@ -216,7 +216,7 @@ var ViewResourceSchemaAttributes = map[string]schema.Attribute{
 			stringvalidator.OneOf("REDIRECT", "REFUSE"),
 			stringvalidator.AlsoRequires(path.MatchRoot("use_blacklist")),
 		},
-		MarkdownDescription: "The action to perform when a domain name matches the pattern defined in a rule that is specified by the blacklist_ruleset method. Valid values are \"REDIRECT\" or \"REFUSE\". The default value is \"REFUSE\".",
+		MarkdownDescription: "The action to perform when a domain name matches the pattern defined in a rule that is specified by the blacklist_ruleset method. Valid values are \"REDIRECT\" or \"REFUSE\". The default value is \"REDIRECT\".",
 	},
 	"blacklist_log_query": schema.BoolAttribute{
 		Optional: true,
