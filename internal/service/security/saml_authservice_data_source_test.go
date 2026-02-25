@@ -21,7 +21,7 @@ func TestAccSamlAuthserviceDataSource_Filters(t *testing.T) {
 	testDataPath := getSamlTestDataPath()
 	idp := map[string]any{
 		"idp_type":           "AZURE_SSO",
-		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"metadata_file_path": filepath.Join(testDataPath, "metadata.xml"),
 		"sso_redirect_url":   "2.2.2.2",
 	}
 

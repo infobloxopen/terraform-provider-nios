@@ -27,7 +27,7 @@ func TestAccSamlAuthserviceResource_basic(t *testing.T) {
 	testDataPath := getSamlTestDataPath()
 	idp := map[string]any{
 		"idp_type":           "AZURE_SSO",
-		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"metadata_file_path": filepath.Join(testDataPath, "metadata.xml"),
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
@@ -58,7 +58,7 @@ func TestAccSamlAuthserviceResource_disappears(t *testing.T) {
 	testDataPath := getSamlTestDataPath()
 	idp := map[string]any{
 		"idp_type":           "AZURE_SSO",
-		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"metadata_file_path": filepath.Join(testDataPath, "metadata.xml"),
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
@@ -86,7 +86,7 @@ func TestAccSamlAuthserviceResource_Comment(t *testing.T) {
 	testDataPath := getSamlTestDataPath()
 	idp := map[string]any{
 		"idp_type":           "AZURE_SSO",
-		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"metadata_file_path": filepath.Join(testDataPath, "metadata.xml"),
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
@@ -122,7 +122,7 @@ func TestAccSamlAuthserviceResource_Idp(t *testing.T) {
 	testDataPath := getSamlTestDataPath()
 	idp := map[string]any{
 		"idp_type":           "AZURE_SSO",
-		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"metadata_file_path": filepath.Join(testDataPath, "metadata.xml"),
 		"sso_redirect_url":   "2.2.2.2",
 	}
 	idpUpdate := map[string]any{
@@ -167,7 +167,7 @@ func TestAccSamlAuthserviceResource_Name(t *testing.T) {
 	testDataPath := getSamlTestDataPath()
 	idp := map[string]any{
 		"idp_type":           "AZURE_SSO",
-		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"metadata_file_path": filepath.Join(testDataPath, "metadata.xml"),
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
@@ -203,7 +203,7 @@ func TestAccSamlAuthserviceResource_SessionTimeout(t *testing.T) {
 	testDataPath := getSamlTestDataPath()
 	idp := map[string]any{
 		"idp_type":           "AZURE_SSO",
-		"metadata_file_path": filepath.Join(testDataPath, "pavithra.xml"),
+		"metadata_file_path": filepath.Join(testDataPath, "metadata.xml"),
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
