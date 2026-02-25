@@ -10,8 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -62,12 +64,12 @@ func (l *RecordAList) ListResourceConfigSchema(ctx context.Context, req list.Lis
 		MarkdownDescription: "Query existing DNS A Records.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
-				MarkdownDescription: "Filter parameters for querying DNS A records.",
+				MarkdownDescription: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType:         types.StringType,
 				Optional:            true,
 			},
 			"extattrfilters": schema.MapAttribute{
-				MarkdownDescription: "Extensible attribute filters for querying DNS A records.",
+				MarkdownDescription: "External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType:         types.StringType,
 				Optional:            true,
 			},
@@ -100,7 +102,8 @@ func (l *RecordAList) List(ctx context.Context, req list.ListRequest, stream *li
 			//Increment the page count
 			pageCount++
 
-			request := l.client.DNSAPI.RecordAAPI.
+			request := l.client.DNSAPI.
+				RecordAAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &diags)).
 				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &diags)).
@@ -166,7 +169,7 @@ func (l *RecordAList) List(ctx context.Context, req list.ListRequest, stream *li
 			}
 
 			// By default, list only returns the identity.
-			// If IncludeResource is true, it gets the full resource and set it in the result.Resource
+			// If IncludeResource is true, it gets the full resource and sets it in the result.Resource
 			if req.IncludeResource {
 				var extAttrsAll types.Map
 				item.ExtAttrs, extAttrsAll, diags = RemoveInheritedExtAttrs(ctx, extAttrsAll, *item.ExtAttrs)
