@@ -357,20 +357,27 @@ func (r *DxlEndpointResource) ValidateConfig(ctx context.Context, req resource.V
 	}
 
 	// Outbound Members Validation
-	if data.OutboundMemberType.ValueString() == "MEMBER" {
-		if data.OutboundMembers.IsNull() || data.OutboundMembers.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("outbound_members"),
-				"Invalid Configuration",
-				"Attribute 'outbound_members' must be specified when 'outbound_member_type' is set to 'MEMBER'.",
-			)
+	hasOutboundMembers := !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown()
+	hasOutboundMemberType := !data.OutboundMemberType.IsNull() && !data.OutboundMemberType.IsUnknown()
+
+	if hasOutboundMemberType {
+		outboundMemberType := data.OutboundMemberType.ValueString()
+		switch outboundMemberType {
+		case "GM":
+			if hasOutboundMembers {
+				resp.Diagnostics.AddError(
+					"Invalid Configuration",
+					"'outbound_member_type' cannot be set to 'GM' when 'outbound_members' is specified.",
+				)
+			}
+		case "MEMBER":
+			if !hasOutboundMembers {
+				resp.Diagnostics.AddError(
+					"Invalid Configuration",
+					"'outbound_member_type' cannot be set to 'MEMBER' when 'outbound_members' is not specified.",
+				)
+			}
 		}
-	} else if !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("outbound_members"),
-			"Invalid Configuration",
-			"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
-		)
 	}
 
 	// Either brokers or brokers_import_file can be specified

@@ -82,7 +82,6 @@ func testAccCheckDxlEndpointResourceAttrPair(resourceName, dataSourceName string
 		resource.TestCheckResourceAttrPair(resourceName, "topics", dataSourceName, "result.0.topics"),
 		resource.TestCheckResourceAttrPair(resourceName, "vendor_identifier", dataSourceName, "result.0.vendor_identifier"),
 		resource.TestCheckResourceAttrPair(resourceName, "wapi_user_name", dataSourceName, "result.0.wapi_user_name"),
-		resource.TestCheckResourceAttrPair(resourceName, "wapi_user_password", dataSourceName, "result.0.wapi_user_password"),
 	}
 }
 

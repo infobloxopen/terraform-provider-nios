@@ -3,6 +3,8 @@ package misc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -17,15 +19,15 @@ import (
 )
 
 type DxlEndpointBrokersModel struct {
-	HostName types.String `tfsdk:"host_name"`
-	Address  types.String `tfsdk:"address"`
-	Port     types.Int64  `tfsdk:"port"`
-	UniqueId types.String `tfsdk:"unique_id"`
+	HostName types.String      `tfsdk:"host_name"`
+	Address  iptypes.IPAddress `tfsdk:"address"`
+	Port     types.Int64       `tfsdk:"port"`
+	UniqueId types.String      `tfsdk:"unique_id"`
 }
 
 var DxlEndpointBrokersAttrTypes = map[string]attr.Type{
 	"host_name": types.StringType,
-	"address":   types.StringType,
+	"address":   iptypes.IPAddressType{},
 	"port":      types.Int64Type,
 	"unique_id": types.StringType,
 }
@@ -40,13 +42,17 @@ var DxlEndpointBrokersResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The FQDN for the DXL endpoint broker.",
 	},
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address or IPv6 Address for the DXL endpoint broker.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 65535),
+		},
 		MarkdownDescription: "The communication port for the DXL endpoint broker.",
 	},
 	"unique_id": schema.StringAttribute{
@@ -74,7 +80,7 @@ func (m *DxlEndpointBrokersModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &misc.DxlEndpointBrokers{
 		HostName: flex.ExpandStringPointer(m.HostName),
-		Address:  flex.ExpandStringPointer(m.Address),
+		Address:  flex.ExpandIPAddress(m.Address),
 		Port:     flex.ExpandInt64Pointer(m.Port),
 		UniqueId: flex.ExpandStringPointer(m.UniqueId),
 	}
@@ -100,7 +106,7 @@ func (m *DxlEndpointBrokersModel) Flatten(ctx context.Context, from *misc.DxlEnd
 		*m = DxlEndpointBrokersModel{}
 	}
 	m.HostName = flex.FlattenStringPointer(from.HostName)
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.UniqueId = flex.FlattenStringPointer(from.UniqueId)
 }
