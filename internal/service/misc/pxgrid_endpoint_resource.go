@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -349,21 +351,57 @@ func (r *PxgridEndpointResource) ValidateConfig(ctx context.Context, req resourc
 		return
 	}
 
-	// Outbound Members Validation
-	if data.OutboundMemberType.ValueString() == "MEMBER" {
-		if data.OutboundMembers.IsNull() || data.OutboundMembers.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("outbound_members"),
-				"Invalid Configuration",
-				"Attribute 'outbound_members' must be specified when 'outbound_member_type' is set to 'MEMBER'.",
-			)
+	// Validate that PublishSettings contains IPADDRESS in enabled_attributes
+	if !data.PublishSettings.IsNull() && !data.PublishSettings.IsUnknown() {
+		var publishSettings PxgridEndpointPublishSettingsModel
+		resp.Diagnostics.Append(data.PublishSettings.As(ctx, &publishSettings, basetypes.ObjectAsOptions{})...)
+
+		if resp.Diagnostics.HasError() {
+			return
 		}
-	} else if !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("outbound_members"),
-			"Invalid Configuration",
-			"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
-		)
+
+		if !publishSettings.EnabledAttributes.IsNull() && !publishSettings.EnabledAttributes.IsUnknown() {
+			var enabledAttrs []string
+			resp.Diagnostics.Append(publishSettings.EnabledAttributes.ElementsAs(ctx, &enabledAttrs, false)...)
+
+			if resp.Diagnostics.HasError() {
+				return
+			}
+
+			hasIPAddress := slices.Contains(enabledAttrs, "IPADDRESS")
+
+			if !hasIPAddress {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("publish_settings").AtName("enabled_attributes"),
+					"Invalid Configuration",
+					"IP Address is a required publish data type.",
+				)
+			}
+		}
+	}
+
+	// Outbound Members Validation
+	hasOutboundMembers := !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown()
+	hasOutboundMemberType := !data.OutboundMemberType.IsNull() && !data.OutboundMemberType.IsUnknown()
+
+	if hasOutboundMemberType {
+		outboundMemberType := data.OutboundMemberType.ValueString()
+		switch outboundMemberType {
+		case "GM":
+			if hasOutboundMembers {
+				resp.Diagnostics.AddError(
+					"Invalid Configuration",
+					"'outbound_member_type' cannot be set to 'GM' when 'outbound_members' is specified.",
+				)
+			}
+		case "MEMBER":
+			if !hasOutboundMembers {
+				resp.Diagnostics.AddError(
+					"Invalid Configuration",
+					"'outbound_member_type' cannot be set to 'MEMBER' when 'outbound_members' is not specified.",
+				)
+			}
+		}
 	}
 }
 
