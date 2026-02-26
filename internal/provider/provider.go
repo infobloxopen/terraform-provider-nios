@@ -25,6 +25,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/microsoft"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/notification"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
@@ -254,6 +255,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameClientipaddressResource,
 		rpz.NewRecordRpzCnameIpaddressdnResource,
 		rpz.NewRecordRpzCnameClientipaddressdnResource,
+
+		microsoft.NewMsserverResource,
 	}
 }
 
@@ -395,6 +398,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameClientipaddressDataSource,
 		rpz.NewRecordRpzCnameIpaddressdnDataSource,
 		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
+
+		microsoft.NewMsserverDataSource,
 	}
 }
 
